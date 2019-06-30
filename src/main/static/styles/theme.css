@@ -1,0 +1,117 @@
+html {
+  --app-accent-color: #ae2d2d;
+
+  --app-surface-0-color: #000000;
+  --app-surface-1-color: #212121;
+  --app-surface-2-color: #383838;
+  --app-surface-3-color: #515151;
+
+  --app-primary-text-color: rgb(255,255,255);
+  --app-secondary-text-color: rgba(255,255,255, .54);
+
+  --app-control-background-color: #383838;
+  --app-control-hover-background-color: #656565;
+
+  --app-icon-color: #fff;
+  --app-secondary-icon-color: rgba(255,255,255, .54);
+
+  --app-divider-color: rgba(255, 255, 255, .12);
+}
+
+@media (prefers-color-scheme: light) {
+  html[theme-auto] {
+    --app-accent-color: #ae2d2d;
+  
+    --app-surface-0-color: #E5E5E5;
+    --app-surface-1-color: #fff;
+    --app-surface-2-color: #fff;
+    --app-surface-3-color: #515151;
+  
+    --app-primary-text-color: rgba(0,0,0,.87);
+    --app-secondary-text-color: rgba(0,0,0,.54);
+  
+    --app-control-background-color: #383838;
+    --app-control-hover-background-color: #656565;
+  
+    --app-icon-color: rgba(0,0,0,.54);
+    --app-secondary-icon-color: rgba(0,0,0,.24);
+  
+    --app-divider-color: rgba(0,0,0,.12);
+  }
+}
+html[theme-light] {
+  --app-accent-color: #ae2d2d;
+
+  --app-surface-0-color: #E5E5E5;
+  --app-surface-1-color: #fff;
+  --app-surface-2-color: #fff;
+  --app-surface-3-color: #515151;
+
+  --app-primary-text-color: rgba(0,0,0,.87);
+  --app-secondary-text-color: rgba(0,0,0,.54);
+
+  --app-control-background-color: #383838;
+  --app-control-hover-background-color: #656565;
+
+  --app-icon-color: rgba(0,0,0,.54);
+  --app-secondary-icon-color: rgba(0,0,0,.24);
+
+  --app-divider-color: rgba(0,0,0,.12);
+}
+
+/* html[dark] {
+  --app-primary-background-color: #212121;
+  --app-secondary-background-color: #000000;
+  --app-highlight-background-color: #383838;
+
+    --app-accent-color: #3999ff;
+
+    --app-separator-color: rgba(255,255,255,.12);
+    --app-popup-background-color: #4e4b5e;
+    --app-surface-color: rgba(255,255,255,.08);
+
+  --app-primary-text-color: rgb(255,255,255);
+  --app-secondary-text-color: rgba(255,255,255, .54);
+  --app-icon-color: #fff;
+  --app-warning-color: #8b2d29;
+} */
+
+html {
+  color: var(--app-primary-text-color, #fff);
+  scrollbar-color: rgba(255, 255, 255, .4) transparent;
+  scrollbar-width: thin;
+  --x-icon-color: var(--app-icon-color);
+}
+
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    -webkit-tap-highlight-color:  rgba(255, 255, 255, 0);
+    grid-template-columns: 1fr minmax(100px,400px) 1fr;
+    grid-template-rows: 1.5fr 48px 1fr 40px;
+    height: 100%;
+    overflow: hidden;
+    background: var(--app-surface-0-color);
+    user-select: none;
+}
+
+#backdrop {
+    height: 100%;
+    width: 100%;
+    background: rgba(0, 0, 0, .1);
+    position: fixed;
+    display: none;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    will-change: opacity;
+    z-index: 97;
+}
+
+video {
+    height: 286px;
+    position: fixed;
+    z-index: 999;
+    top: 95px;
+}
