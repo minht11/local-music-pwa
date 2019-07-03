@@ -57,26 +57,15 @@ export const getFilesFromDirectory = async (
     } else {
       const directoryElement = document.createElement('input')
       directoryElement.onchange = async (e: Event) => {
+        console.log('change', e)
         resolve(getFilesFromLegacyInputEvent(e, supportedFileExtensions))
       }
       directoryElement.type = 'file'
       directoryElement.accept = supportedFileExtensions.map(format => `audio/${format}`).join(',')
       directoryElement.setAttribute('webkitdirectory', '')
       directoryElement.setAttribute('directory', '')
+      console.log('click')
       directoryElement.click()
     }
-  })
-)
-
-export const getArrayBufferFromFile = (file: File): Promise<ArrayBuffer> => (
-  new Promise(async (resolve, reject) => {
-    const reader = new FileReader()
-    reader.onerror = () => {
-      reader.abort()
-      reject(new DOMException('Problem parsing input file.'))
-    }
-
-    reader.onload = () => resolve(reader.result as ArrayBuffer)
-    reader.readAsArrayBuffer(file)
   })
 )

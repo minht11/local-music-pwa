@@ -4,12 +4,9 @@ import copy from 'rollup-plugin-copy'
 import nodeResolve from 'rollup-plugin-node-resolve'
 import commonJs from 'rollup-plugin-commonjs'
 import workbox from 'rollup-plugin-workbox-build'
-// import modify from 'rollup-plugin-modify'
-// import randomstring from 'randomstring'
 import replace from 'rollup-plugin-replace'
 import { terser } from 'rollup-plugin-terser'
 import minifyHTML from 'rollup-plugin-minify-html-literals'
-// import babel from 'rollup-plugin-babel'
 
 // npm run build -> production is true
 // npm run dev -> production is false
@@ -37,7 +34,6 @@ const mainBundle = {
   input: [
     'src/main/app.ts',
     'src/worklets/x-icon-worklet.ts',
-    'src/webworkers/tracks-metadata-worker.ts',
   ],
   output: [{
     dir: 'dist/',
@@ -67,51 +63,22 @@ const mainBundle = {
   ],
 }
 
-// const mainBundleES5 = {
-//   input: 'src/app.ts',
-//   output: [
-//     {
-//       file: 'dist/app-es5.js',
-//       format: 'iife',
-//       sourcemap: false
-//     },
-//   ],
-//   plugins: [
-//     ...mainPlugins,
-//     // babel({
-//     //   extensions: ['.js', '.ts'],
-//     // }),
-//     ...minify,
-//   ],
-//   external: [
-//     '../wasm-game.js',
-//   ],
-// }
-
-// const serviceWorker =  {
-//   input: 'src/service-worker/service-worker.ts',
-//   output: [
-//     {
-//       file: 'dist/service-worker.js',
-//       format: 'es',
-//       sourcemap: false
-//     },
-//   ],
-//   plugins: [
-//     modify({
-//       find: 'sw_hash_replacement',
-//       replace: () => randomstring.generate()
-//     }),
-//     typescript({
-//       typescript: require("typescript"),
-//       verbosity: 2,
-//       clean: true,
-//       sourceMap: false,
-//     }),
-//     ...minify
-//   ],
-// }
+const workersBundle = {
+  input: [
+    'src/webworkers/tracks-metadata/tracks-metadata-worker.ts',
+  ],
+  output: [{
+    dir: 'dist/',
+    format: 'cjs',
+    sourcemap: false,
+  }],
+  plugins: [
+    ...mainPlugins,
+    ...minify,
+  ],
+}
 
 export default [
   mainBundle,
+  workersBundle,
 ]

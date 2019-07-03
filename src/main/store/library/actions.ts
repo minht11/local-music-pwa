@@ -2,7 +2,6 @@ import { AnyAction } from 'redux'
 import { ThunkActionResult } from '../index'
 import { ActionTypes } from './types'
 import { Track, TrackFileType } from '../../typings/interface'
-import { getTrackMetadata } from '../../lib/extract-track-metadata'
 import { addToast, removeToast } from '../toasts/actions'
 import { removeTracks as removePlayerTracks } from '../player/actions'
 import { categorizeTracks } from '../../utils/tracks-utils'
@@ -16,75 +15,75 @@ export const setTracks: ThunkActionResult = (tracks: Track[]) => (dispatch) => {
   })
 }
 
+// IMPORTANT. Currently it is not possible to pass NFS references to the worker or save them to IDB.
+// https://bugs.chromium.org/p/chromium/issues/detail?id=955193
+// This should be possible after chrome 78 lands.
 export const importTracksIntoLibrary: ThunkActionResult = (files: TrackFileType[]) => (
   async (dispatch, getState) => {
     let successfulTracksAdded = 0
     const toastId = `library-${files.length}`
-    const tracksPromises = files.map(async (file): Promise<Track | void> => {
-      try {
-        const metadata = await getTrackMetadata(file)
+    const worker = new Worker('tracks-metadata-worker.js')
+    worker.onmessage = ({ data }: MessageEvent) => {
+      if (!data.finished) {
+        successfulTracksAdded += 1
         dispatch(addToast({
-          title: `Adding ${successfulTracksAdded + 1} of ${files.length} tracks to the library`,
+          title: `Adding ${successfulTracksAdded} of ${files.length} tracks to the library`,
           id: toastId,
           spinner: true,
         }))
-        if (metadata) {
-          successfulTracksAdded += 1
-          return metadata
-        }
-      } catch (err) {
-        // eslint-disable-next-line
-        console.log(err)
+        return
       }
-    })
-    // Get existing tracks
-    const { library: { tracks } } = getState()
-    // Remove holes which are left in case we werent able
-    // to parse all tracks correctly.
-    const newTracksUnfiltered = await Promise.all(tracksPromises)
-    const newTracks = newTracksUnfiltered.filter(track => track) as Track[]
 
-    // Filtering is done existing tracks because new tracks might
-    // have been modified thus existing tracks became stale.
-    const currentTracks = tracks.list.filter((currentTrack) => {
-      const currentFileData = currentTrack.fileData
-      const newTrack = newTracks.find(({ fileData }) => {
-        if (fileData.type === currentFileData.type) {
-          if (fileData.type === 'file') {
-            // Checking if these are the same files is hard
-            // and this doesnt work if file is renamed or modified
-            return fileData.data.name === currentFileData.data.name
-              // @ts-ignore https://github.com/microsoft/TypeScript/issues/32050
-              && fileData.data.size === currentFileData.data.size
+      // Get existing tracks
+      const { library: { tracks } } = getState()
+      // Remove holes which are left in case we werent able
+      // to parse all tracks correctly.
+      const newTracksUnfiltered = data.tracks as Track[]
+      const newTracks = newTracksUnfiltered.filter(track => track) as Track[]
+
+      // Filtering is done existing tracks because new tracks might
+      // have been modified thus existing tracks became stale.
+      const currentTracks = tracks.list.filter((currentTrack) => {
+        const currentFileData = currentTrack.fileData
+        const newTrack = newTracks.find(({ fileData }) => {
+          if (fileData.type === currentFileData.type) {
+            if (fileData.type === 'file') {
+              // Checking if these are the same files is hard
+              // and this doesnt work if file is renamed or modified
+              return fileData.data.name === currentFileData.data.name
+                // @ts-ignore https://github.com/microsoft/TypeScript/issues/32050
+                && fileData.data.size === currentFileData.data.size
+            }
+            if (fileData.type === 'fileRef') {
+              // Not sure if this actually works.
+              // Revisit this later on when spec for NFS is more mature.
+              // Or saving in IDB is fixed.
+              return fileData.data === currentFileData.data
+            }
           }
-          if (fileData.type === 'fileRef') {
-            // Not sure if this actually works.
-            // Revisit this later on when spec for NFS is more mature.
-            // Or saving in IDB is fixed.
-            return fileData.data === currentFileData.data
-          }
+          return false
+        })
+        // Make ids the same so playlists doesn't change.
+        if (newTrack) {
+          newTrack.id = currentTrack.id
         }
-        return false
+        return !newTrack
       })
-      // Make ids the same so playlists doesn't change.
-      if (newTrack) {
-        newTrack.id = currentTrack.id
-      }
-      return !newTrack
-    })
 
-    const allTracks = [...currentTracks, ...newTracks]
-    dispatch(setTracks(allTracks))
+      const allTracks = [...currentTracks, ...newTracks]
+      dispatch(setTracks(allTracks))
 
-    dispatch(removeToast(toastId))
-    dispatch(addToast({
-      title: `Successfully added ${successfulTracksAdded} tracks`,
-      id: `library-finished-adding-${files.length}`,
-      duration: 4000,
-      button: {
-        title: 'Dismiss',
-      },
-    }))
+      dispatch(removeToast(toastId))
+      dispatch(addToast({
+        title: `Successfully added ${successfulTracksAdded} tracks`,
+        id: `library-finished-adding-${files.length}`,
+        duration: 4000,
+        button: {
+          title: 'Dismiss',
+        },
+      }))
+    }
+    worker.postMessage(files)
   }
 )
 

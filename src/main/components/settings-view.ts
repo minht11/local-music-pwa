@@ -18,7 +18,6 @@ import './x-select'
 import './x-switch'
 import './x-icon'
 import './x-icon-button'
-import { SUPPORTED_FILE_FORMATS } from '../lib/extract-track-metadata'
 
 @customElement('settings-view')
 export class SettingsView extends connect(store)(LitElement) {
@@ -283,12 +282,12 @@ export class SettingsView extends connect(store)(LitElement) {
   }
 
   async onFilesSelectClickHandler() {
-    const filesData = await getFilesFromDirectory(SUPPORTED_FILE_FORMATS)
+    const filesData = await getFilesFromDirectory(['mp3'])
     store.dispatch(importTracksIntoLibrary(filesData))
   }
 
   onFilesDropChangeHandler(e: Event) {
-    const filesData = getFilesFromLegacyInputEvent(e, SUPPORTED_FILE_FORMATS)
+    const filesData = getFilesFromLegacyInputEvent(e, ['mp3'])
     store.dispatch(importTracksIntoLibrary(filesData))
   }
 }
