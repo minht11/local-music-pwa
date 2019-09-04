@@ -8,9 +8,6 @@ import {
 } from 'lit-element'
 import { render } from 'lit-html'
 import bind from 'bind-decorator'
-// For some reasons eslint can't find resize-observer-browser.
-// eslint-disable-next-line
-import { ResizeObserver, ResizeObserverEntry } from 'resize-observer-browser'
 import { isResizeObserverSupported } from '../lib/supported'
 import { listItemStyles } from './shared-styles'
 
