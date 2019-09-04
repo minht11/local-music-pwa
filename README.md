@@ -21,5 +21,5 @@ While it should work with all latests major browsers as of yet it's only been te
 - `git clone https://github.com/minht11/local-music-pwa`
 - `cd local-music-pwa`
 - `npm install`
-- `npm run build` or `npm run dev`
-- Start app using your chosen local server
+- `npm run build` or `npm run watch`
+- Start the app using `npm start`
