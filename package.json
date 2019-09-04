@@ -37,6 +37,7 @@
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.17.3",
     "eslint-plugin-lit": "^1.0.0",
+    "http-server": "^0.11.1",
     "replace": "^1.1.0",
     "rollup": "^1.13.1",
     "rollup-plugin-babel": "^4.3.2",
