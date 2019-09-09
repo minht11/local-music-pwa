@@ -1,5 +1,4 @@
-import { parse as parseMetadata } from 'id3-parser'
-import { getMP3Duration } from './get-mp3-duration'
+import * as musicMetadata from 'music-metadata-browser'
 import { Track, TrackFileType } from '../../shared/types'
 
 const getArrayBufferFromFile = (file: File): Promise<ArrayBuffer> => (
@@ -17,34 +16,24 @@ const getArrayBufferFromFile = (file: File): Promise<ArrayBuffer> => (
 
 const getTrackMetadata = async (fileData: TrackFileType): Promise<Track | void> => {
   const file = fileData.type === 'file' ? fileData.data : await fileData.data.getFile()
-  const buff = await getArrayBufferFromFile(file)
-  const tags = parseMetadata(new Uint8Array(buff))
+  const {format, common: tags} = await musicMetadata.parseBlob(file, {duration: true})
 
   if (tags) {
-    let trackPosition
-    if (tags.track) {
-      if (typeof tags.track === 'number') {
-        trackPosition = undefined
-      } else {
-        const [no, of] = tags.track.split('/')
-        trackPosition = { no: parseInt(no, 10), of: parseInt(of, 10) }
-      }
-    }
     let imageBlob
-    if (tags.image) {
-      const { image } = tags
+    if (tags.picture && tags.picture.length > 0) {
+      const image = tags.picture[0]
       const imageData = new Uint8ClampedArray(image.data)
-      imageBlob = new Blob([imageData], { type: image.type })
+      imageBlob = new Blob([imageData], { type: image.format })
     }
     const trackData: Track = {
       name: tags.title || file.name,
       album: tags.album,
       artist: tags.artist,
-      genre: tags.genre ? tags.genre.split(' ') : [],
-      track: trackPosition,
-      year: tags.year,
+      genre: tags.genre ? tags.genre : [],
+      track: tags.track,
+      year: `${tags.year}`,
       image: imageBlob,
-      duration: getMP3Duration(buff),
+      duration: format.duration as any,
       id: new Date().getTime(),
       fileData,
     }
