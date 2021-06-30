@@ -7,7 +7,7 @@ export const loadPolyfills = async () => {
   if (!window.requestIdleCallback) {
     polyfills.push(
       // @ts-ignore
-      import('requestIdleCallback'),
+      import('requestidlecallback'),
     )
   }
 
