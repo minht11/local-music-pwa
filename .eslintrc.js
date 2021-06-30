@@ -1,48 +1,44 @@
-module.exports =  {
-  parser:  '@typescript-eslint/parser',
-  plugins: [
-    '@typescript-eslint',
-    'lit',
-  ],
-  extends:  [
-    'eslint-config-airbnb-base',
-    'eslint-config-airbnb-base/rules/strict',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:lit/recommended',
-  ],
-  parserOptions:  {
-    ecmaVersion:  2018,
-    sourceType:  'module',
-    project: 'tsconfig.json',
-  },
-  rules: {
-    'import/prefer-default-export': 'off',
-    'semi': [2, 'never'],
-    'no-undef': 'off',
-    'consistent-return': 'off',
-    'class-methods-use-this': 'off',
-    'no-restricted-syntax': 'off',
-    'no-restricted-globals': 'off',
-    '@typescript-eslint/member-delimiter-style': 0,
-    'indent': ['error', 2, { 'ignoredNodes': ['TemplateLiteral *'] }],
-    '@typescript-eslint/indent': ['off', 2],
-    '@typescript-eslint/explicit-member-accessibility': 'off',
-    '@typescript-eslint/explicit-function-return-type': [
-      'off',
-      {
-        allowExpressions: false,
-        allowTypedFunctionExpressions: false,
-      },
-    ],
-  },
-  settings: {
-    'import/resolver': {
-      node: {
-        extensions: ['.js', '.ts'],
-      },
+module.exports = {
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    sourceType: 'module',
+    project: './tsconfig.json',
+    ecmaFeatures: {
+      jsx: true,
     },
   },
   env: {
     browser: true,
-  }
+    es6: true,
+  },
+  extends: [
+    'eslint-config-airbnb-base',
+    'plugin:@typescript-eslint/recommended',
+    // 'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    'prettier',
+  ],
+  plugins: ['prettier', '@typescript-eslint'],
+  rules: {
+    'no-param-reassign': 'off',
+    'no-restricted-syntax': 'off',
+    'import/prefer-default-export': 'off',
+    'import/extensions': 'off',
+    'import/no-unresolved': 'off',
+    'import/no-extraneous-dependencies': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    'no-shadow': 'off',
+    '@typescript-eslint/no-shadow': 'error',
+    'no-console': 'off',
+    // Maybe re enable these latter.
+    'no-multi-assign': 'off',
+    'no-fallthrough': 'off',
+  },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      },
+    },
+  },
+  ignorePatterns: ['.eslintrc.js'],
 }

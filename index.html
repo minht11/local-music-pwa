@@ -1,0 +1,122 @@
+<!doctype html >
+<html lang='en-US' app-not-loaded>
+  <head>
+    <title>Snae player</title>
+    <meta charset='UTF-8'>
+    <base href='/'>
+    <meta http-equiv='Content-Security-Policy' content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src https://fonts.gstatic.com;
+      img-src 'self' blob:;
+      media-src 'self' blob:;
+      worker-src 'self' blob:;">
+        
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <meta name='theme-color' content='#2a2827'>
+    <meta name='description' content='Lightweight on device music player right in your browser.'>
+    <link rel='icon' href='/icons/icon_16.png' type='image/png' sizes="16x16" />
+    <link rel='apple-touch-icon' href='/icons/icon_192.png' sizes='192x192' />
+
+    <link rel='preconnect' href='https://fonts.gstatic.com/' crossorigin>
+
+    <!-- 
+      Load fonts async with high priority
+      https://csswizardry.com/2020/05/the-fastest-google-fonts/
+    -->
+    <link
+      rel='preload'
+      as='style'
+      href='https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500&display=swap'
+    />
+
+    <link
+      rel='stylesheet'
+      media='print' onload='this.media="all"'
+      href='https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500&display=swap'
+    />
+    <style>
+    html {
+      color: #fff;
+      background: #1a1a1a;
+      font-family: 'Fira Sans', sans-serif;
+    }
+    body {
+      margin: 0;
+      -webkit-tap-highlight-color:  rgba(255, 255, 255, 0);
+      user-select: none;
+    }
+    html[not-supported] .unsupported-browser {
+      display: block;
+    }
+    .unsupported-browser,
+    html[not-supported] #loading,
+    html[app-not-loaded] #app-content,
+    #loading {
+      display: none;
+    }
+    html[app-not-loaded] #loading {
+      position: absolute;
+      margin: auto;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      width: 100px;
+      height: 100px;
+      font-size: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      animation: loading-appear 0.4s .4s;
+      animation-fill-mode: backwards;
+    }
+    @keyframes loading-appear {
+      0% {
+        opacity: 0;
+      }
+    }
+    html[app-not-loaded] #loading svg {
+      height: 48px;
+      width: 48px;
+      margin-bottom: 8px;
+      animation: loading-rotate 1.4s infinite;
+    }
+    @keyframes loading-rotate {
+      0% {
+        transform: rotate(0);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    * {
+      box-sizing: border-box;
+    }
+    </style>
+  </head>
+  <body>
+    <noscript class='unsupported-browser'>
+      Please enable Javascript in order to use this app.
+    </noscript>
+    <div class='unsupported-browser'>
+      <div>This browser does not support required technologies for this app to function correctly.</div>
+      <div>Please upgrade your browser to the latest version of:</div>
+      <a href='https://www.mozilla.org/en-US/firefox/new/'>Firefox</a>
+      <a href='https://www.microsoft.com/en-us/windows/microsoft-edge'>Edge</a>
+      <a href='https://www.google.com/chrome/'>Chrome</a>
+      <a href='https://www.apple.com/safari/'>Safari</a>
+    </div>
+    <div id='loading'>
+      <svg viewBox='0 0 24 24'>
+        <path fill='#fff' d='M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z' />
+      </svg>
+      <div>Loading</div>
+    </div>
+
+    <script type='module' src='./src/index.ts'></script>
+    <script nomodule>document.documentElement.setAttribute('not-supported', '')</script>
+  </body>
+</html>

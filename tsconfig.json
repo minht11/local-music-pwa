@@ -1,24 +1,27 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "strict": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM"],
     "moduleResolution": "node",
-    "rootDir": "src",
-    "outDir": "dist",
-    "composite": true,
-    "pretty": true,
-    "experimentalDecorators": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "types": [
+      "vite/client",
+      "vite-plugin-pwa/client",
+      "@types/requestidlecallback",
+      "@types/wicg-file-system-access",
+      "@types/wicg-mediasession"
+    ]
   },
   "include": [
-    "./src"
+    "./src/",
+		"./src/types/*.ts",
   ],
-  "exclude": [
-    "./node_modules",
-    "./dist",
-  ]
 }
-  

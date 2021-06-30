@@ -1,25 +1,13 @@
-# local-music-pwa
-Music player which plays your local files inside your browser and also is PWA.
+# Snae player
+Lightweight on device music player right in your browser.
 
-![alt text](https://raw.githubusercontent.com/minht11/local-music-pwa/master/image.png)
+![alt text](https://raw.githubusercontent.com/minht11/local-music-pwa/main/images/preview.webp)
 
-This is work in progress
+Play your local audio files without a native app, using just your browser. Complete with Dark/Light theme support, artwork based UI coloring, animations and more.
 
 ## Limitations
-[Native FileSystem](https://github.com/WICG/native-file-system) is coming to the web, but for now only Chrome partially supports it behind the flag as does this app. Full support should come sometime early-mid 2020. In order to work on all other browser which does not yet support it, instead of caching only reference to file <b>file itself must be saved inside IndexedDB</b> for further uses, this won't be needed once NFS comes out.
+[File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API) is relatively new api which gives websites access to the files you choose. This app makes use of it when supported, unfortunately for now that is only in Chromium based browsers. In other browsers legacy Files api is used which forces app to copy files inside IndexedDB, effectively duplicating used storage space, in oder to work correctly.
+Only mp3 files are supported, more file formats might be added in future.
 
 ## Works with
-While it should work with all latests major browsers as of yet it's only been tested on recent stable desktop versions of Firefox and Chrome. Optimizations for older and other browsers TBD.
-
-## Future work
-- Focus on mobile experience.
-- More robust library filtering and searching options
-- General performance and ui improvements.
-
-## Run locally
-
-- `git clone https://github.com/minht11/local-music-pwa`
-- `cd local-music-pwa`
-- `npm install`
-- `npm run build` or `npm run dev`
-- Start app using your chosen local server
+With limitations in mind app works with every modern browser.

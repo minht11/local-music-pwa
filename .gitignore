@@ -1,7 +1,2 @@
-*.firebaserc
-*.firebase
-*firebase.json
-*node_modules
-*vscode
-*dist
-*package-lock.json
+node_modules
+dist
