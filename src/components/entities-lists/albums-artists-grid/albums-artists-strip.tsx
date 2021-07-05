@@ -1,11 +1,13 @@
 import { Component, createMemo } from 'solid-js'
-import { VirtualGridList } from '../../virtual/virtual'
+import {
+  ScrollTargetContext,
+  VirtualContainer,
+} from '@minht11/solid-virtual-container'
 import {
   EntitiesListContainer,
   BaseEntitiesListProps,
 } from '../entities-list-container'
 import { useEntitiesStore } from '../../../stores/stores'
-import { ScrollTargetContext } from '../../virtual/virtual-content/scroll-target-context'
 import { AlbumArtistGridItem } from './album-artist-grid-item'
 import * as styles from './albums-artists.css'
 
@@ -44,10 +46,15 @@ export const AlbumsArtistsStrip: Component<AlbumsArtistsGridProps> = (
     >
       <div className={styles.scrollContainer} ref={scrollTarget}>
         <ScrollTargetContext.Provider value={{ scrollTarget }}>
-          <VirtualGridList
+          <VirtualContainer
             itemSize={calculateItemSize}
             items={props.items}
             direction='horizontal'
+            crossAxisCount={(measurements) =>
+              Math.floor(
+                measurements.container.cross / measurements.itemSize.cross,
+              )
+            }
           >
             {(itemProps) => (
               <AlbumArtistGridItem
@@ -55,7 +62,7 @@ export const AlbumsArtistsStrip: Component<AlbumsArtistsGridProps> = (
                 itemData={entitiesList()[itemProps.item]}
               />
             )}
-          </VirtualGridList>
+          </VirtualContainer>
         </ScrollTargetContext.Provider>
       </div>
     </EntitiesListContainer>

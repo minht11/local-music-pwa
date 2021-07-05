@@ -9,6 +9,7 @@ import { Search, SEARCH_MAIN_PATH } from '../search/search'
 import { About } from '../about/about'
 import { DetailsPage } from '../details-page/details-page'
 import { DETAILS_PAGES_CONFIG } from '../details-page/details-pages-config'
+import * as styles from './app.css'
 
 export interface MainPagesProps {
   onEnter: (element: Element, done: () => void) => void
@@ -26,7 +27,12 @@ export const MainPages = (props: MainPagesProps) => {
 
   /* eslint-disable @typescript-eslint/ban-ts-comment */
   return (
-    <Transition onEnter={props.onEnter} onExit={props.onExit}>
+    <Transition
+      onEnter={props.onEnter}
+      onExit={props.onExit}
+      exitToClass={styles.pointerEventsNone}
+      enterToClass={styles.pointerEventsNone}
+    >
       <Switch fallback={NotFound}>
         <MatchRoute path={'/library'}>
           <Library installEvent={installEvent()} />

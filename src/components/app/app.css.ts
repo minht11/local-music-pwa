@@ -4,8 +4,8 @@ import '../../styles/global.css'
 export { hueVar } from '../../styles/vars.css'
 
 export const appContainer = style({
-  height: '100vh',
-  width: '100vw',
+  height: '100%',
+  width: '100%',
   overflow: 'hidden',
   position: 'relative',
   display: 'grid',
@@ -25,3 +25,10 @@ export const toastPlayerOpenArea = style({
   gridRow: 'content-left/player',
   gridColumn: 'content-left',
 })
+
+export const pointerEventsNone = style(
+  {
+    pointerEvents: 'none',
+  },
+  'pointer-events-none',
+)

@@ -1,5 +1,5 @@
 import { Component, createMemo } from 'solid-js'
-import { VirtualGridList } from '../../virtual/virtual'
+import { VirtualContainer } from '@minht11/solid-virtual-container'
 import {
   EntitiesListContainer,
   BaseEntitiesListProps,
@@ -41,14 +41,20 @@ export const AlbumsArtistsGrid: Component<AlbumsArtistsGridProps> = (props) => {
       {...props}
       entityName={props.type === 'album' ? 'album' : 'artist'}
     >
-      <VirtualGridList itemSize={calculateItemSize} items={props.items}>
+      <VirtualContainer
+        itemSize={calculateItemSize}
+        items={props.items}
+        crossAxisCount={(measurements) =>
+          Math.floor(measurements.container.cross / measurements.itemSize.cross)
+        }
+      >
         {(itemProps) => (
           <AlbumArtistGridItem
             {...itemProps}
             itemData={entitiesList()[itemProps.item]}
           />
         )}
-      </VirtualGridList>
+      </VirtualContainer>
     </EntitiesListContainer>
   )
 }

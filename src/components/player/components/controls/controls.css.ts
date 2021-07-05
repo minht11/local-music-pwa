@@ -83,12 +83,14 @@ export const animating = style({})
 const animatedIcon = style({
   fill: 'currentcolor',
   pointerEvents: 'none',
+  width: '24px',
+  height: '24px',
 })
 
 export const skipIcon = composeStyles(
   animatedIcon,
   style({
-    clipPath: 'inset(0 7px 0 0)',
+    clipPath: 'inset(0 4px 0 0)',
   }),
 )
 
@@ -165,8 +167,6 @@ export const shuffleIcon = composeStyles(
   animatedIcon,
   style({
     position: 'relative',
-    height: '24px',
-    width: '24px',
     selectors: {
       [`${animating} &`]: {
         transition: `color 0s ${SHUFFLE_ANI_DURATION}ms`,

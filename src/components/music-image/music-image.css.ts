@@ -14,11 +14,15 @@ export const musicImage = composeStyles(
     justifyContent: 'center',
     display: 'flex',
     overflow: 'hidden',
+    position: 'relative',
   }),
 )
 
 export const aspectRatio = style({
   aspectRatio: '1/1',
+  // Position relative can be expensive,
+  // especially when used on a lot of elements.
+  position: 'static',
 })
 
 export const legacyAspectImg = style({
@@ -33,5 +37,6 @@ export const musicIcon = composeStyles(
     padding: '10%',
     width: '100%',
     height: '100%',
+    position: 'absolute',
   }),
 )

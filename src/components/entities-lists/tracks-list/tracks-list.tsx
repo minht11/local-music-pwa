@@ -1,7 +1,10 @@
 import { Component, createMemo } from 'solid-js'
 import { useRouter } from '@rturnq/solid-router'
+import {
+  VirtualContainer,
+  VirtualItemProps,
+} from '@minht11/solid-virtual-container'
 import { Track } from '../../../types/types'
-import { VirtualList, VirtualItemProps } from '../../virtual/virtual'
 import { IconButton, IconType } from '../../icon-button/icon-button'
 import { clx, formatTime, pluralize } from '../../../utils'
 import { MusicImage } from '../../music-image/music-image'
@@ -177,7 +180,7 @@ const TrackListItem = (props: TracksListItemProps) => {
 
 export const TracksList: Component<TracksListProps> = (props) => (
   <EntitiesListContainer {...props} entityName='track'>
-    <VirtualList itemSize={{ height: 72 }} items={props.items}>
+    <VirtualContainer itemSize={{ height: 72 }} items={props.items}>
       {(itemProps) => (
         <TrackListItem
           {...itemProps}
@@ -187,6 +190,6 @@ export const TracksList: Component<TracksListProps> = (props) => (
           additionalMenuItems={props.additionalMenuItems}
         />
       )}
-    </VirtualList>
+    </VirtualContainer>
   </EntitiesListContainer>
 )

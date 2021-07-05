@@ -11,3 +11,15 @@ Only mp3 files are supported, more file formats might be added in future.
 
 ## Works with
 With limitations in mind app works with every modern browser.
+
+## Building locally
+Clone the repo, and:
+```
+npm install
+npm run build
+(optional) npm run serve
+```
+You can run the development server with:
+```
+npm run dev
+```

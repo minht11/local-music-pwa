@@ -1,7 +1,7 @@
 import { Component, For, onCleanup, Show } from 'solid-js'
+import { ScrollTargetContext } from '@minht11/solid-virtual-container'
 import '@a11y/focus-trap'
 import { Icon, IconType } from '../icon/icon'
-import { ScrollTargetContext } from '../virtual/virtual-content/scroll-target-context'
 import { KeyboardCode } from '../../utils/key-codes'
 import * as styles from './modal.css'
 

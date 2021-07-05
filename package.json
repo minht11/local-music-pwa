@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@a11y/focus-trap": "^1.0.5",
+    "@minht11/solid-virtual-container": "^0.1.2",
     "@rturnq/solid-router": "^0.3.0-rc.1",
     "@types/requestidlecallback": "^0.3.1",
     "@types/wicg-file-system-access": "^2020.9.1",

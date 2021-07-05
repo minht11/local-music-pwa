@@ -24,7 +24,8 @@ export interface MusicImageProps {
   ref?: JSX.CustomAttributes<HTMLDivElement>['ref']
 }
 
-const supportsNativeCSSAspectRatio = CSS.supports('aspect-ratio: 1/1')
+// const supportsNativeCSSAspectRatio = CSS.supports('aspect-ratio: 1/1')
+const supportsNativeCSSAspectRatio = false
 
 const getIcon = (item?: MusicImageProps['item']) => {
   if (!item) {
@@ -80,11 +81,12 @@ export const MusicImage: Component<MusicImageProps> = (props) => {
       ref={props.ref}
     >
       <Show when={!supportsNativeCSSAspectRatio}>
-        <img
+        <svg
           aria-hidden='true'
           className={styles.legacyAspectImg}
-          src="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'&gt;&lt;/svg&gt;"
-        />
+          viewBox='0 0 1 1'
+          xmlns='http://www.w3.org/2000/svg'
+        ></svg>
       </Show>
       <Show when={imageURL() === null && getIcon(props.item)}>
         {(icon) => <Icon icon={icon} className={styles.musicIcon} />}

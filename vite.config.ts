@@ -44,9 +44,6 @@ export default defineConfig({
       hot: false,
     }),
     VitePWA({
-      workbox: {
-        // globPatterns: ['/*'],
-      },
       manifest: {
         short_name: 'Snae',
         name: 'Snae player',

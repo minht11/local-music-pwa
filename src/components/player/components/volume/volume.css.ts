@@ -8,6 +8,8 @@ export const volumeLow = style({})
 export const volumeIcon = style({
   fill: 'currentcolor',
   pointerEvents: 'none',
+  height: '24px',
+  width: '24px',
 })
 
 export const volume45 = style({

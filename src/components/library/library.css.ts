@@ -1,9 +1,7 @@
-import { style, composeStyles } from '@vanilla-extract/css'
+import { style, composeStyles, keyframes } from '@vanilla-extract/css'
 import { sharedStyles, atoms, vars } from '../../styles/styles.css'
 
 const mediumSnapPoint = '(max-width: 700px)'
-const smallSnapPoint = '(max-width: 400px)'
-const extraSmallSnapPoint = '(max-width: 268px)'
 
 export const pageContainer = composeStyles(
   sharedStyles.pageContainer,
@@ -46,21 +44,51 @@ export const navRail = composeStyles(
   }),
 )
 
+export const navBtnSelected = style({})
+
+const selectedPillAppearAni = keyframes({
+  from: {
+    opacity: 0,
+    transform: 'scaleX(.8)',
+  },
+})
+
 const navBtnBase = style({
   height: '56px',
   width: '56px',
   lineHeight: '12px',
   fontSize: '12px',
+  borderRadius: vars.static.radius.large,
+  color: `hsla(${vars.colors.contentHsl}, 80%)`,
+  position: 'relative',
   '@media': {
     [mediumSnapPoint]: {
-      flexDirection: 'row',
+      maxWidth: '66px',
       width: '100%',
       height: '100%',
-      maxWidth: '104px',
+      borderRadius: '33px',
+      selectors: {
+        [`${navBtnSelected}&::before`]: {
+          top: 'auto',
+        },
+      },
     },
-    [extraSmallSnapPoint]: {
-      margin: 0,
-      padding: 0,
+  },
+  selectors: {
+    [`${navBtnSelected}&`]: {
+      // Isolate layer creation just to this element
+      // when animation runs.
+      zIndex: 1,
+    },
+    [`${navBtnSelected}&::before`]: {
+      content: '""',
+      height: '28px',
+      width: '50px',
+      top: '6px',
+      position: 'absolute',
+      borderRadius: '14px',
+      backgroundColor: `hsla(${vars.colors.primaryHsl}, 30%)`,
+      animation: `${selectedPillAppearAni} .4s`,
     },
   },
 })
@@ -70,21 +98,15 @@ export const navBtn = composeStyles(
   sharedStyles.flexColumn,
   navBtnBase,
   atoms({
-    radius: 'large',
-    color: 'content2',
-    gap: 'medium',
+    gap: 'small',
     justifyContent: 'center',
     alignItems: 'center',
   }),
 )
 
-export const navBtnSelected = style({
-  color: vars.colors.primary,
-})
-
 export const navBtnTitle = style({
   '@media': {
-    [smallSnapPoint]: {
+    [mediumSnapPoint]: {
       display: 'none',
     },
   },

@@ -19,9 +19,5 @@
       "@types/wicg-file-system-access",
       "@types/wicg-mediasession"
     ]
-  },
-  "include": [
-    "./src/",
-		"./src/types/*.ts",
-  ],
+  }
 }

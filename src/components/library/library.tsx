@@ -114,9 +114,8 @@ const NavRail = () => (
 const EmptyLibraryBanner = () => (
   <MessageBanner
     title={'Your Library is empty'}
-    message={'Import some music to your Library'}
     button={{
-      title: 'Here',
+      title: 'Import some music',
       href: '/settings',
     }}
   />

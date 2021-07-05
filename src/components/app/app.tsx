@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, createSignal } from 'solid-js'
+import { Component, createEffect, createSignal } from 'solid-js'
 import { pathIntegration, Router, useRouter } from '@rturnq/solid-router'
 import { createApp } from 'solid-utils'
 import { setElementVar } from '@vanilla-extract/dynamic'
@@ -53,7 +53,6 @@ function getVarName(variable: string) {
 const App = () => {
   const router = useRouter()
   const isPlayerOpenQuery = createIsPlayerOverlayOpenQuery()
-  const isPlayerOrQueuePath = createMemo(() => isPlayerOpenQuery())
 
   const [playerState] = usePlayerStore()
 
@@ -76,35 +75,20 @@ const App = () => {
     setElementVar(document.documentElement, styles.hueVar, `${tHue}deg`)
   })
 
-  // window.getComputedStyle is very expensive so try do it
-  // as rarely as possible.
-  const titleBarColors = createMemo(() => {
+  // Since <meta name="theme-color" content="color" /> value is static
+  // it needs to be updated every time hue or theme changes.
+  createEffect(() => {
     themeHue()
     isDark()
 
     const style = window.getComputedStyle(document.documentElement)
 
-    const regular = style.getPropertyValue(getVarName(vars.colors.surface1))
-    const player = style.getPropertyValue(getVarName(vars.colors.surface1))
-
-    return {
-      regular,
-      player,
-    }
-  })
-
-  // Since <meta name="theme-color" content="color" /> value is static
-  // it needs to be updated every time hue or theme changes.
-  createEffect(() => {
-    const colors = titleBarColors()
+    const titleColor = style.getPropertyValue(getVarName(vars.colors.surface1))
 
     const titlebarElement = document.querySelector(
       'meta[name="theme-color"]',
     ) as HTMLMetaElement
-
-    titlebarElement.content = isPlayerOrQueuePath()
-      ? colors.player
-      : colors.regular
+    titlebarElement.content = titleColor
   })
 
   const toasts = useToast()

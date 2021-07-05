@@ -90,6 +90,7 @@ export const content = composeStyles(
     alignContent: 'center',
     maxHeight: '624px',
     height: '100%',
+    width: '100%',
   }),
 )
 

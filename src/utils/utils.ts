@@ -130,6 +130,10 @@ export const scrollWindowTopTo = (top: number, smooth = true): void => {
   })
 }
 
+// TODO: once typescript 4.4.0 is out replace it with new version.
+// interface CSSCustomVariables {
+//   [key: `--${string}`]: string | number;
+// }
 interface CustomStyleDeclaration {
   [k: string]: string | number
 }

@@ -1,6 +1,9 @@
 import { Component, createMemo, Show } from 'solid-js'
+import {
+  VirtualContainer,
+  VirtualItemProps,
+} from '@minht11/solid-virtual-container'
 import { FAVORITES_ID } from '../../../types/constants'
-import { VirtualList, VirtualItemProps } from '../../virtual/virtual'
 import { IconButton, IconType } from '../../icon-button/icon-button'
 import { Icon } from '../../icon/icon'
 import { useEntitiesStore } from '../../../stores/stores'
@@ -112,7 +115,7 @@ export interface PlaylistListProps extends BaseEntitiesListProps {
 export const PlaylistList: Component<PlaylistListProps> = (props) => {
   // Maybe memo is not needed here?
   const playlistsIds = createMemo(() => {
-    const {items} = props
+    const { items } = props
 
     if (props.hideFavorites) {
       return items
@@ -123,7 +126,7 @@ export const PlaylistList: Component<PlaylistListProps> = (props) => {
 
   return (
     <EntitiesListContainer {...props} entityName='playlist'>
-      <VirtualList itemSize={{ height: 48 }} items={playlistsIds()}>
+      <VirtualContainer itemSize={{ height: 48 }} items={playlistsIds()}>
         {(itemProps) => (
           <PlaylistListItem
             {...itemProps}
@@ -132,7 +135,7 @@ export const PlaylistList: Component<PlaylistListProps> = (props) => {
             onClick={() => props.onItemClick?.(itemProps.item, itemProps.index)}
           />
         )}
-      </VirtualList>
+      </VirtualContainer>
     </EntitiesListContainer>
   )
 }

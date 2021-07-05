@@ -1,7 +1,7 @@
+import { ScrollTargetContext } from '@minht11/solid-virtual-container'
 import { Component, JSX, Show } from 'solid-js'
 import { clx } from '../../utils'
 import { Toolbar, ToolbarProps } from '../toolbar/toolbar'
-import { ScrollTargetContext } from '../virtual/virtual-content/scroll-target-context'
 import * as styles from './app-scroll-container.css'
 
 interface AppScrollContainerProps {
