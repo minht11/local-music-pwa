@@ -1,4 +1,4 @@
-import { Component, createMemo, For, Show, Switch } from 'solid-js'
+import { createMemo, createSignal, For, Show, Switch } from 'solid-js'
 import { MatchRoute, useRoute, useRouter } from '@rturnq/solid-router'
 import { Transition } from 'solid-transition-group'
 import { Icon, IconType } from '../icon/icon'
@@ -20,11 +20,13 @@ import * as styles from './library.css'
 export const LIBRARY_PATH = '/library'
 export const DEFAULT_LIBRARY_PATH = `${LIBRARY_PATH}/${LIBRARY_PAGES_CONFIG[0].path}`
 
-interface LibraryProps {
-  installEvent?: BeforeInstallPromptEvent
-}
+const [installEvent, setInstallEvent] = createSignal<BeforeInstallPromptEvent>()
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault()
+  setInstallEvent(e as BeforeInstallPromptEvent)
+})
 
-const Header = (props: LibraryProps) => {
+const Header = () => {
   const router = useRouter()
   const menu = useMenu()
 
@@ -50,12 +52,25 @@ const Header = (props: LibraryProps) => {
     )
   }
 
+  const onInstallClickHandler = async () => {
+    const installE = installEvent()
+    if (!installE) {
+      return
+    }
+
+    await installE.prompt()
+    const choice = await installE.userChoice
+    if (choice.outcome === 'accepted') {
+      setInstallEvent(undefined)
+    }
+  }
+
   return (
     <Toolbar mainButton={false} title='Library'>
-      <Show when={props.installEvent}>
+      <Show when={installEvent()}>
         <button
           className={styles.installButton}
-          onClick={() => props.installEvent?.prompt()}
+          onClick={onInstallClickHandler}
         >
           Install
         </button>
@@ -150,12 +165,12 @@ const onExit = (element: Element, done: () => void) => {
   }).finished.then(done)
 }
 
-export const Library: Component<LibraryProps> = (props) => {
+export const Library = () => {
   const [entities] = useEntitiesStore()
 
   return (
     <div className={styles.pageContainer}>
-      <Header installEvent={props.installEvent} />
+      <Header />
       <NavRail />
       <Show
         when={Object.keys(entities.tracks).length}
