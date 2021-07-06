@@ -15,7 +15,7 @@ export const ViewArtistsModal: Component<ViewArtistsModalProps> = (props) => {
   const router = useRouter()
 
   const [entities] = useEntitiesStore()
-  const {artists} = entities
+  const { artists } = entities
 
   const onItemClickHandler = (id: string) => {
     props.close()

@@ -23,7 +23,6 @@ const OpenFullPlayerButton: Component = () => {
 }
 
 interface MiniPlayerProps {
-  artworkRef: (element: HTMLDivElement) => void
   ref: HTMLDivElement
 }
 
@@ -40,7 +39,7 @@ export const MiniPlayer: Component<MiniPlayerProps> = (props) => {
       <Show when={!areMainControlsHidden()}>
         <Timeline />
       </Show>
-      <Artwork className={styles.artwork} ref={props.artworkRef} />
+      <Artwork className={styles.artwork} />
       <Info
         className={!areMainControlsHidden() && styles.fixedWidthInfo}
         hideFavoriteBtn={isFavoritesButtonHidden()}

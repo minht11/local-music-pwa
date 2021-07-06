@@ -6,6 +6,7 @@ export const controls = composeStyles(
   style({
     gridArea: 'controls',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
   }),
 )
 
@@ -45,7 +46,7 @@ export const playing = style({})
 
 export const playPauseIcon = style({
   // Animation causes other nearby elements to
-  // repain aswell. Z-index isolates repaint only to this element.
+  // repaint aswell. Z-index isolates repaint only to this element.
   zIndex: 1,
   position: 'relative',
   height: '24px',

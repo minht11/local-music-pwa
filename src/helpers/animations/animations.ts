@@ -4,9 +4,10 @@ export const animateFade = (
   element: Element,
   fadeOut: boolean,
   options: KeyframeAnimationOptions,
-) => element.animate(
+): Animation =>
+  element.animate(
     {
       opacity: toggleReverseArray([0, 1], fadeOut),
     },
     options,
-  ).finished
+  )

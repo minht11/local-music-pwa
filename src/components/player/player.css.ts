@@ -1,6 +1,13 @@
-import { style, composeStyles, createVar } from '@vanilla-extract/css'
+import {
+  style,
+  composeStyles,
+  createVar,
+  fallbackVar,
+} from '@vanilla-extract/css'
 import { atoms } from '../../styles/styles.css'
 
+// Mobile browsers do not have stable vh values.
+export const windowHeightVar = createVar()
 export const miniPlayerHeightVar = createVar()
 
 export const playerContainer = style({
@@ -45,24 +52,9 @@ export const card = composeStyles(
   }),
 )
 
-export const fakeArtwork = composeStyles(
-  atoms({
-    radius: 'veryLarge',
-  }),
-  style({
-    transformOrigin: '0 0',
-    top: 0,
-    left: 0,
-    position: 'absolute',
-    display: 'none',
-    zIndex: 3,
-    willChange: 'transform',
-  }),
-)
-
 export const fpContainer = style({
   width: '100%',
-  height: '100vh',
+  height: fallbackVar(windowHeightVar, '100vh'),
   display: 'flex',
   contain: 'strict',
 })

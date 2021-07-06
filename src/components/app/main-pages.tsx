@@ -31,7 +31,7 @@ export const MainPages = (props: MainPagesProps) => {
       onEnter={props.onEnter}
       onExit={props.onExit}
       exitToClass={styles.pointerEventsNone}
-      enterToClass={styles.pointerEventsNone}
+      enterActiveClass={styles.pointerEventsNone}
     >
       <Switch fallback={NotFound}>
         <MatchRoute path={'/library'}>

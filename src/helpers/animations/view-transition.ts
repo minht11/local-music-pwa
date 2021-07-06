@@ -45,7 +45,7 @@ const animateViewExit = (element: Element, transformKeyframe: string) => {
   return animateFade(element, true, {
     duration: 90,
     easing: EASING_OUTGOING_40,
-  })
+  }).finished
 }
 
 export const animateViewExitForwards = (element: Element) =>

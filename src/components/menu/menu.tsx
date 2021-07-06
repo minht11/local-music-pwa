@@ -115,7 +115,7 @@ export const MenuProvider: Component = (props) => {
     animateFade(menuEl, true, {
       duration: 100,
       easing: 'linear',
-    }).then(() => {
+    }).finished.then(() => {
       setState('isOpen', false)
       if (elementToReturnFocusTo) {
         setAriaExpanedReturnFocusElement(false)

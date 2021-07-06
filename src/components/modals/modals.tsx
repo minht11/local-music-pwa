@@ -84,9 +84,10 @@ export const ModalsProvider: Component = (props) => {
     }
 
     if (element.classList.contains(styles.scrim)) {
-      animateFade(element, false, { duration: 150, easing: 'linear' }).then(
-        done,
-      )
+      animateFade(element, false, {
+        duration: 150,
+        easing: 'linear',
+      }).finished.then(done)
     } else {
       animateFade(element, false, { duration: 45, easing: 'linear' })
       element
@@ -109,7 +110,10 @@ export const ModalsProvider: Component = (props) => {
       return
     }
 
-    animateFade(element, true, { duration: 150, easing: 'linear' }).then(done)
+    animateFade(element, true, {
+      duration: 150,
+      easing: 'linear',
+    }).finished.then(done)
   }
 
   return (

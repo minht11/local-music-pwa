@@ -1,14 +1,10 @@
-import { Component, createSignal, Show, Switch } from 'solid-js'
+import { Component, createSignal, onCleanup, Show, Switch } from 'solid-js'
 import { MatchRoute, Route, useRouter } from '@rturnq/solid-router'
 import { Transition } from 'solid-transition-group'
+import { setElementVar } from '@vanilla-extract/dynamic'
 import { useAudioPlayer } from './audio/create-audio-player'
 import { createMediaQuery } from '../../helpers/hooks/create-media-query'
-import {
-  prefersReducedMotion,
-  setStyles,
-  toggleReverseArray,
-} from '../../utils'
-import { Artwork } from './components/artwork/artwork'
+import { prefersReducedMotion, toggleReverseArray } from '../../utils'
 import { MiniPlayer } from './mini-player/mini-player'
 import { FullPlayer } from './full-player/full-player'
 import { Queue } from './queue/queue'
@@ -19,6 +15,7 @@ import {
   animateViewExitForwards,
 } from '../../helpers/animations/view-transition'
 import * as styles from './player.css'
+import { animateFade } from '../../helpers/animations/animations'
 
 const cancelAnimations = (animations: Animation[]) =>
   animations.forEach((ani) => ani.cancel())
@@ -58,9 +55,6 @@ export const Player: Component = () => {
   let mpContainerEl!: HTMLDivElement
   // Element wrapping full player and queue
   let fpContentContainerEl!: HTMLDivElement
-  let mpArtworkEl!: HTMLDivElement
-  let fpArtworkEl!: HTMLDivElement
-  let fakeArtworkEl!: HTMLDivElement
 
   // Only used as a check during queue animation.
   let fpContainerEl!: HTMLDivElement
@@ -74,7 +68,6 @@ export const Player: Component = () => {
 
     return cardEl.animate(
       {
-        willChange: 'transform',
         transform: toggleReverseArray(transformFrames, isFpExiting),
       },
       {
@@ -86,101 +79,28 @@ export const Player: Component = () => {
     ).finished
   }
 
-  const animateFadePlayerContent = async (isFpExiting?: boolean) => {
-    const opacityFrames = [0, 1]
-
+  const animateFadePlayerContent = async (isFpExiting = false) => {
     const MP_FADE_DURATION = 75
     const FP_FADE_DURATION = 125
 
-    const ani1 = mpContainerEl.animate(
-      {
-        opacity: toggleReverseArray(opacityFrames, !isFpExiting),
-      },
-      {
-        duration: MP_FADE_DURATION,
-        delay: isFpExiting ? PLAYER_CARD_EXIT_DURATION - MP_FADE_DURATION : 0,
-        easing: 'linear',
-        fill: 'both',
-      },
-    )
-
-    const ani2 = fpContentContainerEl.animate(
-      {
-        opacity: toggleReverseArray(opacityFrames, isFpExiting),
-      },
-      {
-        duration: FP_FADE_DURATION,
-        delay: isFpExiting ? 0 : PLAYER_CARD_ENTER_DURATION - FP_FADE_DURATION,
-        easing: 'linear',
-        fill: 'both',
-      },
-    )
-
-    return Promise.all([ani1.finished, ani2.finished]).then(() => [ani1, ani2])
-  }
-
-  const animateSharedArtwork = (isFpExiting?: boolean) => {
-    if (!mpArtworkEl || !fpArtworkEl) {
-      return
-    }
-
-    const {
-      top: mpTop,
-      left: mpLeft,
-      width: mpWidth,
-      height: mpHeight,
-    } = mpArtworkEl.getBoundingClientRect()
-    const {
-      top: fpTop,
-      left: fpLeft,
-      width: fpWidth,
-      height: fpHeight,
-    } = fpArtworkEl.getBoundingClientRect()
-
-    const scaleX = mpWidth / fpWidth
-    const scaleY = mpHeight / fpHeight
-
-    // In very small screen sizes fp artwork size can be zero.
-    if (![scaleX, scaleY].every((scale) => Number.isFinite(scale))) {
-      return
-    }
-
-    // Position fake artwork
-    setStyles(fakeArtworkEl, {
-      width: `${fpWidth}px`,
-      height: `${fpHeight}px`,
-      left: `${fpLeft}px`,
-      top: `${fpTop}px`,
-      display: 'block',
+    const mpAni = animateFade(mpContainerEl, !isFpExiting, {
+      duration: MP_FADE_DURATION,
+      delay: isFpExiting ? PLAYER_CARD_EXIT_DURATION - MP_FADE_DURATION : 0,
+      easing: 'linear',
+      fill: 'both',
     })
 
-    // Hide real artworks while fake one is animating.
-    setStyles([mpArtworkEl, fpArtworkEl], { opacity: '0' })
+    const fpAni = animateFade(fpContentContainerEl, isFpExiting, {
+      duration: FP_FADE_DURATION,
+      delay: isFpExiting ? 0 : PLAYER_CARD_ENTER_DURATION - FP_FADE_DURATION,
+      easing: 'linear',
+      fill: 'both',
+    })
 
-    // Match full artwork position and size with mini artwork.
-    const transformKeyframes = [
-      `translate(${mpLeft - fpLeft}px, ${mpTop - fpTop}px)
-        scale(${scaleX}, ${scaleY})`,
-      'none',
-    ]
-
-    fakeArtworkEl
-      .animate(
-        {
-          transform: toggleReverseArray(transformKeyframes, isFpExiting),
-        },
-        {
-          duration: isFpExiting
-            ? PLAYER_CARD_EXIT_DURATION
-            : PLAYER_CARD_ENTER_DURATION,
-          easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)',
-        },
-      )
-      .finished.then(() => {
-        // Restore styles as they were before animating.
-        setStyles([mpArtworkEl, fpArtworkEl], { opacity: '' })
-        setStyles(fakeArtworkEl, { display: '' })
-      })
+    return Promise.all([mpAni.finished, fpAni.finished]).then(() => [
+      mpAni,
+      fpAni,
+    ])
   }
 
   const onFPEnter = (_: Element, done: () => void) => {
@@ -190,7 +110,6 @@ export const Player: Component = () => {
       return
     }
 
-    animateSharedArtwork()
     animateCard()
     animateFadePlayerContent().then((animations) => {
       setShouldRenderMiniPlayer(false)
@@ -212,7 +131,6 @@ export const Player: Component = () => {
 
     // Let mini player DOM render, before animating.
     queueMicrotask(() => {
-      animateSharedArtwork(true)
       const contentAnimations = animateFadePlayerContent(true)
       animateCard(true).then(async () => {
         cancelAnimations(await contentAnimations)
@@ -247,27 +165,27 @@ export const Player: Component = () => {
     animateViewExitBackwards(queuePaneEl).then(done)
   }
 
+  const ro = new ResizeObserver(([entry]) => {
+    setElementVar(
+      cardEl,
+      styles.windowHeightVar,
+      `${entry.contentRect.height}px`,
+    )
+  })
+  ro.observe(document.body)
+  onCleanup(() => {
+    ro.disconnect()
+  })
+
   const FullPlayerWrapper = () => (
-    <FullPlayer
-      isCompact={isCompact()}
-      ref={fpContainerEl}
-      artworkRef={(el) => {
-        fpArtworkEl = el
-      }}
-    />
+    <FullPlayer isCompact={isCompact()} ref={fpContainerEl} />
   )
 
   return (
     <div className={styles.playerContainer} ref={playerContainerEl}>
       <div className={styles.card} ref={cardEl}>
-        <Artwork className={styles.fakeArtwork} ref={fakeArtworkEl} />
         <Show when={shouldRenderMiniPlayer()}>
-          <MiniPlayer
-            ref={mpContainerEl}
-            artworkRef={(el) => {
-              mpArtworkEl = el
-            }}
-          />
+          <MiniPlayer ref={mpContainerEl} />
         </Show>
         <Transition onEnter={onFPEnter} onExit={onFPExit}>
           <Route path={PLAYER_OR_QUEUE_PATH} end={!isCompact()}>

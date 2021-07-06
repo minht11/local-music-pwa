@@ -29,9 +29,9 @@ export const BackButton: Component<IconButtonProps> = (props) => {
 
   return (
     <IconButton
-      {...props}
-      title='Back button'
       icon={IconType.BACK_ARROW}
+      title='Back button'
+      {...props}
       onClick={onClickHandler}
     />
   )

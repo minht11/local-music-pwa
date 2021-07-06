@@ -24,8 +24,8 @@ export interface MusicImageProps {
   ref?: JSX.CustomAttributes<HTMLDivElement>['ref']
 }
 
-// const supportsNativeCSSAspectRatio = CSS.supports('aspect-ratio: 1/1')
-const supportsNativeCSSAspectRatio = false
+const supportsNativeCSSAspectRatio =
+  import.meta.env.PROD && CSS.supports('aspect-ratio: 1/1')
 
 const getIcon = (item?: MusicImageProps['item']) => {
   if (!item) {

@@ -1,7 +1,7 @@
 import { style, composeStyles } from '@vanilla-extract/css'
 import { sharedStyles, atoms } from '../../styles/styles.css'
 
-export const {pageContainer} = sharedStyles
+export const { pageContainer } = sharedStyles
 
 export const section = composeStyles(
   atoms({

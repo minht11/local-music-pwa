@@ -12,7 +12,7 @@ export const VolumeButton: Component<VolumeButtonProps> = (props) => {
   const [playerState] = usePlayerStore()
 
   const volumeStateClassName = () => {
-    const {volume} = playerState
+    const { volume } = playerState
 
     let volumeIcon = styles.volumeLow
     if (volume === 0 || playerState.isMuted) {

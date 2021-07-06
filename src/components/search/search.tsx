@@ -216,7 +216,7 @@ export const Search: Component = () => {
     animateFade(element, true, {
       duration: 90,
       easing: EASING_OUTGOING_40,
-    }).then(done)
+    }).finished.then(done)
 
     animateSlide(element, true)
   }

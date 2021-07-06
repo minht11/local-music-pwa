@@ -1,6 +1,6 @@
 import { useRouter } from '@rturnq/solid-router'
+import { VirtualItemProps } from '@minht11/solid-virtual-container'
 import { Album, Artist, MusicItemType } from '../../../types/types'
-import { VirtualItemProps } from '../../virtual/virtual'
 import { MusicImage } from '../../music-image/music-image'
 import { BaseEntitiesListProps } from '../entities-list-container'
 import { UNKNOWN_WORD_STRING } from '../../../types/constants'

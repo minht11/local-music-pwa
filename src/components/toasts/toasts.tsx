@@ -5,6 +5,7 @@ import {
   For,
   Match,
   on,
+  Show,
   Switch,
   useContext,
 } from 'solid-js'
@@ -133,9 +134,11 @@ export const ToastProvider: Component<ToastProviderProps> = (props) => {
 
   return (
     <ToastContext.Provider value={{ show, hide }}>
-      <div className={clx(styles.container, props.className)}>
-        <For each={state.toasts}>{Toast}</For>
-      </div>
+      <Show when={state.toasts.length}>
+        <div className={clx(styles.container, props.className)}>
+          <For each={state.toasts}>{Toast}</For>
+        </div>
+      </Show>
       {props.children}
     </ToastContext.Provider>
   )

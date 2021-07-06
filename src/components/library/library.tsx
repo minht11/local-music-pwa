@@ -123,7 +123,7 @@ const EmptyLibraryBanner = () => (
 
 const onEnter = (element: Element, done: () => void) => {
   if (prefersReducedMotion()) {
-    animateFade(element, false, { duration: 100 }).then(done)
+    animateFade(element, false, { duration: 100 }).finished.then(done)
     return
   }
 
@@ -147,7 +147,7 @@ const onExit = (element: Element, done: () => void) => {
     duration: 90,
     easing: EASING_OUTGOING_40,
     fill: 'both',
-  }).then(done)
+  }).finished.then(done)
 }
 
 export const Library: Component<LibraryProps> = (props) => {

@@ -1,25 +1,11 @@
 import { style, composeStyles, createVar } from '@vanilla-extract/css'
 import { sharedStyles, atoms, vars } from '../../../styles/styles.css'
 
-const FP_SECTION_WIDTH = '320px'
+export const CONTENT_GAP = 24
+export const CONTROLS_HEIGHT = 224
+export const PREFERRED_CONTROLS_WIDTH = 320
 
-const fpMaxSectionWidthVar = createVar()
-const fpArtworkWidthVar = createVar()
-
-/*
-  Vertical layout
-  toolbar  toolbar  toolbar
-  gap      artwork  gap
-  gap      gap      gap
-  gap      controls gap
-  gap      gap      gap
-*/
-/*
-  Horizontal layout
-  toolbar  toolbar  gap   toolbar   gap
-  gap      artwork  gap   controls  gap
-  gap      gap      gap   gap       gap
-*/
+export const artworkSizeVar = createVar()
 
 export const fpPane = composeStyles(
   atoms({
@@ -29,31 +15,9 @@ export const fpPane = composeStyles(
     gap: 'medium',
   }),
   style({
-    // TODO: this needs reworking, layout still breaks
-    // under certain landscape sizes.
-    vars: {
-      /* First min: Max horizontal size */
-      /* Second min: Max vertical size */
-      [fpMaxSectionWidthVar]: `max(
-        min(
-          100vh - ${vars.sizes.toolbarHeight} - 16px,
-          100vw - ${FP_SECTION_WIDTH} - 16px * 3
-        ),
-        min(
-          100vh - 16px * 2 - ${vars.sizes.toolbarHeight} - 184px,
-          100vw - 16px * 2
-        )
-      )
-      `,
-      [fpArtworkWidthVar]: `min(${fpMaxSectionWidthVar}, ${FP_SECTION_WIDTH})`,
-      '--test-1': `min(
-        100vh - ${vars.sizes.toolbarHeight} - 16px,
-        100vw - ${FP_SECTION_WIDTH} - 16px * 3
-      )`,
-    },
     width: '100%',
-    maxWidth: '320px',
-    margin: '0 16px',
+    maxWidth: `${PREFERRED_CONTROLS_WIDTH}px`,
+    padding: '0 16px 16px',
   }),
 )
 
@@ -67,6 +31,7 @@ export const toolbar = composeStyles(
     justifyContent: 'space-between',
     width: '100%',
     height: vars.sizes.toolbarHeight,
+    flexShrink: 0,
   }),
 )
 
@@ -83,12 +48,14 @@ export const content = composeStyles(
   atoms({
     display: 'flex',
     justifyContent: 'center',
-    gap: 'large',
+    alignItems: 'center',
   }),
   style({
-    flexWrap: 'wrap',
+    gap: `${CONTENT_GAP}px`,
     alignContent: 'center',
-    maxHeight: '624px',
+    flexWrap: 'wrap',
+    overflow: 'hidden',
+    maxHeight: '724px',
     height: '100%',
     width: '100%',
   }),
@@ -99,7 +66,8 @@ export const artwork = composeStyles(
     radius: 'veryLarge',
   }),
   style({
-    width: fpArtworkWidthVar,
+    width: artworkSizeVar,
+    height: artworkSizeVar,
     '@media': {
       '(max-width: 200px)': {
         display: 'none',
@@ -109,7 +77,9 @@ export const artwork = composeStyles(
 )
 
 export const controls = style({
-  maxWidth: fpArtworkWidthVar,
+  height: `${CONTROLS_HEIGHT}px`,
+  minWidth: artworkSizeVar,
+  maxWidth: `${PREFERRED_CONTROLS_WIDTH}px`,
   width: '100%',
   alignItems: 'center',
   display: 'grid',
