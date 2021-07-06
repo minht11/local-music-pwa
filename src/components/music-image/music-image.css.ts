@@ -20,9 +20,9 @@ export const musicImage = composeStyles(
 
 export const aspectRatio = style({
   aspectRatio: '1/1',
-  // Position relative can be expensive,
-  // especially when used on a lot of elements.
-  position: 'static',
+  // // Position relative can be expensive,
+  // // especially when used on a lot of elements.
+  // position: 'static',
 })
 
 export const legacyAspectImg = style({
