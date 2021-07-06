@@ -63,7 +63,7 @@ const navBtnBase = style({
   position: 'relative',
   '@media': {
     [mediumSnapPoint]: {
-      maxWidth: '66px',
+      maxWidth: '70px',
       width: '100%',
       height: '100%',
       borderRadius: '33px',
@@ -83,12 +83,12 @@ const navBtnBase = style({
     [`${navBtnSelected}&::before`]: {
       content: '""',
       height: '28px',
-      width: '50px',
+      width: '54px',
       top: '6px',
       position: 'absolute',
       borderRadius: '14px',
       backgroundColor: `hsla(${vars.colors.primaryHsl}, 30%)`,
-      animation: `${selectedPillAppearAni} .4s`,
+      animation: `${selectedPillAppearAni} .2s cubic-bezier(0.0, 0.0, 0.2, 1)`,
     },
   },
 })

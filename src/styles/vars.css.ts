@@ -10,7 +10,7 @@ const darkColorHslVars = createGlobalTheme(root, {
   contentHsl: `${hueVar}, 70%, 97%`,
 })
 
-const lightColorHslVars = assignVars(darkColorHslVars, {
+const lightColorHslTheme = assignVars(darkColorHslVars, {
   primaryHsl: `${hueVar}, 80%, 42%`,
   primaryContentHsl: `${hueVar}, 22%, 98%`,
   contentHsl: `${hueVar}, 82%, 10%`,
@@ -27,7 +27,7 @@ const darkSurfaceVars = createGlobalTheme(root, {
   surface5: `hsl(${hueVar}, 10%, 18%)`,
 })
 
-const lightSurfaceVars = assignVars(darkSurfaceVars, {
+const lightSurfaceTheme = assignVars(darkSurfaceVars, {
   surface0: `hsl(${hueVar}, 24%, 100%)`,
   surface1: `hsl(${hueVar}, 22%, 96%)`,
   surface2: `hsl(${hueVar}, 58%, 94%)`,
@@ -38,16 +38,24 @@ const lightSurfaceVars = assignVars(darkSurfaceVars, {
 
 export const surfaceVars = darkSurfaceVars
 
+const otherDynamicColorVars = createGlobalTheme(root, {
+  content2: `hsla(${colorHslVars.contentHsl}, 54%)`,
+})
+
+const lightOtherDynamicColorTheme = assignVars(otherDynamicColorVars, {
+  content2: `hsla(${colorHslVars.contentHsl}, 64%)`,
+})
+
 export const lightTheme = {
-  ...lightColorHslVars,
-  ...lightSurfaceVars,
+  ...lightColorHslTheme,
+  ...lightSurfaceTheme,
+  ...lightOtherDynamicColorTheme,
 }
 
 const staticColorVars = createGlobalTheme(root, {
   primary: `hsl(${colorHslVars.primaryHsl})`,
   primaryContent: `hsl(${colorHslVars.primaryContentHsl})`,
   content1: `hsla(${colorHslVars.contentHsl}, 100%)`,
-  content2: `hsla(${colorHslVars.contentHsl}, 54%)`,
   scrim: 'hsla(0deg, 0%, 0%, 20%)',
   scrollBar: `hsla(${colorHslVars.contentHsl}, 20%)`,
 })
@@ -56,6 +64,7 @@ const colors = {
   hue: hueVar,
   ...colorHslVars,
   ...surfaceVars,
+  ...otherDynamicColorVars,
   ...staticColorVars,
 }
 
