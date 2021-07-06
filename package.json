@@ -1,6 +1,6 @@
 {
   "name": "snae_music_player",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lightweight on device music player right in your browser.",
   "scripts": {
     "dev": "vite",

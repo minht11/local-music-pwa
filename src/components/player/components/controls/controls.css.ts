@@ -91,7 +91,7 @@ const animatedIcon = style({
 export const skipIcon = composeStyles(
   animatedIcon,
   style({
-    clipPath: 'inset(0 4px 0 0)',
+    clipPath: 'inset(0 6px 0 0)',
   }),
 )
 
