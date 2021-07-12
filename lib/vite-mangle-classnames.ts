@@ -1,7 +1,6 @@
-/* eslint-disable  */
 import { PluginOption } from 'vite'
-// @ts-ignore
 import csstree from 'css-tree'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import cssClassGenerator from 'css-class-generator'
 
@@ -19,17 +18,21 @@ export const mangleClassNames = (): PluginOption => ({
     const fileEntries = Object.entries(bundle)
 
     for (const [fileName, file] of fileEntries) {
-      if (file.type === 'asset' && fileName.endsWith('.css')) {
+      if (
+        file.type === 'asset' &&
+        fileName.endsWith('.css') &&
+        typeof file.source === 'string'
+      ) {
         const ast = csstree.parse(file.source)
 
         /* eslint-disable no-loop-func */
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        csstree.walk(ast, (node: any) => {
+        csstree.walk(ast, (node) => {
           if (node.type === 'ClassSelector') {
             const { name } = node
             let mangledName = classNamesMap.get(name)
 
             if (mangledName === undefined) {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
               mangledName = cssClassGenerator(index) as string
               classNamesMap.set(name, mangledName)
               index += 1

@@ -1,4 +1,4 @@
-import { HtmlTagDescriptor, PluginOption } from 'vite'
+import { PluginOption } from 'vite'
 
 export interface Options {
   input: string[]
@@ -25,25 +25,15 @@ export const injectScriptsToHtmlDuringBuild = (
     transformIndexHtml: {
       enforce: 'post',
       transform() {
-        const preload: HtmlTagDescriptor[] = inputFileNames.map((src) => ({
-          tag: 'link',
-          attrs: {
-            href: src,
-            rel: 'modulepreload',
-          },
-          injectTo: 'head',
-        }))
-
-        const scripts: HtmlTagDescriptor[] = inputFileNames.map((src) => ({
+        return inputFileNames.map((src) => ({
           tag: 'script',
           attrs: {
             src,
             type: 'module',
+            async: true,
           },
-          injectTo: 'body',
+          injectTo: 'head',
         }))
-
-        return [...preload, ...scripts]
       },
     },
   }

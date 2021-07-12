@@ -12,6 +12,9 @@ Only mp3 files are supported, more file formats might be added in future.
 ## Works with
 With limitations in mind app works with every modern browser.
 
+## Privacy
+Minimal, privacy preserving analytics, provided by [GoatCounter](https://goatcounter.com/), are used to count page views.
+
 ## Building locally
 Clone the repo, and:
 ```

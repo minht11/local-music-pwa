@@ -20,6 +20,7 @@ export const About = () => {
         <a href='https://github.com/minht11/local-music-pwa'>
           Source code on Github
         </a>
+        <a href='https://github.com/minht11/local-music-pwa#privacy'>Privacy</a>
       </section>
     </AppScrollContainer>
   )
