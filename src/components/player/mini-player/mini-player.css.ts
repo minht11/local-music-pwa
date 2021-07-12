@@ -4,7 +4,7 @@ import { sharedStyles, atoms, vars } from '../../../styles/styles.css'
 
 const smallMedia = '(max-width: 700px), (max-height: 400px)'
 
-export const mpContainer = composeStyles(
+export const container = composeStyles(
   atoms({
     columnGap: 'large',
     rowGap: 'medium',

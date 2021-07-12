@@ -93,9 +93,7 @@ const PlaylistListItem = (props: PlaylistItem) => {
         <IconButton
           disabled={isFavorites()}
           className={styles.menu}
-          aria-label='Menu button'
-          aria-haspopup='true'
-          aria-expanded='false'
+          title='Menu button'
           icon={IconType.MORE_VERTICAL}
           tabIndex={props.tabIndex}
           onClick={[onMenuHandler, true]}

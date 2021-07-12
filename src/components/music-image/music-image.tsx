@@ -1,5 +1,4 @@
 import {
-  Component,
   createEffect,
   createSignal,
   onCleanup,
@@ -24,8 +23,14 @@ export interface MusicImageProps {
   ref?: JSX.CustomAttributes<HTMLDivElement>['ref']
 }
 
-const supportsNativeCSSAspectRatio =
-  import.meta.env.PROD && CSS.supports('aspect-ratio: 1/1')
+// Too many bugs in browsers, Safari 15 will support aspect-ratio,
+// but it will probably ship with this bug and the fix will only come
+// in a year, so just disable it for now. Making testing overall easier.
+// TODO: enable this in 2022 :).
+// https://bugzilla.mozilla.org/show_bug.cgi?id=1719273
+// const supportsNativeCSSAspectRatio =
+//   import.meta.env.PROD && CSS.supports('aspect-ratio: 1/1')
+const supportsNativeCSSAspectRatio = false
 
 const getIcon = (item?: MusicImageProps['item']) => {
   if (!item) {
@@ -50,7 +55,7 @@ const getIcon = (item?: MusicImageProps['item']) => {
   }
 }
 
-export const MusicImage: Component<MusicImageProps> = (props) => {
+export const MusicImage = (props: MusicImageProps) => {
   const context = useContext(MusicImagesContext)
 
   const [imageURL, setImgURL] = createSignal<string | null>(null)
@@ -70,9 +75,16 @@ export const MusicImage: Component<MusicImageProps> = (props) => {
     })
   })
 
+  const style = () => {
+    const url = imageURL()
+    return {
+      'background-image': (url && `url(${url})`) || '',
+    }
+  }
+
   return (
     <div
-      style={(imageURL() && `background-image: url(${imageURL()})`) || ''}
+      style={style()}
       className={clx(
         styles.musicImage,
         props.className,

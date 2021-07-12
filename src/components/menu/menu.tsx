@@ -1,7 +1,6 @@
 import { Component, createContext, For, Show, useContext } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { FocusTrap } from '@a11y/focus-trap'
-
 import { EASING_INCOMING_80 } from '../../helpers/animations/view-transition'
 import { clx, doesElementContainFocus } from '../../utils'
 import { getMeasurementsFromAnchor } from './helpers/get-menu-position-from-anchor'
@@ -35,7 +34,7 @@ export const MenuProvider: Component = (props) => {
   const setAriaExpanedReturnFocusElement = (value: boolean) => {
     if (elementToReturnFocusTo) {
       if (elementToReturnFocusTo.hasAttribute('aria-expanded')) {
-        elementToReturnFocusTo.setAttribute('aria-expanded', `${value}`)
+        elementToReturnFocusTo.setAttribute('aria-expanded', value.toString())
       }
     }
   }

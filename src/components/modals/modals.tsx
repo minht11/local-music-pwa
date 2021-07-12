@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid'
-import { Component, createContext, For, useContext } from 'solid-js'
+import { Component, createContext, For, useContext, JSX } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Dynamic } from 'solid-js/web'
 import { TransitionGroup } from 'solid-transition-group'
@@ -18,7 +18,7 @@ const MODALS = {
   createOrRenamePlaylist: CreateOrRenamePlaylistModal,
 } as const
 
-type UnwrapComponentProps<T> = T extends Component<infer U> ? U : T
+type UnwrapComponentProps<T> = T extends (props: infer U) => JSX.Element ? U : T
 
 type ModalsType = typeof MODALS
 type ModalsKey = keyof ModalsType
@@ -34,7 +34,7 @@ interface ModalStateItem<K extends ModalsKey = ModalsKey> {
   id: string
   key: K
   modalProps: ModalProps<K>
-  close(): void
+  close(this: void): void
 }
 
 interface ModalsState {
@@ -128,8 +128,11 @@ export const ModalsProvider: Component = (props) => {
                   onClick={() => modalProps.close()}
                 />
                 <Dynamic
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  component={MODALS[modalProps.key] as any}
+                  component={
+                    MODALS[modalProps.key] as (
+                      props: ModalProps<typeof modalProps.key>,
+                    ) => JSX.Element
+                  }
                   {...modalProps.modalProps}
                   close={modalProps.close}
                 />

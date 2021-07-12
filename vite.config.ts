@@ -1,8 +1,11 @@
 import { defineConfig } from 'vite'
 import solidPlugin from 'vite-plugin-solid'
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin'
-import { VitePWA } from 'vite-plugin-pwa'
+import { minifyHtml } from 'vite-plugin-html'
 import manifest from './package.json'
+import { mangleClassNames } from './lib/vite-mangle-classnames'
+import { injectScriptsToHtmlDuringBuild } from './lib/vite-inject-scripts-to-html'
+import { serviceWorker } from './lib/vite-service-worker'
 
 const createMScreenshot = (name: string, sizes: string) => ({
   sizes,
@@ -14,6 +17,9 @@ export default defineConfig({
   build: {
     target: 'esnext',
     polyfillDynamicImport: false,
+    cleanCssOptions: {
+      level: 2,
+    },
     cssCodeSplit: false,
     terserOptions: {
       output: {
@@ -21,7 +27,8 @@ export default defineConfig({
       },
       module: true,
       compress: {
-        passes: 3, // 3 passes instead of 2, because https://github.com/terser/terser/issues/969
+        // 2 or more passes break __vitePreloadHelper
+        // passes: 2,
         unsafe_math: true,
         unsafe_methods: true,
         unsafe_arrows: true,
@@ -34,16 +41,31 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
+        // Disable vendor chunk.
+        manualChunks: undefined,
         preferConst: true,
       },
     },
   },
   plugins: [
+    minifyHtml(),
+    // Vite always bundles or imports all scripts into one file.
+    // In unsupported browsers we want to display error message about it,
+    // but because everything is bundled into one file, main app bundle
+    // fails to load because of syntax errors and no message is displayed.
+    // This plugin fixes that by emiting script separetly
+    // and including it inside html.
+    injectScriptsToHtmlDuringBuild({
+      input: ['./src/disable-app-if-not-supported.ts'],
+    }),
+    // If https://github.com/seek-oss/vanilla-extract/discussions/222 is ever implemented,
+    // this plugin can be replaced.
+    mangleClassNames(),
     vanillaExtractPlugin(),
     solidPlugin({
       hot: false,
     }),
-    VitePWA({
+    serviceWorker({
       manifest: {
         short_name: 'Snae',
         name: 'Snae player',
@@ -56,21 +78,15 @@ export default defineConfig({
         description: manifest.description,
         icons: [
           {
-            src: '/icons/icon_192.png',
-            type: 'image/png',
-            sizes: '192x192',
+            src: '/icons/icon_responsive.svg',
+            type: 'image/svg+xml',
+            sizes: 'any',
             purpose: 'any',
           },
           {
-            src: '/icons/icon_512.png',
-            type: 'image/png',
-            sizes: '512x512',
-            purpose: 'any',
-          },
-          {
-            src: '/icons/maskable_icon.webp',
-            type: 'image/webp',
-            sizes: '512x512',
+            src: '/icons/icon_maskable.svg',
+            type: 'image/svg+xml',
+            sizes: 'any',
             purpose: 'maskable',
           },
         ],
@@ -85,7 +101,4 @@ export default defineConfig({
       },
     }),
   ],
-  optimizeDeps: {
-    exclude: ['@rturnq/solid-router'],
-  },
 })

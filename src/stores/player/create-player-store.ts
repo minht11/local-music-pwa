@@ -6,11 +6,12 @@ import { Track } from '../../types/types'
 import { useToast } from '../../components/toasts/toasts'
 import { useEntitiesStore } from '../stores'
 
-export enum RepeatState {
-  repeatOff = 0,
-  repeatAll = 1,
-  repeatOnce = 2,
-}
+export const RepeatState = {
+  repeatOff: 0,
+  repeatAll: 1,
+  repeatOnce: 2,
+} as const
+export type RepeatState = typeof RepeatState[keyof typeof RepeatState]
 
 interface State {
   isPlaying: boolean

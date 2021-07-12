@@ -27,21 +27,6 @@ const colorAtom = createAtomicStyles({
   },
 })
 
-const marginSize = vars.static.gap
-const marginAtom = createAtomicStyles({
-  properties: {
-    marginTop: marginSize,
-    marginBottom: marginSize,
-    marginLeft: marginSize,
-    marginRight: marginSize,
-    margin: marginSize,
-  },
-  shorthands: {
-    marginX: ['marginLeft', 'marginRight'],
-    marginY: ['marginTop', 'marginBottom'],
-  },
-})
-
 const paddingSize = vars.static.padding
 const paddingAtom = createAtomicStyles({
   properties: {
@@ -60,20 +45,10 @@ const paddingAtom = createAtomicStyles({
 const radiusSize = vars.static.radius
 const borderRadiusAtom = createAtomicStyles({
   properties: {
-    borderTopLeftRadius: radiusSize,
-    borderTopRightRadius: radiusSize,
-    borderBottomLeftRadius: radiusSize,
-    borderBottomRightRadius: radiusSize,
+    borderRadius: radiusSize,
   },
   shorthands: {
-    radiusTop: ['borderTopLeftRadius', 'borderTopRightRadius'],
-    radiusBottom: ['borderBottomLeftRadius', 'borderBottomRightRadius'],
-    radius: [
-      'borderTopLeftRadius',
-      'borderTopRightRadius',
-      'borderBottomLeftRadius',
-      'borderBottomRightRadius',
-    ],
+    radius: ['borderRadius'],
   },
 })
 
@@ -95,7 +70,9 @@ const gapAtom = createAtomicStyles({
   properties: {
     rowGap: gapSize,
     columnGap: gapSize,
-    gap: gapSize,
+  },
+  shorthands: {
+    gap: ['columnGap', 'rowGap'],
   },
 })
 
@@ -122,7 +99,6 @@ export const atoms = createAtomsFn(
   atom,
   borderRadiusAtom,
   paddingAtom,
-  marginAtom,
   colorAtom,
   gapAtom,
   typographyAtom,

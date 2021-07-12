@@ -1,4 +1,5 @@
-import { style } from '@vanilla-extract/css'
+import { composeStyles, style } from '@vanilla-extract/css'
+import { atoms, sharedStyles } from '../../styles/styles.css'
 import '../../styles/global.css'
 
 export { hueVar } from '../../styles/vars.css'
@@ -15,6 +16,11 @@ export const appContainer = style({
     'content-left content-right'
     'player player'
   `,
+  selectors: {
+    'html[app-not-supported] &': {
+      display: 'none',
+    },
+  },
 })
 
 export const toastArea = style({
@@ -26,9 +32,18 @@ export const toastPlayerOpenArea = style({
   gridColumn: 'content-left',
 })
 
-export const pointerEventsNone = style(
-  {
-    pointerEvents: 'none',
-  },
-  'pointer-events-none',
+export const emptyPlayerPage = composeStyles(
+  atoms({
+    surface: 'surface1',
+  }),
+  style({
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: -1,
+  }),
 )
+
+export const { pointerEventsNone } = sharedStyles

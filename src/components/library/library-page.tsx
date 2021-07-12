@@ -37,7 +37,7 @@ export function LibraryPage(props: LibraryPageConfig) {
 
     const itemIds = createMemo(() => {
       const itemsArray = sortByKey(
-        [...Object.values(itemsSelector())] as Track[],
+        [...Object.values<Track>(itemsSelector() as { [key: string]: Track })],
         libraryState.sortKeys[props.type] as keyof Track,
       ) as unknown as BaseMusicItem[]
 
@@ -53,7 +53,7 @@ export function LibraryPage(props: LibraryPageConfig) {
         selected: libraryState.sortKeys[props.type] === item.key,
       }))
 
-      menu?.show(menuItems, e.target as HTMLElement, {
+      menu.show(menuItems, e.target as HTMLElement, {
         anchor: true,
         preferredAlign: { horizontal: 'right' },
         width: 124,

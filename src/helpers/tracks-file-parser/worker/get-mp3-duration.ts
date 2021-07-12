@@ -108,7 +108,7 @@ function parseFrameHeader(header: Uint8Array) {
   const layerBits = (b1 & 0x06) >> 1
   const layer = layers[layerBits]
 
-  const bitRateKey = `V${simpleVersion}L${layer}` as keyof typeof bitRates
+  const bitRateKey: keyof typeof bitRates = `V${simpleVersion}L${layer}`
   const bitRateIndex = (b2 & 0xf0) >> 4
   const bitRate = bitRates[bitRateKey][bitRateIndex] || 0
 

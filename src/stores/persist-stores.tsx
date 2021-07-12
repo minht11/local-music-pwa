@@ -63,7 +63,7 @@ export const PersistStoresC: Component<PersistStoresProps> = (props) => {
       // Listen for changes to values and save them to IDB.
       persistedItems.forEach((item) => {
         createEffect(() => {
-          const value = item.selector()
+          const value: unknown = item.selector()
           if (skippedSetup) {
             setIDB(item.key, unwrap(value), storeIDB)
           }

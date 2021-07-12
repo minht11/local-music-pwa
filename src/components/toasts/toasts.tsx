@@ -29,8 +29,8 @@ export interface ToastItem {
 }
 
 export interface ToastContextProps {
-  show(item: ToastItem): void
-  hide(id: ToastItem['id']): void
+  show(this: void, item: ToastItem): void
+  hide(this: void, id: ToastItem['id']): void
 }
 
 interface ToastState {

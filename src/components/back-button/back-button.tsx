@@ -7,7 +7,9 @@ import {
   IconType,
 } from '../icon-button/icon-button'
 
-export const BackButton: Component<IconButtonProps> = (props) => {
+type BackButtonProps = Exclude<IconButtonProps, 'onClick'>
+
+export const BackButton: Component<BackButtonProps> = (props) => {
   const router = useRouter()
 
   const onClickHandler = () => {

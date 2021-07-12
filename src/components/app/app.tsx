@@ -2,12 +2,13 @@ import { Component, createEffect, createSignal } from 'solid-js'
 import { pathIntegration, Router, useRouter } from '@rturnq/solid-router'
 import { createApp } from 'solid-utils'
 import { setElementVar } from '@vanilla-extract/dynamic'
-import { registerSW } from 'virtual:pwa-register'
+import { registerServiceWorker } from '../../sw/register-sw'
 import { LIBRARY_PATH } from '../library/library'
 import {
   createIsPlayerOverlayOpenQuery,
   Player,
   PLAYER_CARD_ENTER_DURATION,
+  PLAYER_CARD_EXIT_DURATION,
 } from '../player/player'
 import {
   animateViewEnterBackwards,
@@ -23,8 +24,8 @@ import { ModalsProvider } from '../modals/modals'
 import { createMediaQuery } from '../../helpers/hooks/create-media-query'
 import { vars } from '../../styles/styles.css'
 import { prefersReducedMotion } from '../../utils'
-
 import { MainPages } from './main-pages'
+import { animateEmpty } from '../../helpers/animations/animations'
 import * as styles from './app.css'
 
 // const ErrorPage = () => (
@@ -41,7 +42,7 @@ import * as styles from './app.css'
 
 // Direct copy from https://github.com/seek-oss/vanilla-extract/blob/cfb0c89b3f0a300eb58dbeb0ce3d9eb84a612844/packages/private/src/getVarName.ts#L1
 function getVarName(variable: string) {
-  const matches = variable.match(/^var\((.*)\)$/)
+  const matches = /^var\((.*)\)$/.exec(variable)
 
   if (matches) {
     return matches[1]
@@ -93,22 +94,24 @@ const App = () => {
 
   const toasts = useToast()
 
-  const updateSW = registerSW({
-    onNeedRefresh() {
-      toasts.show({
-        message: 'An app update is available',
-        duration: false,
-        controls: [
-          {
-            title: 'Reload',
-            action: () => {
-              updateSW(true)
+  if (import.meta.env.PROD) {
+    registerServiceWorker({
+      onNeedRefresh(updateSW) {
+        toasts.show({
+          message: 'An app update is available',
+          duration: false,
+          controls: [
+            {
+              title: 'Reload',
+              action: () => {
+                updateSW()
+              },
             },
-          },
-        ],
-      })
-    },
-  })
+          ],
+        })
+      },
+    })
+  }
 
   const currentPath = () => router.location.path
   let previousPath = currentPath()
@@ -135,7 +138,7 @@ const App = () => {
     // Player route slides in from the bottom as an overlay so no other
     // animation is needed for other elements.
     if (isCurrentPathPlayerPath() || isPlayerOpenQuery(previousPath)) {
-      done()
+      animateEmpty(element, PLAYER_CARD_EXIT_DURATION).finished.then(done)
     } else if (isLibraryPath(currentPath())) {
       animateViewEnterBackwards(element).then(done)
     } else {
@@ -151,11 +154,7 @@ const App = () => {
 
     // Keep rendering previous route while player route is animating.
     if (isCurrentPathPlayerPath()) {
-      element
-        .animate(null, {
-          duration: PLAYER_CARD_ENTER_DURATION,
-        })
-        .finished.then(done)
+      animateEmpty(element, PLAYER_CARD_ENTER_DURATION).finished.then(done)
     } else if (isLibraryPath(previousPath)) {
       animateViewExitForwards(element).then(done)
     } else {
@@ -194,13 +193,19 @@ const AppLayout: Component = (props) => {
 const onStoresLoad = () =>
   document.documentElement.removeAttribute('app-not-loaded')
 
-createApp(App)
-  .use(Router, { integration: pathIntegration(), children: {} })
-  .use(MusicImagesProvider)
-  .use(AppLayout)
-  .use(RootStoresProvider, {
-    onLoad: onStoresLoad,
-  })
-  .use(ModalsProvider)
-  .use(MenuProvider)
-  .mount('body')
+// The supported browser features check file is very small,
+// still in case if it doesn't load or loads late
+// do not render app only if we explicitly know that browser is not supported.
+// If app loads in unsupported browser because of race condition it's not a big deal.
+if (window.isSupportedBrowser !== false) {
+  createApp(App)
+    .use(Router, { integration: pathIntegration(), children: {} })
+    .use(MusicImagesProvider)
+    .use(AppLayout)
+    .use(RootStoresProvider, {
+      onLoad: onStoresLoad,
+    })
+    .use(ModalsProvider)
+    .use(MenuProvider)
+    .mount('body')
+}

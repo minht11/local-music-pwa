@@ -208,13 +208,15 @@ export const toggleReverseArray = <T>(items: T[], condition = false) =>
   condition ? [...items].reverse() : items
 
 type ClxArgType = string | number | false | undefined | null
-export const clx = <Args extends ClxArgType[]>(...args: Args) =>
-  args.reduce((str, value) => {
+export const clx = <Args extends ClxArgType[]>(...args: Args) => {
+  let str = ''
+  for (const value of args) {
     if (value) {
-      return `${str} ${value}`
+      str += ` ${value}`
     }
-    return str
-  }, '') as string
+  }
+  return str
+}
 
 const pluralRules = new Intl.PluralRules('en-US')
 

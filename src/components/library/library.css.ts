@@ -1,4 +1,4 @@
-import { style, composeStyles, keyframes } from '@vanilla-extract/css'
+import { style, composeStyles } from '@vanilla-extract/css'
 import { sharedStyles, atoms, vars } from '../../styles/styles.css'
 
 const mediumSnapPoint = '(max-width: 700px)'
@@ -46,13 +46,6 @@ export const navRail = composeStyles(
 
 export const navBtnSelected = style({})
 
-const selectedPillAppearAni = keyframes({
-  from: {
-    opacity: 0,
-    transform: 'scaleX(.8)',
-  },
-})
-
 const navBtnBase = style({
   height: '56px',
   width: '56px',
@@ -80,7 +73,9 @@ const navBtnBase = style({
       // when animation runs.
       zIndex: 1,
     },
-    [`${navBtnSelected}&::before`]: {
+    '&::before': {
+      opacity: 0,
+      transform: 'scaleX(.8)',
       content: '""',
       height: '28px',
       width: '54px',
@@ -88,7 +83,12 @@ const navBtnBase = style({
       position: 'absolute',
       borderRadius: '14px',
       backgroundColor: `hsla(${vars.colors.primaryHsl}, 30%)`,
-      animation: `${selectedPillAppearAni} .2s cubic-bezier(0.0, 0.0, 0.2, 1)`,
+    },
+    [`${navBtnSelected}&::before`]: {
+      opacity: 1,
+      transform: 'none',
+      transition:
+        'transform .4s cubic-bezier(0.0, 0.0, 0.2, 1), opacity .2s linear',
     },
   },
 })

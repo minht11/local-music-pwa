@@ -51,11 +51,15 @@ export const primaryText = atoms({
   color: 'primary',
 })
 
-export const tracksInfoCaption = atoms({
-  typography: 'body2',
-  color: 'content2',
-  margin: 'none',
-})
+export const tracksInfoCaption = composeStyles(
+  atoms({
+    typography: 'body2',
+    color: 'content2',
+  }),
+  style({
+    margin: 'none',
+  }),
+)
 
 export const tracksWarnLegacyMessage = atoms({
   userSelect: 'text',

@@ -1,5 +1,5 @@
 import { useRouter } from '@rturnq/solid-router'
-import { Component, For } from 'solid-js'
+import { For } from 'solid-js'
 import { useEntitiesStore } from '../../../stores/stores'
 import { IconType } from '../../icon/icon-paths'
 import { List } from '../../list/list'
@@ -11,7 +11,7 @@ interface ViewArtistsModalProps extends InternalModalProps {
   artistsIds: string[]
 }
 
-export const ViewArtistsModal: Component<ViewArtistsModalProps> = (props) => {
+export const ViewArtistsModal = (props: ViewArtistsModalProps) => {
   const router = useRouter()
 
   const [entities] = useEntitiesStore()
@@ -19,7 +19,7 @@ export const ViewArtistsModal: Component<ViewArtistsModalProps> = (props) => {
 
   const onItemClickHandler = (id: string) => {
     props.close()
-    router.push(`/artists/${id}`)
+    router.push(`/artist/${encodeURIComponent(id)}`)
   }
 
   return (

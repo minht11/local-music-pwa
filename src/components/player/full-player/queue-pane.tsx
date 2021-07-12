@@ -1,12 +1,10 @@
-import { Component } from 'solid-js'
 import { TracksList } from '../../entities-lists/tracks-list/tracks-list'
 import { AppScrollContainer } from '../../app-scroll-container/app-scroll-container'
 import { usePlayerStore } from '../../../stores/stores'
 import { MessageBanner } from '../../message-banner/message-banner'
-import * as styles from './queue.css'
+import * as styles from './full-player.css'
 
-interface QueueProps {
-  ref?: HTMLDivElement
+interface QueuePaneProps {
   isCompact?: boolean
 }
 
@@ -20,19 +18,18 @@ const EmptyMessageBanner = () => (
   />
 )
 
-export const Queue: Component<QueueProps> = (props) => {
+export const QueuePane = (props: QueuePaneProps) => {
   const [playerState, playerActions] = usePlayerStore()
 
   const tracks = () => playerState.trackIds
 
   return (
     <AppScrollContainer
-      ref={props.ref}
-      classNames={{ container: props.isCompact && styles.queueContainer }}
+      classNames={{ container: props.isCompact && styles.queuePaneFill }}
       headerProps={
         props.isCompact && {
           title: 'Up next',
-          className: styles.header,
+          className: styles.queueHeader,
         }
       }
     >

@@ -88,12 +88,11 @@ const animatedIcon = style({
   height: '24px',
 })
 
-export const skipIcon = composeStyles(
-  animatedIcon,
-  style({
-    clipPath: 'inset(0 6px 0 0)',
-  }),
-)
+export const skipIconClip = style({
+  clipPath: 'inset(0 6px 0 0)',
+})
+
+export const skipIcon = animatedIcon
 
 const skipTopAni = keyframes({
   from: {
@@ -238,11 +237,11 @@ export const shuffleArrow = style({
   },
 })
 
-export const shuffleArrowIntersectionClip = style({
-  position: 'absolute',
-  width: '100%',
+export const shuffleIntersectionClip = style({
   height: '100%',
-  clipPath: 'url(#a-shuffle-intersection-mask)',
+  width: '100%',
+  clipPath:
+    'polygon(0% 83%, 0% 0%, 100% 0%, 100% 100%, 18% 100%, 100% 18%, 83% 0%)',
 })
 
 export const shuffleArrowFlipped = composeStyles(shuffleArrow, flippedY)

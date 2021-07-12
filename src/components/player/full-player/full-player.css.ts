@@ -1,13 +1,20 @@
 import { style, composeStyles, createVar } from '@vanilla-extract/css'
 import { sharedStyles, atoms, vars } from '../../../styles/styles.css'
 
+export const fpContainer = style({
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  contain: 'strict',
+})
+
 export const CONTENT_GAP = 24
 export const CONTROLS_HEIGHT = 224
 export const PREFERRED_CONTROLS_WIDTH = 320
 
 export const artworkSizeVar = createVar()
 
-export const fpPane = composeStyles(
+export const controlsPane = composeStyles(
   atoms({
     display: 'flex',
     flexDirection: 'column',
@@ -21,11 +28,11 @@ export const fpPane = composeStyles(
   }),
 )
 
-export const compact = style({
+export const compactControls = style({
   maxWidth: '100%',
 })
 
-export const toolbar = composeStyles(
+export const controlsHeader = composeStyles(
   sharedStyles.actions,
   style({
     justifyContent: 'space-between',
@@ -101,4 +108,14 @@ export const secondaryActions = style({
 
 export const volumeMenuContent = atoms({
   paddingLeft: 'large',
+})
+
+export const queuePaneFill = style({
+  width: '100%',
+  height: '100%',
+  position: 'absolute',
+})
+
+export const queueHeader = style({
+  background: `hsla(${vars.colors.contentHsl}, 5%)`,
 })

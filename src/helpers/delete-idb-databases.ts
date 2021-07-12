@@ -15,7 +15,7 @@ export const deleteIDBDatabases = async (
   } else {
     // Firefox doesn't support idb.databases() yet.
     for (let i = 0; i < latestVersion; i += 1) {
-      ;(idb as IDBFactory).deleteDatabase(`${baseName}-${i}`)
+      idb.deleteDatabase(`${baseName}-${i}`)
     }
   }
 }

@@ -12,7 +12,7 @@ type EntitiesActions = ReturnType<typeof useEntitiesStore>[1]
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface DetailsPageConfig<T = any> extends configs.BaseConfig {
-  type: Exclude<MusicItemType, MusicItemType.TRACK>
+  type: Exclude<MusicItemType, typeof MusicItemType.TRACK>
   itemSelector?: (id: string, state: EntitiesState) => T
   info?: (item: T) => string[]
   actions?: (item: T) => JSX.Element
@@ -42,7 +42,7 @@ const PLAYLISTS_CONFIG: DetailsPageConfig = {
 
     return item
   },
-  actions: (item) => {
+  actions: (item: Playlist) => {
     const modals = useModals()
 
     return (
@@ -76,7 +76,7 @@ const BASE_DETAILS_PAGES_CONFIG: readonly DetailsPageConfig[] = [
   },
   {
     ...PLAYLISTS_CONFIG,
-    additionalTrackMenuItems: (item, track, actions) => [
+    additionalTrackMenuItems: (item: Playlist, track, actions) => [
       {
         name: 'Remove from playlist',
         action: () => actions.removeTracksFromPlaylist(item.id, [track.id]),

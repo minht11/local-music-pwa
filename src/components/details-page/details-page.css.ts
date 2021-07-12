@@ -12,9 +12,9 @@ export const infoHeader = composeStyles(
     columnGap: 'large',
     rowGap: 'medium',
     radius: 'veryLarge',
-    marginY: 'large',
   }),
   style({
+    margin: `${vars.static.gap.large} 0`,
     height: '128px',
     display: 'grid',
     gridTemplateColumns: 'auto 1fr auto',

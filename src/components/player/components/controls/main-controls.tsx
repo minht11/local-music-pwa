@@ -38,32 +38,8 @@ export const Controls: Component = () => {
             playerState.shuffle && styles.enabled,
           )}
         >
-          <svg
-            className={styles.shuffleMaskSvg}
-            viewBox='0 0 24 24'
-            xmlns='http://www.w3.org/2000/svg'
-          >
-            <clipPath id='a-shuffle-intersection-mask'>
-              <rect
-                className={styles.shuffleClipRect}
-                x='10'
-                y='0'
-                width='5'
-                height='9'
-                fill='white'
-              />
-              <rect
-                className={styles.shuffleClipRect}
-                x='6'
-                y='15'
-                width='10'
-                height='9'
-                fill='white'
-              />
-            </clipPath>
-          </svg>
           <div className={styles.shuffleArrow} />
-          <div className={styles.shuffleArrowIntersectionClip}>
+          <div className={styles.shuffleIntersectionClip}>
             <div className={styles.shuffleArrowFlipped} />
           </div>
         </div>

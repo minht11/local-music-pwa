@@ -1,10 +1,8 @@
-import {
-  style,
-  composeStyles,
-  createVar,
-  fallbackVar,
-} from '@vanilla-extract/css'
-import { atoms } from '../../styles/styles.css'
+import { style, composeStyles, createVar } from '@vanilla-extract/css'
+import { atoms, sharedStyles, vars } from '../../styles/styles.css'
+
+export const PLAYER_CARD_ENTER_DURATION = 300
+export const PLAYER_CARD_EXIT_DURATION = 250
 
 // Mobile browsers do not have stable vh values.
 export const windowHeightVar = createVar()
@@ -13,7 +11,6 @@ export const miniPlayerHeightVar = createVar()
 export const playerContainer = style({
   vars: {
     [miniPlayerHeightVar]: '96px',
-    '--mini-player-height': '96px',
   },
   height: miniPlayerHeightVar,
   width: '100%',
@@ -39,22 +36,37 @@ export const card = composeStyles(
   atoms({
     surface: 'surface2',
     alignItems: 'center',
-    radiusTop: 'veryLarge',
   }),
   style({
+    borderRadius: `${vars.static.radius.veryLarge} ${vars.static.radius.veryLarge} 0 0`,
+    height: miniPlayerHeightVar,
     width: '100%',
     overflow: 'hidden',
     bottom: 0,
     zIndex: 1,
     pointerEvents: 'all',
     position: 'absolute',
-    minHeight: miniPlayerHeightVar,
+    transform: `translateY(calc(100% - ${miniPlayerHeightVar}))`,
+    transition: `
+      transform ${PLAYER_CARD_EXIT_DURATION}ms cubic-bezier(0.4, 0.0, 0.2, 1),
+      height 0s ${PLAYER_CARD_EXIT_DURATION}ms
+    `,
+    willChange: 'transform',
+    '@media': {
+      '(prefers-reduced-motion)': {
+        transition: 'none',
+      },
+    },
   }),
 )
 
-export const fpContainer = style({
-  width: '100%',
-  height: fallbackVar(windowHeightVar, '100vh'),
-  display: 'flex',
-  contain: 'strict',
+export const cardOpen = style({
+  height: '100%',
+  transform: 'none',
+  transition: `
+    transform ${PLAYER_CARD_ENTER_DURATION}ms cubic-bezier(0.4, 0.0, 0.2, 1),
+    height 0s
+  `,
 })
+
+export const { pointerEventsNone } = sharedStyles

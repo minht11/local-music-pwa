@@ -1,3 +1,3 @@
 export interface InternalModalProps {
-  close(): void
+  close(this: void): void
 }

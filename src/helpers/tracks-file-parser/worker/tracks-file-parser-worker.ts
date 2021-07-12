@@ -1,3 +1,5 @@
+/// <reference lib='WebWorker' />
+
 import { parse as parseMetadata } from 'id3-parser/src/index'
 import { TrackParseMessage } from '../message-types'
 import { getMP3Duration } from './get-mp3-duration'
@@ -8,10 +10,7 @@ import { getDominantHue } from './get-dominant-hue'
 // a bit bigger and uses older syntax. To reduce size import
 // Typescript source file at 'id3-parser/src/index'
 
-// Using both 'DOM' and 'WebWorker' inside tsconfig lib is not supported.
-// So just use any as is suggested here https://github.com/microsoft/TypeScript/issues/20595
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const worker = globalThis as any
+declare const self: DedicatedWorkerGlobalScope
 
 const getValueOrUndefined = (item?: string) => {
   let formatedItem = item ?? ''
@@ -82,7 +81,7 @@ const parseTrack = async (
 }
 
 const sendMsg = (options: TrackParseMessage) => {
-  worker.postMessage(options)
+  self.postMessage(options)
 }
 
 const parseAllTracks = async (inputFiles: FileWrapper[]) => {
@@ -115,9 +114,9 @@ const parseAllTracks = async (inputFiles: FileWrapper[]) => {
 
   sendMsg({ finished: true, parsedCount, tracks })
 
-  worker.close()
+  self.close()
 }
 
-worker.addEventListener('message', (event: MessageEvent<FileWrapper[]>) => {
+self.addEventListener('message', (event: MessageEvent<FileWrapper[]>) => {
   parseAllTracks(event.data)
 })

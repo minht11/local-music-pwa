@@ -80,7 +80,7 @@ const TrackListItem = (props: TracksListItemProps) => {
       trackItem.album && {
         name: 'View album',
         action: () => {
-          router.push(`/album/${trackItem.album}`)
+          router.push(`/album/${trackItem.album || ''}`)
         },
       },
       {
@@ -106,7 +106,9 @@ const TrackListItem = (props: TracksListItemProps) => {
           entitiesActions.removeTracks([trackId])
         },
       },
-    ].filter(Boolean) as MenuItem[]
+    ]
+      .filter(Boolean)
+      .flat() as MenuItem[]
 
     return menuItems
   }
@@ -168,7 +170,7 @@ const TrackListItem = (props: TracksListItemProps) => {
       <div className={styles.time}>{formatTime(track().duration)}</div>
 
       <IconButton
-        aria-label='More actions'
+        title='More actions'
         className={styles.menu}
         icon={IconType.MORE_VERTICAL}
         tabIndex={props.tabIndex}

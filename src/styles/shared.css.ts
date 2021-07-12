@@ -128,7 +128,6 @@ export const textField = composeStyles(
   atoms({
     typography: 'body2',
     paddingX: 'large',
-    paddingY: 'none',
     color: 'content1',
     radius: 'large',
   }),
@@ -140,6 +139,7 @@ export const textField = composeStyles(
     outline: 'none !important',
     height: '44px',
     border: `2px solid transparent`,
+    padding: 0,
     width: '100%',
     '::placeholder': {
       color: vars.colors.content2,
@@ -151,4 +151,11 @@ export const textField = composeStyles(
       },
     },
   }),
+)
+
+export const pointerEventsNone = style(
+  {
+    pointerEvents: 'none',
+  },
+  'pointer-events-none',
 )

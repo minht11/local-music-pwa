@@ -202,12 +202,12 @@ export const createEntitiesStore = () => {
     const baseToastOptions = {
       id: toastId,
       duration: false,
-      controls: false,
     } as const
 
     showToast({
       ...baseToastOptions,
       message: 'Preparing to import tracks to the library.',
+      controls: false,
     })
 
     try {
@@ -237,6 +237,7 @@ export const createEntitiesStore = () => {
         ...baseToastOptions,
         message:
           'An unknown error has occurred while importing tracks to the library.',
+        controls: undefined,
       })
     }
   }
@@ -256,7 +257,7 @@ export const createEntitiesStore = () => {
 
   const remove = (
     id: string,
-    type: Exclude<MusicItemType, MusicItemType.TRACK>,
+    type: Exclude<MusicItemType, typeof MusicItemType.TRACK>,
   ) => {
     const pathMap = {
       [MusicItemType.ALBUM]: 'albums',

@@ -1,8 +1,10 @@
 import { FocusTrap } from '@a11y/focus-trap'
 
-export {}
-
 declare global {
+  interface Window {
+    isSupportedBrowser?: boolean
+  }
+
   interface Navigator {
     userAgentData: {
       mobile: boolean

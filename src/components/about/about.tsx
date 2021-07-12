@@ -13,7 +13,7 @@ export const About = () => {
       headerProps={{ title: 'About' }}
     >
       <section className={styles.section}>
-        <img src='/icons/icon_192.png' className={styles.logo} />
+        <img src='/icons/icon_responsive.svg' className={styles.logo} />
         <div>{version}</div>
         <h1 className={styles.title}>Snae music player</h1>
         <div>{description}</div>

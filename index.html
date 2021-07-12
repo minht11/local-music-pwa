@@ -15,7 +15,8 @@
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <meta name='theme-color' content='#2a2827'>
     <meta name='description' content='Lightweight on device music player right in your browser.'>
-    <link rel='icon' href='/icons/icon_16.png' type='image/png' sizes="16x16" />
+    <link rel='icon' href='/icons/icon_responsive.svg' type='image/svg+xml' />
+    <link rel="alternate icon" href="/icons/icon_16.png" sizes="16x16" type="image/png" />
     <link rel='apple-touch-icon' href='/icons/apple-touch-icon.png' sizes='180x180' />
 
     <link rel='preconnect' href='https://fonts.gstatic.com/' crossorigin>
@@ -27,19 +28,19 @@
     <link
       rel='preload'
       as='style'
-      href='https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500&display=swap'
+      href='https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500&display=swap'
     />
 
     <link
       rel='stylesheet'
       media='print' onload='this.media="all"'
-      href='https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500&display=swap'
+      href='https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500&display=swap'
     />
     <style>
     html {
       color: #fff;
       background: #1a1a1a;
-      font-family: 'Fira Sans', sans-serif;
+      font-family: 'Fira Sans', system-ui, sans-serif;
     }
     @media (prefers-color-scheme: light) {
       html {
@@ -55,7 +56,12 @@
       width: 100%;
       height: 100%;
     }
-    html[not-supported] .unsupported-browser {
+    #loading,
+    .unsupported-browser,
+    html[app-not-supported] #loading {
+      display: none;
+    }
+    html[app-not-supported] .unsupported-browser {
       display: block;
     }
     html[app-not-loaded] #loading {
@@ -68,6 +74,7 @@
       left: 0;
       height: 48px;
       width: 48px;
+      will-change: transform;
       animation: loading-rotate 1.4s infinite, loading-appear 0.4s .4s backwards;
     }
     @keyframes loading-rotate {
@@ -82,11 +89,6 @@
       0% {
         opacity: 0;
       }
-    }
-    #loading,
-    .unsupported-browser,
-    html[not-supported] #loading {
-      display: none;
     }
     * {
       box-sizing: border-box;

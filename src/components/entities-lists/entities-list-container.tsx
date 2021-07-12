@@ -18,9 +18,7 @@ export const EntitiesListContainer: Component<EntitiesListContainerProps> = (
   props,
 ) => (
   <Show
-    // TODO. Unneeded parentheses https://github.com/solidjs/solid/issues/509
-    // prettier-ignore
-    when={props.count || (props.items.length || !props.fallback)}
+    when={props.count || props.items.length || !props.fallback}
     fallback={props.fallback}
   >
     <section className={styles.entitiesListSection}>

@@ -102,7 +102,7 @@ export const Search: Component = () => {
           return 0
         })
 
-        return sortedItems.map((item) => item.id) as string[]
+        return sortedItems.map((item) => item.id)
       })
     })
 

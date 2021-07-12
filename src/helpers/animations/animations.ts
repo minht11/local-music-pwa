@@ -11,3 +11,8 @@ export const animateFade = (
     },
     options,
   )
+
+export const animateEmpty = (element: Element, duration: number) =>
+  element.animate(null, {
+    duration,
+  })

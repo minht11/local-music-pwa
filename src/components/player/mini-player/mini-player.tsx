@@ -1,5 +1,5 @@
 import { useRouter } from '@rturnq/solid-router'
-import { Component, Show } from 'solid-js'
+import { Show } from 'solid-js'
 import { createMediaQuery } from '../../../helpers/hooks/create-media-query'
 import { IconButton, IconType } from '../../icon-button/icon-button'
 import { Artwork } from '../components/artwork/artwork'
@@ -11,7 +11,7 @@ import { Info } from '../components/info/info'
 import { Timeline } from '../components/timeline/timeline'
 import * as styles from './mini-player.css'
 
-const OpenFullPlayerButton: Component = () => {
+const OpenFullPlayerButton = () => {
   const router = useRouter()
   return (
     <IconButton
@@ -22,11 +22,7 @@ const OpenFullPlayerButton: Component = () => {
   )
 }
 
-interface MiniPlayerProps {
-  ref: HTMLDivElement
-}
-
-export const MiniPlayer: Component<MiniPlayerProps> = (props) => {
+export const MiniPlayer = () => {
   const areMainControlsHidden = createMediaQuery(
     '(max-width: 700px), (max-height: 440px)',
   )
@@ -35,7 +31,7 @@ export const MiniPlayer: Component<MiniPlayerProps> = (props) => {
   const isPlayPauseButtonHidden = createMediaQuery('(max-width: 264px)')
 
   return (
-    <div className={styles.mpContainer} ref={props.ref}>
+    <div className={styles.container}>
       <Show when={!areMainControlsHidden()}>
         <Timeline />
       </Show>

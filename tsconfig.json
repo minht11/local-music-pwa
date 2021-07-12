@@ -14,10 +14,10 @@
     "jsxImportSource": "solid-js",
     "types": [
       "vite/client",
-      "vite-plugin-pwa/client",
       "@types/requestidlecallback",
       "@types/wicg-file-system-access",
       "@types/wicg-mediasession"
     ]
-  }
+  },
+  "include": ["./src"]
 }

@@ -108,10 +108,10 @@ export const firstColumn = style({
 
 export const artwork = composeStyles(
   atoms({
-    marginRight: 'medium',
     radius: 'medium',
   }),
   style({
+    marginRight: vars.static.gap.large,
     height: '36px',
     width: '36px',
     contain: 'strict',

@@ -1,1 +1,1 @@
-document.documentElement.setAttribute('not-supported', '')
+document.documentElement.setAttribute('app-not-supported', '')
