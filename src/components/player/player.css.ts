@@ -4,8 +4,6 @@ import { atoms, sharedStyles, vars } from '../../styles/styles.css'
 export const PLAYER_CARD_ENTER_DURATION = 300
 export const PLAYER_CARD_EXIT_DURATION = 250
 
-// Mobile browsers do not have stable vh values.
-export const windowHeightVar = createVar()
 export const miniPlayerHeightVar = createVar()
 
 export const playerContainer = style({

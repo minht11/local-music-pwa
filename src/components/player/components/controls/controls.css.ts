@@ -90,6 +90,7 @@ const animatedIcon = style({
 
 export const skipIconClip = style({
   clipPath: 'inset(0 6px 0 0)',
+  height: '24px',
 })
 
 export const skipIcon = animatedIcon

@@ -1,6 +1,6 @@
 {
   "name": "snae_music_player",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Lightweight on device music player right in your browser.",
   "scripts": {
     "dev": "vite",
@@ -28,19 +28,18 @@
     "eslint-plugin-prettier": "^3.4.0",
     "prettier": "^2.3.2",
     "typescript": "^4.3.5",
-    "vite": "^2.3.8",
+    "vite": "^2.4.2",
     "vite-plugin-html": "^2.0.7",
     "vite-plugin-solid": "^2.0.0"
   },
   "dependencies": {
     "@a11y/focus-trap": "^1.0.5",
     "@minht11/solid-virtual-container": "^0.1.2",
-    "@rturnq/solid-router": "^0.3.0-rc.1",
+    "@rturnq/solid-router": "^0.3.0",
     "@types/requestidlecallback": "^0.3.1",
     "@types/wicg-file-system-access": "^2020.9.1",
     "@types/wicg-mediasession": "^1.1.0",
-    "@vanilla-extract/css": "^1.1.0",
-    "@vanilla-extract/css-utils": "^0.1.1",
+    "@vanilla-extract/css": "^1.1.1",
     "@vanilla-extract/dynamic": "^1.0.0",
     "@vanilla-extract/sprinkles": "^0.4.3",
     "@vibrant/color": "^3.2.1-alpha.1",
@@ -50,7 +49,7 @@
     "idb-keyval": "^5.0.6",
     "nanoid": "^3.1.23",
     "safari-14-idb-fix": "^1.0.4",
-    "solid-js": "1.0.1",
+    "solid-js": "1.0.3",
     "solid-transition-group": "0.0.8",
     "solid-utils": "^0.8.1"
   }

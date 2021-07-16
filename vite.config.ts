@@ -27,8 +27,7 @@ export default defineConfig({
       },
       module: true,
       compress: {
-        // 2 or more passes break __vitePreloadHelper
-        // passes: 2,
+        passes: 3,
         unsafe_math: true,
         unsafe_methods: true,
         unsafe_arrows: true,

@@ -9,6 +9,12 @@ import { MiniPlayer } from './mini-player/mini-player'
 import { FullPlayer } from './full-player/full-player'
 import { container as mpContainerClassName } from './mini-player/mini-player.css'
 import * as styles from './player.css'
+import {
+  PLAYER_CARD_ENTER_DURATION,
+  PLAYER_CARD_EXIT_DURATION,
+} from './player.css'
+
+export { PLAYER_CARD_ENTER_DURATION, PLAYER_CARD_EXIT_DURATION }
 
 const PLAYER_ROUTE = 'player'
 const QUEUE_ROUTE = 'queue'
@@ -16,7 +22,6 @@ export const PLAYER_PATH = `/${PLAYER_ROUTE}`
 export const PLAYER_QUEUE_PATH = `${PLAYER_PATH}/${QUEUE_ROUTE}`
 export const PLAYER_OR_QUEUE_PATH = `/(${PLAYER_ROUTE}|${PLAYER_ROUTE}/${QUEUE_ROUTE})`
 
-export const { PLAYER_CARD_ENTER_DURATION, PLAYER_CARD_EXIT_DURATION } = styles
 const MP_FADE_DURATION = 75
 const FP_FADE_DURATION = 125
 
