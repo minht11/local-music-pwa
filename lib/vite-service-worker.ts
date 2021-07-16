@@ -23,7 +23,6 @@ export const serviceWorker = ({
   return {
     name: 'service-worker',
     enforce: 'post',
-    apply: 'build',
     async resolveId(id, importer) {
       if (!id.startsWith(importPrefix)) {
         return undefined

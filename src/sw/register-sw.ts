@@ -15,6 +15,10 @@ export interface Options {
 }
 
 export const registerServiceWorker = async (options: Options) => {
+  if (import.meta.env.DEV) {
+    return
+  }
+
   await waitForPageToLoad()
 
   const { serviceWorker } = navigator
