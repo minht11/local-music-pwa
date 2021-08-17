@@ -1,14 +1,14 @@
 /// <reference lib='WebWorker' />
 
-import { parse as parseMetadata } from 'id3-parser/src/index'
+import { Buffer } from 'buffer'
+import { parseBuffer as parseMetadata } from 'music-metadata'
 import { TrackParseMessage } from '../message-types'
-import { getMP3Duration } from './get-mp3-duration'
 import type { UnknownTrack, FileWrapper } from '../../../types/types'
 import { getDominantHue } from './get-dominant-hue'
 
-// published id3-parser package is cjs module which is quite
-// a bit bigger and uses older syntax. To reduce size import
-// Typescript source file at 'id3-parser/src/index'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+globalThis.Buffer = Buffer
 
 declare const self: DedicatedWorkerGlobalScope
 
@@ -36,48 +36,44 @@ const parseTrack = async (
     return null
   }
 
-  const fileBuffer = await new Response(file).arrayBuffer()
-  const fileUint8 = new Uint8Array(fileBuffer)
-  const tags = parseMetadata(fileUint8)
+  try {
+    const fileBuffer = await new Response(file).arrayBuffer()
+    const fileUint8 = new Uint8Array(fileBuffer)
+    const tags = await parseMetadata(
+      fileUint8,
+      { mimeType: file.type, path: file.name, size: file.size },
+      { duration: true },
+    )
 
-  if (!tags) {
+    let imageBlob
+    if (tags.common.picture?.length) {
+      const [image] = tags.common.picture
+      const imageData = new Uint8ClampedArray(image.data)
+      imageBlob = new Blob([imageData], { type: image.type })
+    }
+
+    const artists =
+      getValueOrUndefined(tags.common.artist)
+        ?.split(/,|&/)
+        .map((artist) => artist.trim()) || []
+
+    const trackData: UnknownTrack = {
+      name: tags.common.title || file.name,
+      album: tags.common.album,
+      artists,
+      genre: tags.common.genre || [],
+      trackNo: tags.common.track.no || 0,
+      trackOf: tags.common.track.of || 0,
+      year: tags.common.year?.toString(),
+      image: imageBlob,
+      duration: tags.format.duration || 0,
+      fileWrapper,
+      hue: imageBlob && (await getDominantHue(imageBlob)),
+    }
+    return trackData
+  } catch (_error) {
     return null
   }
-
-  let trackNo: number | undefined
-  let trackOf: number | undefined
-  if (tags.track && typeof tags.track === 'string') {
-    const [no, of] = tags.track.split('/')
-    trackNo = parseInt(no, 10)
-    trackOf = parseInt(of, 10)
-  }
-
-  let imageBlob
-  if (tags.image) {
-    const { image } = tags
-    const imageData = new Uint8ClampedArray(image.data)
-    imageBlob = new Blob([imageData], { type: image.type })
-  }
-
-  const artists =
-    getValueOrUndefined(tags.artist)
-      ?.split(/,|&/)
-      .map((artist) => artist.trim()) || []
-
-  const trackData: UnknownTrack = {
-    name: tags.title || file.name,
-    album: getValueOrUndefined(tags.album),
-    artists,
-    genre: tags.genre ? tags.genre.split(' ') : [],
-    trackNo,
-    trackOf,
-    year: getValueOrUndefined(tags.year),
-    image: imageBlob,
-    duration: getMP3Duration(fileUint8),
-    fileWrapper,
-    hue: imageBlob && (await getDominantHue(imageBlob)),
-  }
-  return trackData
 }
 
 const sendMsg = (options: TrackParseMessage) => {
