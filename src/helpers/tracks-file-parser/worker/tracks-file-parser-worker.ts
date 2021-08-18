@@ -83,30 +83,22 @@ const sendMsg = (options: TrackParseMessage) => {
 const parseAllTracks = async (inputFiles: FileWrapper[]) => {
   let parsedCount = 0
 
-  const tracksPromises = inputFiles.map(async (file) => {
+  console.time('get tracks')
+  const tracks: UnknownTrack[] = []
+  for (const file of inputFiles) {
     try {
       const metadata = await parseTrack(file)
-      if (metadata) {
-        parsedCount += 1
+      if (!metadata) continue
 
-        sendMsg({ finished: false, parsedCount })
-
-        return metadata
-      }
+      sendMsg({ finished: false, parsedCount: ++parsedCount })
+      tracks.push(metadata)
     } catch (err) {
       // Do not throw if one file encounters an error.
       // eslint-disable-next-line no-console
       console.error(err)
     }
-    return null
-  })
-  const unfilteredTracks = await Promise.all(tracksPromises)
-
-  // Remove holes which may be left in case we werent able
-  // to parse all tracks correctly.
-  const tracks = unfilteredTracks.filter(
-    (track) => track !== null,
-  ) as UnknownTrack[]
+  }
+  console.timeEnd('get tracks')
 
   sendMsg({ finished: true, parsedCount, tracks })
 

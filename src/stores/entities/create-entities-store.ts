@@ -183,7 +183,14 @@ export const createEntitiesStore = () => {
   }
 
   const importTracks = async () => {
-    const files = await getFilesFromDirectory(['mp3'])
+    const files = await getFilesFromDirectory([
+      'aac',
+      'mp3',
+      'ogg',
+      'wav',
+      'flac',
+      'm4a',
+    ])
 
     // User canceled directory picker.
     if (!files) {
