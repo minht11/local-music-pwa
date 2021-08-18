@@ -12,13 +12,6 @@ globalThis.Buffer = Buffer
 
 declare const self: DedicatedWorkerGlobalScope
 
-const getValueOrUndefined = (item?: string) => {
-  let formatedItem = item ?? ''
-  formatedItem = formatedItem.trim()
-
-  return formatedItem !== '' ? formatedItem : undefined
-}
-
 // This limit is a bit arbitrary.
 const FILE_SIZE_LIMIT_500MB = 5e8
 
@@ -52,15 +45,10 @@ const parseTrack = async (
       imageBlob = new Blob([imageData], { type: image.type })
     }
 
-    const artists =
-      getValueOrUndefined(tags.common.artist)
-        ?.split(/,|&/)
-        .map((artist) => artist.trim()) || []
-
     const trackData: UnknownTrack = {
       name: tags.common.title || file.name,
       album: tags.common.album,
-      artists,
+      artists: tags.common.artists || [],
       genre: tags.common.genre || [],
       trackNo: tags.common.track.no || 0,
       trackOf: tags.common.track.of || 0,
@@ -83,7 +71,6 @@ const sendMsg = (options: TrackParseMessage) => {
 const parseAllTracks = async (inputFiles: FileWrapper[]) => {
   let parsedCount = 0
 
-  console.time('get tracks')
   const tracks: UnknownTrack[] = []
   for (const file of inputFiles) {
     try {
@@ -98,7 +85,6 @@ const parseAllTracks = async (inputFiles: FileWrapper[]) => {
       console.error(err)
     }
   }
-  console.timeEnd('get tracks')
 
   sendMsg({ finished: true, parsedCount, tracks })
 
