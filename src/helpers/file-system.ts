@@ -69,8 +69,13 @@ export const getFilesFromDirectory = async (
   const directoryElement = document.createElement('input')
   directoryElement.type = 'file'
 
+  // Mobile devices do not support directory selection,
+  // so allow them to pick individual files instead.
   if (isMobile()) {
-    directoryElement.accept = 'audio/mp3'
+    directoryElement.accept = extensions
+      .map((ext) => `'audio/${ext}`)
+      .join(', ')
+
     directoryElement.multiple = true
   } else {
     directoryElement.setAttribute('webkitdirectory', '')

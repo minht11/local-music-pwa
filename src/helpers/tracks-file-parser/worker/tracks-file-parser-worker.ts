@@ -18,18 +18,18 @@ const FILE_SIZE_LIMIT_500MB = 5e8
 const parseTrack = async (
   fileWrapper: FileWrapper,
 ): Promise<UnknownTrack | null> => {
-  const file =
-    fileWrapper.type === 'file'
-      ? fileWrapper.file
-      : await fileWrapper.file.getFile()
-
-  // Ignore files bigger than 500mb because of
-  // potential performance issues.
-  if (file.size > FILE_SIZE_LIMIT_500MB) {
-    return null
-  }
-
   try {
+    const file =
+      fileWrapper.type === 'file'
+        ? fileWrapper.file
+        : await fileWrapper.file.getFile()
+
+    // Ignore files bigger than 500mb because of
+    // potential performance issues.
+    if (file.size > FILE_SIZE_LIMIT_500MB) {
+      return null
+    }
+
     const fileBuffer = await new Response(file).arrayBuffer()
     const fileUint8 = new Uint8Array(fileBuffer)
     const tags = await parseMetadata(
@@ -38,28 +38,34 @@ const parseTrack = async (
       { duration: true },
     )
 
+    const { common } = tags
+
     let imageBlob
-    if (tags.common.picture?.length) {
-      const [image] = tags.common.picture
+    if (common.picture?.length) {
+      const [image] = common.picture
       const imageData = new Uint8ClampedArray(image.data)
       imageBlob = new Blob([imageData], { type: image.type })
     }
 
     const trackData: UnknownTrack = {
-      name: tags.common.title || file.name,
-      album: tags.common.album,
-      artists: tags.common.artists || [],
-      genre: tags.common.genre || [],
-      trackNo: tags.common.track.no || 0,
-      trackOf: tags.common.track.of || 0,
-      year: tags.common.year?.toString(),
+      name: common.title || file.name,
+      album: common.album,
+      artists: common.artists || [],
+      genre: common.genre || [],
+      trackNo: common.track.no || 0,
+      trackOf: common.track.of || 0,
+      year: common.year?.toString(),
       image: imageBlob,
       duration: tags.format.duration || 0,
       fileWrapper,
       hue: imageBlob && (await getDominantHue(imageBlob)),
     }
     return trackData
-  } catch (_error) {
+  } catch (err) {
+    // Do not fail but still show an error.
+    // eslint-disable-next-line no-console
+    console.error(err)
+
     return null
   }
 }
@@ -72,17 +78,13 @@ const parseAllTracks = async (inputFiles: FileWrapper[]) => {
   let parsedCount = 0
 
   const tracks: UnknownTrack[] = []
-  for (const file of inputFiles) {
-    try {
-      const metadata = await parseTrack(file)
-      if (!metadata) continue
+  for await (const file of inputFiles) {
+    const metadata = await parseTrack(file)
 
-      sendMsg({ finished: false, parsedCount: ++parsedCount })
+    if (metadata) {
+      parsedCount += 1
+      sendMsg({ finished: false, parsedCount })
       tracks.push(metadata)
-    } catch (err) {
-      // Do not throw if one file encounters an error.
-      // eslint-disable-next-line no-console
-      console.error(err)
     }
   }
 
