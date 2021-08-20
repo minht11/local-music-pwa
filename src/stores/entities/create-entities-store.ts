@@ -10,6 +10,7 @@ import {
   Playlist,
   MusicItemType,
   UnknownTrack,
+  FileWrapper,
 } from '../../types/types'
 import { UNKNOWN_ITEM_ID } from '../../types/constants'
 import { useToast } from '../../components/toasts/toasts'
@@ -78,45 +79,55 @@ export const createEntitiesStore = () => {
     })
   }
 
-  // Returns undefined if track already exists or the supplied track.
-  const checkIfTrackIsNew = async (newTrack: UnknownTrack) => {
+  const fileEquals = async (
+    fileWrapperA: FileWrapper,
+    fileWrapperB: FileWrapper,
+  ) => {
+    if (fileWrapperA.type === 'fileRef' && fileWrapperB.type === 'fileRef') {
+      const fileA = fileWrapperA.file
+      const fileB = fileWrapperB.file
+
+      return fileA.name === fileB.name && fileA.isSameEntry(fileB)
+    }
+
+    if (fileWrapperA.type === 'file' && fileWrapperB.type === 'file') {
+      const fileA = fileWrapperA.file
+      const fileB = fileWrapperB.file
+
+      // There is no good way to compare two files.
+      return fileA.name === fileB.name && fileA.size === fileB.size
+    }
+
+    return false
+  }
+
+  const filterExistingTracks = async (newTracks: readonly UnknownTrack[]) => {
     const existingTracks = Object.values(state.tracks)
 
-    const newTrackFile = newTrack.fileWrapper
-    // We want search to run sequently here.
-    for await (const { fileWrapper: existingTrackFile } of existingTracks) {
-      if (
-        existingTrackFile.type === 'fileRef' &&
-        newTrackFile.type === 'fileRef'
-      ) {
-        if (await existingTrackFile.file.isSameEntry(newTrackFile.file)) {
-          return undefined
+    const uniqueTracks: UnknownTrack[] = []
+    for await (const newTrack of newTracks) {
+      let foundTrackIndex = -1
+      let i = 0
+      for await (const existingTrack of existingTracks) {
+        if (await fileEquals(newTrack.fileWrapper, existingTrack.fileWrapper)) {
+          foundTrackIndex = i
+          break
         }
+        i += 1
       }
 
-      if (existingTrackFile.type === 'file' && newTrackFile.type === 'file') {
-        const existingFile = existingTrackFile.file
-        const newFile = newTrackFile.file
-
-        // There is no good way to compare two files.
-        const trackAlreadyExists =
-          existingFile.name === newFile.name &&
-          existingFile.size === newFile.size
-
-        if (trackAlreadyExists) {
-          return undefined
-        }
+      if (foundTrackIndex === -1) {
+        uniqueTracks.push(newTrack)
+      } else {
+        existingTracks.splice(foundTrackIndex, 1)
       }
     }
 
-    return newTrack
+    return uniqueTracks
   }
 
   const addNewTracks = async (tracks: readonly UnknownTrack[]) => {
-    // We want independent track checking to occur in parallel.
-    const newTracksWithHoles = await Promise.all(tracks.map(checkIfTrackIsNew))
-
-    const newTracks = newTracksWithHoles.filter(Boolean)
+    const newTracks = await filterExistingTracks(tracks)
 
     setState(
       produce((s: State) => {
