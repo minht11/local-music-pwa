@@ -49,7 +49,7 @@
     "id3-parser": "^2.0.0",
     "idb-keyval": "^5.0.6",
     "music-metadata": "^7.11.3",
-    "nanoid": "^3.1.23",
+    "nanoid": "^3.1.31",
     "safari-14-idb-fix": "^1.0.4",
     "solid-js": "1.0.3",
     "solid-transition-group": "0.0.8",
