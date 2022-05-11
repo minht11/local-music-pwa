@@ -1,6 +1,5 @@
 import { createSignal } from 'solid-js'
 import { useEntitiesStore } from '../../../stores/stores'
-import { IconType } from '../../icon/icon-paths'
 import { Modal } from '../../modal/modal'
 import { InternalModalProps } from '../types'
 import * as styles from '../../../styles/shared.css'
@@ -18,9 +17,7 @@ interface CreatePlaylistProps {
 export type CreateRenamePlaylistProps = InternalModalProps &
   (RenamePlaylistProps | CreatePlaylistProps)
 
-export const CreateOrRenamePlaylistModal = (
-  props: CreateRenamePlaylistProps,
-) => {
+const CreateOrRenamePlaylistModal = (props: CreateRenamePlaylistProps) => {
   const [entities, entitiesActions] = useEntitiesStore()
   const [name, setName] = createSignal('')
 
@@ -40,8 +37,7 @@ export const CreateOrRenamePlaylistModal = (
 
   return (
     <Modal
-      titleIcon={IconType.PLAYLIST}
-      title={`${isCreateType() ? 'Create new' : 'Rename'} Playlist`}
+      title={`${isCreateType() ? 'Create new' : 'Rename'} playlist`}
       onConfirm={onConfirmHandler}
       onCancel={props.close}
       buttons={[
@@ -69,3 +65,5 @@ export const CreateOrRenamePlaylistModal = (
     </Modal>
   )
 }
+
+export default CreateOrRenamePlaylistModal

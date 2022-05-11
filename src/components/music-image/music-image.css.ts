@@ -1,42 +1,20 @@
-import { composeStyles, style } from '@vanilla-extract/css'
-import { atoms, vars } from '../../styles/styles.css'
+import { style } from '@vanilla-extract/css'
+import { vars, sprinkles } from '../../styles/styles.css'
 
-export const musicImage = composeStyles(
-  atoms({
-    border: 'small',
+export const musicImage = style([
+  sprinkles({
+    flexShrink: 0,
   }),
   style({
-    backgroundColor: `hsla(${vars.colors.contentHsl}, 12%)`,
+    borderRadius: 'max(8px, 20%)',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    backgroundClip: 'content-box',
-    alignItems: 'center',
-    justifyContent: 'center',
-    display: 'flex',
-    overflow: 'hidden',
-    position: 'relative',
+    fill: vars.colors.tertiary,
+    backgroundColor: `rgba(${vars.colors.primaryRgb}, .02)`,
+    boxShadow: `inset 0 0 0 1px rgba(${vars.colors.primaryRgb}, .2)`,
   }),
-)
+])
 
-export const aspectRatio = style({
-  aspectRatio: '1/1',
-  // // Position relative can be expensive,
-  // // especially when used on a lot of elements.
-  // position: 'static',
+export const round = style({
+  borderRadius: '50%',
 })
-
-export const legacyAspectImg = style({
-  height: '100%',
-})
-
-export const musicIcon = composeStyles(
-  atoms({
-    color: 'content2',
-  }),
-  style({
-    padding: '10%',
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-  }),
-)

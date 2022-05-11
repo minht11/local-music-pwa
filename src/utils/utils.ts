@@ -1,3 +1,6 @@
+import { createEffect, onCleanup } from 'solid-js'
+import { createMediaQuery } from '../helpers/hooks/create-media-query'
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const debounce = <T extends any[]>(
   callback: (...args: T) => void,
@@ -89,12 +92,13 @@ export const sortByKey = <T>(list: T[], key: keyof Partial<T>): T[] =>
 
       let itemAString: string
       let itemBString: string
-      if (Array.isArray(itemA) && Array.isArray(itemB)) {
-        itemAString = itemA.join(' ')
-        itemBString = itemB.join(' ')
-      } else if (typeof itemA === 'string' && typeof itemB === 'string') {
+
+      if (typeof itemA === 'string' && typeof itemB === 'string') {
         itemAString = itemA
         itemBString = itemB
+      } else if (Array.isArray(itemA) && Array.isArray(itemB)) {
+        itemAString = itemA.join(' ')
+        itemBString = itemB.join(' ')
       } else {
         return 0
       }
@@ -105,12 +109,17 @@ export const sortByKey = <T>(list: T[], key: keyof Partial<T>): T[] =>
       if (itemAStringFormated < itemBStringFormated) {
         return -1
       }
+
       if (itemAStringFormated > itemBStringFormated) {
         return 1
       }
-    } else if (itemA) {
+    }
+    
+    if (itemA) {
       return -1
-    } else if (itemB) {
+    }
+    
+    if (itemB) {
       return 1
     }
 
@@ -118,24 +127,19 @@ export const sortByKey = <T>(list: T[], key: keyof Partial<T>): T[] =>
   })
 
 export const rafPromise = (): Promise<number> =>
-  new Promise((resolve) => requestAnimationFrame(resolve))
+  new Promise((resolve) => {
+    requestAnimationFrame(resolve)
+  })
 
 export const wait = (duration: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, duration))
-
-export const scrollWindowTopTo = (top: number, smooth = true): void => {
-  window.scrollTo({
-    top,
-    behavior: smooth ? 'smooth' : undefined,
+  new Promise((resolve) => {
+    setTimeout(resolve, duration)
   })
-}
 
-// TODO: once typescript 4.4.0 is out replace it with new version.
-// interface CSSCustomVariables {
-//   [key: `--${string}`]: string | number;
-// }
-interface CustomStyleDeclaration {
-  [k: string]: string | number
+interface CSSProperties {
+  // Probbaly should use 'csstype' package instead.
+  [key: string]: string | number
+  [key: `--${string}`]: string | number
 }
 
 type SingleOrArray<T> = T | T[]
@@ -143,10 +147,9 @@ type SingleOrArray<T> = T | T[]
 const alwaysGetArray = <T>(item: T | T[]): T[] =>
   Array.isArray(item) ? item : [item]
 
-type StylesDeclaration = CSSStyleDeclaration & CustomStyleDeclaration
 export const setStyles = (
   element: SingleOrArray<HTMLElement>,
-  styles: Partial<StylesDeclaration>,
+  styles: Partial<CSSProperties>,
 ): void => {
   const stylesEntries = Object.entries(styles)
   alwaysGetArray(element).forEach((el) =>
@@ -158,7 +161,7 @@ export const setStyles = (
 
 export const removeStyles = (
   element: SingleOrArray<HTMLElement>,
-  styleNames: (keyof StylesDeclaration)[],
+  styleNames: (keyof CSSProperties)[],
 ): void => {
   alwaysGetArray(element).forEach((el) => {
     styleNames.forEach((name) => el.style.removeProperty(`${name}`))
@@ -172,17 +175,6 @@ export const isEventMeantForTextInput = (e: Event): boolean => {
   const path = e.composedPath()
   return path.some((el) => isElementTextInput(el))
 }
-
-export const waitForEvent = <T extends EventTarget>(
-  target: T,
-  eventName: string,
-): Promise<Event> =>
-  new Promise((resolve) => {
-    target.addEventListener(eventName, resolve, { once: true })
-  })
-
-export const clamp = (min: number, value: number, max: number): number =>
-  Math.min(Math.max(min, value), max)
 
 const animationsTimeouts = new WeakMap<Element, boolean>()
 // TODO. This function name could be better.
@@ -236,13 +228,23 @@ export const pluralize = (count: number, singular: string) => {
 export const pluralizeCount = (count: number, singular: string) =>
   `${count} ${pluralize(count, singular)}`
 
-export const prefersReducedMotion = () =>
-  matchMedia('(prefers-reduced-motion: reduce)').matches
+export const usePrefersReducedMotion = () =>
+  createMediaQuery('(prefers-reduced-motion: reduce)')
 
-export const createArray = (startPosition: number, count: number) => {
-  const array = []
-  for (let i = 0; i < count; i += 1) {
-    array.push(startPosition + i)
-  }
-  return array
+export const useDarkThemeEnabled = () =>
+  createMediaQuery('(prefers-color-scheme: dark)')
+
+export const useResizeObserver = (
+  element: () => HTMLElement,
+  callback: (entry: ResizeObserverEntry) => void,
+) => {
+  const ro = new ResizeObserver(([entry]) => {
+    callback(entry)
+  })
+
+  createEffect(() => {
+    const el = element()
+    ro.observe(el)
+    onCleanup(() => ro.unobserve(el))
+  })
 }

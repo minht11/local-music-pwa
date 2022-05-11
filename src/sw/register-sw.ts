@@ -43,6 +43,8 @@ export const registerServiceWorker = async (options: Options) => {
     needsRefresh(registration)
   }
 
+  let firstLoad = false
+
   registration.addEventListener('updatefound', () => {
     const { installing } = registration
     if (!installing) {
@@ -51,9 +53,13 @@ export const registerServiceWorker = async (options: Options) => {
 
     // wait until the new Service worker is actually installed (ready to take over)
     installing.addEventListener('statechange', () => {
-      // if there's an existing controller (previous Service Worker), show the prompt
-      if (registration.waiting && navigator.serviceWorker.controller) {
-        needsRefresh(registration)
+      if (registration.waiting) {
+        if (navigator.serviceWorker.controller) {
+          // if there's an existing controller (previous Service Worker), show the prompt
+          needsRefresh(registration)
+        } else {
+          firstLoad = true
+        }
       }
     })
   })
@@ -61,6 +67,11 @@ export const registerServiceWorker = async (options: Options) => {
   let refreshing = false
   // detect controller change and refresh the page
   navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (firstLoad) {
+      firstLoad = false
+      return
+    }
+
     if (!refreshing) {
       window.location.reload()
       refreshing = true

@@ -1,16 +1,6 @@
-import { style, composeStyles, createVar } from '@vanilla-extract/css'
+import { style, keyframes } from '@vanilla-extract/css'
 import { vars } from './vars.css'
-import { atoms } from './atoms.css'
-
-export const pageContainer = style({
-  gridRow: 'content-left/content-right',
-  gridColumn: 'content-left/content-right',
-  height: '100%',
-  width: '100%',
-  contain: 'strict',
-  transformOrigin: 'center center',
-  background: vars.colors.surface0,
-})
+import { sprinkles } from './sprinkles.css'
 
 export const flexColumn = style({
   display: 'flex',
@@ -20,142 +10,231 @@ export const flexColumn = style({
 export const actions = style({
   display: 'flex',
   alignItems: 'center',
-  gap: vars.static.gap.medium,
+  gap: '8px',
+})
+
+export const textEclipse = style({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 })
 
 export const scrollContainer = style({
-  scrollbarColor: `${vars.colors.content1} transparent`,
+  scrollbarColor: `${vars.colors.surfaceVariant} transparent`,
   scrollbarWidth: 'thin',
   overflow: 'auto',
   willChange: 'transform',
 })
 
-export const controlBaseOpacityVar = createVar()
-export const controlSurfaceHslVar = createVar()
-
-export const control = style({
-  vars: {
-    [controlBaseOpacityVar]: '0%',
-    [controlSurfaceHslVar]: vars.colors.contentHsl,
-  },
+export const interactable = style({
+  position: 'relative',
+  overflow: 'hidden',
+  MozAppearance: 'none',
+  WebkitAppearance: 'none',
   appearance: 'none',
   border: 'none',
-  backgroundColor: 'transparent',
   outline: 'none',
   textDecoration: 'none',
   cursor: 'pointer',
   display: 'flex',
+  alignItems: 'center',
+  zIndex: 0,
+  '::after': {
+    display: 'none',
+    content: '',
+    position: 'absolute',
+    height: '100%',
+    width: '100%',
+    left: '0',
+    top: '0',
+    background: 'currentColor',
+    zIndex: -1,
+    pointerEvents: 'none',
+  },
+  '@media': {
+    // Do not show hover styles on touch devices.
+    '(any-hover: hover)': {
+      selectors: {
+        '&:hover::after': {
+          display: 'block',
+          opacity: 0.08,
+        },
+        '&:disabled::after': {
+          display: 'none',
+        },
+      },
+    },
+  },
   selectors: {
-    '&:hover': {
-      backgroundColor: `hsla(${controlSurfaceHslVar}, calc(10% + ${controlBaseOpacityVar}))`,
-    },
-    '&:disabled': {
-      pointerEvents: 'none',
-      opacity: 0.54,
-    },
     '&:is(:focus-visible, &:hover:focus-visible)': {
-      outline: `2px solid ${vars.colors.content1}`,
-      outlineOffset: '1px',
-      backgroundColor: `hsla(${controlSurfaceHslVar}, calc(15% + ${controlBaseOpacityVar}))`,
+      outline: `2px solid ${vars.colors.onSurface}`,
+      outlineOffset: '-2px',
+    },
+    '&:focus-visible::after': {
+      display: 'block',
+      opacity: 0.12,
     },
   },
 })
 
-export const buttonRegular = composeStyles(
-  atoms({
-    typography: 'button',
-  }),
-  control,
-  style({
-    fontFamily: 'inherit',
-    height: '36px',
-    padding: '0 8px',
-    alignItems: 'center',
+export const baseButton = style([
+  interactable,
+  sprinkles({
+    typography: 'labelLarge',
     justifyContent: 'center',
-    borderRadius: vars.static.radius.medium,
   }),
-)
-
-const buttonPill = composeStyles(
-  buttonRegular,
   style({
-    vars: {
-      [controlBaseOpacityVar]: '10%',
-    },
-    borderRadius: '100px',
-    color: vars.colors.content1,
-    background: `hsla(${vars.colors.contentHsl}, 10%)`,
-    padding: '0 16px',
+    gap: '8px',
+    height: '40px',
+    borderRadius: '20px',
   }),
-)
+])
 
-const primaryColor = style({
-  color: vars.colors.primary,
-})
+export const filledButton = style([
+  baseButton,
+  sprinkles({
+    surface: 'primary',
+    color: 'onPrimary',
+  }),
+  style({
+    padding: '0 24px',
+    ':disabled': {
+      background: vars.colors.onSurface,
+      color: vars.colors.surface,
+      opacity: 0.24,
+      cursor: 'auto',
+    },
+  }),
+])
 
-export const button = {
-  flat: {
-    regular: buttonRegular,
-    primary: composeStyles(buttonRegular, primaryColor),
+export const tonalButton = style([
+  baseButton,
+  sprinkles({
+    surface: 'secondaryContainer',
+    color: 'onSecondaryContainer',
+  }),
+  style({
+    padding: '0 24px',
+    ':disabled': {
+      background: vars.colors.onSurface,
+      color: vars.colors.surface,
+      opacity: 0.24,
+      cursor: 'auto',
+    },
+  }),
+])
+
+export const outlinedButton = style([
+  baseButton,
+  sprinkles({ color: 'primary' }),
+  {
+    background: 'transparent',
+    padding: '0 24px',
+    border: `1px solid ${vars.colors.outline}`,
   },
-  pill: {
-    regular: buttonPill,
-    primary: composeStyles(buttonPill, primaryColor),
-  },
-}
+  style({
+    ':disabled': {
+      color: vars.colors.onSurface,
+      opacity: 0.38,
+      cursor: 'auto',
+    },
+  }),
+])
 
-export const listItem = composeStyles(
-  control,
-  atoms({
-    radius: 'medium',
+export const flatButtonBase = style([
+  baseButton,
+  style({
+    background: 'transparent',
+    ':disabled': {
+      color: vars.colors.onSurface,
+      opacity: 0.38,
+      cursor: 'auto',
+    },
+  }),
+])
+
+export const flatButton = style([
+  flatButtonBase,
+  sprinkles({
+    color: 'primary',
+  }),
+  style({
+    padding: '0 12px',
+  }),
+])
+
+export const listItem = style([
+  interactable,
+  sprinkles({
+    paddingLeft: '16px',
+    paddingRight: '8px',
   }),
   style({
     width: '100%',
     height: '40px',
     alignItems: 'center',
     flexShrink: 0,
-    padding: `0 ${vars.static.gap.large}`,
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     contain: 'content',
     textAlign: 'initial',
   }),
-)
+])
 
-export const textField = composeStyles(
-  control,
-  atoms({
-    typography: 'body2',
-    paddingX: 'large',
-    color: 'content1',
-    radius: 'large',
+export const textFieldBase = style({
+  MozAppearance: 'none',
+  WebkitAppearance: 'none',
+  appearance: 'none',
+  padding: 0,
+  border: 'none',
+  width: '100%',
+  height: '48px',
+  outline: 'none !important',
+  background: 'transparent',
+  '::placeholder': {
+    color: vars.colors.outline,
+  },
+})
+
+export const textField = style([
+  textFieldBase,
+  sprinkles({
+    typography: 'labelLarge',
+    color: 'onSurface',
   }),
   style({
-    MozAppearance: 'none',
-    WebkitAppearance: 'none',
-    appearance: 'none',
-    backgroundColor: `hsla(${vars.colors.contentHsl}, 10%)`,
-    outline: 'none !important',
-    height: '44px',
-    border: `2px solid transparent`,
-    padding: 0,
-    width: '100%',
-    '::placeholder': {
-      color: vars.colors.content2,
-    },
+    padding: '0 16px',
+    borderRadius: '8px',
+    border: `2px solid ${vars.colors.outline}`,
+    display: 'flex',
+    alignItems: 'center',
     selectors: {
       '&:is(:focus-within)': {
-        backgroundColor: `hsla(${vars.colors.contentHsl}, 15%)`,
-        borderColor: vars.colors.content1,
+        borderColor: vars.colors.primary,
       },
     },
   }),
-)
+])
 
-export const pointerEventsNone = style(
-  {
-    pointerEvents: 'none',
+export const fadeInAni = keyframes({
+  from: {
+    opacity: 0,
   },
-  'pointer-events-none',
-)
+  to: {
+    opacity: 1,
+  },
+})
+
+export const fadeOutAni = keyframes({
+  from: {
+    opacity: 1,
+  },
+  to: {
+    opacity: 0,
+  },
+})
+
+export const EASING_INCOMING_80_OUTGOING_40 = 'cubic-bezier(0.4, 0.0, 0.2, 1)'
+export const EASING_INCOMING_80 = 'cubic-bezier(0, 0, .2, 1)'
+export const EASING_OUTGOING_40 = 'cubic-bezier(.4, 0, 1, 1)'

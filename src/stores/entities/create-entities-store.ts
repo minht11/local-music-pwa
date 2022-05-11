@@ -48,7 +48,7 @@ export const createEntitiesStore = () => {
   const toasts = useToast()
   const showToast = toasts.show
 
-  const removeTracks = (trackIds: string[]) => {
+  const removeTracks = (trackIds: readonly string[]) => {
     batch(() => {
       for (const trackId of trackIds) {
         const track = state.tracks[trackId]
@@ -130,7 +130,7 @@ export const createEntitiesStore = () => {
     const newTracks = await filterExistingTracks(tracks)
 
     setState(
-      produce((s: State) => {
+      produce((s) => {
         for (const track of newTracks) {
           const id = nanoid()
           s.tracks[id] = <Track>{

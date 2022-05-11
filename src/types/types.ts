@@ -49,7 +49,7 @@ export interface UnknownTrack {
   trackOf?: number
   image?: ImageType
   fileWrapper: FileWrapper
-  hue?: number
+  primaryColor?: number
 }
 
 export interface Track extends BaseMusicItem, UnknownTrack {

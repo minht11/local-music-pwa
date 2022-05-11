@@ -1,15 +1,15 @@
-import { createSignal } from 'solid-js'
+import { createMemo, createSignal, Show } from 'solid-js'
 import { useEntitiesStore } from '../../../stores/stores'
-import { IconType } from '../../icon/icon-paths'
 import { Modal } from '../../modal/modal'
 import { PlaylistList } from '../../entities-lists/playlists-list/playlists-list'
 import { InternalModalProps } from '../types'
+import { MessageBanner } from '../../message-banner/message-banner'
 
-interface AddToPlaylistModalProps extends InternalModalProps {
+export interface AddToPlaylistModalProps extends InternalModalProps {
   trackIds: readonly string[]
 }
 
-export const AddToPlaylistModal = (props: AddToPlaylistModalProps) => {
+const AddToPlaylistModal = (props: AddToPlaylistModalProps) => {
   const [entities, entitiesActions] = useEntitiesStore()
   const [selected, setSelected] = createSignal<string>()
 
@@ -25,9 +25,10 @@ export const AddToPlaylistModal = (props: AddToPlaylistModalProps) => {
     setSelected(id)
   }
 
+  const items = createMemo(() => Object.keys(entities.playlists))
+
   return (
     <Modal
-      titleIcon={IconType.ADD_PLAYLIST}
       title='Add to playlist'
       onCancel={props.close}
       onConfirm={onConfirm}
@@ -36,14 +37,20 @@ export const AddToPlaylistModal = (props: AddToPlaylistModalProps) => {
         { type: 'confirm', title: 'Add', disabled: !selected() },
       ]}
     >
-      <PlaylistList
-        hideSubheader
-        hideFavorites
-        disableMenu
-        items={Object.keys(entities.playlists)}
-        selectedId={selected()}
-        onItemClick={onItemClick}
-      />
+      <Show
+        when={items().length}
+        fallback={<MessageBanner message='No Playlists' />}
+      >
+        <PlaylistList
+          hideFavorites
+          disableMenu
+          items={Object.keys(entities.playlists)}
+          selectedId={selected()}
+          onItemClick={onItemClick}
+        />
+      </Show>
     </Modal>
   )
 }
+
+export default AddToPlaylistModal

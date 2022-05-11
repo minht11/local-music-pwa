@@ -102,9 +102,9 @@ export const serviceWorker = ({
         versionHash.update(contents)
       }
       for (const icon of manifest.icons) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line
         urls.push(icon.src)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line
         versionHash.update(icon.src)
       }
 

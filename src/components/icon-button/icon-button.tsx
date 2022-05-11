@@ -1,9 +1,9 @@
 import { Component, JSX } from 'solid-js'
-import { clx } from '../../utils'
+import { clx } from '~/utils'
 import { Icon, IconType } from '../icon/icon'
 import * as styles from './icon-button.css'
 
-export { IconType }
+export type { IconType }
 
 export interface IconButtonProps {
   icon?: IconType
@@ -16,6 +16,7 @@ export interface IconButtonProps {
 
 export const IconButton: Component<IconButtonProps> = (props) => (
   <button
+    disabled={props.disabled}
     title={props.title}
     className={clx(styles.iconButton, props.className)}
     onClick={props.onClick}

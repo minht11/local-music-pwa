@@ -1,5 +1,4 @@
 import { style } from '@vanilla-extract/css'
-import { vars } from '../../styles/styles.css'
 
 export const modalsContainer = style({
   display: 'grid',
@@ -18,7 +17,7 @@ export const scrim = style({
   width: '100%',
   height: '100%',
   position: 'absolute',
-  background: vars.colors.scrim,
+  background: 'rgba(0 0 0 / 20%)',
   pointerEvents: 'all',
-  zIndex: 2,
+  zIndex: 3,
 })

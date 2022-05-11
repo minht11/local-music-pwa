@@ -1,105 +1,31 @@
 <!doctype html >
-<html lang='en-US' app-not-loaded>
+<html lang='en-US'>
   <head>
     <title>Snae player</title>
     <meta charset='UTF-8'>
     <base href='/'>
     <meta http-equiv='Content-Security-Policy' content="
       default-src 'self';
-      script-src 'self' blob: 'unsafe-hashes' 'sha256-kx8Md/dUVxiWxH0xNDfI+0jY+S4Ev2Jri3jBG4rrm9E=' https://gc.zgo.at/;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      font-src https://fonts.gstatic.com;
+      connect-src 'self';
+      script-src 'self' blob: 'unsafe-hashes' 'sha256-nNExX8dGhf3ce7nlLMW210YbT1+ATSaoMpg5lf/l+Ng=' https://gc.zgo.at/;
+      style-src 'self' 'unsafe-inline';
       img-src 'self' blob: https://snaeplayer.goatcounter.com/count;
-      media-src 'self' blob:;">
+      media-src 'self' blob:;
+      base-uri 'none';
+    ">
 
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no'>
     <meta name='theme-color' content='#2a2827'>
     <meta name='description' content='Lightweight on device music player right in your browser.'>
     <link rel='icon' href='/icons/icon_responsive.svg' type='image/svg+xml' />
     <link rel="alternate icon" href="/icons/icon_16.png" sizes="16x16" type="image/png" />
     <link rel='apple-touch-icon' href='/icons/apple-touch-icon.png' sizes='180x180' />
-
-    <link rel='preconnect' href='https://fonts.gstatic.com/' crossorigin>
-
-    <!-- 
-      Load fonts async with high priority
-      https://csswizardry.com/2020/05/the-fastest-google-fonts/
-    -->
-    <link
-      rel='preload'
-      as='style'
-      href='https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500&display=swap'
-    />
-
-    <link
-      rel='stylesheet'
-      media='print' onload='this.media="all"'
-      href='https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500&display=swap'
-    />
-    <style>
-    html {
-      color: #fff;
-      background: #1a1a1a;
-      font-family: 'Fira Sans', system-ui, sans-serif;
-    }
-    @media (prefers-color-scheme: light) {
-      html {
-        color: #000;
-        background: #fff;
-      }
-    }
-    html,
-    body {
-      margin: 0;
-      -webkit-tap-highlight-color:  rgba(255, 255, 255, 0);
-      user-select: none;
-      width: 100%;
-      height: 100%;
-    }
-    #loading,
-    .unsupported-browser,
-    html[app-not-supported] #loading {
-      display: none;
-    }
-    html[app-not-supported] .unsupported-browser {
-      display: block;
-    }
-    html[app-not-loaded] #loading {
-      display: block;
-      position: absolute;
-      margin: auto;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      left: 0;
-      height: 48px;
-      width: 48px;
-      will-change: transform;
-      animation: loading-rotate 1.4s infinite, loading-appear 0.4s .4s backwards;
-    }
-    @keyframes loading-rotate {
-      0% {
-        transform: rotate(0);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-    @keyframes loading-appear {
-      0% {
-        opacity: 0;
-      }
-    }
-    * {
-      box-sizing: border-box;
-    }
-    </style>
   </head>
   <body>
-    <noscript class='unsupported-browser'>
+    <noscript>
       Please enable Javascript in order to use this app.
     </noscript>
-    <div class='unsupported-browser'>
+    <div id='unsupported-browser' hidden>
       <div>This browser does not support required technologies for this app to function correctly.</div>
       <div>Please upgrade your browser to the latest version of:</div>
       <a href='https://www.mozilla.org/en-US/firefox/new/'>Firefox</a>
@@ -107,9 +33,6 @@
       <a href='https://www.google.com/chrome/'>Chrome</a>
       <a href='https://www.apple.com/safari/'>Safari</a>
     </div>
-    <svg id='loading' viewBox='0 0 24 24'>
-      <path fill='currentColor' d='M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z' />
-    </svg>
 
     <script type='module' src='./src/index.ts'></script>
     <script nomodule src="/nomodule.js"></script>

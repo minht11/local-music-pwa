@@ -1,60 +1,58 @@
-import { composeStyles, style } from '@vanilla-extract/css'
-import { sharedStyles, atoms } from '../../styles/styles.css'
+import { style } from '@vanilla-extract/css'
+import { sharedStyles, sprinkles } from '~/styles/styles.css'
+
+export const { flatButton } = sharedStyles
 
 const modalBase = style({
   width: '100%',
   maxWidth: '320px',
   minHeight: '160px',
   maxHeight: '100vh',
-  zIndex: 2,
+  zIndex: 3,
   position: 'relative',
   gridArea: 'modal',
   pointerEvents: 'all',
 })
 
-export const modal = composeStyles(
+export const modal = style([
   modalBase,
-  atoms({
-    radius: 'veryLarge',
-    surface: 'surface3',
+  sprinkles({
+    radius: '24px',
+    surface: 'surface',
+    tonalElevation: 3,
     display: 'flex',
     flexDirection: 'column',
+    color: 'onSurface',
   }),
-)
+])
 
-export const header = atoms({
+export const header = sprinkles({
   display: 'flex',
-  flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: 'medium',
-  padding: 'large',
+  gap: '8px',
+  paddingX: '24px',
+  paddingTop: '24px',
 })
 
-export const title = atoms({
-  typography: 'headline1',
+export const title = sprinkles({
+  typography: 'headlineSmall',
 })
 
-export const content = composeStyles(
-  sharedStyles.scrollContainer,
-  atoms({
-    padding: 'large',
-  }),
+export const content = style([
   style({
     maxHeight: '400px',
   }),
-)
+])
 
-export const bottomButtons = composeStyles(
+export const bottomButtons = style([
   sharedStyles.actions,
-  atoms({
+  sprinkles({
     justifyContent: 'flex-end',
-    paddingX: 'large',
-    paddingY: 'medium',
+    paddingX: '16px',
+    paddingBottom: '16px',
   }),
   style({
     marginTop: 'auto',
   }),
-)
-
-export const btn = sharedStyles.button.flat.primary
+])

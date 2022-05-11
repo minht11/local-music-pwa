@@ -12,11 +12,14 @@
     "strict": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
+    "baseUrl": "./",
+    "paths": {
+      "~/*": ["./src/*"]
+    },
     "types": [
       "vite/client",
-      "@types/requestidlecallback",
       "@types/wicg-file-system-access",
-      "@types/wicg-mediasession",
+      "@types/offscreencanvas"
     ]
   },
 }

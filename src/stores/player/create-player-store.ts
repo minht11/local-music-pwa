@@ -7,9 +7,9 @@ import { useToast } from '../../components/toasts/toasts'
 import { useEntitiesStore } from '../stores'
 
 export const RepeatState = {
-  repeatOff: 0,
-  repeatAll: 1,
-  repeatOnce: 2,
+  OFF: 0,
+  ALL: 1,
+  ONCE: 2,
 } as const
 export type RepeatState = typeof RepeatState[keyof typeof RepeatState]
 
@@ -37,13 +37,12 @@ type TrackIds = readonly string[]
 export const createPlayerStore = () => {
   const [entities] = useEntitiesStore()
 
-  let isStateInitialized = false
   const [state, setState] = createStore<State>({
     isPlaying: false,
     trackIds: [],
     originalTrackIds: [],
     activeTrackIndex: -1,
-    repeat: RepeatState.repeatOff,
+    repeat: RepeatState.OFF,
     shuffle: false,
     currentTime: 0,
     currentTimeChanged: false,
@@ -51,25 +50,20 @@ export const createPlayerStore = () => {
     isMuted: false,
     volume: 100,
     get activeTrackId(): string {
-      if (isStateInitialized) {
-        // eslint-disable-next-line no-use-before-define
-        return activeTrackIdMemo()
-      }
-      return ''
+      // eslint-disable-next-line no-use-before-define
+      return activeTrackIdMemo()
     },
     get activeTrack(): Track | undefined {
-      if (isStateInitialized) {
-        // eslint-disable-next-line no-use-before-define
-        return activeTrackMemo()
-      }
-      return undefined
+      // eslint-disable-next-line no-use-before-define
+      return activeTrackMemo()
     },
   })
-  isStateInitialized = true
+
   // If state is modified inside batch memo won't run until batch is exited,
   // so offer these selectors directly for functions that need it.
   const activeTrackIdSelector = () => state.trackIds[state.activeTrackIndex]
-  const activeTrackSelector = () => entities.tracks[activeTrackIdSelector()]
+  const activeTrackSelector = () =>
+    entities.tracks[activeTrackIdSelector()] as Track | undefined
 
   const activeTrackIdMemo = createMemo(activeTrackIdSelector)
   const activeTrackMemo = createMemo(activeTrackSelector)
@@ -187,7 +181,7 @@ export const createPlayerStore = () => {
   const addTracksToQueue = (trackIds: TrackIds) => {
     // Merge old queue items with new ones.
     setState(
-      produce((s: State) => {
+      produce((s) => {
         let newTrackIds = trackIds
 
         if (s.shuffle) {
@@ -234,8 +228,8 @@ export const createPlayerStore = () => {
 
   const clearQueue = () => {
     setState({
-      tracks: [],
-      originalTracks: [],
+      trackIds: [],
+      originalTrackIds: [],
       isPlaying: false,
       currentTime: 0,
       duration: NaN,
@@ -272,9 +266,9 @@ export const createPlayerStore = () => {
   const toggleRepeat = () => {
     // Cycle between states 0, 1, 2, 0, 1...
     const repeatMap = {
-      [RepeatState.repeatOff]: RepeatState.repeatAll,
-      [RepeatState.repeatAll]: RepeatState.repeatOnce,
-      [RepeatState.repeatOnce]: RepeatState.repeatOff,
+      [RepeatState.OFF]: RepeatState.ALL,
+      [RepeatState.ALL]: RepeatState.ONCE,
+      [RepeatState.ONCE]: RepeatState.OFF,
     }
 
     setState({ repeat: repeatMap[state.repeat] })
@@ -321,7 +315,7 @@ export const createPlayerStore = () => {
     addTracksToQueue(trackIds)
     toasts.show({
       id: 'player-added-tracks-to-queue',
-      message: 'Added selected tracks to queue',
+      message: 'Selected tracks added to the queue',
       duration: 4000,
     })
   }

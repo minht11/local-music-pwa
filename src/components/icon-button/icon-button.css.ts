@@ -1,14 +1,16 @@
-import { style, composeStyles } from '@vanilla-extract/css'
-import { sharedStyles } from '../../styles/styles.css'
+import { style } from '@vanilla-extract/css'
+import { sharedStyles, sprinkles } from '../../styles/styles.css'
 
-export const iconButton = composeStyles(
-  sharedStyles.button.flat.regular,
+export const iconButton = style([
+  sharedStyles.flatButtonBase,
+  sprinkles({
+    overflow: 'hidden',
+    flexShrink: 0,
+  }),
   style({
     borderRadius: '50%',
     height: '44px',
     width: '44px',
-    overflow: 'hidden',
-    flexShrink: 0,
     transition: 'border-radius .2s linear',
     color: 'inherit',
     selectors: {
@@ -17,4 +19,4 @@ export const iconButton = composeStyles(
       },
     },
   }),
-)
+])

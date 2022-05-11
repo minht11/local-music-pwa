@@ -1,30 +1,44 @@
 import { globalStyle } from '@vanilla-extract/css'
-import { vars, lightTheme } from './vars.css'
+import { vars, defaultDarkTheme, defaultLightTheme } from './vars.css'
 
 const root = 'html'
 
 globalStyle(root, {
-  vars: {
-    [vars.colors.hue]: '20deg',
-  },
-
+  vars: defaultDarkTheme,
+  fontFamily: '"Fira Sans", system-ui, sans-serif',
   fontSize: '14px',
   letterSpacing: '0.25px',
-
-  color: vars.colors.content1,
-  background: vars.colors.surface0,
+  color: vars.colors.onBackground,
+  background: vars.colors.background,
   colorScheme: 'dark',
   '@media': {
     '(prefers-color-scheme: light)': {
-      vars: lightTheme,
+      vars: defaultLightTheme,
       colorScheme: 'light',
     },
     '(max-height: 440px), (max-width: 320px)': {
       vars: {
-        [vars.sizes.toolbarHeight]: '48px',
+        [vars.sizes.headerHeight]: '48px',
+      },
+    },
+    '(max-width: 700px), (max-height: 440px)': {
+      vars: {
+        [vars.sizes.playerCardHeight]: '64px',
       },
     },
   },
+})
+
+globalStyle('html, body', {
+  margin: 0,
+  WebkitTapHighlightColor: 'transparent',
+  userSelect: 'none',
+  width: '100%',
+  height: '100%',
+})
+
+globalStyle('*', {
+  boxSizing: 'border-box',
 })
 
 globalStyle('h1', {
@@ -37,4 +51,8 @@ globalStyle('a', {
 
 globalStyle('strong', {
   fontWeight: 500,
+})
+
+globalStyle('html[app-not-supported] #unsupported-browser', {
+  display: 'block',
 })

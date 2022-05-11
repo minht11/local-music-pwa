@@ -1,27 +1,26 @@
 import { Component, createMemo } from 'solid-js'
 import { VirtualContainer } from '@minht11/solid-virtual-container'
-import {
-  EntitiesListContainer,
-  BaseEntitiesListProps,
-} from '../entities-list-container'
 import { useEntitiesStore } from '../../../stores/stores'
-import { INFO_CONTAINER_HEIGHT } from './albums-artists.css'
+import * as styles from './albums-artists.css'
 import { AlbumArtistGridItem } from './album-artist-grid-item'
+import { Album, Artist } from '~/types/types'
 
-export interface AlbumsArtistsGridProps extends BaseEntitiesListProps {
+export interface AlbumsArtistsGridProps {
   type: 'album' | 'artist'
+  items: readonly string[]
 }
 
 const calculateItemSize = (crossAxisSize: number) => {
-  const minWidth = crossAxisSize > 560 ? 180 : 140
-  const bottomPadding = 8
+  const minWidth = crossAxisSize > 440 ? 200 : 160
 
   const count = Math.floor(crossAxisSize / minWidth)
   const width = Math.floor(crossAxisSize / count)
 
+  const artworkSize = width - styles.SIDE_GAP
+
   return {
     width,
-    height: width + INFO_CONTAINER_HEIGHT - bottomPadding,
+    height: artworkSize + styles.INFO_CONTAINER_HEIGHT + styles.BOTTOM_GAP,
   }
 }
 
@@ -37,24 +36,19 @@ export const AlbumsArtistsGrid: Component<AlbumsArtistsGridProps> = (props) => {
   })
 
   return (
-    <EntitiesListContainer
-      {...props}
-      entityName={props.type === 'album' ? 'album' : 'artist'}
+    <VirtualContainer
+      itemSize={calculateItemSize}
+      items={props.items}
+      crossAxisCount={(measurements) =>
+        Math.floor(measurements.container.cross / measurements.itemSize.cross)
+      }
     >
-      <VirtualContainer
-        itemSize={calculateItemSize}
-        items={props.items}
-        crossAxisCount={(measurements) =>
-          Math.floor(measurements.container.cross / measurements.itemSize.cross)
-        }
-      >
-        {(itemProps) => (
-          <AlbumArtistGridItem
-            {...itemProps}
-            itemData={entitiesList()[itemProps.item]}
-          />
-        )}
-      </VirtualContainer>
-    </EntitiesListContainer>
+      {(itemProps) => (
+        <AlbumArtistGridItem
+          {...itemProps}
+          itemData={entitiesList()[itemProps.item] as Album | Artist}
+        />
+      )}
+    </VirtualContainer>
   )
 }

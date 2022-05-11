@@ -1,7 +1,7 @@
 import { FileWrapper } from '../types/types'
 import { wait } from '../utils/utils'
 
-export const isNativeFileSystemSupported = 'FileSystemDirectoryHandle' in window
+export const isNativeFileSystemSupported = 'showDirectoryPicker' in globalThis
 
 export const getFileRefsRecursively = async (
   directory: FileSystemDirectoryHandle,

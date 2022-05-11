@@ -1,5 +1,5 @@
 import { vars } from './vars.css'
-import { atoms } from './atoms.css'
+import { sprinkles } from './sprinkles.css'
 import * as sharedStyles from './shared.css'
 
-export { vars, atoms, sharedStyles }
+export { vars, sprinkles, sharedStyles }

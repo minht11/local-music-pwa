@@ -1,4 +1,4 @@
-import { children, JSX, createRenderEffect } from 'solid-js'
+import { children, JSX, createRenderEffect, Component } from 'solid-js'
 import { clickFocusedElement, clx, doesElementContainFocus } from '../../utils'
 import { KeyboardCode } from '../../utils/key-codes'
 import * as styles from './list.css'
@@ -8,7 +8,7 @@ export interface ListProps extends JSX.HTMLAttributes<HTMLDivElement> {
   children: JSX.Element
 }
 
-export function List(props: ListProps) {
+export const List: Component<ListProps> = (props) => {
   let listContainerEl: HTMLDivElement
 
   const listItems = children(() => props.children) as () => HTMLElement[]

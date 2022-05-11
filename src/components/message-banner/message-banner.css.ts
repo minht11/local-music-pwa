@@ -1,19 +1,20 @@
-import { style, composeStyles } from '@vanilla-extract/css'
-import { sharedStyles, atoms } from '../../styles/styles.css'
+import { style } from '@vanilla-extract/css'
+import { sharedStyles, sprinkles } from '~/styles/styles.css'
 
-export const title = atoms({
-  typography: 'headline2',
-  color: 'content1',
+export const { outlinedButton } = sharedStyles
+
+export const title = sprinkles({
+  typography: 'headlineSmall',
+  color: 'onSurface',
 })
 
-export const button = sharedStyles.button.pill.regular
-
-export const messageBanner = composeStyles(
-  atoms({
+export const messageBanner = style([
+  sprinkles({
+    typography: 'titleMedium',
     display: 'flex',
     flexDirection: 'column',
-    color: 'content2',
-    rowGap: 'medium',
+    color: 'onSurfaceVariant',
+    rowGap: '16px',
     justifyContent: 'center',
     alignItems: 'center',
   }),
@@ -21,4 +22,4 @@ export const messageBanner = composeStyles(
     textAlign: 'center',
     margin: 'auto',
   }),
-)
+])

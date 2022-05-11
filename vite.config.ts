@@ -1,7 +1,9 @@
+import path from 'node:path'
 import { defineConfig } from 'vite'
 import solidPlugin from 'vite-plugin-solid'
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin'
-import { minifyHtml } from 'vite-plugin-html'
+import { createHtmlPlugin } from 'vite-plugin-html'
+import { ViteWebfontDownload } from 'vite-plugin-webfont-dl'
 import manifest from './package.json'
 import { mangleClassNames } from './lib/vite-mangle-classnames'
 import { injectScriptsToHtmlDuringBuild } from './lib/vite-inject-scripts-to-html'
@@ -14,13 +16,17 @@ const createMScreenshot = (name: string, sizes: string) => ({
 })
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '~': path.resolve(__dirname, './src'),
+    },
+  },
   build: {
     target: 'esnext',
     polyfillDynamicImport: false,
-    cleanCssOptions: {
-      level: 2,
-    },
+    polyfillModulePreload: false,
     cssCodeSplit: false,
+    minify: 'terser',
     terserOptions: {
       output: {
         comments: false,
@@ -47,7 +53,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    minifyHtml(),
+    createHtmlPlugin(),
     // Vite always bundles or imports all scripts into one file.
     // In unsupported browsers we want to display error message about it,
     // but because everything is bundled into one file, main app bundle
@@ -64,6 +70,9 @@ export default defineConfig({
     solidPlugin({
       hot: false,
     }),
+    ViteWebfontDownload([
+      'https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500&display=swap',
+    ]),
     serviceWorker({
       manifest: {
         short_name: 'Snae',

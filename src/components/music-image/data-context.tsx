@@ -39,10 +39,8 @@ export const MusicImagesProvider: Component = (props) => {
 
     if (releaseQueueTimeoutID === null) {
       releaseQueueTimeoutID = window.setTimeout(() => {
-        requestIdleCallback(() => {
-          releaseQueueTimeoutID = null
-          freeUpMemory()
-        })
+        releaseQueueTimeoutID = null
+        freeUpMemory()
       }, 4000)
     }
   }

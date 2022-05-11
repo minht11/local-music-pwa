@@ -1,11 +1,10 @@
-import { createEffect, createSignal, on, Show, Component, lazy } from 'solid-js'
+import { createEffect, createSignal, on, Show, Component } from 'solid-js'
 import { unwrap } from 'solid-js/store'
 import {
   createStore as createStoreIDB,
   getMany as getManyIDB,
   set as setIDB,
 } from 'idb-keyval'
-import isDBReadySafari14Fix from 'safari-14-idb-fix'
 import { deleteIDBDatabases } from '../helpers/delete-idb-databases'
 
 // TODO. Generics arrays with mixed types are hard, fix this one day. Maybe.
@@ -19,13 +18,13 @@ interface PersistedItem<V = any> {
 type UseStore = () => readonly [unknown, unknown, readonly PersistedItem[]]
 
 export interface PersistStoresProps {
-  onLoad: () => void
+  onLoad?: () => void
   storageName: string
   version: number
   useStores: readonly UseStore[]
 }
 
-export const PersistStoresC: Component<PersistStoresProps> = (props) => {
+export const PersistStoresProvider: Component<PersistStoresProps> = (props) => {
   const persistedItems: readonly PersistedItem[] = props.useStores
     .map((stateFn) => stateFn()[2])
     .filter(Boolean)
@@ -42,14 +41,16 @@ export const PersistStoresC: Component<PersistStoresProps> = (props) => {
 
   const persistedKeys = persistedItems.map((t) => t.key)
 
-  getManyIDB(persistedKeys, storeIDB)
-    .then((values) => {
-      values.forEach((value, index) => {
-        if (value !== undefined) {
-          persistedItems[index].load(value)
-        }
-      })
+  const setInitiallyLoadedState = (values: unknown[]) => {
+    values.forEach((value, index) => {
+      if (value !== undefined) {
+        persistedItems[index].load(value)
+      }
     })
+  }
+
+  getManyIDB(persistedKeys, storeIDB)
+    .then(setInitiallyLoadedState)
     .finally(() => setIsLoaded(true))
 
   createEffect(
@@ -75,16 +76,9 @@ export const PersistStoresC: Component<PersistStoresProps> = (props) => {
         skippedSetup = true
       })
 
-      props.onLoad()
+      props.onLoad?.()
     }),
   )
 
   return <Show when={isLoaded()}>{props.children}</Show>
 }
-
-const loadSafariIDBBugFix = async () => {
-  await isDBReadySafari14Fix()
-  return { default: PersistStoresC }
-}
-
-export const PersistStoresProvider = lazy(() => loadSafariIDBBugFix())

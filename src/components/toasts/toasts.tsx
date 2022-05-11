@@ -1,40 +1,15 @@
-import {
-  Component,
-  createContext,
-  createEffect,
-  For,
-  Match,
-  on,
-  Show,
-  Switch,
-  useContext,
-} from 'solid-js'
-import { createStore } from 'solid-js/store'
+import { createEffect, For, JSXElement, Match, Switch, untrack } from 'solid-js'
 import '@a11y/focus-trap'
-import { nanoid } from 'nanoid'
-import { clx } from '../../utils'
 import { Spinner } from '../spinner/spinner'
+import { useToast, ToastProvider } from './toasts-provider'
+import { ToastItem } from './types'
 import * as styles from './toasts.css'
+
+export { useToast, ToastProvider }
 
 export interface ToastButton {
   title: string
   action?: () => void
-}
-
-export interface ToastItem {
-  id?: string
-  message: string
-  duration?: false | number
-  controls?: false | 'spinner' | ToastButton[]
-}
-
-export interface ToastContextProps {
-  show(this: void, item: ToastItem): void
-  hide(this: void, id: ToastItem['id']): void
-}
-
-interface ToastState {
-  toasts: ToastItem[]
 }
 
 const DEFAULT_DURATION = 8000
@@ -42,32 +17,21 @@ const DEFAULT_BUTTON = {
   title: 'Dismiss',
 }
 
-const ToastContext = createContext<ToastContextProps>()
-export const useToast = () => useContext(ToastContext) as ToastContextProps
-
 const Toast = (props: ToastItem) => {
   const toasts = useToast()
 
-  const hide = () => {
-    toasts?.hide(props.id)
-  }
+  const hide = () => toasts?.hide(props.id)
 
-  createEffect(
-    on(
-      () => props.duration,
-      (duration) => {
-        if (duration === false) {
-          return
-        }
+  createEffect(() => {
+    const dur = props.duration
+    untrack(() => {
+      if (dur === false) {
+        return
+      }
 
-        const timeoutDuration = duration ?? DEFAULT_DURATION
-
-        setTimeout(() => {
-          hide()
-        }, timeoutDuration)
-      },
-    ),
-  )
+      setTimeout(hide, dur ?? DEFAULT_DURATION)
+    })
+  })
 
   return (
     <div className={styles.toastItem}>
@@ -75,7 +39,7 @@ const Toast = (props: ToastItem) => {
       <div className={styles.buttons}>
         <Switch>
           <Match when={props.controls === 'spinner'}>
-            <Spinner />
+            <Spinner className={styles.spinner} />
           </Match>
           <Match when={props.controls !== false}>
             <For each={(props.controls || [DEFAULT_BUTTON]) as ToastButton[]}>
@@ -98,48 +62,8 @@ const Toast = (props: ToastItem) => {
   )
 }
 
-interface ToastProviderProps {
-  className?: string
-}
+export const Toasts = (): JSXElement => {
+  const toasts = useToast()
 
-export const ToastProvider: Component<ToastProviderProps> = (props) => {
-  const [state, setState] = createStore<ToastState>({
-    toasts: [],
-  })
-
-  const filterToast = (id: ToastItem['id']) =>
-    state.toasts.filter((item) => item.id !== id)
-
-  const show = (item: ToastItem) => {
-    const toastIndex = state.toasts.findIndex((t) => t.id === item.id)
-
-    if (toastIndex === -1) {
-      const newToast = {
-        ...item,
-        id: item.id || nanoid(),
-      }
-
-      setState('toasts', (t) => [...t, newToast])
-      return
-    }
-
-    setState('toasts', toastIndex, item)
-  }
-
-  const hide = (id: ToastItem['id']) => {
-    setState({
-      toasts: filterToast(id),
-    })
-  }
-
-  return (
-    <ToastContext.Provider value={{ show, hide }}>
-      <Show when={state.toasts.length}>
-        <div className={clx(styles.container, props.className)}>
-          <For each={state.toasts}>{Toast}</For>
-        </div>
-      </Show>
-      {props.children}
-    </ToastContext.Provider>
-  )
+  return <For each={toasts.toasts}>{(toast) => <Toast {...toast} />}</For>
 }

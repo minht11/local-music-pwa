@@ -1,13 +1,18 @@
-import { style, createVar } from '@vanilla-extract/css'
+import { style, createVar, fallbackVar } from '@vanilla-extract/css'
+import { getVarName } from '../../styles/css-helpers'
 import { vars } from '../../styles/styles.css'
 
 export const sliderValueVar = createVar()
+export const sliderValueVarName = getVarName(sliderValueVar)
 
 const appearance = {
   appearance: 'none',
   WebkitAppearance: 'none',
   MozAppearance: 'none',
 } as const
+
+export const sliderTrackColorVar = createVar()
+export const sliderProgressColorVar = createVar()
 
 const sliderThumb = {
   ...appearance,
@@ -20,6 +25,9 @@ const sliderThumb = {
 
 const disabled = {
   display: 'none',
+  // Firefox
+  width: 0,
+  height: 0,
 }
 
 export const slider = style({
@@ -31,8 +39,8 @@ export const slider = style({
   outline: 'none',
   margin: 0,
   borderRadius: '4px',
-  color: 'inherit',
-  background: `hsla(${vars.colors.contentHsl}, 20%)`,
+  background: fallbackVar(sliderTrackColorVar, vars.colors.outline),
+  color: fallbackVar(sliderProgressColorVar, vars.colors.primary),
   selectors: {
     '&::-moz-range-progress': {
       ...appearance,

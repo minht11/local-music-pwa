@@ -12,7 +12,7 @@ export const animateFade = (
     options,
   )
 
-export const animateEmpty = (element: Element, duration: number) =>
-  element.animate(null, {
-    duration,
-  })
+export const animateEmpty = (
+  element: Element,
+  options: number | KeyframeAnimationOptions,
+) => element.animate(null, options)

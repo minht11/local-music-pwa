@@ -1,5 +1,3 @@
-export const APP_TITLE_POSTFIX = '- Snae Player'
-
 export const FAVORITES_ID = 'favorites--Z5jdHi6B-myT'
 // This cannot change
 export const UNKNOWN_ITEM_ID = '<unknown>'

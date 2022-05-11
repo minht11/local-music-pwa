@@ -1,7 +1,7 @@
-import { Component, createContext, For, Show, useContext } from 'solid-js'
+import { Component, createContext, For, JSXElement, Show, useContext } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { FocusTrap } from '@a11y/focus-trap'
-import { EASING_INCOMING_80 } from '../../helpers/animations/view-transition'
+import { EASING_INCOMING_80 } from '../../styles/shared.css'
 import { clx, doesElementContainFocus } from '../../utils'
 import { getMeasurementsFromAnchor } from './helpers/get-menu-position-from-anchor'
 import { animateFade } from '../../helpers/animations/animations'
@@ -31,13 +31,6 @@ export const MenuProvider: Component = (props) => {
   let menuEl!: HTMLDivElement
 
   let elementToReturnFocusTo: HTMLElement | undefined
-  const setAriaExpanedReturnFocusElement = (value: boolean) => {
-    if (elementToReturnFocusTo) {
-      if (elementToReturnFocusTo.hasAttribute('aria-expanded')) {
-        elementToReturnFocusTo.setAttribute('aria-expanded', value.toString())
-      }
-    }
-  }
 
   const show: MenuContextProps['show'] = (
     itemsOrComponent,
@@ -60,8 +53,6 @@ export const MenuProvider: Component = (props) => {
       items,
       component,
     })
-
-    setAriaExpanedReturnFocusElement(true)
 
     const baseRect = menuEl.getBoundingClientRect()
     const rect = {
@@ -117,7 +108,6 @@ export const MenuProvider: Component = (props) => {
     }).finished.then(() => {
       setState('isOpen', false)
       if (elementToReturnFocusTo) {
-        setAriaExpanedReturnFocusElement(false)
         elementToReturnFocusTo.focus()
       }
     })
@@ -167,7 +157,7 @@ export const MenuProvider: Component = (props) => {
             when={!state.component}
             fallback={
               <div ref={menuEl} className={styles.menu} tabIndex='-1'>
-                {state.component}
+                {state.component as JSXElement}
               </div>
             }
           >

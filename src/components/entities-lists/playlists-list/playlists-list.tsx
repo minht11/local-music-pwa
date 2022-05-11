@@ -1,21 +1,14 @@
-import { Component, createMemo, Show } from 'solid-js'
+import { Component, createMemo } from 'solid-js'
 import {
   VirtualContainer,
   VirtualItemProps,
 } from '@minht11/solid-virtual-container'
 import { FAVORITES_ID } from '../../../types/constants'
-import { IconButton, IconType } from '../../icon-button/icon-button'
 import { Icon } from '../../icon/icon'
 import { useEntitiesStore } from '../../../stores/stores'
-import {
-  EntitiesListContainer,
-  BaseEntitiesListProps,
-} from '../entities-list-container'
-import { MenuOptions, useMenu } from '../../menu/menu'
-import * as styles from './playlists-list.css'
-import { clx } from '../../../utils'
 import { useModals } from '../../modals/modals'
 import { MusicItemType } from '../../../types/types'
+import { ListItem } from '~/components/list-item/listi-tem'
 
 interface PlaylistItem extends VirtualItemProps<string> {
   onClick: () => void
@@ -26,88 +19,58 @@ interface PlaylistItem extends VirtualItemProps<string> {
 
 const PlaylistListItem = (props: PlaylistItem) => {
   const [entities, entitiesActions] = useEntitiesStore()
-  const menu = useMenu()
   const modals = useModals()
 
   const isFavorites = () => props.item === FAVORITES_ID
 
-  const onMenuHandler = (anchor: boolean, e: MouseEvent) => {
-    if (props.disableMenu || isFavorites()) {
-      return
-    }
-
-    const options: MenuOptions = anchor
-      ? { anchor: true, preferredAlign: { horizontal: 'right' } }
-      : { anchor: false, position: { top: e.y, left: e.x } }
-
-    menu?.show(
-      [
-        {
-          name: 'Rename',
-          action: () =>
-            modals.createOrRenamePlaylist.show({
-              type: 'rename',
-              playlistId: props.item,
-            }),
-        },
-        {
-          name: 'Remove',
-          action: () =>
-            entitiesActions.remove(props.item, MusicItemType.PLAYLIST),
-        },
-      ],
-      e.target as HTMLElement,
-      options,
-    )
-
-    e.stopPropagation()
-    e.preventDefault()
-  }
+  const getMenuItems = () => [
+    {
+      name: 'Rename',
+      action: () =>
+        modals.createOrRenamePlaylist.show({
+          type: 'rename',
+          playlistId: props.item,
+        }),
+    },
+    {
+      name: 'Remove',
+      action: () => entitiesActions.remove(props.item, MusicItemType.PLAYLIST),
+    },
+  ]
 
   const item = createMemo(() => {
-    const id = props.item
     if (isFavorites()) {
       return {
-        icon: IconType.FAVORITE,
+        icon: 'favorite',
         name: 'Favorites',
-      }
+      } as const
     }
 
     return {
-      icon: IconType.PLAYLIST,
-      name: entities.playlists[id]?.name,
-    }
+      icon: 'playlist',
+      name: entities.playlists[props.item]?.name,
+    } as const
   })
 
   return (
-    <div
-      style={props.style}
-      className={clx(styles.playlistItem, props.isSelected && styles.selected)}
-      tabIndex={props.tabIndex}
+    <ListItem
       onClick={props.onClick}
-      onContextMenu={[onMenuHandler, false]}
-    >
-      <Icon icon={item().icon} />
-      <div className={styles.name}>{item().name}</div>
-      <Show when={!props.disableMenu}>
-        <IconButton
-          disabled={isFavorites()}
-          className={styles.menu}
-          title='Menu button'
-          icon={IconType.MORE_VERTICAL}
-          tabIndex={props.tabIndex}
-          onClick={[onMenuHandler, true]}
-        />
-      </Show>
-    </div>
+      getMenuItems={getMenuItems}
+      disableMenu={props.disableMenu || isFavorites()}
+      style={props.style}
+      tabIndex={props.tabIndex}
+      icon={<Icon icon={item().icon} />}
+      text={item().name}
+    />
   )
 }
 
-export interface PlaylistListProps extends BaseEntitiesListProps {
+export interface PlaylistListProps {
   hideFavorites?: boolean
   disableMenu?: boolean
   selectedId?: string
   onItemClick?: (id: string, index: number) => void
+  items: readonly string[]
 }
 
 export const PlaylistList: Component<PlaylistListProps> = (props) => {
@@ -123,17 +86,15 @@ export const PlaylistList: Component<PlaylistListProps> = (props) => {
   })
 
   return (
-    <EntitiesListContainer {...props} entityName='playlist'>
-      <VirtualContainer itemSize={{ height: 48 }} items={playlistsIds()}>
-        {(itemProps) => (
-          <PlaylistListItem
-            {...itemProps}
-            disableMenu={props.disableMenu}
-            isSelected={props.selectedId === itemProps.item}
-            onClick={() => props.onItemClick?.(itemProps.item, itemProps.index)}
-          />
-        )}
-      </VirtualContainer>
-    </EntitiesListContainer>
+    <VirtualContainer itemSize={{ height: 56 }} items={playlistsIds()}>
+      {(itemProps) => (
+        <PlaylistListItem
+          {...itemProps}
+          disableMenu={props.disableMenu}
+          isSelected={props.selectedId === itemProps.item}
+          onClick={() => props.onItemClick?.(itemProps.item, itemProps.index)}
+        />
+      )}
+    </VirtualContainer>
   )
 }

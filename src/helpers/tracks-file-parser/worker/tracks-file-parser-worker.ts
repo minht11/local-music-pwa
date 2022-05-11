@@ -4,7 +4,7 @@ import { Buffer } from 'buffer'
 import { parseBuffer as parseMetadata } from 'music-metadata'
 import { TrackParseMessage } from '../message-types'
 import type { UnknownTrack, FileWrapper } from '../../../types/types'
-import { getDominantHue } from './get-dominant-hue'
+import { extractColorFromImage } from './color-from-image'
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -58,7 +58,7 @@ const parseTrack = async (
       image: imageBlob,
       duration: tags.format.duration || 0,
       fileWrapper,
-      hue: imageBlob && (await getDominantHue(imageBlob)),
+      primaryColor: imageBlob && (await extractColorFromImage(imageBlob)),
     }
     return trackData
   } catch (err) {

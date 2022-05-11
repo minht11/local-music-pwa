@@ -1,5 +1,4 @@
-import { setElementVar } from '@vanilla-extract/dynamic'
-import { Component, createEffect, JSX, mergeProps } from 'solid-js'
+import { createEffect, JSX, JSXElement, mergeProps } from 'solid-js'
 import { clx } from '../../utils'
 import * as styles from './slider.css'
 
@@ -10,7 +9,7 @@ export type SliderProps = Omit<JSX.HTMLAttributes<HTMLInputElement>, 'ref'> & {
   value: number
 }
 
-export const Slider: Component<SliderProps> = (props) => {
+export const Slider = (props: SliderProps): JSXElement => {
   const mergedProps = mergeProps(
     {
       min: 0,
@@ -25,7 +24,7 @@ export const Slider: Component<SliderProps> = (props) => {
     const percentage = (mergedProps.value * 100) / mergedProps.max
     const percentageSafe = Number.isFinite(percentage) ? percentage : 0
 
-    setElementVar(inputEl, styles.sliderValueVar, `${percentageSafe}%`)
+    inputEl.style.setProperty(styles.sliderValueVarName, `${percentageSafe}%`)
   })
 
   return (

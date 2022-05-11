@@ -1,18 +1,21 @@
 import { Component } from 'solid-js'
 import { TracksList } from './components/entities-lists/tracks-list/tracks-list'
 import { MusicItemType } from './types/types'
-import { BaseEntitiesListProps } from './components/entities-lists/entities-list-container'
 import { PlaylistList } from './components/entities-lists/playlists-list/playlists-list'
 import {
   AlbumsGrid,
   ArtistsGrid,
 } from './components/entities-lists/albums-artists-grids'
 
+export interface BaseListProps {
+  items: readonly string[]
+}
+
 export interface BaseConfig {
   type: MusicItemType
   title: string
   path: string
-  component: Component<BaseEntitiesListProps>
+  component: Component<BaseListProps>
 }
 
 export const BASE_TRACKS_CONFIG = {

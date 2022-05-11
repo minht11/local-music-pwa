@@ -39,7 +39,6 @@ export const RootStoresProvider: Component<Pick<PersistStoresProps, 'onLoad'>> =
       <LibraryProvider>
         <PlayerProvider>
           <PersistStoresProvider
-            onLoad={props.onLoad}
             storageName={APP_STORAGE_NAME}
             version={APP_STORAGE_VERSION}
             useStores={[useEntitiesStore, useLibraryStore, usePlayerStore]}

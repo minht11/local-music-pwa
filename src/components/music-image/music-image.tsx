@@ -1,16 +1,9 @@
-import {
-  createEffect,
-  createSignal,
-  onCleanup,
-  Show,
-  JSX,
-  useContext,
-} from 'solid-js'
-import { ImageType, MusicItemType } from '../../types/types'
-import { FAVORITES_ID } from '../../types/constants'
-import { Icon, IconType } from '../icon/icon'
+import { onCleanup, Show, JSX, useContext, createMemo } from 'solid-js'
+import { ImageType, MusicItemType } from '~/types/types'
+import { FAVORITES_ID } from '~/types/constants'
+import { ICON_PATHS } from '../icon/icon-paths'
 import { MusicImagesContext } from './data-context'
-import { clx } from '../../utils'
+import { clx } from '~/utils'
 import * as styles from './music-image.css'
 
 export interface MusicImageProps {
@@ -20,59 +13,42 @@ export interface MusicImageProps {
     type: MusicItemType
     image?: ImageType
   }
-  ref?: JSX.CustomAttributes<HTMLDivElement>['ref']
 }
 
-// Too many bugs in browsers, Safari 15 will support aspect-ratio,
-// but it will probably ship with this bug and the fix will only come
-// in a year, so just disable it for now. Making testing overall easier.
-// TODO: enable this in 2022 :).
-// https://bugzilla.mozilla.org/show_bug.cgi?id=1719273
-// const supportsNativeCSSAspectRatio =
-//   import.meta.env.PROD && CSS.supports('aspect-ratio: 1/1')
-const supportsNativeCSSAspectRatio = false
-
-const getIcon = (item?: MusicImageProps['item']) => {
-  if (!item) {
-    return null
-  }
-
-  switch (item.type) {
-    case MusicItemType.TRACK:
-      return IconType.ALBUM
-    case MusicItemType.ALBUM:
-      return IconType.ALBUM
+const getIconType = (item?: MusicImageProps['item']) => {
+  switch (item?.type) {
     case MusicItemType.ARTIST:
-      return IconType.PERSON
+      return 'person'
     case MusicItemType.PLAYLIST: {
       if (item.id === FAVORITES_ID) {
-        return IconType.FAVORITE
+        return 'favorite'
       }
-      return IconType.PLAYLIST
+      return 'playlist'
     }
     default:
-      return IconType.ALBUM
+      return 'album'
   }
 }
 
-export const MusicImage = (props: MusicImageProps) => {
+export const MusicImage = (props: MusicImageProps): JSX.Element => {
   const context = useContext(MusicImagesContext)
 
-  const [imageURL, setImgURL] = createSignal<string | null>(null)
   // Maybe instead of symbol 'item.id' could be used in the future.
   const userKey = Symbol('key')
 
-  createEffect(() => {
-    const { item } = props
-    const imageBlob = item && item.type !== MusicItemType.PLAYLIST && item.image
+  const item = () => props.item
 
-    setImgURL((imageBlob && context?.get(imageBlob, userKey)) || null)
+  const imageURL = createMemo(() => {
+    const itm = item()
+    const imageBlob = itm && itm.type !== MusicItemType.PLAYLIST && itm.image
 
     onCleanup(() => {
       if (imageBlob) {
         context?.release(imageBlob, userKey)
       }
     })
+
+    return (imageBlob && context?.get(imageBlob, userKey)) || null
   })
 
   const style = () => {
@@ -82,27 +58,30 @@ export const MusicImage = (props: MusicImageProps) => {
     }
   }
 
+  const path = () => {
+    const itm = item()
+    if (!itm) {
+      return ''
+    }
+
+    return ICON_PATHS[getIconType(itm)]
+  }
+
   return (
-    <div
+    // Use svg because it keeps it's aspect ratio.
+    <svg
       style={style()}
       className={clx(
         styles.musicImage,
         props.className,
-        supportsNativeCSSAspectRatio && styles.aspectRatio,
+        item()?.type === MusicItemType.ARTIST && styles.round,
       )}
-      ref={props.ref}
+      viewBox='-2 -2 28 28'
+      aria-label='Artwork'
     >
-      <Show when={!supportsNativeCSSAspectRatio}>
-        <svg
-          aria-hidden='true'
-          className={styles.legacyAspectImg}
-          viewBox='0 0 1 1'
-          xmlns='http://www.w3.org/2000/svg'
-        ></svg>
+      <Show when={imageURL() === null}>
+        <path d={path()} />
       </Show>
-      <Show when={imageURL() === null && getIcon(props.item)}>
-        {(icon) => <Icon icon={icon} className={styles.musicIcon} />}
-      </Show>
-    </div>
+    </svg>
   )
 }

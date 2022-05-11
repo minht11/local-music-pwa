@@ -1,18 +1,16 @@
 import { Component, For, onCleanup, Show } from 'solid-js'
-import { ScrollTargetContext } from '@minht11/solid-virtual-container'
 import '@a11y/focus-trap'
-import { Icon, IconType } from '../icon/icon'
+import { ScrollContainer } from '../scroll-container/scroll-container'
 import { KeyboardCode } from '../../utils/key-codes'
 import * as styles from './modal.css'
 
-interface ModalButton {
+export interface ModalButton {
   type: 'confirm' | 'cancel'
   title: string
   disabled?: boolean
 }
 
 export interface ModalProps {
-  titleIcon: IconType
   title: string
   onConfirm?: () => void
   onCancel?: () => void
@@ -20,10 +18,6 @@ export interface ModalProps {
 }
 
 export const Modal: Component<ModalProps> = (props) => {
-  /* eslint-disable prefer-const */
-  let scrollTargetEl = undefined as unknown as HTMLDivElement
-  /* eslint-enable prefer-const */
-
   const cancel = () => {
     props.onCancel?.()
   }
@@ -46,20 +40,17 @@ export const Modal: Component<ModalProps> = (props) => {
   return (
     <focus-trap className={styles.modal}>
       <div className={styles.header}>
-        <Icon icon={props.titleIcon} />
         <h1 className={styles.title}>{props.title}</h1>
       </div>
-      <div className={styles.content} ref={scrollTargetEl}>
-        <ScrollTargetContext.Provider value={{ scrollTarget: scrollTargetEl }}>
-          {props.children}
-        </ScrollTargetContext.Provider>
-      </div>
+      <ScrollContainer className={styles.content}>
+        {props.children}
+      </ScrollContainer>
       <Show when={props.buttons}>
         <div className={styles.bottomButtons}>
           <For each={props.buttons || []}>
             {(button) => (
               <button
-                className={styles.btn}
+                className={styles.flatButton}
                 disabled={button.disabled}
                 onClick={() => {
                   if (button.type === 'cancel') {

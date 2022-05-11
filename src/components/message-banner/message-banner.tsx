@@ -1,5 +1,5 @@
-import { NavLink } from '@rturnq/solid-router'
-import { Component, Show } from 'solid-js'
+import { NavLink } from 'solid-app-router'
+import { Component } from 'solid-js'
 import { clx } from '../../utils'
 import * as styles from './message-banner.css'
 
@@ -16,23 +16,21 @@ export interface MessageBannerProps {
 
 const BannerButton = (props: NonNullable<MessageBannerProps['button']>) =>
   props.href ? (
-    <NavLink className={styles.button} href={props.href}>
+    <NavLink className={styles.outlinedButton} href={props.href}>
       {props.title}
     </NavLink>
   ) : (
-    <button className={styles.button} onClick={props.onClick}>
+    <button className={styles.outlinedButton} onClick={props.onClick}>
       {props.title}
     </button>
   )
 
 export const MessageBanner: Component<MessageBannerProps> = (props) => (
   <div className={clx(styles.messageBanner, props.className)}>
-    <Show when={props.title}>
-      <h1 className={styles.title}>{props.title}</h1>
-    </Show>
-    <Show when={props.message}>
-      <div>{props.message}</div>
-    </Show>
-    <Show when={props.button}>{BannerButton}</Show>
+    {props.title && <h1 className={styles.title}>{props.title}</h1>}
+
+    {props.message && <div>{props.message}</div>}
+
+    {props.button && <BannerButton {...props.button} />}
   </div>
 )

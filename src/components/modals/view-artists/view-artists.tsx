@@ -1,30 +1,28 @@
-import { useRouter } from '@rturnq/solid-router'
+import { useNavigate } from 'solid-app-router'
 import { For } from 'solid-js'
 import { useEntitiesStore } from '../../../stores/stores'
-import { IconType } from '../../icon/icon-paths'
 import { List } from '../../list/list'
 import { Modal } from '../../modal/modal'
 import { InternalModalProps } from '../types'
 import * as sharedStyles from '../../../styles/shared.css'
 
-interface ViewArtistsModalProps extends InternalModalProps {
-  artistsIds: string[]
+export interface ViewArtistsModalProps extends InternalModalProps {
+  artistsIds: readonly string[]
 }
 
-export const ViewArtistsModal = (props: ViewArtistsModalProps) => {
-  const router = useRouter()
+const ViewArtistsModal = (props: ViewArtistsModalProps) => {
+  const navigate = useNavigate()
 
   const [entities] = useEntitiesStore()
   const { artists } = entities
 
   const onItemClickHandler = (id: string) => {
     props.close()
-    router.push(`/artist/${encodeURIComponent(id)}`)
+    navigate(`/artist/${encodeURIComponent(id)}`)
   }
 
   return (
     <Modal
-      titleIcon={IconType.PERSON}
       title='View Artists'
       onConfirm={() => props.close()}
       onCancel={props.close}
@@ -44,3 +42,5 @@ export const ViewArtistsModal = (props: ViewArtistsModalProps) => {
     </Modal>
   )
 }
+
+export default ViewArtistsModal
