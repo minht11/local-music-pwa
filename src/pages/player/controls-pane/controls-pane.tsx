@@ -44,15 +44,9 @@ export const ControlsPane = (props: FullPlayerProps): JSXElement => {
   useResizeObserver(
     () => playerContentEl,
     (entry) => {
-      const USED_HEIGHT = CONTROLS_HEIGHT + CONTENT_GAP
-
       const { width, height } = entry.contentRect
-      const availableSpaceY = height - USED_HEIGHT
-      const availableSpaceX = width - PREFERRED_CONTROLS_WIDTH - CONTENT_GAP
 
-      const isHorizontal =
-        availableSpaceY <= PREFERRED_CONTROLS_WIDTH ||
-        availableSpaceX >= availableSpaceY
+      const isHorizontal = (width / height) > 1.1
 
       setIsHorizontalLayout(isHorizontal)
     },

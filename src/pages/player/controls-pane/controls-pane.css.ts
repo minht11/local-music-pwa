@@ -50,7 +50,7 @@ export const content = style([
     width: '100%',
     selectors: {
       [`${horizontalLayout} &`]: {
-        gridTemplateRows: `1fr`,
+        gridTemplateRows: `100%`,
         gridTemplateColumns: '1fr 1fr',
         gridTemplateAreas: `
           'artwork controls'

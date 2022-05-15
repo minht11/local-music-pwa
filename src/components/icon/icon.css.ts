@@ -6,4 +6,5 @@ export const icon = style({
   contain: 'strict',
   pointerEvents: 'none',
   fill: 'currentColor',
+  flexShrink: 0,
 })

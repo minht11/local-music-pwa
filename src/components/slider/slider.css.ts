@@ -21,6 +21,7 @@ const sliderThumb = {
   borderRadius: '50%',
   width: '16px',
   height: '16px',
+  boxShadow: 'none',
 }
 
 const disabled = {

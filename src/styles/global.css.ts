@@ -31,7 +31,10 @@ globalStyle(root, {
 
 globalStyle('html, body', {
   margin: 0,
+  touchAction: 'manipulation',
+  overscrollBehavior: 'contain',
   WebkitTapHighlightColor: 'transparent',
+  WebkitUserSelect: 'none',
   userSelect: 'none',
   width: '100%',
   height: '100%',
