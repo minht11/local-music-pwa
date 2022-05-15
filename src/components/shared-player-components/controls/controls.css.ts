@@ -91,6 +91,7 @@ const animatedIcon = style({
   pointerEvents: 'none',
   width: '24px',
   height: '24px',
+  flexShrink: 0,
 })
 
 export const skipIconClip = style({

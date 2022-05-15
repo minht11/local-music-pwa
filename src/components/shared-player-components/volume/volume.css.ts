@@ -11,6 +11,7 @@ export const volumeIcon = style({
   pointerEvents: 'none',
   height: '24px',
   width: '24px',
+  flexShrink: 0,
 })
 
 export const volume45 = style({
