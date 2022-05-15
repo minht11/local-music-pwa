@@ -73,7 +73,7 @@ export const getFilesFromDirectory = async (
   // so allow them to pick individual files instead.
   if (isMobile()) {
     directoryElement.accept = extensions
-      .map((ext) => `'audio/${ext}`)
+      .map((ext) => `.${ext}`)
       .join(', ')
 
     directoryElement.multiple = true
