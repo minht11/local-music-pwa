@@ -28,7 +28,7 @@ export const FavoriteButton = (): JSXElement => {
 
   return (
     <IconButton
-      className={styles.infoFavoriteBtn}
+      class={styles.infoFavoriteBtn}
       title={isFavorited() ? 'Remove from Favorites' : 'Add to Favorites'}
       icon={isFavorited() ? 'favorite' : 'favoriteOutline'}
       onClick={onFavoriteBtnClickHandler}

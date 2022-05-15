@@ -11,16 +11,16 @@ export const PlayPauseButton = (): JSXElement => {
       title={playerState.isPlaying ? 'Pause (Space)' : 'Play (Space)'}
       disabled={!playerState.activeTrack}
       onClick={() => playerActions.playPause()}
-      className={styles.playPauseButton}
+      class={styles.playPauseButton}
     >
       <div
-        className={clx(
+        class={clx(
           styles.playPauseIcon,
           playerState.isPlaying && styles.playing,
         )}
       >
-        <div className={styles.playPauseIconBar} />
-        <div className={clx(styles.playPauseIconBar, styles.flippedY)} />
+        <div class={styles.playPauseIconBar} />
+        <div class={clx(styles.playPauseIconBar, styles.flippedY)} />
       </div>
     </button>
   )

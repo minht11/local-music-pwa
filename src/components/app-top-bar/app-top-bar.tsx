@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'solid-app-router'
-import { Component, JSX, Match, Switch } from 'solid-js'
+import { ParentComponent, JSX, Match, Switch } from 'solid-js'
 import { clx, wait } from '~/utils'
 import { IconButton } from '../icon-button/icon-button'
 import { useScaffoldContext } from '../scaffold/scaffold'
@@ -36,13 +36,13 @@ const BackButton = () => {
 export interface AppTopBarProps {
   mainButton?: JSX.Element | false
   title?: string
-  className?: string
+  class?: string
   hideSpacer?: boolean
   belowContent?: JSX.Element
   scrollAware?: boolean
 }
 
-export const AppTopBar: Component<AppTopBarProps> = (props) => {
+export const AppTopBar: ParentComponent<AppTopBarProps> = (props) => {
   const [state] = useScaffoldContext() || [{}]
 
   const scrollAware = () =>
@@ -50,13 +50,13 @@ export const AppTopBar: Component<AppTopBarProps> = (props) => {
 
   return (
     <header
-      className={clx(
+      class={clx(
         styles.appTobBar,
         scrollAware() && state.isScolled && styles.elavated,
-        props.className,
+        props.class,
       )}
     >
-      <div className={styles.content}>
+      <div class={styles.content}>
         <Switch>
           <Match when={props.mainButton === undefined}>
             <BackButton />
@@ -64,9 +64,9 @@ export const AppTopBar: Component<AppTopBarProps> = (props) => {
           <Match when={props.mainButton}>{props.mainButton}</Match>
         </Switch>
 
-        {props.title && <h1 className={styles.title}>{props.title}</h1>}
+        {props.title && <h1 class={styles.title}>{props.title}</h1>}
 
-        {!props.hideSpacer && <div className={styles.spacer} />}
+        {!props.hideSpacer && <div class={styles.spacer} />}
 
         {props.children}
       </div>

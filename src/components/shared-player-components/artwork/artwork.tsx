@@ -5,7 +5,7 @@ import { MusicImage } from '../../music-image/music-image'
 import * as styles from './artwork.css'
 
 export interface ArtworkProps {
-  className?: string
+  class?: string
 }
 
 export const Artwork = (props: ArtworkProps): JSXElement => {
@@ -14,7 +14,7 @@ export const Artwork = (props: ArtworkProps): JSXElement => {
   return (
     <MusicImage
       item={playerState.activeTrack}
-      className={clx(props.className, styles.artwork)}
+      class={clx(props.class, styles.artwork)}
     />
   )
 }

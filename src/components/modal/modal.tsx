@@ -1,4 +1,4 @@
-import { Component, For, onCleanup, Show } from 'solid-js'
+import { For, onCleanup, ParentComponent, Show } from 'solid-js'
 import '@a11y/focus-trap'
 import { ScrollContainer } from '../scroll-container/scroll-container'
 import { KeyboardCode } from '../../utils/key-codes'
@@ -17,7 +17,7 @@ export interface ModalProps {
   buttons?: ModalButton[]
 }
 
-export const Modal: Component<ModalProps> = (props) => {
+export const Modal: ParentComponent<ModalProps> = (props) => {
   const cancel = () => {
     props.onCancel?.()
   }
@@ -38,19 +38,17 @@ export const Modal: Component<ModalProps> = (props) => {
   })
 
   return (
-    <focus-trap className={styles.modal}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>{props.title}</h1>
+    <focus-trap class={styles.modal}>
+      <div class={styles.header}>
+        <h1 class={styles.title}>{props.title}</h1>
       </div>
-      <ScrollContainer className={styles.content}>
-        {props.children}
-      </ScrollContainer>
+      <ScrollContainer class={styles.content}>{props.children}</ScrollContainer>
       <Show when={props.buttons}>
-        <div className={styles.bottomButtons}>
+        <div class={styles.bottomButtons}>
           <For each={props.buttons || []}>
             {(button) => (
               <button
-                className={styles.flatButton}
+                class={styles.flatButton}
                 disabled={button.disabled}
                 onClick={() => {
                   if (button.type === 'cancel') {

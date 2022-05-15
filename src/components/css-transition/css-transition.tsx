@@ -4,7 +4,7 @@ import {
   cssEnter,
   cssExit,
 } from '@otonashixav/solid-flip'
-import { Component, Show } from 'solid-js'
+import { ParentComponent, Show } from 'solid-js'
 import { usePrefersReducedMotion } from '~/utils'
 
 export interface CSSTransitionProps {
@@ -14,7 +14,7 @@ export interface CSSTransitionProps {
   initial?: boolean
 }
 
-export const CSSTransition: Component<CSSTransitionProps> = (props) => {
+export const CSSTransition: ParentComponent<CSSTransitionProps> = (props) => {
   const prefersReducedMotion = usePrefersReducedMotion()
 
   return (

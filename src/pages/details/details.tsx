@@ -134,21 +134,21 @@ const DetailsPage = (props: DetailsPageConfig) => {
         topBar={props.title}
         scrollable
       >
-        <section className={styles.content}>
-          <MusicImage item={data().item} className={styles.musicImage} />
-          <div className={styles.details}>
-            <div className={styles.secondary}>{props.label?.(data().item)}</div>
-            <h1 className={styles.title}>{data().item.name}</h1>
+        <section class={styles.content}>
+          <MusicImage item={data().item} class={styles.musicImage} />
+          <div class={styles.details}>
+            <div class={styles.secondary}>{props.label?.(data().item)}</div>
+            <h1 class={styles.title}>{data().item.name}</h1>
 
-            <div className={styles.secondary}>
+            <div class={styles.secondary}>
               <For each={props.info?.(data().item) || []}>
                 {(infoItem) => <div>{infoItem}</div>}
               </For>
             </div>
 
-            <div className={styles.actions}>
+            <div class={styles.actions}>
               <button
-                className={styles.tonalButton}
+                class={styles.tonalButton}
                 onClick={onPlayHandler}
                 disabled={!dataMemo()!.trackIds.length}
               >

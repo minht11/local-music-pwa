@@ -1,4 +1,4 @@
-import { Component, createMemo } from 'solid-js'
+import { createMemo, ParentComponent } from 'solid-js'
 import { VirtualContainer } from '@minht11/solid-virtual-container'
 import { useEntitiesStore } from '../../../stores/stores'
 import * as styles from './albums-artists.css'
@@ -24,7 +24,9 @@ const calculateItemSize = (crossAxisSize: number) => {
   }
 }
 
-export const AlbumsArtistsGrid: Component<AlbumsArtistsGridProps> = (props) => {
+export const AlbumsArtistsGrid: ParentComponent<AlbumsArtistsGridProps> = (
+  props,
+) => {
   const [entities] = useEntitiesStore()
 
   const entitiesList = createMemo(() => {

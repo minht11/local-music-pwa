@@ -1,5 +1,5 @@
 import { useNavigate } from 'solid-app-router'
-import { Component, Show } from 'solid-js'
+import { Show, VoidComponent } from 'solid-js'
 import { createMediaQuery } from '~/helpers/hooks/create-media-query'
 import { Artwork } from '../shared-player-components/artwork/artwork'
 import { Controls } from '../shared-player-components/controls/main-controls'
@@ -14,10 +14,10 @@ import { Icon } from '../icon/icon'
 import * as styles from './mini-player.css'
 
 export interface MiniPlayerProps {
-  className?: string | false
+  class?: string | false
 }
 
-export const MiniPlayer: Component<MiniPlayerProps> = (props) => {
+export const MiniPlayer: VoidComponent<MiniPlayerProps> = (props) => {
   const areMainControlsHidden = createMediaQuery(styles.COMPACT_MEDIA)
 
   const areSecondaryActionsVisible = createMediaQuery('(min-width: 421px)')
@@ -26,17 +26,17 @@ export const MiniPlayer: Component<MiniPlayerProps> = (props) => {
   const navigate = useNavigate()
 
   return (
-    <div className={clx(styles.container, props.className)}>
+    <div class={clx(styles.container, props.class)}>
       {!areMainControlsHidden() && <Timeline />}
 
-      <div className={styles.infoSection}>
+      <div class={styles.infoSection}>
         <button
           title='Open player'
-          className={styles.openFullPlayerButton}
+          class={styles.openFullPlayerButton}
           onClick={() => navigate('/player')}
         >
-          <div className={styles.artworkContainer}>
-            <Icon icon='chevronUp' className={styles.artworkArrow} />
+          <div class={styles.artworkContainer}>
+            <Icon icon='chevronUp' class={styles.artworkArrow} />
             <Artwork />
           </div>
           <Info />

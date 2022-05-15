@@ -30,18 +30,15 @@ const PlaySkipButton = (props: PlaySkipButtonProps) => {
         Add wrapper div to fix it.
       */}
       <div
-        className={clx(
-          styles.skipIconClip,
-          props.iconFlipped && styles.flippedX,
-        )}
+        class={clx(styles.skipIconClip, props.iconFlipped && styles.flippedX)}
       >
-        <svg className={styles.skipIcon} viewBox='0 0 24 24'>
+        <svg class={styles.skipIcon} viewBox='0 0 24 24'>
           <path
-            className={styles.skipBottom}
+            class={styles.skipBottom}
             d='M 6,18 14.5,12 6,6 M 8,9.86 11.03,12 8,14.14'
           />
           <path
-            className={styles.skipTop}
+            class={styles.skipTop}
             d='M 6,18 14.5,12 6,6 M 8,9.86 11.03,12 8,14.14'
           />
           <path d='M16,6L16,18L18,18L18,6L16,6Z' />

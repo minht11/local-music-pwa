@@ -26,7 +26,7 @@ const CreateNewPlaylistButton = () => {
 
   return (
     <button
-      className={styles.outlinedButton}
+      class={styles.outlinedButton}
       onClick={() => {
         modals.createOrRenamePlaylist.show({ type: 'create' })
       }}

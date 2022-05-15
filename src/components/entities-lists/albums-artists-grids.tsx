@@ -1,4 +1,4 @@
-import { Component } from 'solid-js'
+import { VoidComponent } from 'solid-js'
 import {
   AlbumsArtistsGrid,
   AlbumsArtistsGridProps as AAGridProps,
@@ -6,10 +6,10 @@ import {
 
 type AlbumsArtistsGridProps = Omit<AAGridProps, 'type'>
 
-export const ArtistsGrid: Component<AlbumsArtistsGridProps> = (props) => (
+export const ArtistsGrid: VoidComponent<AlbumsArtistsGridProps> = (props) => (
   <AlbumsArtistsGrid {...props} type='artist' />
 )
 
-export const AlbumsGrid: Component<AlbumsArtistsGridProps> = (props) => (
+export const AlbumsGrid: VoidComponent<AlbumsArtistsGridProps> = (props) => (
   <AlbumsArtistsGrid {...props} type='album' />
 )

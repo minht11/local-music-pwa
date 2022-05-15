@@ -1,4 +1,4 @@
-import { createEffect, createSignal, on, Show, Component } from 'solid-js'
+import { createEffect, createSignal, on, Show, ParentComponent } from 'solid-js'
 import { unwrap } from 'solid-js/store'
 import {
   createStore as createStoreIDB,
@@ -24,7 +24,9 @@ export interface PersistStoresProps {
   useStores: readonly UseStore[]
 }
 
-export const PersistStoresProvider: Component<PersistStoresProps> = (props) => {
+export const PersistStoresProvider: ParentComponent<PersistStoresProps> = (
+  props,
+) => {
   const persistedItems: readonly PersistedItem[] = props.useStores
     .map((stateFn) => stateFn()[2])
     .filter(Boolean)

@@ -1,4 +1,4 @@
-import { Component, ErrorBoundary } from 'solid-js'
+import { ParentComponent, ErrorBoundary } from 'solid-js'
 
 const Fallback = (error: Error) => (
   <div style='user-select: text;'>
@@ -12,6 +12,6 @@ const Fallback = (error: Error) => (
   </div>
 )
 
-export const ErrorPage: Component = (props) => (
+export const ErrorPage: ParentComponent = (props) => (
   <ErrorBoundary fallback={Fallback}>{props.children}</ErrorBoundary>
 )

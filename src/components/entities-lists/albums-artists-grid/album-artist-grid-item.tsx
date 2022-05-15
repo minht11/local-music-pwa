@@ -45,15 +45,15 @@ export const AlbumArtistGridItem = (
   return (
     <div
       style={props.style}
-      className={styles.gridItem}
+      class={styles.gridItem}
       tabIndex={props.tabIndex}
       onClick={onClickHandler}
       role='listitem'
     >
-      <div className={styles.gridItemContent}>
-        <MusicImage item={props.itemData} className={styles.artwork} />
-        <div className={styles.infoContainer}>
-          <div className={styles.title}>{props.itemData.name}</div>
+      <div class={styles.gridItemContent}>
+        <MusicImage item={props.itemData} class={styles.artwork} />
+        <div class={styles.infoContainer}>
+          <div class={styles.title}>{props.itemData.name}</div>
           <div>{artists()}</div>
         </div>
       </div>

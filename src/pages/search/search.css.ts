@@ -37,13 +37,13 @@ export const chip = style([
     fontFamily: 'inherit',
     background: 'transparent',
     height: '32px',
-  })
+  }),
 ])
 
 export const chipSelected = style({
   backgroundColor: vars.colors.secondaryContainer,
   color: vars.colors.onSecondaryContainer,
-  borderColor: 'transparent'
+  borderColor: 'transparent',
 })
 
 export const chipIcon = style({
@@ -55,7 +55,7 @@ export const chipIcon = style({
   selectors: {
     [`${chipSelected} &`]: {
       transform: 'none',
-      marginRight: '0'
+      marginRight: '0',
     },
   },
 })

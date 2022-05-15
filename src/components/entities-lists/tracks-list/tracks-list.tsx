@@ -1,4 +1,10 @@
-import { Component, createMemo, createSignal, JSXElement, Show } from 'solid-js'
+import {
+  createMemo,
+  createSignal,
+  JSXElement,
+  Show,
+  VoidComponent,
+} from 'solid-js'
 import { useNavigate } from 'solid-app-router'
 import {
   VirtualContainer,
@@ -29,7 +35,7 @@ export interface TracksListProps {
 }
 
 interface TracksListItemProps extends VirtualItemProps<string> {
-  className: string
+  class: string
   showIndex?: boolean
   onItemClick?: (item: Track, index: number) => void
   isPlayingItem?: (item: Track, index: number) => boolean
@@ -39,7 +45,7 @@ interface TracksListItemProps extends VirtualItemProps<string> {
 const artistsToString = (artists: readonly string[]) =>
   artists.length ? artists.join(', ') : UNKNOWN_ITEM_STRING
 
-const TrackListItem = (props: TracksListItemProps) => {
+const TrackListItem: VoidComponent<TracksListItemProps> = (props) => {
   const navigate = useNavigate()
   const modals = useModals()
   const [entities, entitiesActions] = useEntitiesStore()
@@ -132,15 +138,15 @@ const TrackListItem = (props: TracksListItemProps) => {
       onClick={onClickHandler}
       style={props.style}
       tabIndex={props.tabIndex}
-      className={props.className}
+      class={props.class}
       icon={
         <Show
           when={!props.showIndex}
-          fallback={<div className={styles.firstColumn}>{props.index + 1}</div>}
+          fallback={<div class={styles.firstColumn}>{props.index + 1}</div>}
         >
           <MusicImage
             item={track()}
-            className={clx(styles.firstColumn, styles.artwork)}
+            class={clx(styles.firstColumn, styles.artwork)}
           />
         </Show>
       }
@@ -148,11 +154,9 @@ const TrackListItem = (props: TracksListItemProps) => {
       secondaryText={artistsToString(track().artists)}
       trailing={
         <>
-          <div className={styles.album}>
-            {track().album || UNKNOWN_ITEM_STRING}
-          </div>
+          <div class={styles.album}>{track().album || UNKNOWN_ITEM_STRING}</div>
 
-          <div className={styles.time}>{formatTime(track().duration)}</div>
+          <div class={styles.time}>{formatTime(track().duration)}</div>
         </>
       }
       getMenuItems={getMenuItems}
@@ -160,7 +164,7 @@ const TrackListItem = (props: TracksListItemProps) => {
   )
 }
 
-const TracksListContent = (props: TracksListProps) => {
+const TracksListContent: VoidComponent<TracksListProps> = (props) => {
   const [isWide, setIsWide] = createSignal(false)
   const [isNarrow, setIsNarrow] = createSignal(false)
 
@@ -174,12 +178,12 @@ const TracksListContent = (props: TracksListProps) => {
   )
 
   return (
-    <div ref={containerEl} className={styles.container}>
+    <div ref={containerEl} class={styles.container}>
       <VirtualContainer itemSize={{ height: 68 }} items={props.items}>
         {(itemProps) => (
           <TrackListItem
             {...itemProps}
-            className={clx(
+            class={clx(
               !isWide() && styles.compact,
               isNarrow() && styles.narrow,
             )}
@@ -194,7 +198,7 @@ const TracksListContent = (props: TracksListProps) => {
   )
 }
 
-export const TracksList: Component<TracksListProps> = (props) => (
+export const TracksList: VoidComponent<TracksListProps> = (props) => (
   <Show when={props.items.length} fallback={props.fallback}>
     <TracksListContent {...props} />
   </Show>

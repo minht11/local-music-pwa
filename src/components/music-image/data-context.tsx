@@ -1,4 +1,4 @@
-import { Component, createContext } from 'solid-js'
+import { ParentComponent, createContext } from 'solid-js'
 
 interface ImageDate {
   url: string
@@ -12,7 +12,7 @@ type ImagesDataProps = {
 
 export const MusicImagesContext = createContext<ImagesDataProps>()
 
-export const MusicImagesProvider: Component = (props) => {
+export const MusicImagesProvider: ParentComponent = (props) => {
   const musicImagesMap = new WeakMap<Blob, ImageDate>()
   const releaseQueue = new Set<Blob>()
 

@@ -57,7 +57,7 @@ const CreateOrRenamePlaylistModal = (props: CreateRenamePlaylistProps) => {
         }
         type='text'
         placeholder='Enter new playlist name'
-        className={styles.textField}
+        class={styles.textField}
         onInput={(e: InputEvent) =>
           setName((e.target as HTMLInputElement).value)
         }

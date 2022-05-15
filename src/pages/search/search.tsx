@@ -1,4 +1,11 @@
-import { createMemo, createSignal, For, JSXElement, Show, untrack } from 'solid-js'
+import {
+  createMemo,
+  createSignal,
+  For,
+  JSXElement,
+  Show,
+  untrack,
+} from 'solid-js'
 import { useMatch } from 'solid-app-router'
 import { Dynamic } from 'solid-js/web'
 import { BaseMusicItem, MusicItemType } from '../../types/types'
@@ -78,9 +85,9 @@ const Search = (): JSXElement => {
     return { ...config, itemIds, isSelected, setIsSelected }
   })
 
-  const isNotEmpty = createMemo(() => (
-    pages.some((page) => page.itemIds().length !== 0)
-  ))
+  const isNotEmpty = createMemo(() =>
+    pages.some((page) => page.itemIds().length !== 0),
+  )
 
   return (
     <Scaffold
@@ -88,17 +95,14 @@ const Search = (): JSXElement => {
       title='Search'
       scrollable
     >
-      <div className={styles.chipsContainer}>
+      <div class={styles.chipsContainer}>
         <For each={pages}>
           {(page) => (
             <button
-              className={clx(
-                styles.chip,
-                page.isSelected() && styles.chipSelected,
-              )}
+              class={clx(styles.chip, page.isSelected() && styles.chipSelected)}
               onClick={() => page.setIsSelected((prev) => !prev)}
             >
-              <Icon icon='checkmark' className={styles.chipIcon} />
+              <Icon icon='checkmark' class={styles.chipIcon} />
               {page.title}
             </button>
           )}
@@ -111,7 +115,7 @@ const Search = (): JSXElement => {
         <For each={pages}>
           {(page) => (
             <Show when={page.itemIds().length && page.isSelected()}>
-              <h1 className={styles.resulsTitle}>{page.title}</h1>
+              <h1 class={styles.resulsTitle}>{page.title}</h1>
               <Dynamic component={page.component} items={page.itemIds()} />
             </Show>
           )}
