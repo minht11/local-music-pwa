@@ -4,13 +4,23 @@
     <title>Snae player</title>
     <meta charset='UTF-8'>
     <base href='/'>
+
+    <!--
+      TODO. For now only Chrome supports 'unsafe-hashes' option.
+      When other browsers support it, it is safer to use it than 'unsafe-hashes'.
+      script-src: 'unsafe-hashes' 'sha256-nNExX8dGhf3ce7nlLMW210YbT1+ATSaoMpg5lf/l+Ng='
+    -->
     <meta http-equiv='Content-Security-Policy' content="
-      default-src 'self';
+      default-src 'none';
       connect-src 'self';
-      script-src 'self' blob: 'unsafe-hashes' 'sha256-nNExX8dGhf3ce7nlLMW210YbT1+ATSaoMpg5lf/l+Ng=' https://gc.zgo.at/;
+      script-src 'self' blob: 'unsafe-inline' https://gc.zgo.at/;
       style-src 'self' 'unsafe-inline';
+      font-src 'self';
+      manifest-src 'self';
       img-src 'self' blob: https://snaeplayer.goatcounter.com/count;
       media-src 'self' blob:;
+      child-src 'self' blob:;
+      form-action 'none';
       base-uri 'none';
     ">
 
