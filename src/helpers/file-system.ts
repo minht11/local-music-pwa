@@ -1,5 +1,5 @@
 import { FileWrapper } from '../types/types'
-import { wait } from '../utils/utils'
+import { IS_DEVICE_A_MOBILE, wait } from '../utils/utils'
 
 export const isNativeFileSystemSupported = 'showDirectoryPicker' in globalThis
 
@@ -44,14 +44,6 @@ export const getFilesFromLegacyInputEvent = (
     )
 }
 
-const isMobile = () => {
-  if (navigator.userAgentData) {
-    return navigator.userAgentData.mobile
-  }
-
-  return /Android|iPhone|iPad|iPod|Opera Mini/i.test(navigator.userAgent)
-}
-
 export const getFilesFromDirectory = async (
   extensions: string[],
 ): Promise<FileWrapper[] | null> => {
@@ -71,10 +63,8 @@ export const getFilesFromDirectory = async (
 
   // Mobile devices do not support directory selection,
   // so allow them to pick individual files instead.
-  if (isMobile()) {
-    directoryElement.accept = extensions
-      .map((ext) => `.${ext}`)
-      .join(', ')
+  if (IS_DEVICE_A_MOBILE) {
+    directoryElement.accept = extensions.map((ext) => `.${ext}`).join(', ')
 
     directoryElement.multiple = true
   } else {

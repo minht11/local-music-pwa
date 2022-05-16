@@ -248,3 +248,13 @@ export const useResizeObserver = (
     onCleanup(() => ro.unobserve(el))
   })
 }
+
+const isMobile = () => {
+  if (navigator.userAgentData) {
+    return navigator.userAgentData.mobile
+  }
+
+  return /Android|iPhone|iPad|iPod|Opera Mini/i.test(navigator.userAgent)
+}
+
+export const IS_DEVICE_A_MOBILE = isMobile()
