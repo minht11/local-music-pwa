@@ -1,6 +1,5 @@
 import { batch, createEffect, createMemo, untrack } from 'solid-js'
 import { produce, createStore } from 'solid-js/store'
-
 import { shuffleArray } from '../../utils/utils'
 import { Track } from '../../types/types'
 import { useToast } from '../../components/toasts/toasts'
@@ -87,13 +86,13 @@ export const createPlayerStore = () => {
     })
   }
 
-  const setShuffleEnabledTracksState = () => {
+  const setShuffleEnabledTracksState = (index: number, tracks: TrackIds) => {
     setState({
       // Save original tracks order, so we can restore them
       // if shuffle is turned off.
-      originalTrackIds: state.trackIds,
+      originalTrackIds: tracks,
       // Shuffle track ids and make active track first element.
-      trackIds: shuffleArray(state.trackIds, state.activeTrackIndex),
+      trackIds: shuffleArray(tracks, index),
       // Selected track in shuffled array is first.
       activeTrackIndex: 0,
     })
@@ -113,16 +112,13 @@ export const createPlayerStore = () => {
         })
 
         if (state.shuffle) {
-          setShuffleEnabledTracksState()
+          setShuffleEnabledTracksState(index, tracks)
         }
       }
-
-      // Set isPlaying to true if track exists.
-
-      // state.activeTrack is a memo and not a state property internally,
-      // because of batch memo didn't change yet so use selector directly.
-      setState('isPlaying', !!activeTrackSelector())
     })
+
+    // Set isPlaying to true if track exists.
+    setState('isPlaying', !!state.activeTrack)
   }
 
   const playNextTrack = (playUnlessLastTrack = false) => {
@@ -244,7 +240,7 @@ export const createPlayerStore = () => {
 
     batch(() => {
       if (shuffle) {
-        setShuffleEnabledTracksState()
+        setShuffleEnabledTracksState(state.activeTrackIndex, state.trackIds)
       } else {
         const { originalTrackIds } = state
 
@@ -320,6 +316,7 @@ export const createPlayerStore = () => {
     })
   }
 
+  // TODO. This is broken.
   createEffect(() => {
     const { tracks } = entities
     untrack(() => {
