@@ -1,4 +1,4 @@
-import { Component, createMemo } from 'solid-js'
+import { ParentComponent, createMemo, VoidComponent } from 'solid-js'
 import {
   VirtualContainer,
   VirtualItemProps,
@@ -17,7 +17,7 @@ interface PlaylistItem extends VirtualItemProps<string> {
   disableMenu?: boolean
 }
 
-const PlaylistListItem = (props: PlaylistItem) => {
+const PlaylistListItem: VoidComponent<PlaylistItem> = (props) => {
   const [entities, entitiesActions] = useEntitiesStore()
   const modals = useModals()
 
@@ -73,7 +73,7 @@ export interface PlaylistListProps {
   items: readonly string[]
 }
 
-export const PlaylistList: Component<PlaylistListProps> = (props) => {
+export const PlaylistList: ParentComponent<PlaylistListProps> = (props) => {
   // Maybe memo is not needed here?
   const playlistsIds = createMemo(() => {
     const { items } = props

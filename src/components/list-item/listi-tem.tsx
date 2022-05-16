@@ -1,4 +1,4 @@
-import { JSX, Show } from 'solid-js'
+import { JSX, Show, VoidComponent } from 'solid-js'
 import { clx } from '~/utils'
 import { IconButton } from '../icon-button/icon-button'
 import { useMenu, MenuOptions, MenuItem } from '../menu/menu'
@@ -9,7 +9,7 @@ export interface ListItemProps extends JSX.HTMLAttributes<HTMLDivElement> {
   secondaryText?: string
   icon?: JSX.Element
   trailing?: JSX.Element
-  className?: string
+  class?: string
   tabIndex?: number
   style?: string | JSX.CSSProperties
   onClick?: (e: MouseEvent) => void
@@ -18,7 +18,7 @@ export interface ListItemProps extends JSX.HTMLAttributes<HTMLDivElement> {
   isSelected?: boolean
 }
 
-export const ListItem = (props: ListItemProps) => {
+export const ListItem: VoidComponent<ListItemProps> = (props) => {
   const menu = useMenu()
 
   const onMenuHandler = (anchor: boolean, e: MouseEvent) => {
@@ -49,29 +49,27 @@ export const ListItem = (props: ListItemProps) => {
       role='listitem'
       tabIndex={props.tabIndex}
       onClick={props.onClick}
-      className={clx(
+      class={clx(
         styles.listItem,
         props.isSelected && styles.selected,
-        props.className,
+        props.class,
       )}
       style={props.style}
       onContextMenu={[onMenuHandler, false]}
     >
-      {props.icon && <div className={styles.icon}>{props.icon}</div>}
-      <div className={styles.textContainer}>
-        <div className={styles.mainText}>{props.text}</div>
-        <div className={styles.textEclipse}>{props.secondaryText}</div>
+      {props.icon && <div class={styles.icon}>{props.icon}</div>}
+      <div class={styles.textContainer}>
+        <div class={styles.mainText}>{props.text}</div>
+        <div class={styles.textEclipse}>{props.secondaryText}</div>
       </div>
-      {props.trailing && (
-        <div className={styles.trailing}>{props.trailing}</div>
-      )}
+      {props.trailing && <div class={styles.trailing}>{props.trailing}</div>}
       <Show when={!props.disableMenu}>
         <IconButton
           title='More actions'
           icon='moreVertical'
           tabIndex={props.tabIndex}
           onClick={[onMenuHandler, true]}
-          className={styles.menu}
+          class={styles.menu}
         />
       </Show>
     </div>

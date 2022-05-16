@@ -1,8 +1,8 @@
 import {
-  Component,
   createContext,
   createEffect,
   JSXElement,
+  ParentComponent,
   Show,
   useContext,
 } from 'solid-js'
@@ -17,7 +17,7 @@ export interface ScaffoldProps {
   topBar?: string | JSXElement
   bottomBar?: JSXElement
   navRail?: JSXElement
-  className?: string | false
+  class?: string | false
   scrollable?: boolean
 }
 
@@ -49,7 +49,7 @@ export const ScaffoldContext = createContext<ScaffoldContextValue>()
 export const useScaffoldContext = () =>
   useContext(ScaffoldContext) as ScaffoldContextValue
 
-export const Scaffold: Component<ScaffoldProps> = (props) => {
+export const Scaffold: ParentComponent<ScaffoldProps> = (props) => {
   const [state, setState] = createStore<ScaffoldContextState>({
     isScolled: false,
   })
@@ -63,21 +63,19 @@ export const Scaffold: Component<ScaffoldProps> = (props) => {
 
   return (
     <ScaffoldContext.Provider value={[state, setState]}>
-      <div className={clx(styles.container, props.className)}>
-        <div className={styles.topBar}>
-          {getTopBar(props.topBar, props.title)}
-        </div>
+      <div class={clx(styles.container, props.class)}>
+        <div class={styles.topBar}>{getTopBar(props.topBar, props.title)}</div>
 
-        <div className={styles.navRail}>{props.navRail}</div>
+        <div class={styles.navRail}>{props.navRail}</div>
 
-        <div className={styles.content}>
+        <div class={styles.content}>
           <Show when={props.scrollable} fallback={props.children}>
             <ScrollContainer observeScrollState>
               {props.children}
             </ScrollContainer>
           </Show>
         </div>
-        <div className={styles.bottomBar}>{props.bottomBar}</div>
+        <div class={styles.bottomBar}>{props.bottomBar}</div>
       </div>
     </ScaffoldContext.Provider>
   )

@@ -9,7 +9,7 @@ interface RippleElement extends HTMLSpanElement {
 const FADE_DURATION = 200
 const SCALE_DURATION = 500
 
-export const installGlobalRipple = (targetClassName: string) => {
+export const installGlobalRipple = (targetclass: string) => {
   const activeRipples = new Set<RippleElement>()
 
   const markOrExitRipple = (ripple: RippleElement) => {
@@ -37,7 +37,7 @@ export const installGlobalRipple = (targetClassName: string) => {
     }
 
     const path = e.composedPath() as Element[]
-    const target = path.find((el) => el.classList?.contains(targetClassName))
+    const target = path.find((el) => el.classList?.contains(targetclass))
 
     if (!target || target.hasAttribute('disabled')) {
       return

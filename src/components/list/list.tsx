@@ -1,14 +1,13 @@
-import { children, JSX, createRenderEffect, Component } from 'solid-js'
+import { children, JSX, createRenderEffect, ParentComponent } from 'solid-js'
 import { clickFocusedElement, clx, doesElementContainFocus } from '../../utils'
 import { KeyboardCode } from '../../utils/key-codes'
 import * as styles from './list.css'
 
 export interface ListProps extends JSX.HTMLAttributes<HTMLDivElement> {
-  className?: string
-  children: JSX.Element
+  class?: string
 }
 
-export const List: Component<ListProps> = (props) => {
+export const List: ParentComponent<ListProps> = (props) => {
   let listContainerEl: HTMLDivElement
 
   const listItems = children(() => props.children) as () => HTMLElement[]
@@ -81,7 +80,7 @@ export const List: Component<ListProps> = (props) => {
   return (
     <div
       {...props}
-      className={clx(styles.listContainer, props.className)}
+      class={clx(styles.listContainer, props.class)}
       role='list'
       tabIndex='-1'
       ref={(el) => {

@@ -1,4 +1,11 @@
-import { Component, createContext, For, JSXElement, Show, useContext } from 'solid-js'
+import {
+  createContext,
+  For,
+  JSXElement,
+  ParentComponent,
+  Show,
+  useContext,
+} from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { FocusTrap } from '@a11y/focus-trap'
 import { EASING_INCOMING_80 } from '../../styles/shared.css'
@@ -22,7 +29,7 @@ export type { MenuItem, MenuOptions }
 const MenuContext = createContext<MenuContextProps>()
 export const useMenu = () => useContext(MenuContext) as MenuContextProps
 
-export const MenuProvider: Component = (props) => {
+export const MenuProvider: ParentComponent = (props) => {
   const [state, setState] = createStore<MenuState>({
     isOpen: false,
     items: [],
@@ -147,7 +154,7 @@ export const MenuProvider: Component = (props) => {
   return (
     <MenuContext.Provider value={{ show }}>
       <Show when={state.isOpen}>
-        <div className={styles.overlay} />
+        <div class={styles.overlay} />
         <focus-trap
           ref={focusTrapEl}
           onKeyDown={onKeyDownHandler}
@@ -156,17 +163,17 @@ export const MenuProvider: Component = (props) => {
           <Show
             when={!state.component}
             fallback={
-              <div ref={menuEl} className={styles.menu} tabIndex='-1'>
+              <div ref={menuEl} class={styles.menu} tabIndex='-1'>
                 {state.component as JSXElement}
               </div>
             }
           >
-            <List ref={menuEl} className={styles.menu} role-description='Menu'>
+            <List ref={menuEl} class={styles.menu} role-description='Menu'>
               <For each={state.items}>
                 {(item) => (
                   <div
                     role='menuitem'
-                    className={clx(
+                    class={clx(
                       styles.menuItem,
                       item.selected && styles.selected,
                     )}

@@ -1,4 +1,12 @@
-import { createEffect, For, JSXElement, Match, Switch, untrack } from 'solid-js'
+import {
+  createEffect,
+  For,
+  JSXElement,
+  Match,
+  Switch,
+  untrack,
+  VoidComponent,
+} from 'solid-js'
 import '@a11y/focus-trap'
 import { Spinner } from '../spinner/spinner'
 import { useToast, ToastProvider } from './toasts-provider'
@@ -17,7 +25,7 @@ const DEFAULT_BUTTON = {
   title: 'Dismiss',
 }
 
-const Toast = (props: ToastItem) => {
+const Toast: VoidComponent<ToastItem> = (props) => {
   const toasts = useToast()
 
   const hide = () => toasts?.hide(props.id)
@@ -34,18 +42,18 @@ const Toast = (props: ToastItem) => {
   })
 
   return (
-    <div className={styles.toastItem}>
-      <div className={styles.message}>{props.message}</div>
-      <div className={styles.buttons}>
+    <div class={styles.toastItem}>
+      <div class={styles.message}>{props.message}</div>
+      <div class={styles.buttons}>
         <Switch>
           <Match when={props.controls === 'spinner'}>
-            <Spinner className={styles.spinner} />
+            <Spinner class={styles.spinner} />
           </Match>
           <Match when={props.controls !== false}>
             <For each={(props.controls || [DEFAULT_BUTTON]) as ToastButton[]}>
               {(btnProps) => (
                 <button
-                  className={styles.btn}
+                  class={styles.btn}
                   onClick={() => {
                     btnProps.action?.()
                     hide()

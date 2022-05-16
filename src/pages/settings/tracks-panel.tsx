@@ -1,4 +1,4 @@
-import { Component, createMemo, Show } from 'solid-js'
+import { VoidComponent, createMemo, Show } from 'solid-js'
 import { pluralize } from '~/utils'
 import { useEntitiesStore } from '~/stores/stores'
 import { isNativeFileSystemSupported } from '~/helpers/file-system'
@@ -6,25 +6,25 @@ import { Icon } from '~/components/icon/icon'
 import * as sharedStyles from '~/styles/shared.css'
 import * as styles from './settings.css'
 
-export const TracksPanel: Component = () => {
+export const TracksPanel: VoidComponent = () => {
   const [entities, entitiesActions] = useEntitiesStore()
 
   const tracksCount = createMemo(() => Object.keys(entities.tracks).length)
 
   return (
-    <div className={styles.tracksInfoPanel}>
-      <div className={styles.tracksInfoText}>
+    <div class={styles.tracksInfoPanel}>
+      <div class={styles.tracksInfoText}>
         <div>
           Currently there are{' '}
-          <strong className={styles.countText}>{tracksCount()}</strong>{' '}
+          <strong class={styles.countText}>{tracksCount()}</strong>{' '}
           {pluralize(tracksCount(), 'track')} inside your library
         </div>
-        <div className={styles.tracksInfoCaption}>
+        <div class={styles.tracksInfoCaption}>
           All data is always stored on device
         </div>
       </div>
       <Show when={!isNativeFileSystemSupported}>
-        <div className={styles.tracksWarnLegacyMessage}>
+        <div class={styles.tracksWarnLegacyMessage}>
           <Icon icon='alertCircle' />
           <span>
             Your browser currently does not support&nbsp
@@ -42,16 +42,18 @@ export const TracksPanel: Component = () => {
           </span>
         </div>
       </Show>
-      <div className={styles.trackPanelActions}>
+      <div class={styles.trackPanelActions}>
         <button
-          className={sharedStyles.outlinedButton}
+          class={sharedStyles.outlinedButton}
           onClick={entitiesActions.clearData}
         >
           Clear data
         </button>
         <button
-          className={sharedStyles.tonalButton}
-          onClick={() => { entitiesActions.importTracks() }}
+          class={sharedStyles.tonalButton}
+          onClick={() => {
+            entitiesActions.importTracks()
+          }}
         >
           Import tracks
         </button>

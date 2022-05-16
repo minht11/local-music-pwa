@@ -1,4 +1,4 @@
-import { Component, createContext, useContext } from 'solid-js'
+import { ParentComponent, createContext, useContext } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { nanoid } from 'nanoid'
 import { ToastItem } from './types'
@@ -16,7 +16,7 @@ export interface ToastState {
 const ToastContext = createContext<ToastContextProps>()
 export const useToast = () => useContext(ToastContext) as ToastContextProps
 
-export const ToastProvider: Component = (props) => {
+export const ToastProvider: ParentComponent = (props) => {
   const [state, setState] = createStore<ToastState>({
     toasts: [],
   })

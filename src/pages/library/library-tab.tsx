@@ -1,4 +1,4 @@
-import { Component, createMemo } from 'solid-js'
+import { createMemo, VoidComponent } from 'solid-js'
 import { Dynamic } from 'solid-js/web'
 import { sortByKey } from '../../utils'
 import { useEntitiesStore, useLibraryStore } from '../../stores/stores'
@@ -7,7 +7,7 @@ import { LibraryPageConfig } from './config'
 import { ScrollContainer } from '../../components/scroll-container/scroll-container'
 import * as styles from './library.css'
 
-export const LibraryPage: Component<LibraryPageConfig> = (props) => {
+export const LibraryPage: VoidComponent<LibraryPageConfig> = (props) => {
   const [dataState] = useEntitiesStore()
   const [libraryState] = useLibraryStore()
 
@@ -36,8 +36,8 @@ export const LibraryPage: Component<LibraryPageConfig> = (props) => {
   })
 
   return (
-    <ScrollContainer className={styles.libraryPageContainer} observeScrollState>
-      {props.actions && <div className={styles.actions}>{props.actions}</div>}
+    <ScrollContainer class={styles.libraryPageContainer} observeScrollState>
+      {props.actions && <div class={styles.actions}>{props.actions}</div>}
       <Dynamic component={props.component} items={itemIds()} />
     </ScrollContainer>
   )

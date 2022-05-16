@@ -10,16 +10,11 @@ import { FavoriteButton } from '~/components/shared-player-components/info/favor
 import { Timeline } from '~/components/shared-player-components/timeline/timeline'
 import { clx, useResizeObserver } from '~/utils'
 import { useMenu } from '~/components/menu/menu'
-import {
-  CONTROLS_HEIGHT,
-  PREFERRED_CONTROLS_WIDTH,
-  CONTENT_GAP,
-} from './controls-pane.css'
 import { AppTopBar } from '~/components/app-top-bar/app-top-bar'
 import * as styles from './controls-pane.css'
 
 const VolumeMenuContent = () => (
-  <div className={styles.volumeMenuContent}>
+  <div class={styles.volumeMenuContent}>
     <VolumePanel />
   </div>
 )
@@ -46,7 +41,7 @@ export const ControlsPane = (props: FullPlayerProps): JSXElement => {
     (entry) => {
       const { width, height } = entry.contentRect
 
-      const isHorizontal = (width / height) > 1.1
+      const isHorizontal = width / height > 1.1
 
       setIsHorizontalLayout(isHorizontal)
     },
@@ -54,23 +49,23 @@ export const ControlsPane = (props: FullPlayerProps): JSXElement => {
 
   return (
     <div
-      className={clx(
+      class={clx(
         styles.controlsPane,
         isHorizontalLayout() && styles.horizontalLayout,
         props.pinned && styles.pinned,
       )}
     >
       <AppTopBar title='Now Playing' scrollAware={false} />
-      <div className={styles.content} ref={playerContentEl}>
-        <Artwork className={styles.artwork} />
-        <div className={styles.controls}>
-          <div className={styles.info}>
+      <div class={styles.content} ref={playerContentEl}>
+        <Artwork class={styles.artwork} />
+        <div class={styles.controls}>
+          <div class={styles.info}>
             <Info bigTitle />
             <FavoriteButton />
           </div>
           <Timeline />
           <Controls />
-          <div className={styles.secondaryActions}>
+          <div class={styles.secondaryActions}>
             <VolumeButton title='Volume' onClick={onVolumeMenuClickHandler} />
             {!props.pinned && (
               <IconButton

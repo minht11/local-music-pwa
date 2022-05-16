@@ -1,4 +1,4 @@
-import { Component } from 'solid-js'
+import { VoidComponent } from 'solid-js'
 import { IconButton } from '../../icon-button/icon-button'
 import { animateIcon, clx } from '../../../utils'
 import { PlayNextButton, PlayPreviousButton } from './play-next-prev-buttons'
@@ -13,7 +13,7 @@ const REPEAT_TITLES = {
   [RepeatState.ONCE]: 'Disable repeat',
 } as const
 
-export const Controls: Component = () => {
+export const Controls: VoidComponent = () => {
   const [playerState, playerActions] = usePlayerStore()
 
   const onShuffleClickHandler = (e: MouseEvent) => {
@@ -27,23 +27,20 @@ export const Controls: Component = () => {
   }
 
   return (
-    <div className={styles.controls}>
+    <div class={styles.controls}>
       <IconButton
         title={playerState.shuffle ? 'Disable shuffle' : 'Enable shuffle'}
         onClick={onShuffleClickHandler}
       >
         <div
-          className={clx(
-            styles.shuffleIcon,
-            playerState.shuffle && styles.enabled,
-          )}
+          class={clx(styles.shuffleIcon, playerState.shuffle && styles.enabled)}
         >
-          <div className={styles.shuffleArrow} />
-          <div className={styles.shuffleIntersectionClip}>
-            <div className={styles.shuffleArrowFlipped} />
+          <div class={styles.shuffleArrow} />
+          <div class={styles.shuffleIntersectionClip}>
+            <div class={styles.shuffleArrowFlipped} />
           </div>
         </div>
-        <div className={styles.enabledIndicator} />
+        <div class={styles.enabledIndicator} />
       </IconButton>
       <PlayPreviousButton />
       <PlayPauseButton />
@@ -53,18 +50,18 @@ export const Controls: Component = () => {
         onClick={onRepeatClickHandler}
       >
         <svg
-          className={clx(
+          class={clx(
             styles.repeatIcon,
             playerState.repeat !== RepeatState.OFF && styles.enabled,
           )}
           viewBox='0 0 24 24'
         >
           <path
-            className={styles.repeatPath}
+            class={styles.repeatPath}
             d='M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z'
           />
           <path
-            className={clx(
+            class={clx(
               styles.repeatPathOne,
               playerState.repeat === RepeatState.ONCE &&
                 styles.repeatPathOneVisible,
@@ -72,7 +69,7 @@ export const Controls: Component = () => {
             d='M 13,15 V 9.0000002 H 12 L 10,10 v 1 h 1.5 v 4 z'
           />
         </svg>
-        <div className={styles.enabledIndicator} />
+        <div class={styles.enabledIndicator} />
       </IconButton>
     </div>
   )

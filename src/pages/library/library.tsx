@@ -108,7 +108,7 @@ const TopBar = (props: TopBar) => {
   return (
     <AppTopBar mainButton={false} title='Library' belowContent={props.tabs}>
       <Show when={installEvent()}>
-        <button className={styles.tonalButton} onClick={onInstallClickHandler}>
+        <button class={styles.tonalButton} onClick={onInstallClickHandler}>
           Install
         </button>
       </Show>
@@ -130,7 +130,7 @@ const TopBar = (props: TopBar) => {
 const NavButton = (props: LibraryPageConfig) => (
   <NavLink
     activeClass={styles.navBtnSelected}
-    className={styles.navBtn}
+    class={styles.navBtn}
     href={props.path}
     replace
   >
@@ -142,7 +142,7 @@ interface NavigationButtonsProps {
   type: 'rail' | 'bottom' | 'tabs'
 }
 
-const getNavButtonsClassName = (type: NavigationButtonsProps['type']) => {
+const getNavButtonsclass = (type: NavigationButtonsProps['type']) => {
   switch (type) {
     case 'rail':
       return styles.navRail
@@ -157,8 +157,8 @@ const getNavButtonsClassName = (type: NavigationButtonsProps['type']) => {
 
 const NavigationButtons = (props: NavigationButtonsProps) => (
   <div
-    className={clx(
-      getNavButtonsClassName(props.type),
+    class={clx(
+      getNavButtonsclass(props.type),
       props.type === 'bottom' && styles.elavated,
     )}
   >
@@ -208,7 +208,7 @@ const Library = (): JSXElement => {
           />
         }
       >
-        <div className={styles.content}>
+        <div class={styles.content}>
           <CSSTransition enter={styles.enterPage} exit={styles.exitPage}>
             <Outlet />
           </CSSTransition>

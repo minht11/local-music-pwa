@@ -1,10 +1,10 @@
-import { Component } from 'solid-js'
+import { VoidComponent } from 'solid-js'
 import { VolumeButton } from './volume-button'
 import { Slider } from '../../slider/slider'
 import { usePlayerStore } from '../../../stores/stores'
 import * as styles from './volume.css'
 
-export const VolumePanel: Component = () => {
+export const VolumePanel: VoidComponent = () => {
   const [playerState, playerActions] = usePlayerStore()
 
   const onVolumeToggleClickHandler = () => {
@@ -21,12 +21,12 @@ export const VolumePanel: Component = () => {
   }
 
   return (
-    <div className={styles.volumeControl}>
+    <div class={styles.volumeControl}>
       <Slider
         aria-label='Volume slider'
         value={playerState.volume}
         onInput={onVolumeInputHandler}
-        className={styles.volumeSlider}
+        class={styles.volumeSlider}
       />
       <VolumeButton
         title={playerState.isMuted ? 'Unmute (m)' : 'Mute (m)'}

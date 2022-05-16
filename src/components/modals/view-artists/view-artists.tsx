@@ -31,7 +31,7 @@ const ViewArtistsModal = (props: ViewArtistsModalProps) => {
         <For each={props.artistsIds}>
           {(id) => (
             <div
-              className={sharedStyles.listItem}
+              class={sharedStyles.listItem}
               onClick={[onItemClickHandler, id]}
             >
               {artists[id].name}

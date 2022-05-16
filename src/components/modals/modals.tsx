@@ -1,5 +1,12 @@
 import { nanoid } from 'nanoid'
-import { Component, createContext, For, useContext, JSX, lazy } from 'solid-js'
+import {
+  createContext,
+  For,
+  useContext,
+  JSX,
+  lazy,
+  ParentComponent,
+} from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { Dynamic } from 'solid-js/web'
 import { InternalModalProps } from './types'
@@ -41,7 +48,7 @@ interface ModalsState {
 const ModalContext = createContext<ModalsActions>()
 export const useModals = () => useContext(ModalContext) as ModalsActions
 
-export const ModalsProvider: Component = (props) => {
+export const ModalsProvider: ParentComponent = (props) => {
   const [state, setState] = createStore<ModalsState>({
     modals: [],
   })
@@ -76,14 +83,11 @@ export const ModalsProvider: Component = (props) => {
 
   return (
     <ModalContext.Provider value={actions}>
-      <div className={styles.modalsContainer}>
+      <div class={styles.modalsContainer}>
         <For each={state.modals}>
           {(modalProps) => (
             <>
-              <div
-                className={styles.scrim}
-                onClick={() => modalProps.close()}
-              />
+              <div class={styles.scrim} onClick={() => modalProps.close()} />
               <Dynamic
                 component={
                   MODALS[modalProps.key] as (

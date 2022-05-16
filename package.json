@@ -19,10 +19,10 @@
   },
   "devDependencies": {
     "@types/css-tree": "^1.0.7",
-    "@types/node": "^16.4.4",
-    "@typescript-eslint/eslint-plugin": "^5.20.0",
-    "@typescript-eslint/parser": "^5.20.0",
-    "@vanilla-extract/vite-plugin": "^3.1.4",
+    "@types/node": "^16.11.35",
+    "@typescript-eslint/eslint-plugin": "^5.23.0",
+    "@typescript-eslint/parser": "^5.23.0",
+    "@vanilla-extract/vite-plugin": "^3.1.6",
     "css-class-generator": "^2.0.0",
     "css-tree": "^2.1.0",
     "eslint": "^8.15.0",
@@ -31,7 +31,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "prettier": "^2.6.2",
     "typescript": "^4.6.4",
-    "vite": "^2.9.7",
+    "vite": "^2.9.9",
     "vite-plugin-html": "^3.2.0",
     "vite-plugin-solid": "^2.2.6",
     "vite-plugin-webfont-dl": "^2.0.0"
@@ -49,10 +49,9 @@
     "buffer": "^6.0.3",
     "idb-keyval": "^6.1.0",
     "music-metadata": "^7.12.3",
-    "nanoid": "^3.3.3",
+    "nanoid": "^3.3.4",
     "solid-app-router": "^0.3.2",
-    "solid-js": "^1.3.17",
-    "solid-transition-group": "^0.0.10",
+    "solid-js": "^1.4.1",
     "solid-utils": "^0.8.1"
   }
 }

@@ -32,7 +32,7 @@ export const Slider = (props: SliderProps): JSXElement => {
       {...mergedProps}
       ref={inputEl}
       type='range'
-      className={clx(styles.slider, props.className)}
+      class={clx(styles.slider, props.class)}
     />
   )
 }

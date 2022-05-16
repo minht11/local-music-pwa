@@ -1,11 +1,11 @@
 import { useMatch } from 'solid-app-router'
-import { Component, createMemo, JSXElement, Show } from 'solid-js'
+import { createMemo, JSXElement, ParentComponent, Show } from 'solid-js'
 import { createMediaQuery } from '~/helpers/hooks/create-media-query'
 import { ControlsPane } from './controls-pane/controls-pane'
 import { QueueList } from './queue-list'
 import { Scaffold } from '~/components/scaffold/scaffold'
 
-const NowPlaying: Component = (props) => (
+const NowPlaying: ParentComponent = (props) => (
   <Scaffold title='Now Playing' topBar={false}>
     <ControlsPane pinned={Boolean(props.children)} />
     {props.children}

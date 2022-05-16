@@ -1,11 +1,11 @@
-import { Component, createSignal } from 'solid-js'
+import { VoidComponent, createSignal } from 'solid-js'
 import { usePlayerStore } from '../../../stores/stores'
 import { formatTime } from '../../../utils'
 import { KeyboardCode } from '../../../utils/key-codes'
 import { Slider } from '../../slider/slider'
 import * as styles from './timeline.css'
 
-export const Timeline: Component = () => {
+export const Timeline: VoidComponent = () => {
   const [playerState, playerActions] = usePlayerStore()
 
   const [isSeeking, setIsSeeking] = createSignal(false)
@@ -56,8 +56,8 @@ export const Timeline: Component = () => {
   }
 
   return (
-    <div className={styles.timelineContainer}>
-      <div className={styles.time}>{formatTime(actualCurrentTime())}</div>
+    <div class={styles.timelineContainer}>
+      <div class={styles.time}>{formatTime(actualCurrentTime())}</div>
       <Slider
         disabled={!playerState.activeTrack}
         aria-label='Audio timeline'
@@ -68,7 +68,7 @@ export const Timeline: Component = () => {
         onKeyDown={onKeyDownHandle}
         value={inputValue()}
       />
-      <div className={styles.time}>{formatTime(duration())}</div>
+      <div class={styles.time}>{formatTime(duration())}</div>
     </div>
   )
 }

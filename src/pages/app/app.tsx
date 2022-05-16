@@ -8,7 +8,7 @@ import { useSetupApp } from './use-setup-app'
 import { ROUTES } from './routes'
 import { PageTransition } from '~/components/page-transition/page-transition'
 import { CONFIG as LIBRARY_CONFIG } from '../library/config'
-// import { CSSTransition } from '~/components/css-transition/css-transition'
+import { CSSTransition } from '~/components/css-transition/css-transition'
 import { PlayerOverlayContext } from '~/components/scroll-container/scroll-container'
 import * as styles from './app.css'
 
@@ -45,15 +45,15 @@ export const App = () => {
     isLibraryRoute() && navigator.userAgentData?.mobile && isSmallLayout()
 
   return (
-    <div className={styles.appContainer}>
+    <div class={styles.appContainer}>
       <div
-        className={clx(
+        class={clx(
           styles.loadingIndicator,
           isRouting() && styles.loadingIndicatorEnabled,
         )}
       />
 
-      <div className={styles.pages}>
+      <div class={styles.pages}>
         <PlayerOverlayContext.Provider value={() => !isPlayerRoute()}>
           <PageTransition forwards={wasLibaryPrevRoute()}>
             <Suspense>
@@ -63,23 +63,20 @@ export const App = () => {
         </PlayerOverlayContext.Provider>
       </div>
       <div
-        className={clx(
+        class={clx(
           styles.bottomOverlay,
           isBottomNavBarVisible() && styles.bottomNavBarVisible,
         )}
       >
-        {/* TODO. There is an issue with solid-flip where it sometimes
-            duplicates element during the transition, so disable it for now.
-        */}
-        {/* <CSSTransition
+        <CSSTransition
           enter={styles.itemEnter}
           exit={styles.itemExit}
           move
-          initial={isPageLoaded}
-        > */}
-        <Toasts />
-        {!isPlayerRoute() && <MiniPlayer />}
-        {/* </CSSTransition> */}
+          // initial={isPageLoaded}
+        >
+          <Toasts />
+          {!isPlayerRoute() && <MiniPlayer />}
+        </CSSTransition>
       </div>
     </div>
   )

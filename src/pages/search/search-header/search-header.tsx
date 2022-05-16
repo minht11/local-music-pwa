@@ -45,9 +45,9 @@ export const SearchHeader = (props: SearchHeaderProps): JSXElement => {
 
   return (
     <AppTopBar hideSpacer>
-      <div className={styles.searchBox}>
+      <div class={styles.searchBox}>
         <input
-          className={styles.searchInput}
+          class={styles.searchInput}
           aria-label='Search box'
           placeholder='Search...'
           autocapitalize='none'
@@ -58,7 +58,7 @@ export const SearchHeader = (props: SearchHeaderProps): JSXElement => {
           <IconButton icon='close' onClick={onClearSearchHandle} />
         )}
       </div>
-      <div className={styles.symmetrySpacer}></div>
+      <div class={styles.symmetrySpacer}></div>
     </AppTopBar>
   )
 }

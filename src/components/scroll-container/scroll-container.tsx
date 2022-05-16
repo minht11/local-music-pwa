@@ -1,9 +1,9 @@
 import { ScrollTargetContext } from '@minht11/solid-virtual-container'
 import {
-  Component,
   createContext,
   createEffect,
   onCleanup,
+  ParentComponent,
   useContext,
 } from 'solid-js'
 import { clx } from '../../utils'
@@ -13,11 +13,13 @@ import * as styles from './scroll-container.css'
 export const PlayerOverlayContext = createContext<() => boolean>(() => false)
 
 export interface ScrollContainerProps {
-  className?: string
+  class?: string
   observeScrollState?: boolean
 }
 
-export const ScrollContainer: Component<ScrollContainerProps> = (props) => {
+export const ScrollContainer: ParentComponent<ScrollContainerProps> = (
+  props,
+) => {
   const isPlayerOverlayVisible = useContext(PlayerOverlayContext)
 
   let targetEl!: HTMLDivElement
@@ -52,17 +54,17 @@ export const ScrollContainer: Component<ScrollContainerProps> = (props) => {
 
   return (
     <div
-      className={clx(
+      class={clx(
         styles.scrollContainer,
         isPlayerOverlayVisible() && styles.playerOverlay,
-        props.className,
+        props.class,
       )}
       ref={targetEl}
     >
       <ScrollTargetContext.Provider value={{ scrollTarget: targetEl }}>
-        <div ref={scrollObserverEl} className={styles.scrollObserver} />
+        <div ref={scrollObserverEl} class={styles.scrollObserver} />
 
-        <div className={styles.contentSizer}>{props.children}</div>
+        <div class={styles.contentSizer}>{props.children}</div>
       </ScrollTargetContext.Provider>
     </div>
   )

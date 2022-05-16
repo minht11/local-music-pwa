@@ -7,7 +7,7 @@ import { clx } from '~/utils'
 import * as styles from './music-image.css'
 
 export interface MusicImageProps {
-  className?: string
+  class?: string
   item?: {
     id: string
     type: MusicItemType
@@ -71,9 +71,9 @@ export const MusicImage = (props: MusicImageProps): JSX.Element => {
     // Use svg because it keeps it's aspect ratio.
     <svg
       style={style()}
-      className={clx(
+      class={clx(
         styles.musicImage,
-        props.className,
+        props.class,
         item()?.type === MusicItemType.ARTIST && styles.round,
       )}
       viewBox='-2 -2 28 28'

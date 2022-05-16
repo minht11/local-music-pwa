@@ -1,4 +1,4 @@
-import { Component } from 'solid-js'
+import { VoidComponent } from 'solid-js'
 import { TracksList } from './components/entities-lists/tracks-list/tracks-list'
 import { MusicItemType } from './types/types'
 import { PlaylistList } from './components/entities-lists/playlists-list/playlists-list'
@@ -15,7 +15,7 @@ export interface BaseConfig {
   type: MusicItemType
   title: string
   path: string
-  component: Component<BaseListProps>
+  component: VoidComponent<BaseListProps>
 }
 
 export const BASE_TRACKS_CONFIG = {
