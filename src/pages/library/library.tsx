@@ -12,7 +12,7 @@ import { useMapRouteToValue } from '~/helpers/router-match'
 import { Scaffold } from '~/components/scaffold/scaffold'
 import { AppTopBar } from '~/components/app-top-bar/app-top-bar'
 import { createMediaQuery } from '~/helpers/hooks/create-media-query'
-import { clx } from '~/utils'
+import { clx, IS_DEVICE_A_MOBILE } from '~/utils'
 import * as styles from './library.css'
 
 const [installEvent, setInstallEvent] = createSignal<BeforeInstallPromptEvent>()
@@ -166,9 +166,6 @@ const NavigationButtons = (props: NavigationButtonsProps) => (
   </div>
 )
 
-// Safari doesn't support this, so it will fallback to tabs.
-const isMobile = navigator.userAgentData?.mobile
-
 const Library = (): JSXElement => {
   const [entities] = useEntitiesStore()
 
@@ -190,11 +187,16 @@ const Library = (): JSXElement => {
       title={`Library ${pageConfig()?.title}`}
       topBar={
         <TopBar
-          tabs={isMedium() && !isMobile && <NavigationButtons type='tabs' />}
+          tabs={
+            isMedium() &&
+            !IS_DEVICE_A_MOBILE && <NavigationButtons type='tabs' />
+          }
         />
       }
       navRail={!isMedium() && <NavigationButtons type='rail' />}
-      bottomBar={isMedium() && isMobile && <NavigationButtons type='bottom' />}
+      bottomBar={
+        isMedium() && IS_DEVICE_A_MOBILE && <NavigationButtons type='bottom' />
+      }
     >
       <Show
         when={Object.keys(entities.tracks).length}

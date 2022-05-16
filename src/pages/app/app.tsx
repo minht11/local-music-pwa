@@ -3,7 +3,7 @@ import { createEffect, createMemo, createSignal, Suspense } from 'solid-js'
 import { MiniPlayer } from '~/components/mini-player/mini-player'
 import { createMediaQuery } from '~/helpers/hooks/create-media-query'
 import { Toasts } from '~/components/toasts/toasts'
-import { clx } from '~/utils'
+import { clx, IS_DEVICE_A_MOBILE } from '~/utils'
 import { useSetupApp } from './use-setup-app'
 import { ROUTES } from './routes'
 import { PageTransition } from '~/components/page-transition/page-transition'
@@ -42,7 +42,7 @@ export const App = () => {
 
   const isSmallLayout = createMediaQuery('(max-width: 700px)')
   const isBottomNavBarVisible = () =>
-    isLibraryRoute() && navigator.userAgentData?.mobile && isSmallLayout()
+    isLibraryRoute() && IS_DEVICE_A_MOBILE && isSmallLayout()
 
   return (
     <div class={styles.appContainer}>
