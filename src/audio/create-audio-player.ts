@@ -11,12 +11,18 @@ import { usePlayerStore } from '../stores/stores'
 import { RepeatState } from '../stores/player/create-player-store'
 import { isEventMeantForTextInput } from '../utils'
 import { KeyboardCode } from '../utils/key-codes'
-import { useToast } from '../components/toasts/toasts'
 import { MusicImagesContext } from '../components/music-image/data-context'
+import { toast } from '~/components/toast/toast'
+
+const toastPlayerError = () => {
+  toast({
+    message: "Something went wrong. Player wasn't able to play selected track.",
+    duration: false,
+  })
+}
 
 export const useAudioPlayer = (): void => {
   const audio = new Audio()
-  const toasts = useToast()
 
   const [playerState, playerActions] = usePlayerStore()
 
@@ -94,12 +100,11 @@ export const useAudioPlayer = (): void => {
       mutateTrackAudioFile(undefined)
       playerActions.pause()
 
-      toasts.show({
-        id: 'track-denied',
-        message:
-          'To play selected track please grant requested permission first.',
+      toast({
+        message: 'To play selected track please grant requested permission first.',
         duration: false,
       })
+    
       return
     }
 
@@ -119,11 +124,7 @@ export const useAudioPlayer = (): void => {
       console.error(err)
 
       playerActions.pause()
-      toasts.show({
-        message:
-          "Something went wrong. Player wasn't able to play selected track.",
-        duration: false,
-      })
+      toastPlayerError()
     }
   })
 
@@ -131,11 +132,7 @@ export const useAudioPlayer = (): void => {
     console.error(err)
     batch(() => {
       playerActions.pause()
-      toasts.show({
-        message:
-          "Something went wrong. Player wasn't able to play selected track.",
-        duration: false,
-      })
+      toastPlayerError()
     })
   }
 

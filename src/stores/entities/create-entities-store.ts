@@ -13,8 +13,8 @@ import {
   FileWrapper,
 } from '../../types/types'
 import { UNKNOWN_ITEM_ID } from '../../types/constants'
-import { useToast } from '../../components/toasts/toasts'
 import { createPlaylistsActions } from './create-playlists-actions'
+import { toast } from '~/components/toast/toast'
 
 export interface State {
   tracks: {
@@ -44,9 +44,6 @@ export const createEntitiesStore = () => {
   })
 
   const playlistsActions = createPlaylistsActions(setState)
-
-  const toasts = useToast()
-  const showToast = toasts.show
 
   const removeTracks = (trackIds: readonly string[]) => {
     batch(() => {
@@ -208,21 +205,20 @@ export const createEntitiesStore = () => {
       return
     }
 
-    const toastId = `it-${new Date().getTime()}`
     if (files.length < 1) {
-      showToast({
-        id: toastId,
+      toast({
         message: 'Selected directory does not contain any tracks.',
       })
       return
     }
 
+    const toastID = nanoid()
     const baseToastOptions = {
-      id: toastId,
+      id: toastID,
       duration: false,
     } as const
 
-    showToast({
+    toast({
       ...baseToastOptions,
       message: 'Preparing to import tracks to the library.',
       controls: false,
@@ -232,7 +228,7 @@ export const createEntitiesStore = () => {
       const newTracks = await tracksParser(
         files,
         (successfullyImportedCount) => {
-          showToast({
+          toast({
             ...baseToastOptions,
             message: `Importing tracks to the library. ${successfullyImportedCount} of ${files.length}`,
             controls: 'spinner',
@@ -242,7 +238,7 @@ export const createEntitiesStore = () => {
 
       batch(() => {
         addNewTracks(newTracks)
-        showToast({
+        toast({
           ...baseToastOptions,
           message: `Successfully imported or uptated ${newTracks.length} tracks to the library.`,
           duration: 8000,
@@ -251,7 +247,7 @@ export const createEntitiesStore = () => {
       })
     } catch (err) {
       console.error(err)
-      showToast({
+      toast({
         ...baseToastOptions,
         message:
           'An unknown error has occurred while importing tracks to the library.',
@@ -261,9 +257,8 @@ export const createEntitiesStore = () => {
   }
 
   const clearData = () => {
-    showToast({
+    toast({
       message: 'Library cleared',
-      id: 'removed-all-tracks',
     })
     setState({
       tracks: {},

@@ -1,6 +1,5 @@
 import { Router } from 'solid-app-router'
 import { createApp } from 'solid-utils'
-import { ToastProvider } from './components/toasts/toasts'
 import { MusicImagesProvider } from './components/music-image/data-context'
 import { MenuProvider } from './components/menu/menu'
 import { RootStoresProvider } from './stores/stores'
@@ -17,7 +16,6 @@ if (window.isSupportedBrowser !== false) {
     .use(Router)
     .use(ErrorPage)
     .use(MusicImagesProvider)
-    .use(ToastProvider)
     .use(RootStoresProvider)
     .use(ModalsProvider)
     .use(MenuProvider)

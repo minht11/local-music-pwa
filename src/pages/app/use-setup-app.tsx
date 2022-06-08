@@ -2,12 +2,12 @@ import { createEffect } from 'solid-js'
 import { setElementVars } from '@vanilla-extract/dynamic'
 import { registerServiceWorker } from '../../sw/register-sw'
 import { useAudioPlayer } from '../../audio/create-audio-player'
-import { useToast } from '../../components/toasts/toasts'
 import { usePlayerStore } from '../../stores/stores'
 import { installGlobalRipple } from '../../helpers/ripple/install-global-ripple'
 import { useDarkThemeEnabled } from '../../utils'
 import { colorsTheme } from '~/styles/vars.css'
 import * as styles from './app.css'
+import { toast } from '~/components/toast/toast'
 
 export const useSetupApp = (): void => {
   useAudioPlayer()
@@ -46,11 +46,9 @@ export const useSetupApp = (): void => {
     })
   })
 
-  const toasts = useToast()
-
   registerServiceWorker({
     onNeedRefresh(updateSW) {
-      toasts.show({
+      toast({
         message: 'An app update is available',
         duration: false,
         controls: [

@@ -2,7 +2,7 @@ import { useIsRouting, useMatch, useRoutes } from 'solid-app-router'
 import { createEffect, createMemo, createSignal, Suspense } from 'solid-js'
 import { MiniPlayer } from '~/components/mini-player/mini-player'
 import { createMediaQuery } from '~/helpers/hooks/create-media-query'
-import { Toasts } from '~/components/toasts/toasts'
+import { Toaster } from '~/components/toast/toast'
 import { clx, IS_DEVICE_A_MOBILE } from '~/utils'
 import { useSetupApp } from './use-setup-app'
 import { ROUTES } from './routes'
@@ -74,7 +74,7 @@ export const App = () => {
           move
           // initial={isPageLoaded}
         >
-          <Toasts />
+          <Toaster />
           {!isPlayerRoute() && <MiniPlayer />}
         </CSSTransition>
       </div>
