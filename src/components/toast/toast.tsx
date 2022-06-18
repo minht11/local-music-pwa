@@ -1,7 +1,6 @@
 import {
   createEffect,
   For,
-  JSXElement,
   Match,
   Switch,
   untrack,
@@ -9,26 +8,19 @@ import {
 } from 'solid-js'
 import '@a11y/focus-trap'
 import { Spinner } from '../spinner/spinner'
-import { useToast, ToastProvider } from './toasts-provider'
-import { ToastItem } from './types'
 import * as styles from './toasts.css'
+import { toast, toasts, ToastOptions, ToastButton } from './store'
 
-export { useToast, ToastProvider }
-
-export interface ToastButton {
-  title: string
-  action?: () => void
-}
+export { toast }
+export type { ToastOptions, ToastButton }
 
 const DEFAULT_DURATION = 8000
 const DEFAULT_BUTTON = {
   title: 'Dismiss',
 }
 
-const Toast: VoidComponent<ToastItem> = (props) => {
-  const toasts = useToast()
-
-  const hide = () => toasts?.hide(props.id)
+const ToastItem: VoidComponent<ToastOptions> = (props) => {
+  const dismiss = () => toast.dismiss(props.id as string)
 
   createEffect(() => {
     const dur = props.duration
@@ -37,7 +29,7 @@ const Toast: VoidComponent<ToastItem> = (props) => {
         return
       }
 
-      setTimeout(hide, dur ?? DEFAULT_DURATION)
+      setTimeout(dismiss, dur ?? DEFAULT_DURATION)
     })
   })
 
@@ -56,7 +48,7 @@ const Toast: VoidComponent<ToastItem> = (props) => {
                   class={styles.btn}
                   onClick={() => {
                     btnProps.action?.()
-                    hide()
+                    dismiss()
                   }}
                 >
                   {btnProps.title}
@@ -70,8 +62,8 @@ const Toast: VoidComponent<ToastItem> = (props) => {
   )
 }
 
-export const Toasts = (): JSXElement => {
-  const toasts = useToast()
-
-  return <For each={toasts.toasts}>{(toast) => <Toast {...toast} />}</For>
-}
+export const Toaster: VoidComponent = () => (
+  <For each={toasts as ToastOptions[]}>
+    {(t: ToastOptions) => <ToastItem {...t} />}
+  </For>
+)

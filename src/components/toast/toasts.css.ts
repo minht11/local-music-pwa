@@ -34,8 +34,9 @@ export const message = style([
 ])
 
 export const spinner = style({
-  height: '36px',
-  width: '36px',
+  height: '28px',
+  width: '28px',
+  marginRight: '4px',
 })
 
 export const buttons = style([

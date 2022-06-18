@@ -2,8 +2,8 @@ import { batch, createEffect, createMemo, untrack } from 'solid-js'
 import { produce, createStore } from 'solid-js/store'
 import { shuffleArray } from '../../utils/utils'
 import { Track } from '../../types/types'
-import { useToast } from '../../components/toasts/toasts'
 import { useEntitiesStore } from '../stores'
+import { toast } from '~/components/toast/toast'
 
 export const RepeatState = {
   OFF: 0,
@@ -305,12 +305,9 @@ export const createPlayerStore = () => {
     setState({ volume, isMuted })
   }
 
-  const toasts = useToast()
-
   const addToQueue = (trackIds: TrackIds) => {
     addTracksToQueue(trackIds)
-    toasts.show({
-      id: 'player-added-tracks-to-queue',
+    toast({
       message: 'Selected tracks added to the queue',
       duration: 4000,
     })
