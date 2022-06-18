@@ -14,10 +14,10 @@ export type RepeatState = typeof RepeatState[keyof typeof RepeatState]
 
 interface State {
   isPlaying: boolean
-  trackIds: string[]
+  trackIds: readonly string[]
   // Used to store tracks in original order
   // when shuffle is on.
-  originalTrackIds: string[]
+  originalTrackIds: readonly string[]
   // Currently playing audio track.
   activeTrackIndex: number
   repeat: RepeatState
