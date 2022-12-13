@@ -1,57 +1,31 @@
 {
-  "name": "snae_music_player",
-  "version": "1.0.4",
-  "description": "Lightweight on device music player right in your browser.",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview",
-    "lint": "npx eslint src",
-    "lint:fix": "npm run lint -- --fix",
-    "prettier": "npx prettier src --check",
-    "prettier:fix": "npm run prettier -- --write",
-    "format": "npm run prettier:fix && npm run lint:fix",
-    "typecheck": "npx tsc --noEmit"
-  },
-  "license": "MIT",
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "devDependencies": {
-    "@types/css-tree": "^1.0.7",
-    "@types/node": "^16.11.35",
-    "@typescript-eslint/eslint-plugin": "^5.28.0",
-    "@typescript-eslint/parser": "^5.28.0",
-    "@vanilla-extract/vite-plugin": "^3.2.1",
-    "css-class-generator": "^2.0.0",
-    "css-tree": "^2.1.0",
-    "eslint": "^8.18.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "prettier": "^2.7.1",
-    "typescript": "^4.7.4",
-    "vite": "^2.9.12",
-    "vite-plugin-html": "^3.2.0",
-    "vite-plugin-solid": "^2.2.6",
-    "vite-plugin-webfont-dl": "^2.1.0"
-  },
-  "dependencies": {
-    "@a11y/focus-trap": "^1.0.5",
-    "@material/material-color-utilities": "^0.1.2",
-    "@minht11/solid-virtual-container": "^0.2.1",
-    "@otonashixav/solid-flip": "0.10.5",
-    "@types/offscreencanvas": "^2019.6.4",
-    "@types/wicg-file-system-access": "^2020.9.5",
-    "@vanilla-extract/css": "^1.7.2",
-    "@vanilla-extract/dynamic": "^2.0.2",
-    "@vanilla-extract/sprinkles": "^1.4.0",
-    "buffer": "^6.0.3",
-    "idb-keyval": "^6.1.0",
-    "music-metadata": "^7.12.3",
-    "nanoid": "^4.0.0",
-    "solid-app-router": "^0.4.1",
-    "solid-js": "^1.4.4",
-    "solid-utils": "^0.8.1"
-  }
+	"name": "local-music-pwa-next",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"lint": "prettier --plugin-search-dir . --check . && eslint .",
+		"format": "prettier --plugin-search-dir . --write ."
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-static": "next",
+		"@sveltejs/kit": "next",
+		"@typescript-eslint/eslint-plugin": "^5.46.1",
+		"@typescript-eslint/parser": "^5.46.1",
+		"eslint": "^8.29.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-svelte3": "^4.0.0",
+		"prettier": "^2.8.1",
+		"prettier-plugin-svelte": "^2.9.0",
+		"svelte": "^3.54.0",
+		"svelte-check": "^2.10.2",
+		"tslib": "^2.4.1",
+		"typescript": "^4.9.4",
+		"vite": "^4.0.0"
+	},
+	"type": "module"
 }
