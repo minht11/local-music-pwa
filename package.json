@@ -2,6 +2,7 @@
 	"name": "local-music-pwa-next",
 	"version": "0.0.1",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -9,23 +10,31 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
-		"format": "prettier --plugin-search-dir . --write ."
+		"format": "prettier --plugin-search-dir . --write .",
+		"generate-tw-colors": "node scripts/generate-tw-colors.js"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-static": "next",
-		"@sveltejs/kit": "next",
+		"@sveltejs/adapter-static": "^1.0.0",
+		"@sveltejs/kit": "^1.0.0",
 		"@typescript-eslint/eslint-plugin": "^5.46.1",
 		"@typescript-eslint/parser": "^5.46.1",
+		"autoprefixer": "^10.4.13",
 		"eslint": "^8.29.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-svelte3": "^4.0.0",
+		"module-from-string": "^3.3.0",
+		"postcss": "^8.4.20",
 		"prettier": "^2.8.1",
 		"prettier-plugin-svelte": "^2.9.0",
 		"svelte": "^3.54.0",
 		"svelte-check": "^2.10.2",
+		"tailwindcss": "^3.2.4",
 		"tslib": "^2.4.1",
 		"typescript": "^4.9.4",
 		"vite": "^4.0.0"
 	},
-	"type": "module"
+	"dependencies": {
+		"@material/material-color-utilities": "^0.2.0",
+		"idb": "^7.1.1"
+	}
 }
