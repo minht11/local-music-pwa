@@ -35,6 +35,7 @@
 	},
 	"dependencies": {
 		"@material/material-color-utilities": "^0.2.0",
-		"idb": "^7.1.1"
+		"idb": "^7.1.1",
+		"svelte-portal": "^2.2.0"
 	}
 }
