@@ -49,23 +49,22 @@ const COLOR_TOKENS_GENERATION_MAP = {
 export const DEFAULT_THEME_ARGB = /*#__PURE__*/ argbFromHex('#ffdcc4')
 
 type Rgb = [r: number, g: number, b: number]
+export type ThemePaletteRgb = Record<keyof typeof COLOR_TOKENS_GENERATION_MAP, Rgb>
 
-export type ThemeRgbPalette = Record<keyof typeof COLOR_TOKENS_GENERATION_MAP, Rgb>
-
-export const getThemeRgbPalette = (argb: number, isDark: boolean) => {
+export const getThemePaletteRgb = (argb: number, isDark: boolean) => {
 	const palette = CorePalette.of(argb)
 
 	const entries = Object.entries(COLOR_TOKENS_GENERATION_MAP)
-	const rgbEntries = entries.map(([key, value]) => {
+	const transformedEntries = entries.map(([key, value]) => {
 		const [toneName, light, dark] = value
 
 		const tone = isDark ? dark : light
 		const argbValue = palette[toneName].tone(tone)
 
-		const rgb = [redFromArgb(argbValue), greenFromArgb(argbValue), blueFromArgb(argbValue)]
+		const rgb: Rgb = [redFromArgb(argbValue), greenFromArgb(argbValue), blueFromArgb(argbValue)]
 
 		return [key, rgb] as [string, Rgb]
 	})
 
-	return Object.fromEntries(rgbEntries) as ThemeRgbPalette
+	return Object.fromEntries(transformedEntries) as ThemePaletteRgb
 }

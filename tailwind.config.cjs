@@ -1,4 +1,13 @@
-const colors = require('./generated-tw-colors.cjs')
+const palette = require('./generated-tw-colors.cjs')
+
+const getColorVariables = (dark = false) => {
+	const entries = Object.entries(palette).map(([name, value]) => [
+		name,
+		dark ? value.dark : value.light,
+	])
+
+	return Object.fromEntries(entries)
+}
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -7,7 +16,23 @@ module.exports = {
 		colors: {
 			transparent: 'transparent',
 			current: 'currentColor',
-			...colors,
+			...Object.fromEntries(
+				Object.keys(palette).map((name) => [name, `rgba(var(--colors-${name}), <alpha-value>)`]),
+			),
+		},
+		variables: {
+			DEFAULT: {
+				colors: {
+					...getColorVariables(),
+				},
+			},
+		},
+		darkVariables: {
+			DEFAULT: {
+				colors: {
+					...getColorVariables(true),
+				},
+			},
 		},
 		spacing: {
 			0: '0',
@@ -42,4 +67,10 @@ module.exports = {
 			32: '32px',
 		},
 	},
+	plugins: [
+		require('@mertasan/tailwindcss-variables')({
+			colorVariables: true,
+			forceRGB: true,
+		}),
+	],
 }

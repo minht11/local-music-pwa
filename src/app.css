@@ -4,7 +4,7 @@
 
 body {
 	font-family: 'Fira Sans', system-ui, sans-serif;
-	@apply text-body-md;
+	@apply text-body-md bg-background text-onBackground;
 }
 
 @layer components {
