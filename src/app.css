@@ -1,3 +1,127 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+	font-family: 'Fira Sans', system-ui, sans-serif;
+	@apply text-body-md;
+}
+
+@layer components {
+	.filled-button {
+	}
+
+	.outlined-button {
+	}
+}
+
+@layer utilities {
+	.text-headline-md {
+		font-size: 28px;
+		line-height: 36px;
+		letter-spacing: 0;
+		font-weight: 400;
+	}
+
+	.text-headline-sm {
+		font-size: 24px;
+		line-height: 32px;
+		letter-spacing: 0;
+		font-weight: 400;
+	}
+
+	.text-title-lg {
+		font-size: 22px;
+		line-height: 28px;
+		letter-spacing: 0;
+		font-weight: 500;
+	}
+
+	.text-title-md {
+		font-size: 16px;
+		line-height: 124px;
+		letter-spacing: 0.15px;
+		font-weight: 500;
+	}
+
+	.text-title-sm {
+		font-size: 14px;
+		line-height: 20px;
+		letter-spacing: 0.1px;
+		font-weight: 500;
+	}
+
+	.text-label-lg {
+		font-size: 14px;
+		line-height: 20px;
+		letter-spacing: 0.1px;
+		font-weight: 500;
+	}
+
+	.text-label-md {
+		font-size: 12px;
+		line-height: 16px;
+		letter-spacing: 0.5px;
+		font-weight: 500;
+	}
+
+	.text-label-sm {
+		font-size: 11px;
+		line-height: 16px;
+		letter-spacing: 0.5px;
+		font-weight: 500;
+	}
+
+	.text-body-lg {
+		font-size: 16px;
+		line-height: 24px;
+		letter-spacing: 0.15px;
+		font-weight: 400;
+	}
+
+	.text-body-md {
+		font-size: 14px;
+		line-height: 20px;
+		letter-spacing: 0.25px;
+		font-weight: 400;
+	}
+
+	.text-body-sm {
+		font-size: 12px;
+		line-height: 16px;
+		letter-spacing: 0.4px;
+		font-weight: 400;
+	}
+
+	.tonal-elevation-1 {
+		background-image: linear-gradient(
+			0deg,
+			theme(colors.primary/5%) 0%,
+			theme(colors.primary/5%) 0%
+		);
+	}
+
+	.tonal-elevation-2 {
+		background-image: linear-gradient(
+			0deg,
+			theme(colors.primary/8%) 0%,
+			theme(colors.primary/8%) 0%
+		);
+	}
+
+	.tonal-elevation-3 {
+		background-image: linear-gradient(
+			0deg,
+			theme(colors.primary/11%) 0%,
+			theme(colors.primary/11%) 0%
+		);
+	}
+
+	.tonal-elevation-4 {
+		background-image: linear-gradient(
+			0deg,
+			theme(colors.primary/12%) 0%,
+			theme(colors.primary/12%) 0%
+		);
+	}
+}
