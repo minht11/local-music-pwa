@@ -18,6 +18,7 @@
 		"exactOptionalPropertyTypes": true,
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
-		"importsNotUsedAsValues": "error"
+		"importsNotUsedAsValues": "error",
+		"types": ["./node_modules/navigation-api-types"]
 	}
 }

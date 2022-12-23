@@ -1,0 +1,65 @@
+<script context="module" lang="ts">
+	export type As = 'button' | 'a'
+	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank'
+</script>
+
+<script lang="ts">
+	import { clx } from '$lib/helpers/clx'
+	import { ripple } from '../actions/ripple'
+
+	export let as: As = 'button'
+	export let kind: ButtonKind = 'filled'
+	export let disabled = false
+
+	const KIND_CLASS_MAP = {
+		filled: 'filled-button',
+		toned: 'tonal-button',
+		outlined: 'outlined-button',
+		flat: 'flat-button',
+	}
+</script>
+
+<svelte:element
+	this={!disabled ? as : 'button'}
+	{...$$restProps}
+	{disabled}
+	use:ripple
+	class={clx(kind !== 'blank' && clx('base-button px-24', KIND_CLASS_MAP[kind]), $$props.class)}
+	on:click
+	on:keydown
+>
+	<slot />
+</svelte:element>
+
+<style lang="postcss">
+	.filled-button {
+		background: theme(colors.primary);
+		color: theme(colors.onPrimary);
+	}
+
+	.tonal-button {
+		background: theme(colors.secondaryContainer);
+		color: theme(colors.onSecondaryContainer);
+	}
+
+	:is(.tonal-button, .filled-button)[disabled] {
+		background-color: theme(colors.onSurface/12%);
+	}
+
+	.outlined-button {
+		color: theme(colors.primary);
+		border: 1px solid theme(colors.outline);
+	}
+
+	.flat-button {
+		color: theme(colors.primary);
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.base-button[disabled] {
+		color: theme(colors.onSurface/38%);
+		border-color: theme(colors.onSurface/12%);
+		cursor: default;
+	}
+</style>

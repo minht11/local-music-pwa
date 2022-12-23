@@ -12,6 +12,11 @@ const getColorVariables = (dark = false) => {
 /** @type {import('tailwindcss').Config} */
 module.exports = {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
+	extend: {
+		willChange: {
+			bg: 'background',
+		},
+	},
 	theme: {
 		colors: {
 			transparent: 'transparent',
@@ -63,8 +68,10 @@ module.exports = {
 			8: '8px',
 			12: '12px',
 			16: '16px',
+			20: '20px',
 			24: '24px',
 			32: '32px',
+			full: '9999px',
 		},
 	},
 	plugins: [

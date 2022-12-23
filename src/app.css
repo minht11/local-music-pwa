@@ -2,20 +2,97 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+	@apply h-full w-full;
+}
+
 body {
 	font-family: 'Fira Sans', system-ui, sans-serif;
-	@apply text-body-md bg-background text-onBackground;
+	@apply text-body-md h-full w-full select-none bg-background text-onBackground;
+}
+
+.ripple {
+	width: 4px;
+	height: 4px;
+	position: absolute;
+	border-radius: 50%;
+	opacity: 0.2;
+	background-color: currentColor;
+	animation-fill-mode: both;
+	contain: strict;
+	will-change: transform, opacity;
+	pointer-events: none;
 }
 
 @layer components {
-	.filled-button {
+	.interactable {
+		position: relative;
+		overflow: hidden;
+		-moz-appearance: none;
+		-webkit-appearance: none;
+		appearance: none;
+		border: none;
+		outline: none;
+		text-decoration: none;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		z-index: 0;
 	}
 
-	.outlined-button {
+	.interactable::after {
+		display: none;
+		content: '';
+		position: absolute;
+		height: 100%;
+		width: 100%;
+		left: 0;
+		top: 0;
+		background: currentColor;
+		z-index: -1;
+		pointer-events: none;
+	}
+
+	@media (any-hover: hover) {
+		.interactable:hover::after {
+			display: block;
+			opacity: 0.08;
+		}
+
+		.interactable[disabled]::after {
+			display: none;
+		}
+	}
+
+	.interactable:is(:focus-visible),
+	.interactable:hover:focus-visible {
+		outline: 2px solid [vars.colors.onSurface];
+		outline-offset: -2px;
+	}
+
+	.interactable:focus-visible::after {
+		display: block;
+		opacity: 0.12;
+	}
+
+	.base-button {
+		@apply interactable text-label-lg h-40 justify-center gap-8 rounded-20;
+	}
+
+	.card {
+		@apply tonal-elevation-1 flex flex-col rounded-8 bg-surface text-onSurface;
 	}
 }
 
 @layer utilities {
+	.contain-strict {
+		contain: strict;
+	}
+
+	.contain-content {
+		contain: content;
+	}
+
 	.text-headline-md {
 		font-size: 28px;
 		line-height: 36px;
