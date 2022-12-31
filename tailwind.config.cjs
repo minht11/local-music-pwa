@@ -18,6 +18,12 @@ module.exports = {
 		},
 	},
 	theme: {
+		extend: {
+			screens: {
+				xss: '320px',
+				xs: '420px',
+			},
+		},
 		colors: {
 			transparent: 'transparent',
 			current: 'currentColor',

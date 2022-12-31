@@ -41,8 +41,11 @@ const COLOR_TOKENS_GENERATION_MAP = {
 	surfaceVariant: ['n2', 90, 30],
 	onSurfaceVariant: ['n2', 30, 80],
 	outline: ['n2', 50, 60],
-	inverseOnSurface: ['n1', 95, 10],
+	outlineVariant: ['n2', 80, 30],
+	shadow: ['n1', 0, 0],
+	scrim: ['n1', 0, 0],
 	inverseSurface: ['n1', 20, 90],
+	inverseOnSurface: ['n1', 95, 10],
 	inversePrimary: ['a1', 80, 40],
 } as const satisfies ColorTokensInput
 

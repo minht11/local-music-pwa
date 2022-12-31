@@ -8,6 +8,7 @@ html {
 
 body {
 	font-family: 'Fira Sans', system-ui, sans-serif;
+	-webkit-tap-highlight-color: transparent;
 	@apply text-body-md h-full w-full select-none bg-background text-onBackground;
 }
 
@@ -81,6 +82,10 @@ body {
 
 	.card {
 		@apply tonal-elevation-1 flex flex-col rounded-8 bg-surface text-onSurface;
+	}
+
+	.link {
+		@apply text-primary underline;
 	}
 }
 
