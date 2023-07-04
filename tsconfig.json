@@ -19,6 +19,10 @@
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"importsNotUsedAsValues": "error",
-		"types": ["./node_modules/navigation-api-types"]
+		"types": [
+			"./node_modules/navigation-api-types",
+			"@types/offscreencanvas",
+			"@types/wicg-file-system-access"
+		]
 	}
 }
