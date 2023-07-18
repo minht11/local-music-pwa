@@ -1,4 +1,8 @@
-// Icons taken from https://materialdesignicons.com/
+<svg>
+
+</svg>
+
+<!-- // Icons taken from https://materialdesignicons.com/
 // and then minified using https://jakearchibald.github.io/svgomg/
 export const ICON_PATHS = {
 	backArrow: 'M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z',
@@ -42,4 +46,4 @@ export const ICON_PATHS = {
 		'M19,8L15,12H18A6,6 0 0,1 12,18C11,18 10.03,17.75 9.2,17.3L7.74,18.76C8.97,19.54 10.43,20 12,20A8,8 0 0,0 20,12H23M6,12A6,6 0 0,1 12,6C13,6 13.97,6.25 14.8,6.7L16.26,5.24C15.03,4.46 13.57,4 12,4A8,8 0 0,0 4,12H1L5,16L9,12',
 	folderHidden:
 		'M9 4v4H6V4h3M4 16v-3H2v3h2m-2-4h2V9H2v3m16-4h4c0-1.11-.9-2-2-2h-2v2m4 5h-2v3h2v-3m-2-4v3h2V9h-2M9 20v-2H6v2h3m-4-2H4v-1H2v1c0 1.11.9 2 2 2h1v-2m15-1v1h-2v2h2c1.11 0 2-.89 2-2v-1h-2M4 8h1V4H4c-1.11 0-2 .89-2 2v2h2m13 10h-3v2h3v-2m-4 0h-3v2h3v-2m4-12h-3v2h3V6m-7 2h3V6h-1l-2-2v4Z',
-} as const
+} as const -->

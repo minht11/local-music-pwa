@@ -7,9 +7,13 @@
 	import { clx } from '$lib/helpers/clx'
 	import { ripple } from '../actions/ripple'
 
+	type T = $$Generic<boolean>
+
 	export let as: As = 'button'
 	export let kind: ButtonKind = 'filled'
 	export let disabled = false
+
+	export let href: As extends 'a' ? string : undefined = undefined
 
 	const KIND_CLASS_MAP = {
 		filled: 'filled-button',
@@ -19,10 +23,12 @@
 	}
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <svelte:element
 	this={!disabled ? as : 'button'}
 	{...$$restProps}
-	{disabled}
+	href={href}
+	disabled={disabled === true ? true : undefined}
 	use:ripple
 	class={clx(kind !== 'blank' && clx('base-button px-24', KIND_CLASS_MAP[kind]), $$props.class)}
 	on:click
