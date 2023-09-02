@@ -3,6 +3,9 @@
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": true,
+		"moduleDetection": "force",
+		"allowImportingTsExtensions": true,
+		"noEmit": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
@@ -15,7 +18,6 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noUncheckedIndexedAccess": true,
-		"exactOptionalPropertyTypes": true,
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"importsNotUsedAsValues": "error",
