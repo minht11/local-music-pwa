@@ -62,7 +62,7 @@
 			</div>
 			<div>All data is stored on your device</div>
 		</div>
-		<div class="flex flex-col gap-8 xs:flex-row">
+		<div class="flex flex-col-reverse gap-8 xs:flex-row">
 			<Button kind="outlined" class="xs:mr-auto">Clear data</Button>
 			<Button kind="toned" on:click={onImportTracksHandler}>
 				{#if isFileSystemAccessSupported}
@@ -106,9 +106,9 @@
 				</div>
 
 				<InfoBanner class="my-8">
-					Every time you open or reload the app, you will be asked by the browser to allow access to
-					your selected directories.
-					<strong>To reduce number of popups please keep directory count to the minimum </strong>
+					Every time you open or reload the app, browser might ask you to allow access to your
+					selected directories.
+					<strong> To reduce number of popups please keep directory count to the minimum </strong>
 				</InfoBanner>
 
 				<ul>
