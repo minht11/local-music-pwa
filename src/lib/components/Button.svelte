@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
 	export type AllowedButtonElements = 'button' | 'a'
-	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank';
+	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank'
 
 	// prettier-ignore
 	export type ButtonHref<As extends AllowedButtonElements> = As extends 'a' ? string : never;
@@ -29,7 +29,7 @@
 <svelte:element
 	this={!disabled ? as : 'button'}
 	{...$$restProps}
-	href={href}
+	{href}
 	disabled={disabled === true ? true : undefined}
 	use:ripple
 	class={clx(kind !== 'blank' && clx('base-button px-24', KIND_CLASS_MAP[kind]), $$props.class)}

@@ -1,20 +1,21 @@
 <script lang="ts" generics="As extends AllowedButtonElements = 'button'">
-  import type { ComponentProps } from 'svelte';
+	import type { ComponentProps } from 'svelte'
 	import { clx } from '$lib/helpers/clx'
 	import Icon, { type IconType } from './icon/Icon.svelte'
 	import Button, { type AllowedButtonElements } from './Button.svelte'
 
 	type ButtonProps = ComponentProps<Button<As>>
+	type Href = ButtonProps['href']
 
 	export let icon: IconType
-	export let as: ButtonProps['as']
-	export let href: ButtonProps['href']
+	export let as: As = 'button' as As
+	export let href: Href = (as === 'a' ? '' : undefined) as Href
 </script>
 
 <Button
 	{...$$restProps}
-	as={as}
-	href={href}
+	{as}
+	{href}
 	kind="blank"
 	class={clx('interactable flex h-44 w-44 items-center rounded-full', $$props.class)}
 	on:click
