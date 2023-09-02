@@ -78,18 +78,20 @@
 	<SlotProvider>
 		<div class="contain-strict flex h-full flex-col">
 			<header
-				class="will-change-bg relative flex h-48 flex-shrink-0 items-center px-16 xs:h-56 sm:h-64 {isScrolled
+				class="will-change-bg relative flex h-56 flex-shrink-0 xs:h-56 sm:h-64 {isScrolled
 					? 'tonal-elevation-4 bg-surface'
 					: ''}"
 			>
-				{#if !$page.data.hideBackButton}
-					<IconButton icon="backArrow" class="mr-8" on:click={handleBackClick} />
-				{/if}
+				<div class="max-w-[1280px] mx-auto w-full items-center px-16 flex">
+					{#if !$page.data.hideBackButton}
+						<IconButton icon="backArrow" class="mr-8" on:click={handleBackClick} />
+					{/if}
 
-				<h1 class="text-title-lg mr-auto">{pageData.title}</h1>
+					<h1 class="text-title-lg mr-auto">{pageData.title}</h1>
 
-				<div class="flex items-center gap-4">
-					<Slot name="actions" />
+					<div class="flex items-center gap-4">
+						<Slot name="actions" />
+					</div>
 				</div>
 			</header>
 			<div class="flex flex-grow flex-col overflow-auto">
@@ -107,8 +109,46 @@
 {/if}
 
 <style>
+	/* @keyframes page-enter-scale {
+		from {
+			transform: scale(0.8, 0.8);
+		}
+	}
+
+	@keyframes page-exit-scale {
+		to {
+			transform: scale(0.8, 0.8);
+		}
+	}
+
+	@keyframes fade-out {
+		to {
+			opacity: 0;
+		}
+	}
+
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+	}
+
+	:root::view-transition-image-pair(root) {
+		isolation: auto;
+	}
+
 	:root::view-transition-old(root),
 	:root::view-transition-new(root) {
-		animation-duration: 200ms;
+		mix-blend-mode: normal;
 	}
+
+	:root::view-transition-old(root) {
+		animation: fade-out 90ms cubic-bezier(0.4, 0, 1, 1) forwards;
+	}
+
+	:root::view-transition-new(root) {
+		animation:
+			fade-in 210ms 90ms cubic-bezier(0, 0, 0.2, 1) backwards,
+			page-enter-scale 300ms cubic-bezier(0.4, 0, 0.2, 1);
+	} */
 </style>
