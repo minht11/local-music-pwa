@@ -2,11 +2,8 @@
 	import { page } from '$app/stores'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
-	import type { PageData } from './$types'
 	import SlotContent from '$lib/components/slot/SlotContent.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
-
-	export let data: PageData
 
 	type LibrarySlug = 'tracks' | 'albums' | 'artists' | 'playlists'
 
