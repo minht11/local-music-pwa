@@ -22,9 +22,10 @@
 		"allowUnusedLabels": false,
 		"importsNotUsedAsValues": "error",
 		"types": [
-			"./node_modules/navigation-api-types",
+			"@types/dom-navigation",
 			"@types/offscreencanvas",
-			"@types/wicg-file-system-access"
+			"@types/wicg-file-system-access",
+			"@types/dom-view-transitions"
 		]
 	}
 }

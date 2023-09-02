@@ -38,12 +38,13 @@
 	"dependencies": {
 		"@material/material-color-utilities": "^0.2.7",
 		"@motionone/svelte": "^10.16.2",
+		"@types/dom-navigation": "^1.0.0",
+		"@types/dom-view-transitions": "^1.0.1",
 		"@types/offscreencanvas": "^2019.7.0",
 		"@types/wicg-file-system-access": "^2020.9.6",
 		"idb": "^7.1.1",
 		"motion": "^10.16.2",
 		"music-metadata": "^8.1.4",
-		"navigation-api-types": "^0.3.1",
 		"svelte-portal": "^2.2.0"
 	}
 }

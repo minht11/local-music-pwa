@@ -9,9 +9,9 @@
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 
 	const handleBackClick = () => {
-		if (navigation !== undefined) {
-			if (navigation.canGoBack) {
-				navigation.back()
+		if (window.navigation !== undefined) {
+			if (window.navigation.canGoBack) {
+				window.navigation.back()
 			} else {
 				goto('/')
 			}
@@ -107,8 +107,8 @@
 {/if}
 
 <style>
-	:global(::view-transition-old(root)),
-	:global(::view-transition-new(root)) {
+	:root::view-transition-old(root),
+	:root::view-transition-new(root) {
 		animation-duration: 200ms;
 	}
 </style>
