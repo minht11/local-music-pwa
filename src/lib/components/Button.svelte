@@ -1,19 +1,21 @@
 <script context="module" lang="ts">
-	export type As = 'button' | 'a'
-	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank'
+	export type AllowedButtonElements = 'button' | 'a'
+	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank';
+
+	// prettier-ignore
+	export type ButtonHref<As extends AllowedButtonElements> = As extends 'a' ? string : never;
 </script>
 
-<script lang="ts">
+<script lang="ts" generics="As extends AllowedButtonElements = 'button'">
 	import { clx } from '$lib/helpers/clx'
 	import { ripple } from '../actions/ripple'
 
-	type T = $$Generic<boolean>
-
-	export let as: As = 'button'
+	export let as: As = 'button' as As
 	export let kind: ButtonKind = 'filled'
 	export let disabled = false
 
-	export let href: As extends 'a' ? string : undefined = undefined
+	type Href = ButtonHref<As>
+	export let href: Href = (as === 'a' ? '' : undefined) as Href
 
 	const KIND_CLASS_MAP = {
 		filled: 'filled-button',
