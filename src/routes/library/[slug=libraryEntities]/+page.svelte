@@ -1,7 +1,5 @@
 <script lang="ts">
-	import type { PageData } from './$types'
-	// import SlotContent from '$lib/components/slot/SlotContent.svelte'
-	export let data: PageData
+	export let data
 
 	const { time } = data
 </script>
