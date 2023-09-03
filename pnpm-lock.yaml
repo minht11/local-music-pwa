@@ -12,6 +12,7 @@ specifiers:
   '@typescript-eslint/eslint-plugin': ^6.5.0
   '@typescript-eslint/parser': ^6.5.0
   '@unocss/eslint-config': ^0.55.6
+  '@unocss/postcss': ^0.55.6
   '@unocss/svelte-scoped': ^0.55.6
   autoprefixer: ^10.4.15
   eslint: ^8.48.0
@@ -51,6 +52,7 @@ devDependencies:
   '@typescript-eslint/eslint-plugin': 6.5.0_nvwva6txm3qs6xnog6dqanz5uy
   '@typescript-eslint/parser': 6.5.0_w2g2uv42be7wag4oipwkfv43p4
   '@unocss/eslint-config': 0.55.6_w2g2uv42be7wag4oipwkfv43p4
+  '@unocss/postcss': 0.55.6_postcss@8.4.29
   '@unocss/svelte-scoped': 0.55.6
   autoprefixer: 10.4.15_postcss@8.4.29
   eslint: 8.48.0
