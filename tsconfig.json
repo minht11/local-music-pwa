@@ -6,7 +6,6 @@
 		"moduleDetection": "force",
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
-		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,

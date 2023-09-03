@@ -41,33 +41,32 @@
 
 <style lang="postcss">
 	.filled-button {
-		background: theme(colors.primary);
-		color: theme(colors.onPrimary);
+		background: theme('colors.primary');
+		color: theme('colors.onPrimary');
 	}
 
 	.tonal-button {
-		background: theme(colors.secondaryContainer);
-		color: theme(colors.onSecondaryContainer);
+		background: theme('colors.secondaryContainer');
+		color: theme('colors.onSecondaryContainer');
 	}
 
 	:is(.tonal-button, .filled-button)[disabled] {
-		background-color: theme(colors.onSurface/12%);
+		@apply bg-onSurface/12%;
 	}
 
 	.outlined-button {
-		color: theme(colors.primary);
-		border: 1px solid theme(colors.outline);
+		color: theme('colors.primary');
+		border: 1px solid theme('colors.outline');
 	}
 
 	.flat-button {
-		color: theme(colors.primary);
+		color: theme('colors.primary');
 		padding-left: 12px;
 		padding-right: 12px;
 	}
 
 	.base-button[disabled] {
-		color: theme(colors.onSurface/38%);
-		border-color: theme(colors.onSurface/12%);
 		cursor: default;
+		@apply bg-onSurface/38% border-onSurface/12%;
 	}
 </style>

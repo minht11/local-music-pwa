@@ -106,7 +106,7 @@
 		<div
 			data-dialog-part="content"
 			bind:this={dialogBody}
-			class="mt-16 flex-grow text-onSurfaceVariant"
+			class="mt-16px flex-grow text-onSurfaceVariant"
 		>
 			<slot />
 		</div>
@@ -116,7 +116,7 @@
 				{#each buttons as button}
 					<Button
 						kind="flat"
-						class="min-w-[60px]"
+						class="min-w-60px"
 						on:click={() => {
 							button.onClick?.()
 							close()

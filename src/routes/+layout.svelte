@@ -76,7 +76,7 @@
 
 {#key data.pathname}
 	<SlotProvider>
-		<div class="contain-strict flex h-full flex-col">
+		<div class="flex h-full w-full flex-col">
 			<header
 				class="will-change-bg relative flex h-56px flex-shrink-0 xs:h-56px sm:h-64px {isScrolled
 					? 'tonal-elevation-4 bg-surface'
@@ -94,7 +94,7 @@
 					</div>
 				</div>
 			</header>
-			<div class="flex flex-grow flex-col overflow-auto">
+			<div class="flex flex-grow flex-col overflow-auto bg-background">
 				<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
 				<div class="mx-auto w-full max-w-[1280px] flex-grow px-8px py-16px">
 					<slot />
@@ -109,6 +109,56 @@
 {/if}
 
 <style>
+	/* :global(.interactable) {
+		position: relative;
+		overflow: hidden;
+		-moz-appearance: none;
+		-webkit-appearance: none;
+		appearance: none;
+		border: none;
+		outline: none;
+		text-decoration: none;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		z-index: 0;
+	}
+
+	:global(.interactable::after) {
+		display: none;
+		content: '';
+		position: absolute;
+		height: 100%;
+		width: 100%;
+		left: 0;
+		top: 0;
+		background: currentColor;
+		z-index: -1;
+		pointer-events: none;
+	}
+
+	@media (any-hover: hover) {
+		:global(.interactable:hover::after) {
+			display: block;
+			opacity: 0.08;
+		}
+
+		:global(.interactable[disabled]::after) {
+			display: none;
+		}
+	}
+
+	:global(.interactable:is(:focus-visible)),
+	:global(.interactable:hover:focus-visible) {
+		outline: 2px solid theme('colors.onSurface');
+		outline-offset: -2px;
+	}
+
+	:global(.interactable:focus-visible::after) {
+		display: block;
+		opacity: 0.12;
+	} */
+
 	/* @keyframes page-enter-scale {
 		from {
 			transform: scale(0.8, 0.8);

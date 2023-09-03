@@ -13,6 +13,7 @@ specifiers:
   '@typescript-eslint/parser': ^6.5.0
   '@unocss/eslint-config': ^0.55.6
   '@unocss/postcss': ^0.55.6
+  '@unocss/reset': ^0.55.6
   '@unocss/svelte-scoped': ^0.55.6
   autoprefixer: ^10.4.15
   eslint: ^8.48.0
@@ -41,6 +42,7 @@ dependencies:
   '@types/dom-view-transitions': 1.0.1
   '@types/offscreencanvas': 2019.7.0
   '@types/wicg-file-system-access': 2020.9.6
+  '@unocss/reset': 0.55.6
   idb: 7.1.1
   motion: 10.16.2
   music-metadata: 8.1.4
@@ -938,7 +940,6 @@ packages:
 
   /@unocss/reset/0.55.6:
     resolution: {integrity: sha512-EdeqkYGchGj7dlQ91WVRo75nLW58zWcg9rxppDHvcJXheZVgOllznBFV8SmA5fBtojMj8BEHz71dXe5CLJEDVw==}
-    dev: true
 
   /@unocss/scope/0.55.6:
     resolution: {integrity: sha512-od4yrUWejdZEB1CjVOdIgC3ghTM5QFNSPRPT0/N2M6RSTNBKb/X105Nnv39vgcc0YCC1ezhLcSctLHtj2w7Aaw==}
