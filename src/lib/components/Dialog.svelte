@@ -89,13 +89,13 @@
 			open = false
 		}}
 		class={clx(
-			'tonal-elevation-4 flex min-w-[280px] max-w-[560px] select-none flex-col rounded-24 bg-surface p-24 text-onSurface will-change-[clip-path]',
+			'tonal-elevation-4 flex min-w-280px max-w-560px select-none flex-col rounded-24px bg-surface p-24px text-onSurface will-change-[clip-path]',
 			$$props.class,
 		)}
 	>
 		<header
 			bind:this={dialogHeader}
-			class={clx('flex flex-col gap-16', icon && 'items-center justify-center text-center')}
+			class={clx('flex flex-col gap-16px', icon && 'items-center justify-center text-center')}
 		>
 			{#if icon}
 				<Icon type={icon} class="text-secondary" />
@@ -112,7 +112,7 @@
 		</div>
 
 		{#if buttons?.length}
-			<div bind:this={dialogFooter} class="mt-24 flex justify-end gap-8">
+			<div bind:this={dialogFooter} class="mt-24px flex justify-end gap-8px">
 				{#each buttons as button}
 					<Button
 						kind="flat"
@@ -130,7 +130,7 @@
 	</dialog>
 {/if}
 
-<style lang="postcss">
+<style>
 	dialog::backdrop {
 		background: rgba(0, 0, 0, 0.22);
 	}

@@ -78,25 +78,25 @@
 	<SlotProvider>
 		<div class="contain-strict flex h-full flex-col">
 			<header
-				class="will-change-bg relative flex h-56 flex-shrink-0 xs:h-56 sm:h-64 {isScrolled
+				class="will-change-bg relative flex h-56px flex-shrink-0 xs:h-56px sm:h-64px {isScrolled
 					? 'tonal-elevation-4 bg-surface'
 					: ''}"
 			>
-				<div class="max-w-[1280px] mx-auto w-full items-center px-16 flex">
+				<div class="max-w-1280px mx-auto w-full items-center px-16px flex">
 					{#if !$page.data.hideBackButton}
-						<IconButton icon="backArrow" class="mr-8" on:click={handleBackClick} />
+						<IconButton icon="backArrow" class="mr-8px" on:click={handleBackClick} />
 					{/if}
 
 					<h1 class="text-title-lg mr-auto">{pageData.title}</h1>
 
-					<div class="flex items-center gap-4">
+					<div class="flex items-center gap-4px">
 						<Slot name="actions" />
 					</div>
 				</div>
 			</header>
 			<div class="flex flex-grow flex-col overflow-auto">
 				<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
-				<div class="mx-auto w-full max-w-[1280px] flex-grow px-8 py-16">
+				<div class="mx-auto w-full max-w-[1280px] flex-grow px-8px py-16px">
 					<slot />
 				</div>
 			</div>

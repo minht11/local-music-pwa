@@ -7,7 +7,7 @@
 
 <div
 	class={clx(
-		'flex select-text flex-col gap-16 rounded-8 border border-solid border-outlineVariant p-16 text-outline sm:flex-row sm:items-center',
+		'flex select-text flex-col gap-16px rounded-8px border border-solid border-outlineVariant p-16px text-outline sm:flex-row sm:items-center',
 		$$props.class,
 	)}
 >

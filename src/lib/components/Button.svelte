@@ -32,7 +32,7 @@
 	{href}
 	disabled={disabled === true ? true : undefined}
 	use:ripple
-	class={clx(kind !== 'blank' && clx('base-button px-24', KIND_CLASS_MAP[kind]), $$props.class)}
+	class={clx(kind !== 'blank' && clx('base-button px-24px', KIND_CLASS_MAP[kind]), $$props.class)}
 	on:click
 	on:keydown
 >

@@ -17,7 +17,7 @@
 	{as}
 	{href}
 	kind="blank"
-	class={clx('interactable flex h-44 w-44 items-center rounded-full', $$props.class)}
+	class={clx('interactable flex h-44px w-44px items-center rounded-full', $$props.class)}
 	on:click
 	on:keydown
 >

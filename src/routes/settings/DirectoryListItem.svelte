@@ -8,11 +8,14 @@
 
 <svelte:element
 	this={as}
-	class={clx('directory-item grid h-48 items-center gap-12 text-onSurfaceVariant', $$props.class)}
+	class={clx(
+		'directory-item grid h-48px items-center gap-12px text-onSurfaceVariant',
+		$$props.class,
+	)}
 >
 	<div class="text-body-lg mr-auto truncate text-onSurface">{name}</div>
 	<div class="truncate border-r border-solid border-outline text-center tabular-nums">{count}</div>
-	<div class="flex gap-4">
+	<div class="flex gap-4px">
 		<slot />
 	</div>
 </svelte:element>

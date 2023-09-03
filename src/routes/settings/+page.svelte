@@ -4,7 +4,6 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import InfoBanner from '$lib/components/InfoBanner.svelte'
-	import { derived } from 'svelte/store'
 	import DirectoryListItem from './DirectoryListItem.svelte'
 
 	let currentTracksCount = 0
@@ -52,17 +51,18 @@
 	}
 </script>
 
-<section class="card mx-auto w-full max-w-[900px] gap-24">
-	<div class="flex flex-col gap-24 px-16 pt-16">
+<section class="card mx-auto w-full max-w-[900px] gap-24px">
+	<div class="flex flex-col gap-24px px-16px pt-16px">
 		<div>
 			<div class="text-body-lg">
 				Currently there are
-				<strong class="rounded-12 bg-tertiary px-8 text-onTertiary">{currentTracksCount}</strong>
+				<strong class="rounded-12px bg-tertiary px-8px text-onTertiary">{currentTracksCount}</strong
+				>
 				tracks inside your library
 			</div>
 			<div>All data is stored on your device</div>
 		</div>
-		<div class="flex flex-col-reverse gap-8 xs:flex-row">
+		<div class="flex flex-col-reverse gap-8px xs:flex-row">
 			<Button kind="outlined" class="xs:mr-auto">Clear data</Button>
 			<Button kind="toned" on:click={onImportTracksHandler}>
 				{#if isFileSystemAccessSupported}
@@ -74,10 +74,10 @@
 		</div>
 	</div>
 
-	<div class="flex flex-col gap-16 border-t border-solid border-outlineVariant p-16">
+	<div class="flex flex-col gap-16px border-t border-solid border-outlineVariant p-16px">
 		{#if !isFileSystemAccessSupported}
 			<div
-				class="flex select-text flex-col gap-16 rounded-8 border border-solid border-outlineVariant p-16 text-onSurfaceVariant"
+				class="flex select-text flex-col gap-16px rounded-8px border border-solid border-outlineVariant p-16px text-onSurfaceVariant"
 			>
 				<Icon type="alertCircle" class="flex-shrink-0" />
 				<span>
@@ -105,7 +105,7 @@
 					<Button kind="flat">Rescan</Button>
 				</div>
 
-				<InfoBanner class="my-8">
+				<InfoBanner class="my-8px">
 					Every time you open or reload the app, browser might ask you to allow access to your
 					selected directories.
 					<strong> To reduce number of popups please keep directory count to the minimum </strong>
