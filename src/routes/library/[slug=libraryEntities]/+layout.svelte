@@ -4,6 +4,7 @@
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
 	import SlotContent from '$lib/components/slot/SlotContent.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
+	import Button from '$lib/components/Button.svelte'
 
 	type LibrarySlug = 'tracks' | 'albums' | 'artists' | 'playlists'
 
@@ -46,13 +47,15 @@
 
 <div>
 	{#each navItems as item}
-		<a
+		<Button
+			as="a"
 			href={`/library/${item.slug}`}
+			kind="blank"
 			title={item.title}
-			class={item.slug === slug ? 'text-primary' : ''}
+			class={clx(item.slug === slug && 'text-primary')}
 		>
 			<Icon type={item.icon} />
-		</a>
+		</Button>
 	{/each}
 </div>
 

@@ -24,7 +24,8 @@
 			"@types/dom-navigation",
 			"@types/offscreencanvas",
 			"@types/wicg-file-system-access",
-			"@types/dom-view-transitions"
+			"@types/dom-view-transitions",
+			"./auto-imports.d.ts"
 		]
 	}
 }

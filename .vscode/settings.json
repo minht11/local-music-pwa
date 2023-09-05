@@ -1,3 +1,6 @@
 {
-	"explorer.fileNesting.enabled": false
+	"explorer.fileNesting.enabled": false,
+	"svelte.plugin.svelte.compilerWarnings": {
+		"missing-declaration": "ignore"
+	}
 }
