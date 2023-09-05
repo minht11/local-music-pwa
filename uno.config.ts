@@ -55,6 +55,8 @@ export default (async () => {
 			'tonal-elevation-4': 'bg-gradient-to-r from-primary/12 to-primary/12',
 			link: 'text-primary underline',
 			card: 'tonal-elevation-1 flex flex-col rounded-8px bg-surface text-onSurface',
+			interactable:
+				'relative overflow-hidden appearance-none border-none outline-none decoration-none cursor-pointer flex items-center z-0',
 			'base-button': 'interactable text-label-lg h-40px justify-center gap-8px rounded-20px',
 		},
 		presets: [
@@ -71,55 +73,41 @@ export default (async () => {
 					.dark {
 						${darkColors.rootDefinition}
 					}
-					.interactable {
-		position: relative;
-		overflow: hidden;
-		-moz-appearance: none;
-		-webkit-appearance: none;
-		appearance: none;
-		border: none;
-		outline: none;
-		text-decoration: none;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		z-index: 0;
-	}
 
-	.interactable::after {
-		display: none;
-		content: '';
-		position: absolute;
-		height: 100%;
-		width: 100%;
-		left: 0;
-		top: 0;
-		background: currentColor;
-		z-index: -1;
-		pointer-events: none;
-	}
+					.interactable::after {
+						display: none;
+						content: '';
+						position: absolute;
+						height: 100%;
+						width: 100%;
+						left: 0;
+						top: 0;
+						background: currentColor;
+						z-index: -1;
+						pointer-events: none;
+					}
 
-	@media (any-hover: hover) {
-		.interactable:hover::after {
-			display: block;
-			opacity: 0.08;
-		}
+					@media (any-hover: hover) {
+						.interactable:hover::after {
+							display: block;
+							opacity: 0.08;
+						}
 
-		.interactable[disabled]::after {
-			display: none;
-		}
-	}
+						.interactable[disabled]::after {
+							display: none;
+						}
+					}
 
-	.interactable:is(:focus-visible),
-	.interactable:hover:focus-visible {
-		outline: 2px solid theme('colors.onSurface');
-		outline-offset: -2px;
-	}
+					.interactable:is(:focus-visible),
+					.interactable:hover:focus-visible {
+						outline: 2px solid rgb(var(--color-onSurface));
+						outline-offset: -2px;
+					}
 
-	.interactable:focus-visible::after {
-		display: block;
-		opacity: 0.12;
-	}
+					.interactable:focus-visible::after {
+						display: block;
+						opacity: 0.12;
+					}
       `,
 			},
 		],
