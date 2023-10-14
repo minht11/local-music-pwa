@@ -58,6 +58,8 @@ export default (async () => {
 			interactable:
 				'relative overflow-hidden appearance-none border-none outline-none decoration-none cursor-pointer flex items-center z-0',
 			'base-button': 'interactable text-label-lg h-40px justify-center gap-8px rounded-20px',
+			'flip-x': '-scale-x-100',
+			'flip-y': '-scale-y-100',
 		},
 		presets: [
 			presetUno({
