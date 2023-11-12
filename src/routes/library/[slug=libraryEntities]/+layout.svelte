@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/stores'
+	import type { LayoutParams } from './$types'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
-	import SlotContent from '$lib/components/slot/SlotContent.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Button from '$lib/components/Button.svelte'
+	import { useRootLayout } from '$lib/app'
 
-	type LibrarySlug = 'tracks' | 'albums' | 'artists' | 'playlists'
+	type LibrarySlug = LayoutParams['slug']
 
-	const slug = $page.params.slug as LibrarySlug
+	const slug = $page.params.slug as LayoutParams['slug']
 
 	interface NavItem {
 		slug: LibrarySlug
@@ -38,25 +39,46 @@
 			icon: 'playlist',
 		},
 	] satisfies NavItem[]
+
+	const layout = useRootLayout()
+	layout.actions = layoutActions
 </script>
 
-<SlotContent name="actions">
+{#snippet layoutActions()}
 	<IconButton as="a" href="/search" icon="search" />
 	<IconButton as="a" href="/settings" icon="moreVertical" />
-</SlotContent>
+{/snippet}
 
-<div>
-	{#each navItems as item}
-		<Button
-			as="a"
-			href={`/library/${item.slug}`}
-			kind="blank"
-			title={item.title}
-			class={clx(item.slug === slug && 'text-primary')}
-		>
-			<Icon type={item.icon} />
-		</Button>
-	{/each}
+<div class="page-layout">
+	<div class="flex flex-col gap-8px">
+		{#each navItems as item}
+			<Button
+				as="a"
+				href={`/library/${item.slug}`}
+				kind="blank"
+				title={item.title}
+				class="h-56px w-56px shrink-0 flex justify-center items-center rounded-full"
+			>
+				<div
+					class={clx(
+						'flex items-center justify-center p-8px rounded-full',
+						item.slug === slug && 'bg-secondaryContainer text-onSecondaryContainer',
+					)}
+				>
+					<Icon type={item.icon} />
+				</div>
+			</Button>
+		{/each}
+	</div>
+
+	<div>
+		<slot />
+	</div>
 </div>
 
-<slot />
+<style lang="postcss">
+	.page-layout {
+		display: grid;
+		grid-template-columns: 96px 1fr;
+	}
+</style>

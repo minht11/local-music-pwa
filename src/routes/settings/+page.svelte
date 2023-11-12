@@ -64,7 +64,7 @@
 		</div>
 		<div class="flex flex-col-reverse gap-8px xs:flex-row">
 			<Button kind="outlined" class="xs:mr-auto">Clear data</Button>
-			<Button kind="toned" on:click={onImportTracksHandler}>
+			<Button kind="toned" onclick={onImportTracksHandler}>
 				{#if isFileSystemAccessSupported}
 					Add directory
 				{:else}
@@ -140,7 +140,7 @@
 	title="Replace directory 'Music' with 'Wow'?"
 	buttons={[{ title: 'Cancel' }, { title: 'Ok' }]}
 	class="max-w-[340px]"
-	on:close={() => {
+	onclose={() => {
 		console.log('submit')
 	}}
 >

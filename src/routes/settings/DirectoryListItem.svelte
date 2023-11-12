@@ -1,16 +1,19 @@
 <script lang="ts">
 	import { clx } from '$lib/helpers/clx'
 
-	export let name: string
-	export let count: number
-	export let as: 'li' | 'div' = 'li'
+	const { name, count, as = 'li', ...restProps } = $props<{
+		name: string
+		count: number
+		as?: 'li' | 'div',
+		class?: string
+	}>()
 </script>
 
 <svelte:element
 	this={as}
 	class={clx(
 		'directory-item grid h-48px items-center gap-12px text-onSurfaceVariant',
-		$$props.class,
+		restProps.class,
 	)}
 >
 	<div class="text-body-lg mr-auto truncate text-onSurface">{name}</div>

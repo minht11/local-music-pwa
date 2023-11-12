@@ -1,12 +1,28 @@
+<script>
+	import Artwork from '$lib/components/player/Artwork.svelte'
+	import PlayPauseIcon from '$lib/components/animated-icons/PlayPauseIcon.svelte'
+	import Button from '$lib/components/Button.svelte'
+	import IconButton from '$lib/components/IconButton.svelte'
+</script>
+
 <section
 	class="overlay mx-auto grid flex-grow grid-cols-[400px_1fr] h-full bg-surface rounded-t-24px tonal-elevation-2"
 >
-	<div class="bg-secondaryContainer h-full w-full flex flex-col rounded-t-24px overflow-hidden">
-		Player controls
+	<div class="bg-secondaryContainer wh-full flex flex-col rounded-t-24px overflow-hidden">
+		<div class="p-40px relative h-full">
+			<Artwork class="view-transition-artwork rounded-16px" />
 
-		<div class="bg-surface h-56px mt-auto tonal-elevation-2"></div>
+			<div class="flex items-center justify-center gap-24px">
+				<IconButton icon="musicNote" class="bg-tertiary text-onTertiary" />
+
+				<Button kind="blank" class="flex rounded-20px items-center justify-center bg-primary text-onPrimary h-72px w-120px">
+					<PlayPauseIcon />
+				</Button>
+
+				<IconButton icon="musicNote" class="bg-tertiary text-onTertiary" />
+			</div>
+		</div>
 	</div>
-
 	<div class="w-full">Queue list</div>
 </section>
 

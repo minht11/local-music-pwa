@@ -1,21 +1,34 @@
 <script context="module" lang="ts">
-	export type AllowedButtonElements = 'button' | 'a'
-	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank'
-
-	// prettier-ignore
-	export type ButtonHref<As extends AllowedButtonElements> = As extends 'a' ? string : never;
-</script>
-
-<script lang="ts" generics="As extends AllowedButtonElements = 'button'">
 	import { clx } from '$lib/helpers/clx'
 	import { ripple } from '../actions/ripple'
 
-	export let as: As = 'button' as As
-	export let kind: ButtonKind = 'filled'
-	export let disabled = false
+	export type AllowedButtonElements = 'button' | 'a'
+	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank'
 
-	type Href = ButtonHref<As>
-	export let href: Href = (as === 'a' ? '' : undefined) as Href
+	export type ButtonHref<As extends AllowedButtonElements> = As extends 'a' ? string : never;
+
+	// prettier-ignore
+	export interface ButtonProps<As extends AllowedButtonElements> {
+		as?: As
+		kind?: ButtonKind
+		disabled?: boolean
+		href?: ButtonHref<As>
+		class?: string
+		title?: string
+		children?: () => unknown
+		onclick?: (event: MouseEvent) => void
+	};
+</script>
+
+<script lang="ts" generics="As extends AllowedButtonElements = 'button'">
+	const {
+			as = 'button',
+			kind = 'filled',
+			disabled = false,
+			href = as === 'a' ? '' : undefined,
+			children,
+			...restProps
+		} = $props<ButtonProps<As>>()
 
 	const KIND_CLASS_MAP = {
 		filled: 'filled-button',
@@ -27,16 +40,19 @@
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <svelte:element
+	{...restProps}
 	this={!disabled ? as : 'button'}
-	{...$$restProps}
 	{href}
 	disabled={disabled === true ? true : undefined}
 	use:ripple
-	class={clx(kind !== 'blank' && clx('base-button px-24px', KIND_CLASS_MAP[kind]), $$props.class)}
-	on:click
-	on:keydown
+	class={clx(
+		kind === 'blank' ? 'interactable' : clx('base-button px-24px', KIND_CLASS_MAP[kind]),
+		restProps.class,
+	)}
 >
-	<slot />
+	{#if children}
+		{@render children()}
+	{/if}
 </svelte:element>
 
 <style lang="postcss">

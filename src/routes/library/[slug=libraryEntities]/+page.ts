@@ -34,7 +34,7 @@ const DATA_MAP = {
 } as const
 
 export const load: PageLoad = (event) => {
-	const slug = event.params.slug as 'tracks' | 'albums' | 'artists' | 'playlists'
+	const slug = event.params.slug
 	const data = DATA_MAP[slug]
 
 	return {

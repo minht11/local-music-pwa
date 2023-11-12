@@ -85,7 +85,7 @@
 {#if open}
 	<dialog
 		bind:this={dialog}
-		on:close={() => {
+		onclose={() => {
 			open = false
 		}}
 		class={clx(
@@ -117,7 +117,7 @@
 					<Button
 						kind="flat"
 						class="min-w-60px"
-						on:click={() => {
+						onclick={() => {
 							button.onClick?.()
 							close()
 						}}

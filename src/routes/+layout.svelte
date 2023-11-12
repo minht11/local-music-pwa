@@ -3,10 +3,46 @@
 	import { goto, onNavigate } from '$app/navigation'
 	import type { LayoutData } from './$types'
 	import IconButton from '$lib/components/IconButton.svelte'
-	import Slot from '$lib/components/slot/Slot.svelte'
-	import SlotProvider from '$lib/components/slot/SlotProvider.svelte'
 	import { wait } from '$lib/helpers/utils'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
+	import { setContext } from 'svelte'
+
+	const { data } = $props<{
+		data: LayoutData
+	}>()
+
+	const pageData = $derived($page.data)
+
+	let scrollThresholdEl: HTMLDivElement
+	let isScrolled = false
+
+	const io = new IntersectionObserver(
+		([entry]) => {
+			isScrolled = !entry?.isIntersecting
+		},
+		{ threshold: 0 },
+	)
+
+	$effect(() => {
+		io.observe(scrollThresholdEl)
+
+		return () => {
+			io.disconnect()
+		}
+	})
+
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) {
+			return
+		}
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve()
+				await navigation.complete
+			})
+		})
+	})
 
 	const handleBackClick = () => {
 		if (window.navigation !== undefined) {
@@ -35,38 +71,12 @@
 		})
 	}
 
-	export let data: LayoutData
+	let actions = $state<() => unknown>()
 
-	$: pageData = $page.data
-
-	let scrollThresholdEl: HTMLDivElement
-	let isScrolled = false
-
-	const io = new IntersectionObserver(
-		([entry]) => {
-			isScrolled = !entry?.isIntersecting
-		},
-		{ threshold: 0 },
-	)
-
-	$: {
-		io.disconnect()
-		if (scrollThresholdEl) {
-			io.observe(scrollThresholdEl)
+	setContext("root-layout",{
+		set actions(val: (() => unknown) | undefined){
+			actions = val
 		}
-	}
-
-	onNavigate((navigation) => {
-		if (!document.startViewTransition) {
-			return
-		}
-
-		return new Promise((resolve) => {
-			document.startViewTransition(async () => {
-				resolve()
-				await navigation.complete
-			})
-		})
 	})
 </script>
 
@@ -75,7 +85,6 @@
 </svelte:head>
 
 {#key data.pathname}
-	<SlotProvider>
 		<div class="flex h-full w-full flex-col">
 			<header
 				class="will-change-bg relative flex h-56px flex-shrink-0 xs:h-56px sm:h-64px {isScrolled
@@ -84,13 +93,15 @@
 			>
 				<div class="max-w-1280px mx-auto w-full items-center px-16px flex">
 					{#if !$page.data.hideBackButton}
-						<IconButton icon="backArrow" class="mr-8px" on:click={handleBackClick} />
+						<IconButton icon="backArrow" class="mr-8px" onclick={handleBackClick} />
 					{/if}
 
 					<h1 class="text-title-lg mr-auto">{pageData.title}</h1>
 
 					<div class="flex items-center gap-4px">
-						<Slot name="actions" />
+						{#if actions}
+							{@render actions()}
+						{/if}
 					</div>
 				</div>
 			</header>
@@ -101,7 +112,6 @@
 				</div>
 			</div>
 		</div>
-	</SlotProvider>
 {/key}
 
 {#if !$page.data.hidePlayerOverlay}
