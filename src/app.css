@@ -3,7 +3,12 @@
 @unocss;
 
 html {
+	color-scheme: light;
 	@apply h-full w-full;
+}
+
+html.dark {
+	color-scheme: dark;
 }
 
 body {

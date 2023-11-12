@@ -7,7 +7,7 @@ const generateThemeVariables = async (isDark: boolean) => {
 	const entries = Object.entries(tokens)
 	const variablesEntries = entries.map(([name]) => [name, `rgb(var(--color-${name}))`])
 
-	const rootDefinition = entries.map(([name, value]) => `--color-${name}: ${value};`).join('\n')
+	const rootDefinition = entries.map(([name, value]) => `--color-${name}: ${value.join(' ')};`).join('\n')
 
 	return {
 		variables: Object.fromEntries(variablesEntries),
