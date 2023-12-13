@@ -1,11 +1,13 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte'
 	import { clx } from '$lib/helpers/clx'
 
-	const { name, count, as = 'li', ...restProps } = $props<{
+	const { name, count, as = 'li',children, ...restProps } = $props<{
 		name: string
 		count: number
 		as?: 'li' | 'div',
 		class?: string
+		children?: Snippet
 	}>()
 </script>
 
@@ -19,7 +21,9 @@
 	<div class="text-body-lg mr-auto truncate text-onSurface">{name}</div>
 	<div class="truncate border-r border-solid border-outline text-center tabular-nums">{count}</div>
 	<div class="flex gap-4px">
-		<slot />
+		{#if children}
+			{@render children()}
+		{/if}
 	</div>
 </svelte:element>
 

@@ -1,4 +1,5 @@
 <script context="module" lang="ts">
+	import type { Snippet } from 'svelte'
 	import { clx } from '$lib/helpers/clx'
 	import { ripple } from '../actions/ripple'
 
@@ -15,7 +16,7 @@
 		href?: ButtonHref<As>
 		class?: string
 		title?: string
-		children?: () => unknown
+		children?: Snippet
 		onclick?: (event: MouseEvent) => void
 	};
 </script>

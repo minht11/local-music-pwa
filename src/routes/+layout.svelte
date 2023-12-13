@@ -5,7 +5,8 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import { wait } from '$lib/helpers/utils'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
-	import { setContext } from 'svelte'
+	import { setContext, type Snippet } from 'svelte'
+	import invariant from 'tiny-invariant'
 
 	const { data } = $props<{
 		data: LayoutData
@@ -13,8 +14,8 @@
 
 	const pageData = $derived($page.data)
 
-	let scrollThresholdEl: HTMLDivElement
-	let isScrolled = false
+	let scrollThresholdEl = $state<HTMLDivElement>()
+	let isScrolled = $state(false)
 
 	const io = new IntersectionObserver(
 		([entry]) => {
@@ -24,6 +25,8 @@
 	)
 
 	$effect(() => {
+		invariant(scrollThresholdEl, 'scrollThresholdEl is undefined')
+	
 		io.observe(scrollThresholdEl)
 
 		return () => {
@@ -71,12 +74,12 @@
 		})
 	}
 
-	let actions = $state<() => unknown>()
+	let actions = $state<Snippet>()
 
-	setContext("root-layout",{
-		set actions(val: (() => unknown) | undefined){
+	setContext('root-layout', {
+		set actions(val: Snippet | undefined) {
 			actions = val
-		}
+		},
 	})
 </script>
 
@@ -85,33 +88,33 @@
 </svelte:head>
 
 {#key data.pathname}
-		<div class="flex h-full w-full flex-col">
-			<header
-				class="will-change-bg relative flex h-56px flex-shrink-0 xs:h-56px sm:h-64px {isScrolled
-					? 'tonal-elevation-4 bg-surface'
-					: ''}"
-			>
-				<div class="max-w-1280px mx-auto w-full items-center px-16px flex">
-					{#if !$page.data.hideBackButton}
-						<IconButton icon="backArrow" class="mr-8px" onclick={handleBackClick} />
+	<div class="flex h-full w-full flex-col">
+		<header
+			class="will-change-bg relative flex h-56px flex-shrink-0 xs:h-56px sm:h-64px {isScrolled
+				? 'tonal-elevation-4 bg-surface'
+				: ''}"
+		>
+			<div class="max-w-1280px mx-auto w-full items-center px-16px flex">
+				{#if !$page.data.hideBackButton}
+					<IconButton icon="backArrow" class="mr-8px" onclick={handleBackClick} />
+				{/if}
+
+				<h1 class="text-title-lg mr-auto">{pageData.title}</h1>
+
+				<div class="flex items-center gap-4px">
+					{#if actions}
+						{@render actions()}
 					{/if}
-
-					<h1 class="text-title-lg mr-auto">{pageData.title}</h1>
-
-					<div class="flex items-center gap-4px">
-						{#if actions}
-							{@render actions()}
-						{/if}
-					</div>
-				</div>
-			</header>
-			<div class="flex flex-grow flex-col overflow-auto bg-background">
-				<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
-				<div class="mx-auto w-full max-w-[1280px] flex-grow px-8px py-16px">
-					<slot />
 				</div>
 			</div>
+		</header>
+		<div class="flex flex-grow flex-col overflow-auto bg-background">
+			<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
+			<div class="mx-auto w-full max-w-[1280px] flex-grow px-8px py-16px">
+				<slot />
+			</div>
 		</div>
+	</div>
 {/key}
 
 {#if !$page.data.hidePlayerOverlay}

@@ -1,11 +1,12 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte'
 	import { clx } from '$lib/helpers/clx'
 	import Icon, { type IconType } from './icon/Icon.svelte'
 
 	const { icon = 'alertCircle', children, ...restProps } = $props<{
 		icon?: IconType
 		class?: string
-		children?: () => unknown
+		children?: Snippet
 	}>()
 </script>
 
