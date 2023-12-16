@@ -29,25 +29,3 @@ body {
 	will-change: transform, opacity;
 	pointer-events: none;
 }
-
-@keyframes ripple {
-	to {
-		transform: scale(2);
-	}
-}
-
-::view-transition-old(ripple-container) {
-	animation: none;
-}
-
-::view-transition-old(ripple) {
-	/* animation: ripple 0.4s ease-out; */
-	animation: none;
-}
-
-::view-transition-new(ripple-container) {
-	animation: none;
-}
-::view-transition-new(ripple) {
-	animation: none;
-}

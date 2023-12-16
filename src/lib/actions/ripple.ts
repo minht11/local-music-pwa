@@ -1,7 +1,7 @@
 import { animateEmpty } from '../helpers/animations'
 
-const FADE_DURATION = 200
-const SCALE_DURATION = 500
+const FADE_DURATION = 180
+const SCALE_DURATION = 400
 
 const rippleSpan = document.createElement('span')
 const activeRipples = new Map<HTMLSpanElement, boolean>()
