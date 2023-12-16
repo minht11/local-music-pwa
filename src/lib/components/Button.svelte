@@ -6,7 +6,7 @@
 	export type AllowedButtonElements = 'button' | 'a'
 	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank'
 
-	export type ButtonHref<As extends AllowedButtonElements> = As extends 'a' ? string : never;
+	export type ButtonHref<As extends AllowedButtonElements> = As extends 'a' ? string : never
 
 	// prettier-ignore
 	export interface ButtonProps<As extends AllowedButtonElements> {
@@ -18,18 +18,18 @@
 		title?: string
 		children?: Snippet
 		onclick?: (event: MouseEvent) => void
-	};
+	}
 </script>
 
 <script lang="ts" generics="As extends AllowedButtonElements = 'button'">
 	const {
-			as = 'button',
-			kind = 'filled',
-			disabled = false,
-			href = as === 'a' ? '' : undefined,
-			children,
-			...restProps
-		} = $props<ButtonProps<As>>()
+		as = 'button',
+		kind = 'filled',
+		disabled = false,
+		href = as === 'a' ? '' : undefined,
+		children,
+		...restProps
+	} = $props<ButtonProps<As>>()
 
 	const KIND_CLASS_MAP = {
 		filled: 'filled-button',
@@ -38,10 +38,11 @@
 		flat: 'flat-button',
 	}
 </script>
+
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <svelte:element
-	{...restProps}
 	this={!disabled ? as : 'button'}
+	{...restProps}
 	{href}
 	disabled={disabled === true ? true : undefined}
 	use:ripple
@@ -83,6 +84,13 @@
 
 	.base-button[disabled] {
 		cursor: default;
-		@apply bg-onSurface/38% border-onSurface/12%;
+		background-color: theme('colors.onSurface/38%');
+		border-color: theme('colors.onSurface/38%');
+	}
+
+	.base-button:focus-visible,
+	.base-button:hover:focus-visible {
+		outline: 2px solid theme('colors.onSurface') !important;
+		outline-offset: -2px;
 	}
 </style>
