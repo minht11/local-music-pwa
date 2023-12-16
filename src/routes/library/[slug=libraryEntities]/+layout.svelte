@@ -6,10 +6,15 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import { useRootLayout } from '$lib/app'
+	import type { Snippet } from 'svelte'
+
+const { children } = $props<{
+	children: Snippet
+}>()
 
 	type LibrarySlug = LayoutParams['slug']
 
-	const slug = $page.params.slug as LayoutParams['slug']
+	const slug = $derived($page.params.slug as LayoutParams['slug'])
 
 	interface NavItem {
 		slug: LibrarySlug
@@ -41,6 +46,7 @@
 	] satisfies NavItem[]
 
 	const layout = useRootLayout()
+	// @ts-ignore
 	layout.actions = layoutActions
 </script>
 
@@ -72,7 +78,7 @@
 	</div>
 
 	<div>
-		<slot />
+		{@render children()}
 	</div>
 </div>
 

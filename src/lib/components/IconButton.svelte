@@ -1,21 +1,28 @@
 <script lang="ts" context="module">
-	import { clx } from '$lib/helpers/clx'
+	import type { Snippet } from 'svelte'
 	import Icon, { type IconType } from './icon/Icon.svelte'
 	import Button, { type AllowedButtonElements, type ButtonProps } from './Button.svelte'
 
 	interface IconButtonProps<As extends AllowedButtonElements> extends ButtonProps<As> {
-		icon: IconType
+		icon?: IconType
+		children?: Snippet
 	}
 </script>
 
 <script lang="ts" generics="As extends AllowedButtonElements = 'button'">
-	const { icon, ...rest } = $props<IconButtonProps<As>>()
+	const { icon, children, ...rest } = $props<IconButtonProps<As>>()
 </script>
 
 <Button
 	{...rest}
 	kind="blank"
-	class={clx('interactable flex h-44px w-44px items-center rounded-full', rest.class)}
+	class={clx('interactable flex justify-center h-44px w-44px items-center rounded-full', rest.class)}
 >
-	<Icon class="mx-auto" type={icon} />
+	{#if icon}
+		<Icon type={icon} />
+	{/if}
+
+	{#if children}
+		{@render children()}
+	{/if}
 </Button>

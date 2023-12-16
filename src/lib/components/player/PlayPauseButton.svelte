@@ -1,14 +1,12 @@
-<script>
+<script lang="ts">
 	import Button from '../Button.svelte'
 	import PlayPauseIcon from '../animated-icons/PlayPauseIcon.svelte'
 
-	let isPlaying = false
+	let { playing, onclick } = $props<{ playing?: boolean, onclick?: (e: MouseEvent) => void }>()
 </script>
 
 <Button
-	onclick={() => {
-		isPlaying = !isPlaying
-	}}
+	onclick={onclick}
 >
-	<PlayPauseIcon playing={isPlaying} />
+	<PlayPauseIcon playing={playing} />
 </Button>

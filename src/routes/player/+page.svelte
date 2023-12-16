@@ -3,6 +3,7 @@
 	import PlayPauseIcon from '$lib/components/animated-icons/PlayPauseIcon.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
+	import PlayPreviousNextIcon from '$lib/components/animated-icons/PlayPreviousNextIcon.svelte'
 </script>
 
 <section
@@ -17,6 +18,10 @@
 
 				<Button kind="blank" class="flex rounded-20px items-center justify-center bg-primary text-onPrimary h-72px w-120px">
 					<PlayPauseIcon />
+				</Button>
+
+				<Button>
+					<PlayPreviousNextIcon type="previous" />
 				</Button>
 
 				<IconButton icon="musicNote" class="bg-tertiary text-onTertiary" />

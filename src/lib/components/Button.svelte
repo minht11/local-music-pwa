@@ -38,7 +38,6 @@
 		flat: 'flat-button',
 	}
 </script>
-
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <svelte:element
 	{...restProps}

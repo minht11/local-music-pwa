@@ -1,29 +1,59 @@
 <script context="module" lang="ts">
+	import { animate, timeline, type TimelineSegment } from 'motion'
+	import { clx } from '$lib/helpers/clx'
+	import Button from './Button.svelte'
+	import Icon, { type IconType } from './icon/Icon.svelte'
+	import type { Snippet } from 'svelte'
+
 	export interface DialogButton {
 		title: string
-		onClick?: () => void
+		action?: () => void
+	}
+
+	export interface DialogProps {
+		open?: boolean
+		title: string
+		icon?: IconType
+		buttons?: DialogButton[]
+		class?: string
+		children: Snippet
 	}
 </script>
 
 <script lang="ts">
-	import { timeline } from 'motion'
-	import type { TimelineSegment } from '@motionone/dom/types/timeline/types'
-	import { clx } from '$lib/helpers/clx'
-	import Button from './Button.svelte'
-	import Icon, { type IconType } from './icon/Icon.svelte'
+	let {
+		open,
+		title,
+		icon,
+		buttons = [],
+		class: className,
+		children,
+	} = $props<DialogProps>()
 
-	export let open = false
-	export let title: string
-	export let icon: IconType | undefined = undefined
-	export let buttons: DialogButton[] = []
-
-	let dialog: HTMLDialogElement
-	let dialogHeader: HTMLElement
-	let dialogBody: HTMLDivElement
-	let dialogFooter: HTMLDivElement
+	let dialog = $state<HTMLDialogElement>()!
+	let dialogHeader = $state<HTMLElement>()!
+	let dialogBody = $state<HTMLElement>()!
+	let dialogFooter = $state<HTMLElement>()!
 
 	const close = () => {
-		dialog?.close()
+		// Check for browser support
+		// if (document.startViewTransition) {
+		// 	const transition = document.startViewTransition(() => {
+		// 		dialog?.close()
+		// 	})
+
+		// 	transition.finished.then(() => {
+		// 		ontoggle?.(false)
+		// 	})
+		// }
+		// else {
+		// 	ontoggle?.(false)
+		// 	dialog?.close()
+		// }
+
+		open = false
+		// ontoggle?.(false)
+		// dialog?.close()
 	}
 
 	const openD = () => {
@@ -72,25 +102,48 @@
 		)
 	}
 
-	$: {
-		dialog
+	$effect(() => {
 		if (open) {
 			openD()
 		} else {
 			close()
 		}
+	})
+
+// 	const dialogAniTrans = (node: HTMLElement, params: any, options: { direction: 'in' | 'out' | 'both' }) => {
+// 	delay?: number,
+// 	duration?: number,
+// 	easing?: (t: number) => number,
+// 	css?: (t: number, u: number) => string,
+// 	tick?: (t: number, u: number) => void
+// }
+
+	const outAni = async (node: HTMLDialogElement) => {
+		console.log(node)
+
+		await animate(node, {
+			opacity: [1, 0],
+		}, {
+			duration: 2,
+			easing: 'linear',
+		}).finished
+
+		console.log('out')
+
+		return
 	}
 </script>
 
 {#if open}
 	<dialog
 		bind:this={dialog}
+		out:outAni
 		onclose={() => {
-			open = false
+			close()
 		}}
 		class={clx(
 			'tonal-elevation-4 flex min-w-280px max-w-560px select-none flex-col rounded-24px bg-surface p-24px text-onSurface will-change-[clip-path]',
-			$$props.class,
+			className,
 		)}
 	>
 		<header
@@ -108,7 +161,7 @@
 			bind:this={dialogBody}
 			class="mt-16px flex-grow text-onSurfaceVariant"
 		>
-			<slot />
+			{@render children()}
 		</div>
 
 		{#if buttons?.length}
@@ -118,7 +171,7 @@
 						kind="flat"
 						class="min-w-60px"
 						onclick={() => {
-							button.onClick?.()
+							button.action?.()
 							close()
 						}}
 					>
@@ -133,5 +186,18 @@
 <style>
 	dialog::backdrop {
 		background: rgba(0, 0, 0, 0.22);
+	}
+
+	/* dialog[open] {
+		opacity: 1;
+	}
+
+	dialog {
+		opacity: 0;
+		transition: opacity 2s ease-in-out, overlay 2s ease-out allow-discrete;
+	} */
+
+	dialog {
+		view-transition-name: dialog;
 	}
 </style>

@@ -7,9 +7,11 @@
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import { setContext, type Snippet } from 'svelte'
 	import invariant from 'tiny-invariant'
+	import { providePlayer } from '$lib/stores/player.svelte'
 
-	const { data } = $props<{
+	const { data, children } = $props<{
 		data: LayoutData
+		children: Snippet
 	}>()
 
 	const pageData = $derived($page.data)
@@ -81,6 +83,8 @@
 			actions = val
 		},
 	})
+
+	providePlayer()
 </script>
 
 <svelte:head>
@@ -110,8 +114,11 @@
 		</header>
 		<div class="flex flex-grow flex-col overflow-auto bg-background">
 			<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
-			<div class="mx-auto w-full max-w-[1280px] flex-grow px-8px py-16px">
-				<slot />
+			<div class={clx(
+				'mx-auto w-full max-w-[1280px] flex-grow px-8px pt-16px',
+				$page.data.hidePlayerOverlay ? 'pb-16px' : 'pb-120px scroll-pb-120px'
+			)}>
+				{@render children()}
 			</div>
 		</div>
 	</div>

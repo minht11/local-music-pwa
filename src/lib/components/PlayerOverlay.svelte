@@ -3,12 +3,12 @@
 	import IconButton from './IconButton.svelte'
 	import Icon from './icon/Icon.svelte'
 	import Artwork from './player/Artwork.svelte'
-	import PlayPauseButton from './player/PlayPauseButton.svelte'
+	import MainControls from './player/MainControls.svelte'
 	import Timeline from './player/Timeline.svelte'
 </script>
 
 <div
-	class="overlay px-24px pt-8px gap-8px fixed flex flex-col items-center left-0 right-0 bottom-8px mx-auto h-96px w-full max-w-1000px rounded-24px bg-secondaryContainer text-onSecondaryContainer"
+	class="overlay px-16px pt-8px gap-8px fixed flex flex-col items-center left-0 right-0 bottom-8px mx-auto h-96px w-full max-w-1000px rounded-24px bg-secondaryContainer text-onSecondaryContainer"
 >
 	<Timeline />
 	<div class="grid items-center w-full controls">
@@ -28,11 +28,7 @@
 			<Icon type="chevronUp" class="bg-tertiary text-onTertiary rounded-full" />
 		</Button>
 
-		<div class="flex gap-8px items-center justify-center">
-			<PlayPauseButton />
-
-			<IconButton icon="musicNote" />
-		</div>
+		<MainControls />
 
 		<div class="ml-auto">
 			<IconButton icon="moreVertical" class="bg-secondary text-onSecondary" />

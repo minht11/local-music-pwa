@@ -140,9 +140,6 @@
 	title="Replace directory 'Music' with 'Wow'?"
 	buttons={[{ title: 'Cancel' }, { title: 'Ok' }]}
 	class="max-w-[340px]"
-	onclose={() => {
-		console.log('submit')
-	}}
 >
 	Existing directory inside your Library 'Wow' is a subdirectory of 'Music' directory. Do you want
 	it to be replaced?
