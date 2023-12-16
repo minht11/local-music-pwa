@@ -6,6 +6,12 @@ const SCALE_DURATION = 500
 const rippleSpan = document.createElement('span')
 const activeRipples = new Map<HTMLSpanElement, boolean>()
 
+let resolvers: undefined | ReturnType<typeof Promise.withResolvers>
+
+export const pendingRipples = async () => {
+	await resolvers?.promise
+}
+
 const markForOrExitRipple = (ripple: HTMLSpanElement) => {
 	const canExit = activeRipples.get(ripple)
 
@@ -20,6 +26,10 @@ const markForOrExitRipple = (ripple: HTMLSpanElement) => {
 		fadeAni.finished.then(() => {
 			activeRipples.delete(ripple)
 			ripple.remove()
+
+			if (!activeRipples.size) {
+				resolvers?.resolve()
+			}
 		})
 	} else {
 		activeRipples.set(ripple, true)
@@ -55,6 +65,8 @@ const onPointerDownHandler = (e: PointerEvent) => {
 
 	const ripple = rippleSpan.cloneNode() as HTMLSpanElement
 	ripple.className = 'ripple'
+
+	resolvers = Promise.withResolvers()
 
 	// Use small value and scale it up to the right size,
 	// because that way less GPU memory is used

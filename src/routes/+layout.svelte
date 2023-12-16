@@ -8,6 +8,7 @@
 	import { setContext, type Snippet } from 'svelte'
 	import invariant from 'tiny-invariant'
 	import { providePlayer } from '$lib/stores/player.svelte'
+	import { pendingRipples } from '$lib/actions/ripple'
 
 	const { data, children } = $props<{
 		data: LayoutData
@@ -41,7 +42,12 @@
 			return
 		}
 
-		return new Promise((resolve) => {
+		return new Promise(async (resolve) => {
+			await Promise.race([
+				pendingRipples(),
+				wait(100),
+			])
+
 			document.startViewTransition(async () => {
 				resolve()
 				await navigation.complete
