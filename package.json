@@ -14,8 +14,9 @@
 		"generate-tw-colors": "node scripts/generate-tw-colors.js"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-static": "^2.0.3",
-		"@sveltejs/kit": "^1.30.3",
+		"@sveltejs/adapter-static": "^3.0.0",
+		"@sveltejs/kit": "^2.0.0",
+		"@sveltejs/vite-plugin-svelte": "^3.0.1",
 		"@typescript-eslint/eslint-plugin": "^6.14.0",
 		"@typescript-eslint/parser": "^6.14.0",
 		"@unocss/eslint-config": "^0.58.0",
@@ -37,7 +38,7 @@
 		"typescript": "^5.3.3",
 		"unocss": "^0.58.0",
 		"unplugin-auto-import": "^0.17.2",
-		"vite": "^5.0.8"
+		"vite": "^5.0.10"
 	},
 	"dependencies": {
 		"@material/material-color-utilities": "^0.2.7",
