@@ -1,9 +1,9 @@
 <script context="module" lang="ts">
-	import { animate, timeline, type TimelineSegment } from 'motion'
+	import { timeline, type TimelineSegment } from 'motion'
 	import { clx } from '$lib/helpers/clx'
 	import Button from './Button.svelte'
 	import Icon, { type IconType } from './icon/Icon.svelte'
-	import type { Snippet } from 'svelte'
+	import { untrack, type Snippet } from 'svelte'
 
 	export interface DialogButton {
 		title: string
@@ -21,47 +21,17 @@
 </script>
 
 <script lang="ts">
-	let {
-		open,
-		title,
-		icon,
-		buttons = [],
-		class: className,
-		children,
-	} = $props<DialogProps>()
+	let { open, title, icon, buttons = [], class: className, children } = $props<DialogProps>()
 
 	let dialog = $state<HTMLDialogElement>()!
 	let dialogHeader = $state<HTMLElement>()!
 	let dialogBody = $state<HTMLElement>()!
 	let dialogFooter = $state<HTMLElement>()!
 
-	const close = () => {
-		// Check for browser support
-		// if (document.startViewTransition) {
-		// 	const transition = document.startViewTransition(() => {
-		// 		dialog?.close()
-		// 	})
-
-		// 	transition.finished.then(() => {
-		// 		ontoggle?.(false)
-		// 	})
-		// }
-		// else {
-		// 	ontoggle?.(false)
-		// 	dialog?.close()
-		// }
-
-		open = false
-		// ontoggle?.(false)
-		// dialog?.close()
-	}
-
-	const openD = () => {
+	const animateEnter = () => {
 		if (!dialog) {
 			return
 		}
-
-		dialog.showModal()
 
 		const fade = (el: HTMLElement) =>
 			[el, { opacity: [0, 1] }, { duration: 0.3, at: '<' }] satisfies TimelineSegment
@@ -102,47 +72,93 @@
 		)
 	}
 
+	const animateExit = () => {
+		if (!dialog) {
+			return
+		}
+
+		const fade = (el: HTMLElement) =>
+			[el, { opacity: [1, 0] }, { duration: 0.3, at: '<' }] satisfies TimelineSegment
+
+		dialog.animate(
+			{
+				opacity: [1, 0],
+			},
+			{
+				pseudoElement: '::backdrop',
+				duration: 300,
+				easing: 'linear',
+				fill: 'forwards',
+			},
+		)
+
+		return timeline(
+			[
+				[
+					dialog,
+					{
+						y: [0, -20],
+						clipPath: ['inset(0% 0% 0% 0% round 24px)', 'inset(0% 0% 100% 0% round 24px)'],
+					},
+					{
+						duration: 0.4,
+					},
+				],
+				[dialogFooter, { y: [0, -60] }, { duration: 0.4, at: 0 }],
+				fade(dialogFooter),
+				fade(dialogBody),
+				fade(dialogHeader),
+			],
+			{
+				defaultOptions: {
+					easing: [0.2, 0, 0, 1],
+				},
+				duration: 0.3,
+			},
+		).finished
+	}
+
+	let isBeingRendered = $state(false)
+
 	$effect(() => {
 		if (open) {
-			openD()
+			untrack(() => {
+				isBeingRendered = true
+			})
 		} else {
-			close()
+			untrack(() => {
+				animateExit()?.then(() => {
+					isBeingRendered = false
+				})
+			})
 		}
 	})
 
-// 	const dialogAniTrans = (node: HTMLElement, params: any, options: { direction: 'in' | 'out' | 'both' }) => {
-// 	delay?: number,
-// 	duration?: number,
-// 	easing?: (t: number) => number,
-// 	css?: (t: number, u: number) => string,
-// 	tick?: (t: number, u: number) => void
-// }
-
-	const outAni = async (node: HTMLDialogElement) => {
-		console.log(node)
-
-		await animate(node, {
-			opacity: [1, 0],
-		}, {
-			duration: 2,
-			easing: 'linear',
-		}).finished
-
-		console.log('out')
-
-		return
+	const onOpenAction = (node: HTMLDialogElement) => {
+		node.showModal()
+		node.focus()
+		animateEnter()
 	}
 </script>
 
-{#if open}
+{#if isBeingRendered}
+	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<dialog
 		bind:this={dialog}
-		out:outAni
+		use:onOpenAction
+		onkeydown={(e) => {
+			if (e.key === 'Escape') {
+				open = false
+				e.preventDefault()
+			}
+		}}
 		onclose={() => {
-			close()
+			// There is no way to prevent dialog close event
+			isBeingRendered = false
+			open = false
 		}}
 		class={clx(
-			'tonal-elevation-4 flex min-w-280px max-w-560px select-none flex-col rounded-24px bg-surface p-24px text-onSurface will-change-[clip-path]',
+			'tonal-elevation-4 focus:outline-none flex min-w-280px max-w-560px select-none flex-col rounded-24px bg-surface p-24px text-onSurface will-change-[clip-path]',
 			className,
 		)}
 	>
@@ -172,7 +188,7 @@
 						class="min-w-60px"
 						onclick={() => {
 							button.action?.()
-							close()
+							open = false
 						}}
 					>
 						{button.title}
@@ -196,8 +212,4 @@
 		opacity: 0;
 		transition: opacity 2s ease-in-out, overlay 2s ease-out allow-discrete;
 	} */
-
-	dialog {
-		view-transition-name: dialog;
-	}
 </style>
