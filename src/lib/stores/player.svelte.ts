@@ -1,5 +1,16 @@
-import { getContext, setContext } from "svelte"
-import invariant from "tiny-invariant"
+import { getContext, setContext } from 'svelte'
+import invariant from 'tiny-invariant'
+
+class Queue {
+	shuffle = $state(false)
+
+	currentIndex = $state(-1)
+
+	#itemsIdsOriginalOrder = $state([])
+	#itemsIdsShuffled = $state([])
+
+	itemsIds = $derived(this.shuffle ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder)
+}
 
 class PlayerStore {
 	playing = $state(false)

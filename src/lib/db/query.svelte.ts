@@ -1,7 +1,6 @@
 import type { IndexNames, StoreNames } from 'idb'
-import { readable, derived, type Readable, type Writable, writable } from 'svelte/store'
 import { type DBChangeRecordList, channel } from './channel'
-import { getAllKeys, getValue, type AppDB, isStoreEmpty } from './get-db'
+import { getAllKeys, getValue, type AppDB } from './get-db'
 
 // TODO. Add support for cleaning up the cache.
 const cache = new Map<string, unknown>()
@@ -57,58 +56,62 @@ export interface QueryActions<R> {
 
 export type QueryFetcher<R, S> = (source: S) => Promise<R> | R
 
-type QueryOptionsWithoutSource<R> = {
-	fetcher: () => Promise<R> | R
-}
-
-type QueryOptionsWithSource<R, S> = {
-	source: S
+export type QueryOptions<S, R> = {
+	source?: () => S
 	fetcher: (source: S) => Promise<R> | R
-}
-
-type BaseQueryOptions<R> = {
-	onDatabaseChange(e: DBChangeRecordList<R>, actions: QueryActions<R>): void
+	onDatabaseChange: (e: DBChangeRecordList<R>, actions: QueryActions<R>) => void
 	initialValue?: R
 }
 
-export type QueryOptions<R, S> = (QueryOptionsWithoutSource<R> | QueryOptionsWithSource<R, S>) &
-	BaseQueryOptions<R>
+export const query = async <S, R>(options: QueryOptions<S, R>) => {
+	const controller = new AbortController()
 
-export const query = <R, S>(options: QueryOptions<R, S>) =>
-	readable(options.initialValue, (set) => {
-		const controller = new AbortController()
+	let value = $state(options.initialValue)
+	let initialRun = true
 
-		const refetch = async () => {
-			let result: R
+	const getSource = () => options.source?.() as S
 
-			if ('source' in options) {
-				result = await options.fetcher(options.source)
-			} else {
-				result = await options.fetcher()
-			}
+	// TODO. Cleanup
+	$effect.root(() => {
+		const source = getSource()
 
-			set(result)
+		if (initialRun) {
+			initialRun = false
+			return
 		}
 
-		channel.addEventListener(
-			'message',
-			(e: MessageEvent<DBChangeRecordList<R>>) => {
-				options.onDatabaseChange(e.data, { mutate: set, refetch })
-			},
-			{
-				signal: controller.signal,
-			},
-		)
-
-		return () => {
-			controller.abort()
-		}
+		fetchValue(source)
 	})
 
-export const nah = query({
-	source: 1,
-	fetcher: () => Promise.resolve(1),
-})
+	const fetchValue = async (source: S) => {
+		const result = await options.fetcher(source)
+
+		value = result
+	}
+
+	const refetch = () => fetchValue(getSource())
+
+	// Initial fetch is blocking
+	await refetch()
+
+	channel.addEventListener(
+		'message',
+		(e: MessageEvent<DBChangeRecordList<R>>) => {
+			options.onDatabaseChange(e.data, { mutate: (v) => (value = v), refetch })
+		},
+		{
+			signal: controller.signal,
+		},
+	)
+
+	// TODO. Cleanup
+
+	return {
+		get value() {
+			return value
+		},
+	}
+}
 
 type AppStoreNames = StoreNames<AppDB>
 

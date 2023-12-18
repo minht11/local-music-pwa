@@ -7,7 +7,7 @@
 	const player = usePlayer()
 </script>
 
-<div class="flex gap-8px">
+<div class="flex gap-8px items-center">
 	<IconButton onclick={player.playNext}>
 		<PlayPreviousNextIcon type="previous" />
 	</IconButton>

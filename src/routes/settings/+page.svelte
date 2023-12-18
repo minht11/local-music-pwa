@@ -5,6 +5,7 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import InfoBanner from '$lib/components/InfoBanner.svelte'
 	import DirectoryListItem from './DirectoryListItem.svelte'
+	import Separator from '$lib/components/Separator.svelte'
 
 	let currentTracksCount = 0
 
@@ -25,10 +26,13 @@
 
 	const isFileSystemAccessSupported = true
 
-	let isDialogOpen = false
+	let dialogsOpen = $state({
+		addDirectory: false,
+		replaceDirectory: false,
+	})
 
 	const onImportTracksHandler = async () => {
-		isDialogOpen = true
+		dialogsOpen.addDirectory = true
 		// const directory = await showDirectoryPicker()
 
 		// const a = directory.entries()
@@ -64,7 +68,7 @@
 		</div>
 		<div class="flex flex-col-reverse gap-8px xs:flex-row">
 			<Button kind="outlined" class="xs:mr-auto">Clear data</Button>
-			<Button kind="toned" onclick={onImportTracksHandler}>
+			<Button kind="toned" onclick={() => { dialogsOpen.addDirectory = true }}>
 				{#if isFileSystemAccessSupported}
 					Add directory
 				{:else}
@@ -124,6 +128,22 @@
 	</div>
 </section>
 
+<section class="card mx-auto w-full max-w-[900px] mt-24px text-body-lg">
+	<div class="text-title-sm px-16px pt-16px">
+		Appearance
+	</div>
+
+	<div class="flex justify-between items-center p-16px">
+		<div>Application theme</div>
+	</div>
+
+	<Separator />
+
+	<div class="flex justify-between items-center p-16px">
+		<div>Reduced motion</div>
+	</div>
+</section>
+
 <!-- <Dialog
 	bind:open={isDialogOpen}
 	class="max-w-[340px]"
@@ -136,10 +156,10 @@
 </Dialog> -->
 
 <Dialog
-	bind:open={isDialogOpen}
+	bind:open={dialogsOpen.addDirectory}
 	title="Replace directory 'Music' with 'Wow'?"
 	buttons={[{ title: 'Cancel' }, { title: 'Ok' }]}
-	class="max-w-[340px]"
+	class="max-w-340px!"
 >
 	Existing directory inside your Library 'Wow' is a subdirectory of 'Music' directory. Do you want
 	it to be replaced?

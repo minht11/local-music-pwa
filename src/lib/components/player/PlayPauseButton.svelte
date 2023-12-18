@@ -7,6 +7,7 @@
 
 <Button
 	onclick={onclick}
+	class="h-56px w-56px p-0 rounded-16px"
 >
 	<PlayPauseIcon playing={playing} />
 </Button>

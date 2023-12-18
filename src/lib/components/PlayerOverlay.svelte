@@ -31,7 +31,7 @@
 		<MainControls />
 
 		<div class="ml-auto">
-			<IconButton icon="moreVertical" class="bg-secondary text-onSecondary" />
+			<IconButton icon="moreVertical" />
 		</div>
 	</div>
 </div>
