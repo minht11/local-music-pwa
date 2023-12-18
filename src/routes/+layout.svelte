@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { page } from '$app/stores'
-	import { goto, onNavigate } from '$app/navigation'
+	import { page, navigating } from '$app/stores'
+	import { goto, onNavigate,  } from '$app/navigation'
 	import type { LayoutData } from './$types'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import { wait } from '$lib/helpers/utils'
@@ -96,6 +96,10 @@
 <svelte:head>
 	<title>{pageData.pageTitle || pageData.title}</title>
 </svelte:head>
+
+{#if $navigating}
+	<div class="fixed z-20 top-0 inset-x-0 bg-onTertiaryContainer h-4px" />
+{/if}
 
 {#key data.pathname}
 	<div class="flex h-full w-full flex-col">
