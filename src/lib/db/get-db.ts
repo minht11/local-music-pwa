@@ -1,11 +1,5 @@
-import type {
-	DBSchema,
-	IDBPDatabase,
-	IDBPObjectStore,
-	IndexNames,
-	StoreNames,
-} from 'idb/with-async-ittr'
-import { openDB } from 'idb/with-async-ittr'
+import type { DBSchema, IDBPDatabase, IDBPObjectStore, IndexNames, StoreNames } from 'idb'
+import { openDB } from 'idb'
 import type { Album, Artist, Track } from './entities'
 
 export interface AppDB extends DBSchema {
@@ -41,6 +35,8 @@ export interface AppDB extends DBSchema {
 	}
 }
 
+export type AppStoreNames = StoreNames<AppDB>
+
 const createIndexes = <DBTypes extends DBSchema | unknown, Name extends StoreNames<DBTypes>>(
 	store: IDBPObjectStore<DBTypes, ArrayLike<StoreNames<DBTypes>>, Name, 'versionchange'>,
 	indexes: readonly IndexNames<DBTypes, Name>[],
@@ -50,8 +46,8 @@ const createIndexes = <DBTypes extends DBSchema | unknown, Name extends StoreNam
 	})
 }
 
-const createUniqueNameIndex = <Name extends StoreNames<AppDB>>(
-	store: IDBPObjectStore<AppDB, ArrayLike<StoreNames<AppDB>>, Name, 'versionchange'>,
+const createUniqueNameIndex = <Name extends AppStoreNames>(
+	store: IDBPObjectStore<AppDB, ArrayLike<AppStoreNames>, Name, 'versionchange'>,
 ) => {
 	store.createIndex('name', 'name', { unique: true })
 }
@@ -97,26 +93,23 @@ export const getDB = () =>
 				const store = createStore(e, 'artists')
 				createUniqueNameIndex(store)
 			}
-
-			// const store = createStore(e, 'artists')
 		},
 	})
 
 export const getAllKeys = async <
-	Name extends StoreNames<AppDB>,
+	Name extends AppStoreNames,
 	Indexes extends IndexNames<AppDB, Name>,
 >(
 	storeName: Name,
 	index: Indexes,
 ) => {
 	const db = await getDB()
-	// const store = db.transaction(storeName).objectStore(storeName)
 	const value = await db.getAllKeysFromIndex(storeName, index)
 
 	return Object.values(value)
 }
 
-export const getValue = async <Name extends StoreNames<AppDB>>(storeName: Name, id?: number) => {
+export const getValue = async <Name extends AppStoreNames>(storeName: Name, id?: number) => {
 	if (id === undefined) {
 		return undefined
 	}
@@ -126,7 +119,7 @@ export const getValue = async <Name extends StoreNames<AppDB>>(storeName: Name, 
 	return db.get(storeName, id)
 }
 
-export const isStoreEmpty = async <Name extends StoreNames<AppDB>>(storeName: Name) => {
+export const isStoreEmpty = async <Name extends AppStoreNames>(storeName: Name) => {
 	const db = await getDB()
 	const store = db.transaction(storeName).objectStore(storeName)
 	const cursor = await store.openKeyCursor()
