@@ -2,6 +2,11 @@ import type { DBSchema, IDBPDatabase, IDBPObjectStore, IndexNames, StoreNames } 
 import { openDB } from 'idb'
 import type { Album, Artist, Track } from './entities'
 
+interface DirectoryDb {
+	name: string
+	handle: FileSystemDirectoryHandle
+}
+
 export interface AppDB extends DBSchema {
 	tracks: {
 		key: number
@@ -33,6 +38,10 @@ export interface AppDB extends DBSchema {
 			name: string
 		}
 	}
+	directories: {
+		key: number
+		value: DirectoryDb
+	}
 }
 
 export type AppStoreNames = StoreNames<AppDB>
@@ -41,12 +50,14 @@ const createIndexes = <DBTypes extends DBSchema | unknown, Name extends StoreNam
 	store: IDBPObjectStore<DBTypes, ArrayLike<StoreNames<DBTypes>>, Name, 'versionchange'>,
 	indexes: readonly IndexNames<DBTypes, Name>[],
 ) => {
-	indexes.forEach((name) => {
+	for (const name of indexes) {
 		store.createIndex(name, name, { unique: false })
-	})
+	}
 }
 
-const createUniqueNameIndex = <Name extends AppStoreNames>(
+const createUniqueNameIndex = <
+	Name extends Extract<AppStoreNames, 'albums' | 'tracks' | 'artists'>,
+>(
 	store: IDBPObjectStore<AppDB, ArrayLike<AppStoreNames>, Name, 'versionchange'>,
 ) => {
 	store.createIndex('name', 'name', { unique: true })
@@ -92,6 +103,10 @@ export const getDB = () =>
 			if (!objectStoreNames.contains('artists')) {
 				const store = createStore(e, 'artists')
 				createUniqueNameIndex(store)
+			}
+
+			if (!objectStoreNames.contains('directories')) {
+				createStore(e, 'directories')
 			}
 		},
 	})

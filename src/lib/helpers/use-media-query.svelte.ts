@@ -10,6 +10,6 @@ export const useMediaQuery = (query: string) => {
 	return {
 		get value() {
 			return isMatched
-		}
+		},
 	}
 }

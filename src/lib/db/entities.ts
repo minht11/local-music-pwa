@@ -7,7 +7,7 @@ export const MusicItemType = {
 	PLAYLIST: 3,
 } as const
 
-export type MusicItemType = typeof MusicItemType[keyof typeof MusicItemType]
+export type MusicItemType = (typeof MusicItemType)[keyof typeof MusicItemType]
 
 export const MusicItemKey = {
 	NAME: 'name',
@@ -18,7 +18,7 @@ export const MusicItemKey = {
 	DATE_CREATED: 'dateCreated',
 } as const
 
-export type MusicItemKey = typeof MusicItemKey[keyof typeof MusicItemKey]
+export type MusicItemKey = (typeof MusicItemKey)[keyof typeof MusicItemKey]
 
 export interface BaseMusicItem {
 	id: number

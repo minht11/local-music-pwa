@@ -97,7 +97,10 @@ export const query = async <S, R>(options: QueryOptions<S, R>) => {
 	channel.addEventListener(
 		'message',
 		(e: MessageEvent<DBChangeRecordList<R>>) => {
-			options.onDatabaseChange(e.data, { mutate: (v) => (value = v), refetch })
+			options.onDatabaseChange(e.data, {
+				mutate: (v) => (value = v),
+				refetch,
+			})
 		},
 		{
 			signal: controller.signal,

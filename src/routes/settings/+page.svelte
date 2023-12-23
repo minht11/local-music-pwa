@@ -6,6 +6,7 @@
 	import InfoBanner from '$lib/components/InfoBanner.svelte'
 	import DirectoryListItem from './DirectoryListItem.svelte'
 	import Separator from '$lib/components/Separator.svelte'
+	import { importTracks } from '$lib/modules/import-tracks'
 
 	let currentTracksCount = 0
 
@@ -68,7 +69,7 @@
 		</div>
 		<div class="flex flex-col-reverse gap-8px xs:flex-row">
 			<Button kind="outlined" class="xs:mr-auto">Clear data</Button>
-			<Button kind="toned" onclick={() => { dialogsOpen.addDirectory = true }}>
+			<Button kind="toned" onclick={importTracks}>
 				{#if isFileSystemAccessSupported}
 					Add directory
 				{:else}
@@ -129,9 +130,7 @@
 </section>
 
 <section class="card mx-auto w-full max-w-[900px] mt-24px text-body-lg">
-	<div class="text-title-sm px-16px pt-16px">
-		Appearance
-	</div>
+	<div class="text-title-sm px-16px pt-16px">Appearance</div>
 
 	<div class="flex justify-between items-center p-16px">
 		<div>Application theme</div>

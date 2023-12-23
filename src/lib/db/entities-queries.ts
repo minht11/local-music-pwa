@@ -7,5 +7,5 @@ export const queryEntityKeys = () =>
 		fetcher: () => getAllKeys('artists', 'name'),
 		onDatabaseChange(e, actions) {
 			// actions.mutate(e)
-		}
+		},
 	})

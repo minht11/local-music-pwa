@@ -1,9 +1,9 @@
 import {
+	CorePalette,
+	argbFromHex,
 	blueFromArgb,
 	greenFromArgb,
 	redFromArgb,
-	argbFromHex,
-	CorePalette,
 } from '@material/material-color-utilities'
 
 export { argbFromHex }
