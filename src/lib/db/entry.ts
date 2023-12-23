@@ -9,5 +9,3 @@ export const time = readable(new Date(), (set) => {
 
 	return () => clearInterval(interval)
 })
-
-export {}

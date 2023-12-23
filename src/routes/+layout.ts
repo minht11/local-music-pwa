@@ -1,6 +1,6 @@
-import type { LayoutLoad } from './$types'
 import '@unocss/reset/tailwind.css'
 import '../app.css'
+import type { LayoutLoad } from './$types'
 
 export const ssr = false
 

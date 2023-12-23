@@ -2,10 +2,10 @@
 
 import { Buffer } from 'buffer'
 import { parseBuffer as parseMetadata } from 'music-metadata/lib/core'
-import { TrackParseMessage } from '../message-types'
-import type { UnknownTrack } from '../../../types/types'
-import { extractColorFromImage } from './color-from-image'
 import { doesTrackAlreadyExist, importTrack } from '~/db/actions/import'
+import type { UnknownTrack } from '../../../types/types'
+import { TrackParseMessage } from '../message-types'
+import { extractColorFromImage } from './color-from-image'
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

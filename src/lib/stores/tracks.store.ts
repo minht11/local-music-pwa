@@ -1,5 +1,5 @@
 import type { Track } from '$lib/db/entities'
-import { getDB, type AppStoreNames } from '$lib/db/get-db'
+import { type AppStoreNames, getDB } from '$lib/db/get-db'
 import { WeakLRUCache } from 'weak-lru-cache'
 
 const getValueById = async <Names extends AppStoreNames>(storeName: Names, id: number) => {

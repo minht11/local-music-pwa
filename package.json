@@ -10,6 +10,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "biome lint ./src",
+		"lint-fix": "biome check ./src --apply",
 		"format": "biome format ./src",
 		"format-fix": "biome format ./src --write",
 		"generate-tw-colors": "node scripts/generate-tw-colors.js"

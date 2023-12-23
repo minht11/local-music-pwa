@@ -1,4 +1,4 @@
-import { argbFromRgb, QuantizerCelebi, Score } from '@material/material-color-utilities'
+import { QuantizerCelebi, Score, argbFromRgb } from '@material/material-color-utilities'
 
 const getImageData = async (blob: Blob): Promise<Uint8ClampedArray> => {
 	const bitmap = await createImageBitmap(blob)

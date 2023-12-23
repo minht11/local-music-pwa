@@ -1,4 +1,4 @@
-import { getContext, type Snippet } from 'svelte'
+import { type Snippet, getContext } from 'svelte'
 import invariant from 'tiny-invariant'
 
 export interface RootLayout {

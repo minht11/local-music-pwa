@@ -1,6 +1,6 @@
 import type { IndexNames, StoreNames } from 'idb'
 import { type DBChangeRecordList, channel } from './channel'
-import { getAllKeys, getValue, type AppDB } from './get-db'
+import { type AppDB, getAllKeys, getValue } from './get-db'
 
 // TODO. Add support for cleaning up the cache.
 const cache = new Map<string, unknown>()
