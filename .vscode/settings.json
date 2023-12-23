@@ -1,6 +1,21 @@
 {
-	"explorer.fileNesting.enabled": false,
 	"svelte.plugin.svelte.compilerWarnings": {
 		"missing-declaration": "ignore"
+	},
+	"editor.codeActionsOnSave": {
+		"source.organizeImports.biome": true,
+		"quickfix.biome": true
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
 	}
 }

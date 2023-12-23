@@ -19,7 +19,7 @@
 		"noUncheckedIndexedAccess": true,
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
-		"importsNotUsedAsValues": "error",
+		"verbatimModuleSyntax": true,
 		"types": [
 			"@types/dom-navigation",
 			"@types/offscreencanvas",
