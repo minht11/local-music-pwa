@@ -27,7 +27,6 @@
 				"useSimplifiedLogicExpression": "error"
 			},
 			"style": {
-				"noNamespace": "error",
 				"noNegationElse": "error",
 				"useBlockStatements": "error",
 				"useCollapsedElseIf": "error",
