@@ -1,6 +1,4 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages'
-
 	const { data } = $props()
 
 	const { time } = data

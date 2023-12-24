@@ -19,6 +19,9 @@ export default defineConfig({
 				{
 					'$lib/helpers/clx.ts': ['clx'],
 				},
+				{
+					'$paraglide/messages': [['*', 'm']],
+				},
 			],
 		}),
 		paraglide({
