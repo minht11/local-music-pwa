@@ -3,8 +3,8 @@
 		"missing-declaration": "ignore"
 	},
 	"editor.codeActionsOnSave": {
-		"source.organizeImports.biome": true,
-		"quickfix.biome": true
+		"source.organizeImports.biome": "explicit",
+		"quickfix.biome": "explicit"
 	},
 	"[jsonc]": {
 		"editor.defaultFormatter": "biomejs.biome"

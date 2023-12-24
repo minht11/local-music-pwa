@@ -1,10 +1,13 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
+import * as m from '$paraglide/messages'
 
 export const removeTracks = async (ids: readonly number[]) => {
 	const id = 'remove-tracks'
 	snackbar({
 		id,
-		message: `Removing selected ${pluralize(ids.length, 'track')}`,
+		message: m.removingSelectedTracks({
+			count: ids.length,
+		}),
 		duration: false,
 	})
 
@@ -12,6 +15,8 @@ export const removeTracks = async (ids: readonly number[]) => {
 
 	snackbar({
 		id,
-		message: `Successfully removed ${ids.length} ${pluralize(ids.length, 'track')}`,
+		message: m.successfullyRemovedTracks({
+			count: ids.length,
+		}),
 	})
 }

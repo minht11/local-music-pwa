@@ -1,5 +1,5 @@
 {
-	"extends": "./.svelte-kit/tsconfig.json",
+	"extends": "./.generated/svelte-kit/tsconfig.json",
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": true,
@@ -25,7 +25,7 @@
 			"@types/offscreencanvas",
 			"@types/wicg-file-system-access",
 			"@types/dom-view-transitions",
-			"./auto-imports.d.ts"
+			"./.generated/types/auto-imports.d.ts"
 		]
 	}
 }

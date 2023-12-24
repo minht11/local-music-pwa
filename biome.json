@@ -8,7 +8,7 @@
 			"node_modules",
 			"dist",
 			"build",
-			".svelte-kit",
+			".generated",
 			".DS_Store",
 			".env",
 			".env.*",

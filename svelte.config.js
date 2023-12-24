@@ -5,11 +5,15 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'
 const config = {
 	preprocess: vitePreprocess(),
 	kit: {
+		outDir: './.generated/svelte-kit',
 		adapter: adapter({
 			fallback: 'index.html',
 		}),
 		prerender: {
 			entries: [],
+		},
+		alias: {
+			$paraglide: './.generated/paraglide',
 		},
 	},
 }
