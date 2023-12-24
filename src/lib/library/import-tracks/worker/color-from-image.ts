@@ -1,4 +1,5 @@
 import { QuantizerCelebi, Score, argbFromRgb } from '@material/material-color-utilities'
+import invariant from 'tiny-invariant'
 
 const getImageData = async (blob: Blob): Promise<Uint8ClampedArray> => {
 	const bitmap = await createImageBitmap(blob)
@@ -7,16 +8,14 @@ const getImageData = async (blob: Blob): Promise<Uint8ClampedArray> => {
 
 	const canvas = new OffscreenCanvas(width, height)
 	const ctx = canvas.getContext('2d')
-	if (!ctx) {
-		throw new Error()
-	}
+
+	invariant(ctx, 'Canvas context is null')
 
 	ctx.drawImage(bitmap, 0, 0)
 	return ctx.getImageData(0, 0, width, height).data
 }
 
 export const extractColorFromImage = async (blob: Blob): Promise<number | undefined> => {
-	// Safari doesn't support it yet.
 	if (globalThis.OffscreenCanvas === undefined) {
 		return undefined
 	}

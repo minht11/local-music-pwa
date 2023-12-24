@@ -39,15 +39,11 @@ export const deleteTrack = async (id: number) => {
 export type TrackState =
 	| {
 			track: Track
-			loading: true
-	  }
-	| {
-			track: undefined
 			loading: false
 	  }
 	| {
-			track: Track | undefined
-			loading: boolean
+			track: undefined
+			loading: true
 	  }
 
 export const useTrack = (id: number) => {
@@ -56,14 +52,22 @@ export const useTrack = (id: number) => {
 	const state = $state<TrackState>({
 		track: cachedTrack,
 		loading: cachedTrack === undefined,
-	})
+	} as TrackState)
 
 	if (state.loading) {
 		getTrack(id).then((t) => {
 			state.loading = false
 			state.track = t
+
+			console.log('Track loaded', t)
 		})
 	}
 
 	return state
+}
+
+export const getTracksIds = async () => {
+	const db = await getDB()
+
+	return db.getAllKeys('tracks')
 }

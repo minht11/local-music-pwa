@@ -1,22 +1,5 @@
-import { readable } from 'svelte/store'
+import { getTracksIds } from '$lib/library/tracks.svelte.ts'
 import type { PageLoad } from './$types'
-
-const createTimeStore = () => {
-	const time = readable(new Date(), (set) => {
-		set(new Date())
-
-		const interval = setInterval(() => {
-			set(new Date())
-		}, 1000)
-
-		return () => {
-			console.log('Clearing interval')
-			clearInterval(interval)
-		}
-	})
-
-	return time
-}
 
 const DATA_MAP = {
 	tracks: {
@@ -33,12 +16,12 @@ const DATA_MAP = {
 	},
 } as const
 
-export const load: PageLoad = (event) => {
+export const load: PageLoad = async (event) => {
 	const slug = event.params.slug
 	const data = DATA_MAP[slug]
 
 	return {
-		time: createTimeStore(),
+		tracks: await getTracksIds(),
 		hideBackButton: true,
 		title: 'Library',
 		pageTitle: `Library - ${data.title}`,

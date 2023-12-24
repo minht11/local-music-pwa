@@ -12,6 +12,12 @@ declare global {
 	}
 }
 
+interface Navigator {
+	userAgentData: {
+		mobile: boolean
+	}
+}
+
 interface PromiseConstructor {
 	withResolvers<T>(): {
 		resolve: (value?: T) => void

@@ -6,7 +6,7 @@
 	import InfoBanner from '$lib/components/InfoBanner.svelte'
 	import DirectoryListItem from './DirectoryListItem.svelte'
 	import Separator from '$lib/components/Separator.svelte'
-	import { importTracks } from '$lib/modules/import-tracks'
+	import { importTracks } from '$lib/library/import-tracks/import-tracks'
 
 	let currentTracksCount = 0
 
@@ -33,7 +33,8 @@
 	})
 
 	const onImportTracksHandler = async () => {
-		dialogsOpen.addDirectory = true
+		await importTracks()
+
 		// const directory = await showDirectoryPicker()
 
 		// const a = directory.entries()
@@ -69,7 +70,7 @@
 		</div>
 		<div class="flex flex-col-reverse gap-8px xs:flex-row">
 			<Button kind="outlined" class="xs:mr-auto">Clear data</Button>
-			<Button kind="toned" onclick={importTracks}>
+			<Button kind="toned" onclick={onImportTracksHandler}>
 				{#if isFileSystemAccessSupported}
 					Add directory
 				{:else}
