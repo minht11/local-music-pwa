@@ -1,4 +1,4 @@
-import { IS_DEVICE_A_MOBILE, wait } from '$lib/helpers/utils'
+import { isMobile, wait } from '$lib/helpers/utils'
 
 export const isNativeFileSystemSupported = 'showDirectoryPicker' in globalThis
 
@@ -54,7 +54,7 @@ export const getFilesFromDirectory = async (extensions: string[]): Promise<FileE
 
 	// Mobile devices do not support directory selection,
 	// so allow them to pick individual files instead.
-	if (IS_DEVICE_A_MOBILE) {
+	if (isMobile()) {
 		directoryElement.accept = extensions.map((ext) => `.${ext}`).join(', ')
 
 		directoryElement.multiple = true
