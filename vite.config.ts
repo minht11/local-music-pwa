@@ -10,6 +10,28 @@ export default defineConfig({
 			allow: ['./.generated'],
 		},
 	},
+	build: {
+		target: 'esnext',
+		cssCodeSplit: false,
+		minify: 'terser',
+		terserOptions: {
+			output: {
+				comments: false,
+			},
+			module: true,
+			compress: {
+				passes: 3,
+				unsafe_math: true,
+				unsafe_methods: true,
+				unsafe_arrows: true,
+			},
+			// mangle: {
+			// 	properties: {
+			// 		regex: /^_/,
+			// 	},
+			// },
+		},
+	},
 	plugins: [
 		UnoCSS(),
 		sveltekit(),
