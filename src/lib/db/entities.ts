@@ -1,7 +1,5 @@
 import type { FileEntity } from '$lib/helpers/file-system'
 
-export type ImageType = Blob | undefined
-
 export const MusicItemType = {
 	TRACK: 0,
 	ALBUM: 1,
@@ -38,7 +36,7 @@ export interface UnknownTrack {
 	genre: string[]
 	trackNo?: number
 	trackOf?: number
-	image?: ImageType
+	image?: Blob
 	file: FileEntity
 	primaryColor?: number
 	isFavorite: boolean
@@ -52,7 +50,7 @@ export interface Album extends BaseMusicItem {
 	type: typeof MusicItemType.ALBUM
 	artists: string[]
 	year?: string
-	image?: ImageType
+	image?: Blob
 }
 
 export interface Artist extends BaseMusicItem {

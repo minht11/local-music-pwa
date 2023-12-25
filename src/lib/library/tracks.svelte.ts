@@ -1,5 +1,6 @@
 import type { Track } from '$lib/db/entities'
 import { type AppStoreNames, getDB } from '$lib/db/get-db'
+import { assign } from '$lib/helpers/utils'
 import { WeakLRUCache } from 'weak-lru-cache'
 
 const getValueById = async <Names extends AppStoreNames>(storeName: Names, id: number) => {
@@ -56,10 +57,10 @@ export const useTrack = (id: number) => {
 
 	if (state.loading) {
 		getTrack(id).then((t) => {
-			state.loading = false
-			state.track = t
-
-			console.log('Track loaded', t)
+			assign(state as TrackState, {
+				loading: false,
+				track: t,
+			})
 		})
 	}
 

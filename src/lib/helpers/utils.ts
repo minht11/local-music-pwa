@@ -1,5 +1,9 @@
 const isMobile = () => {
-	if (navigator.userAgentData) {
+	if (!window) {
+		return false
+	}
+
+	if (window.navigator.userAgentData) {
 		return navigator.userAgentData.mobile
 	}
 
@@ -15,3 +19,8 @@ export const wait = (duration: number): Promise<void> =>
 
 export const toggleReverseArray = <T>(items: T[], condition = false) =>
 	condition ? [...items].reverse() : items
+
+export const assign = <T extends Record<PropertyKey, unknown>, S extends Partial<T>>(
+	target: T,
+	source: S,
+): S & T => Object.assign(target, source)

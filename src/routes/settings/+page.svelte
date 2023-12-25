@@ -6,7 +6,6 @@
 	import InfoBanner from '$lib/components/InfoBanner.svelte'
 	import DirectoryListItem from './DirectoryListItem.svelte'
 	import Separator from '$lib/components/Separator.svelte'
-	import { importTracks } from '$lib/library/import-tracks/import-tracks'
 
 	let currentTracksCount = 0
 
@@ -33,27 +32,9 @@
 	})
 
 	const onImportTracksHandler = async () => {
+		const { importTracks } = await import('$lib/library/import-tracks/import-tracks')
+
 		await importTracks()
-
-		// const directory = await showDirectoryPicker()
-
-		// const a = directory.entries()
-
-		// console.log(directory)
-
-		// const bb = []
-
-		// for await (const entry of a) {
-		// 	bb.push(entry)
-		// }
-
-		// console.log(bb)
-		// const a = window.showDirectoryPicker()
-		// const dir = await directoryOpen({
-		// 	startIn: 'music',
-		// 	recursive: false,
-		// })
-		// console.log(dir)
 	}
 </script>
 

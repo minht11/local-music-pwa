@@ -9,6 +9,7 @@
 	import invariant from 'tiny-invariant'
 	import { providePlayer } from '$lib/stores/player.svelte'
 	import { pendingRipples } from '$lib/actions/ripple'
+	import { provideScrollTarget } from '$lib/helpers/scroll-target.svelte'
 
 	const { data, children } = $props<{
 		data: LayoutData
@@ -91,6 +92,10 @@
 	})
 
 	providePlayer()
+
+	let scrollTarget = $state<HTMLElement>()!
+
+	provideScrollTarget(() => scrollTarget)
 </script>
 
 <svelte:head>
@@ -122,7 +127,8 @@
 				</div>
 			</div>
 		</header>
-		<div class="flex flex-grow flex-col overflow-auto bg-background">
+
+		<div bind:this={scrollTarget} class="flex flex-grow flex-col overflow-auto bg-background">
 			<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
 			<div class={clx(
 				'mx-auto w-full max-w-[1280px] flex-grow px-8px pt-16px',
