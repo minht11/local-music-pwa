@@ -44,9 +44,6 @@ dependencies:
   music-metadata:
     specifier: ^7.14.0
     version: 7.14.0
-  svelte-portal:
-    specifier: ^2.2.0
-    version: 2.2.0
   tiny-invariant:
     specifier: ^1.3.1
     version: 1.3.1
@@ -2817,10 +2814,6 @@ packages:
     dependencies:
       svelte: 5.0.0-next.26
     dev: true
-
-  /svelte-portal@2.2.0:
-    resolution: {integrity: sha512-jhtZWtD6cUE2nMw46dJ5VXWYiqnER+JH+V/BmNBQ5fNP/YdsJCpJi+DemUy9msklqGb0f+wLhJPBtKHLWQvzjg==}
-    dev: false
 
   /svelte-preprocess@5.1.2(@babel/core@7.23.6)(postcss@8.4.32)(svelte@5.0.0-next.26)(typescript@5.3.3):
     resolution: {integrity: sha512-XF0aliMAcYnP4hLETvB6HRAMnaL09ASYT1Z2I1Gwu0nz6xbdg/dSgAEthtFZJA4AKrNhFDFdmUDO+H9d/6xg5g==}
