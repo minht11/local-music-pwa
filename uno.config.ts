@@ -1,5 +1,5 @@
 import { defineConfig, presetUno } from 'unocss'
-import { getThemePaletteRgb, DEFAULT_THEME_ARGB } from './src/lib/theme'
+import { DEFAULT_THEME_ARGB, getThemePaletteRgb } from './src/lib/theme'
 
 const generateThemeVariables = async (isDark: boolean) => {
 	const tokens = await getThemePaletteRgb(DEFAULT_THEME_ARGB, isDark)
@@ -38,7 +38,16 @@ export default (async () => {
 				},
 			}),
 		],
+		rules: [
+			[
+				'scrollbar-gutter-stable',
+				{
+					'scrollbar-gutter': 'stable',
+				},
+			],
+		],
 		shortcuts: {
+			'scrollbar-gutter': 'scrollbar-gutter-stable',
 			'wh-full': 'w-full h-full',
 			'text-headline-md': 'text-28px leading-36px tracking-0 font-400',
 			'text-headline-sm': 'text-24px leading-32px tracking-0 font-400',

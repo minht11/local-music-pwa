@@ -140,9 +140,11 @@
 	</div>
 {/key}
 
-{#if !$page.data.hidePlayerOverlay}
+<div class="fixed flex px-8px flex-col overflow-hidden bottom-8px inset-x-0 pointer-events-none [&>*]:pointer-events-auto scrollbar-gutter-stable">
+	{#if !$page.data.hidePlayerOverlay}
 	<PlayerOverlay />
 {/if}
+</div>
 
 <style>
 	/* :global(.interactable) {
