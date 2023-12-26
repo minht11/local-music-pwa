@@ -128,10 +128,10 @@
 			</div>
 		</header>
 
-		<div bind:this={scrollTarget} class="flex flex-grow flex-col overflow-auto bg-background">
+		<div bind:this={scrollTarget} class="flex grow flex-col overflow-auto bg-background">
 			<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
 			<div class={clx(
-				'mx-auto w-full max-w-[1280px] flex-grow px-8px pt-16px',
+				'mx-auto w-full max-w-[1280px] grow px-8px pt-16px',
 				$page.data.hidePlayerOverlay ? 'pb-16px' : 'pb-120px scroll-pb-120px'
 			)}>
 				{@render children()}

@@ -22,3 +22,10 @@
 >
 	<path d={ICON_PATHS[type]} />
 </svg>
+
+<style>
+	svg {
+		height: var(--icon-size);
+		width: var(--icon-size);
+	}
+</style>

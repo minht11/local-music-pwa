@@ -7,6 +7,7 @@
 	import Button from '$lib/components/Button.svelte'
 	import { useRootLayout } from '$lib/app'
 	import type { Snippet } from 'svelte'
+	import { ripple } from '$lib/actions/ripple'
 
 const { children } = $props<{
 	children: Snippet
@@ -56,7 +57,7 @@ const { children } = $props<{
 {/snippet}
 
 <div class="page-layout">
-	<div class="flex flex-col gap-8px">
+	<div class="flex flex-col gap-8px sticky top-16px h-max w-max">
 		{#each navItems as item}
 			<Button
 				as="a"
@@ -77,8 +78,22 @@ const { children } = $props<{
 		{/each}
 	</div>
 
-	<div>
-		{@render children()}
+	<div class="flex flex-col">
+		<div class="ml-auto flex gap-8px">
+			<button use:ripple class="flex interactable rounded-8px h-32px px-8px gap-4px items-center text-label-md">
+				Name
+
+				<Icon type="chevronDown" class="h-16px w-16px" />
+			</button>
+
+			<IconButton icon="backArrow" class="[--icon-size:20px]" />
+			<!-- <button use:ripple class="flex interactable rounded-8px ">
+				<Icon type="backArrow" />
+			</button> -->
+		</div>
+		<div class="contain-paint w-full">
+			{@render children()}
+		</div>
 	</div>
 </div>
 

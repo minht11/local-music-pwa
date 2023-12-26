@@ -15,17 +15,15 @@
 	})
 </script>
 
-<div
-	style:height={`${$rowVirtualizer.getTotalSize()}px`}
-	style:width="100%"
-	style:position="relative"
->
+<div style:height={`${$rowVirtualizer.getTotalSize()}px`} class="contain-strict relative w-full">
 	{#each $rowVirtualizer.getVirtualItems() as virtualItem (virtualItem.key)}
 		{@const trackId = data.tracks[virtualItem.index]}
 		{#if trackId}
 			<TrackListItem
 				{trackId}
 				style={[
+					'contain: strict',
+					'will-change: transform;',
 					'position: absolute',
 					'top: 0',
 					'left: 0',
