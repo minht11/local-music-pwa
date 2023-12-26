@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page, navigating } from '$app/stores'
-	import { goto, onNavigate,  } from '$app/navigation'
+	import { goto, onNavigate } from '$app/navigation'
 	import type { LayoutData } from './$types'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import { wait } from '$lib/helpers/utils'
@@ -30,7 +30,7 @@
 
 	$effect(() => {
 		invariant(scrollThresholdEl, 'scrollThresholdEl is undefined')
-	
+
 		io.observe(scrollThresholdEl)
 
 		return () => {
@@ -44,10 +44,7 @@
 		}
 
 		return new Promise(async (resolve) => {
-			await Promise.race([
-				pendingRipples(),
-				wait(100),
-			])
+			await Promise.race([pendingRipples(), wait(100)])
 
 			document.startViewTransition(async () => {
 				resolve()
@@ -130,20 +127,24 @@
 
 		<div bind:this={scrollTarget} class="flex grow flex-col overflow-auto bg-background">
 			<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
-			<div class={clx(
-				'mx-auto w-full max-w-[1280px] grow px-8px pt-16px',
-				$page.data.hidePlayerOverlay ? 'pb-16px' : 'pb-120px scroll-pb-120px'
-			)}>
+			<div
+				class={clx(
+					'mx-auto w-full max-w-[1280px] grow px-8px pt-16px',
+					$page.data.hidePlayerOverlay ? 'pb-16px' : 'pb-120px scroll-pb-120px',
+				)}
+			>
 				{@render children()}
 			</div>
 		</div>
 	</div>
 {/key}
 
-<div class="fixed flex px-8px flex-col overflow-hidden bottom-8px inset-x-0 pointer-events-none [&>*]:pointer-events-auto scrollbar-gutter-stable">
+<div
+	class="fixed flex px-8px flex-col overflow-hidden bottom-8px inset-x-0 pointer-events-none [&>*]:pointer-events-auto scrollbar-gutter-stable"
+>
 	{#if !$page.data.hidePlayerOverlay}
-	<PlayerOverlay />
-{/if}
+		<PlayerOverlay />
+	{/if}
 </div>
 
 <style>

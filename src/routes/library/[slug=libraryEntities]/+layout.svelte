@@ -9,9 +9,9 @@
 	import type { Snippet } from 'svelte'
 	import { ripple } from '$lib/actions/ripple'
 
-const { children } = $props<{
-	children: Snippet
-}>()
+	const { children } = $props<{
+		children: Snippet
+	}>()
 
 	type LibrarySlug = LayoutParams['slug']
 
@@ -80,7 +80,10 @@ const { children } = $props<{
 
 	<div class="flex flex-col">
 		<div class="ml-auto flex gap-8px">
-			<button use:ripple class="flex interactable rounded-8px h-32px px-8px gap-4px items-center text-label-md">
+			<button
+				use:ripple
+				class="flex interactable rounded-8px h-32px px-8px gap-4px items-center text-label-md"
+			>
 				Name
 
 				<Icon type="chevronDown" class="h-16px w-16px" />

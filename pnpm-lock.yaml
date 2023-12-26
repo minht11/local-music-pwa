@@ -88,6 +88,12 @@ devDependencies:
   postcss-nesting:
     specifier: ^12.0.2
     version: 12.0.2(postcss@8.4.32)
+  prettier:
+    specifier: ^3.1.1
+    version: 3.1.1
+  prettier-plugin-svelte:
+    specifier: ^3.1.2
+    version: 3.1.2(prettier@3.1.1)(svelte@5.0.0-next.26)
   svelte:
     specifier: 5.0.0-next.26
     version: 5.0.0-next.26
@@ -2542,6 +2548,22 @@ packages:
       rusha: 0.8.14
     transitivePeerDependencies:
       - debug
+    dev: true
+
+  /prettier-plugin-svelte@3.1.2(prettier@3.1.1)(svelte@5.0.0-next.26):
+    resolution: {integrity: sha512-7xfMZtwgAWHMT0iZc8jN4o65zgbAQ3+O32V6W7pXrqNvKnHnkoyQCGCbKeUyXKZLbYE0YhFRnamfxfkEGxm8qA==}
+    peerDependencies:
+      prettier: ^3.0.0
+      svelte: ^3.2.0 || ^4.0.0-next.0 || ^5.0.0-next.0
+    dependencies:
+      prettier: 3.1.1
+      svelte: 5.0.0-next.26
+    dev: true
+
+  /prettier@3.1.1:
+    resolution: {integrity: sha512-22UbSzg8luF4UuZtzgiUOfcGM8s4tjBv6dJRT7j275NXsy2jb4aJa4NNveul5x4eqlF1wuhuR2RElK71RvmVaw==}
+    engines: {node: '>=14'}
+    hasBin: true
     dev: true
 
   /proxy-from-env@1.1.0:
