@@ -1,5 +1,8 @@
 // Icons taken from https://materialdesignicons.com/
 // and then minified using https://jakearchibald.github.io/svgomg/
+
+// TODO. Once chrome fixes https://bugs.chromium.org/p/chromium/issues/detail?id=1065069
+// refactor this file to svg sprite.
 export const ICON_PATHS = {
 	backArrow: 'M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z',
 	play: 'M8 5.14v14l11-7-11-7z',
