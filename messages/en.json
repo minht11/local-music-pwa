@@ -1,1 +1,11 @@
-{"$schema":"https://inlang.com/schema/inlang-message-format","play":"Play","pause":"Pause","removingSelectedTracks":"Removing selected {count} tracks","successfullyRemovedTracks":"Successfully removed {count} tracks"}
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"play": "Play",
+	"pause": "Pause",
+	"removingSelectedTracks": "Removing selected {count} tracks",
+	"successfullyRemovedTracks": "Successfully removed {count} tracks",
+	"tracks": "Tracks",
+	"albums": "Albums",
+	"artists": "Artists",
+	"playlists": "Playlists"
+}

@@ -63,6 +63,8 @@
 
 			<div class="flex flex-col">
 				<div>
+					{trackId}
+					{track.id}
 					{track.name}
 				</div>
 				<div>

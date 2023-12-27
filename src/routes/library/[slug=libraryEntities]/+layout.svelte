@@ -6,12 +6,8 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import { useRootLayout } from '$lib/app'
-	import type { Snippet } from 'svelte'
-	import { ripple } from '$lib/actions/ripple'
 
-	const { children } = $props<{
-		children: Snippet
-	}>()
+	const { children } = $props()
 
 	type LibrarySlug = LayoutParams['slug']
 
@@ -78,25 +74,8 @@
 		{/each}
 	</div>
 
-	<div class="flex flex-col">
-		<div class="ml-auto flex gap-8px">
-			<button
-				use:ripple
-				class="flex interactable rounded-8px h-32px px-8px gap-4px items-center text-label-md"
-			>
-				Name
-
-				<Icon type="chevronDown" class="h-16px w-16px" />
-			</button>
-
-			<IconButton icon="backArrow" class="[--icon-size:20px]" />
-			<!-- <button use:ripple class="flex interactable rounded-8px ">
-				<Icon type="backArrow" />
-			</button> -->
-		</div>
-		<div class="contain-paint w-full">
-			{@render children()}
-		</div>
+	<div class="contain-paint w-full">
+		{@render children()}
 	</div>
 </div>
 

@@ -16,13 +16,14 @@
 <Button
 	{...rest}
 	kind="blank"
-	class={clx('interactable flex justify-center h-44px w-44px items-center rounded-full', rest.class)}
+	class={clx(
+		'interactable flex justify-center h-44px w-44px items-center rounded-full',
+		rest.class,
+	)}
 >
-	{#if icon}
-		<Icon type={icon} />
-	{/if}
-
 	{#if children}
 		{@render children()}
+	{:else if icon}
+		<Icon type={icon} />
 	{/if}
 </Button>

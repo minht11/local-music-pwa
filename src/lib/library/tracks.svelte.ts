@@ -66,9 +66,3 @@ export const useTrack = (id: number) => {
 
 	return state
 }
-
-export const getTracksIds = async () => {
-	const db = await getDB()
-
-	return db.getAllKeys('tracks')
-}
