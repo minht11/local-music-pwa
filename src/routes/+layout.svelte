@@ -7,7 +7,7 @@
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import { setContext, type Snippet } from 'svelte'
 	import invariant from 'tiny-invariant'
-	import { providePlayer } from '$lib/stores/player.svelte'
+	import { providePlayer } from '$lib/stores/player/store.ts'
 	import { pendingRipples } from '$lib/actions/ripple'
 	import { provideScrollTarget } from '$lib/helpers/scroll-target.svelte'
 

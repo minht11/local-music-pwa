@@ -14,9 +14,14 @@ export const wait = (duration: number): Promise<void> =>
 export const toggleReverseArray = <T>(items: T[], condition = false) =>
 	condition ? [...items].reverse() : items
 
-export const assign = <T extends Record<PropertyKey, unknown>, S extends Partial<T>>(
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+type Impossible<K extends keyof any> = {
+	[P in K]: never
+}
+
+export const assign = <T extends {}, S extends Partial<T>>(
 	target: T,
-	source: S,
+	source: S & Impossible<Exclude<keyof S, keyof T>>,
 ): S & T => Object.assign(target, source)
 
 const twoDigits = (num: number) => (num < 10 ? `0${num}` : num)

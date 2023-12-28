@@ -6,6 +6,7 @@
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
+	import { usePlayer } from '$lib/stores/player/store.ts'
 
 	const { data } = $props()
 
@@ -21,9 +22,11 @@
 	const { store } = data
 
 	store.mountSetup()
+
+	const player = usePlayer()
 </script>
 
-<div class="ml-auto flex gap-8px">
+<div class="ml-auto flex gap-8px w-max">
 	<button
 		use:ripple
 		class="flex interactable rounded-8px h-32px px-8px gap-4px items-center text-label-md"
@@ -70,6 +73,9 @@
 					`height: ${virtualItem.size}px`,
 					`transform: translateY(${virtualItem.start}px)`,
 				].join(';')}
+				onclick={() => {
+					player.playTrack(virtualItem.index, data.store.data)
+				}}
 			/>
 		{/if}
 	{/each}

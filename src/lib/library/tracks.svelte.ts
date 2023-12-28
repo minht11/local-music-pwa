@@ -1,6 +1,9 @@
 import type { Track } from '$lib/db/entities'
 import { type AppStoreNames, getDB } from '$lib/db/get-db'
+import { useDbQuery } from '$lib/helpers/use-db-query.svelte'
 import { assign } from '$lib/helpers/utils'
+import { untrack } from 'svelte'
+import invariant from 'tiny-invariant'
 import { WeakLRUCache } from 'weak-lru-cache'
 
 const getValueById = async <Names extends AppStoreNames>(storeName: Names, id: number) => {
@@ -25,6 +28,8 @@ export const getTrack = async (id: number) => {
 		tracksCache.setValue(id, track)
 	}
 
+	// invariant(track, `Track with id ${id} not found`)
+
 	return track
 }
 
@@ -36,33 +41,10 @@ export const deleteTrack = async (id: number) => {
 	return db.delete('tracks', id)
 }
 
-// TODO. Narrow down the type
-export type TrackState =
-	| {
-			track: Track
-			loading: false
-	  }
-	| {
-			track: undefined
-			loading: true
-	  }
-
-export const useTrack = (id: number) => {
-	const cachedTrack = tracksCache.getValue(id)
-
-	const state = $state<TrackState>({
-		track: cachedTrack,
-		loading: cachedTrack === undefined,
-	} as TrackState)
-
-	if (state.loading) {
-		getTrack(id).then((t) => {
-			assign(state as TrackState, {
-				loading: false,
-				track: t,
-			})
-		})
-	}
-
-	return state
-}
+export const useTrack = (id: number | (() => number)) =>
+	useDbQuery({
+		key: () => (typeof id === 'function' ? id() : id),
+		fetcher: (key) => getTrack(key),
+		cache: tracksCache,
+		onDatabaseChange: () => {},
+	})

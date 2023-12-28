@@ -1,10 +1,13 @@
 <script lang="ts">
+	import { usePlayer } from '$lib/stores/player/store.ts'
 	import Button from './Button.svelte'
 	import IconButton from './IconButton.svelte'
 	import Icon from './icon/Icon.svelte'
 	import Artwork from './player/Artwork.svelte'
 	import MainControls from './player/MainControls.svelte'
 	import Timeline from './player/Timeline.svelte'
+
+	const player = usePlayer()
 </script>
 
 <div
@@ -16,16 +19,34 @@
 			as="a"
 			href="/player"
 			kind="blank"
-			class="flex gap-16px items-center rounded-8px pr-8px max-w-180px"
+			class="flex items-center rounded-8px h-44px pr-8px max-w-180px group"
 		>
-			<Artwork class="h-44px w-44px view-transition-artwork" />
+			{@const track = player.activeTrack.value}
+			{@const image = track?.image}
+			<div
+				class="rounded-8px shrink-0 relative h-44px w-44px ring ring-inset ring-onSecondaryContainer/40"
+			>
+				{#if image}
+					<!-- TODO-->
+					<Artwork src={URL.createObjectURL(image)} class="wh-full view-transition-artwork" />
+				{/if}
 
-			<div>
-				<div class="truncate text-body-md">Song Title</div>
-				<div class="truncate text-body-sm">Artist Name</div>
+				<Icon
+					type="chevronUp"
+					class={clx(
+						'm-auto shrink-0 absolute inset-0',
+						image &&
+							'bg-secondary text-onSecondary rounded-full opacity-50 [group:hover_&]:opacity-100',
+					)}
+				/>
 			</div>
 
-			<Icon type="chevronUp" class="bg-tertiary text-onTertiary rounded-full" />
+			{#if track}
+				<div class="min-w-0 ml-16px mr-4px">
+					<div class="truncate text-body-md">{track.name}</div>
+					<div class="truncate text-body-sm">{track.artists}</div>
+				</div>
+			{/if}
 		</Button>
 
 		<MainControls />

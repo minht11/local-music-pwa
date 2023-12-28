@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { usePlayer } from '$lib/stores/player.svelte'
+	import { usePlayer } from '$lib/stores/player/store.ts'
 	import IconButton from '../IconButton.svelte'
 	import PlayPreviousNextIcon from '../animated-icons/PlayPreviousNextIcon.svelte'
 	import PlayPauseButton from './PlayPauseButton.svelte'
@@ -8,13 +8,13 @@
 </script>
 
 <div class="flex gap-8px items-center">
-	<IconButton onclick={player.playNext}>
+	<IconButton onclick={player.playPrev}>
 		<PlayPreviousNextIcon type="previous" />
 	</IconButton>
 
-	<PlayPauseButton playing={player.playing} onclick={player.togglePlay} />
+	<PlayPauseButton playing={player.playing} onclick={() => player.togglePlay()} />
 
-	<IconButton onclick={player.playPrev}>
+	<IconButton onclick={player.playNext}>
 		<PlayPreviousNextIcon type="next" />
 	</IconButton>
 </div>
