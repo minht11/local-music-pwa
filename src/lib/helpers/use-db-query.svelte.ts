@@ -2,32 +2,58 @@ import { untrack } from 'svelte'
 import type { WeakLRUCache } from 'weak-lru-cache'
 import { assign } from './utils'
 
-export interface QueryState<T, R> {
-	error?: unknown
-	loading: boolean
-	value?: R
-	key?: T
+export type QueryStatus = 'loading' | 'loaded' | 'error'
+
+type QueryBaseState<K> = {
+	status: QueryStatus
+	key?: K
 }
 
-export interface QueryOptions<T, R> {
-	cache: WeakLRUCache<T, R>
-	key: () => T
-	fetcher: (key: T) => Promise<R>
+type QueryLoadedState<R> = {
+	status: 'loaded'
+	loading: false
+	value: R
+	error?: undefined
+}
+
+type QueryLoadingState<R> = {
+	status: 'loading'
+	loading: true
+	value?: R
+	error?: undefined
+}
+
+type QueryErrorState<R> = {
+	status: 'error'
+	loading: false
+	value: R
+	error: unknown
+}
+
+export type QueryState<K, R> = QueryBaseState<K> &
+	(QueryLoadedState<R> | QueryLoadingState<R> | QueryErrorState<R>)
+
+export interface QueryOptions<K, R> {
+	cache: WeakLRUCache<K, R>
+	key: () => K
+	fetcher: (key: K) => Promise<R>
 	onDatabaseChange: (event: IDBValidKey, actions: { mutate: (value: R) => void }) => void
 	initialValue?: R
 }
 
-export const useDbQuery = <T, R>(options: QueryOptions<T, R>) => {
+export const useDbQuery = <K, R>(options: QueryOptions<K, R>) => {
 	const { cache } = options
 
-	const getLoadedState = (value: R): QueryState<T, R> => ({
+	type InternalState = Omit<QueryState<K, R>, 'loading'>
+
+	const getLoadedState = (value: R): InternalState => ({
+		status: 'loaded',
 		value,
-		loading: false,
 		error: undefined,
 		key: options.key(),
 	})
 
-	const getInitialValue = (key: T): QueryState<T, R> => {
+	const getInitialValue = (key: K): InternalState => {
 		const value = cache.getValue(key) ?? options.initialValue
 
 		if (value) {
@@ -35,14 +61,14 @@ export const useDbQuery = <T, R>(options: QueryOptions<T, R>) => {
 		}
 
 		return {
+			status: 'loading',
 			error: undefined,
-			loading: true,
 			value: undefined,
 			key: undefined,
 		}
 	}
 
-	const state = $state<QueryState<T, R>>(getInitialValue(options.key()))
+	const state = $state<InternalState>(getInitialValue(options.key()))
 
 	const load = async () => {
 		const key = options.key()
@@ -55,19 +81,23 @@ export const useDbQuery = <T, R>(options: QueryOptions<T, R>) => {
 			return
 		}
 
-		state.loading = true
+		assign(state, {
+			status: 'loading',
+			error: undefined,
+		})
 
 		try {
 			const value = await options.fetcher(key)
+			cache.setValue(key, value)
+
 			assign(state, getLoadedState(value))
 		} catch (e) {
 			assign(state, {
+				status: 'error',
 				value: undefined,
 				error: e,
 				key,
 			})
-		} finally {
-			state.loading = false
 		}
 	}
 
@@ -80,14 +110,17 @@ export const useDbQuery = <T, R>(options: QueryOptions<T, R>) => {
 	})
 
 	return {
+		get status() {
+			return state.status
+		},
 		get value() {
 			return state.value
 		},
 		get loading() {
-			return state.loading
+			return state.status === 'loading'
 		},
 		get error() {
 			return state.error
 		},
-	}
+	} as QueryState<K, R>
 }

@@ -22,7 +22,9 @@ export class PlayerStore {
 
 	itemsIds = $derived(this.shuffle ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder)
 
-	activeTrack = useTrack(() => this.itemsIds[this.#activeTrackIndex] ?? -1)
+	activeTrack = useTrack(() => this.itemsIds[this.#activeTrackIndex] ?? -1, {
+		allowEmpty: true,
+	})
 
 	constructor() {
 		$effect(() => {

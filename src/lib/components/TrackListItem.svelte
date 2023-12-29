@@ -1,5 +1,5 @@
 <script lang="ts" context="module">
-	const cache = new WeakMap<Blob, string>()
+	const cache = new WeakLRUCache<Blob, string>()
 </script>
 
 <script lang="ts">
@@ -9,6 +9,7 @@
 	import { formatDuration } from '$lib/helpers/utils'
 	import { useTrack } from '$lib/library/tracks.svelte.ts'
 	import { usePlayer } from '$lib/stores/player/store.ts'
+	import { WeakLRUCache } from 'weak-lru-cache'
 
 	const { trackId, style, tabindex, onclick } = $props<{
 		trackId: number
@@ -17,18 +18,20 @@
 		onclick?: (track: Track) => void
 	}>()
 
-	const data = useTrack(trackId)
+	const data = useTrack(trackId, {
+		allowEmpty: true,
+	})
 
 	const createImageUrl = () => {
 		const image = data.value?.image
 
 		if (image && cache.has(image)) {
-			return cache.get(image)
+			return cache.getValue(image)
 		}
 
 		if (image) {
 			const url = URL.createObjectURL(image)
-			cache.set(image, url)
+			cache.setValue(image, url)
 
 			return url
 		}
@@ -61,6 +64,8 @@
 <div {style} class="h-72px flex flex-col">
 	{#if data.loading === true}
 		Loading...
+	{:else if data.error}
+		'Error loading track'
 	{:else}
 		{@const track = data.value}
 		<!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-noninteractive-element-interactions -->
