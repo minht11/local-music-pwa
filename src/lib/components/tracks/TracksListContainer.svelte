@@ -23,7 +23,9 @@
 		count: items.length,
 		getScrollElement: scrollTarget,
 		estimateSize: () => 72,
-		overscan: 10,
+		// overscan: 10,
+		// TODO.
+		overscan: 0,
 	})
 </script>
 

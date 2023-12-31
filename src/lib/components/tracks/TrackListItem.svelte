@@ -1,15 +1,11 @@
-<script lang="ts" context="module">
-	const cache = new WeakLRUCache<Blob, string>()
-</script>
-
 <script lang="ts">
 	import { ripple } from '$lib/actions/ripple'
 	import type { Track } from '$lib/db/entities'
+	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
 	import { formatDuration } from '$lib/helpers/utils'
 	import { useTrack } from '$lib/library/tracks.svelte.ts'
 	import { usePlayer } from '$lib/stores/player/store.ts'
-	import { WeakLRUCache } from 'weak-lru-cache'
 
 	const { trackId, style, tabindex, onclick } = $props<{
 		trackId: number
@@ -20,34 +16,6 @@
 
 	const data = useTrack(trackId)
 
-	const createImageUrl = () => {
-		const image = data.value?.image
-
-		if (image && cache.has(image)) {
-			return cache.getValue(image)
-		}
-
-		if (image) {
-			const url = URL.createObjectURL(image)
-			cache.setValue(image, url)
-
-			return url
-		}
-
-		return undefined
-	}
-	const imageUrl = $derived(createImageUrl())
-
-	// $effect(() => {
-	// 	const url = imageUrl
-
-	// 	return () => {
-	// 		if (url) {
-	// 			URL.revokeObjectURL(url)
-	// 		}
-	// 	}
-	// })
-
 	const player = usePlayer()
 
 	const isActive = () => {
@@ -57,6 +25,12 @@
 	}
 
 	const active = $derived(isActive())
+
+	const [artwork] = createManagedArtwork(() => {
+		// console.log('artwork', data.value?.image)
+
+		return data.value?.image
+	})
 </script>
 
 <div {style} class="h-72px flex flex-col">
@@ -85,7 +59,7 @@
 			<img
 				class={clx('h-40px w-40px rounded-4px', active && 'glow')}
 				alt={track.name}
-				src={imageUrl}
+				src={artwork()}
 			/>
 
 			<div class="flex flex-col">
