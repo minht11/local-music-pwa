@@ -67,7 +67,7 @@ export default (async () => {
 			link: 'text-primary underline',
 			card: 'tonal-elevation-1 flex flex-col rounded-8px bg-surface text-onSurface',
 			interactable:
-				'relative overflow-hidden appearance-none border-none outline-none decoration-none cursor-pointer flex items-center z-0',
+				'relative overflow-hidden appearance-none border-none outline-none decoration-none cursor-pointer flex items-center z-0 focus-visible:ring-2 ring-inset ring-current',
 			'base-button': 'interactable text-label-lg h-40px justify-center gap-8px rounded-20px',
 			'flip-x': '-scale-x-100',
 			'flip-y': '-scale-y-100',

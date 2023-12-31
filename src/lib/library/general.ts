@@ -19,7 +19,7 @@ export const getEntityIds = async <StoreName extends LibraryEntityStoreName>(
 	// array reversing is also incredibly fast.
 	const data = await db.getAllKeysFromIndex(store, sortBy)
 
-	if (order === 'asc') {
+	if (order === 'desc') {
 		data.reverse()
 	}
 

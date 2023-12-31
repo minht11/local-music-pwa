@@ -18,9 +18,7 @@
 		onclick?: (track: Track) => void
 	}>()
 
-	const data = useTrack(trackId, {
-		allowEmpty: true,
-	})
+	const data = useTrack(trackId)
 
 	const createImageUrl = () => {
 		const image = data.value?.image
@@ -99,21 +97,34 @@
 				</div>
 			</div>
 
-			<div>
+			<div class="hidden @4xl:block">
 				{track.album}
 			</div>
 
-			<div class="tabular-nums">
+			<div class="hidden @sm:block tabular-nums">
 				{formatDuration(track.duration)}
 			</div>
 		</div>
 	{/if}
 </div>
 
-<style>
+<style lang="postcss">
 	.track-item {
+		--grid-cols: auto 1.5fr;
 		display: grid;
-		grid-template-columns: auto 1.5fr minmax(200px, 1fr) 74px;
+		grid-template-columns: var(--grid-cols);
+	}
+
+	@container (theme('containers.sm')) {
+		.track-item {
+			--grid-cols: auto 1.5fr 74px;
+		}
+	}
+
+	@container (theme('containers.4xl')) {
+		.track-item {
+			--grid-cols: auto 1.5fr minmax(200px, 1fr) 74px;
+		}
 	}
 
 	@keyframes glow {

@@ -1,42 +1,40 @@
 <script lang="ts">
-	import { createVirtualizer } from '@tanstack/svelte-virtual'
-	import TrackListItem from '$lib/components/TrackListItem.svelte'
-	import { useScrollTarget } from '$lib/helpers/scroll-target.svelte.js'
 	import { ripple } from '$lib/actions/ripple'
-	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { usePlayer } from '$lib/stores/player/store.ts'
+	import Menu, { getMenuId } from '$lib/components/Menu.svelte'
+	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 
 	const { data } = $props()
-
-	const scrollTarget = useScrollTarget()
-
-	const rowVirtualizer = createVirtualizer({
-		count: data.store.data.length,
-		getScrollElement: scrollTarget,
-		estimateSize: () => 72,
-		overscan: 10,
-	})
 
 	const { store } = data
 
 	store.mountSetup()
 
 	const player = usePlayer()
+	const menuId = getMenuId()
+
+	const menuItems = $derived(
+		store.sortOptions.map((option) => ({
+			label: option.name,
+			action: () => {
+				store.sortByKey = option.key
+			},
+		})),
+	)
 </script>
 
-<div class="ml-auto flex gap-8px w-max">
+<div class="ml-auto flex gap-8px w-max items-center">
 	<button
+		popovertarget={menuId}
 		use:ripple
-		class="flex interactable rounded-8px h-32px px-8px gap-4px items-center text-label-md"
+		class="flex interactable w-96px border border-solid border-outlineVariant rounded-8px h-40px pl-12px pr-4px gap-4px items-center text-label-md"
 	>
-		Name
+		{store.sortBy?.name}
 
-		<Icon type="chevronDown" class="h-16px w-16px" />
+		<Icon type="menuDown" class="h-16px w-16px ml-auto" />
 	</button>
-
-	<Button kind="flat">Name</Button>
 
 	<IconButton
 		onclick={() => {
@@ -55,28 +53,13 @@
 			)}
 		/>
 	</IconButton>
+
+	<Menu id={menuId} items={menuItems} />
 </div>
 
-<div style:height={`${$rowVirtualizer.getTotalSize()}px`} class="contain-strict relative w-full">
-	{#each $rowVirtualizer.getVirtualItems() as virtualItem (data.store.data[virtualItem.index])}
-		{@const trackId = data.store.data[virtualItem.index]}
-		{#if trackId}
-			<TrackListItem
-				{trackId}
-				style={[
-					'contain: strict',
-					'will-change: transform;',
-					'position: absolute',
-					'top: 0',
-					'left: 0',
-					'width: 100%',
-					`height: ${virtualItem.size}px`,
-					`transform: translateY(${virtualItem.start}px)`,
-				].join(';')}
-				onclick={() => {
-					player.playTrack(virtualItem.index, data.store.data)
-				}}
-			/>
-		{/if}
-	{/each}
-</div>
+<TracksListContainer
+	items={data.store.data}
+	onItemClick={({ items, index }) => {
+		player.playTrack(index, items)
+	}}
+/>

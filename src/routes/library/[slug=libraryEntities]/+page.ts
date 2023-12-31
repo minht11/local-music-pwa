@@ -1,6 +1,3 @@
-import type { AppDB } from '$lib/db/get-db'
-import { getEntityIds } from '$lib/library/general'
-import type { IndexNames } from 'idb'
 import type { PageLoad } from './$types'
 import { LibraryStore } from './store.svelte'
 
@@ -9,11 +6,6 @@ type LibraryStoreNames = 'tracks' | 'albums' | 'artists'
 interface LibraryPageDataBase<T extends LibraryStoreNames> {
 	store: LibraryStore<T>
 	title: string
-	storeName: T
-	sortOptions?: readonly {
-		name: string
-		key: IndexNames<AppDB, T>
-	}[]
 }
 
 type DataMap = {
@@ -27,22 +19,34 @@ const nameSortOption = {
 
 const dataMap = {
 	tracks: {
-		store: new LibraryStore('tracks'),
+		store: new LibraryStore('tracks', [
+			nameSortOption,
+			{
+				name: 'Artist',
+				key: 'artists',
+			},
+			{
+				name: 'Album',
+				key: 'album',
+			},
+			{
+				name: 'Duration',
+				key: 'duration',
+			},
+			{
+				name: 'Year',
+				key: 'year',
+			},
+		]),
 		title: m.tracks(),
-		storeName: 'tracks',
-		sortOptions: [nameSortOption],
 	},
 	albums: {
-		store: new LibraryStore('albums'),
+		store: new LibraryStore('albums', [nameSortOption]),
 		title: m.albums(),
-		storeName: 'albums',
-		sortOptions: [nameSortOption],
 	},
 	artists: {
-		store: new LibraryStore('artists'),
+		store: new LibraryStore('artists', [nameSortOption]),
 		title: m.artists(),
-		storeName: 'artists',
-		sortOptions: [nameSortOption],
 	},
 } satisfies DataMap
 

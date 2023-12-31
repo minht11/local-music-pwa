@@ -1,10 +1,13 @@
+import type { AppDB } from '$lib/db/get-db'
 import {
 	type LibraryEntitySortKey,
 	type LibraryEntityStoreName,
 	type SortOrder,
 	getEntityIds,
 } from '$lib/library/general'
+import type { IndexNames } from 'idb'
 import { untrack } from 'svelte'
+import invariant from 'tiny-invariant'
 
 const defaultData = {
 	order: 'asc',
@@ -21,16 +24,33 @@ export const setPersistedData = (key: string, data: typeof defaultData) => {
 	localStorage.setItem(`library-page:${key}`, JSON.stringify(data))
 }
 
+export type SortOption<StoreName extends LibraryEntityStoreName> = {
+	name: string
+	key: IndexNames<AppDB, StoreName>
+}
+
 export class LibraryStore<StoreName extends LibraryEntityStoreName> {
+	storeName: StoreName
+
 	order = $state<SortOrder>('asc')
-	sortBy = $state<LibraryEntitySortKey<StoreName>>('name')
+
+	sortOptions = $state<SortOption<StoreName>[]>([])
+	sortByKey = $state<LibraryEntitySortKey<StoreName>>(this.sortOptions[0]?.key ?? 'name')
+	sortBy = $derived(this.sortOptions.find((option) => option.key === this.sortByKey))
 
 	data = $state<number[]>([])
 
-	constructor(public storeName: StoreName) {}
+	constructor(storeName: StoreName, sortOptions: SortOption<StoreName>[]) {
+		this.storeName = storeName
+		this.sortOptions = sortOptions
+	}
 
 	async #loadData() {
-		this.data = await getEntityIds(this.storeName, this.sortBy, this.order)
+		const key = this.sortBy?.key
+
+		invariant(key, 'Sort key is not defined')
+
+		this.data = await getEntityIds(this.storeName, key, this.order)
 	}
 
 	preloadData() {
