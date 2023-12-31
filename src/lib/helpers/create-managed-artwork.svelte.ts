@@ -19,7 +19,7 @@ class Artwork {
 	}
 }
 
-const cache = new Map<Blob, Artwork>()
+const cache = new WeakMap<Blob, Artwork>()
 const cleanupQueue = new Set<Blob>()
 
 export const createManagedArtwork = (getImage: () => Blob | undefined) => {

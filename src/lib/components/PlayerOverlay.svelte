@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { usePlayer } from '$lib/stores/player/store.ts'
 	import Button from './Button.svelte'
 	import IconButton from './IconButton.svelte'
@@ -8,6 +9,7 @@
 	import Timeline from './player/Timeline.svelte'
 
 	const player = usePlayer()
+	const [artwork] = createManagedArtwork(() => player.activeTrack?.value?.image)
 </script>
 
 <div
@@ -27,8 +29,7 @@
 				class="rounded-8px shrink-0 relative h-44px w-44px ring ring-inset ring-onSecondaryContainer/40"
 			>
 				{#if image}
-					<!-- TODO-->
-					<Artwork src={URL.createObjectURL(image)} class="wh-full view-transition-artwork" />
+					<Artwork src={artwork()} class="wh-full view-transition-artwork" />
 				{/if}
 
 				<Icon

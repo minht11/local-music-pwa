@@ -26,11 +26,7 @@
 
 	const active = $derived(isActive())
 
-	const [artwork] = createManagedArtwork(() => {
-		// console.log('artwork', data.value?.image)
-
-		return data.value?.image
-	})
+	const [artwork] = createManagedArtwork(() => data.value?.image)
 </script>
 
 <div {style} class="h-72px flex flex-col">
