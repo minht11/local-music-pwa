@@ -3,70 +3,52 @@ import { LibraryStore } from './store.svelte'
 
 type LibraryStoreNames = 'tracks' | 'albums' | 'artists'
 
-interface LibraryPageDataBase<T extends LibraryStoreNames> {
-	store: LibraryStore<T>
-	title: string
-}
-
-type DataMap = {
-	[K in LibraryStoreNames]: LibraryPageDataBase<K>
-}
-
 const nameSortOption = {
 	name: 'Name',
 	key: 'name',
 } as const
 
-const dataMap = {
-	tracks: {
-		store: new LibraryStore('tracks', [
-			nameSortOption,
-			{
-				name: 'Artist',
-				key: 'artists',
-			},
-			{
-				name: 'Album',
-				key: 'album',
-			},
-			{
-				name: 'Duration',
-				key: 'duration',
-			},
-			{
-				name: 'Year',
-				key: 'year',
-			},
-		]),
-		title: m.tracks(),
-	},
-	albums: {
-		store: new LibraryStore('albums', [nameSortOption]),
-		title: m.albums(),
-	},
-	artists: {
-		store: new LibraryStore('artists', [nameSortOption]),
-		title: m.artists(),
-	},
-} satisfies DataMap
+const storeMap = {
+	tracks: new LibraryStore('tracks', m.tracks(), [
+		nameSortOption,
+		{
+			name: 'Artist',
+			key: 'artists',
+		},
+		{
+			name: 'Album',
+			key: 'album',
+		},
+		{
+			name: 'Duration',
+			key: 'duration',
+		},
+		{
+			name: 'Year',
+			key: 'year',
+		},
+	]),
+	albums: new LibraryStore('albums', m.albums(), [nameSortOption]),
+	artists: new LibraryStore('artists', m.artists(), [nameSortOption]),
+} satisfies {
+	[K in LibraryStoreNames]: LibraryStore<K>
+}
 
 export const load: PageLoad = async (event) => {
 	const { slug } = event.params
-
-	console.log('Load', slug)
 
 	if (slug === 'playlists') {
 		throw new Error('Not implemented')
 	}
 
-	const data = dataMap[slug]
+	const store = storeMap[slug]
 
-	await data.store.preloadData()
+	await store.preloadData()
 
 	return {
-		store: data.store,
+		store,
 		hideBackButton: true,
 		title: 'Library',
-		pageTitle: `Library - ${data.title}`,
+		pageTitle: `Library - ${store.title}`,
 	}
 }

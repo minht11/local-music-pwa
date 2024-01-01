@@ -31,6 +31,7 @@ export type SortOption<StoreName extends LibraryEntityStoreName> = {
 
 export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 	storeName: StoreName
+	title: string
 
 	order = $state<SortOrder>('asc')
 
@@ -40,8 +41,9 @@ export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 
 	data = $state<number[]>([])
 
-	constructor(storeName: StoreName, sortOptions: SortOption<StoreName>[]) {
+	constructor(storeName: StoreName, title: string, sortOptions: SortOption<StoreName>[]) {
 		this.storeName = storeName
+		this.title = title
 		this.sortOptions = sortOptions
 	}
 

@@ -18,6 +18,7 @@
 	const menuItems = $derived(
 		store.sortOptions.map((option) => ({
 			label: option.name,
+			selected: store.sortByKey === option.key,
 			action: () => {
 				store.sortByKey = option.key
 			},

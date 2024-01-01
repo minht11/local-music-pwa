@@ -10,6 +10,7 @@
 	export interface MenuItem {
 		label: string
 		icon?: IconType
+		selected?: boolean
 		action: () => void
 	}
 </script>
@@ -65,7 +66,10 @@
 	{#each items as item}
 		<button
 			role="menuitem"
-			class="flex items-center grow h-40px gap-16px px-16px text-body-md relative interactable"
+			class={clx(
+				'flex items-center grow h-40px gap-16px px-16px text-body-md relative interactable',
+				item.selected && 'bg-surfaceVariant text-primary',
+			)}
 			use:ripple
 			onclick={() => {
 				item.action()
