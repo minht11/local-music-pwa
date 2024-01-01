@@ -2,6 +2,7 @@ import { MusicItemType, type UnknownTrack } from '$lib/db/entities'
 // @ts-expect-error - no types
 import { Buffer } from 'buffer-lite'
 import { parseBuffer as parseMetadata } from 'music-metadata/lib/core'
+import invariant from 'tiny-invariant'
 import { extractColorFromImage } from './color-from-image'
 
 // Music metadata library uses the Buffer global.
@@ -10,6 +11,36 @@ globalThis.Buffer = Buffer
 
 // This limit is a bit arbitrary.
 const FILE_SIZE_LIMIT_500MB = 5e8
+
+const getArtwork = async (blob: Blob) => {
+	try {
+		const smallBitmap = await createImageBitmap(blob, {
+			resizeHeight: 100,
+			resizeWidth: 100,
+		})
+
+		const { width, height } = smallBitmap
+
+		const canvas = new OffscreenCanvas(width, height)
+		const ctx = canvas.getContext('bitmaprenderer')
+
+		invariant(ctx, 'Canvas context is null')
+
+		ctx.transferFromImageBitmap(smallBitmap)
+
+		return {
+			small: await canvas.convertToBlob(),
+			full: blob,
+		}
+	} catch (err) {
+		console.error(err)
+
+		return {
+			small: blob,
+			full: blob,
+		}
+	}
+}
 
 export const parseTrack = async (
 	fileOrHandle: File | FileSystemFileHandle,
@@ -49,7 +80,7 @@ export const parseTrack = async (
 		trackNo: common.track.no || 0,
 		trackOf: common.track.of || 0,
 		year: common.year?.toString(),
-		image: imageBlob,
+		images: imageBlob && (await getArtwork(imageBlob)),
 		duration: tags.format.duration || 0,
 		isFavorite: false,
 		file: fileOrHandle,

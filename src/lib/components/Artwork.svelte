@@ -1,14 +1,17 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte'
 	import Icon from './icon/Icon.svelte'
 
 	const {
 		src,
 		class: className,
 		alt,
+		children,
 	} = $props<{
 		src: string
 		class?: string
 		alt?: string
+		children?: Snippet
 	}>()
 
 	let error = $state(false)
@@ -34,6 +37,10 @@
 			}}
 		/>
 	{:else}
-		<Icon type="musicNote" class="m-auto" />
+		<Icon type="musicNote" class="m-auto [--icon-size:60%]" />
+	{/if}
+
+	{#if children}
+		{@render children()}
 	{/if}
 </div>

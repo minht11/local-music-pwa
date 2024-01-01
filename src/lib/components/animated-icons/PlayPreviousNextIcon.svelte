@@ -11,7 +11,6 @@
 
 	let isAnimating = $state(false)
 	const onclick = async () => {
-		console.log('click')
 		isAnimating = true
 
 		wait(200).then(() => {

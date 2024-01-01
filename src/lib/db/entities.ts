@@ -36,7 +36,10 @@ export interface UnknownTrack {
 	genre: string[]
 	trackNo?: number
 	trackOf?: number
-	image?: Blob
+	images?: {
+		small: Blob
+		full: Blob
+	}
 	file: FileEntity
 	primaryColor?: number
 	isFavorite: boolean

@@ -16,17 +16,17 @@ export class PlayerAudio {
 			void this.#audio[this.playing ? 'play' : 'pause']()
 		})
 
-		this.#audio.addEventListener('pause', this.#onAudioPlayPauseHandler)
-		this.#audio.addEventListener('play', this.#onAudioPlayPauseHandler)
-	}
+		const onAudioPlayPauseHandler = () => {
+			const currentAudioState = !this.#audio.paused
 
-	#onAudioPlayPauseHandler = () => {
-		const currentAudioState = !this.#audio.paused
-
-		// If our state is out of sync with audio element, sync it.
-		if (currentAudioState !== this.playing) {
-			this.playing = currentAudioState
+			if (currentAudioState !== this.playing) {
+				// If our state is out of sync with audio element, sync it.
+				this.playing = currentAudioState
+			}
 		}
+
+		this.#audio.addEventListener('pause', onAudioPlayPauseHandler)
+		this.#audio.addEventListener('play', onAudioPlayPauseHandler)
 	}
 
 	#getTrackFile = async (track: FileEntity) => {

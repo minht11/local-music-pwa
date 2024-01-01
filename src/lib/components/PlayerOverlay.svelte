@@ -1,15 +1,13 @@
 <script lang="ts">
-	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { usePlayer } from '$lib/stores/player/store.ts'
 	import Button from './Button.svelte'
 	import IconButton from './IconButton.svelte'
 	import Icon from './icon/Icon.svelte'
-	import Artwork from './player/Artwork.svelte'
+	import PlayerArtwork from './player/PlayerArtwork.svelte'
 	import MainControls from './player/MainControls.svelte'
 	import Timeline from './player/Timeline.svelte'
 
 	const player = usePlayer()
-	const [artwork] = createManagedArtwork(() => player.activeTrack?.value?.image)
 </script>
 
 <div
@@ -24,20 +22,19 @@
 			class="flex items-center rounded-8px h-44px pr-8px max-w-180px group"
 		>
 			{@const track = player.activeTrack.value}
-			{@const image = track?.image}
 			<div
-				class="rounded-8px shrink-0 relative h-44px w-44px ring ring-inset ring-onSecondaryContainer/40"
+				class="rounded-8px overflow-hidden shrink-0 relative h-44px w-44px ring ring-inset ring-onSecondaryContainer/40"
 			>
-				{#if image}
-					<Artwork src={artwork()} class="wh-full view-transition-artwork" />
+				{#if track}
+					<PlayerArtwork class="wh-full view-transition-artwork" />
 				{/if}
 
 				<Icon
 					type="chevronUp"
 					class={clx(
 						'm-auto shrink-0 absolute inset-0',
-						image &&
-							'bg-secondary text-onSecondary rounded-full opacity-50 [group:hover_&]:opacity-100',
+						track &&
+							'bg-tertiary text-onTertiary rounded-full scale-0 transition-transform transition-opacity transition-200 [.group:hover_&]:scale-100',
 					)}
 				/>
 			</div>

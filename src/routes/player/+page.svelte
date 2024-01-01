@@ -1,16 +1,13 @@
 <script>
-	import Artwork from '$lib/components/player/Artwork.svelte'
+	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import PlayPauseIcon from '$lib/components/animated-icons/PlayPauseIcon.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import PlayPreviousNextIcon from '$lib/components/animated-icons/PlayPreviousNextIcon.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { usePlayer } from '$lib/stores/player/store'
-	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
 	const player = usePlayer()
-
-	const [artwork] = createManagedArtwork(() => player.activeTrack?.value?.image)
 </script>
 
 <section
@@ -18,7 +15,7 @@
 >
 	<div class="bg-secondaryContainer wh-full flex flex-col rounded-t-24px overflow-hidden">
 		<div class="p-40px relative h-full">
-			<Artwork src={artwork()} class="view-transition-artwork rounded-16px" />
+			<PlayerArtwork class="view-transition-artwork rounded-16px" />
 
 			<div class="flex items-center justify-center gap-24px">
 				<IconButton icon="musicNote" class="bg-tertiary text-onTertiary" />

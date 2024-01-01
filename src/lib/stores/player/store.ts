@@ -5,7 +5,11 @@ import { PlayerStore } from './player.svelte'
 const playerContext = Symbol('player')
 
 export const providePlayer = () => {
-	setContext(playerContext, new PlayerStore())
+	const player = new PlayerStore()
+
+	setContext(playerContext, player)
+
+	return player
 }
 
 export const usePlayer = () => {

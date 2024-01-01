@@ -26,11 +26,13 @@
 	)
 </script>
 
-<div class="ml-auto flex gap-8px w-max items-center">
+<div
+	class="ml-auto flex justify-end gap-8px w-full pb-16px items-center mb-16px border-b border-outlineVariant w-full"
+>
 	<button
 		popovertarget={menuId}
 		use:ripple
-		class="flex interactable w-96px border border-solid border-outlineVariant rounded-8px h-40px pl-12px pr-4px gap-4px items-center text-label-md"
+		class="flex interactable w-96px rounded-8px h-40px pl-12px pr-4px gap-4px items-center text-label-md"
 	>
 		{store.sortBy?.name}
 

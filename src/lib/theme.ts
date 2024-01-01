@@ -71,3 +71,17 @@ export const getThemePaletteRgb = (argb: number, isDark: boolean) => {
 
 	return Object.fromEntries(transformedEntries) as ThemePaletteRgb
 }
+
+export const clearThemeCssVariables = () => {
+	for (const key of Object.keys(COLOR_TOKENS_GENERATION_MAP)) {
+		document.documentElement.style.removeProperty(`--color-${key}`)
+	}
+}
+
+export const setThemeCssVariables = (argb: number, isDark: boolean) => {
+	const palette = getThemePaletteRgb(argb, isDark)
+
+	for (const [key, rgb] of Object.entries(palette)) {
+		document.documentElement.style.setProperty(`--color-${key}`, rgb.join(' '))
+	}
+}

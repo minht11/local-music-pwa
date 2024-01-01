@@ -10,6 +10,7 @@
 	import { providePlayer } from '$lib/stores/player/store.ts'
 	import { pendingRipples } from '$lib/actions/ripple'
 	import { provideScrollTarget } from '$lib/helpers/scroll-target.svelte'
+	import { clearThemeCssVariables, setThemeCssVariables } from '$lib/theme'
 
 	const { data, children } = $props<{
 		data: LayoutData
@@ -88,11 +89,29 @@
 		},
 	})
 
-	providePlayer()
+	const player = providePlayer()
 
 	let scrollTarget = $state<HTMLElement>()!
 
 	provideScrollTarget(() => scrollTarget)
+
+	let initial = true
+	const primaryThemeColor = $derived(player.activeTrack.value?.primaryColor)
+	$effect(() => {
+		const color = primaryThemeColor
+
+		if (initial) {
+			initial = false
+			return
+		}
+
+		// TODO. Import this lazy
+		if (color) {
+			setThemeCssVariables(color, true)
+		} else {
+			clearThemeCssVariables()
+		}
+	})
 </script>
 
 <svelte:head>

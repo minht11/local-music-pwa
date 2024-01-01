@@ -6,7 +6,7 @@
 	import { formatDuration } from '$lib/helpers/utils'
 	import { useTrack } from '$lib/library/tracks.svelte.ts'
 	import { usePlayer } from '$lib/stores/player/store.ts'
-	import Image from '../Image.svelte'
+	import Artwork from '../Artwork.svelte'
 
 	const { trackId, style, tabindex, onclick } = $props<{
 		trackId: number
@@ -27,7 +27,7 @@
 
 	const active = $derived(isActive())
 
-	const [artwork] = createManagedArtwork(() => data.value?.image)
+	const [artwork] = createManagedArtwork(() => data.value?.images?.small)
 	const track = $derived(data.value)
 </script>
 
@@ -48,7 +48,7 @@
 		}
 	}}
 >
-	<Image src={artwork()} alt={track?.name} class={clx('h-40px w-40px rounded-4px')} />
+	<Artwork src={artwork()} alt={track?.name} class={clx('h-40px w-40px rounded-4px')} />
 
 	{#if data.loading === true}
 		<div>

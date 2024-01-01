@@ -1,3 +1,4 @@
+import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { useTrack } from '$lib/library/tracks.svelte'
 import { PlayerAudio } from './audio.svelte'
 
@@ -26,6 +27,9 @@ export class PlayerStore {
 		allowEmpty: true,
 	})
 
+	#artwork = createManagedArtwork(() => this.activeTrack?.value?.images?.full)
+	artworkSrc = $derived(this.#artwork[0]())
+
 	constructor() {
 		$effect(() => {
 			const track = this.activeTrack?.value
@@ -40,7 +44,6 @@ export class PlayerStore {
 	}
 
 	togglePlay = (force?: boolean) => {
-		console.log('togglePlay', force)
 		this.playing = force ?? !this.playing
 	}
 

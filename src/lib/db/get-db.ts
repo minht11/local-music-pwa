@@ -73,7 +73,7 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 	})
 
 export const getDB = () =>
-	openDB<AppDB>('test-app-storage', 2, {
+	openDB<AppDB>('app-storage', 2, {
 		upgrade(e) {
 			const { objectStoreNames } = e
 

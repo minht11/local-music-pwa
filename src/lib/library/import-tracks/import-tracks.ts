@@ -30,7 +30,7 @@ export const importTracks = async () => {
 		const finishedData = await startImportingTracks(files, (data) => {
 			snackbar({
 				id: snackbarId,
-				message: `Scanning tracks. ${data.current + 1} of ${data.total}`,
+				message: `Scanning tracks. ${data.current} of ${data.total}`,
 				controls: 'spinner',
 				duration: false,
 			})
