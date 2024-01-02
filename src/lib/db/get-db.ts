@@ -1,6 +1,6 @@
 import type { DBSchema, IDBPDatabase, IDBPObjectStore, IndexNames, StoreNames } from 'idb'
 import { openDB } from 'idb'
-import type { Album, Artist, Track, UnknownTrack } from './entities'
+import type { Album, Artist, Track } from './entities'
 
 interface DirectoryDb {
 	name: string

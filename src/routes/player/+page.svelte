@@ -1,9 +1,7 @@
 <script>
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
-	import PlayPauseIcon from '$lib/components/animated-icons/PlayPauseIcon.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
-	import PlayPreviousNextIcon from '$lib/components/animated-icons/PlayPreviousNextIcon.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { usePlayer } from '$lib/stores/player/store'
 	import MainControls from '$lib/components/player/MainControls.svelte'
@@ -13,11 +11,11 @@
 </script>
 
 <section
-	class="overlay mx-auto grid flex-grow grid-cols-[400px_1fr] h-full bg-surface rounded-t-24px tonal-elevation-2"
+	class="view-transition-player-overlay mx-auto overflow-hidden max-h-[140px] w-full grow grid grid-cols-[400px_1fr] bg-red rounded-24px tonal-elevation-2"
 >
-	<div class="bg-secondaryContainer wh-full flex flex-col rounded-t-24px overflow-hidden">
+	<div class="bg-secondaryContainer flex flex-col rounded-t-24px overflow-hidden">
 		<div class="p-40px relative h-full">
-			<PlayerArtwork class="view-transition-artwork rounded-16px" />
+			<PlayerArtwork class="rounded-16px view-transition-artwork" />
 
 			<div class="min-w-0 flex flex-col justify-center h-72px">
 				{#if track}
@@ -63,8 +61,4 @@
 	:root::view-transition-new(root) {
 		animation-duration: 500ms;
 	} */
-
-	.overlay {
-		view-transition-name: player-overlay;
-	}
 </style>

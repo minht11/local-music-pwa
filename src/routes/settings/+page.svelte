@@ -66,7 +66,7 @@
 			<div
 				class="flex select-text flex-col gap-16px rounded-8px border border-solid border-outlineVariant p-16px text-onSurfaceVariant"
 			>
-				<Icon type="alertCircle" class="flex-shrink-0" />
+				<Icon type="alertCircle" class="shrink-0" />
 				<span>
 					Your browser currently does not support&nbsp
 					<a

@@ -5,11 +5,10 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import { wait } from '$lib/helpers/utils'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
-	import { setContext, type Snippet } from 'svelte'
+	import { setContext, untrack, type Snippet } from 'svelte'
 	import invariant from 'tiny-invariant'
 	import { providePlayer } from '$lib/stores/player/store.ts'
 	import { pendingRipples } from '$lib/actions/ripple'
-	import { provideScrollTarget } from '$lib/helpers/scroll-target.svelte'
 	import { clearThemeCssVariables, setThemeCssVariables } from '$lib/theme'
 
 	const { data, children } = $props<{
@@ -82,18 +81,28 @@
 	}
 
 	let actions = $state<Snippet>()
+	let bottom = $state<Snippet>()
 
 	setContext('root-layout', {
 		set actions(val: Snippet | undefined) {
 			actions = val
 		},
+		set bottom(val: Snippet | undefined) {
+			bottom = val
+		},
+	})
+
+	$effect.pre(() => {
+		data.pathname
+
+		return () => {
+			console.log('layout cleanup')
+			actions = undefined
+			bottom = undefined
+		}
 	})
 
 	const player = providePlayer()
-
-	let scrollTarget = $state<HTMLElement>()!
-
-	provideScrollTarget(() => scrollTarget)
 
 	let initial = true
 	const primaryThemeColor = $derived(player.activeTrack.value?.primaryColor)
@@ -112,6 +121,17 @@
 			clearThemeCssVariables()
 		}
 	})
+
+	let overlayContentHeight = $state(0)
+
+	$effect(() => {
+		const bottomPadding = 16
+
+		document.documentElement.style.setProperty(
+			'--bottom-overlay-height',
+			`${overlayContentHeight + bottomPadding}px`,
+		)
+	})
 </script>
 
 <svelte:head>
@@ -122,34 +142,34 @@
 	<div class="fixed z-20 top-0 inset-x-0 bg-onTertiaryContainer h-4px" />
 {/if}
 
-{#key data.pathname}
-	<header
-		class={clx(
-			'fixed inset-x-0 top-0 z-10 flex h-[--app-header-height] flex-shrink-0',
-			isScrolled && 'tonal-elevation-4 bg-surface',
-		)}
-	>
-		<div class="max-w-1280px mx-auto w-full items-center px-16px flex">
-			{#if !$page.data.hideBackButton}
-				<IconButton icon="backArrow" class="mr-8px" onclick={handleBackClick} />
+<header
+	class={clx(
+		'fixed inset-x-0 top-0 z-10 flex h-[--app-header-height] flex-shrink-0',
+		isScrolled && 'tonal-elevation-4 bg-surface',
+	)}
+>
+	<div class="max-w-1280px mx-auto w-full items-center px-16px flex">
+		{#if !$page.data.hideBackButton}
+			<IconButton icon="backArrow" class="mr-8px" onclick={handleBackClick} />
+		{/if}
+
+		<h1 class="text-title-lg mr-auto">{pageData.title}</h1>
+
+		<div class="flex items-center gap-4px">
+			{#if actions}
+				{@render actions()}
 			{/if}
-
-			<h1 class="text-title-lg mr-auto">{pageData.title}</h1>
-
-			<div class="flex items-center gap-4px">
-				{#if actions}
-					{@render actions()}
-				{/if}
-			</div>
 		</div>
-	</header>
+	</div>
+</header>
 
-	<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
+<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
 
+{#key data.pathname}
 	<div
 		class={clx(
-			'mx-auto w-full max-w-[1280px] grow px-8px pt-16px mt-[--app-header-height]',
-			$page.data.hidePlayerOverlay ? 'pb-16px' : 'pb-120px scroll-pb-120px',
+			'flex flex-col mx-auto w-full max-w-[1280px] grow px-8px pt-16px mt-[--app-header-height]',
+			$page.data.hidePlayerOverlay ? '' : 'pb-[--bottom-overlay-height]',
 		)}
 	>
 		{@render children()}
@@ -157,14 +177,19 @@
 {/key}
 
 <div
-	class={clx(
-		'fixed flex px-8px flex-col overflow-hidden inset-x-0 pointer-events-none [&>*]:pointer-events-auto',
-		data.isHandHeldDevice ? 'bottom-72px' : 'bottom-8px',
-	)}
+	class="fixed flex flex-col bottom-0 overflow-hidden inset-x-0 pointer-events-none [&>*]:pointer-events-auto"
 >
-	{#if !$page.data.hidePlayerOverlay}
-		<PlayerOverlay />
-	{/if}
+	<div bind:clientHeight={overlayContentHeight} class="flex flex-col">
+		{#if !$page.data.hidePlayerOverlay}
+			<div class="px-8px pb-8px w-full">
+				<PlayerOverlay class="mx-auto max-w-1000px" />
+			</div>
+		{/if}
+
+		{#if bottom}
+			{@render bottom()}
+		{/if}
+	</div>
 </div>
 
 <style>

@@ -5,8 +5,13 @@
 html {
 	color-scheme: light;
 	width: 100%;
-	scrollbar-gutter: stable;
+	overflow-y: scroll;
+	/* Chrome implementation with fixed elements is very buggy */
+	/* scrollbar-gutter: stable; */
+	scroll-padding-top: var(--app-header-height);
+	scroll-padding-bottom: var(--bottom-overlay-height);
 	--app-header-height: 56px;
+	@apply text-body-md bg-background text-onBackground;
 }
 
 @screen sm {
@@ -19,15 +24,23 @@ html.dark {
 	color-scheme: dark;
 }
 
+html,
+body {
+	min-height: 100vh;
+}
+
 body {
 	font-family: 'Fira Sans', system-ui, sans-serif;
 	-webkit-tap-highlight-color: transparent;
-	@apply text-body-md h-full w-full select-none bg-background text-onBackground;
+	display: flex;
+	flex-direction: column;
+	user-select: none;
 }
 
 .app-container {
 	display: flex;
 	flex-direction: column;
+	flex-grow: 1;
 }
 
 .ripple {
