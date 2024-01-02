@@ -6,8 +6,10 @@
 	import PlayPreviousNextIcon from '$lib/components/animated-icons/PlayPreviousNextIcon.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { usePlayer } from '$lib/stores/player/store'
+	import MainControls from '$lib/components/player/MainControls.svelte'
 
 	const player = usePlayer()
+	const track = $derived(player.activeTrack.value)
 </script>
 
 <section
@@ -17,21 +19,19 @@
 		<div class="p-40px relative h-full">
 			<PlayerArtwork class="view-transition-artwork rounded-16px" />
 
+			<div class="min-w-0 flex flex-col justify-center h-72px">
+				{#if track}
+					<div class="truncate text-title-lg">{track.name}</div>
+					<div class="truncate text-body-md">{track.artists}</div>
+				{/if}
+			</div>
+
 			<div class="flex items-center justify-center gap-24px">
-				<IconButton icon="musicNote" class="bg-tertiary text-onTertiary" />
+				<IconButton icon="musicNote" />
 
-				<Button
-					kind="blank"
-					class="flex rounded-20px items-center justify-center bg-primary text-onPrimary h-72px w-120px"
-				>
-					<PlayPauseIcon />
-				</Button>
+				<MainControls />
 
-				<Button>
-					<PlayPreviousNextIcon type="previous" />
-				</Button>
-
-				<IconButton icon="musicNote" class="bg-tertiary text-onTertiary" />
+				<IconButton icon="musicNote" />
 			</div>
 		</div>
 	</div>

@@ -27,7 +27,7 @@
 </script>
 
 <div
-	class="ml-auto flex justify-end gap-8px w-full pb-16px items-center mb-16px border-b border-outlineVariant w-full"
+	class="ml-auto flex justify-end gap-8px w-full pb-8px items-center mb-16px border-b border-outlineVariant w-full"
 >
 	<button
 		popovertarget={menuId}

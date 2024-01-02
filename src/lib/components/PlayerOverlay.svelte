@@ -11,7 +11,7 @@
 </script>
 
 <div
-	class="overlay px-16px pt-8px gap-8px flex flex-col items-center mx-auto h-96px w-full max-w-1000px rounded-24px bg-secondaryContainer text-onSecondaryContainer"
+	class="overlay px-16px pt-8px pb-16px justify-between gap-8px flex flex-col items-center mx-auto h-96px w-full max-w-1000px rounded-24px bg-secondaryContainer text-onSecondaryContainer"
 >
 	<Timeline />
 	<div class="grid items-center w-full controls">

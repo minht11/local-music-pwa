@@ -4,7 +4,15 @@
 
 html {
 	color-scheme: light;
-	@apply h-full w-full;
+	width: 100%;
+	scrollbar-gutter: stable;
+	--app-header-height: 56px;
+}
+
+@screen sm {
+	html {
+		--app-header-height: 64px;
+	}
 }
 
 html.dark {
@@ -15,6 +23,11 @@ body {
 	font-family: 'Fira Sans', system-ui, sans-serif;
 	-webkit-tap-highlight-color: transparent;
 	@apply text-body-md h-full w-full select-none bg-background text-onBackground;
+}
+
+.app-container {
+	display: flex;
+	flex-direction: column;
 }
 
 .ripple {

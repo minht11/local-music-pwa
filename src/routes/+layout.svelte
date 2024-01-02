@@ -123,43 +123,44 @@
 {/if}
 
 {#key data.pathname}
-	<div class="flex h-full w-full flex-col">
-		<header
-			class="will-change-bg relative flex h-56px flex-shrink-0 xs:h-56px sm:h-64px {isScrolled
-				? 'tonal-elevation-4 bg-surface'
-				: ''}"
-		>
-			<div class="max-w-1280px mx-auto w-full items-center px-16px flex">
-				{#if !$page.data.hideBackButton}
-					<IconButton icon="backArrow" class="mr-8px" onclick={handleBackClick} />
+	<header
+		class={clx(
+			'fixed inset-x-0 top-0 z-10 flex h-[--app-header-height] flex-shrink-0',
+			isScrolled && 'tonal-elevation-4 bg-surface',
+		)}
+	>
+		<div class="max-w-1280px mx-auto w-full items-center px-16px flex">
+			{#if !$page.data.hideBackButton}
+				<IconButton icon="backArrow" class="mr-8px" onclick={handleBackClick} />
+			{/if}
+
+			<h1 class="text-title-lg mr-auto">{pageData.title}</h1>
+
+			<div class="flex items-center gap-4px">
+				{#if actions}
+					{@render actions()}
 				{/if}
-
-				<h1 class="text-title-lg mr-auto">{pageData.title}</h1>
-
-				<div class="flex items-center gap-4px">
-					{#if actions}
-						{@render actions()}
-					{/if}
-				</div>
-			</div>
-		</header>
-
-		<div bind:this={scrollTarget} class="flex grow flex-col overflow-auto bg-background">
-			<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
-			<div
-				class={clx(
-					'mx-auto w-full max-w-[1280px] grow px-8px pt-16px',
-					$page.data.hidePlayerOverlay ? 'pb-16px' : 'pb-120px scroll-pb-120px',
-				)}
-			>
-				{@render children()}
 			</div>
 		</div>
+	</header>
+
+	<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
+
+	<div
+		class={clx(
+			'mx-auto w-full max-w-[1280px] grow px-8px pt-16px mt-[--app-header-height]',
+			$page.data.hidePlayerOverlay ? 'pb-16px' : 'pb-120px scroll-pb-120px',
+		)}
+	>
+		{@render children()}
 	</div>
 {/key}
 
 <div
-	class="fixed flex px-8px flex-col overflow-hidden bottom-8px inset-x-0 pointer-events-none [&>*]:pointer-events-auto scrollbar-gutter-stable"
+	class={clx(
+		'fixed flex px-8px flex-col overflow-hidden inset-x-0 pointer-events-none [&>*]:pointer-events-auto',
+		data.isHandHeldDevice ? 'bottom-72px' : 'bottom-8px',
+	)}
 >
 	{#if !$page.data.hidePlayerOverlay}
 		<PlayerOverlay />

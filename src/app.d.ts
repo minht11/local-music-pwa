@@ -7,6 +7,7 @@ declare global {
 			hideBackButton?: boolean
 			pageTitle?: string
 			title: string
+			isHandHeldDevice: boolean
 		}
 		// interface Platform {}
 	}

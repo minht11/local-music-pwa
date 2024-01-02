@@ -7,7 +7,7 @@
 	import Button from '$lib/components/Button.svelte'
 	import { useRootLayout } from '$lib/app'
 
-	const { children } = $props()
+	const { data, children } = $props()
 
 	type LibrarySlug = LayoutParams['slug']
 
@@ -52,36 +52,37 @@
 	<IconButton as="a" href="/settings" icon="moreVertical" />
 {/snippet}
 
-<div class="page-layout">
-	<div class="flex flex-col gap-8px sticky top-16px h-max w-max">
-		{#each navItems as item}
-			<Button
-				as="a"
-				href={`/library/${item.slug}`}
-				kind="blank"
-				title={item.title}
-				class="h-56px w-56px shrink-0 flex justify-center items-center rounded-full"
+<div
+	class={clx(
+		'gap-8px fixed',
+		data.isHandHeldDevice
+			? 'grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] bottom-0 inset-x-0 bg-surface tonal-elevation-2 w-full h-64px z-10 justify-between'
+			: 'flex left-16px flex-col w-max h-max',
+	)}
+>
+	{#each navItems as item}
+		<Button
+			as="a"
+			href={`/library/${item.slug}`}
+			kind="blank"
+			title={item.title}
+			class={clx(
+				'shrink-0 flex justify-center items-center',
+				data.isHandHeldDevice ? 'h-full rounded-0' : 'h-56px w-56px rounded-full',
+			)}
+		>
+			<div
+				class={clx(
+					'flex items-center justify-center p-8px rounded-full',
+					item.slug === slug && 'bg-secondaryContainer text-onSecondaryContainer',
+				)}
 			>
-				<div
-					class={clx(
-						'flex items-center justify-center p-8px rounded-full',
-						item.slug === slug && 'bg-secondaryContainer text-onSecondaryContainer',
-					)}
-				>
-					<Icon type={item.icon} />
-				</div>
-			</Button>
-		{/each}
-	</div>
-
-	<div class="contain-paint w-full">
-		{@render children()}
-	</div>
+				<Icon type={item.icon} />
+			</div>
+		</Button>
+	{/each}
 </div>
 
-<style lang="postcss">
-	.page-layout {
-		display: grid;
-		grid-template-columns: 96px 1fr;
-	}
-</style>
+<div class={clx('w-full', !data.isHandHeldDevice && 'pl-96px')}>
+	{@render children()}
+</div>

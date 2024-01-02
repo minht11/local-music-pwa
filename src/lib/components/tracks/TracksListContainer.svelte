@@ -1,6 +1,5 @@
 <script lang="ts" context="module">
-	import { useScrollTarget } from '$lib/helpers/scroll-target.svelte'
-	import { createVirtualizer } from '@tanstack/svelte-virtual'
+	import { createWindowVirtualizer } from '@tanstack/svelte-virtual'
 	import TrackListItem from './TrackListItem.svelte'
 	import type { Track } from '$lib/db/entities'
 
@@ -17,11 +16,8 @@
 		onItemClick?: (data: TrackItemClick) => void
 	}>()
 
-	const scrollTarget = useScrollTarget()
-
-	const rowVirtualizer = createVirtualizer({
+	const rowVirtualizer = createWindowVirtualizer({
 		count: items.length,
-		getScrollElement: scrollTarget,
 		estimateSize: () => 72,
 		overscan: 10,
 	})
