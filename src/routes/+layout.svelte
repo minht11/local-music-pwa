@@ -5,7 +5,7 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import { wait } from '$lib/helpers/utils'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
-	import { setContext, untrack, type Snippet } from 'svelte'
+	import { setContext, type Snippet } from 'svelte'
 	import invariant from 'tiny-invariant'
 	import { providePlayer } from '$lib/stores/player/store.ts'
 	import { pendingRipples } from '$lib/actions/ripple'
@@ -45,6 +45,9 @@
 
 		return new Promise(async (resolve) => {
 			await Promise.race([pendingRipples(), wait(100)])
+
+			document.documentElement.setAttribute('data-view-from', navigation.from?.route.id ?? '')
+			document.documentElement.setAttribute('data-view-to', navigation.to?.route.id ?? '')
 
 			document.startViewTransition(async () => {
 				resolve()
@@ -96,7 +99,6 @@
 		data.pathname
 
 		return () => {
-			console.log('layout cleanup')
 			actions = undefined
 			bottom = undefined
 		}
@@ -149,15 +151,19 @@
 <header
 	class={clx(
 		'fixed inset-x-0 top-0 z-10 flex h-[--app-header-height] flex-shrink-0',
-		isScrolled && 'tonal-elevation-4 bg-surface',
+		isScrolled && !pageData.disableHeaderElevation && 'tonal-elevation-4 bg-surface',
 	)}
 >
 	<div class="max-w-1280px mx-auto w-full items-center px-16px flex">
 		{#if !$page.data.hideBackButton}
-			<IconButton icon="backArrow" class="mr-8px" onclick={handleBackClick} />
+			<IconButton
+				icon="backArrow"
+				class="view-transition-page-back-btn mr-8px"
+				onclick={handleBackClick}
+			/>
 		{/if}
 
-		<h1 class="text-title-lg mr-auto">{pageData.title}</h1>
+		<h1 class="view-transition-page-title text-title-lg mr-auto">{pageData.title}</h1>
 
 		<div class="flex items-center gap-4px">
 			{#if actions}
@@ -172,7 +178,7 @@
 {#key data.pathname}
 	<div
 		class={clx(
-			'flex flex-col mx-auto w-full max-w-[1280px] grow px-8px pt-16px mt-[--app-header-height]',
+			'flex flex-col mx-auto w-full max-w-1280px grow px-8px pt-16px mt-[--app-header-height]',
 			$page.data.hidePlayerOverlay ? '' : 'pb-[--bottom-overlay-height]',
 		)}
 	>
@@ -186,7 +192,7 @@
 	<div bind:clientHeight={overlayContentHeight} class="flex flex-col">
 		{#if !$page.data.hidePlayerOverlay}
 			<div class="px-8px pb-8px w-full">
-				<PlayerOverlay class="mx-auto max-w-1000px" />
+				<PlayerOverlay />
 			</div>
 		{/if}
 

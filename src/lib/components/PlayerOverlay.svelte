@@ -14,12 +14,12 @@
 
 <div
 	class={clx(
-		'view-transition-player-overlay px-16px pt-8px pb-16px justify-between gap-8px flex flex-col items-center h-96px w-full rounded-24px bg-secondaryContainer text-onSecondaryContainer',
+		'view-transition-pl-container max-w-900px mx-auto justify-between h-96px rounded-24px bg-secondaryContainer text-onSecondaryContainer',
 		className,
 	)}
 >
 	<div
-		class="view-transition-player-overlay-content justify-between grow gap-8px flex flex-col items-center w-full"
+		class="player-content justify-between grow gap-8px flex flex-col items-center w-full px-16px pt-8px pb-16px"
 	>
 		<Timeline />
 		<div class="grid items-center w-full controls">
@@ -31,7 +31,7 @@
 			>
 				{@const track = player.activeTrack.value}
 				<div
-					class="view-transition-artwork rounded-8px overflow-hidden shrink-0 relative h-44px w-44px ring ring-inset ring-onSecondaryContainer/40"
+					class="player-artwork rounded-8px overflow-hidden shrink-0 relative h-44px w-44px ring ring-inset ring-onSecondaryContainer/40"
 				>
 					{#if track}
 						<PlayerArtwork class="wh-full" />
@@ -67,5 +67,13 @@
 <style>
 	.controls {
 		grid-template-columns: 1fr max-content 1fr;
+	}
+
+	:global(:is([data-view-from='/player'], [data-view-to='/player'])) .player-content {
+		view-transition-name: pl-content;
+	}
+
+	:global(:is([data-view-from='/player'], [data-view-to='/player'])) .player-artwork {
+		view-transition-name: pl-artwork;
 	}
 </style>
