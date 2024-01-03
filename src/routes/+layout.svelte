@@ -139,7 +139,11 @@
 </svelte:head>
 
 {#if $navigating}
-	<div class="fixed z-20 top-0 inset-x-0 bg-onTertiaryContainer h-4px" />
+	<div class="page-loading-indicator fixed z-20 top-0 inset-x-0 bg-tertiary/40 h-4px">
+		<div
+			class="page-loading-indicator-bar h-4px w-full origin-top-left overflow-hidden bg-onTertiaryContainer"
+		/>
+	</div>
 {/if}
 
 <header
@@ -193,6 +197,29 @@
 </div>
 
 <style>
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+	}
+
+	.page-loading-indicator {
+		animation: fade-in 0.2s 0.2s linear backwards;
+	}
+
+	.page-loading-indicator-bar {
+		animation: page-loading-indicator 6s cubic-bezier(0.05, 0.7, 0.1, 1) forwards;
+	}
+
+	@keyframes page-loading-indicator {
+		0% {
+			transform: scaleX(0);
+		}
+		100% {
+			transform: scaleX(0.8);
+		}
+	}
+
 	/* :global(.interactable) {
 		position: relative;
 		overflow: hidden;
