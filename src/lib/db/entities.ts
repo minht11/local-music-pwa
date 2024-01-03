@@ -37,6 +37,7 @@ export interface UnknownTrack {
 	trackNo?: number
 	trackOf?: number
 	images?: {
+		optimized: boolean
 		small: Blob
 		full: Blob
 	}

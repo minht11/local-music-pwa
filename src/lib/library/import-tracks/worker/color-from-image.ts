@@ -1,30 +1,15 @@
 import { QuantizerCelebi, Score, argbFromRgb } from '@material/material-color-utilities'
-import invariant from 'tiny-invariant'
 
-const getImageData = async (blob: Blob): Promise<Uint8ClampedArray> => {
-	const bitmap = await createImageBitmap(blob)
-
-	const { width, height } = bitmap
-
-	const canvas = new OffscreenCanvas(width, height)
-	const ctx = canvas.getContext('2d')
-
-	invariant(ctx, 'Canvas context is null')
-
-	ctx.drawImage(bitmap, 0, 0)
-	return ctx.getImageData(0, 0, width, height).data
-}
-
-export const extractColorFromImage = async (blob: Blob): Promise<number | undefined> => {
-	if (globalThis.OffscreenCanvas === undefined) {
-		return undefined
-	}
-
+export const extractColorFromImage = async (image: ImageData): Promise<number | undefined> => {
 	try {
-		const imageBytes = await getImageData(blob)
+		const skipPixels = 1
+		const bytesPerPixel = 4
+		const increment = bytesPerPixel + bytesPerPixel * skipPixels
+
+		const imageBytes = image.data
 
 		const pixels: number[] = []
-		for (let i = 0; i < imageBytes.length; i += 4) {
+		for (let i = 0; i < imageBytes.length; i += increment) {
 			const r = imageBytes[i] as number
 			const g = imageBytes[i + 1] as number
 			const b = imageBytes[i + 2] as number
