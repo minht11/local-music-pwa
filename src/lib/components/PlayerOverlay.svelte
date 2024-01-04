@@ -18,7 +18,7 @@
 
 <div
 	class={clx(
-		'view-transition-pl-container max-w-900px mx-auto justify-between sm:h-96px rounded-16px sm:rounded-24px bg-secondaryContainer text-onSecondaryContainer',
+		'view-transition-pl-container overflow-hidden max-w-900px mx-auto justify-between sm:h-96px rounded-16px sm:rounded-24px bg-secondaryContainer text-onSecondaryContainer',
 		className,
 	)}
 >
@@ -31,7 +31,7 @@
 				as="a"
 				href="/player"
 				kind="blank"
-				class="flex items-center max-sm:p-8px rounded-8px grow sm:h-44px pr-8px sm:max-w-180px group"
+				class="flex items-center max-sm:p-8px max-sm:rounded-r-16px rounded-8px grow sm:h-44px pr-8px sm:max-w-180px group"
 			>
 				{@const track = player.activeTrack.value}
 				<div
