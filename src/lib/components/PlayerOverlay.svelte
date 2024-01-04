@@ -6,6 +6,10 @@
 	import PlayerArtwork from './player/PlayerArtwork.svelte'
 	import MainControls from './player/MainControls.svelte'
 	import Timeline from './player/Timeline.svelte'
+	import PlayToggleButton from './player/buttons/PlayToggleButton.svelte'
+	import PlayNextButton from './player/buttons/PlayNextButton.svelte'
+	// import PlayNextButton from './buttons/PlayNextButton.svelte'
+	// import PlayPrevButton from './buttons/PlayPrevButton.svelte'
 
 	const { class: className } = $props<{ class?: string }>()
 
@@ -14,20 +18,20 @@
 
 <div
 	class={clx(
-		'view-transition-pl-container max-w-900px mx-auto justify-between h-96px rounded-24px bg-secondaryContainer text-onSecondaryContainer',
+		'view-transition-pl-container max-w-900px mx-auto justify-between sm:h-96px rounded-16px sm:rounded-24px bg-secondaryContainer text-onSecondaryContainer',
 		className,
 	)}
 >
 	<div
-		class="player-content justify-between grow gap-8px flex flex-col items-center w-full px-16px pt-8px pb-16px"
+		class="player-content h-full justify-between gap-8px flex flex-col items-center w-full sm:px-16px sm:pt-8px sm:pb-16px"
 	>
-		<Timeline />
-		<div class="grid items-center w-full controls">
+		<Timeline class="max-sm:hidden" />
+		<div class="flex sm:grid items-center w-full grow grid-cols-[1fr_max-content_1fr]">
 			<Button
 				as="a"
 				href="/player"
 				kind="blank"
-				class="flex items-center rounded-8px h-44px pr-8px max-w-180px group"
+				class="flex items-center max-sm:p-8px rounded-8px grow sm:h-44px pr-8px sm:max-w-180px group"
 			>
 				{@const track = player.activeTrack.value}
 				<div
@@ -55,9 +59,15 @@
 				{/if}
 			</Button>
 
-			<MainControls />
+			<div class="ml-auto flex gap-8px sm:hidden pr-8px">
+				<PlayToggleButton />
 
-			<div class="ml-auto">
+				<PlayNextButton class="max-xss:hidden" />
+			</div>
+
+			<MainControls class="max-sm:hidden" />
+
+			<div class="ml-auto max-sm:hidden">
 				<IconButton icon="moreVertical" />
 			</div>
 		</div>

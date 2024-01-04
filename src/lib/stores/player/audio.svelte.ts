@@ -1,5 +1,5 @@
 import type { FileEntity } from '$lib/helpers/file-system'
-import { assign, throttle } from '$lib/helpers/utils'
+import { throttle } from '$lib/helpers/utils'
 
 export class PlayerAudio {
 	playing = $state(false)
@@ -42,7 +42,6 @@ export class PlayerAudio {
 
 		audio.ontimeupdate = throttle(() => {
 			this.time.current = audio.currentTime
-			console.log('timeupdate', this.time.current, audio.currentTime)
 		}, 1000)
 	}
 
@@ -83,8 +82,6 @@ export class PlayerAudio {
 		if (!file) {
 			return
 		}
-
-		// await this.#audio.pause()
 
 		this.#cleanupSource()
 

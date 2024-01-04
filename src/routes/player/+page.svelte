@@ -6,6 +6,7 @@
 	import { usePlayer } from '$lib/stores/player/store'
 	import MainControls from '$lib/components/player/MainControls.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
+	import Timeline from '$lib/components/player/Timeline.svelte'
 
 	const player = usePlayer()
 	const track = $derived(player.activeTrack.value)
@@ -47,14 +48,16 @@
 		>
 			<PlayerArtwork class="rounded-24px view-transition-pl-artwork" />
 
-			<div class="min-w-0 flex flex-col justify-center h-72px">
+			<div class="min-w-0 flex flex-col justify-center h-72px mb-16px">
 				{#if track}
 					<div class="truncate text-title-lg">{track.name}</div>
 					<div class="truncate text-body-md">{track.artists}</div>
 				{/if}
 			</div>
 
-			<div class="flex items-center justify-center gap-24px">
+			<Timeline />
+
+			<div class="flex items-center justify-center gap-24px mt-16px">
 				<IconButton icon="musicNote" />
 
 				<MainControls />

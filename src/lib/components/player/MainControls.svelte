@@ -1,20 +1,15 @@
 <script lang="ts">
-	import { usePlayer } from '$lib/stores/player/store.ts'
-	import IconButton from '../IconButton.svelte'
-	import PlayPreviousNextIcon from '../animated-icons/PlayPreviousNextIcon.svelte'
-	import PlayPauseButton from './PlayPauseButton.svelte'
+	import PlayNextButton from './buttons/PlayNextButton.svelte'
+	import PlayPrevButton from './buttons/PlayPrevButton.svelte'
+	import PlayTogglePillButton from './buttons/PlayTogglePillButton.svelte'
 
-	const player = usePlayer()
+	const { class: className } = $props<{ class?: string }>()
 </script>
 
-<div class="flex gap-8px items-center">
-	<IconButton onclick={player.playPrev}>
-		<PlayPreviousNextIcon type="previous" />
-	</IconButton>
+<div class={clx('flex gap-8px items-center', className)}>
+	<PlayPrevButton />
 
-	<PlayPauseButton playing={player.playing} onclick={() => player.togglePlay()} />
+	<PlayTogglePillButton />
 
-	<IconButton onclick={player.playNext}>
-		<PlayPreviousNextIcon type="next" />
-	</IconButton>
+	<PlayNextButton />
 </div>

@@ -3,6 +3,8 @@
 	import { usePlayer } from '$lib/stores/player/store'
 	import Slider from '../Slider.svelte'
 
+	const { class: className } = $props<{ class?: string }>()
+
 	const player = usePlayer()
 
 	const max = 1000
@@ -37,7 +39,7 @@
 	}
 </script>
 
-<div class="flex items-center tabular-nums gap-10px w-full">
+<div class={clx('flex items-center tabular-nums gap-10px w-full', className)}>
 	<div class="text-body-sm">
 		{formatDuration(seeking ? getTime(seekingValue) : player.currentTime)}
 	</div>
