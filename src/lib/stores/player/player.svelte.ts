@@ -7,14 +7,20 @@ export class PlayerStore {
 
 	shuffle = $state(false)
 
-	currentTime = $state(0)
-
 	get playing() {
 		return this.#audio.playing
 	}
 
 	set playing(value: boolean) {
 		this.#audio.playing = value
+	}
+
+	get currentTime() {
+		return this.#audio.time.current
+	}
+
+	get duration() {
+		return this.#audio.time.duration
 	}
 
 	#activeTrackIndex = $state(-1)
@@ -73,4 +79,6 @@ export class PlayerStore {
 		this.#activeTrackIndex = trackIndex
 		this.togglePlay(true)
 	}
+
+	seek = this.#audio.seek
 }

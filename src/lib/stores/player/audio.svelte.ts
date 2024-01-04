@@ -1,23 +1,31 @@
 import type { FileEntity } from '$lib/helpers/file-system'
+import { assign, throttle } from '$lib/helpers/utils'
 
 export class PlayerAudio {
 	playing = $state(false)
 
 	#audio = new Audio()
 
+	time = $state({
+		current: 0,
+		duration: 0,
+	})
+
 	constructor() {
+		const audio = this.#audio
+
 		$effect(() => {
 			// If audio state matches our state
 			// we do not need to do anything
-			if (this.#audio.paused === !this.playing) {
+			if (audio.paused === !this.playing) {
 				return
 			}
 
-			void this.#audio[this.playing ? 'play' : 'pause']()
+			void audio[this.playing ? 'play' : 'pause']()
 		})
 
 		const onAudioPlayPauseHandler = () => {
-			const currentAudioState = !this.#audio.paused
+			const currentAudioState = !audio.paused
 
 			if (currentAudioState !== this.playing) {
 				// If our state is out of sync with audio element, sync it.
@@ -25,8 +33,17 @@ export class PlayerAudio {
 			}
 		}
 
-		this.#audio.addEventListener('pause', onAudioPlayPauseHandler)
-		this.#audio.addEventListener('play', onAudioPlayPauseHandler)
+		audio.onpause = onAudioPlayPauseHandler
+		audio.onplay = onAudioPlayPauseHandler
+
+		audio.ondurationchange = () => {
+			this.time.duration = audio.duration
+		}
+
+		audio.ontimeupdate = throttle(() => {
+			this.time.current = audio.currentTime
+			console.log('timeupdate', this.time.current, audio.currentTime)
+		}, 1000)
 	}
 
 	#getTrackFile = async (track: FileEntity) => {
@@ -84,5 +101,10 @@ export class PlayerAudio {
 		// }
 		// this.#cleanupSource()
 		// this.#audio.src = ''
+	}
+
+	seek = (time: number) => {
+		this.#audio.currentTime = time
+		this.time.current = time
 	}
 }
