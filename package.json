@@ -47,7 +47,6 @@
 		"@tanstack/svelte-virtual": "^3.0.1",
 		"@types/dom-navigation": "^1.0.3",
 		"@types/dom-view-transitions": "^1.0.4",
-		"@types/offscreencanvas": "^2019.7.3",
 		"@types/wicg-file-system-access": "^2023.10.4",
 		"@unocss/reset": "^0.58.3",
 		"buffer-lite": "^2.1.0",

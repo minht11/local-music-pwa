@@ -22,7 +22,6 @@
 		"verbatimModuleSyntax": true,
 		"types": [
 			"@types/dom-navigation",
-			"@types/offscreencanvas",
 			"@types/wicg-file-system-access",
 			"@types/dom-view-transitions",
 			"./.generated/types/auto-imports.d.ts"
