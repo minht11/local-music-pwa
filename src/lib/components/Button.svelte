@@ -16,6 +16,7 @@
 		href?: ButtonHref<As>
 		class?: string
 		title?: string
+		popovertarget?: string
 		children?: Snippet
 		onclick?: (event: MouseEvent) => void
 	}

@@ -16,9 +16,16 @@
 </script>
 
 <script lang="ts">
-	const { items, id } = $props<{
+	const {
+		items,
+		id,
+		class: className,
+		matchWidth = true,
+	} = $props<{
 		id?: string
 		items: MenuItem[]
+		class?: string
+		matchWidth?: boolean
 	}>()
 
 	let popover = $state<HTMLDivElement>()!
@@ -44,10 +51,17 @@
 		cleanup = autoUpdate(target, popover, () => {
 			const rect = target.getBoundingClientRect()
 
+			if (matchWidth) {
+				popover.style.width = `${rect.width}px`
+			}
+
+			const popoverRect = popover.getBoundingClientRect()
+			const left = rect.left + rect.width - popoverRect.width
+			const top = rect.top + rect.height
+
 			assign(popover.style, {
-				width: `${rect.width}px`,
-				left: `${rect.left}px`,
-				top: `${rect.top + rect.height}px`,
+				left: `${left}px`,
+				top: `${top}px`,
 			})
 		})
 	}
@@ -58,7 +72,10 @@
 	bind:this={popover}
 	popover
 	role="menu"
-	class="flex-col contain-content inset-auto m-0 px-0 rounded-4px py-8px tonal-elevation-3 overscroll-contain"
+	class={clx(
+		'flex-col contain-content inset-auto m-0 px-0 rounded-4px py-8px tonal-elevation-3 overscroll-contain',
+		className,
+	)}
 	ontoggle={(e) => {
 		onToggle(e as unknown as ToggleEvent)
 	}}

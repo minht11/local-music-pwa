@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto, pushState } from '$app/navigation'
 	import { page } from '$app/stores'
 	import type { LayoutParams } from './$types'
 	import Icon from '$lib/components/icon/Icon.svelte'
@@ -6,6 +7,7 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import { useRootLayout } from '$lib/app'
+	import Menu, { getMenuId } from '$lib/components/Menu.svelte'
 
 	const { data, children } = $props()
 
@@ -42,6 +44,8 @@
 		},
 	] satisfies NavItem[]
 
+	const menuId = getMenuId()
+
 	const layout = useRootLayout()
 	// @ts-ignore
 	layout.actions = layoutActions
@@ -72,7 +76,27 @@
 
 {#snippet layoutActions()}
 	<IconButton as="a" href="/search" icon="search" />
-	<IconButton as="a" href="/settings" icon="moreVertical" />
+	<IconButton icon="moreVertical" popovertarget={menuId} />
+
+	<Menu
+		id={menuId}
+		class="w-100px"
+		matchWidth={false}
+		items={[
+			{
+				label: 'Settings',
+				action: () => {
+					goto('/settings')
+				},
+			},
+			{
+				label: 'About',
+				action: () => {
+					goto('/about')
+				},
+			},
+		]}
+	/>
 {/snippet}
 
 {#snippet layoutBottom()}
