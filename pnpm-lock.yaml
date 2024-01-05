@@ -106,9 +106,6 @@ devDependencies:
   terser:
     specifier: ^5.26.0
     version: 5.26.0
-  tslib:
-    specifier: ^2.6.2
-    version: 2.6.2
   typescript:
     specifier: ^5.3.3
     version: 5.3.3
@@ -3356,6 +3353,7 @@ packages:
 
   /tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
+    dev: false
 
   /typescript@5.3.3:
     resolution: {integrity: sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==}
