@@ -9,10 +9,14 @@
 			"dist",
 			"build",
 			".generated",
-			".DS_Store",
+			"**/*.DS_Store",
 			".env",
 			".env.*",
-			"pnpm-lock.yaml"
+			"pnpm-lock.yaml",
+			"./src/paraglide",
+			"**/*.html",
+			"**/*.svg",
+			"**/*.svelte"
 		]
 	},
 	"formatter": {
