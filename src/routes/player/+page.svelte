@@ -4,14 +4,21 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { usePlayer } from '$lib/stores/player/store'
-	import MainControls from '$lib/components/player/MainControls.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
+	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
+	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
+	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
+	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
+	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
+
+	const { data } = $props()
 
 	const player = usePlayer()
 	const track = $derived(player.activeTrack.value)
 
-	const isCompact = useMediaQuery('(max-width: 768px)')
+	const isCompactMedia = useMediaQuery('(max-width: 768px)')
+	const isCompact = $derived(isCompactMedia.value)
 </script>
 
 {#snippet queue()}
@@ -42,30 +49,52 @@
 	class="w-full max-w-1280px bg-secondaryContainer view-transition-pl-container mx-auto fixed inset-0"
 />
 <section class="view-transition-pl-content grow flex flex-col mx-auto w-full max-w-1280px">
-	<div class="grow grid grid-cols-[360px_1fr]">
-		<div
-			class="sticky px-24px lg:px-40px top-[calc(var(--app-header-height)+16px)] h-screen flex flex-col"
-		>
-			<PlayerArtwork class="rounded-24px view-transition-pl-artwork" />
+	<div class="flex sm:grow sm:grid grow grid-cols-[400px_1fr]">
+		{#if (isCompact && !data.isQueueOpen) || !isCompact}
+			<div
+				class="flex flex-col grow sm:sticky sm:max-h-[calc(100vh-80px)] top-[calc(var(--app-header-height)+16px)]"
+			>
+				<div class="px-16px grow flex flex-col">
+					<PlayerArtwork
+						class="rounded-24px view-transition-pl-artwork mb-24px max-w-280px w-full mx-auto"
+					/>
 
-			<div class="min-w-0 flex flex-col justify-center h-72px mb-16px">
-				{#if track}
-					<div class="truncate text-title-lg">{track.name}</div>
-					<div class="truncate text-body-md">{track.artists}</div>
-				{/if}
+					<Timeline />
+
+					<div class="flex items-center my-auto justify-between gap-24px">
+						<RepeatButton />
+
+						<PlayPrevButton />
+
+						<PlayTogglePillButton />
+
+						<PlayNextButton />
+
+						<ShuffleButton />
+					</div>
+				</div>
+
+				<div class="min-w-0 mt-auto px-16px tonal-elevation-1 mt-auto flex items-center h-72px">
+					{#if track}
+						<div class="text-body-lg mr-8px min-w-24px text-center tabular-nums">
+							{player.activeTrackIndex}
+						</div>
+
+						<div class="flex flex-col">
+							<div class="truncate text-title-lg">{track.name}</div>
+							<div class="truncate text-body-md">{track.artists}</div>
+						</div>
+					{/if}
+
+					<div class="flex gap-4px ml-auto">
+						<IconButton icon="favorite" />
+
+						<IconButton icon="trayFull" as="a" href="?queue" />
+					</div>
+				</div>
 			</div>
-
-			<Timeline />
-
-			<div class="flex items-center justify-center gap-24px mt-16px">
-				<IconButton icon="musicNote" />
-
-				<MainControls />
-
-				<IconButton icon="musicNote" />
-			</div>
-		</div>
-		{#if !isCompact.value}
+		{/if}
+		{#if !isCompact || (isCompact && data.isQueueOpen)}
 			{@render queue()}
 		{/if}
 	</div>

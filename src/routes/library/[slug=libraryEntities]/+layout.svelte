@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto, pushState } from '$app/navigation'
+	import { goto } from '$app/navigation'
 	import { page } from '$app/stores'
 	import type { LayoutParams } from './$types'
 	import Icon from '$lib/components/icon/Icon.svelte'

@@ -178,8 +178,9 @@
 {#key data.pathname}
 	<div
 		class={clx(
-			'flex flex-col mx-auto w-full max-w-1280px grow px-8px pt-16px mt-[--app-header-height]',
+			'flex flex-col mx-auto w-full max-w-1280px grow mt-[--app-header-height]',
 			$page.data.hidePlayerOverlay ? '' : 'pb-[--bottom-overlay-height]',
+			!$page.data.disableContentPadding && 'px-8px pt-16px',
 		)}
 	>
 		{@render children()}

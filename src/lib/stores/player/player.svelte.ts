@@ -33,6 +33,10 @@ export class PlayerStore {
 		allowEmpty: true,
 	})
 
+	get activeTrackIndex() {
+		return this.#activeTrackIndex
+	}
+
 	#artwork = createManagedArtwork(() => this.activeTrack?.value?.images?.full)
 	artworkSrc = $derived(this.#artwork[0]())
 

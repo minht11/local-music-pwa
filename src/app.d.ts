@@ -8,6 +8,7 @@ declare global {
 			pageTitle?: string
 			title: string
 			isHandHeldDevice: boolean
+			disableContentPadding?: boolean
 			disableHeaderElevation?: boolean
 		}
 		// interface Platform {}
