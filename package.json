@@ -13,7 +13,6 @@
 		"lint-fix": "biome check ./src --apply",
 		"format": "biome format ./src",
 		"format-fix": "biome format ./src --write",
-		"generate-tw-colors": "node scripts/generate-tw-colors.js",
 		"compile-i18n": "paraglide-js compile --project ./project.inlang",
 		"postinstall": "paraglide-js compile --project ./project.inlang"
 	},
