@@ -5,15 +5,14 @@
 	},
 	"files": {
 		"ignore": [
-			"node_modules",
-			"dist",
-			"build",
-			".generated",
+			"node_modules/**",
+			"dist/**",
+			"build/**",
+			".generated/**",
 			"**/*.DS_Store",
-			".env",
-			".env.*",
+			"**/*.env.*",
 			"pnpm-lock.yaml",
-			"./src/paraglide",
+			"./src/paraglide/**",
 			"**/*.html",
 			"**/*.svg",
 			"**/*.svelte"
