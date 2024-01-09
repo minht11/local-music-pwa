@@ -38,6 +38,13 @@
 			},
 			"suspicious": {
 				"noMisrefactoredShorthandAssign": "error"
+			},
+			"nursery": {
+				"useFilenamingConvention": "error",
+				"noUselessTernary": "error",
+				"useAwait": "error",
+				"useNumberNamespace": "error",
+				"useShorthandFunctionType": "error"
 			}
 		}
 	},

@@ -1,14 +1,8 @@
 import type { Track } from '$lib/db/entities'
-import { type AppStoreNames, getDB } from '$lib/db/get-db'
+import { getDB, getValue } from '$lib/db/get-db'
 import { useDbQuery } from '$lib/helpers/use-db-query.svelte'
 import invariant from 'tiny-invariant'
 import { WeakLRUCache } from 'weak-lru-cache'
-
-const getValueById = async <Names extends AppStoreNames>(storeName: Names, id: number) => {
-	const db = await getDB()
-
-	return db.get(storeName, id)
-}
 
 const tracksCache = new WeakLRUCache<number, Track>({
 	cacheSize: 10_000,
@@ -21,7 +15,7 @@ export const getTrack = async (id: number) => {
 		return cachedValue
 	}
 
-	const track = await getValueById('tracks', id)
+	const track = await getValue('tracks', id)
 	if (track !== undefined) {
 		tracksCache.setValue(id, track)
 	}

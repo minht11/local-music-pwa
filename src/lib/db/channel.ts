@@ -1,14 +1,14 @@
-export interface DBChangeRecord<T> {
+export interface DBChangeRecord {
 	storeName: string
-	key?: number
-	value?: T
+	id?: number
+	value?: unknown
 	operation: 'add' | 'update' | 'delete' | 'clear-all'
 }
 
-export type DBChangeRecordList<T> = readonly DBChangeRecord<T>[]
+export type DBChangeRecordList = readonly DBChangeRecord[]
 
 export const channel = new BroadcastChannel('app-db-channel')
 
-export const notifyDB = <T>(data: readonly (DBChangeRecord<T> | undefined)[]) => {
-	channel.postMessage(data.filter(Boolean))
+export const notifyDB = (changes: DBChangeRecordList) => {
+	channel.postMessage(changes.filter(Boolean))
 }

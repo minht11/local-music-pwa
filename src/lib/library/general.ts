@@ -25,3 +25,34 @@ export const getEntityIds = async <StoreName extends LibraryEntityStoreName>(
 
 	return data
 }
+
+// export interface UseEntityOptions<AllowEmpty extends boolean = false> {
+// 	allowEmpty?: AllowEmpty
+// }
+
+// export type UseTrackResult<AllowEmpty extends boolean = false> = AllowEmpty extends true
+// 	? Track | undefined
+// 	: Track
+
+// export const useEntityData = <AllowEmpty extends boolean = false>(
+// 	id: number | (() => number),
+// 	options: UseEntityOptions<AllowEmpty> = {},
+// ) =>
+// 	useDbQuery({
+// 		key: () => (typeof id === 'function' ? id() : id),
+// 		fetcher: async (key): Promise<UseTrackResult<AllowEmpty>> => {
+// 			const track = await getTrack(key)
+
+// 			if (options.allowEmpty) {
+// 				return track as Track
+// 			}
+
+// 			invariant(track, `Track with id ${key} not found`)
+
+// 			return track
+// 		},
+// 		cache: tracksCache,
+// 		onDatabaseChange: () => {},
+// 	})
+
+// export const useValue = <T>(value: T) => {}

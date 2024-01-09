@@ -7,7 +7,9 @@
 	import DirectoryListItem from './DirectoryListItem.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 
-	let currentTracksCount = 0
+	const { data } = $props()
+
+	const currentTracksCount = data.countQuery()
 
 	const folders = [
 		{
@@ -43,8 +45,9 @@
 		<div>
 			<div class="text-body-lg">
 				Currently there are
-				<strong class="rounded-12px bg-tertiary px-8px text-onTertiary">{currentTracksCount}</strong
-				>
+				<strong class="rounded-12px tabular-nums bg-tertiary px-8px text-onTertiary">
+					{currentTracksCount.value}
+				</strong>
 				tracks inside your library
 			</div>
 			<div>All data is stored on your device</div>
