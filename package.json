@@ -42,7 +42,6 @@
 	"dependencies": {
 		"@floating-ui/dom": "^1.5.4",
 		"@material/material-color-utilities": "^0.2.7",
-		"@motionone/svelte": "^10.16.4",
 		"@tanstack/svelte-virtual": "^3.0.1",
 		"@types/dom-navigation": "^1.0.3",
 		"@types/dom-view-transitions": "^1.0.4",
