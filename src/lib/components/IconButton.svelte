@@ -17,7 +17,7 @@
 	{...rest}
 	kind="blank"
 	class={clx(
-		'interactable flex justify-center h-44px w-44px items-center rounded-full',
+		'interactable flex justify-center shrink-0 h-44px w-44px items-center rounded-full',
 		rest.class,
 	)}
 >

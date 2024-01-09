@@ -11,6 +11,7 @@
 	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
 	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
+	import Slider from '$lib/components/Slider.svelte'
 
 	const { data } = $props()
 
@@ -54,14 +55,12 @@
 			<div
 				class="flex flex-col grow sm:sticky sm:max-h-[calc(100vh-80px)] top-[calc(var(--app-header-height)+16px)]"
 			>
-				<div class="px-16px grow flex flex-col">
-					<PlayerArtwork
-						class="rounded-24px view-transition-pl-artwork mb-24px max-w-280px w-full mx-auto"
-					/>
+				<PlayerArtwork class="rounded-24px view-transition-pl-artwork max-w-300px w-full mx-auto" />
 
+				<div class="grow flex flex-col pt-24px pb-16px px-16px">
 					<Timeline />
 
-					<div class="flex items-center my-auto justify-between gap-24px">
+					<div class="flex items-center gap-8px my-auto justify-between">
 						<RepeatButton />
 
 						<PlayPrevButton />
@@ -72,9 +71,17 @@
 
 						<ShuffleButton />
 					</div>
+
+					<div class="flex items-center gap-8px">
+						<IconButton icon="volumeMid" />
+
+						<Slider value={100} />
+
+						<IconButton icon="volumeHigh" />
+					</div>
 				</div>
 
-				<div class="min-w-0 mt-auto px-16px tonal-elevation-1 mt-auto flex items-center h-72px">
+				<div class="min-w-0 mt-auto px-16px tonal-elevation-1 flex items-center h-72px">
 					{#if track}
 						<div class="text-body-lg mr-8px min-w-24px text-center tabular-nums">
 							{player.activeTrackIndex}
