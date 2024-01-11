@@ -93,11 +93,11 @@ export class PlayerAudio {
 	}
 
 	reset() {
-		// if (!this.#audio.src) {
-		// 	return
-		// }
-		// this.#cleanupSource()
-		// this.#audio.src = ''
+		if (!this.#audio.src) {
+			return
+		}
+		this.#cleanupSource()
+		this.#audio.src = ''
 	}
 
 	seek = (time: number) => {

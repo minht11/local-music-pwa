@@ -1,7 +1,7 @@
 import { assign } from '$lib/helpers/utils'
 import { untrack } from 'svelte'
 import { WeakLRUCache } from 'weak-lru-cache'
-import { type DBChangeRecordList, channel } from './channel'
+import { type DBChangeRecordList, listenForDatabaseChanges } from './channel'
 
 // Fast in memory cache so we do not need to
 // call indexed db for every access
@@ -9,11 +9,25 @@ const cache = new WeakLRUCache<string, unknown>({
 	cacheSize: 10_000,
 })
 
+export type QueryKey = readonly unknown[]
+
+const normalizeKey = <const K extends QueryKey>(key: K) => JSON.stringify(key)
+
+export const getCacheValue = <const K extends QueryKey, R>(key: K) =>
+	cache.getValue(normalizeKey(key)) as R | undefined
+
+export const deleteCacheValue = <const K extends QueryKey>(key: K) =>
+	cache.delete(normalizeKey(key))
+
+if (!import.meta.env.SSR) {
+	window.acache = cache
+}
+
 export type QueryStatus = 'loading' | 'loaded' | 'error'
 
-type QueryBaseState<K> = {
+type QueryBaseState = {
 	status: QueryStatus
-	key?: K
+	key?: string
 }
 
 type QueryLoadedState<R> = {
@@ -37,20 +51,24 @@ type QueryErrorState<R> = {
 	error: unknown
 }
 
-export type QueryState<K, R> = QueryBaseState<K> &
+export type QueryState<R> = QueryBaseState &
 	(QueryLoadedState<R> | QueryLoadingState<R> | QueryErrorState<R>)
 
 export type QueryMutate<R> = (value: R | ((prev: R) => void)) => void
 
-export interface QueryOptions<K extends string, R> {
+export interface QueryOptions<K extends QueryKey, R> {
 	key: K | (() => K)
+	disableCache?: boolean
 	fetcher: (key: K) => Promise<R> | R
-	onDatabaseChange?: (data: DBChangeRecordList, actions: { mutate: QueryMutate<R> }) => void
+	onDatabaseChange?: (
+		changes: DBChangeRecordList,
+		actions: { mutate: QueryMutate<R>; refetch: () => void },
+	) => void
 	initialValue?: R
 }
 
-export const createQuery = <K extends string, R>(options: QueryOptions<K, R>) => {
-	type InternalState = Omit<QueryState<K, R>, 'loading'>
+export const createQuery = <const K extends QueryKey, R>(options: QueryOptions<K, R>) => {
+	type InternalState = Omit<QueryState<R>, 'loading'>
 
 	const getKey = () => (typeof options.key === 'function' ? options.key() : options.key)
 
@@ -58,11 +76,15 @@ export const createQuery = <K extends string, R>(options: QueryOptions<K, R>) =>
 		status: 'loaded',
 		value,
 		error: undefined,
-		key: getKey(),
+		key: normalizeKey(getKey()),
 	})
 
 	const getInitialValue = (key: K): InternalState => {
-		const value = cache.getValue(key) ?? options.initialValue
+		if (options.disableCache) {
+			return getLoadedState(undefined as R)
+		}
+
+		const value = getCacheValue(key) ?? options.initialValue
 
 		if (value) {
 			return getLoadedState(value as R)
@@ -78,15 +100,20 @@ export const createQuery = <K extends string, R>(options: QueryOptions<K, R>) =>
 
 	const state = $state<InternalState>(getInitialValue(getKey()))
 
-	const load = async () => {
+	const load = async (forceFresh?: boolean) => {
 		const key = getKey()
+		const normalizedKey = normalizeKey(key)
 
-		// Attempt to load data from cache
-		const value = cache.getValue(key)
-		if (value) {
-			assign(state, getLoadedState(value as R))
+		const useCache = !(options.disableCache || forceFresh)
 
-			return
+		if (useCache) {
+			// Attempt to load data from cache
+			const value = cache.getValue(normalizedKey)
+			if (value) {
+				assign(state, getLoadedState(value as R))
+
+				return
+			}
 		}
 
 		assign(state, {
@@ -96,7 +123,9 @@ export const createQuery = <K extends string, R>(options: QueryOptions<K, R>) =>
 
 		try {
 			const value = await options.fetcher(key)
-			cache.setValue(key, value)
+			if (!options.disableCache) {
+				cache.setValue(normalizedKey, value)
+			}
 
 			assign(state, getLoadedState(value))
 		} catch (e) {
@@ -104,20 +133,18 @@ export const createQuery = <K extends string, R>(options: QueryOptions<K, R>) =>
 				status: 'error',
 				value: undefined,
 				error: e,
-				key,
+				key: normalizedKey,
 			})
 		}
 	}
 
 	$effect(() => {
-		if (state.key !== getKey()) {
+		if (state.key !== normalizeKey(getKey())) {
 			void untrack(load)
 		}
 	})
 
-	channel.addEventListener('message', (e) => {
-		const changes = e.data as DBChangeRecordList
-
+	listenForDatabaseChanges((changes) => {
 		options.onDatabaseChange?.(changes, {
 			mutate: (v) => {
 				let value: R | undefined
@@ -126,9 +153,13 @@ export const createQuery = <K extends string, R>(options: QueryOptions<K, R>) =>
 					value = v(state.value)
 				}
 
-				cache.setValue(getKey(), value)
+				if (!options.disableCache) {
+					cache.setValue(normalizeKey(getKey()), value)
+				}
+
 				assign(state, getLoadedState(value as R))
 			},
+			refetch: () => load(true),
 		})
 	})
 
@@ -145,15 +176,17 @@ export const createQuery = <K extends string, R>(options: QueryOptions<K, R>) =>
 		get error() {
 			return state.error
 		},
-	} as QueryState<K, R>
+	} as QueryState<R>
 }
 
-export const defineQuery = <K extends string, R>(options: QueryOptions<K, R>) => {
+export const defineQuery = <const K extends QueryKey, R>(options: QueryOptions<K, R>) => {
 	const preload = async () => {
 		const key = typeof options.key === 'function' ? options.key() : options.key
 		const value = await options.fetcher(key)
 
-		cache.setValue(key, value)
+		if (!options.disableCache) {
+			cache.setValue(normalizeKey(key), value)
+		}
 	}
 
 	const create = () => createQuery(options)

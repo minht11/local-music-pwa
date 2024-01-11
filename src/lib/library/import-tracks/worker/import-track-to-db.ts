@@ -1,4 +1,4 @@
-import { notifyDB } from '$lib/db/channel'
+import { notifyAboutDatabaseChanges } from '$lib/db/channel'
 import type { Track, UnknownTrack } from '$lib/db/entities'
 import { getDB } from '$lib/db/get-db'
 
@@ -9,7 +9,7 @@ export const importTrackToDb = async (metadata: UnknownTrack) => {
 
 	const trackId = await db.add('tracks', metadata as Track)
 
-	notifyDB([
+	notifyAboutDatabaseChanges([
 		{
 			storeName: 'tracks',
 			id: trackId,

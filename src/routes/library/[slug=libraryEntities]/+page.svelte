@@ -10,7 +10,8 @@
 
 	const { store } = data
 
-	store.mountSetup()
+	const itemsIdsQuery = store.query()
+	const itemsIds = $derived(itemsIdsQuery.value ?? [])
 
 	const player = usePlayer()
 	const menuId = getMenuId()
@@ -61,7 +62,7 @@
 </div>
 
 <TracksListContainer
-	items={data.store.data}
+	items={itemsIds}
 	onItemClick={({ items, index }) => {
 		player.playTrack(index, items)
 	}}

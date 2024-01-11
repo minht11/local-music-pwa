@@ -1,4 +1,6 @@
+import { listenForDatabaseChanges } from '$lib/db/channel'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
+import { debounce } from '$lib/helpers/utils'
 import { useTrack } from '$lib/library/tracks.svelte'
 import { PlayerAudio } from './audio.svelte'
 
@@ -41,14 +43,45 @@ export class PlayerStore {
 	artworkSrc = $derived(this.#artwork[0]())
 
 	constructor() {
+		const reset = debounce(() => {
+			if (!this.activeTrack?.value) {
+				this.#audio.reset()
+			}
+		}, 100)
+
 		$effect(() => {
 			const track = this.activeTrack?.value
 
 			if (track) {
+				reset.cancel()
 				this.#audio.load(track.file)
 			} else {
-				// TODO. Do not reset while loading
-				this.#audio.reset()
+				reset()
+			}
+		})
+
+		listenForDatabaseChanges((changes) => {
+			for (const change of changes) {
+				const id = change.id
+				if (change.operation === 'delete' && id !== undefined) {
+					const index = this.itemsIds.indexOf(id)
+
+					if (index === -1) {
+						continue
+					}
+
+					if (index < this.#activeTrackIndex) {
+						this.#activeTrackIndex -= 1
+					} else if (index === this.#activeTrackIndex) {
+						this.#activeTrackIndex = -1
+					}
+
+					if (this.shuffle) {
+						this.#itemsIdsShuffled.splice(index, 1)
+					} else {
+						this.#itemsIdsOriginalOrder.splice(index, 1)
+					}
+				}
 			}
 		})
 	}

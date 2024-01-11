@@ -4,9 +4,10 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
 	import { formatDuration } from '$lib/helpers/utils'
-	import { useTrack } from '$lib/library/tracks.svelte.ts'
+	import { removeTrack, useTrack } from '$lib/library/tracks.svelte.ts'
 	import { usePlayer } from '$lib/stores/player/store.ts'
 	import Artwork from '../Artwork.svelte'
+	import IconButton from '../IconButton.svelte'
 
 	const { trackId, style, tabindex, onclick } = $props<{
 		trackId: number
@@ -40,7 +41,6 @@
 	)}
 	{tabindex}
 	role="listitem"
-	use:ripple
 	onclick={() => onclick?.(data.value!)}
 	onkeydown={(e) => {
 		if (e.key === 'Enter') {
@@ -74,25 +74,34 @@
 		<div class="hidden @sm:block tabular-nums">
 			{formatDuration(track.duration)}
 		</div>
+
+		<IconButton
+			icon="moreVertical"
+			onclick={(e) => {
+				e.stopPropagation()
+
+				removeTrack(track.id)
+			}}
+		/>
 	{/if}
 </div>
 
 <style lang="postcss">
 	.track-item {
-		--grid-cols: auto 1.5fr;
+		--grid-cols: auto 1.5fr 44px;
 		display: grid;
 		grid-template-columns: var(--grid-cols);
 	}
 
 	@container (theme('containers.sm')) {
 		.track-item {
-			--grid-cols: auto 1.5fr 74px;
+			--grid-cols: auto 1.5fr 74px 44px;
 		}
 	}
 
 	@container (theme('containers.4xl')) {
 		.track-item {
-			--grid-cols: auto 1.5fr minmax(200px, 1fr) 74px;
+			--grid-cols: auto 1.5fr minmax(200px, 1fr) 74px 44px;
 		}
 	}
 </style>

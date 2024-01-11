@@ -13,6 +13,7 @@
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 
+	// @ts-ignore
 	const { data } = $props()
 
 	const player = usePlayer()

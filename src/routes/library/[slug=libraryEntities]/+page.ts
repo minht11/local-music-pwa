@@ -9,29 +9,30 @@ const nameSortOption = {
 } as const
 
 const storeMap = {
-	tracks: new LibraryStore('tracks', m.tracks(), [
-		nameSortOption,
-		{
-			name: 'Artist',
-			key: 'artists',
-		},
-		{
-			name: 'Album',
-			key: 'album',
-		},
-		{
-			name: 'Duration',
-			key: 'duration',
-		},
-		{
-			name: 'Year',
-			key: 'year',
-		},
-	]),
-	albums: new LibraryStore('albums', m.albums(), [nameSortOption]),
-	artists: new LibraryStore('artists', m.artists(), [nameSortOption]),
+	tracks: () =>
+		new LibraryStore('tracks', m.tracks(), [
+			nameSortOption,
+			{
+				name: 'Artist',
+				key: 'artists',
+			},
+			{
+				name: 'Album',
+				key: 'album',
+			},
+			{
+				name: 'Duration',
+				key: 'duration',
+			},
+			{
+				name: 'Year',
+				key: 'year',
+			},
+		]),
+	albums: () => new LibraryStore('albums', m.albums(), [nameSortOption]),
+	artists: () => new LibraryStore('artists', m.artists(), [nameSortOption]),
 } satisfies {
-	[K in LibraryStoreNames]: LibraryStore<K>
+	[K in LibraryStoreNames]: () => LibraryStore<K>
 }
 
 export const load: PageLoad = async (event) => {
@@ -41,7 +42,7 @@ export const load: PageLoad = async (event) => {
 		throw new Error('Not implemented')
 	}
 
-	const store = storeMap[slug]
+	const store = storeMap[slug]()
 
 	await store.preloadData()
 

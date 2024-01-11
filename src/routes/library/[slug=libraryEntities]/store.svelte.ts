@@ -1,3 +1,4 @@
+import { defineQuery } from '$lib/db/db-fast.svelte'
 import type { AppDB } from '$lib/db/get-db'
 import {
 	type LibraryEntitySortKey,
@@ -6,8 +7,6 @@ import {
 	getEntityIds,
 } from '$lib/library/general'
 import type { IndexNames } from 'idb'
-import { untrack } from 'svelte'
-import invariant from 'tiny-invariant'
 
 const defaultData = {
 	order: 'asc',
@@ -39,36 +38,63 @@ export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 	sortByKey = $state<LibraryEntitySortKey<StoreName>>(this.sortOptions[0]?.key ?? 'name')
 	sortBy = $derived(this.sortOptions.find((option) => option.key === this.sortByKey))
 
-	data = $state<number[]>([])
+	#query = defineQuery({
+		key: () => ['library', this.storeName, this.sortByKey, this.order],
+		fetcher: async ([, name, sortKey, order]) => {
+			const ids = await getEntityIds(name, sortKey, order)
+
+			return ids
+		},
+		onDatabaseChange: (changes, { mutate, refetch }) => {
+			console.log(changes)
+
+			let needRefetch = false
+			for (const change of changes) {
+				if (change.storeName !== this.storeName) {
+					continue
+				}
+
+				if (change.operation === 'add') {
+					// We have no way of knowing where should the new item be inserted.
+					// So we just refetch the whole list.
+					needRefetch = true
+					break
+				}
+
+				const id = change.id
+				if (change.operation === 'delete' && id !== undefined) {
+					mutate((value) => {
+						const index = value.indexOf(id)
+
+						value.splice(index, 1)
+
+						return value
+					})
+				}
+			}
+
+			if (needRefetch) {
+				refetch()
+			}
+		},
+	})
+
+	preloadData = () => this.#query.preload()
+
+	// TODO.
+	query = () => {
+		const query = this.#query.create()
+
+		return {
+			get value() {
+				return query.value
+			},
+		}
+	}
 
 	constructor(storeName: StoreName, title: string, sortOptions: SortOption<StoreName>[]) {
 		this.storeName = storeName
 		this.title = title
 		this.sortOptions = sortOptions
-	}
-
-	async #loadData() {
-		const key = this.sortBy?.key
-
-		invariant(key, 'Sort key is not defined')
-
-		this.data = await getEntityIds(this.storeName, key, this.order)
-	}
-
-	preloadData() {
-		return this.#loadData()
-	}
-
-	mountSetup() {
-		$effect(() => {
-			this.order
-			this.sortBy
-
-			untrack(() => {
-				this.#loadData()
-			})
-
-			console.log('Mount', this.storeName)
-		})
 	}
 }
