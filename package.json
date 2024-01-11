@@ -17,11 +17,11 @@
 		"postinstall": "paraglide-js compile --project ./project.inlang"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.5.0",
-		"@inlang/paraglide-js": "^1.0.0",
-		"@inlang/paraglide-js-adapter-vite": "^1.2.0",
+		"@biomejs/biome": "1.5.1",
+		"@inlang/paraglide-js": "^1.1.1",
+		"@inlang/paraglide-js-adapter-vite": "^1.2.1",
 		"@sveltejs/adapter-static": "^3.0.1",
-		"@sveltejs/kit": "^2.1.2",
+		"@sveltejs/kit": "^2.3.1",
 		"@sveltejs/vite-plugin-svelte": "^3.0.1",
 		"@unocss/postcss": "^0.58.3",
 		"@unocss/svelte-scoped": "^0.58.3",
