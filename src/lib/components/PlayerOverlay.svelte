@@ -8,6 +8,7 @@
 	import Timeline from './player/Timeline.svelte'
 	import PlayToggleButton from './player/buttons/PlayToggleButton.svelte'
 	import PlayNextButton from './player/buttons/PlayNextButton.svelte'
+	import VolumeSlider from './player/VolumeSlider.svelte'
 	// import PlayNextButton from './buttons/PlayNextButton.svelte'
 	// import PlayPrevButton from './buttons/PlayPrevButton.svelte'
 
@@ -26,7 +27,7 @@
 		class="player-content h-full justify-between gap-8px flex flex-col items-center w-full sm:px-16px sm:pt-8px sm:pb-16px"
 	>
 		<Timeline class="max-sm:hidden" />
-		<div class="flex sm:grid items-center w-full grow grid-cols-[1fr_max-content_1fr]">
+		<div class="flex sm:grid items-center w-full h-min grow grid-cols-[1fr_max-content_1fr]">
 			<Button
 				as="a"
 				href="/player"
@@ -67,7 +68,8 @@
 
 			<MainControls class="max-sm:hidden" />
 
-			<div class="ml-auto max-sm:hidden">
+			<div class="flex items-center gap-8px ml-auto max-sm:hidden">
+				<VolumeSlider />
 				<IconButton icon="moreVertical" />
 			</div>
 		</div>
