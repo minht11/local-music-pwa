@@ -2,6 +2,7 @@ import { listenForDatabaseChanges } from '$lib/db/channel'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { debounce } from '$lib/helpers/utils'
 import { useTrack } from '$lib/library/tracks.svelte'
+import { untrack } from 'svelte'
 import { PlayerAudio } from './audio.svelte'
 
 export class PlayerStore {
@@ -58,6 +59,9 @@ export class PlayerStore {
 				reset.cancel()
 				this.#audio.load(track.file)
 			} else {
+				untrack(() => {
+					this.playing = false
+				})
 				reset()
 			}
 		})
@@ -113,6 +117,10 @@ export class PlayerStore {
 	playTrack = (trackIndex: number, queue?: readonly number[]) => {
 		if (queue) {
 			this.#itemsIdsOriginalOrder = [...queue]
+		}
+
+		if (this.itemsIds.length === 0) {
+			return
 		}
 
 		this.#activeTrackIndex = trackIndex
