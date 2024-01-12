@@ -45,7 +45,7 @@
 	</div>
 
 	<Slider
-		disabled={!player.activeTrack.value}
+		disabled={!player.activeTrack}
 		{max}
 		bind:value={timeline.value}
 		onSeekStart={() => {

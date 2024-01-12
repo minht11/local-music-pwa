@@ -46,8 +46,6 @@ export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 			return ids
 		},
 		onDatabaseChange: (changes, { mutate, refetch }) => {
-			console.log(changes)
-
 			let needRefetch = false
 			for (const change of changes) {
 				if (change.storeName !== this.storeName) {

@@ -11,4 +11,4 @@
 	const player = usePlayer()
 </script>
 
-<Artwork src={player.artworkSrc} alt={player.activeTrack.value?.name} {...props} />
+<Artwork src={player.artworkSrc} alt={player.activeTrack?.name} {...props} />

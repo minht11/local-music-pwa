@@ -107,7 +107,7 @@
 	const player = providePlayer()
 
 	let initial = true
-	const primaryThemeColor = $derived(player.activeTrack.value?.primaryColor)
+	const primaryThemeColor = $derived(player.activeTrack?.primaryColor)
 	$effect(() => {
 		const color = primaryThemeColor
 

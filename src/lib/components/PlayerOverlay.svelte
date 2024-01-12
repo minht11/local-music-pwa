@@ -33,7 +33,7 @@
 				kind="blank"
 				class="flex items-center max-sm:p-8px max-sm:rounded-r-16px rounded-8px grow sm:h-44px pr-8px sm:max-w-180px group"
 			>
-				{@const track = player.activeTrack.value}
+				{@const track = player.activeTrack}
 				<div
 					class="player-artwork rounded-8px overflow-hidden shrink-0 relative h-44px w-44px ring ring-inset ring-onSecondaryContainer/40"
 				>

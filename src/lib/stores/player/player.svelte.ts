@@ -31,26 +31,28 @@ export class PlayerStore {
 
 	itemsIds = $derived(this.shuffle ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder)
 
-	activeTrack = useTrack(() => this.itemsIds[this.#activeTrackIndex] ?? -1, {
+	activeTrackQuery = useTrack(() => this.itemsIds[this.#activeTrackIndex] ?? -1, {
 		allowEmpty: true,
 	})
+
+	activeTrack = $derived(this.activeTrackQuery.value)
 
 	get activeTrackIndex() {
 		return this.#activeTrackIndex
 	}
 
-	#artwork = createManagedArtwork(() => this.activeTrack?.value?.images?.full)
+	#artwork = createManagedArtwork(() => this.activeTrack?.images?.full)
 	artworkSrc = $derived(this.#artwork[0]())
 
 	constructor() {
 		const reset = debounce(() => {
-			if (!this.activeTrack?.value) {
+			if (!this.activeTrack) {
 				this.#audio.reset()
 			}
 		}, 100)
 
 		$effect(() => {
-			const track = this.activeTrack?.value
+			const track = this.activeTrack
 
 			if (track) {
 				reset.cancel()

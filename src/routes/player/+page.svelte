@@ -17,7 +17,7 @@
 	const { data } = $props()
 
 	const player = usePlayer()
-	const track = $derived(player.activeTrack.value)
+	const track = $derived(player.activeTrack)
 
 	const isCompactMedia = useMediaQuery('(max-width: 768px)')
 	const isCompact = $derived(isCompactMedia.value)
@@ -62,7 +62,7 @@
 					<Timeline />
 
 					<div class="flex items-center gap-8px my-auto justify-between">
-						<RepeatButton />
+						<ShuffleButton />
 
 						<PlayPrevButton />
 
@@ -70,7 +70,7 @@
 
 						<PlayNextButton />
 
-						<ShuffleButton />
+						<RepeatButton />
 					</div>
 
 					<div class="flex items-center gap-8px">

@@ -21,7 +21,7 @@
 	const player = usePlayer()
 
 	const isActive = () => {
-		const activeTrackId = player.activeTrack.value?.id
+		const activeTrackId = player.activeTrack?.id
 
 		return Boolean(activeTrackId && activeTrackId === data.value?.id)
 	}
