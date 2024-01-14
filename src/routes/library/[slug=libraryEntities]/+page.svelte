@@ -2,7 +2,6 @@
 	import { ripple } from '$lib/actions/ripple'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
-	import { usePlayer } from '$lib/stores/player/store.ts'
 	import Menu, { getMenuId } from '$lib/components/Menu.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import AlbumsListContainer from '$lib/components/albums/AlbumsListContainer.svelte'
