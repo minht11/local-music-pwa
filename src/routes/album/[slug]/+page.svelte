@@ -13,17 +13,17 @@
 	const [artwork] = createManagedArtwork(() => album.value?.image)
 </script>
 
-<section class="h-192px p-16px flex">
-	<Artwork src={artwork()} class="rounded-8px" />
+<section class="h-256px p-16px flex items-center">
+	<Artwork src={artwork()} class="rounded-8px h-full" />
 
-	<div class="pl-16px flex flex-col">
+	<div class="pl-24px flex flex-col">
 		<h1 class="text-headline-md">{album.value?.name}</h1>
 		<h2 class="text-body-lg">{album.value?.artists.join(', ')}</h2>
 		<div>
 			{album.value?.year} • {tracks.value?.length} tracks
 		</div>
 
-		<div class="flex gap-8px mt-auto">
+		<div class="flex gap-8px mt-16px">
 			<Button kind="toned">
 				Shuffle
 				<Icon type="shuffle" />
