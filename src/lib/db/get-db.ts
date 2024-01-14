@@ -28,7 +28,6 @@ export interface AppDB extends DBSchema {
 			name: string
 			artists: string[]
 			year: string
-			tracksIds: number[]
 		}
 	}
 	artists: {
@@ -96,11 +95,6 @@ export const getDB = () =>
 				createIndexes(store, ['year'])
 
 				store.createIndex('artists', 'artists', {
-					unique: false,
-					multiEntry: true,
-				})
-
-				store.createIndex('tracksIds', 'tracksIds', {
 					unique: false,
 					multiEntry: true,
 				})

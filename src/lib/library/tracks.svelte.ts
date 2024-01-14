@@ -1,17 +1,60 @@
-import { notifyAboutDatabaseChanges } from '$lib/db/channel'
+import { type DBChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
 import { createQuery, deleteCacheValue } from '$lib/db/db-fast.svelte'
 import { type AppDB, type AppStoreNames, getDB, getValue } from '$lib/db/get-db'
+import type { IDBPTransaction } from 'idb'
 import invariant from 'tiny-invariant'
 
 const trackCacheKey = 'tracks'
 const trackCacheIdKey = (id: number) => [trackCacheKey, id] as const
+
+const removeAlbum = async (
+	tx: IDBPTransaction<AppDB, ('tracks' | 'albums')[], 'readwrite'>,
+	name?: string,
+) => {
+	if (!name) {
+		return
+	}
+
+	const store = tx.objectStore('albums')
+	const album = await store.index('name').get(name)
+
+	if (!album) {
+		return
+	}
+
+	const { id } = album
+
+	await store.delete(id)
+
+	const change: DBChangeRecord = {
+		storeName: 'albums',
+		id,
+		operation: 'delete',
+	}
+
+	return change
+}
 
 export const removeTrack = async (id: number) => {
 	const db = await getDB()
 
 	deleteCacheValue(trackCacheIdKey(id))
 
-	await db.delete('tracks', id)
+	const tx = db.transaction(['tracks', 'albums'], 'readwrite')
+	const tracksStore = tx.objectStore('tracks')
+	const track = await tracksStore.get(id)
+
+	if (!track) {
+		return
+	}
+
+	const tracksWithSameAlbumCount = await tracksStore.index('album').count(track.album)
+
+	const [albumChange] = await Promise.all([
+		tracksWithSameAlbumCount === 1 ? removeAlbum(tx, track.album) : undefined,
+		tracksStore.delete(id),
+		tx.done,
+	])
 
 	notifyAboutDatabaseChanges([
 		{
@@ -19,6 +62,7 @@ export const removeTrack = async (id: number) => {
 			operation: 'delete',
 			id,
 		},
+		albumChange,
 	])
 }
 

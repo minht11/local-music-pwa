@@ -18,8 +18,8 @@ const importAlbum = async (
 	const updatedAlbum: Omit<Album, 'id'> = existingAlbum
 		? {
 				...existingAlbum,
+				year: existingAlbum.year ?? track.year,
 				image: existingAlbum.image ?? track.images?.full,
-				tracksIds: [...existingAlbum.tracksIds, track.id],
 		  }
 		: {
 				type: MusicItemType.ALBUM,
@@ -27,7 +27,6 @@ const importAlbum = async (
 				artists: track.artists,
 				year: track.year,
 				image: track.images?.full,
-				tracksIds: [track.id],
 		  }
 
 	// Id will be auto-generated

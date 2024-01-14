@@ -37,9 +37,4 @@
 	</div>
 </section>
 
-<TracksListContainer
-	items={tracks.value ?? []}
-	onItemClick={({ items, index }) => {
-		// player.playTrack(index, items)
-	}}
-/>
+<TracksListContainer items={tracks.value ?? []} />

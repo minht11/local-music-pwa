@@ -55,7 +55,6 @@ export interface Album extends BaseMusicItem {
 	artists: string[]
 	year?: string
 	image?: Blob
-	tracksIds: number[]
 }
 
 export interface Artist extends BaseMusicItem {

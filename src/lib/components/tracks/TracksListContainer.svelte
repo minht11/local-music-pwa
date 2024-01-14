@@ -2,6 +2,7 @@
 	import { createWindowVirtualizer } from '@tanstack/svelte-virtual'
 	import TrackListItem from './TrackListItem.svelte'
 	import type { Track } from '$lib/db/entities'
+	import { usePlayer } from '$lib/stores/player/store'
 
 	export interface TrackItemClick {
 		track: Track
@@ -11,7 +12,13 @@
 </script>
 
 <script lang="ts">
-	const { items, onItemClick } = $props<{
+	const player = usePlayer()
+
+	const defaultOnItemClick = (data: TrackItemClick) => {
+		player.playTrack(data.index, data.items)
+	}
+
+	const { items, onItemClick = defaultOnItemClick } = $props<{
 		items: number[]
 		onItemClick?: (data: TrackItemClick) => void
 	}>()
@@ -43,7 +50,7 @@
 					`transform: translateY(${virtualItem.start}px)`,
 				].join(';')}
 				onclick={(track) => {
-					onItemClick?.({
+					onItemClick({
 						track,
 						items,
 						index: virtualItem.index,

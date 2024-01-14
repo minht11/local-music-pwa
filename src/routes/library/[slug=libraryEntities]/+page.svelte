@@ -14,7 +14,6 @@
 	const itemsIdsQuery = store.query()
 	const itemsIds = $derived(itemsIdsQuery.value ?? [])
 
-	const player = usePlayer()
 	const menuId = getMenuId()
 
 	const menuItems = $derived(
@@ -63,12 +62,7 @@
 </div>
 
 {#if store.storeName === 'tracks'}
-	<TracksListContainer
-		items={itemsIds}
-		onItemClick={({ items, index }) => {
-			player.playTrack(index, items)
-		}}
-	/>
+	<TracksListContainer items={itemsIds} />
 {:else if store.storeName === 'albums'}
 	<AlbumsListContainer
 		items={itemsIds}

@@ -4,7 +4,7 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
 	import { formatDuration } from '$lib/helpers/utils'
-	import { getAlbumByTrackId, useTrack } from '$lib/library/tracks.svelte.ts'
+	import { removeTrack, useTrack } from '$lib/library/tracks.svelte.ts'
 	import { usePlayer } from '$lib/stores/player/store.ts'
 	import Artwork from '../Artwork.svelte'
 	import IconButton from '../IconButton.svelte'
@@ -81,8 +81,7 @@
 			onclick={(e) => {
 				e.stopPropagation()
 
-				getAlbumByTrackId(track.album)
-				// removeTrack(track.id)
+				removeTrack(track.id)
 			}}
 		/>
 	{/if}
