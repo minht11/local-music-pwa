@@ -90,3 +90,11 @@ export const debounce = <Fn extends (...args: Parameters<Fn>) => ReturnType<Fn>>
 
 	return debounceFn
 }
+
+export const safeInteger = (num: number, fallback = 0) => {
+	if (Number.isSafeInteger(num)) {
+		return num
+	}
+
+	return fallback
+}

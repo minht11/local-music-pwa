@@ -5,6 +5,7 @@
 	import { usePlayer } from '$lib/stores/player/store.ts'
 	import Menu, { getMenuId } from '$lib/components/Menu.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import AlbumsListContainer from '$lib/components/albums/AlbumsListContainer.svelte'
 
 	const { data } = $props()
 
@@ -61,9 +62,18 @@
 	<Menu id={menuId} items={menuItems} />
 </div>
 
-<TracksListContainer
-	items={itemsIds}
-	onItemClick={({ items, index }) => {
-		player.playTrack(index, items)
-	}}
-/>
+{#if store.storeName === 'tracks'}
+	<TracksListContainer
+		items={itemsIds}
+		onItemClick={({ items, index }) => {
+			player.playTrack(index, items)
+		}}
+	/>
+{:else if store.storeName === 'albums'}
+	<AlbumsListContainer
+		items={itemsIds}
+		onItemClick={() => {
+			// player.playTrack(index, items)
+		}}
+	/>
+{/if}

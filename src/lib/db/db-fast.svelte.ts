@@ -62,7 +62,7 @@ export interface QueryOptions<K extends QueryKey, R> {
 	fetcher: (key: K) => Promise<R> | R
 	onDatabaseChange?: (
 		changes: DBChangeRecordList,
-		actions: { mutate: QueryMutate<R>; refetch: () => void },
+		actions: { mutate: QueryMutate<R | undefined>; refetch: () => void },
 	) => void
 	initialValue?: R
 }
@@ -144,7 +144,7 @@ export const createQuery = <const K extends QueryKey, R>(options: QueryOptions<K
 		}
 	})
 
-	listenForDatabaseChanges((changes) => {
+	const stopListening = listenForDatabaseChanges((changes) => {
 		options.onDatabaseChange?.(changes, {
 			mutate: (v) => {
 				let value: R | undefined
@@ -161,6 +161,13 @@ export const createQuery = <const K extends QueryKey, R>(options: QueryOptions<K
 			},
 			refetch: () => load(true),
 		})
+	})
+
+	$effect(() => () => {
+		return () => {
+			console.log('stop listening')
+			stopListening()
+		}
 	})
 
 	return {
@@ -187,6 +194,8 @@ export const defineQuery = <const K extends QueryKey, R>(options: QueryOptions<K
 		if (!options.disableCache) {
 			cache.setValue(normalizeKey(key), value)
 		}
+
+		return value
 	}
 
 	const create = () => createQuery(options)
@@ -195,9 +204,12 @@ export const defineQuery = <const K extends QueryKey, R>(options: QueryOptions<K
 		preload,
 		create,
 		createPreloaded: async () => {
-			await preload()
+			const value = await preload()
 
-			return create
+			// @ts-ignore
+			create.preloadedValue = value
+
+			return create as (() => QueryState<R>) & { preloadedValue: R }
 		},
 	}
 }

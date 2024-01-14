@@ -4,7 +4,7 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
 	import { formatDuration } from '$lib/helpers/utils'
-	import { removeTrack, useTrack } from '$lib/library/tracks.svelte.ts'
+	import { getAlbumByTrackId, useTrack } from '$lib/library/tracks.svelte.ts'
 	import { usePlayer } from '$lib/stores/player/store.ts'
 	import Artwork from '../Artwork.svelte'
 	import IconButton from '../IconButton.svelte'
@@ -34,6 +34,7 @@
 
 <!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-noninteractive-element-interactions -->
 <div
+	use:ripple
 	{style}
 	class={clx(
 		'h-72px relative overflow-hidden track-item px-16px items-center grow gap-20px cursor-pointer hover:bg-onSurface/10 rounded-8px',
@@ -80,7 +81,8 @@
 			onclick={(e) => {
 				e.stopPropagation()
 
-				removeTrack(track.id)
+				getAlbumByTrackId(track.album)
+				// removeTrack(track.id)
 			}}
 		/>
 	{/if}

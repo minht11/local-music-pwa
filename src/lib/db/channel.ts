@@ -31,7 +31,7 @@ export const listenForDatabaseChanges = (handler: (changes: readonly DBChangeRec
 	return () => channel.removeEventListener('message', eventHandler)
 }
 
-export const notifyAboutDatabaseChanges = (changes: DBChangeRecordList) => {
+export const notifyAboutDatabaseChanges = (changes: readonly (DBChangeRecord | undefined)[]) => {
 	const filteredChanges = changes.filter(Boolean)
 
 	channel.dispatchEvent(new CustomEvent('message', { detail: filteredChanges }))
