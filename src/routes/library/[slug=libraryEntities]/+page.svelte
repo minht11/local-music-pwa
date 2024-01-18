@@ -26,8 +26,9 @@
 	)
 </script>
 
+<!-- 
 <div
-	class="ml-auto flex px-16px justify-end gap-8px w-full pb-8px items-center mb-16px border-b border-outlineVariant w-full"
+	class="ml-auto right-8px fixed will-change-transform top-72px bg-surface tonal-elevation-4 rounded-8px z-1 flex gap-8px p-8px items-center mb-16px"
 >
 	<button
 		popovertarget={menuId}
@@ -58,7 +59,13 @@
 	</IconButton>
 
 	<Menu id={menuId} items={menuItems} />
-</div>
+
+	<input
+		type="text"
+		placeholder="Search your library"
+		class="rounded-24px h-40px w-240px px-24px ml-auto placeholder:text-onSurface/54 text-body-md bg-onSecondaryContainer/12 focus:outline-none"
+	/>
+</div> -->
 
 {#if store.storeName === 'tracks'}
 	<TracksListContainer items={itemsIds} />

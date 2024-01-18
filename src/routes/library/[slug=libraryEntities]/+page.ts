@@ -51,5 +51,6 @@ export const load: PageLoad = async (event) => {
 		hideBackButton: true,
 		title: 'Library',
 		pageTitle: `Library - ${store.title}`,
+		disableHeaderElevation: true,
 	}
 }

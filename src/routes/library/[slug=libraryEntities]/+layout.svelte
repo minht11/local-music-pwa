@@ -8,6 +8,8 @@
 	import Button from '$lib/components/Button.svelte'
 	import { useRootLayout } from '$lib/app'
 	import Menu, { getMenuId } from '$lib/components/Menu.svelte'
+	import { ripple } from '$lib/actions/ripple.js'
+	import Separator from '$lib/components/Separator.svelte'
 
 	const { data, children } = $props()
 
@@ -75,7 +77,29 @@
 {/snippet}
 
 {#snippet layoutActions()}
-	<IconButton as="a" href="/search" icon="search" />
+	<input
+		type="text"
+		placeholder="Search tracks"
+		class="h-40px w-240px pl-8px placeholder:text-onSurface/54 text-body-md bg-transparent focus:outline-none"
+	/>
+
+	<Separator vertical class="h-24px my-auto" />
+
+	<button
+		popovertarget={menuId}
+		use:ripple
+		class="flex interactable w-96px rounded-8px h-40px pl-12px pr-4px gap-4px items-center text-label-md"
+	>
+		Name
+
+		<Icon type="menuDown" class="h-16px w-16px ml-auto" />
+	</button>
+
+	<IconButton as="a" href="/search" icon="sortAscending" />
+
+	<Separator vertical class="h-24px my-auto" />
+
+	<!-- <IconButton as="a" href="/search" icon="search" /> -->
 	<IconButton icon="moreVertical" popovertarget={menuId} />
 
 	<Menu
@@ -111,7 +135,7 @@
 
 <div
 	class={clx(
-		'gap-8px fixed left-0 flex-col w-max h-max',
+		'gap-8px fixed desktop-sidebar flex-col w-max h-max',
 		data.isHandHeldDevice ? 'hidden sm:flex' : 'flex',
 	)}
 >
@@ -121,3 +145,9 @@
 <div class={clx('w-full', data.isHandHeldDevice ? 'sm:pl-96px' : 'pl-96px')}>
 	{@render children()}
 </div>
+
+<style>
+	.desktop-sidebar {
+		left: max(0px, (100% - 1280px) / 2);
+	}
+</style>

@@ -37,7 +37,7 @@
 	use:ripple
 	{style}
 	class={clx(
-		'h-72px relative overflow-hidden track-item px-16px items-center grow gap-20px cursor-pointer hover:bg-onSurface/10 rounded-8px',
+		'h-72px relative overflow-hidden track-item pl-16px pr-8px items-center grow gap-20px cursor-pointer hover:bg-onSurface/10 rounded-8px',
 		active ? 'bg-surfaceVariant text-onSurfaceVariant' : 'color-onSurfaceVariant',
 	)}
 	{tabindex}

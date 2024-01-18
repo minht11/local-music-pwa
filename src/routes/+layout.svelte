@@ -154,7 +154,7 @@
 		isScrolled && !pageData.disableHeaderElevation && 'tonal-elevation-4 bg-surface',
 	)}
 >
-	<div class="max-w-1280px mx-auto w-full items-center px-24px flex">
+	<div class="max-w-1280px flex mx-auto w-full items-center pl-24px pr-8px">
 		{#if !$page.data.hideBackButton}
 			<IconButton
 				icon="backArrow"
@@ -165,7 +165,15 @@
 
 		<h1 class="view-transition-page-title text-title-lg mr-auto">{pageData.title}</h1>
 
-		<div class="flex items-center gap-4px">
+		<!-- <input
+			type="text"
+			placeholder="Search your library"
+			class="rounded-24px h-40px w-240px px-24px ml-auto placeholder:text-onSurface/54 text-body-md bg-onSecondaryContainer/12 focus:outline-none"
+		/> -->
+
+		<!-- <IconButton as="a" href="/search" icon="search" /> -->
+
+		<div class="flex items-center gap-8px tonal-elevation-2 bg-surface rounded-8px px-8px py-4px">
 			{#if actions}
 				{@render actions()}
 			{/if}
