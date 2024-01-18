@@ -154,7 +154,7 @@
 		isScrolled && !pageData.disableHeaderElevation && 'tonal-elevation-4 bg-surface',
 	)}
 >
-	<div class="max-w-1280px mx-auto w-full items-center px-16px flex">
+	<div class="max-w-1280px mx-auto w-full items-center px-24px flex">
 		{#if !$page.data.hideBackButton}
 			<IconButton
 				icon="backArrow"
