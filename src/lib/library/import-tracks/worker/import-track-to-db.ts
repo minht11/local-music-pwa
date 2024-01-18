@@ -1,17 +1,21 @@
 import { type DBChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
-import { type Album, MusicItemType, type Track, type UnknownTrack } from '$lib/db/entities'
+import {
+	type Album,
+	type Artist,
+	MusicItemType,
+	type Track,
+	type UnknownTrack,
+} from '$lib/db/entities'
 import { type AppDB, getDB } from '$lib/db/get-db'
 import type { IDBPTransaction } from 'idb'
 
-const importAlbum = async (
-	track: Track,
-	tx: IDBPTransaction<AppDB, ('tracks' | 'albums')[], 'readwrite'>,
-) => {
+type Tx = IDBPTransaction<AppDB, ('tracks' | 'albums' | 'artists')[], 'readwrite'>
+
+const importAlbum = async (tx: Tx, track: Track) => {
 	if (!track.album) {
 		return
 	}
 
-	const now = performance.now()
 	const store = tx.objectStore('albums')
 
 	const existingAlbum = await store.index('name').get(track.album)
@@ -39,15 +43,44 @@ const importAlbum = async (
 		operation: existingAlbum ? 'update' : 'add',
 	}
 
-	console.log('Import album took', performance.now() - now)
-
 	return change
+}
+
+const importArtist = async (tx: Tx, track: Track) => {
+	const store = tx.objectStore('artists')
+	const changes: DBChangeRecord[] = []
+
+	for (const artist of track.artists) {
+		const existingArtist = await store.index('name').get(artist)
+
+		if (existingArtist) {
+			continue
+		}
+
+		const newArtist: Omit<Artist, 'id'> = {
+			type: MusicItemType.ARTIST,
+			name: artist,
+		}
+
+		const artistId = await store.put(newArtist as Artist)
+
+		const change: DBChangeRecord = {
+			storeName: 'artists',
+			id: artistId,
+			value: { ...newArtist, id: artistId },
+			operation: 'add',
+		}
+
+		changes.push(change)
+	}
+
+	return changes
 }
 
 export const importTrackToDb = async (metadata: UnknownTrack) => {
 	const db = await getDB()
 
-	const tx = db.transaction(['tracks', 'albums'], 'readwrite')
+	const tx = db.transaction(['tracks', 'albums', 'artists'], 'readwrite')
 	const tracksStore = tx.objectStore('tracks')
 
 	const trackId = await tracksStore.add(metadata as Track)
@@ -57,7 +90,11 @@ export const importTrackToDb = async (metadata: UnknownTrack) => {
 		id: trackId,
 	}
 
-	const [albumChange] = await Promise.all([importAlbum(track, tx), tx.done])
+	const [albumChange, artistsChanges] = await Promise.all([
+		importAlbum(tx, track),
+		importArtist(tx, track),
+		tx.done,
+	])
 
 	// TODO. Check if track already exists.
 
@@ -69,5 +106,6 @@ export const importTrackToDb = async (metadata: UnknownTrack) => {
 			operation: 'add',
 		},
 		albumChange,
+		...artistsChanges,
 	])
 }

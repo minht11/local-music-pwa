@@ -41,12 +41,15 @@ export const parseTrack = async (
 	}
 
 	const artworkData = imageBlob && (await getArtworkRelatedData(imageBlob))
+	const artists = common.artists
+		?.flatMap((artist) => artist.split(/,|&/))
+		.map((artist) => artist.trim())
 
 	const trackData: UnknownTrack = {
 		type: MusicItemType.TRACK,
 		name: common.title || file.name,
 		album: common.album,
-		artists: common.artists || [],
+		artists: artists ?? [],
 		genre: common.genre || [],
 		trackNo: common.track.no || 0,
 		trackOf: common.track.of || 0,

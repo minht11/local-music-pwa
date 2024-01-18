@@ -1,34 +1,46 @@
 import { type DBChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
 import { createQuery, deleteCacheValue } from '$lib/db/db-fast.svelte'
 import { type AppDB, type AppStoreNames, getDB, getValue } from '$lib/db/get-db'
-import type { IDBPTransaction } from 'idb'
+import type { IDBPTransaction, IndexNames } from 'idb'
 import invariant from 'tiny-invariant'
 
 const trackCacheKey = 'tracks'
 const trackCacheIdKey = (id: number) => [trackCacheKey, id] as const
 
-const removeAlbum = async (
-	tx: IDBPTransaction<AppDB, ('tracks' | 'albums')[], 'readwrite'>,
-	name?: string,
+type LibraryStoreName = 'tracks' | 'albums' | 'artists'
+
+export const removeTrackRelatedData = async <
+	StoreName extends LibraryStoreName,
+	EntityIndexName extends IndexNames<AppDB, StoreName>,
+	EntityValue extends AppDB[StoreName]['indexes'][EntityIndexName],
+	IndexName extends IndexNames<AppDB, 'tracks'>,
+>(
+	tx: IDBPTransaction<AppDB, ('tracks' | 'albums' | 'artists')[], 'readwrite'>,
+	trackIndex: IndexName,
+	entityStoreName: StoreName,
+	entityIndex: EntityIndexName,
+	entityValue?: EntityValue,
 ) => {
-	if (!name) {
+	if (!entityValue) {
 		return
 	}
 
-	const store = tx.objectStore('albums')
-	const album = await store.index('name').get(name)
+	const tracksWithEntityCount = await tx.objectStore('tracks').index(trackIndex).count()
 
-	if (!album) {
+	if (tracksWithEntityCount > 1) {
 		return
 	}
 
-	const { id } = album
+	const store = tx.objectStore(entityStoreName)
+	const entity = await store.index(entityIndex).get(IDBKeyRange.only(entityValue))
 
-	await store.delete(id)
+	if (!entity) {
+		return
+	}
 
 	const change: DBChangeRecord = {
-		storeName: 'albums',
-		id,
+		storeName: entityStoreName,
+		id: entity.id,
 		operation: 'delete',
 	}
 
@@ -40,7 +52,7 @@ export const removeTrack = async (id: number) => {
 
 	deleteCacheValue(trackCacheIdKey(id))
 
-	const tx = db.transaction(['tracks', 'albums'], 'readwrite')
+	const tx = db.transaction(['tracks', 'albums', 'artists'], 'readwrite')
 	const tracksStore = tx.objectStore('tracks')
 	const track = await tracksStore.get(id)
 
@@ -48,13 +60,14 @@ export const removeTrack = async (id: number) => {
 		return
 	}
 
-	const tracksWithSameAlbumCount = await tracksStore.index('album').count(track.album)
-
-	const [albumChange] = await Promise.all([
-		tracksWithSameAlbumCount === 1 ? removeAlbum(tx, track.album) : undefined,
-		tracksStore.delete(id),
-		tx.done,
+	const [albumChange, ...artistsChanges] = await Promise.all([
+		removeTrackRelatedData(tx, 'album', 'albums', 'name', track.album),
+		...track.artists.map((artist) =>
+			removeTrackRelatedData(tx, 'artists', 'artists', 'name', artist),
+		),
 	])
+
+	await Promise.all([tracksStore.delete(id), tx.done])
 
 	notifyAboutDatabaseChanges([
 		{
@@ -63,6 +76,7 @@ export const removeTrack = async (id: number) => {
 			id,
 		},
 		albumChange,
+		...artistsChanges,
 	])
 }
 
@@ -127,4 +141,18 @@ export const getAlbumByTrackId = async (albumName?: string) => {
 	console.log('album', album)
 
 	return album
+}
+
+export const getArtistByName = async (artistName?: string) => {
+	const db = await getDB()
+
+	if (!artistName) {
+		return undefined
+	}
+
+	const artist = await db.getFromIndex('artists', 'name', artistName)
+
+	console.log('artist', artist)
+
+	return artist
 }
