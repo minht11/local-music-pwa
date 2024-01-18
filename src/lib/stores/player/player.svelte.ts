@@ -26,6 +26,14 @@ export class PlayerStore {
 		return this.#audio.time.duration
 	}
 
+	get volume() {
+		return this.#audio.volume
+	}
+
+	set volume(value: number) {
+		this.#audio.volume = value
+	}
+
 	#activeTrackIndex = $state(-1)
 	#itemsIdsOriginalOrder = $state<number[]>([])
 	#itemsIdsShuffled = $state<number[]>([])

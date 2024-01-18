@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { usePlayer } from '$lib/stores/player/store'
 	import Slider from '../Slider.svelte'
 
-	let volume = $state(1)
+	const player = usePlayer()
 </script>
 
-<Slider bind:value={volume} />
+<Slider bind:value={player.volume} />

@@ -11,6 +11,8 @@ export class PlayerAudio {
 		duration: 0,
 	})
 
+	volume = $state(100)
+
 	constructor() {
 		const audio = this.#audio
 
@@ -43,6 +45,10 @@ export class PlayerAudio {
 		audio.ontimeupdate = throttle(() => {
 			this.time.current = audio.currentTime
 		}, 1000)
+
+		$effect(() => {
+			audio.volume = this.volume / 100
+		})
 	}
 
 	#getTrackFile = async (track: FileEntity) => {
