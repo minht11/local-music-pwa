@@ -2,6 +2,7 @@ import { assign } from '$lib/helpers/utils'
 import { untrack } from 'svelte'
 import { WeakLRUCache } from 'weak-lru-cache'
 import { type DBChangeRecordList, listenForDatabaseChanges } from './channel'
+import type { AppStoreNames } from './get-db'
 
 // Fast in memory cache so we do not need to
 // call indexed db for every access
@@ -213,3 +214,51 @@ export const defineQuery = <const K extends QueryKey, R>(options: QueryOptions<K
 		},
 	}
 }
+
+export type QueryListOptions<K extends QueryKey> = Omit<
+	QueryOptions<K, number[]>,
+	'onDatabaseChange' | 'initialValue'
+>
+
+export const defineListQuery = <const StoreName extends AppStoreNames, const K extends QueryKey>(
+	storeName: () => StoreName,
+	options: QueryListOptions<K>,
+) =>
+	defineQuery({
+		...options,
+		onDatabaseChange: (changes, { mutate, refetch }) => {
+			const name = storeName()
+
+			let needRefetch = false
+			for (const change of changes) {
+				if (change.storeName !== name) {
+					continue
+				}
+
+				if (change.operation === 'add') {
+					// We have no way of knowing where should the new item be inserted.
+					// So we just refetch the whole list.
+					needRefetch = true
+					break
+				}
+
+				const id = change.id
+				if (change.operation === 'delete' && id !== undefined) {
+					mutate((value) => {
+						if (!value) {
+							return value
+						}
+
+						const index = value.indexOf(id)
+						value.splice(index, 1)
+
+						return value
+					})
+				}
+			}
+
+			if (needRefetch) {
+				refetch()
+			}
+		},
+	})

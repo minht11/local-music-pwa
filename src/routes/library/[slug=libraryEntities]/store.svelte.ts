@@ -1,4 +1,4 @@
-import { defineQuery } from '$lib/db/db-fast.svelte'
+import { defineListQuery, defineQuery } from '$lib/db/db-fast.svelte'
 import type { AppDB } from '$lib/db/get-db'
 import {
 	type LibraryEntitySortKey,
@@ -38,43 +38,9 @@ export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 	sortByKey = $state<LibraryEntitySortKey<StoreName>>(this.sortOptions[0]?.key ?? 'name')
 	sortBy = $derived(this.sortOptions.find((option) => option.key === this.sortByKey))
 
-	#query = defineQuery({
+	#query = defineListQuery(() => this.storeName, {
 		key: () => ['library', this.storeName, this.sortByKey, this.order],
-		fetcher: async ([, name, sortKey, order]) => {
-			const ids = await getEntityIds(name, sortKey, order)
-
-			return ids
-		},
-		onDatabaseChange: (changes, { mutate, refetch }) => {
-			let needRefetch = false
-			for (const change of changes) {
-				if (change.storeName !== this.storeName) {
-					continue
-				}
-
-				if (change.operation === 'add') {
-					// We have no way of knowing where should the new item be inserted.
-					// So we just refetch the whole list.
-					needRefetch = true
-					break
-				}
-
-				const id = change.id
-				if (change.operation === 'delete' && id !== undefined) {
-					mutate((value) => {
-						const index = value.indexOf(id)
-
-						value.splice(index, 1)
-
-						return value
-					})
-				}
-			}
-
-			if (needRefetch) {
-				refetch()
-			}
-		},
+		fetcher: ([, name, sortKey, order]) => getEntityIds(name, sortKey, order),
 	})
 
 	preloadData = () => this.#query.preload()
