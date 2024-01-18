@@ -6,6 +6,7 @@
 	import InfoBanner from '$lib/components/InfoBanner.svelte'
 	import DirectoryListItem from './DirectoryListItem.svelte'
 	import Separator from '$lib/components/Separator.svelte'
+	import Switch from '$lib/components/Switch.svelte'
 
 	const { data } = $props()
 
@@ -38,6 +39,8 @@
 
 		await importTracks()
 	}
+
+	let compactLayout = $state(false)
 </script>
 
 <section class="card mx-auto w-full max-w-[900px] gap-24px">
@@ -121,10 +124,35 @@
 		<div>Application theme</div>
 	</div>
 
+	<div class="flex justify-between items-center p-16px">
+		<div>Automatically pick color from currently playing song</div>
+
+		<Switch bind:checked={compactLayout} />
+	</div>
+
+	<div class="flex justify-between items-center p-16px">
+		<div>Application primary color</div>
+
+		<div class="bg-primary rounded-full h-40px w-40px"></div>
+	</div>
+
 	<Separator />
 
 	<div class="flex justify-between items-center p-16px">
-		<div>Reduced motion</div>
+		<div class="flex flex-col justify-center">
+			<div>Compact layout</div>
+			<div class="text-body-sm text-onSurface/54">
+				Some elements such as lists will be more compact.
+			</div>
+		</div>
+
+		<Switch bind:checked={compactLayout} />
+	</div>
+
+	<div class="flex justify-between items-center p-16px">
+		<div>Display volume slider inside full player screen</div>
+
+		<Switch bind:checked={compactLayout} />
 	</div>
 </section>
 
