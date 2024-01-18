@@ -2,7 +2,6 @@
 	import { createWindowVirtualizer } from '@tanstack/svelte-virtual'
 	import TrackListItem from './TrackListItem.svelte'
 	import type { Track } from '$lib/db/entities'
-	import { usePlayer } from '$lib/stores/player/store'
 
 	export interface TrackItemClick {
 		track: Track

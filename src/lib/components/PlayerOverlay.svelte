@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { usePlayer } from '$lib/stores/player/store.ts'
 	import Button from './Button.svelte'
 	import IconButton from './IconButton.svelte'
 	import Icon from './icon/Icon.svelte'

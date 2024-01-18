@@ -3,7 +3,7 @@
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { usePlayer } from '$lib/stores/player/store'
+
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'

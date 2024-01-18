@@ -44,6 +44,9 @@ export default defineConfig({
 				{
 					'$paraglide/messages': [['*', 'm']],
 				},
+				{
+					'$lib/stores/player/store': ['usePlayer'],
+				},
 			],
 		}),
 		paraglide({
