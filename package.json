@@ -19,9 +19,9 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.5.2",
 		"@inlang/paraglide-js": "^1.2.1",
-		"@inlang/paraglide-js-adapter-vite": "^1.2.6",
+		"@inlang/paraglide-js-adapter-vite": "^1.2.8",
 		"@sveltejs/adapter-static": "^3.0.1",
-		"@sveltejs/kit": "^2.3.5",
+		"@sveltejs/kit": "^2.4.3",
 		"@sveltejs/vite-plugin-svelte": "^3.0.1",
 		"@unocss/postcss": "^0.58.3",
 		"@unocss/svelte-scoped": "^0.58.3",
@@ -37,7 +37,7 @@
 		"typescript": "^5.3.3",
 		"unocss": "^0.58.3",
 		"unplugin-auto-import": "^0.17.3",
-		"vite": "^5.0.11"
+		"vite": "^5.0.12"
 	},
 	"dependencies": {
 		"@floating-ui/dom": "^1.5.4",
