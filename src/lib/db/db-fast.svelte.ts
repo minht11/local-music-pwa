@@ -20,10 +20,6 @@ export const getCacheValue = <const K extends QueryKey, R>(key: K) =>
 export const deleteCacheValue = <const K extends QueryKey>(key: K) =>
 	cache.delete(normalizeKey(key))
 
-if (!import.meta.env.SSR) {
-	window.acache = cache
-}
-
 export type QueryStatus = 'loading' | 'loaded' | 'error'
 
 type QueryBaseState = {
@@ -140,7 +136,7 @@ export const createQuery = <const K extends QueryKey, R>(options: QueryOptions<K
 	}
 
 	$effect(() => {
-		if (state.key !== normalizeKey(getKey())) {
+		if (untrack(() => state.key) !== normalizeKey(getKey())) {
 			void untrack(load)
 		}
 	})

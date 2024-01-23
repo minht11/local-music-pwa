@@ -1,15 +1,10 @@
 <script lang="ts">
-	import { goto } from '$app/navigation'
 	import { page } from '$app/stores'
 	import type { LayoutParams } from './$types'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
-	import IconButton from '$lib/components/IconButton.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import { useRootLayout } from '$lib/app'
-	import Menu, { getMenuId } from '$lib/components/Menu.svelte'
-	import { ripple } from '$lib/actions/ripple.js'
-	import Separator from '$lib/components/Separator.svelte'
 
 	const { data, children } = $props()
 
@@ -46,11 +41,7 @@
 		},
 	] satisfies NavItem[]
 
-	const menuId = getMenuId()
-
 	const layout = useRootLayout()
-	// @ts-ignore
-	layout.actions = layoutActions
 	// @ts-ignore
 	layout.bottom = layoutBottom
 </script>
@@ -76,53 +67,6 @@
 	{/each}
 {/snippet}
 
-{#snippet layoutActions()}
-	<input
-		type="text"
-		placeholder="Search tracks"
-		class="h-40px w-240px pl-8px placeholder:text-onSurface/54 text-body-md bg-transparent focus:outline-none"
-	/>
-
-	<Separator vertical class="h-24px my-auto" />
-
-	<button
-		popovertarget={menuId}
-		use:ripple
-		class="flex interactable w-96px rounded-8px h-40px pl-12px pr-4px gap-4px items-center text-label-md"
-	>
-		Name
-
-		<Icon type="menuDown" class="h-16px w-16px ml-auto" />
-	</button>
-
-	<IconButton as="a" href="/search" icon="sortAscending" />
-
-	<Separator vertical class="h-24px my-auto" />
-
-	<!-- <IconButton as="a" href="/search" icon="search" /> -->
-	<IconButton icon="moreVertical" popovertarget={menuId} />
-
-	<Menu
-		id={menuId}
-		class="w-100px"
-		matchWidth={false}
-		items={[
-			{
-				label: 'Settings',
-				action: () => {
-					goto('/settings')
-				},
-			},
-			{
-				label: 'About',
-				action: () => {
-					goto('/about')
-				},
-			},
-		]}
-	/>
-{/snippet}
-
 {#snippet layoutBottom()}
 	{#if data.isHandHeldDevice}
 		<div
@@ -142,9 +86,7 @@
 	{@render navItemsSnippet('h-56px w-80px')}
 </div>
 
-<div class={clx('w-full', data.isHandHeldDevice ? 'sm:pl-96px' : 'pl-96px')}>
-	{@render children()}
-</div>
+{@render children()}
 
 <style>
 	.desktop-sidebar {

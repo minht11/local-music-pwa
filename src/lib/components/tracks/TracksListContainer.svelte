@@ -1,5 +1,4 @@
 <script lang="ts" context="module">
-	import { createWindowVirtualizer } from '@tanstack/svelte-virtual'
 	import TrackListItem from './TrackListItem.svelte'
 	import type { Track } from '$lib/db/entities'
 
@@ -11,6 +10,8 @@
 </script>
 
 <script lang="ts">
+	import VirtualContainer from '../VirtualContainer.svelte'
+
 	const player = usePlayer()
 
 	const defaultOnItemClick = (data: TrackItemClick) => {
@@ -21,41 +22,24 @@
 		items: number[]
 		onItemClick?: (data: TrackItemClick) => void
 	}>()
-
-	const rowVirtualizer = createWindowVirtualizer({
-		count: items.length,
-		estimateSize: () => 72,
-		overscan: 10,
-	})
 </script>
 
-<div
-	style:height={`${$rowVirtualizer.getTotalSize()}px`}
-	class="contain-strict relative w-full @container"
->
-	{#each $rowVirtualizer.getVirtualItems() as virtualItem (items[virtualItem.index])}
-		{@const trackId = items[virtualItem.index]}
-		{#if trackId}
-			<TrackListItem
-				{trackId}
-				style={[
-					'contain: strict',
-					'will-change: transform;',
-					'position: absolute',
-					'top: 0',
-					'left: 0',
-					'width: 100%',
-					`height: ${virtualItem.size}px`,
-					`transform: translateY(${virtualItem.start}px)`,
-				].join(';')}
-				onclick={(track) => {
-					onItemClick({
-						track,
-						items,
-						index: virtualItem.index,
-					})
-				}}
-			/>
-		{/if}
-	{/each}
-</div>
+<VirtualContainer size={72} count={items.length} key={(index) => items[index] as number}>
+	{#snippet children(item)}
+		{@const trackId = items[item.index] as number}
+
+		<TrackListItem
+			{trackId}
+			active={player.activeTrack?.id === trackId}
+			style="transform: translateY({item.start}px)"
+			class="virtual-item top-0 left-0 w-full"
+			onclick={(track) => {
+				onItemClick({
+					track,
+					items,
+					index: item.index,
+				})
+			}}
+		/>
+	{/snippet}
+</VirtualContainer>

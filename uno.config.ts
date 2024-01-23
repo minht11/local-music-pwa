@@ -71,6 +71,7 @@ export default (async () => {
 			'base-button': 'interactable text-label-lg h-40px justify-center gap-8px rounded-20px',
 			'flip-x': '-scale-x-100',
 			'flip-y': '-scale-y-100',
+			'virtual-item': 'contain-strict will-change-transform !absolute',
 		},
 		presets: [
 			presetUno({

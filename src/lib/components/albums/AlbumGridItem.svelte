@@ -4,12 +4,18 @@
 	import { useAlbum } from '$lib/library/tracks.svelte.ts'
 	import GridItem from '../GridItem.svelte'
 
-	const { albumId, style, tabindex, onclick, index } = $props<{
+	const {
+		albumId,
+		style,
+		tabindex,
+		class: className,
+		onclick,
+	} = $props<{
 		albumId: number
 		style?: string
 		tabindex?: number
+		class?: string
 		onclick?: (album: Album) => void
-		index: number
 	}>()
 
 	const data = useAlbum(albumId)
@@ -21,8 +27,8 @@
 <GridItem
 	{style}
 	{tabindex}
+	class={className}
 	role="listitem"
-	data-index={index}
 	artwork={album?.image}
 	onclick={() => album && onclick?.(album)}
 	onkeydown={(e) => {

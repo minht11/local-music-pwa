@@ -1,5 +1,5 @@
 import { type AppDB, getDB } from '$lib/db/get-db'
-import type { IndexNames } from 'idb'
+import type { IDBPIndex, IndexNames } from 'idb'
 
 export type SortOrder = 'asc' | 'desc'
 export type LibraryEntityStoreName = 'tracks' | 'albums' | 'artists'
@@ -8,18 +8,56 @@ export type LibraryEntitySortKey<StoreName extends LibraryEntityStoreName> = Ind
 	StoreName
 >
 
+export interface SortOptions<StoreName extends LibraryEntityStoreName> {
+	sort: LibraryEntitySortKey<StoreName>
+	order?: SortOrder
+	searchTerm?: string
+	searchFn?: (value: AppDB[StoreName]['value'], term: string) => boolean
+}
+
+type GetEntityIdsIndex<StoreName extends LibraryEntityStoreName> = IDBPIndex<
+	AppDB,
+	[StoreName],
+	StoreName,
+	keyof AppDB[StoreName]['indexes']
+>
+
+// biome-ignore lint/nursery/useAwait: <explanation>
+export const getEntityIdsWithSearchSlow = async <const StoreName extends LibraryEntityStoreName>(
+	storeIndex: GetEntityIdsIndex<StoreName>,
+	searchTerm: string,
+	searchFn: (value: AppDB[StoreName]['value'], term: string) => boolean,
+) => {
+	const data: number[] = []
+
+	for await (const cursor of storeIndex.iterate()) {
+		if (searchFn(cursor.value, searchTerm)) {
+			data.push(cursor.primaryKey)
+		}
+	}
+
+	return data
+}
+
 export const getEntityIds = async <StoreName extends LibraryEntityStoreName>(
 	store: StoreName,
-	sortBy: LibraryEntitySortKey<StoreName>,
-	order: SortOrder = 'asc',
+	options: SortOptions<StoreName>,
 ) => {
 	const db = await getDB()
-	// Compared to all other methods this
-	// is the fastest way to get data from DB,
-	// array reversing is also incredibly fast.
-	const data = await db.getAllKeysFromIndex(store, sortBy)
+	const storeIndex = db.transaction(store).store.index(options.sort)
 
-	if (order === 'desc') {
+	console.log('storeIndex', options.sort, storeIndex, options.order)
+	const { searchTerm, searchFn } = options
+
+	let data: number[]
+	if (searchTerm && searchFn) {
+		data = await getEntityIdsWithSearchSlow(storeIndex, searchTerm, searchFn)
+	} else {
+		// Fast path
+		data = await db.getAllKeysFromIndex(store, options.sort)
+	}
+
+	if (options.order === 'desc') {
 		data.reverse()
 	}
 

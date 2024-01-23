@@ -29,6 +29,7 @@
 			{alt}
 			loading="eager"
 			class="object-cover w-full h-full"
+			draggable="false"
 			onerror={() => {
 				error = true
 			}}

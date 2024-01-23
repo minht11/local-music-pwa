@@ -1,5 +1,5 @@
-import { defineListQuery, defineQuery } from '$lib/db/db-fast.svelte'
-import type { AppDB } from '$lib/db/get-db'
+import { defineListQuery } from '$lib/db/db-fast.svelte'
+import { type AppDB } from '$lib/db/get-db'
 import {
 	type LibraryEntitySortKey,
 	type LibraryEntityStoreName,
@@ -32,6 +32,8 @@ export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 	storeName: StoreName
 	title: string
 
+	searchTerm = $state('')
+
 	order = $state<SortOrder>('asc')
 
 	sortOptions = $state<SortOption<StoreName>[]>([])
@@ -39,8 +41,20 @@ export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 	sortBy = $derived(this.sortOptions.find((option) => option.key === this.sortByKey))
 
 	#query = defineListQuery(() => this.storeName, {
-		key: () => ['library', this.storeName, this.sortByKey, this.order],
-		fetcher: ([, name, sortKey, order]) => getEntityIds(name, sortKey, order),
+		key: () => [
+			'library',
+			this.storeName,
+			this.sortByKey,
+			this.order,
+			this.searchTerm.toLowerCase().trim(),
+		],
+		fetcher: async ([, name, sortKey, order, searchTerm]) =>
+			getEntityIds(name, {
+				sort: sortKey,
+				order,
+				searchTerm,
+				searchFn: (value) => value.name.toLowerCase().includes(searchTerm),
+			}),
 	})
 
 	preloadData = () => this.#query.preload()

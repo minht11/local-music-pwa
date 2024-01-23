@@ -4,29 +4,27 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
 	import { formatDuration } from '$lib/helpers/utils'
-	import { getArtistByName, removeTrack, useTrack } from '$lib/library/tracks.svelte.ts'
-	import { usePlayer } from '$lib/stores/player/store.ts'
+	import { getArtistByName, useTrack } from '$lib/library/tracks.svelte.ts'
 	import Artwork from '../Artwork.svelte'
 	import IconButton from '../IconButton.svelte'
 
-	const { trackId, style, tabindex, onclick } = $props<{
+	const {
+		trackId,
+		style,
+		tabindex,
+		active,
+		class: className,
+		onclick,
+	} = $props<{
 		trackId: number
 		style?: string
 		tabindex?: number
+		active?: boolean
+		class?: string
 		onclick?: (track: Track) => void
 	}>()
 
 	const data = useTrack(trackId)
-
-	const player = usePlayer()
-
-	const isActive = () => {
-		const activeTrackId = player.activeTrack?.id
-
-		return Boolean(activeTrackId && activeTrackId === data.value?.id)
-	}
-
-	const active = $derived(isActive())
 
 	const [artwork] = createManagedArtwork(() => data.value?.images?.small)
 	const track = $derived(data.value)
@@ -37,8 +35,9 @@
 	use:ripple
 	{style}
 	class={clx(
-		'h-72px relative overflow-hidden track-item pl-16px pr-8px items-center grow gap-20px cursor-pointer hover:bg-onSurface/10 rounded-8px',
+		'h-72px overflow-hidden track-item pl-16px pr-8px items-center grow gap-20px cursor-pointer hover:bg-onSurface/10 rounded-8px',
 		active ? 'bg-surfaceVariant text-onSurfaceVariant' : 'color-onSurfaceVariant',
+		className,
 	)}
 	{tabindex}
 	role="listitem"

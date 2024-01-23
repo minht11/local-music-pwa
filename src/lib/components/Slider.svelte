@@ -29,7 +29,7 @@
 	{disabled}
 	{min}
 	{max}
-	class="slider appearance-none cursor-pointer disabled:cursor-auto grow bg-transparent"
+	class="slider h-44px text-primary flex items-center appearance-none disabled:cursor-auto grow bg-transparent"
 	style={`--current-value: ${getPercentage()}%;`}
 	onpointerdown={() => onSeekStart?.()}
 	onpointerup={() => onSeekEnd?.()}
@@ -38,25 +38,27 @@
 <style lang="postcss">
 	.slider::-webkit-slider-container {
 		height: 4px;
-		border-radius: 4px;
+		border-radius: 16px;
 		background: linear-gradient(
 			to right,
-			currentColor var(--current-value),
-			theme('colors.outline') 0%
+			currentColor 0 calc(var(--current-value) - 6px),
+			transparent calc(var(--current-value) - 6px) calc(var(--current-value) + 4px + 6px),
+			theme('colors.onPrimaryContainer/0.5') calc(var(--current-value) + 4px + 6px) 100%
 		);
 	}
 
 	.slider::-webkit-slider-thumb {
 		background: currentColor;
-		height: 16px;
-		width: 16px;
+		height: 24px;
+		width: 4px;
 		appearance: none;
-		border-radius: 100%;
+		border-radius: 2px;
 		transition: transform 0.2s ease-out;
+		box-shadow: none;
 	}
 
 	.slider:active::-webkit-slider-thumb {
-		transform: scale(1.2);
+		transform: scaleX(1.2);
 	}
 
 	.slider:disabled::-webkit-slider-thumb {
