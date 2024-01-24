@@ -5,6 +5,7 @@ class Artwork {
 	index: number
 
 	image: Blob
+
 	url: string
 
 	refs = new Set<symbol>()
