@@ -107,8 +107,8 @@ devDependencies:
     specifier: ^0.58.3
     version: 0.58.3(postcss@8.4.33)(vite@5.0.12)
   unplugin-auto-import:
-    specifier: ^0.17.3
-    version: 0.17.3
+    specifier: ^0.17.4
+    version: 0.17.4
   vite:
     specifier: ^5.0.12
     version: 5.0.12(terser@5.27.0)
@@ -1533,11 +1533,11 @@ packages:
   /@types/jsonwebtoken@9.0.5:
     resolution: {integrity: sha512-VRLSGzik+Unrup6BsouBeHsf4d1hOEgYWTm/7Nmw1sXoN1+tRly/Gy/po3yeahnP4jfnQWWAhQAqcNfH7ngOkA==}
     dependencies:
-      '@types/node': 20.11.5
+      '@types/node': 20.11.6
     dev: true
 
-  /@types/node@20.11.5:
-    resolution: {integrity: sha512-g557vgQjUUfN76MZAN/dt1z3dzcUsimuysco0KeluHgrPdJXkP/XdAURgyO2W9fZWHRtRBiVKzKn8vyOAwlG+w==}
+  /@types/node@20.11.6:
+    resolution: {integrity: sha512-+EOokTnksGVgip2PbYbr3xnR7kZigh4LbybAfBAw5BpnQ+FqBYUsvCEjYd70IXKlbohQ64mzEYmMtlWUY8q//Q==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -1894,7 +1894,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001579
-      electron-to-chromium: 1.4.643
+      electron-to-chromium: 1.4.644
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.22.2)
     dev: true
@@ -2133,8 +2133,8 @@ packages:
       safe-buffer: 5.2.1
     dev: true
 
-  /electron-to-chromium@1.4.643:
-    resolution: {integrity: sha512-QHscvvS7gt155PtoRC0dR2ilhL8E9LHhfTQEq1uD5AL0524rBLAwpAREFH06f87/e45B9XkR6Ki5dbhbCsVEIg==}
+  /electron-to-chromium@1.4.644:
+    resolution: {integrity: sha512-zOnPndwz3u1sVFSyBcRWcn0529Kz+jr+tDxN9iP69I3CpC5wlvYmjLrK2O7TEsg2oDDoUqooeXqbiHLvXvl6Lg==}
     dev: true
 
   /es6-promise@3.3.1:
@@ -3448,8 +3448,8 @@ packages:
       - supports-color
     dev: true
 
-  /unplugin-auto-import@0.17.3:
-    resolution: {integrity: sha512-0cn0wr8X579TtdZKUAps0dDVrYzttx38ImdxZjmCeNlMDJX8UuSjO83vFqgS4ClNDIGWAute+xl9j5vRSX+vsw==}
+  /unplugin-auto-import@0.17.4:
+    resolution: {integrity: sha512-sInr7+UOeFMtiRCr7lYZXouTnVqXNUJtN5yN5GDzg6Sr2rwY5ZWZmqf4yvItYCm8mq1PdzPw3oojYHgZAJnTRQ==}
     engines: {node: '>=14'}
     peerDependencies:
       '@nuxt/kit': ^3.2.2
