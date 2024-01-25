@@ -1,6 +1,8 @@
 <script lang="ts" context="module">
 	import TrackListItem from './TrackListItem.svelte'
 	import type { Track } from '$lib/db/entities'
+	import VirtualContainer from '../VirtualContainer.svelte'
+	import { useMenu } from '../menu/MenuProvider.svelte'
 
 	export interface TrackItemClick {
 		track: Track
@@ -10,9 +12,8 @@
 </script>
 
 <script lang="ts">
-	import VirtualContainer from '../VirtualContainer.svelte'
-
 	const player = usePlayer()
+	const menu = useMenu()
 
 	const defaultOnItemClick = (data: TrackItemClick) => {
 		player.playTrack(data.index, data.items)
@@ -38,6 +39,12 @@
 					track,
 					items,
 					index: item.index,
+				})
+			}}
+			oncontextmenu={(_, e) => {
+				menu.show([], e.target as HTMLElement, {
+					anchor: false,
+					position: { top: e.y, left: e.x }
 				})
 			}}
 		/>

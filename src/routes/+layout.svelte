@@ -10,6 +10,7 @@
 	import { providePlayer } from '$lib/stores/player/store.ts'
 	import { pendingRipples } from '$lib/actions/ripple'
 	import { clearThemeCssVariables, setThemeCssVariables } from '$lib/theme'
+	import MenuProvider, { provideMenu } from '$lib/components/menu/MenuProvider.svelte'
 
 	const { data, children } = $props<{
 		data: LayoutData
@@ -17,6 +18,8 @@
 	}>()
 
 	const pageData = $derived($page.data)
+
+	provideMenu()
 
 	let scrollThresholdEl = $state<HTMLDivElement>()
 	let isScrolled = $state(false)
@@ -209,6 +212,10 @@
 			{@render bottom()}
 		{/if}
 	</div>
+</div>
+
+<div class="fixed inset-0 z-10 pointer-events-none">
+	<MenuProvider />
 </div>
 
 <style>

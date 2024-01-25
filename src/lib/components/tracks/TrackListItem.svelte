@@ -4,7 +4,7 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
 	import { formatDuration } from '$lib/helpers/utils'
-	import { getArtistByName, useTrack } from '$lib/library/tracks.svelte.ts'
+	import { useTrack } from '$lib/library/tracks.svelte.ts'
 	import Artwork from '../Artwork.svelte'
 	import IconButton from '../IconButton.svelte'
 
@@ -15,13 +15,15 @@
 		active,
 		class: className,
 		onclick,
+		oncontextmenu,
 	} = $props<{
 		trackId: number
 		style?: string
 		tabindex?: number
 		active?: boolean
 		class?: string
-		onclick?: (track: Track) => void
+		onclick?: (track: Track, e: MouseEvent) => void
+		oncontextmenu?: (track: Track, e: MouseEvent) => void
 	}>()
 
 	const data = useTrack(trackId)
@@ -41,11 +43,16 @@
 	)}
 	{tabindex}
 	role="listitem"
-	onclick={() => onclick?.(data.value!)}
+	onclick={(e) => onclick?.(data.value!, e)}
 	onkeydown={(e) => {
 		if (e.key === 'Enter') {
-			onclick?.(data.value!)
+			onclick?.(data.value!, e)
 		}
+	}}
+	oncontextmenu={(e) => {
+		e.preventDefault()
+
+		oncontextmenu?.(data.value!, e)
 	}}
 >
 	<Artwork src={artwork()} alt={track?.name} class={clx('h-40px w-40px rounded-4px')} />
@@ -80,10 +87,7 @@
 			onclick={(e) => {
 				e.stopPropagation()
 
-				// removeTrack(track.id)
-				track.artists.map((artist) => {
-					getArtistByName(artist)
-				})
+				oncontextmenu?.(track, e)
 			}}
 		/>
 	{/if}

@@ -31,7 +31,7 @@
 		"postcss-nesting": "^12.0.2",
 		"prettier": "^3.2.4",
 		"prettier-plugin-svelte": "^3.1.2",
-		"svelte": "5.0.0-next.37",
+		"svelte": "5.0.0-next.38",
 		"svelte-check": "^3.6.3",
 		"terser": "^5.27.0",
 		"typescript": "^5.3.3",
@@ -40,6 +40,7 @@
 		"vite": "^5.0.12"
 	},
 	"dependencies": {
+		"@a11y/focus-trap": "^1.0.5",
 		"@floating-ui/dom": "^1.5.4",
 		"@material/material-color-utilities": "^0.2.7",
 		"@tanstack/svelte-virtual": "^3.0.2",
