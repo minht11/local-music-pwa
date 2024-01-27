@@ -5,12 +5,12 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import { wait } from '$lib/helpers/utils'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
-	import { setContext, type Snippet } from 'svelte'
+	import { setContext } from 'svelte'
 	import invariant from 'tiny-invariant'
 	import { providePlayer } from '$lib/stores/player/store.ts'
 	import { pendingRipples } from '$lib/actions/ripple'
 	import { clearThemeCssVariables, setThemeCssVariables } from '$lib/theme'
-	import MenuProvider, { provideMenu } from '$lib/components/menu/MenuProvider.svelte'
+	import MenuRenderer, { initGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 
 	const { data, children } = $props<{
 		data: LayoutData
@@ -19,7 +19,7 @@
 
 	const pageData = $derived($page.data)
 
-	provideMenu()
+	initGlobalMenu()
 
 	let scrollThresholdEl = $state<HTMLDivElement>()
 	let isScrolled = $state(false)
@@ -41,22 +41,24 @@
 		}
 	})
 
-	onNavigate((navigation) => {
+	onNavigate(async (navigation) => {
 		if (!document.startViewTransition) {
 			return
 		}
 
-		return new Promise(async (resolve) => {
-			await Promise.race([pendingRipples(), wait(100)])
+		const { promise, resolve } = Promise.withResolvers<void>()
 
-			document.documentElement.setAttribute('data-view-from', navigation.from?.route.id ?? '')
-			document.documentElement.setAttribute('data-view-to', navigation.to?.route.id ?? '')
+		await Promise.race([pendingRipples(), wait(100)])
 
-			document.startViewTransition(async () => {
-				resolve()
-				await navigation.complete
-			})
+		document.documentElement.setAttribute('data-view-from', navigation.from?.route.id ?? '')
+		document.documentElement.setAttribute('data-view-to', navigation.to?.route.id ?? '')
+
+		document.startViewTransition(async () => {
+			resolve()
+			await navigation.complete
 		})
+
+		return promise
 	})
 
 	const handleBackClick = () => {
@@ -215,7 +217,7 @@
 </div>
 
 <div class="fixed inset-0 z-10 pointer-events-none">
-	<MenuProvider />
+	<MenuRenderer />
 </div>
 
 <style>

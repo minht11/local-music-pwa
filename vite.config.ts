@@ -39,6 +39,11 @@ export default defineConfig({
 			dts: './.generated/types/auto-imports.d.ts',
 			imports: [
 				{
+					from: 'svelte',
+					imports: ['Snippet'],
+					type: true,
+				},
+				{
 					'$lib/helpers/clx.ts': ['clx'],
 				},
 				{
@@ -46,6 +51,9 @@ export default defineConfig({
 				},
 				{
 					'$lib/stores/player/store': ['usePlayer'],
+				},
+				{
+					'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
 				},
 			],
 		}),

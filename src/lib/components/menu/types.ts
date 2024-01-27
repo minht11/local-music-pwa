@@ -5,14 +5,14 @@ export type MenuPosition = {
 	left: number
 }
 
-export interface MenuAlign {
+export interface MenuAlignment {
 	horizontal?: 'left' | 'right'
 	vertical?: 'top' | 'bottom'
 }
 
 interface MenuAnchorOptions {
 	anchor: true
-	preferredAlignment?: MenuAlign
+	preferredAlignment?: MenuAlignment
 }
 
 interface MenuPositionOptions {

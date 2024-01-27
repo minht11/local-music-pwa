@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
-	import type { Snippet } from 'svelte'
 	import Artwork from './Artwork.svelte'
 	import { ripple } from '$lib/actions/ripple'
 

@@ -3,7 +3,7 @@
 	import { clx } from '$lib/helpers/clx'
 	import Button from './Button.svelte'
 	import Icon, { type IconType } from './icon/Icon.svelte'
-	import { untrack, type Snippet } from 'svelte'
+	import { untrack } from 'svelte'
 
 	export interface DialogButton {
 		title: string

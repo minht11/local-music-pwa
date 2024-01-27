@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { ripple } from '$lib/actions/ripple'
 	import type { Track } from '$lib/db/entities'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
 	import { formatDuration } from '$lib/helpers/utils'
 	import { useTrack } from '$lib/library/tracks.svelte.ts'
 	import Artwork from '../Artwork.svelte'
-	import IconButton from '../IconButton.svelte'
+	import ListItem from '../ListItem.svelte'
 
 	const {
 		trackId,
@@ -32,8 +31,47 @@
 	const track = $derived(data.value)
 </script>
 
+<ListItem
+	{style}
+	class={clx(
+		'h-72px text-left',
+		active ? 'bg-surfaceVariant text-onSurfaceVariant' : 'color-onSurfaceVariant',
+		className,
+	)}
+>
+	<button class="track-item grow gap-20px">
+		<Artwork src={artwork()} alt={track?.name} class={clx('h-40px w-40px rounded-4px')} />
+
+		{#if data.loading === true}
+			<div>
+				<div class="h-8px rounded-2px bg-onSurface/10 mb-8px"></div>
+				<div class="h-4px rounded-2px bg-onSurface/10 w-80%"></div>
+			</div>
+		{:else if data.error}
+			Error loading track
+		{:else if track}
+			<div class="flex flex-col">
+				<div class={clx(active ? 'text-primary' : 'color-onSurface')}>
+					{track.name}
+				</div>
+				<div>
+					{track.artists.join(', ')}
+				</div>
+			</div>
+
+			<div class="hidden @4xl:block">
+				{track.album}
+			</div>
+
+			<div class="hidden @sm:block tabular-nums">
+				{formatDuration(track.duration)}
+			</div>
+		{/if}
+	</button>
+</ListItem>
+
 <!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-noninteractive-element-interactions -->
-<div
+<!-- <div
 	use:ripple
 	{style}
 	class={clx(
@@ -91,24 +129,24 @@
 			}}
 		/>
 	{/if}
-</div>
+</div> -->
 
 <style lang="postcss">
 	.track-item {
-		--grid-cols: auto 1.5fr 44px;
+		--grid-cols: auto 1fr;
 		display: grid;
 		grid-template-columns: var(--grid-cols);
 	}
 
 	@container (theme('containers.sm')) {
 		.track-item {
-			--grid-cols: auto 1.5fr 74px 44px;
+			--grid-cols: auto 1.5fr 74px;
 		}
 	}
 
 	@container (theme('containers.4xl')) {
 		.track-item {
-			--grid-cols: auto 1.5fr minmax(200px, 1fr) 74px 44px;
+			--grid-cols: auto 1.5fr minmax(200px, 1fr) 74px;
 		}
 	}
 </style>

@@ -4,7 +4,7 @@
 		type SvelteVirtualizer,
 		type VirtualItem,
 	} from '@tanstack/svelte-virtual'
-	import { untrack, type Snippet } from 'svelte'
+	import { untrack } from 'svelte'
 	import type { Readable } from 'svelte/motion'
 
 	let {

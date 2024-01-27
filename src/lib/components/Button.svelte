@@ -1,5 +1,4 @@
 <script context="module" lang="ts">
-	import type { Snippet } from 'svelte'
 	import { clx } from '$lib/helpers/clx'
 	import { ripple } from '../actions/ripple'
 
@@ -16,7 +15,7 @@
 		href?: ButtonHref<As>
 		class?: string
 		title?: string
-		popovertarget?: string
+		ariaLabel?: string
 		children?: Snippet
 		onclick?: (event: MouseEvent) => void
 	}
@@ -29,6 +28,7 @@
 		disabled = false,
 		href = as === 'a' ? '' : undefined,
 		children,
+		ariaLabel,
 		...restProps
 	} = $props<ButtonProps<As>>()
 
@@ -44,6 +44,7 @@
 <svelte:element
 	this={!disabled ? as : 'button'}
 	{...restProps}
+	aria-label={ariaLabel}
 	{href}
 	disabled={disabled === true ? true : undefined}
 	use:ripple

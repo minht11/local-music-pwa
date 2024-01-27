@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte'
 	import Artwork from '../Artwork.svelte'
 
 	const { ...props } = $props<{

@@ -2,7 +2,6 @@
 	import TrackListItem from './TrackListItem.svelte'
 	import type { Track } from '$lib/db/entities'
 	import VirtualContainer from '../VirtualContainer.svelte'
-	import { useMenu } from '../menu/MenuProvider.svelte'
 
 	export interface TrackItemClick {
 		track: Track
