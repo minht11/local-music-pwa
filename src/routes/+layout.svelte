@@ -11,6 +11,7 @@
 	import { pendingRipples } from '$lib/actions/ripple'
 	import { clearThemeCssVariables, setThemeCssVariables } from '$lib/theme'
 	import MenuRenderer, { initGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
+	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 
 	const { data, children } = $props<{
 		data: LayoutData
@@ -204,6 +205,10 @@
 	class="fixed flex flex-col bottom-0 overflow-hidden inset-x-0 pointer-events-none [&>*]:pointer-events-auto"
 >
 	<div bind:clientHeight={overlayContentHeight} class="flex flex-col">
+		<div class="max-w-500px px-8px w-full mx-auto mb-16px flex flex-col gap-8px">
+			<SnackbarRenderer />
+		</div>
+
 		{#if !$page.data.hidePlayerOverlay}
 			<div class="px-8px pb-8px w-full">
 				<PlayerOverlay />

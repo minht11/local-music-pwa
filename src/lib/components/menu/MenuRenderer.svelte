@@ -11,7 +11,7 @@
 	import { animate, timeline } from 'motion'
 	import Menu from './Menu.svelte'
 
-	export const key = Symbol('menu')
+	const key = Symbol('menu')
 
 	export interface MenuInternalData {
 		items: MenuItem[]
@@ -77,7 +77,6 @@
 
 	const openMenu = (menuEl: FocusTrap) => {
 		closing = false
-		console.log('openMenu')
 
 		invariant(data, 'data is undefined')
 		invariant(menuEl, 'menuEl is undefined')
@@ -159,8 +158,10 @@
 				easing: 'linear',
 			},
 		).finished.then(() => {
-			console.log('Close', data?.targetElement)
-			context.value = undefined
+			// Check if menu is still closing.
+			if (closing) {
+				context.value = undefined
+			}
 		})
 	}
 
@@ -181,14 +182,12 @@
 <svelte:window oncontextmenu={globalContextMenuHandler} />
 
 {#if data}
-	{#key data.items}
-		<div class="absolute inset-0 pointer-events-auto" />
-		<Menu
-			items={data.items}
-			onopen={(el) => {
-				openMenu(el)
-			}}
-			onclose={closeMenu}
-		/>
-	{/key}
+	<div class="absolute inset-0 pointer-events-auto" />
+	<Menu
+		items={data.items}
+		onopen={(el) => {
+			openMenu(el)
+		}}
+		onclose={closeMenu}
+	/>
 {/if}
