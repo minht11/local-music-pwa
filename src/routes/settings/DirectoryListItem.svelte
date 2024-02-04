@@ -25,7 +25,7 @@
 >
 	<div class="text-body-lg mr-auto truncate text-onSurface">{name}</div>
 	<div class="truncate border-r border-solid border-outline text-center tabular-nums">{count}</div>
-	<div class="flex gap-4px">
+	<div class="flex gap-4px items-center">
 		{#if children}
 			{@render children()}
 		{/if}

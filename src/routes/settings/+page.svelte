@@ -7,15 +7,20 @@
 	import DirectoryListItem from './DirectoryListItem.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import Switch from '$lib/components/Switch.svelte'
+	import { snackbar } from '$lib/components/snackbar/snackbar.js'
+	import Spinner from '$lib/components/Spinner.svelte'
 
 	const { data } = $props()
 
 	const currentTracksCount = data.countQuery()
 
+	const directories = $state<FileSystemDirectoryHandle[]>([])
+
 	const folders = [
 		{
 			name: 'Music',
 			count: 100,
+			loading: true,
 		},
 		{
 			name: 'Podcasts',
@@ -29,15 +34,110 @@
 
 	const isFileSystemAccessSupported = true
 
-	let dialogsOpen = $state({
+	interface DirectoryCollision {
+		existing: string
+		new: string
+	}
+
+	interface DialogOpenState {
+		addDirectory: boolean
+		alreadyIncludedChild?: DirectoryCollision
+		replaceDirectory?: DirectoryCollision
+	}
+
+	let dialogsOpen = $state<DialogOpenState>({
 		addDirectory: false,
-		replaceDirectory: false,
+		alreadyIncludedChild: undefined,
+		replaceDirectory: undefined,
 	})
 
-	const onImportTracksHandler = async () => {
-		const { importTracks } = await import('$lib/library/import-tracks/import-tracks')
+	const checkNewDirectoryConditions = async (
+		existingDir: FileSystemDirectoryHandle,
+		newDir: FileSystemDirectoryHandle,
+	) => {
+		const paths = await existingDir.resolve(newDir)
 
-		await importTracks()
+		let status: 'child' | 'existing' | 'parent' | undefined
+		if (paths) {
+			status = paths.length === 0 ? 'existing' : 'child'
+		} else {
+			const parent = await newDir.resolve(existingDir)
+
+			if (parent) {
+				status = 'parent'
+			}
+		}
+
+		if (status) {
+			return {
+				status,
+				existingDir,
+				newDir,
+			}
+		}
+
+		return
+	}
+
+	const onImportTracksHandler = async () => {
+		const directory = await showDirectoryPicker()
+
+		let data: Awaited<ReturnType<typeof checkNewDirectoryConditions>> | undefined
+		for (const existingDirectory of directories) {
+			const result = await checkNewDirectoryConditions(existingDirectory, directory)
+
+			if (result) {
+				data = result
+				break
+			}
+		}
+
+		if (!data) {
+			directories.push(directory)
+
+			snackbar({
+				id: 'directory-added',
+				message: `Directory '${directory.name}' added`,
+			})
+
+			return
+		}
+
+		const { status, existingDir, newDir } = data
+
+		if (status === 'child') {
+			dialogsOpen.alreadyIncludedChild = {
+				existing: existingDir.name,
+				new: newDir.name,
+			}
+		} else if (status === 'existing') {
+			snackbar({
+				id: 'directory-already-included',
+				message: `Directory '${directory.name}' is already included`,
+			})
+		} else if (status === 'parent') {
+			dialogsOpen.replaceDirectory = {
+				existing: existingDir.name,
+				new: newDir.name,
+			}
+		} else {
+			directories.push(directory)
+
+			snackbar({
+				id: 'directory-added',
+				message: `Directory '${directory.name}' added`,
+			})
+		}
+		// for await (const handle of directory.values()) {
+		// 	console.log(entry, a)
+		// 	// if (entry.kind === 'directory') {
+		// 	// 	directories.update((dirs) => [...dirs, entry])
+		// 	// }
+		// }
+
+		// const { importTracks } = await import('$lib/library/import-tracks/import-tracks')
+
+		// await importTracks()
 	}
 
 	let compactLayout = $state(false)
@@ -107,8 +207,12 @@
 				<ul>
 					{#each folders as folder}
 						<DirectoryListItem name={folder.name} count={folder.count}>
-							<IconButton icon="cached" title="Rescan" />
-							<IconButton icon="close" title="Remove" />
+							{#if folder.loading}
+								<Spinner class="w-20px h-20px ml-8px mr-10px" />
+							{:else}
+								<IconButton icon="cached" title="Rescan" />
+								<IconButton icon="close" title="Remove" />
+							{/if}
 						</DirectoryListItem>
 					{/each}
 				</ul>
@@ -156,16 +260,23 @@
 	</div>
 </section>
 
-<!-- <Dialog
-	bind:open={isDialogOpen}
-	class="max-w-[340px]"
-	icon="folderHidden"
-	title="'Wow' is already included"
-	buttons={[{ title: 'Understood' }]}
->
-	Directory 'Wow' is already included because it is inside 'Music' directory. You don't need to add
-	it again
-</Dialog> -->
+{#if dialogsOpen.replaceDirectory}
+	{@const newName = dialogsOpen.replaceDirectory.new}
+	{@const existingName = dialogsOpen.replaceDirectory.existing}
+	<Dialog
+		open={!!dialogsOpen.replaceDirectory}
+		class="!max-w-[340px]"
+		icon="folderHidden"
+		title="{`"${newName}"`} is already included"
+		buttons={[{ title: 'Understood' }]}
+		onclose={() => {
+			dialogsOpen.replaceDirectory = undefined
+		}}
+	>
+		Directory "{newName}" is already included because it is inside "{existingName}" directory. You
+		don't need to add it again.
+	</Dialog>
+{/if}
 
 <Dialog
 	bind:open={dialogsOpen.addDirectory}

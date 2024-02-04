@@ -26,7 +26,7 @@ const cleanupQueue = new Set<Blob>()
 export const createManagedArtwork = (getImage: () => Blob | undefined) => {
 	const key = Symbol()
 
-	const getArtworkState = () => {
+	const state = $derived.call(() => {
 		const image = getImage()
 
 		if (!image) {
@@ -43,9 +43,8 @@ export const createManagedArtwork = (getImage: () => Blob | undefined) => {
 		}
 
 		return artwork
-	}
+	})
 
-	const state = $derived(getArtworkState())
 	const url = $derived(state?.url ?? '')
 
 	const releaseLock = (state: Artwork) => {

@@ -17,11 +17,20 @@
 		buttons?: DialogButton[]
 		class?: string
 		children: Snippet
+		onclose?: () => void
 	}
 </script>
 
 <script lang="ts">
-	let { open, title, icon, buttons = [], class: className, children } = $props<DialogProps>()
+	let {
+		open,
+		title,
+		icon,
+		buttons = [],
+		class: className,
+		children,
+		onclose,
+	} = $props<DialogProps>()
 
 	let dialog = $state<HTMLDialogElement>()!
 	let dialogHeader = $state<HTMLElement>()!
@@ -139,6 +148,12 @@
 		node.focus()
 		animateEnter()
 	}
+
+	$effect(() => {
+		if (isBeingRendered && !open) {
+			onclose?.()
+		}
+	})
 </script>
 
 {#if isBeingRendered}

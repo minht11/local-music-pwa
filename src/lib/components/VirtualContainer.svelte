@@ -23,7 +23,7 @@
 		gap?: number
 		offsetWidth?: number
 		key: (index: number) => string | number
-		children: Snippet<VirtualItem>
+		children: Snippet<[VirtualItem]>
 	}>()
 
 	let rowVirtualizer: Readable<SvelteVirtualizer<Window, Element>> | undefined

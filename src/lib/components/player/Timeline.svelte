@@ -9,15 +9,14 @@
 
 	const max = 1000
 
-	const getValue = () => {
-		const value = (player.currentTime / player.duration) * max
-
-		return Number.isFinite(value) ? value : 0
-	}
-
 	let seeking = $state(false)
 	let seekingValue = $state(0)
-	const value = $derived(getValue())
+
+	const value = $derived.call(() => {
+		const v = (player.currentTime / player.duration) * max
+
+		return Number.isFinite(v) ? v : 0
+	})
 
 	const getTime = (percentage: number) => (percentage / max) * player.duration
 

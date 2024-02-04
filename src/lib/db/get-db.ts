@@ -2,11 +2,6 @@ import type { DBSchema, IDBPDatabase, IDBPObjectStore, IndexNames, StoreNames } 
 import { openDB } from 'idb'
 import type { Album, Artist, Track } from './entities'
 
-interface DirectoryDb {
-	name: string
-	handle: FileSystemDirectoryHandle
-}
-
 export interface AppDB extends DBSchema {
 	tracks: {
 		key: number
@@ -18,6 +13,7 @@ export interface AppDB extends DBSchema {
 			year: string
 			duration: string
 			artists: string[]
+			directory?: number
 		}
 	}
 	albums: {
@@ -40,7 +36,7 @@ export interface AppDB extends DBSchema {
 	}
 	directories: {
 		key: number
-		value: DirectoryDb
+		value: FileSystemDirectoryHandle
 	}
 }
 

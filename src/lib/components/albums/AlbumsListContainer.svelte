@@ -22,8 +22,7 @@
 
 	const gap = 16
 
-	// Width must fill the container like css grid grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	const calculateWidthHeightAndColumns = () => {
+	const sizes = $derived.call(() => {
 		const minWidth = containerWidth > 600 ? 180 : 140
 
 		const columns = safeInteger(Math.floor(containerWidth / minWidth), 1)
@@ -37,9 +36,7 @@
 			columns,
 			heightWithoutGap: height,
 		}
-	}
-
-	const sizes = $derived(calculateWidthHeightAndColumns())
+	})
 </script>
 
 <VirtualContainer

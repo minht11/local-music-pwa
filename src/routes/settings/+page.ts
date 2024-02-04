@@ -3,7 +3,7 @@ import { getDB } from '$lib/db/get-db'
 import type { PageLoad } from './$types'
 
 const countQuery = defineQuery({
-	key: 'tracks-count',
+	key: ['tracks-count'],
 	fetcher: async () => {
 		const db = await getDB()
 
@@ -25,7 +25,7 @@ const countQuery = defineQuery({
 			// TODO. Handle clear all
 		}
 
-		mutate((v) => v + countDiff)
+		mutate((v = 0) => v + countDiff)
 	},
 })
 
