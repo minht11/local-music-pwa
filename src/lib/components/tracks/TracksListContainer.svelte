@@ -33,6 +33,7 @@
 			active={player.activeTrack?.id === trackId}
 			style="transform: translateY({item.start}px)"
 			class="virtual-item top-0 left-0 w-full"
+			ariaRowIndex={item.index}
 			onclick={(track) => {
 				onItemClick({
 					track,

@@ -146,6 +146,16 @@
 	<title>{pageData.pageTitle || pageData.title}</title>
 </svelte:head>
 
+<svelte:window
+	onkeydown={(e) => {
+		if (e.key === ' ') {
+			e.preventDefault()
+
+			player.togglePlay()
+		}
+	}}
+/>
+
 {#if $navigating}
 	<div class="page-loading-indicator fixed z-20 top-0 inset-x-0 bg-tertiary/40 h-4px">
 		<div

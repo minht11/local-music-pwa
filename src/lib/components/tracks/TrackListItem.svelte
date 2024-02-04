@@ -10,18 +10,18 @@
 	const {
 		trackId,
 		style,
-		tabindex,
 		active,
 		class: className,
 		onclick,
+		ariaRowIndex,
 		oncontextmenu,
 	} = $props<{
 		trackId: number
 		style?: string
-		tabindex?: number
+		ariaRowIndex?: number
 		active?: boolean
 		class?: string
-		onclick?: (track: Track, e: MouseEvent) => void
+		onclick?: (track: Track) => void
 		oncontextmenu?: (track: Track, e: MouseEvent) => void
 	}>()
 
@@ -32,14 +32,18 @@
 </script>
 
 <ListItem
+	tabindex={-1}
 	{style}
 	class={clx(
 		'h-72px text-left',
 		active ? 'bg-surfaceVariant text-onSurfaceVariant' : 'color-onSurfaceVariant',
 		className,
 	)}
+	ariaLabel={`Play ${track?.name}`}
+	{ariaRowIndex}
+	onclick={() => onclick?.(track!)}
 >
-	<button class="track-item grow gap-20px">
+	<div role="cell" class="track-item grow gap-20px items-center">
 		<Artwork src={artwork()} alt={track?.name} class={clx('h-40px w-40px rounded-4px')} />
 
 		{#if data.loading === true}
@@ -67,69 +71,8 @@
 				{formatDuration(track.duration)}
 			</div>
 		{/if}
-	</button>
+	</div>
 </ListItem>
-
-<!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-noninteractive-element-interactions -->
-<!-- <div
-	use:ripple
-	{style}
-	class={clx(
-		'h-72px overflow-hidden track-item pl-16px pr-8px items-center grow gap-20px cursor-pointer hover:bg-onSurface/10 rounded-8px',
-		active ? 'bg-surfaceVariant text-onSurfaceVariant' : 'color-onSurfaceVariant',
-		className,
-	)}
-	{tabindex}
-	role="listitem"
-	onclick={(e) => onclick?.(data.value!, e)}
-	onkeydown={(e) => {
-		if (e.key === 'Enter') {
-			onclick?.(data.value!, e)
-		}
-	}}
-	oncontextmenu={(e) => {
-		e.preventDefault()
-
-		oncontextmenu?.(data.value!, e)
-	}}
->
-	<Artwork src={artwork()} alt={track?.name} class={clx('h-40px w-40px rounded-4px')} />
-
-	{#if data.loading === true}
-		<div>
-			<div class="h-8px rounded-2px bg-onSurface/10 mb-8px"></div>
-			<div class="h-4px rounded-2px bg-onSurface/10 w-80%"></div>
-		</div>
-	{:else if data.error}
-		Error loading track
-	{:else if track}
-		<div class="flex flex-col">
-			<div class={clx(active ? 'text-primary' : 'color-onSurface')}>
-				{track.name}
-			</div>
-			<div>
-				{track.artists.join(', ')}
-			</div>
-		</div>
-
-		<div class="hidden @4xl:block">
-			{track.album}
-		</div>
-
-		<div class="hidden @sm:block tabular-nums">
-			{formatDuration(track.duration)}
-		</div>
-
-		<IconButton
-			icon="moreVertical"
-			onclick={(e) => {
-				e.stopPropagation()
-
-				oncontextmenu?.(track, e)
-			}}
-		/>
-	{/if}
-</div> -->
 
 <style lang="postcss">
 	.track-item {

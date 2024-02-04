@@ -15,6 +15,7 @@
 		href?: ButtonHref<As>
 		class?: string
 		title?: string
+		tabindex?: number
 		ariaLabel?: string
 		children?: Snippet
 		onclick?: (event: MouseEvent) => void

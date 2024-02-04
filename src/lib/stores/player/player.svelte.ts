@@ -101,6 +101,10 @@ export class PlayerStore {
 	}
 
 	togglePlay = (force?: boolean) => {
+		if (!this.activeTrack) {
+			return
+		}
+
 		this.playing = force ?? !this.playing
 	}
 

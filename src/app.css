@@ -73,3 +73,12 @@ body {
 		opacity: 0;
 	}
 }
+
+:where(:focus) {
+	outline: none;
+}
+
+:where(:focus-visible) {
+	outline: 2px solid theme('colors.onSurface');
+	outline-offset: -2px;
+}
