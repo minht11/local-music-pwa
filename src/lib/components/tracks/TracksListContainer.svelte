@@ -12,7 +12,6 @@
 
 <script lang="ts">
 	const player = usePlayer()
-	const menu = useMenu()
 
 	const defaultOnItemClick = (data: TrackItemClick) => {
 		player.playTrack(data.index, data.items)

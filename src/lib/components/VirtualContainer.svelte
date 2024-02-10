@@ -147,9 +147,6 @@
 	}
 </script>
 
-<div class="fixed top-0 bg-blue">
-	{focusIndex}
-</div>
 <div
 	bind:this={container}
 	bind:offsetWidth
