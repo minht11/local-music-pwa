@@ -27,7 +27,7 @@
 		children: Snippet<[VirtualItem]>
 	}>()
 
-	let focusedItemIndex = $state(-1)
+	let focusIndex = $state(-1)
 	let virtualizer: Readable<SvelteVirtualizer<Window, Element>> | undefined
 
 	$effect(() => {
@@ -49,33 +49,23 @@
 				estimateSize: () => itemSize,
 				overscan: 10,
 				rangeExtractor: (range) => {
-					const final = range.count - 1
-
 					const start = Math.max(range.startIndex - range.overscan, 0)
-					let end = range.endIndex + range.overscan
+					const initialEnd = range.endIndex + range.overscan
 
-					let initialI = 0
-					if (focusedItemIndex !== -1) {
-						if (focusedItemIndex < start) {
-							initialI = 1
-							len += 1
-							arr[0] = focusedItemIndex
-							console.log('Focused before')
-						} else if (focusedItemIndex > end) {
-							arr[len] = focusedItemIndex
-							console.log('Focused after')
-						}
+					const arr = []
+
+					if (focusIndex !== -1 && focusIndex < start) {
+						arr.push(focusIndex)
 					}
 
-					end = Math.max(end, range.count - 1)
-					const len = end - start + 1
-					const arr = Array(len)
-
-					for (let i = initialI; i < len; i++) {
-						arr[i] = start + i
+					const end = Math.min(initialEnd, range.count - 1)
+					for (let i = start; i <= end; i += 1) {
+						arr.push(i)
 					}
 
-					console.log('Range', arr)
+					if (focusIndex !== -1 && focusIndex > initialEnd) {
+						arr.push(focusIndex)
+					}
 
 					return arr
 				},
@@ -130,16 +120,20 @@
 
 		const nextIndex = currentIndex + increment
 		if (nextIndex >= 0 && nextIndex < count) {
-			focusedItemIndex = nextIndex
-			$virtualizer?.scrollToIndex(nextIndex)
-			findRow(nextIndex)?.focus()
+			$virtualizer?.scrollToIndex(currentIndex, {
+				behavior: 'smooth',
+			})
+
+			queueMicrotask(() => {
+				findRow(nextIndex)?.focus()
+			})
 		}
 	}
 
 	const focusinHandler = () => {
 		const index = findCurrentFocusedRow()
 		if (index !== -1) {
-			focusedItemIndex = index
+			focusIndex = index
 		}
 	}
 
@@ -147,14 +141,14 @@
 		queueMicrotask(() => {
 			const index = findCurrentFocusedRow()
 			if (index === -1) {
-				focusedItemIndex = -1
+				focusIndex = -1
 			}
 		})
 	}
 </script>
 
 <div class="fixed top-0 bg-blue">
-	{focusedItemIndex}
+	{focusIndex}
 </div>
 <div
 	bind:this={container}
