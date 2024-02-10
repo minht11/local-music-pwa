@@ -27,11 +27,11 @@
 		children: Snippet<[VirtualItem]>
 	}>()
 
-	let focusedElementIndex = -1
-	let rowVirtualizer: Readable<SvelteVirtualizer<Window, Element>> | undefined
+	let focusedItemIndex = $state(-1)
+	let virtualizer: Readable<SvelteVirtualizer<Window, Element>> | undefined
 
 	$effect(() => {
-		if (!rowVirtualizer && lanes === 0) {
+		if (!virtualizer && lanes === 0) {
 			return
 		}
 
@@ -43,27 +43,39 @@
 			lanes,
 		}
 
-		if (!rowVirtualizer) {
-			rowVirtualizer = createWindowVirtualizer({
+		if (!virtualizer) {
+			virtualizer = createWindowVirtualizer({
 				...baseOptions,
 				estimateSize: () => itemSize,
 				overscan: 10,
 				rangeExtractor: (range) => {
-					const start = Math.max(range.startIndex - range.overscan, 0)
-					const end = Math.min(range.endIndex + range.overscan, range.count - 1)
+					const final = range.count - 1
 
+					const start = Math.max(range.startIndex - range.overscan, 0)
+					let end = range.endIndex + range.overscan
+
+					let initialI = 0
+					if (focusedItemIndex !== -1) {
+						if (focusedItemIndex < start) {
+							initialI = 1
+							len += 1
+							arr[0] = focusedItemIndex
+							console.log('Focused before')
+						} else if (focusedItemIndex > end) {
+							arr[len] = focusedItemIndex
+							console.log('Focused after')
+						}
+					}
+
+					end = Math.max(end, range.count - 1)
 					const len = end - start + 1
 					const arr = Array(len)
 
-					for (let i = 0; i < len; i++) {
+					for (let i = initialI; i < len; i++) {
 						arr[i] = start + i
 					}
 
-					if (focusedElementIndex !== -1 && !arr.includes(focusedElementIndex)) {
-						arr[len] = focusedElementIndex
-					}
-
-					console.log('range', focusedElementIndex, arr)
+					console.log('Range', arr)
 
 					return arr
 				},
@@ -71,8 +83,8 @@
 		}
 
 		untrack(() => {
-			$rowVirtualizer?.setOptions(baseOptions)
-			$rowVirtualizer?.measure()
+			$virtualizer?.setOptions(baseOptions)
+			$virtualizer?.measure()
 		})
 	})
 
@@ -118,7 +130,8 @@
 
 		const nextIndex = currentIndex + increment
 		if (nextIndex >= 0 && nextIndex < count) {
-			focusedElementIndex = nextIndex
+			focusedItemIndex = nextIndex
+			$virtualizer?.scrollToIndex(nextIndex)
 			findRow(nextIndex)?.focus()
 		}
 	}
@@ -126,7 +139,7 @@
 	const focusinHandler = () => {
 		const index = findCurrentFocusedRow()
 		if (index !== -1) {
-			focusedElementIndex = index
+			focusedItemIndex = index
 		}
 	}
 
@@ -134,25 +147,28 @@
 		queueMicrotask(() => {
 			const index = findCurrentFocusedRow()
 			if (index === -1) {
-				focusedElementIndex = -1
+				focusedItemIndex = -1
 			}
 		})
 	}
 </script>
 
+<div class="fixed top-0 bg-blue">
+	{focusedItemIndex}
+</div>
 <div
 	bind:this={container}
 	bind:offsetWidth
 	role="grid"
 	aria-rowcount={count}
-	style:height={`${($rowVirtualizer?.getTotalSize() ?? 0) - gap}px`}
-	class="contain-strict relative w-full @container rounded-8px"
+	style:height={`${($virtualizer?.getTotalSize() ?? 0) - gap}px`}
+	class="contain-strict relative w-full @container rounded-8px outline-offset--2px"
 	tabindex="0"
 	onfocusin={focusinHandler}
 	onfocusout={focusoutHandler}
 	onkeydown={keydownHandler}
 >
-	{#each $rowVirtualizer?.getVirtualItems() ?? [] as virtualItem (key(virtualItem.index))}
+	{#each $virtualizer?.getVirtualItems() ?? [] as virtualItem (key(virtualItem.index))}
 		{@render children(virtualItem)}
 	{/each}
 </div>

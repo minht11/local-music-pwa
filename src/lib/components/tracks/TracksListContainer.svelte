@@ -34,17 +34,20 @@
 			style="transform: translateY({item.start}px)"
 			class="virtual-item top-0 left-0 w-full"
 			ariaRowIndex={item.index}
+			menuItems={() => [
+				{
+					label: 'Add to queue',
+					action: () => {
+						// TODO.
+						console.log('Add to queue')
+					},
+				},
+			]}
 			onclick={(track) => {
 				onItemClick({
 					track,
 					items,
 					index: item.index,
-				})
-			}}
-			oncontextmenu={(_, e) => {
-				menu.show([], e.target as HTMLElement, {
-					anchor: false,
-					position: { top: e.y, left: e.x }
 				})
 			}}
 		/>

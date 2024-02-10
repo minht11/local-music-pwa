@@ -5,7 +5,7 @@
 	import { formatDuration } from '$lib/helpers/utils'
 	import { useTrack } from '$lib/library/tracks.svelte.ts'
 	import Artwork from '../Artwork.svelte'
-	import ListItem from '../ListItem.svelte'
+	import ListItem, { type ListMenuFn } from '../ListItem.svelte'
 
 	const {
 		trackId,
@@ -14,15 +14,15 @@
 		class: className,
 		onclick,
 		ariaRowIndex,
-		oncontextmenu,
+		menuItems,
 	} = $props<{
 		trackId: number
 		style?: string
 		ariaRowIndex?: number
 		active?: boolean
 		class?: string
+		menuItems?: ListMenuFn
 		onclick?: (track: Track) => void
-		oncontextmenu?: (track: Track, e: MouseEvent) => void
 	}>()
 
 	const data = useTrack(trackId)
@@ -32,8 +32,9 @@
 </script>
 
 <ListItem
-	tabindex={-1}
 	{style}
+	{menuItems}
+	tabindex={-1}
 	class={clx(
 		'h-72px text-left',
 		active ? 'bg-surfaceVariant text-onSurfaceVariant' : 'color-onSurfaceVariant',

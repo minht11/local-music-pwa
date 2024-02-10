@@ -1,7 +1,14 @@
-<script lang="ts">
+<script lang="ts" context="module">
 	import { ripple } from '$lib/actions/ripple'
 	import IconButton from './IconButton.svelte'
+	import type { MenuItem } from './menu/types'
 
+	export type { MenuItem }
+
+	export type ListMenuFn = () => MenuItem[]
+</script>
+
+<script lang="ts">
 	const {
 		children,
 		class: className,
@@ -9,6 +16,7 @@
 		ariaLabel,
 		ariaRowIndex,
 		tabindex = 0,
+		menuItems,
 		onclick,
 	} = $props<{
 		style?: string
@@ -17,6 +25,7 @@
 		ariaRowIndex?: number
 		tabindex?: number
 		children: Snippet
+		menuItems?: ListMenuFn
 		onclick?: () => void
 	}>()
 
@@ -42,6 +51,17 @@
 			clickHandler()
 		}
 	}}
+	oncontextmenu={(e) => {
+		if (!menuItems) {
+			return
+		}
+
+		e.preventDefault()
+		menu.showFromEvent(e, menuItems(), {
+			anchor: false,
+			position: { top: e.y, left: e.x },
+		})
+	}}
 >
 	{@render children()}
 
@@ -51,12 +71,16 @@
 		onclick={(e) => {
 			e.stopPropagation()
 
-			menu.show([], e.target as HTMLElement, {
+			if (!menuItems) {
+				return
+			}
+
+			menu.showFromEvent(e, menuItems(), {
 				anchor: true,
 				preferredAlignment: {
 					horizontal: 'right',
 					vertical: 'top',
-				}
+				},
 			})
 		}}
 	/>
