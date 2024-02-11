@@ -57,17 +57,15 @@
 		{#if (isCompact && !data.isQueueOpen) || !isCompact}
 			<div class="flex flex-col grow sm:sticky sm:max-h-100vh top-0 tonal-elevation-2">
 				<div
-					class="overflow-clip pt-[calc(var(--app-header-height)+16px)] pb-40px relative bg-secondaryContainer/60"
+					class="overflow-clip flex flex-col items-center justify-center grow pt-[calc(var(--app-header-height)+16px)] pb-40px relative bg-secondaryContainer/60"
 				>
 					<PlayerArtwork class="absolute h-full w-full -z-1 blur-10px inset-0 scale-110" />
-					<PlayerArtwork
-						class="rounded-24px view-transition-pl-artwork max-w-300px w-full mx-auto"
-					/>
+					<PlayerArtwork class="rounded-24px view-transition-pl-artwork max-w-300px w-full" />
 				</div>
 
 				<Timeline class="-mt-12px z-0" />
 
-				<div class="grow flex flex-col pt-24px pb-16px px-16px">
+				<div class="flex flex-col pt-24px pb-16px px-16px h-256px">
 					<!-- <Timeline /> -->
 
 					<div class="flex items-center gap-8px my-auto justify-between">
