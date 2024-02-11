@@ -24,7 +24,7 @@
 </script>
 
 {#snippet queue()}
-	<div class="w-full p-16px flex flex-col rounded-t-24px tonal-elevation-2">
+	<div class="w-full p-16px flex flex-col">
 		<div class="flex items-center h-48px">
 			<div class="text-title-md mr-auto ml-16px">Queue list</div>
 
@@ -47,19 +47,28 @@
 	</div>
 {/snippet}
 
+<!-- <div class="w-full bg-secondaryContainer/60 fixed inset-0" /> -->
+
 <div
 	class="w-full max-w-1280px bg-secondaryContainer view-transition-pl-container mx-auto fixed inset-0"
 />
 <section class="view-transition-pl-content grow flex flex-col mx-auto w-full max-w-1280px">
 	<div class="flex sm:grow sm:grid grow grid-cols-[400px_1fr]">
 		{#if (isCompact && !data.isQueueOpen) || !isCompact}
-			<div
-				class="flex flex-col grow sm:sticky sm:max-h-[calc(100vh-80px)] top-[calc(var(--app-header-height)+16px)]"
-			>
-				<PlayerArtwork class="rounded-24px view-transition-pl-artwork max-w-300px w-full mx-auto" />
+			<div class="flex flex-col grow sm:sticky sm:max-h-100vh top-0 tonal-elevation-2">
+				<div
+					class="overflow-clip pt-[calc(var(--app-header-height)+16px)] pb-40px relative bg-secondaryContainer/60"
+				>
+					<PlayerArtwork class="absolute h-full w-full -z-1 blur-10px inset-0 scale-110" />
+					<PlayerArtwork
+						class="rounded-24px view-transition-pl-artwork max-w-300px w-full mx-auto"
+					/>
+				</div>
+
+				<Timeline class="-mt-12px z-0" />
 
 				<div class="grow flex flex-col pt-24px pb-16px px-16px">
-					<Timeline />
+					<!-- <Timeline /> -->
 
 					<div class="flex items-center gap-8px my-auto justify-between">
 						<ShuffleButton />
@@ -82,7 +91,9 @@
 					</div>
 				</div>
 
-				<div class="min-w-0 mt-auto px-16px tonal-elevation-1 flex items-center h-72px">
+				<div
+					class="min-w-0 mt-auto px-16px border-t border-onSecondaryContainer/20 flex items-center h-72px"
+				>
 					{#if track}
 						<div class="text-body-lg mr-8px min-w-24px text-center tabular-nums">
 							{player.activeTrackIndex}

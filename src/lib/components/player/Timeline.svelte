@@ -39,9 +39,9 @@
 </script>
 
 <div class={clx('flex items-center tabular-nums gap-10px w-full', className)}>
-	<div class="text-body-sm">
+	<!-- <div class="text-body-sm">
 		{formatDuration(seeking ? getTime(seekingValue) : player.currentTime)}
-	</div>
+	</div> -->
 
 	<Slider
 		disabled={!player.activeTrack}
@@ -57,7 +57,7 @@
 		}}
 	/>
 
-	<div class="text-body-sm">
+	<!-- <div class="text-body-sm">
 		{formatDuration(player.duration)}
-	</div>
+	</div> -->
 </div>

@@ -18,7 +18,7 @@
 
 <div
 	class={clx(
-		'view-transition-pl-container overflow-hidden max-w-900px mx-auto justify-between sm:h-120px rounded-16px sm:rounded-24px bg-secondaryContainer text-onSecondaryContainer',
+		'view-transition-pl-container overflow-hidden max-w-900px mx-auto justify-between sm:h-108px rounded-16px sm:rounded-24px bg-secondaryContainer text-onSecondaryContainer',
 		className,
 	)}
 >

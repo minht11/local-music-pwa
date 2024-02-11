@@ -29,7 +29,7 @@
 	{disabled}
 	{min}
 	{max}
-	class="slider h-44px text-primary flex items-center appearance-none disabled:cursor-auto grow bg-transparent"
+	class="slider h-24px text-primary flex items-center appearance-none disabled:cursor-auto grow bg-transparent"
 	style={`--current-value: ${getPercentage()}%;`}
 	onpointerdown={() => onSeekStart?.()}
 	onpointerup={() => onSeekEnd?.()}
@@ -41,9 +41,8 @@
 		border-radius: 16px;
 		background: linear-gradient(
 			to right,
-			currentColor 0 calc(var(--current-value) - 6px),
-			transparent calc(var(--current-value) - 6px) calc(var(--current-value) + 4px + 6px),
-			theme('colors.onPrimaryContainer/0.5') calc(var(--current-value) + 4px + 6px) 100%
+			currentColor 0 var(--current-value),
+			theme('colors.onPrimaryContainer/0.5') var(--current-value) 100%
 		);
 	}
 
