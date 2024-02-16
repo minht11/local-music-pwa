@@ -22,7 +22,7 @@
 
 	const gap = 16
 
-	const sizes = $derived.call(() => {
+	const sizes = $derived.by(() => {
 		const minWidth = containerWidth > 600 ? 180 : 140
 
 		const columns = safeInteger(Math.floor(containerWidth / minWidth), 1)
@@ -48,7 +48,7 @@
 	key={(index) => items[index] as number}
 >
 	{#snippet children(item)}
-		{@const albumId = items[item.index] as number}
+		{@const  albumId = items[item.index] as number}
 		<AlbumGridItem
 			{albumId}
 			class="virtual-item top-0"

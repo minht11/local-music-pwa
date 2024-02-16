@@ -26,7 +26,7 @@ const cleanupQueue = new Set<Blob>()
 export const createManagedArtwork = (getImage: () => Blob | undefined) => {
 	const key = Symbol()
 
-	const state = $derived.call(() => {
+	const state = $derived.by(() => {
 		const image = getImage()
 
 		if (!image) {

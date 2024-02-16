@@ -12,7 +12,7 @@
 	let seeking = $state(false)
 	let seekingValue = $state(0)
 
-	const value = $derived.call(() => {
+	const value = $derived.by(() => {
 		const v = (player.currentTime / player.duration) * max
 
 		return Number.isFinite(v) ? v : 0
