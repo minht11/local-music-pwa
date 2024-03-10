@@ -29,22 +29,23 @@
 			"complexity": {
 				"useSimplifiedLogicExpression": "error"
 			},
+			"correctness": {
+				"noUndeclaredVariables": "error"
+			},
 			"style": {
 				"noNegationElse": "error",
 				"useBlockStatements": "error",
 				"useCollapsedElseIf": "error",
 				"useShorthandArrayType": "error",
-				"useShorthandAssign": "error"
+				"useShorthandAssign": "error",
+				"useFilenamingConvention": "error"
 			},
 			"suspicious": {
-				"noMisrefactoredShorthandAssign": "error"
+				"noMisrefactoredShorthandAssign": "error",
+				"useAwait": "error"
 			},
 			"nursery": {
-				"useFilenamingConvention": "error",
-				"noUselessTernary": "error",
-				"useAwait": "error",
-				"useNumberNamespace": "error",
-				"useShorthandFunctionType": "error"
+				"noUselessTernary": "error"
 			}
 		}
 	},
