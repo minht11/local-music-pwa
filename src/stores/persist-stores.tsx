@@ -1,4 +1,11 @@
-import { createEffect, createSignal, on, Show, ParentComponent, $TRACK } from 'solid-js'
+import { trackStore } from '@solid-primitives/deep'
+import {
+  createEffect,
+  createSignal,
+  on,
+  Show,
+  ParentComponent,
+} from 'solid-js'
 import { unwrap } from 'solid-js/store'
 import {
   createStore as createStoreIDB,
@@ -66,10 +73,12 @@ export const PersistStoresProvider: ParentComponent<PersistStoresProps> = (
       // Listen for changes to values and save them to IDB.
       persistedItems.forEach((item) => {
         createEffect(() => {
-          // eslint-disable-next-line
-          item.selector()[$TRACK]
-
           const value: unknown = item.selector()
+
+          if (typeof value === 'object' && value !== null) {
+            trackStore(item.selector())
+          }
+
           if (skippedSetup) {
             setIDB(item.key, unwrap(value), storeIDB)
           }
