@@ -17,7 +17,7 @@
 
 	const { items, onopen, onclose }: Props = $props()
 
-	const menuEl = $state<FocusTrap>()
+	let menuEl = $state<FocusTrap>()
 
 	const passHandler = (handler: Handler) => {
 		invariant(menuEl, 'menu container is undefined')

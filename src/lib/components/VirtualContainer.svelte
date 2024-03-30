@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { doesElementHasFocus, findFocusedElement } from '$lib/helpers/focus'
 	import {
-		createWindowVirtualizer,
 		type SvelteVirtualizer,
 		type VirtualItem,
+		createWindowVirtualizer,
 	} from '@tanstack/svelte-virtual'
 	import { untrack } from 'svelte'
 	import type { Readable } from 'svelte/motion'
@@ -80,10 +80,10 @@
 		})
 	})
 
-	let container = $state<HTMLDivElement>()!
+	let container = $state<HTMLDivElement>()
 
 	const findRow = (index: number) => {
-		const el = container.querySelector(`[aria-rowindex="${index}"]`)
+		const el = container?.querySelector(`[aria-rowindex="${index}"]`)
 		if (el instanceof HTMLElement) {
 			return el
 		}
@@ -92,7 +92,7 @@
 	}
 
 	const findCurrentFocusedRow = () => {
-		const index = Number(findFocusedElement(container)?.ariaRowIndex)
+		const index = container ? Number(findFocusedElement(container)?.ariaRowIndex) : -1
 
 		return Number.isNaN(index) ? -1 : index
 	}
@@ -111,7 +111,7 @@
 
 		e.preventDefault()
 
-		if (doesElementHasFocus(container)) {
+		if (container && doesElementHasFocus(container)) {
 			findRow(0)?.focus()
 
 			return
