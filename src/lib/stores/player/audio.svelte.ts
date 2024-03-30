@@ -93,9 +93,7 @@ export class PlayerAudio {
 
 		this.#audio.src = URL.createObjectURL(file)
 
-		if (this.playing) {
-			await this.#audio.play()
-		}
+		await this.#audio.play()
 	}
 
 	reset() {
