@@ -9,6 +9,7 @@
 	import Switch from '$lib/components/Switch.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.js'
 	import Spinner from '$lib/components/Spinner.svelte'
+	import { checkNewDirectoryStatus } from './directories.svelte.ts'
 
 	const { data } = $props()
 
@@ -51,40 +52,12 @@
 		replaceDirectory: undefined,
 	})
 
-	const checkNewDirectoryConditions = async (
-		existingDir: FileSystemDirectoryHandle,
-		newDir: FileSystemDirectoryHandle,
-	) => {
-		const paths = await existingDir.resolve(newDir)
-
-		let status: 'child' | 'existing' | 'parent' | undefined
-		if (paths) {
-			status = paths.length === 0 ? 'existing' : 'child'
-		} else {
-			const parent = await newDir.resolve(existingDir)
-
-			if (parent) {
-				status = 'parent'
-			}
-		}
-
-		if (status) {
-			return {
-				status,
-				existingDir,
-				newDir,
-			}
-		}
-
-		return
-	}
-
 	const onImportTracksHandler = async () => {
 		const directory = await showDirectoryPicker()
 
-		let data: Awaited<ReturnType<typeof checkNewDirectoryConditions>> | undefined
+		let data: Awaited<ReturnType<typeof checkNewDirectoryStatus>> | undefined
 		for (const existingDirectory of directories) {
-			const result = await checkNewDirectoryConditions(existingDirectory, directory)
+			const result = await checkNewDirectoryStatus(existingDirectory, directory)
 
 			if (result) {
 				data = result
@@ -259,6 +232,10 @@
 		<Switch bind:checked={compactLayout} />
 	</div>
 </section>
+
+{#snippet directoryHandlerDialog(newDir)}
+	As
+{/snippet}
 
 {#if dialogsOpen.replaceDirectory}
 	{@const newName = dialogsOpen.replaceDirectory.new}
