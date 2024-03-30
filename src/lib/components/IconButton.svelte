@@ -9,7 +9,7 @@
 </script>
 
 <script lang="ts" generics="As extends AllowedButtonElements = 'button'">
-	const { icon, children, ...rest } = $props<IconButtonProps<As>>()
+	const { icon, children, ...rest }: IconButtonProps<As> = $props()
 </script>
 
 <Button

@@ -3,7 +3,7 @@
 		playing?: boolean
 	}
 
-	const { playing = false } = $props<Props>()
+	const { playing = false }: Props = $props()
 </script>
 
 <div class={clx('w-24px h-24px relative z-1 play-icon', playing && 'rotate-90 playing')}>

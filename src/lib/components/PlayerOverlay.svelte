@@ -11,7 +11,7 @@
 	// import PlayNextButton from './buttons/PlayNextButton.svelte'
 	// import PlayPrevButton from './buttons/PlayPrevButton.svelte'
 
-	const { class: className } = $props<{ class?: string }>()
+	const { class: className }: { class?: string } = $props()
 
 	const player = usePlayer()
 </script>

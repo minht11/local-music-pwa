@@ -5,7 +5,7 @@
 		type: 'next' | 'previous'
 	}
 
-	const { type } = $props<Props>()
+	const { type }: Props = $props()
 
 	const flipIcon = $derived(type === 'previous')
 

@@ -11,7 +11,7 @@
 </script>
 
 <script lang="ts">
-	const { type, ...restProps } = $props<IconProps>()
+	const { type, ...restProps }: IconProps = $props()
 </script>
 
 <svg

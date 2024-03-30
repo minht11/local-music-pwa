@@ -31,7 +31,7 @@
 		children,
 		ariaLabel,
 		...restProps
-	} = $props<ButtonProps<As>>()
+	}: ButtonProps<As> = $props()
 
 	const KIND_CLASS_MAP = {
 		filled: 'filled-button',

@@ -2,7 +2,7 @@
 	import IconButton from '../../IconButton.svelte'
 	import PlayPreviousNextIcon from '../../animated-icons/PlayPreviousNextIcon.svelte'
 
-	const { class: className } = $props<{ class?: string }>()
+	const { class: className }: { class?: string } = $props()
 
 	const player = usePlayer()
 </script>

@@ -30,7 +30,7 @@
 		class: className,
 		children,
 		onclose,
-	} = $props<DialogProps>()
+	}: DialogProps = $props()
 
 	let dialog = $state<HTMLDialogElement>()!
 	let dialogHeader = $state<HTMLElement>()!

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IconButton from '../../IconButton.svelte'
 
-	const { class: className } = $props<{ class?: string }>()
+	const { class: className }: { class?: string } = $props()
 </script>
 
 <IconButton class={className} icon="shuffle" />
