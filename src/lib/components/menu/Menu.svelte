@@ -1,11 +1,11 @@
 <script lang="ts">
-	import '@a11y/focus-trap'
-	import { type FocusTrap } from '@a11y/focus-trap'
-	import invariant from 'tiny-invariant'
 	import { ripple } from '$lib/actions/ripple'
+	import '@a11y/focus-trap'
+	import type { FocusTrap } from '@a11y/focus-trap'
+	import { untrack } from 'svelte'
+	import invariant from 'tiny-invariant'
 	import Icon from '../icon/Icon.svelte'
 	import type { MenuItem } from './types.ts'
-	import { untrack } from 'svelte'
 
 	type Handler = (el: FocusTrap) => void
 
@@ -17,7 +17,7 @@
 
 	const { items, onopen, onclose }: Props = $props()
 
-	let menuEl = $state<FocusTrap>()
+	const menuEl = $state<FocusTrap>()
 
 	const passHandler = (handler: Handler) => {
 		invariant(menuEl, 'menu container is undefined')

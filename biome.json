@@ -14,13 +14,13 @@
 			"pnpm-lock.yaml",
 			"./src/paraglide/**",
 			"**/*.html",
-			"**/*.svg",
-			"**/*.svelte"
+			"**/*.svg"
 		]
 	},
 	"formatter": {
 		"enabled": true,
-		"lineWidth": 100
+		"lineWidth": 100,
+		"ignore": ["**/*.svelte"]
 	},
 	"linter": {
 		"enabled": true,
@@ -68,5 +68,34 @@
 		"formatter": {
 			"indentWidth": 2
 		}
-	}
+	},
+	"overrides": [
+		{
+			"include": ["*.svelte"],
+			"javascript": {
+				"globals": [
+					"Snippet",
+					"$state",
+					"$effect",
+					"$derived",
+					"m",
+					"$page",
+					"$props",
+					"$bindable",
+					"usePlayer"
+				]
+			},
+			"linter": {
+				"rules": {
+					"style": {
+						"useConst": "off",
+						"useImportType": "off"
+					},
+					"correctness": {
+						"noUndeclaredVariables": "off"
+					}
+				}
+			}
+		}
+	]
 }

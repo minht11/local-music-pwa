@@ -1,9 +1,9 @@
 <script context="module" lang="ts">
-	import { timeline, type TimelineSegment } from 'motion'
 	import { clx } from '$lib/helpers/clx'
+	import { timeline, type TimelineSegment } from 'motion'
+	import { untrack } from 'svelte'
 	import Button from './Button.svelte'
 	import Icon, { type IconType } from './icon/Icon.svelte'
-	import { untrack } from 'svelte'
 
 	export interface DialogButton {
 		title: string

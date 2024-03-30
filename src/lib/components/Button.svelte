@@ -2,13 +2,13 @@
 	import { clx } from '$lib/helpers/clx'
 	import { ripple } from '../actions/ripple'
 
-	export type AllowedButtonElements = 'button' | 'a'
+	export type AllowedButtonElement = 'button' | 'a'
 	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank'
 
-	export type ButtonHref<As extends AllowedButtonElements> = As extends 'a' ? string : never
+	export type ButtonHref<As extends AllowedButtonElement> = As extends 'a' ? string : never
 
 	// prettier-ignore
-	export interface ButtonProps<As extends AllowedButtonElements> {
+	export interface ButtonProps<As extends AllowedButtonElement> {
 		as?: As
 		kind?: ButtonKind
 		disabled?: boolean
@@ -22,12 +22,12 @@
 	}
 </script>
 
-<script lang="ts" generics="As extends AllowedButtonElements = 'button'">
+<script lang="ts" generics="As extends AllowedButtonElement = 'button'">
 	const {
-		as = 'button',
+		as = 'button' as As,
 		kind = 'filled',
 		disabled = false,
-		href = as === 'a' ? '' : undefined,
+		href = (as === 'a' ? '' : undefined) as ButtonHref<As>,
 		children,
 		ariaLabel,
 		...restProps

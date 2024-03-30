@@ -1,14 +1,14 @@
 <script lang="ts" context="module">
+	import Button, { type AllowedButtonElement, type ButtonProps } from './Button.svelte'
 	import Icon, { type IconType } from './icon/Icon.svelte'
-	import Button, { type AllowedButtonElements, type ButtonProps } from './Button.svelte'
 
-	interface IconButtonProps<As extends AllowedButtonElements> extends ButtonProps<As> {
+	interface IconButtonProps<As extends AllowedButtonElement> extends ButtonProps<As> {
 		icon?: IconType
 		children?: Snippet
 	}
 </script>
 
-<script lang="ts" generics="As extends AllowedButtonElements = 'button'">
+<script lang="ts" generics="As extends AllowedButtonElement = 'button'">
 	const { icon, children, ...rest }: IconButtonProps<As> = $props()
 </script>
 

@@ -1,15 +1,15 @@
 <script lang="ts" context="module">
-	import '@a11y/focus-trap'
-	import { type FocusTrap } from '@a11y/focus-trap'
-	import { setContext } from 'svelte'
-	import invariant from 'tiny-invariant'
-	import type { MenuItem, MenuOptions, MenuPosition } from './types.ts'
 	import { assign } from '$lib/helpers/utils.ts'
+	import '@a11y/focus-trap'
+	import type { FocusTrap } from '@a11y/focus-trap'
+	import { animate, timeline } from 'motion'
+	import { setContext } from 'svelte'
 	import { getContext } from 'svelte'
+	import invariant from 'tiny-invariant'
+	import Menu from './Menu.svelte'
 	import { getMeasurementsFromAnchor } from './positioning.ts'
 	import { positionMenu } from './positioning.ts'
-	import { animate, timeline } from 'motion'
-	import Menu from './Menu.svelte'
+	import type { MenuItem, MenuOptions, MenuPosition } from './types.ts'
 
 	const key = Symbol('menu')
 
