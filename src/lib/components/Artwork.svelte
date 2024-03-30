@@ -1,17 +1,14 @@
 <script lang="ts">
 	import Icon from './icon/Icon.svelte'
 
-	const {
-		src,
-		class: className,
-		alt,
-		children,
-	} = $props<{
+	interface Props {
 		src: string
 		class?: string
 		alt?: string
 		children?: Snippet
-	}>()
+	}
+
+	const { src, class: className, alt, children }: Props = $props()
 
 	let error = $state(false)
 </script>

@@ -1,19 +1,14 @@
 <script lang="ts">
-	let {
-		min = 0,
-		max = 100,
-		value,
-		disabled,
-		onSeekStart,
-		onSeekEnd,
-	} = $props<{
+	interface Props {
 		min?: number
 		max?: number
 		value: number
 		disabled?: boolean
 		onSeekStart?: () => void
 		onSeekEnd?: () => void
-	}>()
+	}
+
+	let { min = 0, max = 100, value = $bindable(0), disabled, onSeekStart, onSeekEnd }: Props = $props()
 
 	const getPercentage = () => {
 		const percentage = ((value || 1) * 100) / max

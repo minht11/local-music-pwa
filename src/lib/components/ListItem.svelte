@@ -9,6 +9,17 @@
 </script>
 
 <script lang="ts">
+	interface Props {
+		style?: string
+		class?: string
+		ariaLabel?: string
+		ariaRowIndex?: number
+		tabindex?: number
+		children: Snippet
+		menuItems?: ListMenuFn
+		onclick?: () => void
+	}
+
 	const {
 		children,
 		class: className,
@@ -18,16 +29,7 @@
 		tabindex = 0,
 		menuItems,
 		onclick,
-	} = $props<{
-		style?: string
-		class?: string
-		ariaLabel?: string
-		ariaRowIndex?: number
-		tabindex?: number
-		children: Snippet
-		menuItems?: ListMenuFn
-		onclick?: () => void
-	}>()
+	}: Props = $props()
 
 	const menu = useMenu()
 

@@ -1,10 +1,10 @@
 <script lang="ts" generics="T">
 	import { computePosition, autoUpdate, size, shift, flip } from '@floating-ui/dom'
 
-	const { options, value } = $props<{
-		options: T[]
-		value: T
-	}>()
+	const { options, value }: {
+			options: T[]
+			value: T
+		} = $props()
 
 	let target = $state<HTMLButtonElement>()!
 	let popover = $state<HTMLDivElement>()!
@@ -37,7 +37,7 @@
 
 <div
 	bind:this={popover}
-	popover
+	popover="auto"
 	class="m-0 h-400px rounded-4px overscroll-contain shadow-md tonal-elevation-2"
 >
 	Greetings, one and all!

@@ -2,15 +2,13 @@
 	import { clx } from '$lib/helpers/clx'
 	import Icon, { type IconType } from './icon/Icon.svelte'
 
-	const {
-		icon = 'alertCircle',
-		children,
-		...restProps
-	} = $props<{
+	interface Props {
 		icon?: IconType
 		class?: string
 		children?: Snippet
-	}>()
+	}
+
+	const { icon = 'alertCircle', children, ...restProps }: Props = $props()
 </script>
 
 <div

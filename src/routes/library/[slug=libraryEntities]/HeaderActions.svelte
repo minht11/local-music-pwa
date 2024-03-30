@@ -7,9 +7,11 @@
 	import { debounce } from '$lib/helpers/utils'
 	import type { PageData } from './$types'
 
-	const { data } = $props<{
+	interface Props {
 		data: PageData
-	}>()
+	}
+
+	const { data }: Props = $props()
 
 	const { store } = data
 

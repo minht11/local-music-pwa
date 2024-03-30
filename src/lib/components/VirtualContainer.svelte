@@ -8,16 +8,7 @@
 	import { untrack } from 'svelte'
 	import type { Readable } from 'svelte/motion'
 
-	let {
-		count,
-		lanes = 1,
-		gap = 0,
-		size: itemSize,
-		key,
-		children,
-		// @ts-expect-error TODO. https://github.com/sveltejs/language-tools/issues/2268
-		offsetWidth,
-	} = $props<{
+	interface Props {
 		count: number
 		lanes?: number
 		size: number
@@ -25,7 +16,18 @@
 		offsetWidth?: number
 		key: (index: number) => string | number
 		children: Snippet<[VirtualItem]>
-	}>()
+	}
+
+	let {
+		count,
+		lanes = 1,
+		gap = 0,
+		size: itemSize,
+		key,
+		children,
+		// @ts-ignore TODO. https://github.com/sveltejs/language-tools/issues/2268
+		offsetWidth = $bindable(0),
+	}: Props = $props()
 
 	let focusIndex = $state(-1)
 	let virtualizer: Readable<SvelteVirtualizer<Window, Element>> | undefined

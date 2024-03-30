@@ -17,15 +17,17 @@
 		player.playTrack(data.index, data.items)
 	}
 
-	const { items, onItemClick = defaultOnItemClick } = $props<{
+	interface Props {
 		items: number[]
 		onItemClick?: (data: TrackItemClick) => void
-	}>()
+	}
+
+	const { items, onItemClick = defaultOnItemClick }: Props = $props()
 </script>
 
 <VirtualContainer size={72} count={items.length} key={(index) => items[index] as number}>
 	{#snippet children(item)}
-		{@const trackId = items[item.index] as number}
+		{@const  trackId = items[item.index] as number}
 
 		<TrackListItem
 			{trackId}

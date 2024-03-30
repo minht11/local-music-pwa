@@ -3,12 +3,7 @@
 	import Artwork from './Artwork.svelte'
 	import { ripple } from '$lib/actions/ripple'
 
-	const {
-		artwork,
-		class: className,
-		children,
-		...props
-	} = $props<{
+	interface Props {
 		artwork?: Blob
 		class?: string
 		style?: string
@@ -18,7 +13,9 @@
 		'data-index'?: number
 		onclick?: (e: MouseEvent) => void
 		onkeydown?: (e: KeyboardEvent) => void
-	}>()
+	}
+
+	const { artwork, class: className, children, ...props }: Props = $props()
 
 	const [artworkSrc] = createManagedArtwork(() => artwork)
 </script>

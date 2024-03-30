@@ -17,5 +17,6 @@
 	},
 	"[typescript]": {
 		"editor.defaultFormatter": "biomejs.biome"
-	}
+	},
+	"editor.formatOnSave": true
 }

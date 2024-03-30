@@ -4,19 +4,15 @@
 	import { useAlbum } from '$lib/library/tracks.svelte.ts'
 	import GridItem from '../GridItem.svelte'
 
-	const {
-		albumId,
-		style,
-		tabindex,
-		class: className,
-		onclick,
-	} = $props<{
+	interface Props {
 		albumId: number
 		style?: string
 		tabindex?: number
 		class?: string
 		onclick?: (album: Album) => void
-	}>()
+	}
+
+	const { albumId, style, tabindex, class: className, onclick }: Props = $props()
 
 	const data = useAlbum(albumId)
 

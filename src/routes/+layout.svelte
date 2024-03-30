@@ -13,10 +13,12 @@
 	import MenuRenderer, { initGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 
-	const { data, children } = $props<{
+	interface Props {
 		data: LayoutData
 		children: Snippet
-	}>()
+	}
+
+	const { data, children }: Props = $props()
 
 	const pageData = $derived($page.data)
 

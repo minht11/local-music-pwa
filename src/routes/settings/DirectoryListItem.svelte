@@ -1,19 +1,15 @@
 <script lang="ts">
 	import { clx } from '$lib/helpers/clx'
 
-	const {
-		name,
-		count,
-		as = 'li',
-		children,
-		...restProps
-	} = $props<{
+	interface Props {
 		name: string
 		count: number
 		as?: 'li' | 'div'
 		class?: string
 		children?: Snippet
-	}>()
+	}
+
+	const { name, count, as = 'li', children, ...restProps }: Props = $props()
 </script>
 
 <svelte:element

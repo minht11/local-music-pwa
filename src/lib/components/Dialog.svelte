@@ -23,7 +23,7 @@
 
 <script lang="ts">
 	let {
-		open,
+		open = $bindable(false),
 		title,
 		icon,
 		buttons = [],

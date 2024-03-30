@@ -1,10 +1,12 @@
 <script lang="ts">
 	import Artwork from '../Artwork.svelte'
 
-	const { ...props } = $props<{
+	interface Props {
 		class?: string
 		children?: Snippet
-	}>()
+	}
+
+	const { ...props }: Props = $props()
 
 	const player = usePlayer()
 </script>

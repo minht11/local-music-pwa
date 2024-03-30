@@ -1,7 +1,9 @@
 <script lang="ts">
-	let { checked } = $props<{
+	interface Props {
 		checked: boolean
-	}>()
+	}
+
+	let { checked = $bindable(false) }: Props = $props()
 
 	const toggle = () => {
 		checked = !checked

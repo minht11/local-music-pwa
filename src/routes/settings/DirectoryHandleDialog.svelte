@@ -1,14 +1,16 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte'
+	import Dialog from '$lib/components/Dialog.svelte'
 
-	const { children } = $props<{
+	interface Props {
 		newDir: FileSystemDirectoryHandle
 		existingDir: FileSystemDirectoryHandle
 		children: Snippet<{
 			newDir: FileSystemDirectoryHandle
 			existingDir: FileSystemDirectoryHandle
 		}>
-	}>()
+	}
+
+	const { children }: Props = $props()
 </script>
 
 <Dialog
@@ -21,7 +23,5 @@
 		dialogsOpen.replaceDirectory = undefined
 	}}
 >
-	{
-		
-	}
+	{@render children({ newDir, existingDir })}
 </Dialog>

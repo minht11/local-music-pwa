@@ -1,9 +1,11 @@
 <script lang="ts">
 	// Spinner from https://codepen.io/mrrocks/pen/EiplA
 
-	const { class: className } = $props<{
+	interface Props {
 		class?: string
-	}>()
+	}
+
+	const { class: className }: Props = $props()
 </script>
 
 <svg

@@ -7,6 +7,16 @@
 	import Artwork from '../Artwork.svelte'
 	import ListItem, { type ListMenuFn } from '../ListItem.svelte'
 
+	interface Props {
+		trackId: number
+		style?: string
+		ariaRowIndex?: number
+		active?: boolean
+		class?: string
+		menuItems?: ListMenuFn
+		onclick?: (track: Track) => void
+	}
+
 	const {
 		trackId,
 		style,
@@ -15,15 +25,7 @@
 		onclick,
 		ariaRowIndex,
 		menuItems,
-	} = $props<{
-		trackId: number
-		style?: string
-		ariaRowIndex?: number
-		active?: boolean
-		class?: string
-		menuItems?: ListMenuFn
-		onclick?: (track: Track) => void
-	}>()
+	}: Props = $props()
 
 	const data = useTrack(trackId)
 

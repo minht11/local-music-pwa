@@ -14,9 +14,11 @@
 <script lang="ts">
 	import VirtualContainer from '../VirtualContainer.svelte'
 
-	const { items } = $props<{
+	interface Props {
 		items: number[]
-	}>()
+	}
+
+	const { items }: Props = $props()
 
 	let containerWidth = $state(0)
 
@@ -48,7 +50,7 @@
 	key={(index) => items[index] as number}
 >
 	{#snippet children(item)}
-		{@const  albumId = items[item.index] as number}
+		{@const    albumId = items[item.index] as number}
 		<AlbumGridItem
 			{albumId}
 			class="virtual-item top-0"

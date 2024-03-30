@@ -9,11 +9,13 @@
 
 	type Handler = (el: FocusTrap) => void
 
-	const { items, onopen, onclose } = $props<{
+	interface Props {
 		items: readonly MenuItem[]
 		onopen: Handler
 		onclose: Handler
-	}>()
+	}
+
+	const { items, onopen, onclose }: Props = $props()
 
 	let menuEl = $state<FocusTrap>()
 
