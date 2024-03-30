@@ -42,15 +42,16 @@ export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRel
 
 		ctx.drawImage(bitmap, 0, 0)
 
-		const [minifiedImage, primaryColor] = await Promise.all([
-			isSafari()
-				? imageBlob
-				: canvas.convertToBlob({
-						type: 'image/webp',
-						quality: 0.8,
-				  }),
-			extractColorFromImage(ctx.getImageData(0, 0, bitmap.width, bitmap.height)),
-		])
+		const minifiedImage = isSafari()
+			? imageBlob
+			: await canvas.convertToBlob({
+					type: 'image/webp',
+					quality: 0.8,
+				})
+
+		const primaryColor = extractColorFromImage(
+			ctx.getImageData(0, 0, bitmap.width, bitmap.height),
+		)
 
 		const [smallWidth, smallHeight] = getSmallImageDimensions(bitmap.width, bitmap.height)
 		canvas.width = smallWidth

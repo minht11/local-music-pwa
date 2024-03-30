@@ -1,6 +1,6 @@
 import { QuantizerCelebi, Score, argbFromRgb } from '@material/material-color-utilities'
 
-export const extractColorFromImage = async (image: ImageData): Promise<number | undefined> => {
+export const extractColorFromImage = (image: ImageData): number | undefined => {
 	try {
 		const skipPixels = 1
 		const bytesPerPixel = 4

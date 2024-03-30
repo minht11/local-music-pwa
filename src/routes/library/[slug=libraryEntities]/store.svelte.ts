@@ -1,5 +1,5 @@
 import { defineListQuery } from '$lib/db/db-fast.svelte'
-import { type AppDB } from '$lib/db/get-db'
+import type { AppDB } from '$lib/db/get-db'
 import {
 	type LibraryEntitySortKey,
 	type LibraryEntityStoreName,

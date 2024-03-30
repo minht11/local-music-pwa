@@ -24,14 +24,14 @@ const importAlbum = async (tx: Tx, track: Track) => {
 				...existingAlbum,
 				year: existingAlbum.year ?? track.year,
 				image: existingAlbum.image ?? track.images?.full,
-		  }
+			}
 		: {
 				type: MusicItemType.ALBUM,
 				name: track.album,
 				artists: track.artists,
 				year: track.year,
 				image: track.images?.full,
-		  }
+			}
 
 	// Id will be auto-generated
 	const albumId = await store.put(updatedAlbum as Album)

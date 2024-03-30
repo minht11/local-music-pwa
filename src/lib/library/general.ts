@@ -22,7 +22,6 @@ type GetEntityIdsIndex<StoreName extends LibraryEntityStoreName> = IDBPIndex<
 	keyof AppDB[StoreName]['indexes']
 >
 
-// biome-ignore lint/nursery/useAwait: <explanation>
 export const getEntityIdsWithSearchSlow = async <const StoreName extends LibraryEntityStoreName>(
 	storeIndex: GetEntityIdsIndex<StoreName>,
 	searchTerm: string,

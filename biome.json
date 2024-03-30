@@ -38,7 +38,13 @@
 				"useCollapsedElseIf": "error",
 				"useShorthandArrayType": "error",
 				"useShorthandAssign": "error",
-				"useFilenamingConvention": "error"
+				"useFilenamingConvention": {
+					"level": "off",
+					"options": {
+						"requireAscii": true,
+						"filenameCases": ["kebab-case", "export", "PascalCase"]
+					}
+				}
 			},
 			"suspicious": {
 				"noMisrefactoredShorthandAssign": "error",
@@ -55,7 +61,8 @@
 			"quoteStyle": "single",
 			"jsxQuoteStyle": "single",
 			"indentWidth": 4
-		}
+		},
+		"globals": ["Snippet", "$state", "$effect", "$derived", "m"]
 	},
 	"json": {
 		"formatter": {
