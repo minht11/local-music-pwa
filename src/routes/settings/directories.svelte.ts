@@ -1,3 +1,4 @@
+import { snackbar } from '$lib/components/snackbar/snackbar'
 import { notifyAboutDatabaseChanges } from '$lib/db/channel'
 import type { Directory } from '$lib/db/entities'
 import { getDB } from '$lib/db/get-db'
@@ -91,10 +92,13 @@ export const removeDirectory = async (directoryId: number) => {
 	directoriesStore.markAsInprogress(directoryId)
 	const tx = db.transaction(['directories', 'tracks', 'albums', 'artists'], 'readwrite')
 
-	const tracksToBeRemoved = await tx
-		.objectStore('tracks')
-		.index('directory')
-		.getAllKeys(directoryId)
+	const [directoryName, tracksToBeRemoved] = await Promise.all([
+		tx
+			.objectStore('directories')
+			.get(directoryId)
+			.then((dir) => dir?.handle.name),
+		tx.objectStore('tracks').index('directory').getAllKeys(directoryId),
+	])
 
 	for (const trackId of tracksToBeRemoved) {
 		await removeTrackWithTx(tx, trackId)
@@ -111,4 +115,9 @@ export const removeDirectory = async (directoryId: number) => {
 			operation: 'delete',
 		},
 	])
+
+	snackbar({
+		id: `dir-removed-${directoryId}`,
+		message: directoryName ? `Directory "${directoryName}" removed.` : 'Directory removed.',
+	})
 }
