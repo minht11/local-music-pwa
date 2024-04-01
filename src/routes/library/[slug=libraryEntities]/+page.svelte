@@ -1,15 +1,15 @@
 <script lang="ts">
-	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import AlbumsListContainer from '$lib/components/albums/AlbumsListContainer.svelte'
 	import { useRootLayout } from '$lib/app.js'
+	import AlbumsListContainer from '$lib/components/albums/AlbumsListContainer.svelte'
+	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import HeaderActions from './HeaderActions.svelte'
 
 	const { data } = $props()
 
 	const { store } = data
 
-	const itemsIdsQuery = store.query()
-	const itemsIds = $derived(itemsIdsQuery.value ?? [])
+	store.hydrateQuery()
+	const itemsIds = $derived(store.items)
 
 	const layout = useRootLayout()
 	layout.actions = layoutActions

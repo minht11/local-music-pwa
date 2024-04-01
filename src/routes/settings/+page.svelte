@@ -1,37 +1,23 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte'
 	import Dialog from '$lib/components/Dialog.svelte'
-	import Icon from '$lib/components/icon/Icon.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import InfoBanner from '$lib/components/InfoBanner.svelte'
-	import DirectoryListItem from './DirectoryListItem.svelte'
 	import Separator from '$lib/components/Separator.svelte'
-	import Switch from '$lib/components/Switch.svelte'
-	import { snackbar } from '$lib/components/snackbar/snackbar.js'
 	import Spinner from '$lib/components/Spinner.svelte'
-	import { checkNewDirectoryStatus } from './directories.svelte.ts'
+	import Switch from '$lib/components/Switch.svelte'
+	import Icon from '$lib/components/icon/Icon.svelte'
+	// import { snackbar } from '$lib/components/snackbar/snackbar.js'
+	import { initPageQueries } from '$lib/db/db-fast.svelte.ts'
+	import DirectoryListItem from './DirectoryListItem.svelte'
+	import { directoriesStore, importDirectory, removeDirectory } from './directories.svelte.ts'
 
 	const { data } = $props()
 
-	const currentTracksCount = data.countQuery()
+	initPageQueries(data)
 
-	const directories = $state<FileSystemDirectoryHandle[]>([])
-
-	const folders = [
-		{
-			name: 'Music',
-			count: 100,
-			loading: true,
-		},
-		{
-			name: 'Podcasts',
-			count: 10,
-		},
-		{
-			name: 'Audiobooks',
-			count: 5,
-		},
-	]
+	const count = $derived(data.countQuery.value)
+	const directories = $derived(data.directoriesQuery.value)
 
 	const isFileSystemAccessSupported = true
 
@@ -52,55 +38,58 @@
 		replaceDirectory: undefined,
 	})
 
-	const onImportTracksHandler = async () => {
-		const directory = await showDirectoryPicker()
+	const onImportTracksHandler = () => {
+		importDirectory()
 
-		let data: Awaited<ReturnType<typeof checkNewDirectoryStatus>> | undefined
-		for (const existingDirectory of directories) {
-			const result = await checkNewDirectoryStatus(existingDirectory, directory)
+		// return
+		// const directory = await showDirectoryPicker()
 
-			if (result) {
-				data = result
-				break
-			}
-		}
+		// let data: Awaited<ReturnType<typeof checkNewDirectoryStatus>> | undefined
+		// for (const existingDirectory of directories) {
+		// 	const result = await checkNewDirectoryStatus(existingDirectory, directory)
 
-		if (!data) {
-			directories.push(directory)
+		// 	if (result) {
+		// 		data = result
+		// 		break
+		// 	}
+		// }
 
-			snackbar({
-				id: 'directory-added',
-				message: `Directory '${directory.name}' added`,
-			})
+		// if (!data) {
+		// 	directories.push(directory)
 
-			return
-		}
+		// 	snackbar({
+		// 		id: 'directory-added',
+		// 		message: `Directory '${directory.name}' added`,
+		// 	})
 
-		const { status, existingDir, newDir } = data
+		// 	return
+		// }
 
-		if (status === 'child') {
-			dialogsOpen.alreadyIncludedChild = {
-				existing: existingDir.name,
-				new: newDir.name,
-			}
-		} else if (status === 'existing') {
-			snackbar({
-				id: 'directory-already-included',
-				message: `Directory '${directory.name}' is already included`,
-			})
-		} else if (status === 'parent') {
-			dialogsOpen.replaceDirectory = {
-				existing: existingDir.name,
-				new: newDir.name,
-			}
-		} else {
-			directories.push(directory)
+		// const { status, existingDir, newDir } = data
 
-			snackbar({
-				id: 'directory-added',
-				message: `Directory '${directory.name}' added`,
-			})
-		}
+		// if (status === 'child') {
+		// 	dialogsOpen.alreadyIncludedChild = {
+		// 		existing: existingDir.name,
+		// 		new: newDir.name,
+		// 	}
+		// } else if (status === 'existing') {
+		// 	snackbar({
+		// 		id: 'directory-already-included',
+		// 		message: `Directory '${directory.name}' is already included`,
+		// 	})
+		// } else if (status === 'parent') {
+		// 	dialogsOpen.replaceDirectory = {
+		// 		existing: existingDir.name,
+		// 		new: newDir.name,
+		// 	}
+		// } else {
+		// 	directories.push(directory)
+
+		// 	snackbar({
+		// 		id: 'directory-added',
+		// 		message: `Directory '${directory.name}' added`,
+		// 	})
+		// }
 		// for await (const handle of directory.values()) {
 		// 	console.log(entry, a)
 		// 	// if (entry.kind === 'directory') {
@@ -116,13 +105,13 @@
 	let compactLayout = $state(false)
 </script>
 
-<section class="card mx-auto w-full max-w-[900px] gap-24px">
+<section class="card mx-auto w-full max-w-[900px] gap-24px mt-64px">
 	<div class="flex flex-col gap-24px px-16px pt-16px">
 		<div>
 			<div class="text-body-lg">
 				Currently there are
 				<strong class="rounded-12px tabular-nums bg-tertiary px-8px text-onTertiary">
-					{currentTracksCount.value}
+					{count}
 				</strong>
 				tracks inside your library
 			</div>
@@ -161,36 +150,67 @@
 				</span>
 			</div>
 		{:else}
-			<DirectoryListItem as="div" name="Tracks without directory" count={100}>
-				<IconButton icon="close" title="Remove" />
-			</DirectoryListItem>
-
 			<div class="flex flex-col">
 				<div class="flex items-center justify-between">
 					<div class="text-title-sm">Directories</div>
-					<Button kind="flat">Rescan</Button>
+					{#if directories.length > 0}
+						<div class="flex gap-8px">
+							<Button kind="flat">Remove all</Button>
+
+							<Button kind="flat">
+								Rescan all
+
+								<Icon type="cached" />
+							</Button>
+						</div>
+					{/if}
 				</div>
 
-				<InfoBanner class="my-8px">
+				<InfoBanner class="my-16px">
 					Every time you open or reload the app, browser might ask you to allow access to your
 					selected directories.
 					<strong> To reduce number of popups please keep directory count to the minimum </strong>
 				</InfoBanner>
 
-				<ul>
-					{#each folders as folder}
-						<DirectoryListItem name={folder.name} count={folder.count}>
-							{#if folder.loading}
+				<ul class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-8px">
+					{#each directories as dir}
+						<div
+							class="flex h-56px gap-8px items-center bg-tertiaryContainer/40 pl-16px pr-4px rounded-4px"
+						>
+							<div class="truncate">
+								{dir.handle.name}
+							</div>
+
+							<div class="ml-auto flex gap-4px items-center">
+								{#if directoriesStore.isInprogress(dir.id)}
+									<Spinner class="w-20px h-20px ml-8px mr-10px" />
+								{:else}
+									<IconButton icon="cached" title="Rescan" />
+									<IconButton
+										icon="close"
+										title="Remove"
+										onclick={() => {
+											removeDirectory(dir.id)
+										}}
+									/>
+								{/if}
+							</div>
+						</div>
+						<!-- <DirectoryListItem name={dir.handle.name}>
+							{#if directoriesStore.isInprogress(dir.id)}
 								<Spinner class="w-20px h-20px ml-8px mr-10px" />
 							{:else}
 								<IconButton icon="cached" title="Rescan" />
 								<IconButton icon="close" title="Remove" />
 							{/if}
-						</DirectoryListItem>
+						</DirectoryListItem> -->
 					{/each}
 				</ul>
 			</div>
 		{/if}
+		<DirectoryListItem as="div" name="Tracks without directory" count={100}>
+			<IconButton icon="close" title="Remove" />
+		</DirectoryListItem>
 	</div>
 </section>
 
@@ -232,10 +252,6 @@
 		<Switch bind:checked={compactLayout} />
 	</div>
 </section>
-
-{#snippet directoryHandlerDialog(newDir)}
-	As
-{/snippet}
 
 {#if dialogsOpen.replaceDirectory}
 	{@const newName = dialogsOpen.replaceDirectory.new}

@@ -1,6 +1,6 @@
 import type { DBSchema, IDBPDatabase, IDBPObjectStore, IndexNames, StoreNames } from 'idb'
 import { openDB } from 'idb'
-import type { Album, Artist, Track } from './entities'
+import type { Album, Artist, Directory, Track } from './entities'
 
 export interface AppDB extends DBSchema {
 	tracks: {
@@ -13,7 +13,7 @@ export interface AppDB extends DBSchema {
 			year: string
 			duration: string
 			artists: string[]
-			directory?: number
+			directory: number
 		}
 	}
 	albums: {
@@ -36,7 +36,10 @@ export interface AppDB extends DBSchema {
 	}
 	directories: {
 		key: number
-		value: FileSystemDirectoryHandle
+		value: Directory
+		indexes: {
+			id: number
+		}
 	}
 }
 
@@ -76,7 +79,7 @@ export const getDB = () =>
 			if (!objectStoreNames.contains('tracks')) {
 				const store = createStore(e, 'tracks')
 
-				createIndexes(store, ['name', 'album', 'year', 'duration'])
+				createIndexes(store, ['name', 'album', 'year', 'duration', 'directory'])
 
 				store.createIndex('artists', 'artists', {
 					unique: false,

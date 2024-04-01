@@ -1,8 +1,8 @@
-import { defineQuery } from '$lib/db/db-fast.svelte.ts'
+import { definePageQuery } from '$lib/db/db-fast.svelte.ts'
 import { getDB } from '$lib/db/get-db'
 import type { PageLoad } from './$types'
 
-const countQuery = defineQuery({
+const countQuery = definePageQuery({
 	key: ['tracks-count'],
 	fetcher: async () => {
 		const db = await getDB()
@@ -29,9 +29,33 @@ const countQuery = defineQuery({
 	},
 })
 
+const directoriesQuery = definePageQuery({
+	key: ['directories'],
+	fetcher: async () => {
+		const db = await getDB()
+
+		return db.getAll('directories')
+	},
+	onDatabaseChange: (changes, { mutate }) => {
+		for (const change of changes) {
+			if (change.storeName === 'directories') {
+				if (change.operation === 'delete') {
+					mutate((v) => v?.filter((dir) => dir.id !== change.id))
+				} else if (change.operation === 'add') {
+					mutate((v = []) => [...v, change.value])
+				}
+				// TODO. Handle other operations
+			}
+		}
+	},
+})
+
 export const load = (async () => {
+	await Promise.all([countQuery.preload(), directoriesQuery.preload()])
+
 	return {
-		countQuery: await countQuery.createPreloaded(),
+		countQuery,
+		directoriesQuery,
 		backButton: true,
 		title: 'Settings',
 	}

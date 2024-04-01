@@ -15,7 +15,7 @@ export const removeTrackRelatedData = async <
 	EntityValue extends AppDB[StoreName]['indexes'][EntityIndexName],
 	IndexName extends IndexNames<AppDB, 'tracks'>,
 >(
-	tx: IDBPTransaction<AppDB, ('tracks' | 'albums' | 'artists')[], 'readwrite'>,
+	tx: IDBPTransaction<AppDB, ('directories' | 'tracks' | 'albums' | 'artists')[], 'readwrite'>,
 	trackIndex: IndexName,
 	entityStoreName: StoreName,
 	entityIndex: EntityIndexName,
@@ -47,14 +47,20 @@ export const removeTrackRelatedData = async <
 	return change
 }
 
-export const removeTrack = async (id: number) => {
-	const db = await getDB()
+export const removeTrackWithTx = async <
+	Tx extends IDBPTransaction<
+		AppDB,
+		('directories' | 'tracks' | 'albums' | 'artists')[],
+		'readwrite'
+	>,
+>(
+	tx: Tx,
+	trackId: number,
+) => {
+	deleteCacheValue(trackCacheIdKey(trackId))
 
-	deleteCacheValue(trackCacheIdKey(id))
-
-	const tx = db.transaction(['tracks', 'albums', 'artists'], 'readwrite')
 	const tracksStore = tx.objectStore('tracks')
-	const track = await tracksStore.get(id)
+	const track = await tracksStore.get(trackId)
 
 	if (!track) {
 		return
@@ -67,17 +73,26 @@ export const removeTrack = async (id: number) => {
 		),
 	])
 
-	await Promise.all([tracksStore.delete(id), tx.done])
+	await tracksStore.delete(trackId)
 
 	notifyAboutDatabaseChanges([
 		{
 			storeName: 'tracks',
 			operation: 'delete',
-			id,
+			id: trackId,
 		},
 		albumChange,
 		...artistsChanges,
 	])
+}
+
+export const removeTrack = async (id: number) => {
+	const db = await getDB()
+
+	const tx = db.transaction(['tracks', 'albums', 'artists'], 'readwrite')
+	removeTrackWithTx(tx, id)
+
+	await tx.done
 }
 
 export interface UseTrackOptions<AllowEmpty extends boolean = false> {

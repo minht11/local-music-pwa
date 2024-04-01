@@ -44,6 +44,7 @@ export interface UnknownTrack {
 	file: FileEntity
 	primaryColor?: number
 	isFavorite: boolean
+	directory: number
 }
 
 export interface Track extends BaseMusicItem, UnknownTrack {
@@ -65,4 +66,9 @@ export interface Playlist extends BaseMusicItem {
 	type: typeof MusicItemType.PLAYLIST
 	dateCreated: number
 	trackIDs: number[]
+}
+
+export interface Directory {
+	id: number
+	handle: FileSystemDirectoryHandle
 }

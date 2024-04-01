@@ -1,23 +1,8 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
-import { getFilesFromDirectory } from '$lib/helpers/file-system'
+import type { Directory } from '$lib/db/entities'
 import { startImportingTracks } from './importer'
 
-export const importTracks = async () => {
-	const files = await getFilesFromDirectory(['aac', 'mp3', 'ogg', 'wav', 'flac', 'm4a'])
-
-	// User canceled directory picker.
-	if (!files) {
-		return
-	}
-
-	if (files.length < 1) {
-		snackbar({
-			id: 'import-tracks-no-tracks',
-			message: 'Selected directory does not contain any tracks.',
-		})
-		return
-	}
-
+export const importTracksFromDirectory = async (directory: Directory) => {
 	const snackbarId = 'import-tracks'
 	snackbar({
 		id: snackbarId,
@@ -27,7 +12,7 @@ export const importTracks = async () => {
 	})
 
 	try {
-		const finishedData = await startImportingTracks(files, (data) => {
+		const finishedData = await startImportingTracks(directory, (data) => {
 			snackbar({
 				id: snackbarId,
 				message: `Scanning tracks. ${data.current} of ${data.total}`,
@@ -35,6 +20,16 @@ export const importTracks = async () => {
 				duration: false,
 			})
 		})
+
+		if (finishedData.total === 0) {
+			snackbar({
+				id: snackbarId,
+				message: 'No new tracks found in the selected directory.',
+				duration: 8000,
+				controls: false,
+			})
+			return
+		}
 
 		snackbar({
 			id: snackbarId,

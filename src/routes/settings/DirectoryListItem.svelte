@@ -3,7 +3,7 @@
 
 	interface Props {
 		name: string
-		count: number
+		count?: number
 		as?: 'li' | 'div'
 		class?: string
 		children?: Snippet
@@ -20,7 +20,13 @@
 	)}
 >
 	<div class="text-body-lg mr-auto truncate text-onSurface">{name}</div>
-	<div class="truncate border-r border-solid border-outline text-center tabular-nums">{count}</div>
+
+	{#if count}
+		<div class="truncate border-r border-solid border-outline text-center tabular-nums">
+			{count}
+		</div>
+	{/if}
+
 	<div class="flex gap-4px items-center">
 		{#if children}
 			{@render children()}

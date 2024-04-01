@@ -48,7 +48,7 @@ export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 			this.order,
 			this.searchTerm.toLowerCase().trim(),
 		],
-		fetcher: async ([, name, sortKey, order, searchTerm]) =>
+		fetcher: ([, name, sortKey, order, searchTerm]) =>
 			getEntityIds(name, {
 				sort: sortKey,
 				order,
@@ -59,15 +59,12 @@ export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 
 	preloadData = () => this.#query.preload()
 
-	// TODO.
-	query = () => {
-		const query = this.#query.create()
+	hydrateQuery = () => {
+		this.#query.hydrate()
+	}
 
-		return {
-			get value() {
-				return query.value
-			},
-		}
+	get items() {
+		return this.#query.value
 	}
 
 	constructor(storeName: StoreName, title: string, sortOptions: SortOption<StoreName>[]) {

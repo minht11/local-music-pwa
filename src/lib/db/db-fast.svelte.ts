@@ -162,7 +162,6 @@ export const createQuery = <const K extends QueryKey, R>(options: QueryOptions<K
 
 	$effect(() => () => {
 		return () => {
-			console.log('stop listening')
 			stopListening()
 		}
 	})
@@ -183,33 +182,116 @@ export const createQuery = <const K extends QueryKey, R>(options: QueryOptions<K
 	} as QueryState<R>
 }
 
-export const defineQuery = <const K extends QueryKey, R>(options: QueryOptions<K, R>) => {
-	const preload = async () => {
-		const key = typeof options.key === 'function' ? options.key() : options.key
-		const value = await options.fetcher(key)
+interface PageQueryOptions<K extends QueryKey, R> {
+	key: K | (() => K)
+	fetcher: (key: K) => Promise<R> | R
+	onDatabaseChange?: (
+		changes: DBChangeRecordList,
+		actions: { mutate: QueryMutate<R | undefined>; refetch: () => void },
+	) => void
+}
 
-		if (!options.disableCache) {
-			cache.setValue(normalizeKey(key), value)
+class PageQuery<const K extends QueryKey, R> {
+	#hydrated = false
+
+	options: PageQueryOptions<K, R>
+
+	#state = $state<{
+		value: R | undefined
+		resolvedKey: string
+	}>({
+		value: undefined,
+		resolvedKey: '',
+	})
+
+	get value() {
+		if (!this.#hydrated) {
+			throw new Error('PageQuery not hydrated')
 		}
+
+		return this.#state.value as R
+	}
+
+	set value(v: R) {
+		this.#state.value = v
+	}
+
+	getKey() {
+		const key = this.options.key
+
+		return typeof key === 'function' ? key() : key
+	}
+
+	constructor(options: PageQueryOptions<K, R>) {
+		this.options = options
+	}
+
+	#fetch = async () => {
+		const key = this.getKey()
+		const resolvedKey = normalizeKey(key)
+
+		const newValue = await this.options.fetcher(key)
+
+		this.#state.value = newValue
+		this.#state.resolvedKey = resolvedKey
+
+		return newValue
+	}
+
+	preload = async () => {
+		const value = await this.#fetch()
 
 		return value
 	}
 
-	const create = () => createQuery(options)
+	hydrate() {
+		this.#hydrated = true
 
-	return {
-		preload,
-		create,
-		createPreloaded: async () => {
-			const value = await preload()
+		const { options } = this
 
-			// @ts-ignore
-			create.preloadedValue = value
+		$effect(() => {
+			if (untrack(() => this.#state.resolvedKey) !== normalizeKey(this.getKey())) {
+				void untrack(this.#fetch)
+			}
+		})
 
-			return create as (() => QueryState<R>) & { preloadedValue: R }
-		},
+		const stopListening = listenForDatabaseChanges((changes) => {
+			options.onDatabaseChange?.(changes, {
+				mutate: (v) => {
+					let value: R | undefined
+					if (typeof v === 'function') {
+						// @ts-expect-error TODO
+						value = v(this.#state.value)
+					}
+
+					this.#state.value = value
+					this.#state.resolvedKey = normalizeKey(this.getKey())
+				},
+				refetch: () => this.#fetch(),
+			})
+		})
+
+		$effect(() => () => {
+			return () => {
+				console.log('cleanup')
+				stopListening()
+			}
+		})
+
+		return this.value
 	}
 }
+
+export const initPageQueries = (data: Record<string, unknown>) => {
+	for (const query of Object.values(data)) {
+		if (query instanceof PageQuery) {
+			query.hydrate()
+		}
+	}
+}
+
+export const definePageQuery = <const K extends QueryKey, R>(options: PageQueryOptions<K, R>) =>
+	new PageQuery(options)
 
 export type QueryListOptions<K extends QueryKey> = Omit<
 	QueryOptions<K, number[]>,
@@ -220,7 +302,7 @@ export const defineListQuery = <const StoreName extends AppStoreNames, const K e
 	storeName: () => StoreName,
 	options: QueryListOptions<K>,
 ) =>
-	defineQuery({
+	definePageQuery({
 		...options,
 		onDatabaseChange: (changes, { mutate, refetch }) => {
 			const name = storeName()

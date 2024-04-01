@@ -9,30 +9,50 @@ export interface DBChangeRecord {
 
 export type DBChangeRecordList = readonly DBChangeRecord[]
 
-const channel = new EventTarget()
+// We need to notify our local frame and all other frames about database changes.
+// Including web workers, other tabs, etc.
+const crossChannel = new BroadcastChannel('db-changes')
+const localChannel = new EventTarget()
 
 export const listenForDatabaseChanges = (handler: (changes: readonly DBChangeRecord[]) => void) => {
 	if (import.meta.env.SSR) {
 		return () => {}
 	}
 
-	const eventHandler = (event: CustomEventInit<DBChangeRecord[]>) => {
-		const changes = event.detail
+	const abort = new AbortController()
 
-		if (!changes) {
-			return
-		}
+	localChannel.addEventListener(
+		'message',
+		(e: CustomEventInit<DBChangeRecord[]>) => {
+			const changes = e.detail
 
-		handler(changes)
+			if (!changes) {
+				return
+			}
+
+			handler(changes)
+		},
+		{
+			signal: abort.signal,
+		},
+	)
+
+	crossChannel.addEventListener('message', (e: MessageEvent<DBChangeRecord[]>) => {
+		handler(e.data)
+	})
+
+	return () => {
+		abort.abort()
 	}
-
-	channel.addEventListener('message', eventHandler)
-
-	return () => channel.removeEventListener('message', eventHandler)
 }
 
 export const notifyAboutDatabaseChanges = (changes: readonly (DBChangeRecord | undefined)[]) => {
 	const filteredChanges = changes.filter(Boolean)
 
-	channel.dispatchEvent(new CustomEvent('message', { detail: filteredChanges }))
+	if (filteredChanges.length === 0) {
+		return
+	}
+
+	localChannel.dispatchEvent(new CustomEvent('message', { detail: filteredChanges }))
+	crossChannel.postMessage(filteredChanges)
 }

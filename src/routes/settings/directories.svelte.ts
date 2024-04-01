@@ -1,3 +1,9 @@
+import { notifyAboutDatabaseChanges } from '$lib/db/channel'
+import type { Directory } from '$lib/db/entities'
+import { getDB } from '$lib/db/get-db'
+import { removeTrackWithTx } from '$lib/library/tracks.svelte'
+import { Set as SvelteSet } from 'svelte/reactivity'
+
 export const checkNewDirectoryStatus = async (
 	existingDir: FileSystemDirectoryHandle,
 	newDir: FileSystemDirectoryHandle,
@@ -27,19 +33,82 @@ export const checkNewDirectoryStatus = async (
 }
 
 class DirectoriesStore {
-	#inProgress = $state<Record<number, boolean>>({})
+	#inProgress = new SvelteSet<number>()
+
+	isInprogress = (id: number) => this.#inProgress.has(id)
 
 	markAsInprogress = (id: number) => {
-		this.#inProgress[id] = true
+		this.#inProgress.add(id)
 	}
 
-	isInprogress = (id: number) => {
-		return this.#inProgress[id] ?? false
-	}
-
-	remove = (id: number) => {
-		delete this.#inProgress[id]
+	narkAsDone = (id: number) => {
+		this.#inProgress.delete(id)
 	}
 }
 
 export const directoriesStore = new DirectoriesStore()
+
+export const importDirectory = async () => {
+	const newDirectory = await window.showDirectoryPicker()
+
+	const db = await getDB()
+	const tx = db.transaction('directories', 'readwrite')
+
+	const [id] = await Promise.all([
+		tx.objectStore('directories').add({
+			handle: newDirectory,
+		} as Directory),
+		tx.done,
+	])
+
+	directoriesStore.markAsInprogress(id)
+
+	notifyAboutDatabaseChanges([
+		{
+			id,
+			storeName: 'directories',
+			operation: 'add',
+			value: {
+				handle: newDirectory,
+				id,
+			},
+		},
+	])
+
+	const { importTracksFromDirectory } = await import('$lib/library/import-tracks/import-tracks')
+
+	await importTracksFromDirectory({
+		handle: newDirectory,
+		id,
+	})
+
+	directoriesStore.narkAsDone(id)
+}
+
+export const removeDirectory = async (directoryId: number) => {
+	const db = await getDB()
+
+	directoriesStore.markAsInprogress(directoryId)
+	const tx = db.transaction(['directories', 'tracks', 'albums', 'artists'], 'readwrite')
+
+	const tracksToBeRemoved = await tx
+		.objectStore('tracks')
+		.index('directory')
+		.getAllKeys(directoryId)
+
+	for (const trackId of tracksToBeRemoved) {
+		await removeTrackWithTx(tx, trackId)
+	}
+
+	await Promise.all([tx.objectStore('directories').delete(directoryId), tx.done])
+
+	directoriesStore.narkAsDone(directoryId)
+
+	notifyAboutDatabaseChanges([
+		{
+			id: directoryId,
+			storeName: 'directories',
+			operation: 'delete',
+		},
+	])
+}

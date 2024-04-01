@@ -13,6 +13,7 @@ const FILE_SIZE_LIMIT_500MB = 5e8
 
 export const parseTrack = async (
 	fileOrHandle: File | FileSystemFileHandle,
+	directoryId: number,
 ): Promise<UnknownTrack | null> => {
 	const file = fileOrHandle instanceof File ? fileOrHandle : await fileOrHandle.getFile()
 
@@ -57,6 +58,7 @@ export const parseTrack = async (
 		duration: tags.format.duration || 0,
 		isFavorite: false,
 		file: fileOrHandle,
+		directory: directoryId,
 		...artworkData,
 	}
 

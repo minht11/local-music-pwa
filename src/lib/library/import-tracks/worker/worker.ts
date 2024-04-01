@@ -1,14 +1,16 @@
 /// <reference lib='WebWorker' />
 
+import type { Directory } from '$lib/db/entities'
+import { getFileHandlesRecursively } from '$lib/helpers/file-system'
 import { importTrackToDb } from './import-track-to-db'
 import { parseTrack } from './parse-track'
 import type { TrackImportMessage } from './types'
 
 declare const self: DedicatedWorkerGlobalScope
 
-const importTrack = async (file: File | FileSystemFileHandle) => {
+const importTrack = async (file: File | FileSystemFileHandle, directoryId: number) => {
 	try {
-		const metadata = await parseTrack(file)
+		const metadata = await parseTrack(file, directoryId)
 
 		if (!metadata) {
 			return false
@@ -25,7 +27,7 @@ const importTrack = async (file: File | FileSystemFileHandle) => {
 	}
 }
 
-const processTracks = async (inputFiles: (File | FileSystemFileHandle)[]) => {
+const processTracks = async (inputFiles: (File | FileSystemFileHandle)[], directoryId: number) => {
 	let imported = 0
 	let current = 0
 
@@ -43,7 +45,7 @@ const processTracks = async (inputFiles: (File | FileSystemFileHandle)[]) => {
 	}
 
 	for await (const file of inputFiles) {
-		const success = await importTrack(file)
+		const success = await importTrack(file, directoryId)
 		if (success) {
 			imported += 1
 		}
@@ -56,6 +58,13 @@ const processTracks = async (inputFiles: (File | FileSystemFileHandle)[]) => {
 	self.close()
 }
 
-self.addEventListener('message', (event: MessageEvent<(File | FileSystemFileHandle)[]>) => {
-	processTracks(event.data)
+const processDirectory = async (directory: Directory) => {
+	// TODO. Add more extensions
+	const files = await getFileHandlesRecursively(directory.handle, ['mp3'])
+
+	processTracks(files, directory.id)
+}
+
+self.addEventListener('message', async (event: MessageEvent<Directory>) => {
+	await processDirectory(event.data)
 })
