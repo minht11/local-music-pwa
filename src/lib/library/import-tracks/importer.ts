@@ -1,10 +1,10 @@
-import type { FileEntity } from '$lib/helpers/file-system'
+import type { Directory } from '$lib/db/entities'
 import type { TrackImportCount, TrackImportMessage } from './worker/types'
 
 export type TrackParsedFn = (totalParsedCount: number) => void
 
 export const startImportingTracks = async (
-	files: FileEntity[],
+	directory: Directory,
 	progress: (data: TrackImportCount) => void,
 ) => {
 	const { promise, reject, resolve } = Promise.withResolvers<TrackImportCount>()
@@ -22,7 +22,7 @@ export const startImportingTracks = async (
 		}
 	})
 
-	worker.postMessage(files)
+	worker.postMessage(directory)
 
 	return promise
 }
