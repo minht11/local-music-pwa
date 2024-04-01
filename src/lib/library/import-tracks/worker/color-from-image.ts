@@ -2,21 +2,25 @@ import { QuantizerCelebi, Score, argbFromRgb } from '@material/material-color-ut
 
 export const extractColorFromImage = (image: ImageData): number | undefined => {
 	try {
-		const skipPixels = 1
+		const skipPixels = 2
 		const bytesPerPixel = 4
 		const increment = bytesPerPixel + bytesPerPixel * skipPixels
 
 		const imageBytes = image.data
 
-		const pixels: number[] = []
-		for (let i = 0; i < imageBytes.length; i += increment) {
+		const pixelsLen = Math.round(imageBytes.length / increment)
+		// Preallocate array because it is faster
+		const pixels = new Array<number>(pixelsLen)
+
+		for (let i = 0, realIndex = 0; i < imageBytes.length; i += increment, realIndex += 1) {
 			const r = imageBytes[i] as number
 			const g = imageBytes[i + 1] as number
 			const b = imageBytes[i + 2] as number
 			const a = imageBytes[i + 3] as number
 			if (a >= 255) {
 				const argb = argbFromRgb(r, g, b)
-				pixels.push(argb)
+
+				pixels[realIndex] = argb
 			}
 		}
 

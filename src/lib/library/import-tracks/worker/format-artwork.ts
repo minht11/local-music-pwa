@@ -49,10 +49,6 @@ export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRel
 					quality: 0.8,
 				})
 
-		const primaryColor = extractColorFromImage(
-			ctx.getImageData(0, 0, bitmap.width, bitmap.height),
-		)
-
 		const [smallWidth, smallHeight] = getSmallImageDimensions(bitmap.width, bitmap.height)
 		canvas.width = smallWidth
 		canvas.height = smallHeight
@@ -62,6 +58,8 @@ export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRel
 			type: isSafari() ? 'image/png' : 'image/webp',
 			quality: 0.7,
 		})
+
+		const primaryColor = extractColorFromImage(ctx.getImageData(0, 0, smallWidth, smallHeight))
 
 		return {
 			images: {
