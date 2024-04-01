@@ -141,26 +141,28 @@ export const createQuery = <const K extends QueryKey, R>(options: QueryOptions<K
 		}
 	})
 
-	const stopListening = listenForDatabaseChanges((changes) => {
-		options.onDatabaseChange?.(changes, {
-			mutate: (v) => {
-				let value: R | undefined
-				if (typeof v === 'function') {
-					// @ts-expect-error TODO
-					value = v(state.value)
-				}
+	$effect(() => {
+		const stopListening = untrack(() =>
+			listenForDatabaseChanges((changes) => {
+				options.onDatabaseChange?.(changes, {
+					mutate: (v) => {
+						let value: R | undefined
+						if (typeof v === 'function') {
+							// @ts-expect-error TODO
+							value = v(state.value)
+						}
 
-				if (!options.disableCache) {
-					cache.setValue(normalizeKey(getKey()), value)
-				}
+						if (!options.disableCache) {
+							cache.setValue(normalizeKey(getKey()), value)
+						}
 
-				assign(state, getLoadedState(value as R))
-			},
-			refetch: () => load(true),
-		})
-	})
+						assign(state, getLoadedState(value as R))
+					},
+					refetch: () => load(true),
+				})
+			}),
+		)
 
-	$effect(() => () => {
 		return () => {
 			stopListening()
 		}
@@ -255,25 +257,25 @@ class PageQuery<const K extends QueryKey, R> {
 			}
 		})
 
-		const stopListening = listenForDatabaseChanges((changes) => {
-			options.onDatabaseChange?.(changes, {
-				mutate: (v) => {
-					let value: R | undefined
-					if (typeof v === 'function') {
-						// @ts-expect-error TODO
-						value = v(this.#state.value)
-					}
+		$effect(() => {
+			const stopListening = untrack(() =>
+				listenForDatabaseChanges((changes) => {
+					options.onDatabaseChange?.(changes, {
+						mutate: (v) => {
+							let value: R | undefined
+							if (typeof v === 'function') {
+								// @ts-expect-error TODO
+								value = v(this.#state.value)
+							}
 
-					this.#state.value = value
-					this.#state.resolvedKey = normalizeKey(this.getKey())
-				},
-				refetch: () => this.#fetch(),
-			})
-		})
-
-		$effect(() => () => {
+							this.#state.value = value
+							this.#state.resolvedKey = normalizeKey(this.getKey())
+						},
+						refetch: () => this.#fetch(),
+					})
+				}),
+			)
 			return () => {
-				console.log('cleanup')
 				stopListening()
 			}
 		})

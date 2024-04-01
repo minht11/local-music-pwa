@@ -1,3 +1,4 @@
+import { browser } from '$app/environment'
 import type { AppStoreNames } from './get-db'
 
 export interface DBChangeRecord {
@@ -14,35 +15,42 @@ export type DBChangeRecordList = readonly DBChangeRecord[]
 const crossChannel = new BroadcastChannel('db-changes')
 const localChannel = new EventTarget()
 
+type Listener = (changes: readonly DBChangeRecord[]) => void
+
+// It is faster to manually store listeners in a Set, than registering 2 EventTargets.
+const listeners = new Set<Listener>()
+
+if (browser) {
+	const notifyListeners = (changes: readonly DBChangeRecord[]) => {
+		for (const listener of listeners) {
+			listener(changes)
+		}
+	}
+
+	localChannel.addEventListener('message', (e: CustomEventInit<DBChangeRecord[]>) => {
+		const changes = e.detail
+
+		if (!changes) {
+			return
+		}
+
+		notifyListeners(changes)
+	})
+
+	crossChannel.addEventListener('message', (e: MessageEvent<DBChangeRecord[]>) => {
+		notifyListeners(e.data)
+	})
+}
+
 export const listenForDatabaseChanges = (handler: (changes: readonly DBChangeRecord[]) => void) => {
 	if (import.meta.env.SSR) {
 		return () => {}
 	}
 
-	const abort = new AbortController()
-
-	localChannel.addEventListener(
-		'message',
-		(e: CustomEventInit<DBChangeRecord[]>) => {
-			const changes = e.detail
-
-			if (!changes) {
-				return
-			}
-
-			handler(changes)
-		},
-		{
-			signal: abort.signal,
-		},
-	)
-
-	crossChannel.addEventListener('message', (e: MessageEvent<DBChangeRecord[]>) => {
-		handler(e.data)
-	})
+	listeners.add(handler)
 
 	return () => {
-		abort.abort()
+		listeners.delete(handler)
 	}
 }
 

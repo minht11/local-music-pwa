@@ -20,12 +20,18 @@ const countQuery = definePageQuery({
 					countDiff += 1
 				} else if (operation === 'delete') {
 					countDiff -= 1
+				} else if (operation === 'clear-all') {
+					countDiff = 0
+
+					mutate(0)
 				}
 			}
 			// TODO. Handle clear all
 		}
 
-		mutate((v = 0) => v + countDiff)
+		if (countDiff !== 0) {
+			mutate((v = 0) => v + countDiff)
+		}
 	},
 })
 
