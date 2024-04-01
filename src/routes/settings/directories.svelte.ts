@@ -100,8 +100,6 @@ export const removeDirectory = async (directoryId: number) => {
 		await removeTrackWithTx(tx, trackId)
 	}
 
-	console.log('removed', tracksToBeRemoved)
-
 	await Promise.all([tx.objectStore('directories').delete(directoryId), tx.done])
 
 	directoriesStore.narkAsDone(directoryId)
