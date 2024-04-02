@@ -49,9 +49,7 @@ class DirectoriesStore {
 
 export const directoriesStore = new DirectoriesStore()
 
-export const importDirectory = async () => {
-	const newDirectory = await window.showDirectoryPicker()
-
+export const importDirectory = async (newDirectory: FileSystemDirectoryHandle) => {
 	const db = await getDB()
 	const tx = db.transaction('directories', 'readwrite')
 

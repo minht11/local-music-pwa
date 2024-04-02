@@ -173,7 +173,7 @@
 			open = false
 		}}
 		class={clx(
-			'tonal-elevation-4 focus:outline-none flex min-w-280px max-w-560px select-none flex-col rounded-24px bg-surface p-24px text-onSurface will-change-[clip-path]',
+			'tonal-elevation-4 focus:outline-none flex min-w-280px max-w-[min(100%-16px,var(--dialog-width,560px))] select-none flex-col rounded-24px bg-surface p-24px text-onSurface will-change-[clip-path]',
 			className,
 		)}
 	>
