@@ -7,5 +7,10 @@
 	"tracks": "Tracks",
 	"albums": "Albums",
 	"artists": "Artists",
-	"playlists": "Playlists"
+	"playlists": "Playlists",
+	"understood": "Understood",
+	"cancel": "Cancel",
+	"replace": "Replace",
+	"replaceDirectoryQ": "Replace directory?",
+	"replaceDirectoryExplanation": "New directory {newDir} which you are trying to add is parent of {existingDir} which already is in your Library.\n Nothing will change for existing tracks."
 }

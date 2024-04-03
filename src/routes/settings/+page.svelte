@@ -5,11 +5,10 @@
 	import Separator from '$lib/components/Separator.svelte'
 	import Spinner from '$lib/components/Spinner.svelte'
 	import Switch from '$lib/components/Switch.svelte'
+	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
-	// import { snackbar } from '$lib/components/snackbar/snackbar.js'
 	import { initPageQueries } from '$lib/db/db-fast.svelte.ts'
-	import invariant from 'tiny-invariant'
 	import {
 		checkNewDirectoryStatus,
 		directoriesStore,
@@ -34,13 +33,13 @@
 	interface DialogOpenState {
 		addDirectory: boolean
 		alreadyIncludedChild?: DirectoryCollision
-		replaceDirectory?: DirectoryCollision
+		reparentDirectory?: DirectoryCollision
 	}
 
 	let dialogsOpen = $state<DialogOpenState>({
 		addDirectory: false,
 		alreadyIncludedChild: undefined,
-		replaceDirectory: undefined,
+		reparentDirectory: undefined,
 	})
 
 	const onImportTracksHandler = async () => {
@@ -74,7 +73,7 @@
 		}
 
 		if (status === 'parent') {
-			dialogsOpen.replaceDirectory = {
+			dialogsOpen.reparentDirectory = {
 				existing: existingDir.name,
 				new: newDir.name,
 			}
@@ -98,7 +97,7 @@
 		// 		message: `Directory '${directory.name}' is already included`,
 		// 	})
 		// } else if (status === 'parent') {
-		// 	dialogsOpen.replaceDirectory = {
+		// 	dialogsOpen.reparentDirectory = {
 		// 		existing: existingDir.name,
 		// 		new: newDir.name,
 		// 	}
@@ -261,26 +260,30 @@
 	</div>
 </section>
 
-<Dialog
-	open={!!dialogsOpen.replaceDirectory}
-	class="[--dialog-width:340px]"
-	icon="folderHidden"
-	title="{`"${dialogsOpen.replaceDirectory?.new}"`} is already included"
-	buttons={[{ title: 'Understood' }]}
-	onclose={() => {
-		dialogsOpen.replaceDirectory = undefined
-	}}
->
-	Directory "{dialogsOpen.replaceDirectory?.new}" is already included because it is inside "{dialogsOpen
-		.replaceDirectory?.existing}" directory. You don't need to add it again.
-</Dialog>
+{#snippet directoryName(name: string | undefined)}
+	<span class="text-tertiary w-fit h-16.5px inline-flex items-center gap-4px">
+		<Icon type="folder" class="!size-12px" />
+
+		<span class="truncate inline max-w-[100px] w-fit h-full">{name}</span>
+	</span>
+{/snippet}
 
 <Dialog
-	bind:open={dialogsOpen.addDirectory}
-	title="Replace directory 'Music' with 'Wow'?"
-	buttons={[{ title: 'Cancel' }, { title: 'Ok' }]}
-	class="max-w-340px!"
+	open={!!dialogsOpen.reparentDirectory}
+	class="[--dialog-width:340px]"
+	icon="folderHidden"
+	title={m.replaceDirectoryQ()}
+	buttons={[{ title: m.cancel() }, { title: m.replace() }]}
+	onclose={() => {
+		dialogsOpen.reparentDirectory = undefined
+	}}
 >
-	Existing directory inside your Library 'Wow' is a subdirectory of 'Music' directory. Do you want
-	it to be replaced?
+	<WrapTranslation messageFn={m.replaceDirectoryExplanation}>
+		{#snippet existingDir()}
+			{@render directoryName(dialogsOpen.reparentDirectory?.existing)}
+		{/snippet}
+		{#snippet newDir()}
+			{@render directoryName(dialogsOpen.reparentDirectory?.new)}
+		{/snippet}
+	</WrapTranslation>
 </Dialog>
