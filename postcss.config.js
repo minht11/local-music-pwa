@@ -1,7 +1,7 @@
+import unocss from '@unocss/postcss'
+import autoprefixer from 'autoprefixer'
+import nesting from 'postcss-nesting'
+
 export default {
-	plugins: {
-		'@unocss/postcss': {},
-		autoprefixer: {},
-		'postcss-nesting': {},
-	},
+	plugins: [unocss(), autoprefixer(), nesting],
 }
