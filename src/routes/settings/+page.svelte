@@ -9,9 +9,7 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import { initPageQueries } from '$lib/db/db-fast.svelte.ts'
-	import type { Directory, Track } from '$lib/db/entities.ts'
-	import { getDB } from '$lib/db/get-db.ts'
-	import { getFileHandlesRecursively } from '$lib/helpers/file-system.ts'
+	import type { Directory } from '$lib/db/entities.ts'
 	import {
 		checkNewDirectoryStatus,
 		directoriesStore,

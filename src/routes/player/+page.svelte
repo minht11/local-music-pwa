@@ -4,14 +4,14 @@
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 
-import Slider from '$lib/components/Slider.svelte'
+	import Slider from '$lib/components/Slider.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
 	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
-		import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
+	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
 
 	const { data } = $props()
 
@@ -50,7 +50,7 @@ import Slider from '$lib/components/Slider.svelte'
 
 <div
 	class="w-full max-w-1280px bg-secondaryContainer view-transition-pl-container mx-auto fixed inset-0"
-/>
+></div>
 <section class="view-transition-pl-content grow flex flex-col mx-auto w-full max-w-1280px">
 	<div class="flex sm:grow sm:grid grow grid-cols-[400px_1fr]">
 		{#if (isCompact && !data.isQueueOpen) || !isCompact}

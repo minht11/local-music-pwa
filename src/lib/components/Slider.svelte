@@ -8,7 +8,14 @@
 		onSeekEnd?: () => void
 	}
 
-	let { min = 0, max = 100, value = $bindable(0), disabled, onSeekStart, onSeekEnd }: Props = $props()
+	let {
+		min = 0,
+		max = 100,
+		value = $bindable(0),
+		disabled,
+		onSeekStart,
+		onSeekEnd,
+	}: Props = $props()
 
 	const getPercentage = () => {
 		const percentage = ((value || 1) * 100) / max

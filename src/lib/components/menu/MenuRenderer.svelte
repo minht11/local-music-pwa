@@ -182,7 +182,7 @@
 <svelte:window oncontextmenu={globalContextMenuHandler} />
 
 {#if data}
-	<div class="absolute inset-0 pointer-events-auto" />
+	<div class="absolute inset-0 pointer-events-auto"></div>
 	<Menu
 		items={data.items}
 		onopen={(el) => {

@@ -199,7 +199,7 @@
 	</div>
 </header>
 
-<div bind:this={scrollThresholdEl} class="h-0 w-full" inert />
+<div bind:this={scrollThresholdEl} class="h-0 w-full" inert></div>
 
 {#key data.pathname}
 	<div
