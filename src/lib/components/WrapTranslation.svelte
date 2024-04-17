@@ -8,7 +8,7 @@
 	const { messageFn, ...props }: Props = $props()
 
 	const partMarker = '__PART_MARKER__'
-	const valueMarker = `__VALUE_MARKER__`
+	const valueMarker = '__VALUE_MARKER__'
 
 	const parts = $derived.by(() => {
 		const paramsKeys = Object.keys(props)

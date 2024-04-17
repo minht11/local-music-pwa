@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores'
-	import type { LayoutParams } from './$types'
+	import { useRootLayout } from '$lib/app'
+	import Button from '$lib/components/Button.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
-	import Button from '$lib/components/Button.svelte'
-	import { useRootLayout } from '$lib/app'
+	import type { LayoutParams } from './$types'
 
 	const { data, children } = $props()
 

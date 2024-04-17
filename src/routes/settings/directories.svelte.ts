@@ -6,16 +6,16 @@ import { removeTrackWithTx } from '$lib/library/tracks.svelte'
 import { Set as SvelteSet } from 'svelte/reactivity'
 
 export const checkNewDirectoryStatus = async (
-	existingDir: FileSystemDirectoryHandle,
-	newDir: FileSystemDirectoryHandle,
+	existingDir: Directory,
+	newDirHandle: FileSystemDirectoryHandle,
 ) => {
-	const paths = await existingDir.resolve(newDir)
+	const paths = await existingDir.handle.resolve(newDirHandle)
 
 	let status: 'child' | 'existing' | 'parent' | undefined
 	if (paths) {
 		status = paths.length === 0 ? 'existing' : 'child'
 	} else {
-		const parent = await newDir.resolve(existingDir)
+		const parent = await newDirHandle.resolve(existingDir.handle)
 
 		if (parent) {
 			status = 'parent'
@@ -26,7 +26,7 @@ export const checkNewDirectoryStatus = async (
 		return {
 			status,
 			existingDir,
-			newDir,
+			newDirHandle,
 		}
 	}
 
@@ -48,6 +48,14 @@ class DirectoriesStore {
 }
 
 export const directoriesStore = new DirectoriesStore()
+
+const importTracksFromDirectory = async (directory: Directory) => {
+	const { importTracksFromDirectory: importDir } = await import(
+		'$lib/library/import-tracks/import-tracks'
+	)
+
+	await importDir(directory)
+}
 
 export const importDirectory = async (newDirectory: FileSystemDirectoryHandle) => {
 	const db = await getDB()
@@ -74,14 +82,42 @@ export const importDirectory = async (newDirectory: FileSystemDirectoryHandle) =
 		},
 	])
 
-	const { importTracksFromDirectory } = await import('$lib/library/import-tracks/import-tracks')
-
 	await importTracksFromDirectory({
 		handle: newDirectory,
 		id,
 	})
 
 	directoriesStore.narkAsDone(id)
+}
+
+export const importReplaceDirectory = async (
+	directoryId: number,
+	newDirHandle: FileSystemDirectoryHandle,
+) => {
+	directoriesStore.markAsInprogress(directoryId)
+
+	const db = await getDB()
+	const tx = db.transaction('directories', 'readwrite')
+
+	const newDir = {
+		id: directoryId,
+		handle: newDirHandle,
+	} satisfies Directory
+
+	await Promise.all([tx.objectStore('directories').put(newDir), tx.done])
+
+	notifyAboutDatabaseChanges([
+		{
+			id: directoryId,
+			storeName: 'directories',
+			operation: 'update',
+			value: newDir,
+		},
+	])
+
+	await importTracksFromDirectory(newDir)
+
+	directoriesStore.narkAsDone(directoryId)
 }
 
 export const removeDirectory = async (directoryId: number) => {

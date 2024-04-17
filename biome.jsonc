@@ -14,9 +14,7 @@
 			"pnpm-lock.yaml",
 			"./src/paraglide/**",
 			"**/*.html",
-			"**/*.svg",
-			"src/lib/components/Dialog.svelte",
-			"src/lib/components/Button.svelte"
+			"**/*.svg"
 		]
 	},
 	"formatter": {
@@ -51,9 +49,6 @@
 			"suspicious": {
 				"noMisrefactoredShorthandAssign": "error",
 				"useAwait": "error"
-			},
-			"nursery": {
-				"noUselessTernary": "error"
 			}
 		}
 	},

@@ -26,8 +26,7 @@ export interface BaseMusicItem {
 	name: string
 }
 
-export interface UnknownTrack {
-	type: typeof MusicItemType.TRACK
+export interface ParsedTrackData {
 	name: string
 	album?: string
 	artists: string[]
@@ -36,20 +35,25 @@ export interface UnknownTrack {
 	genre: string[]
 	trackNo?: number
 	trackOf?: number
+	// TODO. Rename this field to image
 	images?: {
 		optimized: boolean
 		small: Blob
 		full: Blob
 	}
-	file: FileEntity
 	primaryColor?: number
-	isFavorite: boolean
+}
+
+export interface UnknownTrack {
+	type: typeof MusicItemType.TRACK
+	file: FileEntity
 	directory: number
 }
 
-export interface Track extends BaseMusicItem, UnknownTrack {
-	type: typeof MusicItemType.TRACK
-}
+export type Track = BaseMusicItem &
+	UnknownTrack & {
+		isFavorite: boolean
+	}
 
 export interface Album extends BaseMusicItem {
 	type: typeof MusicItemType.ALBUM

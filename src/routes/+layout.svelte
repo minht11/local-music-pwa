@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { page, navigating } from '$app/stores'
 	import { goto, onNavigate } from '$app/navigation'
-	import type { LayoutData } from './$types'
-	import IconButton from '$lib/components/IconButton.svelte'
-	import { wait } from '$lib/helpers/utils'
-	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
-	import { setContext } from 'svelte'
-	import invariant from 'tiny-invariant'
-	import { providePlayer } from '$lib/stores/player/store.ts'
+	import { navigating, page } from '$app/stores'
 	import { pendingRipples } from '$lib/actions/ripple'
-	import { clearThemeCssVariables, setThemeCssVariables } from '$lib/theme'
+	import IconButton from '$lib/components/IconButton.svelte'
+	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import MenuRenderer, { initGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
+	import { wait } from '$lib/helpers/utils'
+	import { providePlayer } from '$lib/stores/player/store.ts'
+	import { clearThemeCssVariables, setThemeCssVariables } from '$lib/theme'
+	import { setContext } from 'svelte'
+	import invariant from 'tiny-invariant'
+	import type { LayoutData } from './$types'
 
 	interface Props {
 		data: LayoutData

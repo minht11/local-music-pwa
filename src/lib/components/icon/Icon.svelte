@@ -11,7 +11,7 @@
 </script>
 
 <script lang="ts">
-	const { type, ...restProps }: IconProps = $props()
+	const { type, class: className }: IconProps = $props()
 </script>
 
 <svg
@@ -19,7 +19,7 @@
 	width="24"
 	height="24"
 	viewBox="0 0 24 24"
-	class={clx('fill-current pointer-events-none', restProps.class)}
+	class={clx('fill-current pointer-events-none shrink-0', className)}
 >
 	<path d={ICON_PATHS[type]} />
 </svg>

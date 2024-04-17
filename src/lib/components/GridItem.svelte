@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { ripple } from '$lib/actions/ripple'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import Artwork from './Artwork.svelte'
-	import { ripple } from '$lib/actions/ripple'
 
 	interface Props {
 		artwork?: Blob

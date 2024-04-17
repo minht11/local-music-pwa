@@ -9,10 +9,14 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import { initPageQueries } from '$lib/db/db-fast.svelte.ts'
+	import type { Directory, Track } from '$lib/db/entities.ts'
+	import { getDB } from '$lib/db/get-db.ts'
+	import { getFileHandlesRecursively } from '$lib/helpers/file-system.ts'
 	import {
 		checkNewDirectoryStatus,
 		directoriesStore,
 		importDirectory,
+		importReplaceDirectory,
 		removeDirectory,
 	} from './directories.svelte.ts'
 
@@ -25,29 +29,24 @@
 
 	const isFileSystemAccessSupported = true
 
-	interface DirectoryCollision {
-		existing: string
-		new: string
+	interface ReparentDirectory {
+		existingDir: Directory
+		newDirHandle: FileSystemDirectoryHandle
 	}
 
-	interface DialogOpenState {
-		addDirectory: boolean
-		alreadyIncludedChild?: DirectoryCollision
-		reparentDirectory?: DirectoryCollision
-	}
-
-	let dialogsOpen = $state<DialogOpenState>({
-		addDirectory: false,
-		alreadyIncludedChild: undefined,
-		reparentDirectory: undefined,
-	})
+	let reparentDirectory = $state<ReparentDirectory | null>(null)
 
 	const onImportTracksHandler = async () => {
-		const directory = await showDirectoryPicker()
+		const directory = await showDirectoryPicker({
+			startIn: 'music',
+			mode: 'read',
+		})
+
+		return await importDirectory(directory)
 
 		let data: Awaited<ReturnType<typeof checkNewDirectoryStatus>> | undefined
 		for (const existingDir of directories) {
-			const result = await checkNewDirectoryStatus(existingDir.handle, directory)
+			const result = await checkNewDirectoryStatus(existingDir, directory)
 
 			if (result) {
 				data = result
@@ -61,7 +60,10 @@
 			return
 		}
 
-		const { status, existingDir, newDir } = data
+		const { status, existingDir, newDirHandle } = data
+
+		const existingDirName = existingDir.handle.name
+		const newDirName = newDirHandle.name
 
 		if (status === 'existing') {
 			snackbar({
@@ -72,49 +74,22 @@
 			return
 		}
 
-		if (status === 'parent') {
-			dialogsOpen.reparentDirectory = {
-				existing: existingDir.name,
-				new: newDir.name,
-			}
-		} else {
-			// directories.push(directory)
-			// snackbar({
-			// 	id: 'directory-added',
-			// 	message: `Directory '${directory.name}' added`,
-			// })
+		if (status === 'child') {
+			snackbar({
+				id: 'directory-added',
+				message: m.directoryIsIncludedInParent({
+					existingDir: existingDirName,
+					newDir: newDirName,
+				}),
+			})
+
+			return
 		}
 
-		// if (status === 'child') {
-		// 	dialogsOpen.alreadyIncludedChild = {
-		// 		existing: existingDir.name,
-		// 		new: newDir.name,
-		// 	}
-		// }
-		//  else if (status === 'existing') {
-		// 	snackbar({
-		// 		id: 'directory-already-included',
-		// 		message: `Directory '${directory.name}' is already included`,
-		// 	})
-		// } else if (status === 'parent') {
-		// 	dialogsOpen.reparentDirectory = {
-		// 		existing: existingDir.name,
-		// 		new: newDir.name,
-		// 	}
-		// } else {
-		// 	directories.push(directory)
-
-		// 	snackbar({
-		// 		id: 'directory-added',
-		// 		message: `Directory '${directory.name}' added`,
-		// 	})
-		// }
-		// for await (const handle of directory.values()) {
-		// 	console.log(entry, a)
-		// 	// if (entry.kind === 'directory') {
-		// 	// 	directories.update((dirs) => [...dirs, entry])
-		// 	// }
-		// }
+		reparentDirectory = {
+			existingDir,
+			newDirHandle,
+		}
 	}
 
 	let compactLayout = $state(false)
@@ -193,22 +168,22 @@
 					</li>
 				</ul>
 
-				<div class="flex gap-8px mt-16px">
+				<div class="flex flex-col sm:flex-row gap-8px mt-16px">
 					{#if directories.length > 0}
-						<Button kind="flat">
+						<Button kind="outlined">
 							<Icon type="trashOutline" />
 
 							Remove all
 						</Button>
 
-						<Button kind="flat">
+						<Button kind="outlined">
 							<Icon type="cached" />
 
 							Rescan all
 						</Button>
 					{/if}
 
-					<Button kind="toned" class="ml-auto" onclick={onImportTracksHandler}>
+					<Button kind="toned" class="sm:ml-auto" onclick={onImportTracksHandler}>
 						{#if isFileSystemAccessSupported}
 							Add directory
 						{:else}
@@ -268,22 +243,33 @@
 	</span>
 {/snippet}
 
+<!-- TODO. When closing dialog text changes -->
 <Dialog
-	open={!!dialogsOpen.reparentDirectory}
+	open={!!reparentDirectory}
 	class="[--dialog-width:340px]"
 	icon="folderHidden"
 	title={m.replaceDirectoryQ()}
-	buttons={[{ title: m.cancel() }, { title: m.replace() }]}
+	buttons={[
+		{
+			title: m.cancel()
+		},
+		{
+			title: m.replace(),
+			action: () => {
+				importReplaceDirectory(reparentDirectory?.existingDir.id!, reparentDirectory?.newDirHandle!)
+			},
+		},
+	]}
 	onclose={() => {
-		dialogsOpen.reparentDirectory = undefined
+		reparentDirectory = null
 	}}
 >
 	<WrapTranslation messageFn={m.replaceDirectoryExplanation}>
 		{#snippet existingDir()}
-			{@render directoryName(dialogsOpen.reparentDirectory?.existing)}
+			{@render directoryName(reparentDirectory?.existingDir.handle.name)}
 		{/snippet}
 		{#snippet newDir()}
-			{@render directoryName(dialogsOpen.reparentDirectory?.new)}
+			{@render directoryName(reparentDirectory?.newDirHandle.name)}
 		{/snippet}
 	</WrapTranslation>
 </Dialog>

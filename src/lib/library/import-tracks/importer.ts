@@ -1,10 +1,9 @@
-import type { Directory } from '$lib/db/entities'
-import type { TrackImportCount, TrackImportMessage } from './worker/types'
+import type { TrackImportCount, TrackImportMessage, TrackImportOptions } from './worker/types'
 
 export type TrackParsedFn = (totalParsedCount: number) => void
 
 export const startImportingTracks = async (
-	directory: Directory,
+	options: TrackImportOptions,
 	progress: (data: TrackImportCount) => void,
 ) => {
 	const { promise, reject, resolve } = Promise.withResolvers<TrackImportCount>()
@@ -22,7 +21,7 @@ export const startImportingTracks = async (
 		}
 	})
 
-	worker.postMessage(directory)
+	worker.postMessage(options)
 
 	return promise
 }

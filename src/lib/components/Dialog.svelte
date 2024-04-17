@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
 	import { clx } from '$lib/helpers/clx'
-	import { timeline, type TimelineSegment } from 'motion'
+	import { type TimelineSegment, timeline } from 'motion'
 	import { untrack } from 'svelte'
 	import Button from './Button.svelte'
 	import Icon, { type IconType } from './icon/Icon.svelte'

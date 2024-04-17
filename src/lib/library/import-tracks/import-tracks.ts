@@ -1,8 +1,8 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
-import type { Directory } from '$lib/db/entities'
 import { startImportingTracks } from './importer'
+import type { TrackImportOptions } from './worker/types'
 
-export const importTracksFromDirectory = async (directory: Directory) => {
+export const importTracksFromDirectory = async (options: TrackImportOptions) => {
 	const snackbarId = 'import-tracks'
 	snackbar({
 		id: snackbarId,
@@ -12,7 +12,7 @@ export const importTracksFromDirectory = async (directory: Directory) => {
 	})
 
 	try {
-		const finishedData = await startImportingTracks(directory, (data) => {
+		const finishedData = await startImportingTracks(options, (data) => {
 			snackbar({
 				id: snackbarId,
 				message: `Scanning tracks. ${data.current} of ${data.total}`,

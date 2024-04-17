@@ -1,7 +1,7 @@
 <script lang="ts" context="module">
-	import TrackListItem from './TrackListItem.svelte'
 	import type { Track } from '$lib/db/entities'
 	import VirtualContainer from '../VirtualContainer.svelte'
+	import TrackListItem from './TrackListItem.svelte'
 
 	export interface TrackItemClick {
 		track: Track

@@ -1,17 +1,17 @@
 <script>
-	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
+	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 
-	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
+import Slider from '$lib/components/Slider.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
-	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
-	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
 	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
 	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
-	import Slider from '$lib/components/Slider.svelte'
+	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
+	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
+		import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
 
 	const { data } = $props()
 

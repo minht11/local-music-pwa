@@ -1,5 +1,5 @@
 <script lang="ts" generics="T">
-	import { computePosition, autoUpdate, size, shift, flip } from '@floating-ui/dom'
+	import { autoUpdate, computePosition, flip, shift, size } from '@floating-ui/dom'
 
 	const { options, value }: {
 			options: T[]
