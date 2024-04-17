@@ -42,53 +42,57 @@
 			mode: 'read',
 		})
 
-		return await importDirectory(directory)
-		// let data: Awaited<ReturnType<typeof checkNewDirectoryStatus>> | undefined
-		// for (const existingDir of directories) {
-		// 	const result = await checkNewDirectoryStatus(existingDir, directory)
+		// TODO. Testing stuff
+		if (window) {
+			return await importDirectory(directory)
+		}
 
-		// 	if (result) {
-		// 		data = result
-		// 		break
-		// 	}
-		// }
+		let data: Awaited<ReturnType<typeof checkNewDirectoryStatus>> | undefined
+		for (const existingDir of directories) {
+			const result = await checkNewDirectoryStatus(existingDir, directory)
 
-		// if (!data) {
-		// 	await importDirectory(directory)
+			if (result) {
+				data = result
+				break
+			}
+		}
 
-		// 	return
-		// }
+		if (!data) {
+			await importDirectory(directory)
 
-		// const { status, existingDir, newDirHandle } = data
+			return
+		}
 
-		// const existingDirName = existingDir.handle.name
-		// const newDirName = newDirHandle.name
+		const { status, existingDir, newDirHandle } = data
 
-		// if (status === 'existing') {
-		// 	snackbar({
-		// 		id: 'directory-already-included',
-		// 		message: `Directory '${directory.name}' is already included`,
-		// 	})
+		const existingDirName = existingDir.handle.name
+		const newDirName = newDirHandle.name
 
-		// 	return
-		// }
+		if (status === 'existing') {
+			snackbar({
+				id: 'directory-already-included',
+				message: `Directory '${directory.name}' is already included`,
+			})
 
-		// if (status === 'child') {
-		// 	snackbar({
-		// 		id: 'directory-added',
-		// 		message: m.directoryIsIncludedInParent({
-		// 			existingDir: existingDirName,
-		// 			newDir: newDirName,
-		// 		}),
-		// 	})
+			return
+		}
 
-		// 	return
-		// }
+		if (status === 'child') {
+			snackbar({
+				id: 'directory-added',
+				message: m.directoryIsIncludedInParent({
+					existingDir: existingDirName,
+					newDir: newDirName,
+				}),
+			})
 
-		// reparentDirectory = {
-		// 	existingDir,
-		// 	newDirHandle,
-		// }
+			return
+		}
+
+		reparentDirectory = {
+			existingDir,
+			newDirHandle,
+		}
 	}
 
 	let compactLayout = $state(false)
