@@ -43,53 +43,52 @@
 		})
 
 		return await importDirectory(directory)
+		// let data: Awaited<ReturnType<typeof checkNewDirectoryStatus>> | undefined
+		// for (const existingDir of directories) {
+		// 	const result = await checkNewDirectoryStatus(existingDir, directory)
 
-		let data: Awaited<ReturnType<typeof checkNewDirectoryStatus>> | undefined
-		for (const existingDir of directories) {
-			const result = await checkNewDirectoryStatus(existingDir, directory)
+		// 	if (result) {
+		// 		data = result
+		// 		break
+		// 	}
+		// }
 
-			if (result) {
-				data = result
-				break
-			}
-		}
+		// if (!data) {
+		// 	await importDirectory(directory)
 
-		if (!data) {
-			await importDirectory(directory)
+		// 	return
+		// }
 
-			return
-		}
+		// const { status, existingDir, newDirHandle } = data
 
-		const { status, existingDir, newDirHandle } = data
+		// const existingDirName = existingDir.handle.name
+		// const newDirName = newDirHandle.name
 
-		const existingDirName = existingDir.handle.name
-		const newDirName = newDirHandle.name
+		// if (status === 'existing') {
+		// 	snackbar({
+		// 		id: 'directory-already-included',
+		// 		message: `Directory '${directory.name}' is already included`,
+		// 	})
 
-		if (status === 'existing') {
-			snackbar({
-				id: 'directory-already-included',
-				message: `Directory '${directory.name}' is already included`,
-			})
+		// 	return
+		// }
 
-			return
-		}
+		// if (status === 'child') {
+		// 	snackbar({
+		// 		id: 'directory-added',
+		// 		message: m.directoryIsIncludedInParent({
+		// 			existingDir: existingDirName,
+		// 			newDir: newDirName,
+		// 		}),
+		// 	})
 
-		if (status === 'child') {
-			snackbar({
-				id: 'directory-added',
-				message: m.directoryIsIncludedInParent({
-					existingDir: existingDirName,
-					newDir: newDirName,
-				}),
-			})
+		// 	return
+		// }
 
-			return
-		}
-
-		reparentDirectory = {
-			existingDir,
-			newDirHandle,
-		}
+		// reparentDirectory = {
+		// 	existingDir,
+		// 	newDirHandle,
+		// }
 	}
 
 	let compactLayout = $state(false)
