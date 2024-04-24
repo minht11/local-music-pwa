@@ -20,8 +20,8 @@ export const VolumePanel: VoidComponent = () => {
     const value = Number.isInteger(parsedValue) ? parsedValue : maxValue
     
     const k = 0.5 //value for adjusting the curve
-    const normalizedInput = inputVolume / maxVolume;
-    const powValue = maxVolume * Math.pow(normalizedInput, k)
+    const normalizedValue = value / maxVolume;
+    const powValue = maxVolume * Math.pow(normalizedValue, k)
     
     playerActions.setVolume(powValue)
   }
