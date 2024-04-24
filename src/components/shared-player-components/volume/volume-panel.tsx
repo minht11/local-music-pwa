@@ -13,7 +13,7 @@ export const VolumePanel: VoidComponent = () => {
 
   const onVolumeInputHandler = (e: InputEvent) => {
     const inputEl = e.target as HTMLInputElement
-    const parsedValue = Math.pow(1, 2)
+    const parsedValue = parseInt(inputEl.value, 10)
     
     const maxValue = 100 // value for normalizing
     // This is probably not needed, but it doen't hurt.
