@@ -15,9 +15,9 @@ export const VolumePanel: VoidComponent = () => {
     const inputEl = e.target as HTMLInputElement
     const parsedValue = parseFloat(inputEl.value)
     
-    const maxValue = 100 // value for normalizing
+    const maxVolume = 100 // value for normalizing
     // This is probably not needed, but it doen't hurt.
-    const value = Number.isInteger(parsedValue) ? parsedValue : maxValue
+    const value = Number.isInteger(parsedValue) ? parsedValue : maxVolume
     
     const k = 0.5 //value for adjusting the curve
     const normalizedValue = value / maxVolume;
