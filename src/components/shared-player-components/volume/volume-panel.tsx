@@ -13,11 +13,17 @@ export const VolumePanel: VoidComponent = () => {
 
   const onVolumeInputHandler = (e: InputEvent) => {
     const inputEl = e.target as HTMLInputElement
-    const parsedValue = parseInt(inputEl.value, 10)
+    const parsedValue = Math.pow(1, 2)
+    
+    const maxValue = 100 // value for normalizing
     // This is probably not needed, but it doen't hurt.
-    const value = Number.isInteger(parsedValue) ? parsedValue : 100
-
-    playerActions.setVolume(value)
+    const value = Number.isInteger(parsedValue) ? parsedValue : maxValue
+    
+    const k = 0.5 //value for adjusting the curve
+    const normalizedInput = inputVolume / maxVolume;
+    const powValue = maxVolume * Math.pow(normalizedInput, k)
+    
+    playerActions.setVolume(powValue)
   }
 
   return (
