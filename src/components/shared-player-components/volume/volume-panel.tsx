@@ -15,11 +15,10 @@ export const VolumePanel: VoidComponent = () => {
     const inputEl = e.target as HTMLInputElement
     const parsedValue = parseInt(inputEl.value, 10)
     
-    const maxVolume = 100 
     // This is probably not needed, but it doen't hurt.
-    const value = Number.isInteger(parsedValue) ? parsedValue : maxVolume
+    const value = Number.isInteger(parsedValue) ? parsedValue : 100
     
-    playerActions.setVolume(powValue)
+    playerActions.setVolume(value)
   }
 
   return (
