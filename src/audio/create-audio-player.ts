@@ -157,7 +157,8 @@ export const useAudioPlayer = (): void => {
   }
 
   createEffect(() => {
-    audio.volume = playerState.volume / 100
+    const k = 0.5 //value for adjusting the curve
+    audio.volume = Math.pow(playerState.volume / 100, k)
     audio.muted = playerState.isMuted
     audio.loop = playerState.repeat === RepeatState.ONCE
   })
