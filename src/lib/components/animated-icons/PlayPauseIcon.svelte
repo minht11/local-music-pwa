@@ -7,8 +7,8 @@
 </script>
 
 <div class={clx('w-24px h-24px relative z-1 play-icon', playing && 'rotate-90 playing')}>
-	<div class="play-bar" />
-	<div class="play-bar flip-y" />
+	<div class="play-bar"></div>
+	<div class="play-bar flip-y"></div>
 </div>
 
 <style lang="postcss">

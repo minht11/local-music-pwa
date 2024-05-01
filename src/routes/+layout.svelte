@@ -162,7 +162,7 @@
 	<div class="page-loading-indicator fixed z-20 top-0 inset-x-0 bg-tertiary/40 h-4px">
 		<div
 			class="page-loading-indicator-bar h-4px w-full origin-top-left overflow-hidden bg-onTertiaryContainer"
-		/>
+		></div>
 	</div>
 {/if}
 

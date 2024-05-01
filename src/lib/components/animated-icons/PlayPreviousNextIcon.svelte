@@ -19,11 +19,11 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class={clx(flipIcon && 'flip-x')}
 	data-icon-animating={isAnimating ? '' : undefined}
-	on:keydown={onclick}
+	onkeydown={onclick}
 	{onclick}
 >
 	<svg class="icon-clip fill-current w-24px h-24px" viewBox="0 0 24 24">
