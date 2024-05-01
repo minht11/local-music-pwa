@@ -18,7 +18,7 @@
 		"postinstall": "paraglide-js compile --project ./project.inlang"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.7.1",
+		"@biomejs/biome": "1.7.2",
 		"@inlang/paraglide-js": "^1.7.2",
 		"@inlang/paraglide-js-adapter-vite": "^1.2.40",
 		"@sveltejs/adapter-static": "^3.0.1",
@@ -32,7 +32,7 @@
 		"postcss-nesting": "^12.1.2",
 		"prettier": "^3.2.5",
 		"prettier-plugin-svelte": "^3.2.3",
-		"svelte": "5.0.0-next.117",
+		"svelte": "5.0.0-next.120",
 		"svelte-check": "^3.7.0",
 		"terser": "^5.31.0",
 		"typescript": "^5.4.5",
