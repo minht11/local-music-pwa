@@ -1,4 +1,3 @@
-import type { UnknownTrack } from '$lib/db/entities'
 import invariant from 'tiny-invariant'
 import { extractColorFromImage } from './color-from-image'
 
@@ -29,7 +28,14 @@ const getSmallImageDimensions = (
 	return [smallerTarget * ratio, smallerTarget]
 }
 
-type ArtworkRelatedData = Pick<UnknownTrack, 'images' | 'primaryColor'>
+export type ArtworkRelatedData = {
+	images: {
+		optimized: boolean
+		full: Blob
+		small: Blob
+	}
+	primaryColor: number | undefined
+}
 
 export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRelatedData> => {
 	try {

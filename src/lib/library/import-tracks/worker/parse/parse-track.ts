@@ -1,4 +1,4 @@
-import { MusicItemType, type UnknownTrack } from '$lib/db/entities'
+import type { ParsedTrackData } from '$lib/db/entities'
 // @ts-expect-error - no types
 import { Buffer } from 'buffer-lite'
 import { parseBuffer as parseMetadata } from 'music-metadata/lib/core'
@@ -11,12 +11,7 @@ globalThis.Buffer = Buffer
 // This limit is a bit arbitrary.
 const FILE_SIZE_LIMIT_500MB = 5e8
 
-export const parseTrack = async (
-	fileOrHandle: File | FileSystemFileHandle,
-	directoryId: number,
-): Promise<UnknownTrack | null> => {
-	const file = fileOrHandle instanceof File ? fileOrHandle : await fileOrHandle.getFile()
-
+export const parseTrack = async (file: File): Promise<ParsedTrackData | null> => {
 	// Ignore files bigger than 500mb because of
 	// potential performance issues.
 	if (file.size > FILE_SIZE_LIMIT_500MB) {
@@ -46,8 +41,7 @@ export const parseTrack = async (
 		?.flatMap((artist) => artist.split(/,|&/))
 		.map((artist) => artist.trim())
 
-	const trackData: UnknownTrack = {
-		type: MusicItemType.TRACK,
+	const trackData: ParsedTrackData = {
 		name: common.title || file.name,
 		album: common.album,
 		artists: artists ?? [],
@@ -56,9 +50,6 @@ export const parseTrack = async (
 		trackOf: common.track.of || 0,
 		year: common.year?.toString(),
 		duration: tags.format.duration || 0,
-		isFavorite: false,
-		file: fileOrHandle,
-		directory: directoryId,
 		...artworkData,
 	}
 

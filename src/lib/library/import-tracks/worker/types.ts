@@ -1,6 +1,13 @@
 export interface TrackImportCount {
-	imported: number
+	/** Count of many tracks were newly added */
+	newlyImported: number
+	/** Count of many existing tracks were updated */
+	existingUpdated: number
+	/** Count of many tracks were removed */
+	removed: number
+	/** Index of currently scanned track */
 	current: number
+	/** Total count of tracks */
 	total: number
 }
 

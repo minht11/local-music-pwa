@@ -197,6 +197,16 @@
 	</div>
 </section>
 
+<section class="card mx-auto w-full max-w-[900px] mt-24px text-body-lg p-16px">
+	<div>Development panel</div>
+
+	<div class="flex gap-8px mt-16px">
+		<Button kind="toned">Import directory handle</Button>
+		<Button kind="toned">Import file handle</Button>
+		<Button kind="toned">Import file</Button>
+	</div>
+</section>
+
 <section class="card mx-auto w-full max-w-[900px] mt-24px text-body-lg">
 	<div class="text-title-sm px-16px pt-16px">Appearance</div>
 

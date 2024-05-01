@@ -14,6 +14,7 @@ export interface AppDB extends DBSchema {
 			duration: string
 			artists: string[]
 			directory: number
+			lastScanned: number
 		}
 	}
 	albums: {
@@ -79,7 +80,14 @@ export const getDB = () =>
 			if (!objectStoreNames.contains('tracks')) {
 				const store = createStore(e, 'tracks')
 
-				createIndexes(store, ['name', 'album', 'year', 'duration', 'directory'])
+				createIndexes(store, [
+					'name',
+					'album',
+					'year',
+					'duration',
+					'directory',
+					'lastScanned',
+				])
 
 				store.createIndex('artists', 'artists', {
 					unique: false,

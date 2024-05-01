@@ -1,24 +1,41 @@
 /// <reference lib='WebWorker' />
 
-import type { Directory, Track } from '$lib/db/entities'
+import { LegacyDirectoryId, MusicItemType, type Track } from '$lib/db/entities'
 import { getDB } from '$lib/db/get-db'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
 import { removeTrack } from '$lib/library/tracks.svelte'
 import { importTrackToDb } from './import-track-to-db.ts'
 import { parseTrack } from './parse/parse-track.ts'
-import type { TrackImportMessage, TrackImportOptions } from './types'
+import type { TrackImportCount, TrackImportMessage, TrackImportOptions } from './types'
 
 declare const self: DedicatedWorkerGlobalScope
 
-const importTrack = async (file: File | FileSystemFileHandle, directoryId: number) => {
+interface ImportTrackOptions {
+	unwrappedFile: File
+	file: FileEntity
+	directoryId: number
+	/** In cases when track already was imported */
+	trackId?: number
+}
+
+const importTrack = async (options: ImportTrackOptions) => {
 	try {
-		const metadata = await parseTrack(file, directoryId)
+		const metadata = await parseTrack(options.unwrappedFile)
 
 		if (!metadata) {
 			return false
 		}
 
-		await importTrackToDb(metadata)
+		await importTrackToDb(
+			{
+				...metadata,
+				type: MusicItemType.Track,
+				file: options.file,
+				directory: options.directoryId,
+				lastScanned: Date.now(),
+			},
+			options.trackId,
+		)
 
 		return true
 	} catch (err) {
@@ -29,36 +46,36 @@ const importTrack = async (file: File | FileSystemFileHandle, directoryId: numbe
 	}
 }
 
-const processTracks = async (inputFiles: FileEntity[], directoryId: number) => {
-	let imported = 0
-	let current = 0
+// const processTracks = async (inputFiles: FileEntity[], directoryId: number) => {
+// 	let imported = 0
+// 	let current = 0
 
-	const sendMsg = (finished: boolean) => {
-		const message: TrackImportMessage = {
-			finished,
-			count: {
-				imported,
-				current,
-				total: inputFiles.length,
-			},
-		}
+// const sendMsg = (finished: boolean) => {
+// 	const message: TrackImportMessage = {
+// 		finished,
+// 		count: {
+// 			imported,
+// 			current,
+// 			total: inputFiles.length,
+// 		},
+// 	}
 
-		self.postMessage(message)
-	}
+// 	self.postMessage(message)
+// }
 
-	for (const file of inputFiles) {
-		const success = await importTrack(file, directoryId)
-		if (success) {
-			imported += 1
-		}
+// 	for (const file of inputFiles) {
+// 		const success = await importTrack(file, directoryId)
+// 		if (success) {
+// 			imported += 1
+// 		}
 
-		current += 1
-		sendMsg(false)
-	}
+// 		current += 1
+// 		sendMsg(false)
+// 	}
 
-	sendMsg(true)
-	self.close()
-}
+// 	sendMsg(true)
+// 	self.close()
+// }
 
 const findTrackByFileHandle = async (handle: FileSystemFileHandle, tracks: Set<Track>) => {
 	for (const track of tracks) {
@@ -73,88 +90,89 @@ const findTrackByFileHandle = async (handle: FileSystemFileHandle, tracks: Set<T
 
 	return null
 }
-
-const benchmark22 = async (existingTracks: Track[], files: FileSystemFileHandle[]) => {
-	const existingTrackSet = new Set(existingTracks)
-
-	for (const newFile of files) {
-		const existingTrack = await findTrackByFileHandle(newFile, existingTrackSet)
-
-		if (existingTrack) {
-			existingTrackSet.delete(existingTrack)
-		} else {
-		}
-	}
-
-	// If we have any tracks left in the set,
-	// that means they no longer exist in the directory, so we remove them.
-	for (const track of existingTrackSet) {
-		await removeTrack(track.id)
-	}
-}
-
-const processDirectory = async (directory: Directory) => {
+const processDirectory = async (newDirHandle: FileSystemDirectoryHandle, directoryId: number) => {
 	const db = await getDB()
 	const tx = db.transaction(['directories', 'tracks'], 'readwrite')
-	const existingTracks = await tx.objectStore('tracks').index('directory').getAll(directory.id)
-	const existingTrackSet = new Set(existingTracks)
-
-	console.log(existingTracks)
-
-	// const foundIndexes: string[] = []
-
-	// const metadata = existingTracks.map((track) => {
-	// 	const file = track.file as FileSystemFileHandle
-
-	// 	return {
-	// 		name: file.name,
-	// 	}
-	// })
-
-	// for (const existingTrack of existingTracks) {
-	// 	existingTracks
-	// }
-
-	// TODO. Add more extensions
-	const files = await getFileHandlesRecursively(directory.handle, ['mp3'])
-
-	processTracks(files, directory.id)
-}
-
-const processDirectory2 = async (
-	newDirHandle: FileSystemDirectoryHandle,
-	existingDirId?: number,
-) => {
-	const db = await getDB()
-	const tx = db.transaction(['directories', 'tracks'], 'readwrite')
-	const existingTracks = await tx.objectStore('tracks').index('directory').getAll(existingDirId)
+	const existingTracks = await tx.objectStore('tracks').index('directory').getAll(directoryId)
 
 	// TODO. Add more extensions
 	const handles = await getFileHandlesRecursively(newDirHandle, ['mp3'])
 
+	const count: TrackImportCount = {
+		newlyImported: 0,
+		existingUpdated: 0,
+		removed: 0,
+		current: 0,
+		total: handles.length,
+	}
+
+	const sendMsg = (finished: boolean) => {
+		const message: TrackImportMessage = {
+			finished,
+			count,
+		}
+
+		self.postMessage(message)
+	}
+
 	const existingTrackSet = new Set(existingTracks)
 
 	for (const handle of handles) {
+		// TODO. This whole block should be wrapped in a try-catch block.
 		const existingTrack = await findTrackByFileHandle(handle, existingTrackSet)
+
+		const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
+		let existingTrackId = undefined
 
 		if (existingTrack) {
 			existingTrackSet.delete(existingTrack)
-			processTracks
-		} else {
+
+			// We only scan files that have been modified since the last scan.
+			if (unwrappedFile.lastModified <= existingTrack.lastScanned) {
+				continue
+			}
+
+			existingTrackId = existingTrack.id
 		}
+
+		const success = await importTrack({
+			unwrappedFile,
+			file: handle,
+			directoryId,
+			trackId: existingTrackId,
+		})
+
+		if (success) {
+			if (existingTrackId) {
+				count.existingUpdated += 1
+			} else {
+				count.newlyImported += 1
+			}
+		}
+
+		sendMsg(false)
+
+		count.current += 1
 	}
 
 	// If we have any tracks left in the set,
 	// that means they no longer exist in the directory, so we remove them.
 	for (const track of existingTrackSet) {
-		await removeTrack(track.id)
+		await removeTrack(track.id).catch(console.warn)
+		count.removed += 1
 	}
+
+	sendMsg(true)
 }
 
 self.addEventListener('message', async (event: MessageEvent<TrackImportOptions>) => {
 	const options = event.data
 
 	if (options.action === 'directory-replace' || options.action === 'directory-add') {
-		await processDirectory2(options.newDirHandle, options.existingDirId)
+		// TODO.
+		await processDirectory(
+			options.newDirHandle,
+			options.existingDirId ?? LegacyDirectoryId.File,
+		)
 	}
 })

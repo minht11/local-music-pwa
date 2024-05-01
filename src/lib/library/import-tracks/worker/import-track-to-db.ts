@@ -26,7 +26,7 @@ const importAlbum = async (tx: Tx, track: Track) => {
 				image: existingAlbum.image ?? track.images?.full,
 			}
 		: {
-				type: MusicItemType.ALBUM,
+				type: MusicItemType.Album,
 				name: track.album,
 				artists: track.artists,
 				year: track.year,
@@ -58,7 +58,7 @@ const importArtist = async (tx: Tx, track: Track) => {
 		}
 
 		const newArtist: Omit<Artist, 'id'> = {
-			type: MusicItemType.ARTIST,
+			type: MusicItemType.Artist,
 			name: artist,
 		}
 
@@ -77,17 +77,19 @@ const importArtist = async (tx: Tx, track: Track) => {
 	return changes
 }
 
-export const importTrackToDb = async (metadata: UnknownTrack) => {
+export const importTrackToDb = async (metadata: UnknownTrack, existingTrackId: number | undefined) => {
 	const db = await getDB()
 
 	const tx = db.transaction(['tracks', 'albums', 'artists'], 'readwrite')
 	const tracksStore = tx.objectStore('tracks')
 
-	const trackId = await tracksStore.add(metadata as Track)
+	const trackId = await tracksStore.put(metadata as Track, existingTrackId)
 
 	const track: Track = {
 		...metadata,
 		id: trackId,
+		// TODO. Should this be here?
+		isFavorite: false,
 	}
 
 	const [albumChange, artistsChanges] = await Promise.all([
