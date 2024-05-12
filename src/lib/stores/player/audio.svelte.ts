@@ -47,7 +47,10 @@ export class PlayerAudio {
 		}, 1000)
 
 		$effect(() => {
-			audio.volume = this.volume / 100
+			// Humans perceive volume logarithmically
+			// so we adjust the volume to match that perception
+			const k = 0.5
+			audio.volume = (this.volume / 100) ** k
 		})
 	}
 
