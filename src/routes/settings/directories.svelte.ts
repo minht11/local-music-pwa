@@ -2,6 +2,7 @@ import { snackbar } from '$lib/components/snackbar/snackbar'
 import { notifyAboutDatabaseChanges } from '$lib/db/channel'
 import type { Directory } from '$lib/db/entities'
 import { getDB } from '$lib/db/get-db'
+import type { TrackImportOptions } from '$lib/library/import-tracks/worker/types'
 import { removeTrackWithTx } from '$lib/library/tracks.svelte'
 import { Set as SvelteSet } from 'svelte/reactivity'
 
@@ -49,12 +50,12 @@ class DirectoriesStore {
 
 export const directoriesStore = new DirectoriesStore()
 
-const importTracksFromDirectory = async (directory: Directory) => {
+const importTracksFromDirectory = async (options: TrackImportOptions) => {
 	const { importTracksFromDirectory: importDir } = await import(
 		'$lib/library/import-tracks/import-tracks'
 	)
 
-	await importDir(directory)
+	await importDir(options)
 }
 
 export const importDirectory = async (newDirectory: FileSystemDirectoryHandle) => {
@@ -83,8 +84,9 @@ export const importDirectory = async (newDirectory: FileSystemDirectoryHandle) =
 	])
 
 	await importTracksFromDirectory({
-		handle: newDirectory,
-		id,
+		action: 'directory-add',
+		dirId: id,
+		dirHandle: newDirectory,
 	})
 
 	directoriesStore.narkAsDone(id)
@@ -115,7 +117,11 @@ export const importReplaceDirectory = async (
 		},
 	])
 
-	await importTracksFromDirectory(newDir)
+	await importTracksFromDirectory({
+		action: 'directory-replace',
+		dirId: directoryId,
+		dirHandle: newDirHandle,
+	})
 
 	directoriesStore.narkAsDone(directoryId)
 }

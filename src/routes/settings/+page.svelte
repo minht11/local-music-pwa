@@ -36,14 +36,14 @@
 
 	const onImportTracksHandler = async () => {
 		const directory = await showDirectoryPicker({
-			startIn: 'music',
+			// startIn: 'music',
 			mode: 'read',
 		})
 
-		// TODO. Testing stuff
-		if (window) {
-			return await importDirectory(directory)
-		}
+		// // TODO. Testing stuff
+		// if (window) {
+		// 	return await importDirectory(directory)
+		// }
 
 		let data: Awaited<ReturnType<typeof checkNewDirectoryStatus>> | undefined
 		for (const existingDir of directories) {
@@ -160,13 +160,15 @@
 								{/if}
 							</div>
 						</li>
+					{:else}
+						<div class="mx-auto col-span-full">No directories added</div>
 					{/each}
-					<li
+					<!-- <li
 						class="flex h-56px gap-8px items-center text-onTertiaryContainer bg-tertiaryContainer/24 pl-16px pr-4px rounded-4px"
 					>
 						<div class="truncate">Tracks without directory</div>
 						<Icon type="information" class="text-onTertiaryContainer/54 !size-16px" />
-					</li>
+					</li> -->
 				</ul>
 
 				<div class="flex flex-col sm:flex-row gap-8px mt-16px">

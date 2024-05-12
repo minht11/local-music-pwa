@@ -77,7 +77,10 @@ const importArtist = async (tx: Tx, track: Track) => {
 	return changes
 }
 
-export const importTrackToDb = async (metadata: UnknownTrack, existingTrackId: number | undefined) => {
+export const importTrackToDb = async (
+	metadata: UnknownTrack,
+	existingTrackId: number | undefined,
+) => {
 	const db = await getDB()
 
 	const tx = db.transaction(['tracks', 'albums', 'artists'], 'readwrite')

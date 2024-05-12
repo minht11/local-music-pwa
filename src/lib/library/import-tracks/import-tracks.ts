@@ -1,6 +1,6 @@
-import { snackbar } from '$lib/components/snackbar/snackbar'
-import { startImportingTracks } from './importer'
-import type { TrackImportOptions } from './worker/types'
+import { snackbar } from '$lib/components/snackbar/snackbar.ts'
+import { startImportingTracks } from './importer.ts'
+import type { TrackImportOptions } from './worker/types.ts'
 
 export const importTracksFromDirectory = async (options: TrackImportOptions) => {
 	const snackbarId = 'import-tracks'
@@ -33,7 +33,7 @@ export const importTracksFromDirectory = async (options: TrackImportOptions) => 
 
 		snackbar({
 			id: snackbarId,
-			message: `Successfully imported ${finishedData.imported} new tracks to the library.`,
+			message: `Successfully imported ${finishedData.newlyImported} new tracks to the library.`,
 			duration: 8000,
 			controls: false,
 		})

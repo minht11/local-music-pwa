@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { flip } from 'svelte/animate'
 	import Snackbar from './Snackbar.svelte'
 	import { snackbarItems } from './store.svelte'
 
@@ -12,5 +13,7 @@
 </script>
 
 {#each snackbarItems as item (item.id)}
-	<Snackbar {...item} ondismiss={dismissHandler} />
+	<div animate:flip={{ duration: 140 }}>
+		<Snackbar {...item} ondismiss={dismissHandler} />
+	</div>
 {/each}

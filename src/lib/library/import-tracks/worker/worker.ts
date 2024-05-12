@@ -170,9 +170,8 @@ self.addEventListener('message', async (event: MessageEvent<TrackImportOptions>)
 
 	if (options.action === 'directory-replace' || options.action === 'directory-add') {
 		// TODO.
-		await processDirectory(
-			options.newDirHandle,
-			options.existingDirId ?? LegacyDirectoryId.File,
-		)
+		await processDirectory(options.dirHandle, options.dirId ?? LegacyDirectoryId.File)
+	} else {
+		throw new Error('Unsupported action')
 	}
 })

@@ -19,13 +19,13 @@ export interface TrackImportMessage {
 export type TrackImportOptions =
 	| {
 			action: 'directory-replace'
-			existingDirId: number
-			newDirHandle: FileSystemDirectoryHandle
+			dirId: number
+			dirHandle: FileSystemDirectoryHandle
 	  }
 	| {
-			existingDirId?: number
 			action: 'directory-add'
-			newDirHandle: FileSystemDirectoryHandle
+			dirId: number
+			dirHandle: FileSystemDirectoryHandle
 	  }
 	| {
 			action: 'file-handles-add'
