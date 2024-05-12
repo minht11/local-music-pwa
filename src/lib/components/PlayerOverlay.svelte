@@ -35,7 +35,7 @@
 			>
 				{@const track = player.activeTrack}
 				<div
-					class="player-artwork rounded-8px overflow-hidden shrink-0 relative h-44px w-44px ring ring-inset ring-onSecondaryContainer/40"
+					class="player-artwork rounded-8px overflow-hidden shrink-0 relative h-44px w-44px ring-1 ring-inset ring-onSecondaryContainer/40"
 				>
 					{#if track}
 						<PlayerArtwork class="wh-full" />
@@ -80,7 +80,7 @@
 		grid-template-columns: 1fr max-content 1fr;
 	}
 
-	:global(:is([data-view-from='/player'], [data-view-to='/player'])) .player-content {
+	:global(html:is([data-view-from='/player'], [data-view-to='/player'])) .player-content {
 		view-transition-name: pl-content;
 	}
 

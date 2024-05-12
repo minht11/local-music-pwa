@@ -79,7 +79,7 @@
 
 <div
 	class={clx(
-		'gap-8px fixed desktop-sidebar flex-col w-max h-max',
+		'gap-8px fixed desktop-sidebar flex-col w-max h-max mt-64px',
 		data.isHandHeldDevice ? 'hidden sm:flex' : 'flex',
 	)}
 >

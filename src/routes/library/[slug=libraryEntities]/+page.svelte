@@ -19,7 +19,9 @@
 	<HeaderActions {data} />
 {/snippet}
 
-<div class={clx('w-full grow flex flex-col', data.isHandHeldDevice ? 'sm:pl-96px' : 'pl-96px')}>
+<div
+	class={clx('w-full grow flex flex-col mt-64px', data.isHandHeldDevice ? 'sm:pl-96px' : 'pl-96px')}
+>
 	{#if store.searchTerm && itemsIds.length === 0}
 		<div class="text-body-md w-max m-auto text-onSurfaceVariant">No results found</div>
 	{:else if store.storeName === 'tracks'}
