@@ -69,9 +69,7 @@
 
 {#snippet layoutBottom()}
 	{#if data.isHandHeldDevice}
-		<div
-			class="grid sm:hidden grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surface tonal-elevation-2 w-full h-64px"
-		>
+		<div class="grid sm:hidden grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surface w-full h-64px">
 			{@render navItemsSnippet('h-full')}
 		</div>
 	{/if}

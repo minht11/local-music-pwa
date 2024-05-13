@@ -15,7 +15,7 @@
 
 <div
 	class={clx(
-		'ring ring-inset ring-primary/20 aspect-1/1 flex overflow-hidden contain-strict',
+		'ring-1 ring-inset ring-primary/20 aspect-1/1 flex overflow-hidden contain-strict',
 		className,
 	)}
 >

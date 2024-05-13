@@ -46,7 +46,7 @@
 	bind:this={menuEl}
 	role="menu"
 	tabindex="-1"
-	class="pointer-events-auto flex flex-col absolute bg-surface rounded-4px py-8px tonal-elevation-4 overscroll-contain shadow-2xl"
+	class="pointer-events-auto flex flex-col absolute bg-surface rounded-4px py-8px bg-surfaceContainerHigh overscroll-contain shadow-2xl"
 	onkeydown={(e: KeyboardEvent) => {
 		if (e.key === 'ArrowDown') {
 			e.preventDefault()

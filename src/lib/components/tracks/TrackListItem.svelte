@@ -39,7 +39,7 @@
 	tabindex={-1}
 	class={clx(
 		'h-72px text-left',
-		active ? 'bg-surfaceVariant text-onSurfaceVariant' : 'color-onSurfaceVariant',
+		active ? 'bg-onSurfaceVariant/10 text-onSurfaceVariant' : 'color-onSurfaceVariant',
 		className,
 	)}
 	ariaLabel={`Play ${track?.name}`}

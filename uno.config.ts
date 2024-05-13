@@ -60,12 +60,8 @@ export default (async () => {
 			'text-body-lg': 'text-16px leading-24px tracking-0.15px font-400',
 			'text-body-md': 'text-14px leading-20px tracking-0.25px font-400',
 			'text-body-sm': 'text-12px leading-16px tracking-0.4px font-400',
-			'tonal-elevation-1': 'bg-gradient-to-r from-primary/5 to-primary/5',
-			'tonal-elevation-2': 'bg-gradient-to-r from-primary/8 to-primary/8',
-			'tonal-elevation-3': 'bg-gradient-to-r from-primary/11 to-primary/11',
-			'tonal-elevation-4': 'bg-gradient-to-r from-primary/12 to-primary/12',
 			link: 'text-primary underline',
-			card: 'tonal-elevation-1 flex flex-col rounded-8px bg-surface text-onSurface',
+			card: 'bg-surfaceContainer flex flex-col rounded-8px text-onSurface',
 			interactable:
 				'relative overflow-hidden appearance-none border-none outline-none decoration-none cursor-pointer flex items-center z-0 focus-visible:ring-2 ring-inset ring-current',
 			'base-button': 'interactable text-label-lg h-40px justify-center gap-8px rounded-20px',

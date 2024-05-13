@@ -1,5 +1,7 @@
 import {
-	CorePalette,
+	type CorePalette,
+	Hct,
+	TonalPalette,
 	argbFromHex,
 	blueFromArgb,
 	greenFromArgb,
@@ -36,10 +38,16 @@ const COLOR_TOKENS_GENERATION_MAP = {
 	onErrorContainer: ['error', 10, 90],
 	background: ['n1', 99, 10],
 	onBackground: ['n1', 10, 90],
-	surface: ['n1', 99, 10],
+	surface: ['n1', 98, 10],
 	onSurface: ['n1', 10, 90],
 	surfaceVariant: ['n2', 90, 30],
 	onSurfaceVariant: ['n2', 30, 80],
+	surfaceContainerHighest: ['n1', 90, 22],
+	surfaceContainerHigh: ['n1', 92, 17],
+	surfaceContainer: ['n1', 94, 12],
+	surfaceContainerLow: ['n1', 96, 10],
+	surfaceContainerLowest: ['n1', 100, 4],
+	surfaceTint: ['a1', 40, 80],
 	outline: ['n2', 50, 60],
 	outlineVariant: ['n2', 80, 30],
 	shadow: ['n1', 0, 0],
@@ -55,7 +63,20 @@ type Rgb = [r: number, g: number, b: number]
 export type ThemePaletteRgb = Record<keyof typeof COLOR_TOKENS_GENERATION_MAP, Rgb>
 
 export const getThemePaletteRgb = (argb: number, isDark: boolean) => {
-	const palette = CorePalette.of(argb)
+	const hct = Hct.fromInt(argb)
+	const hue = hct.hue
+	const chroma = hct.chroma
+
+	// We do not use material-color-utilities CorePalette because of large bundle size
+	// and because its color scheme is bit outdated with the current design guidelines
+	const palette: Record<Tone, TonalPalette> = {
+		a1: TonalPalette.fromHueAndChroma(hue, Math.max(48, chroma)),
+		a2: TonalPalette.fromHueAndChroma(hue, 16),
+		a3: TonalPalette.fromHueAndChroma(hue + 60, 24),
+		n1: TonalPalette.fromHueAndChroma(hue, 6),
+		n2: TonalPalette.fromHueAndChroma(hue, 8),
+		error: TonalPalette.fromHueAndChroma(25, 84),
+	}
 
 	const entries = Object.entries(COLOR_TOKENS_GENERATION_MAP)
 	const transformedEntries = entries.map(([key, value]) => {

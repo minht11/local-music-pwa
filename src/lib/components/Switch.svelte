@@ -13,7 +13,7 @@
 <div
 	class={clx(
 		'w-52px h-32px border-2 cursor-pointer flex items-center rounded-32px transition-all duration-150',
-		checked ? 'border-transparent bg-primary' : 'border-outline bg-surface tonal-elevation-4',
+		checked ? 'border-transparent bg-primary' : 'border-outline bg-surface bg-surfaceContainerHigh',
 	)}
 	tabindex="0"
 	role="switch"

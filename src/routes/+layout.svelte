@@ -169,7 +169,7 @@
 <header
 	class={clx(
 		'fixed inset-x-0 top-0 z-10 flex h-[--app-header-height] flex-shrink-0',
-		isScrolled && !pageData.disableHeaderElevation && 'tonal-elevation-4 bg-surface',
+		isScrolled && !pageData.disableHeaderElevation && 'bg-surfaceContainerHigh bg-surface',
 	)}
 >
 	<div class="max-w-1280px flex mx-auto w-full items-center pl-24px pr-8px">
@@ -191,7 +191,7 @@
 
 		<!-- <IconButton as="a" href="/search" icon="search" /> -->
 
-		<div class="flex items-center gap-8px tonal-elevation-2 bg-surface rounded-8px px-8px py-4px">
+		<div class="flex items-center gap-8px bg-surfaceContainerHigh rounded-8px px-8px py-4px">
 			{#if actions}
 				{@render actions()}
 			{/if}

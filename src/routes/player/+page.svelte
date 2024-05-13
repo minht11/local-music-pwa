@@ -18,7 +18,7 @@
 	const player = usePlayer()
 	const track = $derived(player.activeTrack)
 
-	const isCompactMedia = useMediaQuery('(max-width: 768px)')
+	const isCompactMedia = useMediaQuery('(max-width: 767px)')
 	const isCompact = $derived(isCompactMedia.value)
 </script>
 
@@ -50,52 +50,46 @@
 <section
 	class="view-transition-pl-content bg-secondaryContainer grow flex flex-col mx-auto w-full max-w-1280px"
 >
-	<div class="flex sm:grow sm:grid grow grid-cols-[400px_1fr]">
+	<div class="flex sm:grow md:grid grow grid-cols-[400px_1fr]">
 		{#if (isCompact && !data.isQueueOpen) || !isCompact}
-			<div class="flex flex-col grow sm:sticky sm:max-h-100vh top-0 tonal-elevation-2">
-				<div
-					class="overflow-clip flex flex-col items-center justify-center grow pt-[calc(var(--app-header-height)+16px)] pb-40px relative bg-secondaryContainer/60"
-				>
-					{#if player.artworkSrc}
-						<img
-							aria-hidden="true"
-							src={player.artworkSrc}
-							alt={track?.name}
-							class="absolute h-full w-full object-cover object-center -z-1 blur-10px inset-0 scale-110"
-						/>
-					{/if}
-					<PlayerArtwork class="rounded-24px view-transition-pl-artwork max-w-300px w-full" />
-				</div>
+			<div
+				class="flex flex-col z-0 bg-surfaceContainerLowest p-8px pt-[calc(var(--app-header-height)+8px)] gap-8px overflow-clip items-center grow sm:sticky sm:max-h-100vh top-0"
+			>
+				<div class="absolute -z-1 h-full w-full inset-0 bg-secondaryContainer/40"></div>
 
-				<Timeline class="-mt-12px z-0" />
+				<PlayerArtwork
+					class="rounded-16px bg-secondaryContainer view-transition-pl-artwork max-w-300px w-full my-auto"
+				/>
 
-				<div class="flex flex-col pt-24px pb-16px px-16px h-256px">
-					<!-- <Timeline /> -->
-
-					<div class="flex items-center gap-8px my-auto justify-between">
-						<ShuffleButton />
-
-						<PlayPrevButton />
-
-						<PlayTogglePillButton />
-
-						<PlayNextButton />
-
-						<RepeatButton />
+				<div class="bg-surfaceContainerHighest rounded-16px w-full">
+					<div class="h-56px flex flex-col items-center justify-center px-24px rounded-16px">
+						<Timeline />
 					</div>
 
-					<div class="flex items-center gap-8px">
-						<IconButton icon="volumeMid" />
+					<div class="flex bg-secondaryContainer flex-col p-16px px-16px rounded-16px">
+						<div class="flex items-center gap-8px py-24px my-auto justify-between">
+							<ShuffleButton />
 
-						<Slider value={100} />
+							<PlayPrevButton />
 
-						<IconButton icon="volumeHigh" />
+							<PlayTogglePillButton />
+
+							<PlayNextButton />
+
+							<RepeatButton />
+						</div>
+
+						<div class="flex items-center gap-8px">
+							<IconButton icon="volumeMid" />
+
+							<Slider value={100} />
+
+							<IconButton icon="volumeHigh" />
+						</div>
 					</div>
 				</div>
 
-				<div
-					class="min-w-0 mt-auto px-16px border-t border-onSecondaryContainer/20 flex items-center h-72px"
-				>
+				<div class="w-full bg-secondaryContainer px-16px rounded-16px flex items-center h-72px">
 					{#if track}
 						<div class="text-body-lg mr-8px min-w-24px text-center tabular-nums">
 							{player.activeTrackIndex}
