@@ -1,4 +1,4 @@
-export const isMobile = () => {
+export const isMobile = (): boolean => {
 	if (window.navigator.userAgentData) {
 		return navigator.userAgentData.mobile
 	}
@@ -11,7 +11,7 @@ export const wait = (duration: number): Promise<void> =>
 		setTimeout(resolve, duration)
 	})
 
-export const toggleReverseArray = <T>(items: T[], condition = false) =>
+export const toggleReverseArray = <T>(items: T[], condition = false): T[] =>
 	condition ? [...items].reverse() : items
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -91,10 +91,13 @@ export const debounce = <Fn extends (...args: Parameters<Fn>) => ReturnType<Fn>>
 	return debounceFn
 }
 
-export const safeInteger = (num: number, fallback = 0) => {
+export const safeInteger = (num: number, fallback = 0): number => {
 	if (Number.isSafeInteger(num)) {
 		return num
 	}
 
 	return fallback
 }
+
+export const clamp = (num: number, min: number, max: number): number =>
+	Math.min(Math.max(num, min), max)

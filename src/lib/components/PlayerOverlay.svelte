@@ -18,12 +18,12 @@
 
 <div
 	class={clx(
-		'view-transition-pl-container overflow-hidden max-w-900px mx-auto justify-between sm:h-108px rounded-16px sm:rounded-24px bg-secondaryContainer text-onSecondaryContainer',
+		'view-transition-pl-container overflow-hidden max-w-900px mx-auto justify-between sm:h-auto rounded-16px sm:rounded-24px bg-secondaryContainer text-onSecondaryContainer',
 		className,
 	)}
 >
 	<div
-		class="player-content h-full justify-between gap-8px flex flex-col items-center w-full sm:px-16px sm:pt-8px sm:pb-16px"
+		class="player-content h-full justify-between gap-16px flex flex-col items-center w-full sm:px-16px sm:pt-8px sm:pb-16px"
 	>
 		<Timeline class="max-sm:hidden" />
 		<div class="flex sm:grid items-center w-full h-min grow grid-cols-[1fr_max-content_1fr]">

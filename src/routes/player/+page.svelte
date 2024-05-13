@@ -61,31 +61,31 @@
 					class="rounded-16px bg-secondaryContainer view-transition-pl-artwork max-w-300px w-full my-auto"
 				/>
 
-				<div class="bg-surfaceContainerHighest rounded-16px w-full">
-					<div class="h-56px flex flex-col items-center justify-center px-24px rounded-16px">
-						<Timeline />
+				<div class="w-full bg-surfaceContainerHighest px-16px py-8px rounded-16px">
+					<Timeline class="w-full" />
+				</div>
+
+				<div
+					class="bg-secondaryContainer flex flex-col px-16px pb-16px pt-32px gap-24px rounded-16px w-full"
+				>
+					<div class="flex items-center gap-8px my-auto justify-between">
+						<ShuffleButton />
+
+						<PlayPrevButton />
+
+						<PlayTogglePillButton />
+
+						<PlayNextButton />
+
+						<RepeatButton />
 					</div>
 
-					<div class="flex bg-secondaryContainer flex-col p-16px px-16px rounded-16px">
-						<div class="flex items-center gap-8px py-24px my-auto justify-between">
-							<ShuffleButton />
+					<div class="flex items-center gap-8px">
+						<IconButton icon="volumeMid" />
 
-							<PlayPrevButton />
+						<Slider bind:value={player.volume} />
 
-							<PlayTogglePillButton />
-
-							<PlayNextButton />
-
-							<RepeatButton />
-						</div>
-
-						<div class="flex items-center gap-8px">
-							<IconButton icon="volumeMid" />
-
-							<Slider value={100} />
-
-							<IconButton icon="volumeHigh" />
-						</div>
+						<IconButton icon="volumeHigh" />
 					</div>
 				</div>
 
@@ -96,7 +96,7 @@
 						</div>
 
 						<div class="flex flex-col">
-							<div class="truncate text-title-lg">{track.name}</div>
+							<div class="truncate text-body-lg">{track.name}</div>
 							<div class="truncate text-body-md">{track.artists}</div>
 						</div>
 					{/if}
