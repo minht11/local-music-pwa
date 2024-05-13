@@ -156,14 +156,18 @@
 		}
 	}
 
-	::view-transition-group(pl-container) {
+	:global(html:is([data-view-from='/player'], [data-view-to='/player']))::view-transition-group(
+			pl-container
+		) {
 		background: theme('colors.secondaryContainer');
 		animation:
 			player-container-rounded 400ms cubic-bezier(0.2, 0, 0, 1),
 			-ua-view-transition-group-anim-pl-container 400ms cubic-bezier(0.2, 0, 0, 1);
 	}
 
-	::view-transition-image-pair(pl-container) {
+	:global(
+			html:is([data-view-from='/player'], [data-view-to='/player'])
+		)::view-transition-image-pair(pl-container) {
 		display: none;
 	}
 </style>
