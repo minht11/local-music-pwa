@@ -1,9 +1,13 @@
 import { listenForDatabaseChanges } from '$lib/db/channel'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
-import { debounce } from '$lib/helpers/utils'
+import { debounce, shuffleArray } from '$lib/helpers/utils'
 import { useTrack } from '$lib/library/tracks.svelte'
 import { untrack } from 'svelte'
 import { PlayerAudio } from './audio.svelte'
+
+export interface PlayTrackOptions {
+	shuffle?: boolean
+}
 
 export class PlayerStore {
 	#audio = new PlayerAudio()
@@ -126,13 +130,22 @@ export class PlayerStore {
 		this.playTrack(newIndex)
 	}
 
-	playTrack = (trackIndex: number, queue?: readonly number[]) => {
+	playTrack = (trackIndex: number, queue?: readonly number[], options: PlayTrackOptions = {}) => {
 		if (queue) {
 			this.#itemsIdsOriginalOrder = [...queue]
 		}
 
 		if (this.itemsIds.length === 0) {
 			return
+		}
+
+		if (options.shuffle) {
+			const items = [...this.#itemsIdsOriginalOrder]
+			shuffleArray(items)
+
+			this.#itemsIdsOriginalOrder = items
+			this.#itemsIdsShuffled = []
+			this.shuffle = false
 		}
 
 		this.#activeTrackIndex = trackIndex

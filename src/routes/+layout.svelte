@@ -183,14 +183,6 @@
 
 		<h1 class="view-transition-page-title text-title-lg mr-auto">{pageData.title}</h1>
 
-		<!-- <input
-			type="text"
-			placeholder="Search your library"
-			class="rounded-24px h-40px w-240px px-24px ml-auto placeholder:text-onSurface/54 text-body-md bg-onSecondaryContainer/12 focus:outline-none"
-		/> -->
-
-		<!-- <IconButton as="a" href="/search" icon="search" /> -->
-
 		<div class="flex items-center gap-8px bg-surfaceContainerHigh rounded-8px px-8px py-4px">
 			{#if actions}
 				{@render actions()}

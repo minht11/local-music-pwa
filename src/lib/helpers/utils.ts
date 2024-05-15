@@ -101,3 +101,13 @@ export const safeInteger = (num: number, fallback = 0): number => {
 
 export const clamp = (num: number, min: number, max: number): number =>
 	Math.min(Math.max(num, min), max)
+
+export const shuffleArray = <T>(array: T[]) => {
+	for (let i = array.length - 1; i > 0; i -= 1) {
+		const j = Math.floor(Math.random() * (i + 1))
+		const temp = array[i] as T
+
+		array[i] = array[j] as T
+		array[j] = temp
+	}
+}

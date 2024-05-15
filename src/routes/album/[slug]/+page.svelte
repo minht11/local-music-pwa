@@ -14,6 +14,8 @@
 	const tracks = $derived(data.tracksQuery.value)
 
 	const [artwork] = createManagedArtwork(() => album?.image)
+
+	const player = usePlayer()
 </script>
 
 <section class="h-256px px-16px pb-40px mb-24px flex items-center border-b border-outlineVariant">
@@ -27,7 +29,14 @@
 		</div>
 
 		<div class="flex gap-8px mt-16px">
-			<Button kind="toned">
+			<Button
+				kind="toned"
+				onclick={() => {
+					player.playTrack(0, tracks, {
+						shuffle: true,
+					})
+				}}
+			>
 				Shuffle
 				<Icon type="shuffle" />
 			</Button>

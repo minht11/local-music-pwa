@@ -41,7 +41,7 @@
 	}}
 />
 
-<div class="absolute inset-0 pointer-events-auto"></div>
+<div onclick={close} aria-hidden="true" class="absolute inset-0 pointer-events-auto"></div>
 <focus-trap
 	bind:this={menuEl}
 	role="menu"
