@@ -21,17 +21,17 @@
 		"@inlang/paraglide-js": "^1.8.0",
 		"@inlang/paraglide-js-adapter-vite": "^1.2.40",
 		"@sveltejs/adapter-static": "^3.0.1",
-		"@sveltejs/kit": "^2.5.7",
-		"@sveltejs/vite-plugin-svelte": "^4.0.0-next.0",
+		"@sveltejs/kit": "^2.5.8",
+		"@sveltejs/vite-plugin-svelte": "4.0.0-next.1",
 		"@unocss/postcss": "^0.60.2",
 		"@unocss/svelte-scoped": "^0.60.2",
 		"autoprefixer": "^10.4.19",
 		"nanoid": "^5.0.7",
 		"postcss": "^8.4.38",
-		"postcss-nesting": "^12.1.3",
+		"postcss-nesting": "^12.1.4",
 		"prettier": "^3.2.5",
 		"prettier-plugin-svelte": "^3.2.3",
-		"svelte": "5.0.0-next.131",
+		"svelte": "5.0.0-next.134",
 		"svelte-check": "^3.7.1",
 		"terser": "^5.31.0",
 		"typescript": "^5.4.5",
@@ -58,5 +58,5 @@
 	"engines": {
 		"node": "20.11.1"
 	},
-	"packageManager": "pnpm@9.1.0"
+	"packageManager": "pnpm@9.1.1"
 }
