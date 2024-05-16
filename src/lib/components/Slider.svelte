@@ -65,14 +65,14 @@
 
 		let start = getTrackRange(currentTrackWidth, {
 			trackStart: 0,
-			trackEnd: 56,
+			trackEnd: 36,
 			roundedStart: 0,
 			roundedEnd: 8,
 		})
 
 		const end = getTrackRange(currentTrackWidth, {
 			trackStart: trackWidth,
-			trackEnd: trackWidth - 56,
+			trackEnd: trackWidth - 36,
 			roundedStart: 0,
 			roundedEnd: 8,
 		})
@@ -107,12 +107,12 @@
 	>
 		<div
 			class="bar absolute -left-full rounded-r-2px inset-y-0 w-full h-16px my-auto bg-primary"
-			style={getTransform('- 4px')}
+			style={getTransform('- 6px')}
 		></div>
 
 		<div
 			class="bar absolute left-0 top-0 w-full bg-primary/30 h-full pointer-events-none"
-			style={getTransform('+ 8px')}
+			style={getTransform('+ 10px')}
 		></div>
 	</div>
 </div>

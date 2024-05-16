@@ -1,7 +1,6 @@
 import {
 	type CorePalette,
 	Hct,
-	TonalPalette,
 	argbFromHex,
 	blueFromArgb,
 	greenFromArgb,
@@ -62,6 +61,14 @@ export const DEFAULT_THEME_ARGB = /*#__PURE__*/ argbFromHex('#ffdcc4')
 type Rgb = [r: number, g: number, b: number]
 export type ThemePaletteRgb = Record<keyof typeof COLOR_TOKENS_GENERATION_MAP, Rgb>
 
+const createTonalPalette = (hue: number, chroma: number) => ({
+	tone: (tone: number) => Hct.from(hue, chroma, tone).toInt(),
+})
+
+interface TonalPalette {
+	tone(argb: number): number
+}
+
 export const getThemePaletteRgb = (argb: number, isDark: boolean) => {
 	const hct = Hct.fromInt(argb)
 	const hue = hct.hue
@@ -70,12 +77,12 @@ export const getThemePaletteRgb = (argb: number, isDark: boolean) => {
 	// We do not use material-color-utilities CorePalette because of large bundle size
 	// and because its color scheme is bit outdated with the current design guidelines
 	const palette: Record<Tone, TonalPalette> = {
-		a1: TonalPalette.fromHueAndChroma(hue, Math.max(48, chroma)),
-		a2: TonalPalette.fromHueAndChroma(hue, 16),
-		a3: TonalPalette.fromHueAndChroma(hue + 60, 24),
-		n1: TonalPalette.fromHueAndChroma(hue, 6),
-		n2: TonalPalette.fromHueAndChroma(hue, 8),
-		error: TonalPalette.fromHueAndChroma(25, 84),
+		a1: createTonalPalette(hue, Math.max(48, chroma)),
+		a2: createTonalPalette(hue, 16),
+		a3: createTonalPalette(hue + 60, 24),
+		n1: createTonalPalette(hue, 6),
+		n2: createTonalPalette(hue, 8),
+		error: createTonalPalette(25, 84),
 	}
 
 	const entries = Object.entries(COLOR_TOKENS_GENERATION_MAP)
