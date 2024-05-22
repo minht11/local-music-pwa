@@ -3,13 +3,13 @@ declare global {
 		// interface Error {}
 		// interface Locals {}
 		interface PageData {
-			hidePlayerOverlay?: boolean
+			noPlayerOverlay?: boolean
+			noHeader?: boolean
 			hideBackButton?: boolean
 			pageTitle?: string
 			title: string
 			isHandHeldDevice: boolean
 			disableContentPadding?: boolean
-			disableHeaderElevation?: boolean
 		}
 		// interface Platform {}
 	}

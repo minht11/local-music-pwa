@@ -66,14 +66,14 @@
 		let start = getTrackRange(currentTrackWidth, {
 			trackStart: 0,
 			trackEnd: 36,
-			roundedStart: 0,
+			roundedStart: 2,
 			roundedEnd: 8,
 		})
 
 		const end = getTrackRange(currentTrackWidth, {
 			trackStart: trackWidth,
 			trackEnd: trackWidth - 36,
-			roundedStart: 0,
+			roundedStart: 2,
 			roundedEnd: 8,
 		})
 		return `border-radius: ${start}px ${end}px ${end}px ${start}px;`
@@ -89,16 +89,16 @@
 		{disabled}
 		{min}
 		{max}
-		class="h-44px opacity-0 disabled:cursor-auto grow w-full"
+		class="h-44px opacity-0 appearance-none disabled:cursor-auto grow w-full"
 		onpointerdown={() => onSeekStart?.()}
 		onpointerup={() => onSeekEnd?.()}
 	/>
 
 	<div
-		class="handle absolute h-full left-0 top-0 w-[calc(100%-4px)] pointer-events-none mr-8px"
+		class="absolute h-full left-0 top-0 w-[calc(100%-4px)] pointer-events-none mr-8px"
 		style={getTransform()}
 	>
-		<div class="thumb h-full w-4px bg-primary rounded-8px"></div>
+		<div class="thumb h-full w-4px transition-transform bg-primary rounded-8px"></div>
 	</div>
 
 	<div
@@ -106,24 +106,24 @@
 		style={getBarBorder()}
 	>
 		<div
-			class="bar absolute -left-full rounded-r-2px inset-y-0 w-full h-16px my-auto bg-primary"
+			class="absolute -left-full rounded-r-2px inset-y-0 w-full h-16px my-auto bg-primary"
 			style={getTransform('- 6px')}
 		></div>
 
 		<div
-			class="bar absolute left-0 top-0 w-full bg-primary/30 h-full pointer-events-none"
+			class="absolute left-0 top-0 rounded-l-2px w-full bg-primary/30 h-full pointer-events-none"
 			style={getTransform('+ 10px')}
 		></div>
 	</div>
 </div>
 
-<style lang="postcss">
+<style>
 	input:active ~ div > .thumb {
 		transform: scaleX(0.5);
 	}
 
-	.handle,
-	.bar {
-		transform: translateX(var(--current-value));
+	input::-webkit-slider-thumb {
+		height: 44px;
+		cursor: pointer;
 	}
 </style>

@@ -5,8 +5,8 @@ export const load: PageLoad = ({ url }) => {
 
 	return {
 		title: 'Player',
-		hidePlayerOverlay: true,
-		disableHeaderElevation: true,
+		noPlayerOverlay: true,
+		noHeader: true,
 		disableContentPadding: true,
 		isQueueOpen,
 	}

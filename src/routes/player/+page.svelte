@@ -58,7 +58,7 @@
 				<div class="absolute -z-1 h-full w-full inset-0 bg-secondaryContainer/40"></div>
 
 				<PlayerArtwork
-					class="rounded-16px bg-secondaryContainer view-transition-pl-artwork max-w-300px w-full my-auto"
+					class="rounded-16px bg-secondaryContainer view-transition-pl-artwork max-w-300px w-full my-auto ring-1 ring-secondaryContainer"
 				/>
 
 				<div class="w-full bg-surfaceContainerHighest px-16px py-8px rounded-16px">

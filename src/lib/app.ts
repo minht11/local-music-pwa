@@ -5,6 +5,7 @@ export interface RootLayout {
 	actions: Snippet
 }
 
+// TODO. Do we still need this?
 export const useRootLayout = () => {
 	const layout = getContext<RootLayout>('root-layout')
 

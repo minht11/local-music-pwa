@@ -20,7 +20,11 @@
 	const [artworkSrc] = createManagedArtwork(() => artwork)
 </script>
 
-<div use:ripple {...props} class={clx(className, 'flex flex-col interactable rounded-8px')}>
+<div
+	use:ripple
+	{...props}
+	class={clx(className, 'flex flex-col interactable rounded-8px bg-surfaceContainerHigh')}
+>
 	<Artwork src={artworkSrc()} class="rounded-inherit w-full" />
 
 	<div class="flex flex-col items-center overflow-hidden">

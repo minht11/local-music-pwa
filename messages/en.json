@@ -4,6 +4,7 @@
 	"pause": "Pause",
 	"removingSelectedTracks": "Removing selected {count} tracks",
 	"successfullyRemovedTracks": "Successfully removed {count} tracks",
+	"library": "Library",
 	"tracks": "Tracks",
 	"albums": "Albums",
 	"artists": "Artists",

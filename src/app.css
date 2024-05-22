@@ -10,18 +10,17 @@ html {
 	/* scrollbar-gutter: stable; */
 	scroll-padding-top: var(--app-header-height);
 	scroll-padding-bottom: var(--bottom-overlay-height);
-	--app-header-height: 56px;
+	--app-header-height: 64px;
 	@apply text-body-md bg-background text-onBackground;
-}
-
-@screen sm {
-	html {
-		--app-header-height: 64px;
-	}
 }
 
 html.dark {
 	color-scheme: dark;
+}
+
+* {
+	scrollbar-width: thin;
+	scrollbar-color: theme('colors.secondary') transparent;
 }
 
 html,
