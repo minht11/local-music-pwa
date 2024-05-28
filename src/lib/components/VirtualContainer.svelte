@@ -54,10 +54,8 @@
 			lanes,
 		}
 
-		if (!virtualizer || $virtualizer?.scrollElement !== scrollTarget) {
+		if (!virtualizer || untrack(() => $virtualizer?.scrollElement !== scrollTarget)) {
 			type CommonOptions = Parameters<typeof createVirtualizer>[0]
-
-			console.log('Creating virtualizer', scrollTarget)
 
 			const commonOptions: CommonOptions = {
 				...baseOptions,
@@ -173,10 +171,6 @@
 		})
 	}
 </script>
-
-<div>
-	HAAA {$virtualizer?.scrollElement == window}
-</div>
 
 <div
 	bind:this={container}

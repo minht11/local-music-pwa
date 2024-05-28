@@ -1,11 +1,7 @@
 <script lang="ts">
-	import { goto } from '$app/navigation'
 	import { ripple } from '$lib/actions/ripple.ts'
 	import IconButton from '$lib/components/IconButton.svelte'
-	import Separator from '$lib/components/Separator.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
-	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
-	import { debounce } from '$lib/helpers/utils.ts'
 	import type { PageData } from './$types.ts'
 
 	interface Props {
@@ -15,12 +11,6 @@
 	const { data }: Props = $props()
 
 	const { store } = data
-
-	const searchHandler = debounce((e: InputEvent) => {
-		const term = (e.target as HTMLInputElement).value
-
-		store.searchTerm = term
-	}, 300)
 
 	const menu = useMenu()
 
@@ -41,35 +31,6 @@
 			},
 		})
 	}
-
-	const generalMenuHandler = (e: MouseEvent) => {
-		const menuItems = [
-			{
-				label: 'Settings',
-				action: () => {
-					goto('/settings')
-				},
-			},
-			{
-				label: 'About',
-				action: () => {
-					goto('/about')
-				},
-			},
-		]
-
-		menu.showFromEvent(e, menuItems, {
-			width: 200,
-			anchor: true,
-			preferredAlignment: {
-				vertical: 'top',
-				horizontal: 'right',
-			},
-		})
-	}
-
-	// const isWiderLayoutMedia = useMediaQuery('(min-width: 640px)')
-	// const isWiderLayout = $derived(isWiderLayoutMedia.value)
 </script>
 
 {#snippet sortActions()}
@@ -93,25 +54,10 @@
 	/>
 {/snippet}
 
-<div
-	class="pointer-events-auto sticky top-8px z-10 bg-surfaceContainerLowest flex w-full rounded-24px px-8px gap-8px items-center ml-auto"
->
-	<input
-		value={store.searchTerm}
-		type="text"
-		placeholder="Search tracks"
-		class="h-48px w-240px pl-8px grow placeholder:text-onSurface/54 text-body-md bg-transparent focus:outline-none"
-		oninput={(e) => searchHandler(e as unknown as InputEvent)}
-	/>
-
-	<Separator vertical class="h-24px my-auto" />
-
-	<IconButton ariaLabel="Application menu" icon="moreVertical" onclick={generalMenuHandler} />
-</div>
-<!-- <div class="mt-64px"></div> -->
-
-<!-- {#if !isWiderLayout}
-	<div class="flex items-center ml-auto pb-16px">
+<div class="mx-auto w-full max-w-540px mb-24px -mt-24px">
+	<div
+		class="flex items-center w-max ml-auto bg-surfaceContainerHigh rounded-t-8px rounded-b-16px pt-24px"
+	>
 		{@render sortActions()}
 	</div>
-{/if} -->
+</div>

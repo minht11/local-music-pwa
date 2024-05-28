@@ -110,7 +110,7 @@
 		const module = await import('$lib/theme.ts')
 
 		if (color) {
-			module.setThemeCssVariables(color, true)
+			module.setThemeCssVariables(color, false)
 		} else {
 			module.clearThemeCssVariables()
 		}
@@ -193,18 +193,6 @@
 {#key pageData.rootLayoutKey?.() ?? $page.url.pathname}
 	{@render children()}
 {/key}
-
-<!-- {#key data.pathname} -->
-<!-- <div
-		class={clx(
-			'flex flex-col mx-auto w-full max-w-1280px grow',
-			!$page.data.noPlayerOverlay && 'pb-[--bottom-overlay-height]',
-			!$page.data.disableContentPadding && 'px-8px pt-16px',
-		)}
-	> -->
-<!-- {@render children()} -->
-<!-- </div> -->
-<!-- {/key} -->
 
 <div
 	class="fixed flex flex-col bottom-0 overflow-hidden inset-x-0 pointer-events-none [&>*]:pointer-events-auto"

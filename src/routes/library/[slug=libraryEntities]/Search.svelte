@@ -49,7 +49,7 @@
 </script>
 
 <div
-	class="sticky top-8px my-24px z-1 bg-surfaceContainerHigh flex w-full rounded-24px px-8px gap-8px items-center ml-auto max-w-540px mx-auto"
+	class="sticky top-8px mt-24px z-1 bg-surfaceContainerHighest flex w-full rounded-24px px-8px gap-8px items-center ml-auto max-w-540px mx-auto"
 >
 	<input
 		value={store.searchTerm}

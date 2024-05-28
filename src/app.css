@@ -11,7 +11,7 @@ html {
 	scroll-padding-top: var(--app-header-height);
 	scroll-padding-bottom: var(--bottom-overlay-height);
 	--app-header-height: 64px;
-	@apply text-body-md bg-background text-onBackground;
+	@apply text-body-md bg-surface text-onSurface;
 }
 
 html.dark {
@@ -20,7 +20,7 @@ html.dark {
 
 * {
 	scrollbar-width: thin;
-	scrollbar-color: theme('colors.secondary') transparent;
+	scrollbar-color: theme('colors.secondary/0.3') transparent;
 }
 
 html,

@@ -9,6 +9,7 @@
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.js'
 	import type { LayoutParams } from './$types'
+	import HeaderActions from './HeaderActions.svelte'
 	import Search from './Search.svelte'
 
 	const { data, children } = $props()
@@ -58,8 +59,6 @@
 		const isWide = isWideLayout.value
 		const hasEntityId = !!$page.params.id
 
-		console.log('Checkkk', isWide)
-
 		if (slug === 'tracks') {
 			return 'list'
 		}
@@ -78,6 +77,8 @@
 	const layout = useRootLayout()
 	// @ts-expect-error snippet is defined
 	layout.bottom = layoutBottom
+
+	console.log('layoutMode', $page.url.pathname)
 </script>
 
 {#snippet navItemsSnippet(className: string)}
@@ -109,7 +110,7 @@
 	{/if}
 {/snippet}
 
-{#if isWideLayout.value}
+{#if !(layoutMode === 'details' && !isWideLayout.value)}
 	<div
 		class={clx(
 			'gap-8px fixed z-1 desktop-sidebar flex-col w-max h-max mt-64px',
@@ -120,11 +121,17 @@
 	</div>
 {/if}
 
-<ListDetailsLayout mode={layoutMode} class="max-w-[var(--library-max-width)] w-full mx-auto grow">
+<ListDetailsLayout
+	mode={layoutMode}
+	gap={12}
+	class="max-w-[var(--library-max-width)] w-full mx-auto grow"
+>
 	{#snippet list(mode)}
-		<div class={clx(mode === 'both' && 'pr-24px', 'pl-96px')}>
+		<div class={clx(mode === 'both' && 'pr-12px', 'pl-96px')}>
 			<div class={clx(mode === 'both' && 'w-400px')}>
 				<Search {data} />
+
+				<HeaderActions {data} />
 
 				<div class={clx('w-full grow flex flex-col')}>
 					{#if store.searchTerm && itemsIds.length === 0}
@@ -140,9 +147,7 @@
 	{/snippet}
 
 	{#snippet details()}
-		<div
-			class="h-full rounded-24px pointer-events-auto bg-surfaceContainerLowest mt-24px flex flex-col"
-		>
+		<div class="h-full rounded-24px pointer-events-auto bg-surfaceContainer mt-24px flex flex-col">
 			{#key $page.url.pathname}
 				{#if children}
 					{@render children()}
