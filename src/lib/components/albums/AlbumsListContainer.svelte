@@ -22,7 +22,7 @@
 
 	let containerWidth = $state(0)
 
-	const gap = 16
+	const gap = 8
 
 	const sizes = $derived.by(() => {
 		const minWidth = containerWidth > 600 ? 180 : 140
@@ -61,7 +61,7 @@
 					transform: translateY({item.start}px);
 				"
 			onclick={() => {
-				goto(`/album/${albumId}`)
+				goto(`/library/albums/${albumId}`)
 			}}
 		/>
 	{/snippet}

@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
-	import { ripple } from '$lib/actions/ripple'
+	import { ripple } from '$lib/actions/ripple.ts'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
-	import { debounce } from '$lib/helpers/utils'
-	import type { PageData } from './$types'
+	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
+	import { debounce } from '$lib/helpers/utils.ts'
+	import type { PageData } from './$types.ts'
 
 	interface Props {
 		data: PageData
@@ -66,37 +67,51 @@
 			},
 		})
 	}
+
+	// const isWiderLayoutMedia = useMediaQuery('(min-width: 640px)')
+	// const isWiderLayout = $derived(isWiderLayoutMedia.value)
 </script>
 
-<input
-	value={store.searchTerm}
-	type="text"
-	placeholder="Search tracks"
-	class="h-40px w-240px pl-8px placeholder:text-onSurface/54 text-body-md bg-transparent focus:outline-none"
-	oninput={(e) => searchHandler(e as unknown as InputEvent)}
-/>
+{#snippet sortActions()}
+	<button
+		use:ripple
+		class="flex interactable w-96px rounded-8px h-40px pl-12px pr-4px gap-4px items-center text-label-md"
+		onclick={sortMenuHandler}
+	>
+		{store.sortBy?.name}
 
-<Separator vertical class="h-24px my-auto" />
+		<Icon type="menuDown" class="h-16px w-16px ml-auto" />
+	</button>
 
-<button
-	use:ripple
-	class="flex interactable w-96px rounded-8px h-40px pl-12px pr-4px gap-4px items-center text-label-md"
-	onclick={sortMenuHandler}
+	<IconButton
+		class={clx(store.order === 'desc' && 'rotate-180', 'transition-transform')}
+		icon="sortAscending"
+		ariaLabel="Toggle sort order"
+		onclick={() => {
+			store.order = store.order === 'asc' ? 'desc' : 'asc'
+		}}
+	/>
+{/snippet}
+
+<div
+	class="pointer-events-auto sticky top-8px z-10 bg-surfaceContainerLowest flex w-full rounded-24px px-8px gap-8px items-center ml-auto"
 >
-	{store.sortBy?.name}
+	<input
+		value={store.searchTerm}
+		type="text"
+		placeholder="Search tracks"
+		class="h-48px w-240px pl-8px grow placeholder:text-onSurface/54 text-body-md bg-transparent focus:outline-none"
+		oninput={(e) => searchHandler(e as unknown as InputEvent)}
+	/>
 
-	<Icon type="menuDown" class="h-16px w-16px ml-auto" />
-</button>
+	<Separator vertical class="h-24px my-auto" />
 
-<IconButton
-	class={clx(store.order === 'desc' && 'rotate-180', 'transition-transform')}
-	icon="sortAscending"
-	ariaLabel="Toggle sort order"
-	onclick={() => {
-		store.order = store.order === 'asc' ? 'desc' : 'asc'
-	}}
-/>
+	<IconButton ariaLabel="Application menu" icon="moreVertical" onclick={generalMenuHandler} />
+</div>
+<!-- <div class="mt-64px"></div> -->
 
-<Separator vertical class="h-24px my-auto" />
-
-<IconButton ariaLabel="Application menu" icon="moreVertical" onclick={generalMenuHandler} />
+<!-- {#if !isWiderLayout}
+	<div class="flex items-center ml-auto pb-16px">
+		{@render sortActions()}
+	</div>
+{/if} -->

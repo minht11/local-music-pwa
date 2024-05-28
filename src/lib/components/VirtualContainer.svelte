@@ -3,10 +3,13 @@
 	import {
 		type SvelteVirtualizer,
 		type VirtualItem,
+		type VirtualizerOptions,
+		createVirtualizer,
 		createWindowVirtualizer,
 	} from '@tanstack/svelte-virtual'
 	import { untrack } from 'svelte'
 	import type { Readable } from 'svelte/motion'
+	import { useScrollTarget } from './ScrollContainer.svelte'
 
 	interface Props {
 		count: number
@@ -29,11 +32,17 @@
 		offsetWidth = $bindable(0),
 	}: Props = $props()
 
+	const scrollContainer = useScrollTarget()
+
 	let focusIndex = $state(-1)
-	let virtualizer: Readable<SvelteVirtualizer<Window, Element>> | undefined
+	let virtualizer:
+		| Readable<SvelteVirtualizer<Element, Element> | SvelteVirtualizer<Window, Element>>
+		| undefined
 
 	$effect(() => {
-		if (!virtualizer && lanes === 0) {
+		const scrollTarget = scrollContainer.scrollTarget
+
+		if ((!virtualizer && lanes === 0) || !scrollTarget) {
 			return
 		}
 
@@ -45,11 +54,16 @@
 			lanes,
 		}
 
-		if (!virtualizer) {
-			virtualizer = createWindowVirtualizer({
+		if (!virtualizer || $virtualizer?.scrollElement !== scrollTarget) {
+			type CommonOptions = Parameters<typeof createVirtualizer>[0]
+
+			console.log('Creating virtualizer', scrollTarget)
+
+			const commonOptions: CommonOptions = {
 				...baseOptions,
 				estimateSize: () => itemSize,
 				overscan: 10,
+				getScrollElement: () => scrollTarget as Element,
 				rangeExtractor: (range) => {
 					const start = Math.max(range.startIndex - range.overscan, 0)
 					const initialEnd = range.endIndex + range.overscan
@@ -71,7 +85,18 @@
 
 					return arr
 				},
-			})
+			}
+
+			if (scrollTarget === window) {
+				virtualizer = createWindowVirtualizer(
+					commonOptions as unknown as VirtualizerOptions<Window, Element>,
+				)
+			} else {
+				virtualizer = createVirtualizer({
+					...commonOptions,
+					getScrollElement: () => scrollTarget as Element,
+				})
+			}
 		}
 
 		untrack(() => {
@@ -148,6 +173,10 @@
 		})
 	}
 </script>
+
+<div>
+	HAAA {$virtualizer?.scrollElement == window}
+</div>
 
 <div
 	bind:this={container}

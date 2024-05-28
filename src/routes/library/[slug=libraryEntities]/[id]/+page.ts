@@ -1,11 +1,16 @@
-import { defineListQuery, definePageQuery } from '$lib/db/db-fast.svelte'
-import { getDB, getValue } from '$lib/db/get-db'
+import { defineListQuery, definePageQuery } from '$lib/db/db-fast.svelte.ts'
+import { getDB, getValue } from '$lib/db/get-db.ts'
+import { preloadTracks } from '$lib/library/tracks.svelte.ts'
 import { error } from '@sveltejs/kit'
 import invariant from 'tiny-invariant'
-import type { PageLoad } from './$types'
+import type { PageLoad } from './$types.ts'
 
 export const load: PageLoad = async (event) => {
-	const id = Number(event.params.slug)
+	if (event.params.slug === 'tracks') {
+		error(404)
+	}
+
+	const id = Number(event.params.id)
 
 	const albumQuery = definePageQuery({
 		key: () => ['albums', id],
@@ -24,7 +29,7 @@ export const load: PageLoad = async (event) => {
 	const album = await albumQuery.preload()
 
 	if (!album) {
-		error(404, 'Not found')
+		error(404)
 	}
 
 	const tracksQuery = defineListQuery(() => 'albums', {
@@ -37,12 +42,12 @@ export const load: PageLoad = async (event) => {
 		},
 	})
 
-	await tracksQuery.preload()
+	const trackIds = await tracksQuery.preload()
+	await preloadTracks(trackIds, 10)
 
 	return {
 		title: 'Album',
 		albumQuery,
 		tracksQuery,
-		// pageTitle: `Album - ${store.title}`,
 	}
 }

@@ -10,15 +10,17 @@
 
 	initPageQueries(data)
 
-	const album = $derived(data.albumQuery.value)
-	const tracks = $derived(data.tracksQuery.value)
+	const { albumQuery, tracksQuery } = data
 
-	const [artwork] = createManagedArtwork(() => album?.image)
+	const album = $derived(albumQuery.value)
+	const tracks = $derived(tracksQuery.value)
+
+	const [artwork] = createManagedArtwork(() => album.image)
 
 	const player = usePlayer()
 </script>
 
-<section class="h-256px px-16px pb-40px mb-24px flex items-center border-b border-outlineVariant">
+<section class="h-256px p-16px pb-40px mb-24px flex items-center border-b border-outlineVariant">
 	<Artwork src={artwork()} class="rounded-8px h-full" />
 
 	<div class="pl-24px flex flex-col">

@@ -1,5 +1,6 @@
 import { type DBChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
 import { createQuery, deleteCacheValue } from '$lib/db/db-fast.svelte'
+import type { Track } from '$lib/db/entities'
 import { type AppDB, type AppStoreNames, getDB, getValue } from '$lib/db/get-db'
 import type { IDBPTransaction, IndexNames } from 'idb'
 import invariant from 'tiny-invariant'
@@ -143,6 +144,21 @@ export const createLibraryEntityQuery =
 export const useTrack = createLibraryEntityQuery('tracks')
 export const useAlbum = createLibraryEntityQuery('albums')
 export const useArtist = createLibraryEntityQuery('artists')
+
+export const preloadTracks = async (ids: number[], count: number) => {
+	const db = await getDB()
+	const results: Track[] = []
+
+	let index = 0
+	for (const id of ids) {
+		if (results.length >= count) {
+			break
+		}
+
+		await db.get('tracks', id)
+		index += 1
+	}
+}
 
 export const getAlbumByTrackId = async (albumName?: string) => {
 	const db = await getDB()

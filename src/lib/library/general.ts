@@ -45,7 +45,7 @@ export const getEntityIds = async <StoreName extends LibraryEntityStoreName>(
 	const db = await getDB()
 	const storeIndex = db.transaction(store).store.index(options.sort)
 
-	console.log('storeIndex', options.sort, storeIndex, options.order)
+	// console.log('storeIndex', options.sort, storeIndex, options.order)
 	const { searchTerm, searchFn } = options
 
 	let data: number[]

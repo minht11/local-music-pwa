@@ -8,17 +8,9 @@
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 	import { wait } from '$lib/helpers/utils'
 	import { providePlayer } from '$lib/stores/player/store.ts'
-	import { clearThemeCssVariables, setThemeCssVariables } from '$lib/theme'
 	import { setContext } from 'svelte'
-	import invariant from 'tiny-invariant'
-	import type { LayoutData } from './$types'
 
-	interface Props {
-		data: LayoutData
-		children: Snippet
-	}
-
-	const { data, children }: Props = $props()
+	const { children } = $props()
 
 	const pageData = $derived($page.data)
 
@@ -35,9 +27,9 @@
 	)
 
 	$effect(() => {
-		invariant(scrollThresholdEl, 'scrollThresholdEl is undefined')
-
-		io.observe(scrollThresholdEl)
+		if (scrollThresholdEl) {
+			io.observe(scrollThresholdEl)
+		}
 
 		return () => {
 			io.disconnect()
@@ -104,7 +96,7 @@
 	})
 
 	$effect.pre(() => {
-		data.pathname
+		$page.url.pathname
 
 		return () => {
 			actions = undefined
@@ -114,22 +106,26 @@
 
 	const player = providePlayer()
 
+	const updateStyles = async (color: number | undefined) => {
+		const module = await import('$lib/theme.ts')
+
+		if (color) {
+			module.setThemeCssVariables(color, true)
+		} else {
+			module.clearThemeCssVariables()
+		}
+	}
+
 	let initial = true
-	const primaryThemeColor = $derived(player.activeTrack?.primaryColor)
 	$effect(() => {
-		const color = primaryThemeColor
+		const color = player.activeTrack?.primaryColor
 
 		if (initial) {
 			initial = false
 			return
 		}
 
-		// TODO. Import this lazy
-		if (color) {
-			setThemeCssVariables(color, true)
-		} else {
-			clearThemeCssVariables()
-		}
+		updateStyles(color)
 	})
 
 	let overlayContentHeight = $state(0)
@@ -166,45 +162,49 @@
 	</div>
 {/if}
 
-<header
-	class={clx(
-		'fixed inset-x-0 top-0 z-10 flex h-[--app-header-height] flex-shrink-0',
-		isScrolled && !pageData.disableHeaderElevation && 'bg-surfaceContainerHigh bg-surface',
-	)}
->
-	<div class="max-w-1280px flex mx-auto w-full items-center pl-24px pr-8px">
-		{#if !$page.data.hideBackButton}
-			<IconButton
-				icon="backArrow"
-				class="view-transition-page-back-btn mr-8px"
-				onclick={handleBackClick}
-			/>
-		{/if}
-
-		<h1 class="view-transition-page-title text-title-lg mr-auto">{pageData.title}</h1>
-
-		<div class="flex items-center gap-8px bg-surfaceContainerHigh rounded-8px px-8px py-4px">
-			{#if actions}
-				{@render actions()}
-			{/if}
-		</div>
-	</div>
-</header>
-
-<div bind:this={scrollThresholdEl} class="h-0 w-full" inert></div>
-
-{#key data.pathname}
-	<div
+{#if !pageData.noHeader}
+	<header
 		class={clx(
-			// mt-[--app-header-height]
-			'flex flex-col mx-auto w-full max-w-1280px grow',
-			$page.data.hidePlayerOverlay ? '' : 'pb-[--bottom-overlay-height]',
-			!$page.data.disableContentPadding && 'px-8px pt-16px',
+			'fixed inset-x-0 top-0 z-10 flex h-[--app-header-height] flex-shrink-0',
+			isScrolled && 'bg-surfaceContainerHigh bg-surface',
 		)}
 	>
-		{@render children()}
-	</div>
+		<div class="max-w-1280px flex mx-auto w-full items-center pl-24px pr-8px">
+			{#if !$page.data.hideBackButton}
+				<IconButton
+					icon="backArrow"
+					class="view-transition-page-back-btn mr-8px"
+					onclick={handleBackClick}
+				/>
+			{/if}
+
+			<h1 class="view-transition-page-title text-title-lg mr-auto">{pageData.title}</h1>
+
+			<div class="flex items-center gap-8px">
+				{#if actions}
+					{@render actions()}
+				{/if}
+			</div>
+		</div>
+	</header>
+	<div bind:this={scrollThresholdEl} class="h-0 w-full" inert></div>
+{/if}
+
+{#key pageData.rootLayoutKey?.() ?? $page.url.pathname}
+	{@render children()}
 {/key}
+
+<!-- {#key data.pathname} -->
+<!-- <div
+		class={clx(
+			'flex flex-col mx-auto w-full max-w-1280px grow',
+			!$page.data.noPlayerOverlay && 'pb-[--bottom-overlay-height]',
+			!$page.data.disableContentPadding && 'px-8px pt-16px',
+		)}
+	> -->
+<!-- {@render children()} -->
+<!-- </div> -->
+<!-- {/key} -->
 
 <div
 	class="fixed flex flex-col bottom-0 overflow-hidden inset-x-0 pointer-events-none [&>*]:pointer-events-auto"
@@ -214,7 +214,7 @@
 			<SnackbarRenderer />
 		</div>
 
-		{#if !$page.data.hidePlayerOverlay}
+		{#if !$page.data.noPlayerOverlay}
 			<div class="px-8px pb-8px w-full">
 				<PlayerOverlay />
 			</div>
@@ -253,97 +253,4 @@
 			transform: scaleX(0.8);
 		}
 	}
-
-	/* :global(.interactable) {
-		position: relative;
-		overflow: hidden;
-		-moz-appearance: none;
-		-webkit-appearance: none;
-		appearance: none;
-		border: none;
-		outline: none;
-		text-decoration: none;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		z-index: 0;
-	}
-
-	:global(.interactable::after) {
-		display: none;
-		content: '';
-		position: absolute;
-		height: 100%;
-		width: 100%;
-		left: 0;
-		top: 0;
-		background: currentColor;
-		z-index: -1;
-		pointer-events: none;
-	}
-
-	@media (any-hover: hover) {
-		:global(.interactable:hover::after) {
-			display: block;
-			opacity: 0.08;
-		}
-
-		:global(.interactable[disabled]::after) {
-			display: none;
-		}
-	}
-
-	:global(.interactable:is(:focus-visible)),
-	:global(.interactable:hover:focus-visible) {
-		outline: 2px solid theme('colors.onSurface');
-		outline-offset: -2px;
-	}
-
-	:global(.interactable:focus-visible::after) {
-		display: block;
-		opacity: 0.12;
-	} */
-
-	/* @keyframes page-enter-scale {
-		from {
-			transform: scale(0.8, 0.8);
-		}
-	}
-
-	@keyframes page-exit-scale {
-		to {
-			transform: scale(0.8, 0.8);
-		}
-	}
-
-	@keyframes fade-out {
-		to {
-			opacity: 0;
-		}
-	}
-
-	@keyframes fade-in {
-		from {
-			opacity: 0;
-		}
-	}
-
-	:root::view-transition-image-pair(root) {
-		isolation: auto;
-	}
-
-	:root::view-transition-old(root),
-	:root::view-transition-new(root) {
-		mix-blend-mode: normal;
-	}
-
-	:root::view-transition-old(root) {
-		animation: fade-out 90ms cubic-bezier(0.4, 0, 1, 1) forwards;
-	}
-
-	:root::view-transition-new(root) {
-		animation:
-			fade-in 210ms 90ms cubic-bezier(0, 0, 0.2, 1) backwards,
-			page-enter-scale 300ms cubic-bezier(0.4, 0, 0.2, 1);
-	} */
 </style>

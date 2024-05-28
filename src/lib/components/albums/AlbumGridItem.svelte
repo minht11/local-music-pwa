@@ -19,7 +19,7 @@
 	const album = $derived(data.value)
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-tabindex a11y-no-noninteractive-element-interactions -->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <GridItem
 	{style}
 	{tabindex}

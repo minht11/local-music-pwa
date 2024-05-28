@@ -20,6 +20,10 @@ export const getCacheValue = <const K extends QueryKey, R>(key: K) =>
 export const deleteCacheValue = <const K extends QueryKey>(key: K) =>
 	cache.delete(normalizeKey(key))
 
+export const setCacheValue = <const K extends QueryKey, R>(key: K, value: R) => {
+	cache.setValue(normalizeKey(key), value)
+}
+
 export type QueryStatus = 'loading' | 'loaded' | 'error'
 
 type QueryBaseState = {

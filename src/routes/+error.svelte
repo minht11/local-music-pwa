@@ -2,11 +2,6 @@
 	import { page } from '$app/stores'
 	import Button from '$lib/components/Button.svelte'
 
-	const { ...p } = $props()
-
-	$inspect(p)
-	$inspect($page)
-
 	const is404 = $derived($page.status === 404)
 </script>
 
