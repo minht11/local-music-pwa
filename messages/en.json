@@ -14,5 +14,11 @@
 	"replace": "Replace",
 	"replaceDirectoryQ": "Replace directory?",
 	"replaceDirectoryExplanation": "The directory {newDir} you're adding is already a parent of {existingDir} which already is in your Library.\n No changes will occur for existing tracks.",
-	"directoryIsIncludedInParent": "New \"{newDir}\" is subdirectory of \"{existingDir}\" which is already in your Library. You do not need to add it again."
+	"directoryIsIncludedInParent": "New \"{newDir}\" is subdirectory of \"{existingDir}\" which is already in your Library. You do not need to add it again.",
+	"settingsThemeAuto": "Auto",
+	"settingsThemeLight": "Light",
+	"settingsThemeDark": "Dark",
+	"settingsAppearance": "Appearance",
+	"settingsApplicationTheme": "Application theme",
+	"settingPickColorFromArtwork": "Automatically pick color from currently playing song artwork"
 }

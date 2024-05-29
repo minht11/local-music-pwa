@@ -27,7 +27,7 @@
 	}
 </script>
 
-<script>
+<script lang="ts">
 	interface Props {
 		class?: string
 		children: Snippet

@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { dev } from '$app/environment'
 	import Button from '$lib/components/Button.svelte'
 	import Dialog from '$lib/components/Dialog.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
+	import Select from '$lib/components/Select.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import Spinner from '$lib/components/Spinner.svelte'
 	import Switch from '$lib/components/Switch.svelte'
@@ -10,6 +12,7 @@
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import { initPageQueries } from '$lib/db/db-fast.svelte.ts'
 	import type { Directory } from '$lib/db/entities.ts'
+	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 	import {
 		checkNewDirectoryStatus,
 		directoriesStore,
@@ -21,6 +24,8 @@
 	const { data } = $props()
 
 	initPageQueries(data)
+
+	const mainStore = useMainStore()
 
 	const count = $derived(data.countQuery.value)
 	const directories = $derived(data.directoriesQuery.value)
@@ -94,6 +99,21 @@
 	}
 
 	let compactLayout = $state(false)
+
+	const themeOptions = [
+		{
+			name: m.settingsThemeAuto(),
+			value: 'auto',
+		},
+		{
+			name: m.settingsThemeDark(),
+			value: 'dark',
+		},
+		{
+			name: m.settingsThemeLight(),
+			value: 'light',
+		},
+	]
 </script>
 
 <section class="card mx-auto w-full max-w-[900px] mt-64px">
@@ -199,27 +219,31 @@
 	</div>
 </section>
 
-<section class="card mx-auto w-full max-w-[900px] mt-24px text-body-lg p-16px">
-	<div>Development panel</div>
+{#if dev}
+	<section class="card mx-auto w-full max-w-[900px] mt-24px text-body-lg p-16px">
+		<div>Development panel</div>
 
-	<div class="flex gap-8px mt-16px">
-		<Button kind="toned">Import directory handle</Button>
-		<Button kind="toned">Import file handle</Button>
-		<Button kind="toned">Import file</Button>
-	</div>
-</section>
+		<div class="flex gap-8px mt-16px">
+			<Button kind="toned">Import directory handle</Button>
+			<Button kind="toned">Import file handle</Button>
+			<Button kind="toned">Import file</Button>
+		</div>
+	</section>
+{/if}
 
 <section class="card mx-auto w-full max-w-[900px] mt-24px text-body-lg">
-	<div class="text-title-sm px-16px pt-16px">Appearance</div>
+	<div class="text-title-sm px-16px pt-16px">{m.settingsAppearance()}</div>
 
 	<div class="flex justify-between items-center p-16px">
-		<div>Application theme</div>
+		<div>{m.settingsApplicationTheme()}</div>
+
+		<Select items={themeOptions} key="value" labelKey="name" bind:selected={mainStore.theme} />
 	</div>
 
 	<div class="flex justify-between items-center p-16px">
-		<div>Automatically pick color from currently playing song</div>
+		<div>{m.settingPickColorFromArtwork()}</div>
 
-		<Switch bind:checked={compactLayout} />
+		<Switch bind:checked={mainStore.pickColorFromArtwork} />
 	</div>
 
 	<div class="flex justify-between items-center p-16px">

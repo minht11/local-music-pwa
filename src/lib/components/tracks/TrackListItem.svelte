@@ -47,7 +47,11 @@
 	onclick={() => onclick?.(track!)}
 >
 	<div role="cell" class="track-item grow gap-20px items-center">
-		<Artwork src={artwork()} alt={track?.name} class={clx('h-40px w-40px rounded-4px')} />
+		<Artwork
+			src={artwork()}
+			alt={track?.name}
+			class={clx('h-40px w-40px rounded-4px', data.loading && 'opacity-50')}
+		/>
 
 		{#if data.loading === true}
 			<div>

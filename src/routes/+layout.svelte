@@ -7,6 +7,7 @@
 	import MenuRenderer, { initGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 	import { wait } from '$lib/helpers/utils'
+	import { provideMainStore } from '$lib/stores/main-store.svelte'
 	import { providePlayer } from '$lib/stores/player/store.ts'
 	import { setContext } from 'svelte'
 
@@ -15,6 +16,7 @@
 	const pageData = $derived($page.data)
 
 	initGlobalMenu()
+	const mainStore = provideMainStore()
 
 	let scrollThresholdEl = $state<HTMLDivElement>()
 	let isScrolled = $state(false)
@@ -110,7 +112,7 @@
 		const module = await import('$lib/theme.ts')
 
 		if (color) {
-			module.setThemeCssVariables(color, false)
+			module.setThemeCssVariables(color, mainStore.themeIsDark)
 		} else {
 			module.clearThemeCssVariables()
 		}
@@ -118,7 +120,7 @@
 
 	let initial = true
 	$effect(() => {
-		const color = player.activeTrack?.primaryColor
+		const color = mainStore.pickColorFromArtwork ? player.activeTrack?.primaryColor : undefined
 
 		if (initial) {
 			initial = false
@@ -126,6 +128,10 @@
 		}
 
 		updateStyles(color)
+	})
+
+	$effect.pre(() => {
+		document.documentElement.classList.toggle('dark', mainStore.themeIsDark)
 	})
 
 	let overlayContentHeight = $state(0)
