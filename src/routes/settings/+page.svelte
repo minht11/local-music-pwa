@@ -237,7 +237,13 @@
 	<div class="flex justify-between items-center p-16px">
 		<div>{m.settingsApplicationTheme()}</div>
 
-		<Select items={themeOptions} key="value" labelKey="name" bind:selected={mainStore.theme} />
+		<Select
+			items={themeOptions}
+			key="value"
+			labelKey="name"
+			bind:selected={mainStore.theme}
+			class="w-200px"
+		/>
 	</div>
 
 	<div class="flex justify-between items-center p-16px">
@@ -253,17 +259,6 @@
 	</div>
 
 	<Separator />
-
-	<div class="flex justify-between items-center p-16px">
-		<div class="flex flex-col justify-center">
-			<div>Compact layout</div>
-			<div class="text-body-sm text-onSurface/54">
-				Some elements such as lists will be more compact.
-			</div>
-		</div>
-
-		<Switch bind:checked={compactLayout} />
-	</div>
 
 	<div class="flex justify-between items-center p-16px">
 		<div>Display volume slider inside full player screen</div>

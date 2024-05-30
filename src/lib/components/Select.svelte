@@ -2,6 +2,7 @@
 	import { ripple } from '$lib/actions/ripple'
 	import { computePosition, flip, shift } from '@floating-ui/dom'
 	import { nanoid } from 'nanoid'
+	import Icon from './icon/Icon.svelte'
 
 	export interface SelectProps<T, Key extends keyof T, LabelKey extends keyof T> {
 		items: T[]
@@ -53,7 +54,7 @@
 <button
 	bind:this={target}
 	class={clx(
-		'border border-outlineVariant h-40px rounded-4px px-16px appearance-none relative overflow-hidden',
+		'border border-outlineVariant h-40px rounded-4px pl-16px pr-8px gap-8px appearance-none relative overflow-hidden flex items-center',
 		className,
 	)}
 	use:ripple
@@ -68,6 +69,8 @@
 	{:else}
 		Select item
 	{/if}
+
+	<Icon type="menuDown" class="size-20px ml-auto" />
 </button>
 
 <div

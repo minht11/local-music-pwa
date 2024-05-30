@@ -34,7 +34,7 @@
 			}}
 		/>
 	{:else}
-		<Icon type="musicNote" class="m-auto [--icon-size:60%]" />
+		<Icon type="musicNote" class="m-auto size-60%" />
 	{/if}
 
 	{#if children}
