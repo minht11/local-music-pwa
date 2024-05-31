@@ -1,34 +1,9 @@
+import { persist } from '$lib/helpers/persist.svelte.ts'
 import { getContext, setContext } from 'svelte'
 import invariant from 'tiny-invariant'
 
 export type AppTheme = 'light' | 'dark'
 export type AppThemeOption = AppTheme | 'auto'
-
-const persist = <T>(storeName: string, instance: T, keys: (keyof T)[]) => {
-	for (const key of keys) {
-		invariant(typeof key === 'string', 'Key must be a string')
-
-		const fullKey = `snaeplayer-${storeName}.${key}`
-
-		const valueRaw = localStorage.getItem(fullKey)
-		const value = valueRaw === null || valueRaw === undefined ? null : JSON.parse(valueRaw)
-		if (value !== null) {
-			instance[key] = value
-		}
-
-		let initial = true
-		$effect(() => {
-			const updatedValue = instance[key]
-
-			if (initial) {
-				initial = false
-				return
-			}
-
-			localStorage.setItem(fullKey, JSON.stringify(updatedValue))
-		})
-	}
-}
 
 export class MainStore {
 	theme: AppThemeOption = $state('auto')

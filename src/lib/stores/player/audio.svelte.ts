@@ -1,4 +1,5 @@
 import type { FileEntity } from '$lib/helpers/file-system'
+import { persist } from '$lib/helpers/persist.svelte.ts'
 import { throttle } from '$lib/helpers/utils'
 
 export class PlayerAudio {
@@ -13,7 +14,11 @@ export class PlayerAudio {
 
 	volume = $state(100)
 
+	muted = $state(false)
+
 	constructor() {
+		persist('player-audio', this, ['volume'])
+
 		const audio = this.#audio
 
 		$effect(() => {

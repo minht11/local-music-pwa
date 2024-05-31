@@ -28,9 +28,19 @@ export type SortOption<StoreName extends LibraryEntityStoreName> = {
 	key: IndexNames<AppDB, StoreName>
 }
 
+export interface LibraryStoreOptions<StoreName extends LibraryEntityStoreName> {
+	storeName: StoreName
+	singularTitle: string
+	pluralTitle: string
+	sortOptions: SortOption<StoreName>[]
+}
+
 export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 	storeName: StoreName
-	title: string
+
+	singularTitle: string
+
+	pluralTitle: string
 
 	searchTerm = $state('')
 
@@ -67,9 +77,10 @@ export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 		return this.#query.value
 	}
 
-	constructor(storeName: StoreName, title: string, sortOptions: SortOption<StoreName>[]) {
-		this.storeName = storeName
-		this.title = title
-		this.sortOptions = sortOptions
+	constructor(options: LibraryStoreOptions<StoreName>) {
+		this.storeName = options.storeName
+		this.singularTitle = options.singularTitle
+		this.pluralTitle = options.pluralTitle
+		this.sortOptions = options.sortOptions
 	}
 }

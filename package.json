@@ -31,7 +31,7 @@
 		"postcss-nesting": "^12.1.5",
 		"prettier": "^3.2.5",
 		"prettier-plugin-svelte": "^3.2.3",
-		"svelte": "5.0.0-next.148",
+		"svelte": "5.0.0-next.144",
 		"svelte-check": "^3.8.0",
 		"terser": "^5.31.0",
 		"typescript": "^5.4.5",

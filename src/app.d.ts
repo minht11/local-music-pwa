@@ -9,7 +9,6 @@ declare global {
 			pageTitle?: string
 			title: string
 			isHandHeldDevice: boolean
-			disableContentPadding?: boolean
 			rootLayoutKey?: (url: URL) => string
 		}
 		// interface Platform {}

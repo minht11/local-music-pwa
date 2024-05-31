@@ -65,7 +65,7 @@
 				<div class={clx(active ? 'text-primary' : 'color-onSurface')}>
 					{track.name}
 				</div>
-				<div>
+				<div class="truncate overflow-hidden">
 					{track.artists.join(', ')}
 				</div>
 			</div>

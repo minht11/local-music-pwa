@@ -14,8 +14,8 @@
 	const { mode, list, details, class: className, gap = 0 }: Props = $props()
 </script>
 
-<div class={className}>
-	<div class="flex" style={`column-gap: ${gap}px;`}>
+<div class={clx('!flex !flex-col', className)}>
+	<div class="flex h-full grow" style={`column-gap: ${gap}px;`}>
 		{#if mode === 'both'}
 			<ScrollContainer
 				class="overflow-y-auto max-h-100vh shrink-0 sticky top-0 overscroll-contain flex flex-col"

@@ -73,8 +73,6 @@
 	const layout = useRootLayout()
 	// @ts-expect-error snippet is defined
 	layout.bottom = layoutBottom
-
-	console.log('layoutMode', $page.url.pathname)
 </script>
 
 {#snippet navItemsSnippet(className: string)}
@@ -117,15 +115,11 @@
 	</div>
 {/if}
 
-<ListDetailsLayout
-	mode={layoutMode}
-	gap={12}
-	class="max-w-[var(--library-max-width)] w-full mx-auto grow"
->
+<ListDetailsLayout mode={layoutMode} class="max-w-[var(--library-max-width)] w-full mx-auto grow">
 	{#snippet list(mode)}
 		<div class={clx(mode === 'both' && 'pr-12px', 'pl-96px')}>
 			<div class={clx(mode === 'both' && 'w-400px')}>
-				<Search {data} />
+				<Search {store} />
 
 				<div class={clx('w-full grow flex flex-col')}>
 					{#if store.searchTerm && itemsIds.length === 0}
@@ -141,7 +135,12 @@
 	{/snippet}
 
 	{#snippet details()}
-		<div class="h-full rounded-24px pointer-events-auto bg-surfaceContainer mt-24px flex flex-col">
+		<div
+			class={clx(
+				'h-full rounded-24px pointer-events-auto flex flex-col @container',
+				layoutMode === 'both' && 'bg-surfaceContainer mx-16px mt-16px',
+			)}
+		>
 			{#key $page.url.pathname}
 				{#if children}
 					{@render children()}

@@ -10,27 +10,44 @@ const nameSortOption = {
 
 const storeMap = {
 	tracks: () =>
-		new LibraryStore('tracks', m.tracks(), [
-			nameSortOption,
-			{
-				name: 'Artist',
-				key: 'artists',
-			},
-			{
-				name: 'Album',
-				key: 'album',
-			},
-			{
-				name: 'Duration',
-				key: 'duration',
-			},
-			{
-				name: 'Year',
-				key: 'year',
-			},
-		]),
-	albums: () => new LibraryStore('albums', m.albums(), [nameSortOption]),
-	artists: () => new LibraryStore('artists', m.artists(), [nameSortOption]),
+		new LibraryStore({
+			storeName: 'tracks',
+			singularTitle: m.track(),
+			pluralTitle: m.tracks(),
+			sortOptions: [
+				nameSortOption,
+				{
+					name: 'Artist',
+					key: 'artists',
+				},
+				{
+					name: 'Album',
+					key: 'album',
+				},
+				{
+					name: 'Duration',
+					key: 'duration',
+				},
+				{
+					name: 'Year',
+					key: 'year',
+				},
+			],
+		}),
+	albums: () =>
+		new LibraryStore({
+			storeName: 'albums',
+			singularTitle: m.album(),
+			pluralTitle: m.albums(),
+			sortOptions: [nameSortOption],
+		}),
+	artists: () =>
+		new LibraryStore({
+			storeName: 'artists',
+			singularTitle: m.artist(),
+			pluralTitle: m.artists(),
+			sortOptions: [nameSortOption],
+		}),
 } satisfies {
 	[K in LibraryStoreNames]: () => LibraryStore<K>
 }
@@ -49,9 +66,7 @@ export const load: LayoutLoad = async (event) => {
 	return {
 		slug,
 		store,
-		hideBackButton: true,
 		title: 'Library',
-		pageTitle: `Library - ${store.title}`,
 		noHeader: true,
 		rootLayoutKey: () => slug,
 	}

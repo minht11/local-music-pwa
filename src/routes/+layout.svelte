@@ -108,11 +108,11 @@
 
 	const player = providePlayer()
 
-	const updateStyles = async (color: number | undefined) => {
+	const updateStyles = async (color: number | undefined, isDark: boolean) => {
 		const module = await import('$lib/theme.ts')
 
 		if (color) {
-			module.setThemeCssVariables(color, mainStore.themeIsDark)
+			module.setThemeCssVariables(color, isDark)
 		} else {
 			module.clearThemeCssVariables()
 		}
@@ -120,6 +120,7 @@
 
 	let initial = true
 	$effect(() => {
+		const isDark = mainStore.themeIsDark
 		const color = mainStore.pickColorFromArtwork ? player.activeTrack?.primaryColor : undefined
 
 		if (initial) {
@@ -127,7 +128,7 @@
 			return
 		}
 
-		updateStyles(color)
+		void updateStyles(color, isDark)
 	})
 
 	$effect.pre(() => {

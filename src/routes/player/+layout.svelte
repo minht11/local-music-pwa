@@ -4,6 +4,9 @@
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 
+	import { page } from '$app/stores'
+	import Header from '$lib/components/Header.svelte'
+	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
@@ -13,22 +16,115 @@
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
 
-	const { data } = $props()
-
 	const player = usePlayer()
 	const track = $derived(player.activeTrack)
 
 	const isCompactMedia = useMediaQuery('(max-width: 767px)')
 	const isCompact = $derived(isCompactMedia.value)
+
+	const layoutMode = $derived.by(() => {
+		if (!isCompact) {
+			return 'both'
+		}
+
+		if ($page.url.pathname.endsWith('/queue')) {
+			return 'details'
+		}
+
+		return 'list'
+	})
 </script>
 
-{#snippet queue()}
-	<div class="w-full p-16px flex flex-col">
-		<div class="flex items-center h-48px">
-			<div class="text-title-md mr-auto ml-16px">Queue list</div>
+{#snippet playerSnippet()}
+	<div
+		class={clx(
+			layoutMode === 'both' && 'w-400px',
+			layoutMode === 'list' && 'max-w-500px mx-auto w-full',
+			'flex flex-col z-0 bg-surfaceContainerLowest p-8px pt-[calc(var(--app-header-height)+8px)] gap-8px overflow-clip items-center grow',
+		)}
+	>
+		<div class="absolute -z-1 h-full w-full inset-0 bg-secondaryContainer/40"></div>
 
-			<Button kind="flat">Clear</Button>
+		<PlayerArtwork
+			class="rounded-16px bg-secondaryContainer view-transition-pl-artwork max-w-300px w-full my-auto ring-1 ring-secondaryContainer"
+		/>
+
+		<div class="w-full bg-surfaceContainerHighest px-16px py-8px rounded-16px">
+			<Timeline class="w-full" />
 		</div>
+
+		<div
+			class="bg-secondaryContainer flex flex-col px-16px pb-16px pt-32px gap-24px rounded-16px w-full"
+		>
+			<div class="flex items-center gap-8px my-auto justify-between">
+				<ShuffleButton />
+
+				<PlayPrevButton />
+
+				<PlayTogglePillButton />
+
+				<PlayNextButton />
+
+				<RepeatButton />
+			</div>
+
+			<div class="flex items-center gap-8px">
+				<IconButton icon="volumeMid" />
+
+				<Slider bind:value={player.volume} />
+
+				<IconButton icon="volumeHigh" />
+			</div>
+		</div>
+
+		<div
+			class="w-full bg-secondaryContainer px-16px rounded-16px flex items-center h-72px shrink-0"
+		>
+			{#if track}
+				<div class="text-body-lg mr-8px min-w-24px text-center tabular-nums">
+					{player.activeTrackIndex}
+				</div>
+
+				<div class="flex flex-col">
+					<div class="truncate text-body-lg">{track.name}</div>
+					<div class="truncate text-body-md">{track.artists}</div>
+				</div>
+			{/if}
+
+			<div class="flex gap-4px ml-auto">
+				<IconButton icon="favorite" />
+
+				{#if layoutMode === 'list'}
+					<IconButton icon="trayFull" as="a" href="/player/queue" />
+				{/if}
+			</div>
+		</div>
+	</div>
+{/snippet}
+
+{#snippet queueActions()}
+	<IconButton icon="clearQueue" />
+{/snippet}
+
+{#snippet queueSnippet()}
+	{#if layoutMode === 'details'}
+		<Header title={m.queue()}>
+			{#if layoutMode === 'details'}
+				{@render queueActions()}
+			{/if}
+		</Header>
+	{/if}
+
+	<div class="w-full flex flex-col grow">
+		{#if layoutMode !== 'details'}
+			<div class="flex items-center h-64px border-b border-onSecondaryContainer/24 px-16px">
+				<div class="text-title-lg mr-auto">
+					{m.queue()}
+				</div>
+
+				{@render queueActions()}
+			</div>
+		{/if}
 
 		{#if player.itemsIds.length === 0}
 			<div class="m-auto text-center flex flex-col items-center gap-8px">
@@ -47,75 +143,18 @@
 {/snippet}
 
 <div class="w-full max-w-1280px invisible view-transition-pl-container mx-auto fixed inset-0"></div>
-<section
-	class="view-transition-pl-content bg-secondaryContainer grow flex flex-col mx-auto w-full max-w-1280px"
->
-	<div class="flex sm:grow md:grid grow grid-cols-[400px_1fr]">
-		{#if (isCompact && !data.isQueueOpen) || !isCompact}
-			<div
-				class="flex flex-col z-0 bg-surfaceContainerLowest p-8px pt-[calc(var(--app-header-height)+8px)] gap-8px overflow-clip items-center grow sm:sticky sm:max-h-100vh top-0"
-			>
-				<div class="absolute -z-1 h-full w-full inset-0 bg-secondaryContainer/40"></div>
 
-				<PlayerArtwork
-					class="rounded-16px bg-secondaryContainer view-transition-pl-artwork max-w-300px w-full my-auto ring-1 ring-secondaryContainer"
-				/>
+<ListDetailsLayout
+	mode={layoutMode}
+	class={clx(
+		layoutMode === 'list' ? 'bg-surfaceContainerLowest' : 'bg-secondaryContainer',
+		'view-transition-pl-content grow mx-auto w-full max-w-1280px',
+	)}
+	list={playerSnippet}
+	details={queueSnippet}
+/>
 
-				<div class="w-full bg-surfaceContainerHighest px-16px py-8px rounded-16px">
-					<Timeline class="w-full" />
-				</div>
-
-				<div
-					class="bg-secondaryContainer flex flex-col px-16px pb-16px pt-32px gap-24px rounded-16px w-full"
-				>
-					<div class="flex items-center gap-8px my-auto justify-between">
-						<ShuffleButton />
-
-						<PlayPrevButton />
-
-						<PlayTogglePillButton />
-
-						<PlayNextButton />
-
-						<RepeatButton />
-					</div>
-
-					<div class="flex items-center gap-8px">
-						<IconButton icon="volumeMid" />
-
-						<Slider bind:value={player.volume} />
-
-						<IconButton icon="volumeHigh" />
-					</div>
-				</div>
-
-				<div class="w-full bg-secondaryContainer px-16px rounded-16px flex items-center h-72px">
-					{#if track}
-						<div class="text-body-lg mr-8px min-w-24px text-center tabular-nums">
-							{player.activeTrackIndex}
-						</div>
-
-						<div class="flex flex-col">
-							<div class="truncate text-body-lg">{track.name}</div>
-							<div class="truncate text-body-md">{track.artists}</div>
-						</div>
-					{/if}
-
-					<div class="flex gap-4px ml-auto">
-						<IconButton icon="favorite" />
-
-						<IconButton icon="trayFull" as="a" href="?queue" />
-					</div>
-				</div>
-			</div>
-		{/if}
-		{#if !isCompact || (isCompact && data.isQueueOpen)}
-			{@render queue()}
-		{/if}
-	</div>
-</section>
-
-<style>
+<style lang="postcss">
 	::view-transition-old(pl-content) {
 		animation: fade-out 75ms linear forwards;
 	}
