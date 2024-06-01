@@ -1,19 +1,33 @@
 <!doctype html>
 <html lang="en" class="dark" data-sveltekit-preload-data="false">
 	<head>
-		<meta charset="utf-8" ></meta>
-		<link rel="icon" href="%sveltekit.assets%/favicon.png" ></link>
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta charset="utf-8" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 
-		<link rel="preconnect" href="https://fonts.googleapis.com" ></link>
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin ></link>
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="theme-color" content="#202123" />
+
+		<meta name="theme-color" content="#0066FF" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#0066FF" media="(prefers-color-scheme: dark)" />
+
+		<meta name="description" content="Lightweight on device music player right in your browser." />
+		<link rel="icon" href="/icons/icon_responsive.svg" type="image/svg+xml" />
+		<link rel="alternate icon" href="/icons/icon_16.png" sizes="16x16" type="image/png" />
+		<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180" />
+
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
 		<link
 			href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500&display=swap"
 			rel="stylesheet"
-		></link>
+		/>
 
 		%unocss-svelte-scoped.global% %sveltekit.head%
+
+		<link rel="manifest" href="/manifest.webmanifest" />
 	</head>
+
 	<body>
 		<div class="app-container">%sveltekit.body%</div>
 	</body>
