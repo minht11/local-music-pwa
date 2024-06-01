@@ -66,13 +66,13 @@
 	}
 
 	let searchWidth = $state(0)
-	let actionsBelow = $derived(searchWidth < 400)
 </script>
 
 {#snippet sortActions()}
+	<IconButton class="@md:hidden" icon="sort" onclick={sortMenuHandler} />
 	<button
 		use:ripple
-		class="flex interactable shrink-0 w-96px rounded-8px h-40px pl-12px pr-4px gap-4px items-center text-label-md"
+		class="hidden interactable @md:flex shrink-0 w-96px rounded-8px h-40px pl-12px pr-4px gap-4px items-center text-label-md"
 		onclick={sortMenuHandler}
 	>
 		{store.sortBy?.name}
@@ -102,23 +102,11 @@
 		oninput={(e) => searchHandler(e as unknown as InputEvent)}
 	/>
 
-	{#if !actionsBelow}
-		<Separator vertical class="h-24px my-auto" />
+	<Separator vertical class="h-24px my-auto" />
 
-		{@render sortActions()}
-	{/if}
+	{@render sortActions()}
 
 	<Separator vertical class="h-24px my-auto" />
 
 	<IconButton ariaLabel="Application menu" icon="moreVertical" onclick={generalMenuHandler} />
 </div>
-
-{#if actionsBelow}
-	<div class="mx-auto w-full max-w-500px mb-24px -mt-40px @md:hidden">
-		<div
-			class="flex items-center w-max ml-auto bg-surfaceContainerHigh rounded-t-8px rounded-b-16px pt-16px"
-		>
-			{@render sortActions()}
-		</div>
-	</div>
-{/if}

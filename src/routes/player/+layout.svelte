@@ -5,6 +5,7 @@
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 
 	import { page } from '$app/stores'
+	import BackButton from '$lib/components/BackButton.svelte'
 	import Header from '$lib/components/Header.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import Slider from '$lib/components/Slider.svelte'
@@ -40,9 +41,17 @@
 		class={clx(
 			layoutMode === 'both' && 'w-400px',
 			layoutMode === 'list' && 'max-w-500px mx-auto w-full',
-			'flex flex-col z-0 bg-surfaceContainerLowest p-8px pt-[calc(var(--app-header-height)+8px)] gap-8px overflow-clip items-center grow',
+			'flex flex-col z-0 bg-surfaceContainerLowest px-8px pb-8px gap-8px overflow-clip items-center grow',
 		)}
 	>
+		<div class="h-64px w-full flex gap-8px items-center">
+			<BackButton />
+
+			<div class="text-title-lg mx-auto">Player</div>
+
+			<div class="w-40px"></div>
+		</div>
+
 		<div class="absolute -z-1 h-full w-full inset-0 bg-secondaryContainer/40"></div>
 
 		<PlayerArtwork

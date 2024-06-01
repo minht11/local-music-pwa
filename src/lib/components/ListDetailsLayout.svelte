@@ -18,13 +18,13 @@
 	<div class="flex h-full grow" style={`column-gap: ${gap}px;`}>
 		{#if mode === 'both'}
 			<ScrollContainer
-				class="overflow-y-auto max-h-100vh shrink-0 sticky top-0 overscroll-contain flex flex-col"
+				class="overflow-y-auto max-h-100vh shrink-0 sticky top-0 overscroll-contain flex flex-col pb-[var(--bottom-overlay-height)]"
 			>
 				{@render list(mode)}
 			</ScrollContainer>
 		{/if}
 
-		<div class="w-full grow flex flex-col">
+		<div class="w-full grow flex flex-col pb-[var(--bottom-overlay-height)]">
 			{#if mode === 'both' || mode === 'details'}
 				{@render details(mode)}
 			{:else if mode === 'list'}

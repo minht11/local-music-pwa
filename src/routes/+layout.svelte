@@ -172,7 +172,7 @@
 {#if !pageData.noHeader}
 	<header
 		class={clx(
-			'fixed inset-x-0 top-0 z-10 flex h-[--app-header-height] flex-shrink-0',
+			'fixed inset-x-0 top-0 z-10 flex h-[var(--app-header-height)] flex-shrink-0',
 			isScrolled && 'bg-surfaceContainerHigh bg-surface',
 		)}
 	>
