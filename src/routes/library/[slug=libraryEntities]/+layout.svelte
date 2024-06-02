@@ -98,7 +98,9 @@
 
 {#snippet layoutBottom()}
 	{#if data.isHandHeldDevice}
-		<div class="grid sm:hidden grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surface w-full h-64px">
+		<div
+			class="grid sm:hidden grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer w-full h-64px"
+		>
 			{@render navItemsSnippet('h-full')}
 		</div>
 	{/if}
@@ -107,7 +109,7 @@
 {#if !(layoutMode === 'details' && !isWideLayout.value)}
 	<div
 		class={clx(
-			'gap-8px fixed z-1 desktop-sidebar flex-col w-max h-max mt-64px',
+			'gap-8px fixed z-1 desktop-sidebar flex-col w-max h-max mt-80px',
 			data.isHandHeldDevice ? 'hidden sm:flex' : 'flex',
 		)}
 	>
@@ -117,8 +119,8 @@
 
 <ListDetailsLayout mode={layoutMode} class="max-w-[var(--library-max-width)] w-full mx-auto grow">
 	{#snippet list(mode)}
-		<div class={clx(mode === 'both' && 'pr-12px', 'pl-96px')}>
-			<div class={clx(mode === 'both' && 'w-400px')}>
+		<div class={clx(!data.isHandHeldDevice && 'pl-80px')}>
+			<div class={clx(mode === 'both' && 'w-400px', 'px-16px')}>
 				<Search {store} />
 
 				<div class={clx('w-full grow flex flex-col')}>

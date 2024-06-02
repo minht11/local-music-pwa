@@ -138,11 +138,9 @@
 	let overlayContentHeight = $state(0)
 
 	$effect(() => {
-		const bottomPadding = 16
-
 		document.documentElement.style.setProperty(
 			'--bottom-overlay-height',
-			`${overlayContentHeight + bottomPadding}px`,
+			`${overlayContentHeight}px`,
 		)
 	})
 </script>

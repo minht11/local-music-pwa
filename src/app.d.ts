@@ -16,8 +16,13 @@ declare global {
 }
 
 interface Navigator {
-	userAgentData: {
+	// Optional because Safari and Firefox don't support it
+	userAgentData?: {
 		mobile: boolean
+		brands: {
+			brand: string
+			version: string
+		}[]
 	}
 }
 

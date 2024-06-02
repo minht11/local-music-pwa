@@ -9,6 +9,7 @@
 	import Header from '$lib/components/Header.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import Slider from '$lib/components/Slider.svelte'
+	import Icon from '$lib/components/icon/Icon.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
 	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
@@ -136,8 +137,10 @@
 		{/if}
 
 		{#if player.itemsIds.length === 0}
-			<div class="m-auto text-center flex flex-col items-center gap-8px">
-				<div>Your queue is empty</div>
+			<div class="m-auto text-center flex flex-col items-center">
+				<Icon type="playlistMusic" class="size-40 my-auto opacity-54 color-onSecondaryContainer" />
+
+				<div class="text-body-lg mb-16px">Your queue is empty</div>
 				<Button kind="outlined" as="a" href="/">Play something here</Button>
 			</div>
 		{:else}
@@ -161,6 +164,7 @@
 	)}
 	list={playerSnippet}
 	details={queueSnippet}
+	noPlayerOverlayPadding
 />
 
 <style lang="postcss">

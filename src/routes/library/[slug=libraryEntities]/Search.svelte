@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
-	import { ripple } from '$lib/actions/ripple'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Separator from '$lib/components/Separator.svelte'
-	import Icon from '$lib/components/icon/Icon.svelte'
 	import { debounce } from '$lib/helpers/utils.ts'
 	import type { PageData } from './$types'
 
@@ -64,35 +62,10 @@
 			},
 		})
 	}
-
-	let searchWidth = $state(0)
 </script>
 
-{#snippet sortActions()}
-	<IconButton class="@md:hidden" icon="sort" onclick={sortMenuHandler} />
-	<button
-		use:ripple
-		class="hidden interactable @md:flex shrink-0 w-96px rounded-8px h-40px pl-12px pr-4px gap-4px items-center text-label-md"
-		onclick={sortMenuHandler}
-	>
-		{store.sortBy?.name}
-
-		<Icon type="menuDown" class="size-20px ml-auto" />
-	</button>
-
-	<IconButton
-		class={clx(store.order === 'desc' && 'rotate-180', 'transition-transform')}
-		icon="sortAscending"
-		ariaLabel="Toggle sort order"
-		onclick={() => {
-			store.order = store.order === 'asc' ? 'desc' : 'asc'
-		}}
-	/>
-{/snippet}
-
 <div
-	bind:clientWidth={searchWidth}
-	class="sticky @container top-8px my-8px z-1 bg-surfaceContainerHighest flex w-full rounded-8px px-8px gap-8px items-center ml-auto max-w-500px"
+	class="sticky @container top-8px my-16px z-1 bg-surfaceContainerHighest flex w-full rounded-8px px-8px gap-8px items-center ml-auto max-w-500px"
 >
 	<input
 		value={store.searchTerm}
@@ -104,7 +77,16 @@
 
 	<Separator vertical class="h-24px my-auto" />
 
-	{@render sortActions()}
+	<IconButton icon="sort" onclick={sortMenuHandler} />
+
+	<IconButton
+		class={clx(store.order === 'desc' && 'rotate-180', 'transition-transform')}
+		icon="sortAscending"
+		ariaLabel="Toggle sort order"
+		onclick={() => {
+			store.order = store.order === 'asc' ? 'desc' : 'asc'
+		}}
+	/>
 
 	<Separator vertical class="h-24px my-auto" />
 
