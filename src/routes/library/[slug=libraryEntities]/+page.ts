@@ -1,4 +1,4 @@
-import type { PageLoad } from './$types'
+import type { PageLoad } from './$types.ts'
 
 export const load: PageLoad = async (event) => {
 	const data = await event.parent()

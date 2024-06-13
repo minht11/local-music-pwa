@@ -8,7 +8,7 @@
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.js'
-	import type { LayoutParams } from './$types'
+	import type { LayoutParams } from './$types.ts'
 	import Search from './Search.svelte'
 
 	const { data, children } = $props()

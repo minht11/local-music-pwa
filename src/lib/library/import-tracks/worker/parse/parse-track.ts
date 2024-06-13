@@ -2,7 +2,7 @@ import type { ParsedTrackData } from '$lib/db/entities'
 // @ts-expect-error - no types
 import { Buffer } from 'buffer-lite'
 import { parseBuffer as parseMetadata } from 'music-metadata/lib/core'
-import { getArtworkRelatedData } from './format-artwork'
+import { getArtworkRelatedData } from './format-artwork.ts'
 
 // Music metadata library uses the Buffer global.
 // @ts-ignore

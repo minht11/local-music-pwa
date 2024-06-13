@@ -9,6 +9,7 @@
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"biome-check": "biome check ./src",
 		"lint": "biome lint ./src",
 		"lint-fix": "biome check ./src --apply",
 		"format-prettier-fix": "prettier --write ./src",

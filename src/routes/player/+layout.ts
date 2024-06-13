@@ -1,4 +1,4 @@
-import type { LayoutLoad } from './$types'
+import type { LayoutLoad } from './$types.ts'
 
 export const load: LayoutLoad = () => ({
 	title: 'Player',

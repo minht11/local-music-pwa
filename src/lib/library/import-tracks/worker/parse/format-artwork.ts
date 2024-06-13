@@ -1,5 +1,5 @@
 import invariant from 'tiny-invariant'
-import { extractColorFromImage } from './color-from-image'
+import { extractColorFromImage } from './color-from-image.ts'
 
 const isSafari = () => {
 	const ua = navigator.userAgent.toLowerCase()

@@ -1,6 +1,6 @@
 import { untrack } from 'svelte'
 import type { WeakLRUCache } from 'weak-lru-cache'
-import { assign } from './utils'
+import { assign } from './utils.ts'
 
 export type QueryStatus = 'loading' | 'loaded' | 'error'
 

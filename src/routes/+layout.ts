@@ -1,7 +1,7 @@
 import { isMobile } from '$lib/helpers/utils'
 import '@unocss/reset/tailwind.css'
 import '../app.css'
-import type { LayoutLoad } from './$types'
+import type { LayoutLoad } from './$types.ts'
 
 export const ssr = false
 

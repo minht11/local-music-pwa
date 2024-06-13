@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
 	import { clx } from '$lib/helpers/clx'
-	import { ripple } from '../actions/ripple'
+	import { ripple } from '../actions/ripple.ts'
 
 	export type AllowedButtonElement = 'button' | 'a'
 	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank'

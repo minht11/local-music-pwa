@@ -1,4 +1,4 @@
-import { toggleReverseArray } from './utils'
+import { toggleReverseArray } from './utils.ts'
 
 export const animateFade = (
 	element: Element,

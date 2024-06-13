@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
 	import { clx } from '$lib/helpers/clx'
-	import { ICON_PATHS } from './icon-paths'
+	import { ICON_PATHS } from './icon-paths.ts'
 
 	export type IconType = keyof typeof ICON_PATHS
 

@@ -6,7 +6,7 @@ import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-sy
 import { removeTrack } from '$lib/library/tracks.svelte'
 import { importTrackToDb } from './import-track-to-db.ts'
 import { parseTrack } from './parse/parse-track.ts'
-import type { TrackImportCount, TrackImportMessage, TrackImportOptions } from './types'
+import type { TrackImportCount, TrackImportMessage, TrackImportOptions } from './types.ts'
 
 declare const self: DedicatedWorkerGlobalScope
 

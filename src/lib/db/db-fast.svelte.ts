@@ -1,8 +1,8 @@
 import { assign } from '$lib/helpers/utils'
 import { untrack } from 'svelte'
 import { WeakLRUCache } from 'weak-lru-cache'
-import { type DBChangeRecordList, listenForDatabaseChanges } from './channel'
-import type { AppStoreNames } from './get-db'
+import { type DBChangeRecordList, listenForDatabaseChanges } from './channel.ts'
+import type { AppStoreNames } from './get-db.ts'
 
 // Fast in memory cache so we do not need to
 // call indexed db for every access

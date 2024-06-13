@@ -1,4 +1,4 @@
-import type { TrackImportCount, TrackImportMessage, TrackImportOptions } from './worker/types'
+import type { TrackImportCount, TrackImportMessage, TrackImportOptions } from './worker/types.ts'
 
 export type TrackParsedFn = (totalParsedCount: number) => void
 

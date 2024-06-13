@@ -1,4 +1,4 @@
-import { animateEmpty } from '../helpers/animations'
+import { animateEmpty } from '../helpers/animations.ts'
 
 const FADE_DURATION = 180
 const SCALE_DURATION = 400

@@ -1,5 +1,5 @@
 export const isMobile = (): boolean => {
-	if (window.navigator.userAgentData) {
+	if (navigator.userAgentData) {
 		return navigator.userAgentData.mobile
 	}
 
