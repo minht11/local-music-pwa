@@ -1,4 +1,4 @@
-import type { LayoutLoad } from './$types'
+import type { LayoutLoad } from './$types.ts'
 import { LibraryStore } from './store.svelte'
 
 type LibraryStoreNames = 'tracks' | 'albums' | 'artists'

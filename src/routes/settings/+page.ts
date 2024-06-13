@@ -1,6 +1,6 @@
 import { definePageQuery } from '$lib/db/db-fast.svelte.ts'
 import { getDB } from '$lib/db/get-db'
-import type { PageLoad } from './$types'
+import type { PageLoad } from './$types.ts'
 
 const countQuery = definePageQuery({
 	key: ['tracks-count'],

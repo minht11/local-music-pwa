@@ -138,7 +138,10 @@
 
 		{#if player.itemsIds.length === 0}
 			<div class="m-auto text-center flex flex-col items-center">
-				<Icon type="playlistMusic" class="size-40 my-auto opacity-54 color-onSecondaryContainer" />
+				<Icon
+					type="playlistMusic"
+					class="size-140px my-auto opacity-54 color-onSecondaryContainer"
+				/>
 
 				<div class="text-body-lg mb-16px">Your queue is empty</div>
 				<Button kind="outlined" as="a" href="/">Play something here</Button>

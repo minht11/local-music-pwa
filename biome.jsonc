@@ -49,6 +49,14 @@
 			"suspicious": {
 				"noMisrefactoredShorthandAssign": "error",
 				"useAwait": "error"
+			},
+			"nursery": {
+				"useImportExtensions": "error",
+				"useDateNow": "error",
+				"useErrorMessage": "error",
+				"useThrowNewError": "error",
+				"useThrowOnlyError": "error",
+				"useConsistentBuiltinInstantiation": "error"
 			}
 		}
 	},

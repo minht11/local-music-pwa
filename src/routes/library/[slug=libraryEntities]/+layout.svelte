@@ -119,13 +119,22 @@
 
 <ListDetailsLayout mode={layoutMode} class="max-w-[var(--library-max-width)] w-full mx-auto grow">
 	{#snippet list(mode)}
-		<div class={clx(!data.isHandHeldDevice && 'pl-80px')}>
-			<div class={clx(mode === 'both' && 'w-400px', 'px-16px')}>
+		<div class={clx(!data.isHandHeldDevice && 'pl-80px', 'flex flex-col grow')}>
+			<div class={clx(mode === 'both' && 'w-400px', 'px-16px grow flex flex-col')}>
 				<Search {store} />
 
 				<div class={clx('w-full grow flex flex-col')}>
 					{#if store.searchTerm && itemsIds.length === 0}
-						<div class="text-body-md w-max m-auto text-onSurfaceVariant">No results found</div>
+						<div class="flex flex-col relative text-center items-center m-auto">
+							<Icon type="magnify" class="size-140px my-auto opacity-54" />
+
+							<div class="text-body-lg">
+								{m.libraryNoResults()}
+							</div>
+							<div>
+								{m.libraryNoResultsExplanation()}
+							</div>
+						</div>
 					{:else if store.storeName === 'tracks'}
 						<TracksListContainer items={itemsIds} />
 					{:else if store.storeName === 'albums'}
@@ -148,7 +157,7 @@
 					{@render children()}
 				{:else}
 					<div class="flex flex-col gap-16px items-center justify-center m-auto items-center">
-						<Icon type="album" class="size-40 my-auto opacity-54" />
+						<Icon type="album" class="size-140px my-auto opacity-54" />
 
 						<div class="flex flex-col relative">
 							<div class="text-body-lg max-w-200px text-center">

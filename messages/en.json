@@ -17,6 +17,8 @@
 	"cancel": "Cancel",
 	"replace": "Replace",
 	"queue": "Queue",
+	"libraryNoResults": "No results found",
+	"libraryNoResultsExplanation": "Try searching for something else",
 	"librarySelectSomethingToBeShown": "Select something from the list to be shown here",
 	"replaceDirectoryQ": "Replace directory?",
 	"replaceDirectoryExplanation": "The directory {newDir} you're adding is already a parent of {existingDir} which already is in your Library.\n No changes will occur for existing tracks.",

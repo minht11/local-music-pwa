@@ -1,5 +1,5 @@
 import { browser } from '$app/environment'
-import type { AppStoreNames } from './get-db'
+import type { AppStoreNames } from './get-db.ts'
 
 export interface DBChangeRecord {
 	storeName: AppStoreNames

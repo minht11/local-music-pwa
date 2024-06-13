@@ -19,7 +19,7 @@
 		{#if mode === 'both'}
 			<ScrollContainer
 				class={clx(
-					'overflow-y-auto max-h-100vh shrink-0 sticky top-0 overscroll-contain flex flex-col',
+					'overflow-y-auto max-h-100vh shrink-0 sticky top-0 overscroll-contain flex flex-col scrollbar-gutter-stable',
 					!noPlayerOverlayPadding && 'pb-[var(--bottom-overlay-height)]',
 				)}
 			>
