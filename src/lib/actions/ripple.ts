@@ -1,3 +1,4 @@
+import { on } from 'svelte/events'
 import { animateEmpty } from '../helpers/animations.ts'
 
 const FADE_DURATION = 180
@@ -49,7 +50,10 @@ const onExitHandler = () => {
 document.addEventListener('pointercancel', onExitHandler)
 document.addEventListener('pointerup', onExitHandler)
 
-const onPointerDownHandler = (e: PointerEvent) => {
+const onPointerDownHandler = (_e: Event) => {
+	// TODO. https://github.com/sveltejs/svelte/issues/12027
+	const e = _e as PointerEvent
+
 	// Only respond to main click events.
 	if (e.button !== 0) {
 		return
@@ -113,11 +117,11 @@ const onPointerDownHandler = (e: PointerEvent) => {
 }
 
 export const ripple = (node: HTMLElement) => {
-	node.addEventListener('pointerdown', onPointerDownHandler)
+	const cleanup = on(node, 'pointerdown', onPointerDownHandler)
 
 	return {
 		destroy() {
-			node.removeEventListener('pointerdown', onPointerDownHandler)
+			cleanup()
 		},
 	}
 }
