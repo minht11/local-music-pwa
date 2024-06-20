@@ -34,5 +34,9 @@
 	"settingsDisplayVolumeSlider": "Display volume slider inside",
 	"settingsPrimaryColor": "Application primary color",
 	"settingsColorPick": "Pick color",
-	"settingsColorReset": "Reset"
+	"settingsColorReset": "Reset",
+
+	"about": "About",
+	"aboutSourceCode": "Source code",
+	"aboutPrivacy": "Privacy"
 }
