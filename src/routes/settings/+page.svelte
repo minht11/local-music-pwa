@@ -12,7 +12,9 @@
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import { initPageQueries } from '$lib/db/db-fast.svelte.ts'
 	import type { Directory } from '$lib/db/entities.ts'
+	import { debounce } from '$lib/helpers/utils.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
+	import { argbFromHex } from '@material/material-color-utilities'
 	import {
 		checkNewDirectoryStatus,
 		directoriesStore,
@@ -98,8 +100,6 @@
 		}
 	}
 
-	let compactLayout = $state(false)
-
 	const themeOptions = [
 		{
 			name: m.settingsThemeAuto(),
@@ -114,6 +114,19 @@
 			value: 'light',
 		},
 	]
+
+	const themeColor = {
+		get value() {
+			return mainStore.themeColorSeedHex
+		},
+		set value(value: string | null) {
+			updateMainColor(value)
+		},
+	}
+
+	const updateMainColor = debounce((value: string) => {
+		mainStore.themeColorSeedHex = value
+	}, 400)
 </script>
 
 <section class="card mx-auto w-full max-w-[900px] mt-64px">
@@ -252,18 +265,35 @@
 		<Switch bind:checked={mainStore.pickColorFromArtwork} />
 	</div>
 
-	<div class="flex justify-between items-center p-16px">
-		<div>Application primary color</div>
+	<div class="flex items-center p-16px gap-8px">
+		<div class="mr-auto">{m.settingsPrimaryColor()}</div>
 
-		<div class="bg-primary rounded-full h-40px w-40px"></div>
+		<Button kind="outlined">{m.settingsColorReset()}</Button>
+
+		<Button kind="toned">
+			<div class="rounded-full p-4px" style={`background: ${mainStore.themeColorSeedHex}`}>
+				<Icon type="eyedropper" class="size-20px" />
+			</div>
+
+			{m.settingsColorPick()}
+
+			<input
+				type="color"
+				bind:value={themeColor.value}
+				class="appearance-none w-full h-full absolute inset-0 opacity-0 cursor-pointer"
+			/>
+		</Button>
+		<!-- </div> -->
 	</div>
 
 	<Separator />
 
 	<div class="flex justify-between items-center p-16px">
-		<div>Display volume slider inside full player screen</div>
+		<div>
+			{m.settingsDisplayVolumeSlider()}
+		</div>
 
-		<Switch bind:checked={compactLayout} />
+		<Switch bind:checked={mainStore.volumeSliderEnabled} />
 	</div>
 </section>
 

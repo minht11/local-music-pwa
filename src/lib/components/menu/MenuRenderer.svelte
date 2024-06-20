@@ -145,7 +145,9 @@
 
 		closing = true
 
-		data.targetElement.focus()
+		data.targetElement.focus({
+			preventScroll: true,
+		})
 
 		// Restore focus to the element that opened the menu
 		animate(

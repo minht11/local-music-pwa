@@ -55,7 +55,7 @@ const COLOR_TOKENS_GENERATION_MAP = {
 	inversePrimary: ['a1', 80, 40],
 } as const satisfies ColorTokensInput
 
-export const DEFAULT_THEME_ARGB = /*#__PURE__*/ argbFromHex('#ffdcc4')
+export const DEFAULT_THEME_ARGB = /*#__PURE__*/ argbFromHex('#4c9e29')
 
 type Rgb = [r: number, g: number, b: number]
 export type ThemePaletteRgb = Record<keyof typeof COLOR_TOKENS_GENERATION_MAP, Rgb>

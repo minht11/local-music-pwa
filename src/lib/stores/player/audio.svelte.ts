@@ -1,8 +1,11 @@
 import type { FileEntity } from '$lib/helpers/file-system'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { throttle } from '$lib/helpers/utils'
+import { useMainStore } from '../main-store.svelte'
 
 export class PlayerAudio {
+	#main = useMainStore()
+
 	playing = $state(false)
 
 	#audio = new Audio()
@@ -12,7 +15,19 @@ export class PlayerAudio {
 		duration: 0,
 	})
 
-	volume = $state(100)
+	#volume = $state(100)
+
+	get volume() {
+		if (!this.#main.volumeSliderEnabled) {
+			return 100
+		}
+
+		return this.#volume
+	}
+
+	set volume(value: number) {
+		this.#volume = value
+	}
 
 	muted = $state(false)
 

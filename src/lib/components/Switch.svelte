@@ -31,5 +31,5 @@
 			'h-16px w-16px rounded-full ml-6px transition-all duration-150',
 			checked ? 'bg-onPrimary translate-x-20px scale-150' : 'bg-outline',
 		)}
-	/>
+	></div>
 </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useMainStore } from '$lib/stores/main-store.svelte'
 	import Button from './Button.svelte'
 	import IconButton from './IconButton.svelte'
 	import Icon from './icon/Icon.svelte'
@@ -13,6 +14,7 @@
 
 	const { class: className }: { class?: string } = $props()
 
+	const mainStore = useMainStore()
 	const player = usePlayer()
 </script>
 
@@ -59,7 +61,7 @@
 				{/if}
 			</Button>
 
-			<div class="ml-auto flex gap-8px sm:hidden pr-8px">
+			<div class="ml-uto flex gap-8px sm:hidden pr-8px">
 				<PlayToggleButton />
 
 				<PlayNextButton class="max-xss:hidden" />
@@ -68,7 +70,10 @@
 			<MainControls class="max-sm:hidden" />
 
 			<div class="flex items-center gap-8px ml-auto max-sm:hidden">
-				<VolumeSlider />
+				{#if mainStore.volumeSliderEnabled}
+					<VolumeSlider />
+				{/if}
+
 				<IconButton icon="moreVertical" />
 			</div>
 		</div>

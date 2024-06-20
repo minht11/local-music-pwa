@@ -1,4 +1,6 @@
 import { persist } from '$lib/helpers/persist.svelte.ts'
+import { isMobile } from '$lib/helpers/utils'
+import { argbFromHex } from '@material/material-color-utilities'
 import { getContext, setContext } from 'svelte'
 import invariant from 'tiny-invariant'
 
@@ -18,10 +20,30 @@ export class MainStore {
 		return this.realTheme === 'dark'
 	}
 
+	themeColorSeed = $state<null | number>(null)
+
+	#hexColorSeed = $state<string | null>(null)
+
+	get themeColorSeedHex() {
+		return this.#hexColorSeed
+	}
+
+	set themeColorSeedHex(value: string | null) {
+		this.#hexColorSeed = value
+		this.themeColorSeed = value ? argbFromHex(value) : null
+	}
+
 	pickColorFromArtwork = $state(true)
 
+	/**
+	 * Controls whatever volume slider is visible.
+	 * The initial value is false for mobile devices and true for desktop.
+	 * User can change this setting.
+	 */
+	volumeSliderEnabled = $state(!isMobile())
+
 	constructor() {
-		persist('main', this, ['theme', 'pickColorFromArtwork'])
+		persist('main', this, ['theme', 'pickColorFromArtwork', 'volumeSliderEnabled'])
 
 		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
 			this.#deviceTheme = e.matches ? 'dark' : 'light'

@@ -17,7 +17,9 @@
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
+	import { useMainStore } from '$lib/stores/main-store.svelte'
 
+	const mainStore = useMainStore()
 	const player = usePlayer()
 	const track = $derived(player.activeTrack)
 
@@ -64,7 +66,10 @@
 		</div>
 
 		<div
-			class="bg-secondaryContainer flex flex-col px-16px pb-16px pt-32px gap-24px rounded-16px w-full"
+			class={clx(
+				'bg-secondaryContainer flex flex-col px-16px gap-24px rounded-16px w-full',
+				mainStore.volumeSliderEnabled ? 'pt-32px pb-16px' : 'py-32px',
+			)}
 		>
 			<div class="flex items-center gap-8px my-auto justify-between">
 				<ShuffleButton />
@@ -78,13 +83,15 @@
 				<RepeatButton />
 			</div>
 
-			<div class="flex items-center gap-8px">
-				<IconButton icon="volumeMid" />
+			{#if mainStore.volumeSliderEnabled}
+				<div class="flex items-center gap-8px">
+					<IconButton icon="volumeMid" />
 
-				<Slider bind:value={player.volume} />
+					<Slider bind:value={player.volume} />
 
-				<IconButton icon="volumeHigh" />
-			</div>
+					<IconButton icon="volumeHigh" />
+				</div>
+			{/if}
 		</div>
 
 		<div
