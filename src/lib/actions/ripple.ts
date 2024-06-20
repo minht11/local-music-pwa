@@ -1,3 +1,4 @@
+import type { Action } from 'svelte/action'
 import { on } from 'svelte/events'
 import { animateEmpty } from '../helpers/animations.ts'
 
@@ -7,11 +8,7 @@ const SCALE_DURATION = 400
 const rippleSpan = document.createElement('span')
 const activeRipples = new Map<HTMLSpanElement, boolean>()
 
-let resolvers: undefined | ReturnType<typeof Promise.withResolvers>
-
-export const pendingRipples = async () => {
-	await resolvers?.promise
-}
+export const getActiveRipplesCount = (): number => activeRipples.size
 
 const markForOrExitRipple = (ripple: HTMLSpanElement) => {
 	const canExit = activeRipples.get(ripple)
@@ -29,7 +26,7 @@ const markForOrExitRipple = (ripple: HTMLSpanElement) => {
 			ripple.remove()
 
 			if (!activeRipples.size) {
-				resolvers?.resolve()
+				console.log('resolving')
 			}
 		})
 	} else {
@@ -50,10 +47,7 @@ const onExitHandler = () => {
 document.addEventListener('pointercancel', onExitHandler)
 document.addEventListener('pointerup', onExitHandler)
 
-const onPointerDownHandler = (_e: Event) => {
-	// TODO. https://github.com/sveltejs/svelte/issues/12027
-	const e = _e as PointerEvent
-
+const onPointerDownHandler = (e: PointerEvent) => {
 	// Only respond to main click events.
 	if (e.button !== 0) {
 		return
@@ -69,8 +63,6 @@ const onPointerDownHandler = (_e: Event) => {
 
 	const ripple = rippleSpan.cloneNode() as HTMLSpanElement
 	ripple.className = 'ripple'
-
-	resolvers = Promise.withResolvers()
 
 	// Use small value and scale it up to the right size,
 	// because that way less GPU memory is used
@@ -116,8 +108,18 @@ const onPointerDownHandler = (_e: Event) => {
 	)
 }
 
-export const ripple = (node: HTMLElement) => {
-	const cleanup = on(node, 'pointerdown', onPointerDownHandler)
+export interface RippleOptions {
+	stopPropagation?: boolean
+}
+
+export const ripple: Action<HTMLElement, RippleOptions | undefined> = (node, options) => {
+	const cleanup = on(node, 'pointerdown', (e) => {
+		if (options?.stopPropagation) {
+			e.stopPropagation()
+		}
+
+		onPointerDownHandler(e)
+	})
 
 	return {
 		destroy() {

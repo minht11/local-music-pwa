@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto, onNavigate } from '$app/navigation'
 	import { navigating, page } from '$app/stores'
-	import { pendingRipples } from '$lib/actions/ripple'
+	import { getActiveRipplesCount } from '$lib/actions/ripple'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import MenuRenderer, { initGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
@@ -45,7 +45,10 @@
 
 		const { promise, resolve } = Promise.withResolvers<void>()
 
-		await Promise.race([pendingRipples(), wait(100)])
+		if (getActiveRipplesCount() > 0) {
+			// Allow ripple animations to finish before transitioning
+			await wait(175)
+		}
 
 		document.documentElement.setAttribute('data-view-from', navigation.from?.route.id ?? '')
 		document.documentElement.setAttribute('data-view-to', navigation.to?.route.id ?? '')

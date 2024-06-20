@@ -44,11 +44,11 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <svelte:element
 	this={!disabled ? as : 'button'}
+	use:ripple={{ stopPropagation: true }}
 	{...restProps}
 	aria-label={ariaLabel}
 	{href}
 	disabled={disabled === true ? true : undefined}
-	use:ripple
 	class={clx(
 		kind === 'blank' ? 'interactable' : clx('base-button px-24px', KIND_CLASS_MAP[kind]),
 		restProps.class,

@@ -14,10 +14,7 @@
 </script>
 
 <div
-	class={clx(
-		'ring-1 ring-inset ring-primary/20 aspect-1/1 flex overflow-hidden contain-strict',
-		className,
-	)}
+	class={clx('ring-1 ring-primary/20 aspect-1/1 flex overflow-hidden contain-strict', className)}
 >
 	{#if src && !error}
 		<img
