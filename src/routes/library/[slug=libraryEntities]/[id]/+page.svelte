@@ -27,57 +27,59 @@
 </script>
 
 {#if !isWideLayout.value}
-	<Header title={store.singularTitle} />
+	<Header title={store.singularTitle} mode="fixed" />
 {/if}
 
-<section
-	class="@2xl:h-224px gap-24px flex flex-col @2xl:flex-row items-center justify-center w-full p-16px"
->
-	<Artwork src={artwork()} class="rounded-16px shrink-0 h-196px @2xl:h-full" />
+<div class="@container">
+	<section
+		class="@2xl:h-224px gap-24px flex flex-col @2xl:flex-row items-center justify-center w-full p-16px"
+	>
+		<Artwork src={artwork()} class="rounded-16px shrink-0 h-196px @2xl:h-full" />
 
-	<div class="flex flex-col bg-surfaceContainerHigh rounded-16px h-full w-full">
-		<div
-			class="flex flex-col items-center justify-center border-b border-outlineVariant p-16px grow"
-		>
-			<h1 class="text-headline-md">{album.name}</h1>
-			<h2 class="text-body-lg">{album.artists.join(', ')}</h2>
-			<div>
-				{album.year} • {tracks.length} tracks
+		<div class="flex flex-col bg-surfaceContainerHigh rounded-16px h-full w-full">
+			<div
+				class="flex flex-col items-center justify-center border-b border-outlineVariant p-16px grow"
+			>
+				<h1 class="text-headline-md">{album.name}</h1>
+				<h2 class="text-body-lg">{album.artists.join(', ')}</h2>
+				<div>
+					{album.year} • {tracks.length} tracks
+				</div>
+			</div>
+
+			<div class="flex gap-8px mt-auto py-16px pl-16px pr-8px items-center">
+				<Button
+					kind="toned"
+					class="mr-auto"
+					onclick={() => {
+						player.playTrack(0, tracks, {
+							shuffle: true,
+						})
+					}}
+				>
+					Shuffle
+					<Icon type="shuffle" />
+				</Button>
+
+				<IconButton
+					icon="moreVertical"
+					onclick={(e) => {
+						e.stopPropagation()
+
+						menu.showFromEvent(e, [], {
+							anchor: true,
+							preferredAlignment: {
+								horizontal: 'right',
+								vertical: 'top',
+							},
+						})
+					}}
+				/>
 			</div>
 		</div>
+	</section>
 
-		<div class="flex gap-8px mt-auto py-16px pl-16px pr-8px items-center">
-			<Button
-				kind="toned"
-				class="mr-auto"
-				onclick={() => {
-					player.playTrack(0, tracks, {
-						shuffle: true,
-					})
-				}}
-			>
-				Shuffle
-				<Icon type="shuffle" />
-			</Button>
-
-			<IconButton
-				icon="moreVertical"
-				onclick={(e) => {
-					e.stopPropagation()
-
-					menu.showFromEvent(e, [], {
-						anchor: true,
-						preferredAlignment: {
-							horizontal: 'right',
-							vertical: 'top',
-						},
-					})
-				}}
-			/>
-		</div>
+	<div class="px-16px">
+		<TracksListContainer items={tracks} />
 	</div>
-</section>
-
-<div class="px-16px">
-	<TracksListContainer items={tracks} />
 </div>

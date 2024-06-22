@@ -42,6 +42,8 @@ export class MainStore {
 	 */
 	volumeSliderEnabled = $state(!isMobile())
 
+	createNewPlaylistDialogOpen = $state(false)
+
 	constructor() {
 		persist('main', this, ['theme', 'pickColorFromArtwork', 'volumeSliderEnabled'])
 

@@ -24,10 +24,6 @@ const markForOrExitRipple = (ripple: HTMLSpanElement) => {
 		fadeAni.finished.then(() => {
 			activeRipples.delete(ripple)
 			ripple.remove()
-
-			if (!activeRipples.size) {
-				console.log('resolving')
-			}
 		})
 	} else {
 		activeRipples.set(ripple, true)

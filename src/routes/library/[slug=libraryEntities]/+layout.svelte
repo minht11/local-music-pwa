@@ -8,12 +8,14 @@
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.js'
+	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 	import type { LayoutParams } from './$types.ts'
 	import Search from './Search.svelte'
 
 	const { data, children } = $props()
 
 	const { store } = data
+	const main = useMainStore()
 
 	store.hydrateQuery()
 	const itemsIds = $derived(store.items)
@@ -123,6 +125,18 @@
 			<div class={clx(mode === 'both' && 'w-400px', 'px-16px grow flex flex-col')}>
 				<Search {store} />
 
+				{#if store.storeName === 'playlists'}
+					<div class="flex items-center justify-end mb-16px">
+						<Button
+							onclick={() => {
+								main.createNewPlaylistDialogOpen = true
+							}}
+						>
+							{m.libraryNewPlaylist()}
+						</Button>
+					</div>
+				{/if}
+
 				<div class={clx('w-full grow flex flex-col')}>
 					{#if store.searchTerm && itemsIds.length === 0}
 						<div class="flex flex-col relative text-center items-center m-auto">
@@ -148,7 +162,7 @@
 	{#snippet details()}
 		<div
 			class={clx(
-				'h-full rounded-24px pointer-events-auto flex flex-col @container',
+				'h-full rounded-24px pointer-events-auto flex flex-col',
 				layoutMode === 'both' && 'bg-surfaceContainer mx-16px mt-16px',
 			)}
 		>

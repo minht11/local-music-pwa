@@ -79,8 +79,7 @@ export interface Artist extends BaseMusicItem {
 
 export interface Playlist extends BaseMusicItem {
 	type: typeof MusicItemType.Playlist
-	dateCreated: number
-	trackIDs: number[]
+	created: number
 }
 
 export interface Directory {

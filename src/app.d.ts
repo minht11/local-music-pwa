@@ -4,10 +4,7 @@ declare global {
 		// interface Locals {}
 		interface PageData {
 			noPlayerOverlay?: boolean
-			noHeader?: boolean
-			hideBackButton?: boolean
 			pageTitle?: string
-			title: string
 			isHandHeldDevice: boolean
 			rootLayoutKey?: (url: URL) => string
 		}

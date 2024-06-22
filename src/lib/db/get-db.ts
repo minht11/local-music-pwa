@@ -1,6 +1,6 @@
 import type { DBSchema, IDBPDatabase, IDBPObjectStore, IndexNames, StoreNames } from 'idb'
 import { openDB } from 'idb'
-import type { Album, Artist, Directory, Track } from './entities.ts'
+import type { Album, Artist, Directory, Playlist, Track } from './entities.ts'
 
 export interface AppDB extends DBSchema {
 	tracks: {
@@ -35,6 +35,15 @@ export interface AppDB extends DBSchema {
 			name: string
 		}
 	}
+	playlists: {
+		key: number
+		value: Playlist
+		indexes: {
+			id: number
+			name: string
+			created: number
+		}
+	}
 	directories: {
 		key: number
 		value: Directory
@@ -56,7 +65,7 @@ const createIndexes = <DBTypes extends DBSchema | unknown, Name extends StoreNam
 }
 
 const createUniqueNameIndex = <
-	Name extends Extract<AppStoreNames, 'albums' | 'tracks' | 'artists'>,
+	Name extends Extract<AppStoreNames, 'albums' | 'tracks' | 'artists' | 'playlists'>,
 >(
 	store: IDBPObjectStore<AppDB, ArrayLike<AppStoreNames>, Name, 'versionchange'>,
 ) => {
@@ -73,7 +82,7 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 	})
 
 export const getDB = () =>
-	openDB<AppDB>('app-storage', 2, {
+	openDB<AppDB>('app-storage', 3, {
 		upgrade(e) {
 			const { objectStoreNames } = e
 
@@ -110,6 +119,12 @@ export const getDB = () =>
 			if (!objectStoreNames.contains('artists')) {
 				const store = createStore(e, 'artists')
 				createUniqueNameIndex(store)
+			}
+
+			if (!objectStoreNames.contains('playlists')) {
+				const store = createStore(e, 'playlists')
+				createUniqueNameIndex(store)
+				store.createIndex('created', 'created', { unique: false })
 			}
 
 			if (!objectStoreNames.contains('directories')) {

@@ -14,7 +14,6 @@
 	import type { Directory } from '$lib/db/entities.ts'
 	import { debounce } from '$lib/helpers/utils.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
-	import { argbFromHex } from '@material/material-color-utilities'
 	import {
 		checkNewDirectoryStatus,
 		directoriesStore,
@@ -124,7 +123,7 @@
 		},
 	}
 
-	const updateMainColor = debounce((value: string) => {
+	const updateMainColor = debounce((value: string | null) => {
 		mainStore.themeColorSeedHex = value
 	}, 400)
 </script>
@@ -313,7 +312,7 @@
 	title={m.replaceDirectoryQ()}
 	buttons={[
 		{
-			title: m.cancel()
+			title: m.cancel(),
 		},
 		{
 			title: m.replace(),

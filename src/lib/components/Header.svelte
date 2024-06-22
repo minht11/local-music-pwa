@@ -3,13 +3,16 @@
 		children?: Snippet
 		title?: string
 		noBackButton?: boolean
+		mode?: 'fixed' | 'sticky'
 	}
 </script>
 
 <script lang="ts">
 	import BackButton from './BackButton.svelte'
 
-	const { children, title, noBackButton }: HeaderProps = $props()
+	const { children, title, noBackButton, mode = 'sticky' }: HeaderProps = $props()
+
+	const isFixed = $derived(mode === 'fixed')
 
 	let scrollThresholdEl = $state<HTMLDivElement>()
 	let isScrolled = $state(false)
@@ -33,10 +36,16 @@
 </script>
 
 <div bind:this={scrollThresholdEl} class="h-0 w-full" inert></div>
+
+{#if isFixed}
+	<div class="h-[--app-header-height] shrink-0" aria-hidden="true"></div>
+{/if}
+
 <header
 	class={clx(
-		'sticky inset-x-0 top-0 z-10 flex h-[--app-header-height] flex-shrink-0',
-		isScrolled && 'bg-surfaceContainerHigh bg-surface',
+		'inset-x-0 top-0 z-10 flex h-[--app-header-height] flex-shrink-0 transition-background-color duration-200 ease-in-out',
+		isScrolled && 'bg-surfaceContainerHigh',
+		isFixed ? 'fixed' : 'sticky',
 	)}
 >
 	<div class="max-w-1280px flex mx-auto w-full items-center pl-24px pr-8px">

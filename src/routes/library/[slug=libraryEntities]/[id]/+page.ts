@@ -6,7 +6,9 @@ import invariant from 'tiny-invariant'
 import type { PageLoad } from './$types.ts'
 
 export const load: PageLoad = async (event) => {
-	if (event.params.slug === 'tracks') {
+	const { slug } = event.params
+
+	if (slug === 'tracks') {
 		error(404)
 	}
 
@@ -46,6 +48,7 @@ export const load: PageLoad = async (event) => {
 	await preloadTracks(trackIds, 10)
 
 	return {
+		libraryType: slug,
 		title: 'Album',
 		albumQuery,
 		tracksQuery,

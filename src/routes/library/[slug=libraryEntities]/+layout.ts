@@ -1,7 +1,7 @@
 import type { LayoutLoad } from './$types.ts'
 import { LibraryStore } from './store.svelte'
 
-type LibraryStoreNames = 'tracks' | 'albums' | 'artists'
+type LibraryStoreNames = 'tracks' | 'albums' | 'artists' | 'playlists'
 
 const nameSortOption = {
 	name: 'Name',
@@ -48,16 +48,19 @@ const storeMap = {
 			pluralTitle: m.artists(),
 			sortOptions: [nameSortOption],
 		}),
+	playlists: () =>
+		new LibraryStore({
+			storeName: 'playlists',
+			singularTitle: m.playlist(),
+			pluralTitle: m.playlists(),
+			sortOptions: [nameSortOption],
+		}),
 } satisfies {
 	[K in LibraryStoreNames]: () => LibraryStore<K>
 }
 
 export const load: LayoutLoad = async (event) => {
 	const { slug } = event.params
-
-	if (slug === 'playlists') {
-		throw new Error('Not implemented')
-	}
 
 	const store = storeMap[slug]()
 
@@ -67,7 +70,6 @@ export const load: LayoutLoad = async (event) => {
 		slug,
 		store,
 		title: 'Library',
-		noHeader: true,
 		rootLayoutKey: () => slug,
 	}
 }

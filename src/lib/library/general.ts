@@ -2,7 +2,7 @@ import { type AppDB, getDB } from '$lib/db/get-db'
 import type { IDBPIndex, IndexNames } from 'idb'
 
 export type SortOrder = 'asc' | 'desc'
-export type LibraryEntityStoreName = 'tracks' | 'albums' | 'artists'
+export type LibraryEntityStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
 export type LibraryEntitySortKey<StoreName extends LibraryEntityStoreName> = IndexNames<
 	AppDB,
 	StoreName

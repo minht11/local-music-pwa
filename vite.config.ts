@@ -12,7 +12,6 @@ export default defineConfig({
 	},
 	build: {
 		target: 'esnext',
-		cssCodeSplit: false,
 		minify: 'terser',
 		terserOptions: {
 			output: {
