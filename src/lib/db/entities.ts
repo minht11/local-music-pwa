@@ -1,5 +1,7 @@
 import type { FileEntity } from '$lib/helpers/file-system'
 
+export type OmitId<T> = Omit<T, 'id'>
+
 export const MusicItemType = {
 	Track: 0,
 	Album: 1,

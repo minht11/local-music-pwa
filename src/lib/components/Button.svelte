@@ -11,6 +11,7 @@
 	export interface ButtonProps<As extends AllowedButtonElement> {
 		as?: As
 		kind?: ButtonKind
+		type?: 'button' | 'submit' | 'reset'
 		disabled?: boolean
 		href?: ButtonHref<As>
 		class?: string
@@ -28,6 +29,7 @@
 		kind = 'filled',
 		disabled = false,
 		href = (as === 'a' ? '' : undefined) as ButtonHref<As>,
+		type = 'button',
 		children,
 		ariaLabel,
 		...restProps
@@ -46,6 +48,7 @@
 	this={!disabled ? as : 'button'}
 	use:ripple={{ stopPropagation: true }}
 	{...restProps}
+	{type}
 	aria-label={ariaLabel}
 	{href}
 	disabled={disabled === true ? true : undefined}

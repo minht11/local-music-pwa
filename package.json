@@ -54,6 +54,7 @@
 		"motion": "^10.18.0",
 		"music-metadata": "^7.14.0",
 		"tiny-invariant": "^1.3.3",
+		"valibot": "^0.33.3",
 		"weak-lru-cache": "^1.2.2"
 	},
 	"engines": {

@@ -7,6 +7,7 @@
 
 	export interface DialogButton {
 		title: string
+		type?: 'submit' | 'button' | 'reset' | 'close'
 		action?: () => void
 	}
 
@@ -18,6 +19,7 @@
 		class?: string
 		children: Snippet
 		onclose?: () => void
+		onsubmit?: (e: SubmitEvent) => void
 	}
 </script>
 
@@ -30,6 +32,7 @@
 		class: className,
 		children,
 		onclose,
+		onsubmit,
 	}: DialogProps = $props()
 
 	let dialog = $state<HTMLDialogElement>()!
@@ -145,7 +148,6 @@
 
 	const onOpenAction = (node: HTMLDialogElement) => {
 		node.showModal()
-		node.focus()
 		animateEnter()
 	}
 
@@ -187,36 +189,42 @@
 			<h1 class="text-headline-sm">{title}</h1>
 		</header>
 
-		<div
-			data-dialog-part="content"
-			bind:this={dialogBody}
-			class="mt-16px flex-grow text-onSurfaceVariant"
-		>
-			{@render children()}
-		</div>
-
-		{#if buttons?.length}
-			<div bind:this={dialogFooter} class="mt-24px flex justify-end gap-8px">
-				{#each buttons as button}
-					<Button
-						kind="flat"
-						class="min-w-60px"
-						onclick={() => {
-							button.action?.()
-							open = false
-						}}
-					>
-						{button.title}
-					</Button>
-				{/each}
+		<form method="dialog" class="contents" {onsubmit}>
+			<div
+				data-dialog-part="content"
+				bind:this={dialogBody}
+				class="mt-16px flex-grow text-onSurfaceVariant"
+			>
+				{@render children()}
 			</div>
-		{/if}
+
+			{#if buttons?.length}
+				<div bind:this={dialogFooter} class="mt-24px flex justify-end gap-8px">
+					{#each buttons as button}
+						<Button
+							kind="flat"
+							class="min-w-60px"
+							type={button.type !== 'close' ? button.type : 'button'}
+							onclick={() => {
+								button.action?.()
+								if (!button.type || button.type === 'close') {
+									open = false
+								}
+							}}
+						>
+							{button.title}
+						</Button>
+					{/each}
+				</div>
+			{/if}
+		</form>
 	</dialog>
 {/if}
 
 <style>
 	dialog::backdrop {
 		background: rgba(0, 0, 0, 0.22);
+		backdrop-filter: blur(4px);
 	}
 
 	/* dialog[open] {

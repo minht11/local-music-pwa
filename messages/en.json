@@ -26,6 +26,7 @@
 	"libraryCreateNewPlaylist": "Create new playlist",
 	"libraryCancel": "Cancel",
 	"libraryCreate": "Create",
+	"libraryPlaylistFieldName": "playlist name",
 
 	"replaceDirectoryQ": "Replace directory?",
 	"replaceDirectoryExplanation": "The directory {newDir} you're adding is already a parent of {existingDir} which already is in your Library.\n No changes will occur for existing tracks.",
@@ -44,5 +45,9 @@
 
 	"about": "About",
 	"aboutSourceCode": "Source code",
-	"aboutPrivacy": "Privacy"
+	"aboutPrivacy": "Privacy",
+
+	"validationRequired": "Field is required",
+	"validationMinLength": "At least {min} characters required",
+	"validationMaxLength": "At most {max} characters allowed"
 }
