@@ -128,10 +128,13 @@
 				{#if store.storeName === 'playlists'}
 					<div class="flex items-center justify-end mb-16px">
 						<Button
+							kind="outlined"
 							onclick={() => {
 								main.createNewPlaylistDialogOpen = true
 							}}
 						>
+							<Icon type="plus" />
+
 							{m.libraryNewPlaylist()}
 						</Button>
 					</div>
