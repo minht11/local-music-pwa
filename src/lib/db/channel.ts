@@ -1,4 +1,4 @@
-import { browser } from '$app/environment'
+// import { browser } from '$app/environment'
 import type { AppStoreNames } from './get-db.ts'
 
 export interface DBChangeRecord {
@@ -20,7 +20,8 @@ type Listener = (changes: readonly DBChangeRecord[]) => void
 // It is faster to manually store listeners in a Set, than registering 2 EventTargets.
 const listeners = new Set<Listener>()
 
-if (browser) {
+// TODO. https://github.com/sveltejs/kit/issues/12394
+if (globalThis.window) {
 	const notifyListeners = (changes: readonly DBChangeRecord[]) => {
 		for (const listener of listeners) {
 			listener(changes)

@@ -11,6 +11,16 @@ export default defineConfig({
 		},
 	},
 	build: {
+		modulePreload: {
+			polyfill: false,
+		},
+		rollupOptions: {
+			output: {
+				// Some chunks will still be smaller than this
+				// because of how svelte kit works.
+				experimentalMinChunkSize: 20 * 1024, // 20kb
+			},
+		},
 		target: 'esnext',
 		minify: 'terser',
 		terserOptions: {
