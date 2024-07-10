@@ -4,7 +4,7 @@ import type { Directory } from '$lib/db/entities'
 import { getDB } from '$lib/db/get-db'
 import type { TrackImportOptions } from '$lib/library/import-tracks/worker/types'
 import { removeTrackWithTx } from '$lib/library/tracks.svelte'
-import { Set as SvelteSet } from 'svelte/reactivity'
+import { SvelteSet } from 'svelte/reactivity'
 
 export const checkNewDirectoryStatus = async (
 	existingDir: Directory,

@@ -1,7 +1,7 @@
 import type { ParsedTrackData } from '$lib/db/entities'
 // @ts-expect-error - no types
 import { Buffer } from 'buffer-lite'
-import { parseBuffer as parseMetadata } from 'music-metadata/lib/core'
+import { parseBlob } from 'music-metadata'
 import { getArtworkRelatedData } from './format-artwork.ts'
 
 // Music metadata library uses the Buffer global.
@@ -18,14 +18,9 @@ export const parseTrack = async (file: File): Promise<ParsedTrackData | null> =>
 		return null
 	}
 
-	const fileBuffer = await new Response(file).arrayBuffer()
-
-	const fileUint8 = new Uint8Array(fileBuffer)
-	const tags = await parseMetadata(
-		fileUint8,
-		{ mimeType: file.type, path: file.name, size: file.size },
-		{ duration: true },
-	)
+	const tags = await parseBlob(file, {
+		duration: true,
+	})
 
 	const { common } = tags
 
