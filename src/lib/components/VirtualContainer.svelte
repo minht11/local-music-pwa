@@ -8,7 +8,7 @@
 		createWindowVirtualizer,
 	} from '@tanstack/svelte-virtual'
 	import { untrack } from 'svelte'
-	import type { Readable } from 'svelte/motion'
+	import type { Readable } from 'svelte/store'
 	import { useScrollTarget } from './ScrollContainer.svelte'
 
 	interface Props {
@@ -18,7 +18,7 @@
 		gap?: number
 		offsetWidth?: number
 		key: (index: number) => string | number
-		children: Snippet<[VirtualItem]>
+		children: Snippet<[VirtualItem<HTMLElement>]>
 	}
 
 	let {

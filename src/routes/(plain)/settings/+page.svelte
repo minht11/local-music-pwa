@@ -128,7 +128,7 @@
 	}, 400)
 </script>
 
-<section class="card mx-auto w-full max-w-[900px] mt-64px">
+<section class="card mx-auto w-full max-w-[900px]">
 	<div class="flex gap-24px px-16px pt-16px">
 		<div>
 			<div class="text-body-lg">
@@ -264,25 +264,35 @@
 		<Switch bind:checked={mainStore.pickColorFromArtwork} />
 	</div>
 
-	<div class="flex items-center p-16px gap-8px">
+	<div class="flex flex-col sm:flex-row items-center p-16px gap-x-8px gap-y-16px">
 		<div class="mr-auto">{m.settingsPrimaryColor()}</div>
 
-		<Button kind="outlined">{m.settingsColorReset()}</Button>
+		<div class="flex gap-8px max-sm:w-full">
+			<Button
+				kind="outlined"
+				class="max-sm:w-full"
+				disabled={!mainStore.themeColorSeedHex}
+				onclick={() => {
+					mainStore.themeColorSeedHex = null
+				}}
+			>
+				{m.settingsColorReset()}
+			</Button>
 
-		<Button kind="toned">
-			<div class="rounded-full p-4px" style={`background: ${mainStore.themeColorSeedHex}`}>
-				<Icon type="eyedropper" class="size-20px" />
-			</div>
+			<Button kind="toned" class="max-sm:w-full">
+				<div class="rounded-full p-4px" style={`background: ${mainStore.themeColorSeedHex}`}>
+					<Icon type="eyedropper" class="size-20px" />
+				</div>
 
-			{m.settingsColorPick()}
+				{m.settingsColorPick()}
 
-			<input
-				type="color"
-				bind:value={themeColor.value}
-				class="appearance-none w-full h-full absolute inset-0 opacity-0 cursor-pointer"
-			/>
-		</Button>
-		<!-- </div> -->
+				<input
+					type="color"
+					bind:value={themeColor.value}
+					class="appearance-none w-full h-full absolute inset-0 opacity-0 cursor-pointer"
+				/>
+			</Button>
+		</div>
 	</div>
 
 	<Separator />

@@ -144,6 +144,7 @@ export const createLibraryEntityQuery =
 export const useTrack = createLibraryEntityQuery('tracks')
 export const useAlbum = createLibraryEntityQuery('albums')
 export const useArtist = createLibraryEntityQuery('artists')
+export const usePlaylist = createLibraryEntityQuery('playlists')
 
 export const preloadTracks = async (ids: number[], count: number) => {
 	const db = await getDB()

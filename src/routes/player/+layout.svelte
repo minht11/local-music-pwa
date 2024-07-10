@@ -156,6 +156,9 @@
 		{:else}
 			<TracksListContainer
 				items={player.itemsIds}
+				predefinedMenuItems={{
+					addToQueue: false,
+				}}
 				onItemClick={({ index }) => {
 					player.playTrack(index)
 				}}

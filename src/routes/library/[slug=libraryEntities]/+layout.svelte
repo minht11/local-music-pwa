@@ -6,6 +6,7 @@
 	import AlbumsListContainer from '$lib/components/albums/AlbumsListContainer.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
+	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.js'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
@@ -156,6 +157,8 @@
 						<TracksListContainer items={itemsIds} />
 					{:else if store.storeName === 'albums'}
 						<AlbumsListContainer items={itemsIds} />
+					{:else if store.storeName === 'playlists'}
+						<PlaylistListContainer items={itemsIds} />
 					{/if}
 				</div>
 			</div>

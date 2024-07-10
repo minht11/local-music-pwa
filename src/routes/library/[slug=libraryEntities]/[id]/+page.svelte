@@ -37,9 +37,7 @@
 		<Artwork src={artwork()} class="rounded-16px shrink-0 h-196px @2xl:h-full" />
 
 		<div class="flex flex-col bg-surfaceContainerHigh rounded-16px h-full w-full">
-			<div
-				class="flex flex-col items-center justify-center border-b border-outlineVariant p-16px grow"
-			>
+			<div class="flex flex-col p-16px grow">
 				<h1 class="text-headline-md">{album.name}</h1>
 				<h2 class="text-body-lg">{album.artists.join(', ')}</h2>
 				<div>

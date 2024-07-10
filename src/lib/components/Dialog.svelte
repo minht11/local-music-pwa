@@ -17,7 +17,7 @@
 		icon?: IconType
 		buttons?: DialogButton[]
 		class?: string
-		children: Snippet
+		children?: Snippet
 		onclose?: () => void
 		onsubmit?: (e: SubmitEvent) => void
 	}
@@ -156,6 +156,12 @@
 			onclose?.()
 		}
 	})
+
+	const submitHandler = (e: SubmitEvent) => {
+		e.preventDefault()
+
+		onsubmit?.(e)
+	}
 </script>
 
 {#if isBeingRendered}
@@ -189,14 +195,16 @@
 			<h1 class="text-headline-sm">{title}</h1>
 		</header>
 
-		<form method="dialog" class="contents" {onsubmit}>
-			<div
-				data-dialog-part="content"
-				bind:this={dialogBody}
-				class="mt-16px flex-grow text-onSurfaceVariant"
-			>
-				{@render children()}
-			</div>
+		<form method="dialog" class="contents" onsubmit={submitHandler}>
+			{#if children}
+				<div
+					data-dialog-part="content"
+					bind:this={dialogBody}
+					class="mt-16px flex-grow text-onSurfaceVariant"
+				>
+					{@render children()}
+				</div>
+			{/if}
 
 			{#if buttons?.length}
 				<div bind:this={dialogFooter} class="mt-24px flex justify-end gap-8px">

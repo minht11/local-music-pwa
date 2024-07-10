@@ -3,6 +3,7 @@
 	import { navigating, page } from '$app/stores'
 	import { getActiveRipplesCount } from '$lib/actions/ripple'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
+	import ConfirmRemovePlaylistDialog from '$lib/components/dialogs/ConfirmRemovePlaylistDialog.svelte'
 	import NewPlaylistDialog from '$lib/components/dialogs/new-playlist/NewPlaylistDialog.svelte'
 	import MenuRenderer, { initGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
@@ -149,6 +150,7 @@
 </div>
 
 <NewPlaylistDialog />
+<ConfirmRemovePlaylistDialog />
 
 <style>
 	@keyframes fade-in {

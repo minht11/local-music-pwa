@@ -47,3 +47,35 @@ export const createPlaylist = async (name: string) => {
 		})
 	}
 }
+
+export const removePlaylistInDatabase = async (id: number) => {
+	const db = await getDB()
+
+	await db.delete('playlists', id)
+
+	notifyAboutDatabaseChanges([
+		{
+			operation: 'delete',
+			storeName: 'playlists',
+			id,
+		},
+	])
+}
+
+export const removePlaylist = async (id: number, name: string) => {
+	try {
+		await removePlaylistInDatabase(id)
+
+		snackbar({
+			id: `playlist-removed-${id}`,
+			// TODO. i18n
+			message: `Playlist "${truncate(name, 20)}" removed`,
+		})
+	} catch {
+		snackbar({
+			id: 'playlist-remove-error',
+			// TODO. i18n
+			message: 'Failed to remove playlist',
+		})
+	}
+}
