@@ -1,12 +1,6 @@
 import type { ParsedTrackData } from '$lib/db/entities'
-// @ts-expect-error - no types
-import { Buffer } from 'buffer-lite'
 import { parseBlob } from 'music-metadata'
 import { getArtworkRelatedData } from './format-artwork.ts'
-
-// Music metadata library uses the Buffer global.
-// @ts-ignore
-globalThis.Buffer = Buffer
 
 // This limit is a bit arbitrary.
 const FILE_SIZE_LIMIT_500MB = 5e8
