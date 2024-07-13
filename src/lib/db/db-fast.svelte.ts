@@ -154,6 +154,8 @@ export const createQuery = <const K extends QueryKey, R>(options: QueryOptions<K
 						if (typeof v === 'function') {
 							// @ts-expect-error TODO
 							value = v(state.value)
+						} else {
+							value = v
 						}
 
 						if (!options.disableCache) {
@@ -319,9 +321,13 @@ export const defineListQuery = <const StoreName extends AppStoreNames, const K e
 					continue
 				}
 
-				if (change.operation === 'add') {
+				if (
 					// We have no way of knowing where should the new item be inserted.
 					// So we just refetch the whole list.
+					change.operation === 'add' ||
+					// If playlist name changes, order might change as well.
+					(name === 'playlists' && change.operation === 'update')
+				) {
 					needRefetch = true
 					break
 				}

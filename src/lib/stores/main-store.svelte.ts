@@ -7,7 +7,7 @@ import invariant from 'tiny-invariant'
 export type AppTheme = 'light' | 'dark'
 export type AppThemeOption = AppTheme | 'auto'
 
-export interface RemovePlaylistConfirmOptions {
+export interface ModifyPlaylistOptions {
 	id: number
 	name: string
 }
@@ -50,10 +50,10 @@ export class MainStore {
 	createNewPlaylistDialogOpen = $state(false)
 
 	/** Contains playlist id while dialog is open */
-	editPlaylistDialogOpenId = $state<number | null>(null)
+	editPlaylistDialogOpen = $state<ModifyPlaylistOptions | null>(null)
 
 	/** Contains playlist id while dialog is open */
-	removePlaylistDialogOpen = $state<RemovePlaylistConfirmOptions | null>()
+	removePlaylistDialogOpen = $state<ModifyPlaylistOptions | null>(null)
 
 	constructor() {
 		persist('main', this, ['theme', 'pickColorFromArtwork', 'volumeSliderEnabled'])

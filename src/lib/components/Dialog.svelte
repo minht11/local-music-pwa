@@ -48,6 +48,7 @@
 				pseudoElement: '::backdrop',
 				duration: 300,
 				easing: 'linear',
+				fill: isOut ? 'forwards' : undefined,
 			},
 		)
 

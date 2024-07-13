@@ -35,7 +35,10 @@
 				{
 					label: 'Edit playlist',
 					action: () => {
-						// TODO.
+						main.editPlaylistDialogOpen = {
+							id: playlist.id,
+							name: playlist.name,
+						}
 					},
 				},
 				{

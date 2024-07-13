@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { truncate } from '$lib/helpers/utils'
+	import { removePlaylist } from '$lib/library/playlists.svelte'
 	import { useMainStore } from '$lib/stores/main-store.svelte'
+	import invariant from 'tiny-invariant'
 	import Dialog from '../Dialog.svelte'
 
 	const main = useMainStore()
@@ -29,6 +31,10 @@
 		},
 	]}
 	onsubmit={() => {
-		console.log('Remove playlist', main.removePlaylistDialogOpen?.id)
+		const data = main.removePlaylistDialogOpen
+		invariant(data !== null, 'Playlist to remove is not set')
+
+		open.value = false
+		void removePlaylist(data.id, data.name)
 	}}
 ></Dialog>

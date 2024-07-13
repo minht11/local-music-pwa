@@ -26,6 +26,7 @@
 	"libraryCreateNewPlaylist": "Create new playlist",
 	"libraryCancel": "Cancel",
 	"libraryCreate": "Create",
+	"librarySave": "Save",
 	"libraryPlaylistFieldName": "playlist name",
 
 	"replaceDirectoryQ": "Replace directory?",

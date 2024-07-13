@@ -7,8 +7,6 @@
 	const main = useMainStore()
 
 	const onSubmitHandler = async (event: SubmitEvent) => {
-		event.preventDefault()
-
 		const formData = new FormData(event.target as HTMLFormElement)
 		const name = formData.get('name') as string
 
