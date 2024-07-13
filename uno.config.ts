@@ -1,5 +1,5 @@
 import { defineConfig, presetUno } from 'unocss'
-import { DEFAULT_THEME_ARGB, getThemePaletteRgb } from './src/lib/theme'
+import { DEFAULT_THEME_ARGB, getThemePaletteRgb } from './src/lib/theme.ts'
 
 const generateThemeVariables = async (isDark: boolean) => {
 	const tokens = await getThemePaletteRgb(DEFAULT_THEME_ARGB, isDark)

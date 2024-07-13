@@ -1,7 +1,7 @@
 <script context="module" lang="ts">
 	import { clx } from '$lib/helpers/clx'
 	import { type TimelineSegment, timeline } from 'motion'
-	import { untrack } from 'svelte'
+	import type { AnimationConfig } from 'svelte/animate'
 	import Button from './Button.svelte'
 	import Icon, { type IconType } from './icon/Icon.svelte'
 
@@ -35,22 +35,14 @@
 		onsubmit,
 	}: DialogProps = $props()
 
-	let dialog = $state<HTMLDialogElement>()!
 	let dialogHeader = $state<HTMLElement>()!
 	let dialogBody = $state<HTMLElement>()!
 	let dialogFooter = $state<HTMLElement>()!
 
-	const animateEnter = () => {
-		if (!dialog) {
-			return
-		}
-
-		const fade = (el: HTMLElement) =>
-			[el, { opacity: [0, 1] }, { duration: 0.3, at: '<' }] satisfies TimelineSegment
-
+	const animateBackdrop = (dialog: HTMLDialogElement, isOut = false) =>
 		dialog.animate(
 			{
-				opacity: [0, 1],
+				opacity: isOut ? [1, 0] : [0, 1],
 			},
 			{
 				pseudoElement: '::backdrop',
@@ -58,6 +50,12 @@
 				easing: 'linear',
 			},
 		)
+
+	const animateIn = (dialog: HTMLDialogElement) => {
+		const fade = (el: HTMLElement) =>
+			[el, { opacity: [0, 1] }, { duration: 0.3, at: '<' }] satisfies TimelineSegment
+
+		animateBackdrop(dialog)
 
 		timeline(
 			[
@@ -84,25 +82,11 @@
 		)
 	}
 
-	const animateExit = () => {
-		if (!dialog) {
-			return
-		}
-
+	const animateOut = (dialog: HTMLDialogElement) => {
 		const fade = (el: HTMLElement) =>
 			[el, { opacity: [1, 0] }, { duration: 0.3, at: '<' }] satisfies TimelineSegment
 
-		dialog.animate(
-			{
-				opacity: [1, 0],
-			},
-			{
-				pseudoElement: '::backdrop',
-				duration: 300,
-				easing: 'linear',
-				fill: 'forwards',
-			},
-		)
+		animateBackdrop(dialog, true)
 
 		return timeline(
 			[
@@ -130,29 +114,8 @@
 		).finished
 	}
 
-	let isBeingRendered = $state(false)
-
 	$effect(() => {
-		if (open) {
-			untrack(() => {
-				isBeingRendered = true
-			})
-		} else {
-			untrack(() => {
-				animateExit()?.then(() => {
-					isBeingRendered = false
-				})
-			})
-		}
-	})
-
-	const onOpenAction = (node: HTMLDialogElement) => {
-		node.showModal()
-		animateEnter()
-	}
-
-	$effect(() => {
-		if (isBeingRendered && !open) {
+		if (!open) {
 			onclose?.()
 		}
 	})
@@ -162,22 +125,38 @@
 
 		onsubmit?.(e)
 	}
+
+	const onOpenAction = (dialog: HTMLDialogElement) => {
+		dialog.showModal()
+		void animateIn(dialog)
+	}
+
+	const outAni = (dialog: HTMLDialogElement): AnimationConfig => {
+		void animateOut(dialog)
+
+		// TODO. A hack until svelte supports non duration based animations
+		return {
+			duration: 300,
+		}
+	}
 </script>
 
-{#if isBeingRendered}
+{#if open}
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<dialog
-		bind:this={dialog}
 		use:onOpenAction
+		out:outAni
 		onkeydown={(e) => {
 			if (e.key === 'Escape') {
 				open = false
+				// We don't want dialog to exit top level
+				// and instead remain until the animation is complete
+				// and then remove from the DOM
 				e.preventDefault()
 			}
 		}}
 		onclose={() => {
 			// There is no way to prevent dialog close event
-			isBeingRendered = false
 			open = false
 		}}
 		class={clx(
@@ -234,13 +213,4 @@
 		background: rgba(0, 0, 0, 0.22);
 		backdrop-filter: blur(4px);
 	}
-
-	/* dialog[open] {
-		opacity: 1;
-	}
-
-	dialog {
-		opacity: 0;
-		transition: opacity 2s ease-in-out, overlay 2s ease-out allow-discrete;
-	} */
 </style>
