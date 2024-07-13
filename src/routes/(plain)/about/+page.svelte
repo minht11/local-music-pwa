@@ -5,11 +5,11 @@
 	<div class="text-headline-md mb-16px">Snae Player</div>
 
 	<div class="flex justify-between bg-surfaceContainerLowest px-16px py-8px rounded-8px gap-16px">
-		<a href="https://github.com/minht11/local-music-pwa" class="link">
+		<a href="https://github.com/minht11/local-music-pwa" target="_blank" class="link">
 			{m.aboutSourceCode()}
 		</a>
 
-		<a href="https://github.com/minht11/local-music-pwa#privacy" class="link">
+		<a href="https://github.com/minht11/local-music-pwa#privacy" target="_blank" class="link">
 			{m.aboutPrivacy()}
 		</a>
 	</div>
