@@ -71,19 +71,32 @@
 		}
 	}
 
+	const updateWindowTileBarColor = () => {
+		const element = document.querySelector('meta[name="theme-color"]')
+		if (!element) {
+			return
+		}
+
+		const surfaceRgb = window.getComputedStyle(document.body).getPropertyValue('--color-surface')
+		element.setAttribute('content', `rgb(${surfaceRgb})`)
+	}
+
 	let initial = true
 	$effect(() => {
 		mainStore.themeColorSeed
 		const isDark = mainStore.themeIsDark
 		const color = mainStore.pickColorFromArtwork ? player.activeTrack?.primaryColor : undefined
 
-		console.log('updateStyles', color, isDark)
 		if (initial) {
 			initial = false
+			updateWindowTileBarColor()
+
 			return
 		}
 
-		void updateStyles(color ?? mainStore.themeColorSeed, isDark)
+		updateStyles(color ?? mainStore.themeColorSeed, isDark).then(() => {
+			updateWindowTileBarColor()
+		})
 	})
 
 	$effect.pre(() => {

@@ -20,7 +20,7 @@
 
 <div
 	class={clx(
-		'view-transition-pl-container overflow-hidden max-w-900px mx-auto justify-between sm:h-auto rounded-16px sm:rounded-24px bg-secondaryContainer text-onSecondaryContainer',
+		'view-transition-pl-container border border-primary/10 overflow-hidden max-w-900px mx-auto justify-between sm:h-auto rounded-16px sm:rounded-24px bg-secondaryContainer text-onSecondaryContainer',
 		className,
 	)}
 >

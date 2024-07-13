@@ -33,7 +33,7 @@
 <Dialog
 	bind:open={open.value}
 	icon="addPlaylist"
-	title={m.libraryCreateNewPlaylist()}
+	title={m.libraryEditPlaylistName()}
 	class="w-400px"
 	buttons={[
 		{
