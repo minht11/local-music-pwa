@@ -112,7 +112,7 @@
 {#if !(layoutMode === 'details' && !isWideLayout.value)}
 	<div
 		class={clx(
-			'gap-8px fixed z-1 desktop-sidebar flex-col w-max h-max mt-80px',
+			'gap-8px fixed z-1 desktop-sidebar flex-col w-max h-max mt-80px [@media(max-height:400px)]:mt-0',
 			data.isHandHeldDevice ? 'hidden sm:flex' : 'flex',
 		)}
 	>
@@ -158,7 +158,29 @@
 					{:else if store.storeName === 'albums'}
 						<AlbumsListContainer items={itemsIds} />
 					{:else if store.storeName === 'playlists'}
-						<PlaylistListContainer items={itemsIds} />
+						<PlaylistListContainer
+							items={itemsIds}
+							menuItems={(playlist) => [
+								{
+									label: 'Edit playlist',
+									action: () => {
+										main.editPlaylistDialogOpen = {
+											id: playlist.id,
+											name: playlist.name,
+										}
+									},
+								},
+								{
+									label: 'Remove playlist',
+									action: () => {
+										main.removePlaylistDialogOpen = {
+											id: playlist.id,
+											name: playlist.name,
+										}
+									},
+								},
+							]}
+						/>
 					{/if}
 				</div>
 			</div>

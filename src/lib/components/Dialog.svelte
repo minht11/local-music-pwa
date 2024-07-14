@@ -13,7 +13,7 @@
 
 	export interface DialogProps {
 		open?: boolean
-		title: string
+		title?: string
 		icon?: IconType
 		buttons?: DialogButton[]
 		class?: string
@@ -161,7 +161,7 @@
 			open = false
 		}}
 		class={clx(
-			'focus:outline-none flex min-w-280px max-w-[min(100%-16px,var(--dialog-width,560px))] select-none flex-col rounded-24px bg-surfaceContainerHigh p-24px text-onSurface',
+			'focus:outline-none overscroll-contain flex min-w-280px max-w-[min(100%-16px,var(--dialog-width,560px))] select-none flex-col rounded-24px bg-surfaceContainerHigh p-24px text-onSurface',
 			className,
 		)}
 	>
@@ -172,7 +172,10 @@
 			{#if icon}
 				<Icon type={icon} class="text-secondary" />
 			{/if}
-			<h1 class="text-headline-sm">{title}</h1>
+
+			{#if title}
+				<h1 class="text-headline-sm">{title}</h1>
+			{/if}
 		</header>
 
 		<form method="dialog" class="contents" onsubmit={submitHandler}>

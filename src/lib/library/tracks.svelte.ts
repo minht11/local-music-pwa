@@ -160,31 +160,3 @@ export const preloadTracks = async (ids: number[], count: number) => {
 		index += 1
 	}
 }
-
-export const getAlbumByTrackId = async (albumName?: string) => {
-	const db = await getDB()
-
-	if (!albumName) {
-		return undefined
-	}
-
-	const album = await db.getFromIndex('albums', 'name', albumName)
-
-	console.log('album', album)
-
-	return album
-}
-
-export const getArtistByName = async (artistName?: string) => {
-	const db = await getDB()
-
-	if (!artistName) {
-		return undefined
-	}
-
-	const artist = await db.getFromIndex('artists', 'name', artistName)
-
-	console.log('artist', artist)
-
-	return artist
-}

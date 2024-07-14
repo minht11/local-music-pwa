@@ -3,6 +3,7 @@
 	import { navigating, page } from '$app/stores'
 	import { getActiveRipplesCount } from '$lib/actions/ripple'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
+	import AddToPlaylistDialog from '$lib/components/dialogs/AddToPlaylistDialog.svelte'
 	import ConfirmRemovePlaylistDialog from '$lib/components/dialogs/ConfirmRemovePlaylistDialog.svelte'
 	import EditPlaylistDialog from '$lib/components/dialogs/EditPlaylistDialog.svelte'
 	import NewPlaylistDialog from '$lib/components/dialogs/new-playlist/NewPlaylistDialog.svelte'
@@ -166,6 +167,7 @@
 <NewPlaylistDialog />
 <EditPlaylistDialog />
 <ConfirmRemovePlaylistDialog />
+<AddToPlaylistDialog />
 
 <style>
 	@keyframes fade-in {

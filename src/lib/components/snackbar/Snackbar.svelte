@@ -12,7 +12,7 @@
 </script>
 
 <script lang="ts">
-	const { id, message, duration = 8000, ondismiss }: SnackbarProps = $props()
+	const { id, message, duration = 6000, ondismiss }: SnackbarProps = $props()
 
 	const dismiss = () => ondismiss(id)
 

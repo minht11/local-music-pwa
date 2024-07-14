@@ -55,6 +55,8 @@ export class MainStore {
 	/** Contains playlist id while dialog is open */
 	removePlaylistDialogOpen = $state<ModifyPlaylistOptions | null>(null)
 
+	addTrackToPlaylistDialogOpen = $state<number | null>(null)
+
 	constructor() {
 		persist('main', this, ['theme', 'pickColorFromArtwork', 'volumeSliderEnabled'])
 

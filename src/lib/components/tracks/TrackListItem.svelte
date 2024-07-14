@@ -61,8 +61,8 @@
 		{:else if data.error}
 			Error loading track
 		{:else if track}
-			<div class="flex flex-col">
-				<div class={clx(active ? 'text-primary' : 'color-onSurface')}>
+			<div class="flex flex-col truncate">
+				<div class={clx(active ? 'text-primary' : 'color-onSurface', 'truncate')}>
 					{track.name}
 				</div>
 				<div class="truncate overflow-hidden">

@@ -6,6 +6,7 @@ html {
 	color-scheme: light;
 	width: 100%;
 	overflow-y: scroll;
+	overflow-x: hidden;
 	/* Chrome implementation with fixed elements is very buggy */
 	/* scrollbar-gutter: stable; */
 	scroll-padding-top: var(--app-header-height);

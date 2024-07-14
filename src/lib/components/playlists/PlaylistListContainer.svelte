@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
 	import type { Playlist } from '$lib/db/entities'
-	import { useMainStore } from '$lib/stores/main-store.svelte'
+	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import PlaylistListItem from './PlaylistListItem.svelte'
 
@@ -15,11 +15,10 @@
 	interface Props {
 		items: number[]
 		onItemClick?: (data: TrackItemClick) => void
+		menuItems?: (playlist: Playlist) => MenuItem[]
 	}
 
-	const { items, onItemClick }: Props = $props()
-
-	const main = useMainStore()
+	const { items, menuItems, onItemClick }: Props = $props()
 </script>
 
 <VirtualContainer size={56} count={items.length} key={(index) => items[index] as number}>
@@ -31,26 +30,7 @@
 			style="transform: translateY({item.start}px)"
 			class="virtual-item top-0 left-0 w-full"
 			ariaRowIndex={item.index}
-			menuItems={(playlist) => [
-				{
-					label: 'Edit playlist',
-					action: () => {
-						main.editPlaylistDialogOpen = {
-							id: playlist.id,
-							name: playlist.name,
-						}
-					},
-				},
-				{
-					label: 'Remove playlist',
-					action: () => {
-						main.removePlaylistDialogOpen = {
-							id: playlist.id,
-							name: playlist.name,
-						}
-					},
-				},
-			]}
+			{menuItems}
 			onclick={(playlist) => {
 				onItemClick?.({
 					playlist,

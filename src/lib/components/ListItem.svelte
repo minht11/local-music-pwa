@@ -67,23 +67,25 @@
 >
 	{@render children()}
 
-	<IconButton
-		tabindex={-1}
-		icon="moreVertical"
-		onclick={(e) => {
-			e.stopPropagation()
+	{#if menuItems}
+		<IconButton
+			tabindex={-1}
+			icon="moreVertical"
+			onclick={(e) => {
+				e.stopPropagation()
 
-			if (!menuItems) {
-				return
-			}
+				if (!menuItems) {
+					return
+				}
 
-			menu.showFromEvent(e, menuItems(), {
-				anchor: true,
-				preferredAlignment: {
-					horizontal: 'right',
-					vertical: 'top',
-				},
-			})
-		}}
-	/>
+				menu.showFromEvent(e, menuItems(), {
+					anchor: true,
+					preferredAlignment: {
+						horizontal: 'right',
+						vertical: 'top',
+					},
+				})
+			}}
+		/>
+	{/if}
 </div>

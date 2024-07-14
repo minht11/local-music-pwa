@@ -1,10 +1,15 @@
 <script lang="ts" context="module">
 	import type { Track } from '$lib/db/entities'
+	import { useMainStore } from '$lib/stores/main-store.svelte'
 	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import TrackListItem from './TrackListItem.svelte'
 
-	export type PredefinedTrackMenuItems = 'addToQueue' | 'addToPlaylist' | 'removeFromLibrary'
+	export type PredefinedTrackMenuItems =
+		| 'addToQueue'
+		| 'addToPlaylist'
+		| 'removeFromLibrary'
+		| 'addToFavorites'
 	export interface TrackItemClick {
 		track: Track
 		items: number[]
@@ -14,6 +19,7 @@
 
 <script lang="ts">
 	const player = usePlayer()
+	const main = useMainStore()
 
 	const defaultOnItemClick = (data: TrackItemClick) => {
 		player.playTrack(data.index, data.items)
@@ -31,21 +37,29 @@
 		predefinedKey: PredefinedTrackMenuItems
 	}
 
-	const getMenuItems = () => {
+	const getMenuItems = (trackId: number) => {
 		const items: PredefinedMenuItem[] = [
+			{
+				predefinedKey: 'addToPlaylist',
+				label: 'Add to playlist',
+				action: () => {
+					main.addTrackToPlaylistDialogOpen = trackId
+				},
+			},
+			{
+				predefinedKey: 'addToFavorites',
+				label: 'Add to favorites',
+				action: () => {
+					// TODO.
+					console.log('Add to favorites')
+				},
+			},
 			{
 				predefinedKey: 'addToQueue',
 				label: 'Add to queue',
 				action: () => {
 					// TODO.
 					console.log('Add to queue')
-				},
-			},
-			{
-				predefinedKey: 'addToPlaylist',
-				label: 'Add to playlist',
-				action: () => {
-					// TODO.
 				},
 			},
 			{
@@ -77,7 +91,7 @@
 			style="transform: translateY({item.start}px)"
 			class="virtual-item top-0 left-0 w-full"
 			ariaRowIndex={item.index}
-			menuItems={() => getMenuItems()}
+			menuItems={() => getMenuItems(trackId)}
 			onclick={(track) => {
 				onItemClick({
 					track,
