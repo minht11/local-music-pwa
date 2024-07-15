@@ -1,21 +1,20 @@
 <script>
-	import Button from '$lib/components/Button.svelte'
-	import IconButton from '$lib/components/IconButton.svelte'
-	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
-	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-
 	import { page } from '$app/stores'
 	import BackButton from '$lib/components/BackButton.svelte'
+	import Button from '$lib/components/Button.svelte'
 	import Header from '$lib/components/Header.svelte'
+	import IconButton from '$lib/components/IconButton.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
+	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
 	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
+	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
 	import { useMainStore } from '$lib/stores/main-store.svelte'
 
@@ -23,8 +22,13 @@
 	const player = usePlayer()
 	const track = $derived(player.activeTrack)
 
-	const isCompactMedia = useMediaQuery('(max-width: 767px)')
-	const isCompact = $derived(isCompactMedia.value)
+	const isCompactVerticalMedia = useMediaQuery('(max-height: 600px)')
+	const isCompactVertical = $derived(isCompactVerticalMedia.value)
+	const isCompactHorizontalMedia = useMediaQuery('(max-width: 767px)')
+	const isCompactHorizontal = $derived(isCompactHorizontalMedia.value)
+	const isVeryCompactHorizontal = useMediaQuery('(max-width: 500px)')
+
+	const isCompact = $derived(isCompactVertical || isCompactHorizontal)
 
 	const layoutMode = $derived.by(() => {
 		if (!isCompact) {
@@ -43,77 +47,85 @@
 	<div
 		class={clx(
 			layoutMode === 'both' && 'w-400px',
-			layoutMode === 'list' && 'max-w-500px mx-auto w-full',
-			'flex flex-col z-0 bg-surfaceContainerLowest px-8px pb-8px gap-8px overflow-clip items-center grow',
+			layoutMode === 'list' && 'mx-auto w-full',
+			'player-content z-0 bg-secondaryContainerVariant px-8px pb-8px gap-x-24px gap-y-8px overflow-clip items-center grow',
+			isCompactVertical && !isVeryCompactHorizontal.value && 'player-content-horizontal',
 		)}
 	>
-		<div class="h-64px w-full flex gap-8px items-center">
+		<div
+			class={clx(
+				isCompactVertical && !isVeryCompactHorizontal.value
+					? 'h-56px absolute top-0 left-0'
+					: 'h-64px',
+				'w-full flex gap-8px items-center justify-between [grid-area:header]',
+			)}
+		>
 			<BackButton />
 
-			<div class="text-title-lg mx-auto">Player</div>
+			<div class="text-title-lg">Player</div>
 
 			<div class="w-40px"></div>
 		</div>
 
-		<div class="absolute -z-1 h-full w-full inset-0 bg-secondaryContainer/40"></div>
-
 		<PlayerArtwork
-			class="rounded-16px bg-secondaryContainer view-transition-pl-artwork max-w-300px w-full my-auto ring-1 ring-secondaryContainer"
+			class="rounded-16px m-auto view-transition-pl-artwork [grid-area:artwork] max-h-300px h-full my-auto"
 		/>
 
-		<div class="w-full bg-surfaceContainerHighest px-16px py-8px rounded-16px">
-			<Timeline class="w-full" />
-		</div>
-
-		<div
-			class={clx(
-				'bg-secondaryContainer flex flex-col px-16px gap-24px rounded-16px w-full',
-				mainStore.volumeSliderEnabled ? 'pt-32px pb-16px' : 'py-32px',
-			)}
-		>
-			<div class="flex items-center gap-8px my-auto justify-between">
-				<ShuffleButton />
-
-				<PlayPrevButton />
-
-				<PlayTogglePillButton />
-
-				<PlayNextButton />
-
-				<RepeatButton />
+		<div class="flex flex-col gap-8px w-full [grid-area:controls]">
+			<div class="w-full bg-surfaceContainerHighest px-16px py-8px rounded-16px">
+				<Timeline class="w-full" />
 			</div>
 
-			{#if mainStore.volumeSliderEnabled}
-				<div class="flex items-center gap-8px">
-					<IconButton icon="volumeMid" />
+			<div
+				class={clx(
+					'bg-secondaryContainer flex flex-col px-16px gap-24px rounded-16px w-full [grid-area:header]',
+					mainStore.volumeSliderEnabled ? 'pt-32px pb-16px' : 'py-32px',
+				)}
+			>
+				<div class="flex items-center gap-8px my-auto justify-between">
+					<ShuffleButton />
 
-					<Slider bind:value={player.volume} />
+					<PlayPrevButton />
 
-					<IconButton icon="volumeHigh" />
+					<PlayTogglePillButton />
+
+					<PlayNextButton />
+
+					<RepeatButton />
 				</div>
-			{/if}
-		</div>
 
-		<div
-			class="w-full bg-secondaryContainer px-16px rounded-16px flex items-center h-72px shrink-0"
-		>
-			{#if track}
-				<div class="text-body-lg mr-8px min-w-24px text-center tabular-nums">
-					{player.activeTrackIndex}
-				</div>
+				{#if mainStore.volumeSliderEnabled}
+					<div class="flex items-center gap-8px">
+						<IconButton icon="volumeMid" />
 
-				<div class="flex flex-col">
-					<div class="truncate text-body-lg">{track.name}</div>
-					<div class="truncate text-body-md">{track.artists}</div>
-				</div>
-			{/if}
+						<Slider bind:value={player.volume} />
 
-			<div class="flex gap-4px ml-auto">
-				<IconButton icon="favorite" />
-
-				{#if layoutMode === 'list'}
-					<IconButton icon="trayFull" as="a" href="/player/queue" />
+						<IconButton icon="volumeHigh" />
+					</div>
 				{/if}
+			</div>
+
+			<div
+				class="w-full bg-secondaryContainer px-16px rounded-16px flex items-center h-72px shrink-0"
+			>
+				{#if track}
+					<div class="text-body-lg mr-8px min-w-24px text-center tabular-nums">
+						{player.activeTrackIndex}
+					</div>
+
+					<div class="overflow-hidden grid">
+						<div class="truncate text-body-lg truncate">{track.name}</div>
+						<div class="truncate text-body-md truncate">{track.artists}</div>
+					</div>
+				{/if}
+
+				<div class="flex gap-4px ml-auto">
+					<IconButton icon="favorite" />
+
+					{#if layoutMode === 'list'}
+						<IconButton icon="trayFull" as="a" href="/player/queue" />
+					{/if}
+				</div>
 			</div>
 		</div>
 	</div>
@@ -171,16 +183,28 @@
 
 <ListDetailsLayout
 	mode={layoutMode}
-	class={clx(
-		layoutMode === 'list' ? 'bg-surfaceContainerLowest' : 'bg-secondaryContainer',
-		'view-transition-pl-content grow mx-auto w-full max-w-1280px',
-	)}
+	class={clx('view-transition-pl-content grow mx-auto w-full max-w-1280px bg-secondaryContainer')}
 	list={playerSnippet}
 	details={queueSnippet}
 	noPlayerOverlayPadding
 />
 
 <style lang="postcss">
+	.player-content {
+		display: grid;
+		grid-template-columns: 1fr;
+		grid-template-rows: max-content minmax(140px, 1fr) auto;
+		grid-template-areas: 'header' 'artwork' 'controls';
+	}
+
+	.player-content-horizontal {
+		grid-template-columns: 1fr minmax(0, 300px) minmax(0, 500px) 1fr;
+		grid-template-rows: max-content 1fr;
+		grid-template-areas:
+			'header header header header'
+			'. artwork controls .';
+	}
+
 	::view-transition-old(pl-content) {
 		animation: fade-out 75ms linear forwards;
 	}

@@ -112,7 +112,7 @@
 {#if !(layoutMode === 'details' && !isWideLayout.value)}
 	<div
 		class={clx(
-			'gap-8px fixed z-1 desktop-sidebar flex-col w-max h-max mt-80px [@media(max-height:400px)]:mt-0',
+			'gap-8px fixed z-1 desktop-sidebar flex-col w-max h-max mt-80px [@media(max-height:500px)]:mt-8px',
 			data.isHandHeldDevice ? 'hidden sm:flex' : 'flex',
 		)}
 	>

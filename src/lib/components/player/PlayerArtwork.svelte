@@ -1,14 +1,21 @@
 <script lang="ts">
 	import Artwork from '../Artwork.svelte'
+	import type { IconType } from '../icon/icon-types.ts'
 
 	interface Props {
+		fallbackIcon?: IconType | null
 		class?: string
 		children?: Snippet
 	}
 
-	const { ...props }: Props = $props()
+	const { fallbackIcon, ...props }: Props = $props()
 
 	const player = usePlayer()
 </script>
 
-<Artwork src={player.artworkSrc} alt={player.activeTrack?.name} {...props} />
+<Artwork
+	src={player.artworkSrc}
+	alt={player.activeTrack?.name}
+	fallbackIcon={player.activeTrack ? undefined : null}
+	{...props}
+/>

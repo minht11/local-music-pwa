@@ -1,14 +1,16 @@
 <script lang="ts">
 	import Icon from './icon/Icon.svelte'
+	import type { IconType } from './icon/icon-types.ts'
 
 	interface Props {
 		src: string
 		class?: string
 		alt?: string
+		fallbackIcon?: IconType | null
 		children?: Snippet
 	}
 
-	const { src, class: className, alt, children }: Props = $props()
+	const { src, fallbackIcon = 'musicNote', class: className, alt, children }: Props = $props()
 
 	let error = $state(false)
 </script>
@@ -30,8 +32,8 @@
 				error = false
 			}}
 		/>
-	{:else}
-		<Icon type="musicNote" class="m-auto size-60%" />
+	{:else if fallbackIcon !== null}
+		<Icon type={fallbackIcon} class="m-auto size-60%" />
 	{/if}
 
 	{#if children}

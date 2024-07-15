@@ -26,6 +26,7 @@ const COLOR_TOKENS_GENERATION_MAP = {
 	secondary: ['a2', 40, 80],
 	onSecondary: ['a2', 100, 20],
 	secondaryContainer: ['a2', 90, 30],
+	secondaryContainerVariant: ['a2', 75, 15],
 	onSecondaryContainer: ['a2', 10, 90],
 	tertiary: ['a3', 40, 80],
 	onTertiary: ['a3', 100, 20],
