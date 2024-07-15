@@ -39,7 +39,7 @@
 				"useShorthandArrayType": "error",
 				"useShorthandAssign": "error",
 				"useFilenamingConvention": {
-					"level": "off",
+					"level": "error",
 					"options": {
 						"requireAscii": true,
 						"filenameCases": ["kebab-case", "export", "PascalCase"]
@@ -98,6 +98,16 @@
 					},
 					"correctness": {
 						"noUndeclaredVariables": "off"
+					}
+				}
+			}
+		},
+		{
+			"include": ["src/routes/*.svelte", "src/params"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useFilenamingConvention": "off"
 					}
 				}
 			}
