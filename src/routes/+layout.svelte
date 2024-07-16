@@ -3,10 +3,7 @@
 	import { navigating, page } from '$app/stores'
 	import { getActiveRipplesCount } from '$lib/actions/ripple'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
-	import AddToPlaylistDialog from '$lib/components/dialogs/AddToPlaylistDialog.svelte'
-	import ConfirmRemovePlaylistDialog from '$lib/components/dialogs/ConfirmRemovePlaylistDialog.svelte'
-	import EditPlaylistDialog from '$lib/components/dialogs/EditPlaylistDialog.svelte'
-	import NewPlaylistDialog from '$lib/components/dialogs/new-playlist/NewPlaylistDialog.svelte'
+	import PlaylistDialogs from '$lib/components/app-dialogs/PlaylistDialogs.svelte'
 	import MenuRenderer, { initGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 	import { wait } from '$lib/helpers/utils'
@@ -144,9 +141,7 @@
 	class="fixed flex flex-col bottom-0 overflow-hidden inset-x-0 pointer-events-none [&>*]:pointer-events-auto"
 >
 	<div class="flex flex-col">
-		<div class="max-w-500px px-8px w-full mx-auto mb-16px flex flex-col gap-8px">
-			<SnackbarRenderer />
-		</div>
+		<SnackbarRenderer bottomOffset={overlayContentHeight} />
 
 		{#if !$page.data.noPlayerOverlay}
 			<div bind:clientHeight={overlayContentHeight} class="px-8px pb-8px w-full">
@@ -164,10 +159,7 @@
 	<MenuRenderer />
 </div>
 
-<NewPlaylistDialog />
-<EditPlaylistDialog />
-<ConfirmRemovePlaylistDialog />
-<AddToPlaylistDialog />
+<PlaylistDialogs />
 
 <style>
 	@keyframes fade-in {

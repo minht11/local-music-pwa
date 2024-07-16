@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Playlist } from '$lib/db/entities'
 	import { usePlaylist } from '$lib/library/tracks.svelte.ts'
+	import type { Snippet } from 'svelte'
 	import invariant from 'tiny-invariant'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'
 	import Icon from '../icon/Icon.svelte'
@@ -11,6 +12,7 @@
 		ariaRowIndex?: number
 		active?: boolean
 		class?: string
+		iconSnippet?: Snippet<[Playlist]>
 		menuItems?: (playlist: Playlist) => MenuItem[]
 		onclick?: (playlist: Playlist) => void
 	}
@@ -21,6 +23,7 @@
 		active,
 		class: className,
 		onclick,
+		iconSnippet,
 		ariaRowIndex,
 		menuItems,
 	}: Props = $props()
@@ -52,9 +55,13 @@
 	onclick={() => onclick?.(playlist!)}
 >
 	<div role="cell" class="track-item grow gap-20px items-center">
-		<div class="bg-surfaceContainerHigh p-8px rounded-24px text-onSurfaceVariant/54">
-			<Icon type="playlist" />
-		</div>
+		{#if playlist && iconSnippet}
+			{@render iconSnippet(playlist)}
+		{:else}
+			<div class="bg-surfaceContainerHigh p-8px rounded-24px text-onSurfaceVariant/54">
+				<Icon type="playlist" />
+			</div>
+		{/if}
 
 		{#if data.loading === true}
 			<div>

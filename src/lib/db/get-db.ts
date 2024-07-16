@@ -44,6 +44,10 @@ export interface AppDB extends DBSchema {
 			created: number
 		}
 	}
+	playlistsTracks: {
+		key: [playlistId: number, trackId: number]
+		value: null
+	}
 	directories: {
 		key: number
 		value: Directory
@@ -82,7 +86,8 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 	})
 
 export const getDB = () =>
-	openDB<AppDB>('app-storage', 3, {
+	// TODO. Reset database version
+	openDB<AppDB>('app-storage', 1, {
 		upgrade(e) {
 			const { objectStoreNames } = e
 
@@ -125,6 +130,17 @@ export const getDB = () =>
 				const store = createStore(e, 'playlists')
 				createUniqueNameIndex(store)
 				store.createIndex('created', 'created', { unique: false })
+			}
+
+			if (!objectStoreNames.contains('playlistsTracks')) {
+				e.createObjectStore('playlistsTracks', {
+					keyPath: ['playlistId', 'trackId'],
+				})
+
+				// const store = createStore(e, 'playlistsTracks')
+
+				// store.createIndex('playlistId', 'playlistId', { unique: true })
+				// store.createIndex('trackId', 'trackId', { unique: true })
 			}
 
 			if (!objectStoreNames.contains('directories')) {

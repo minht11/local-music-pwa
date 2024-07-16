@@ -26,7 +26,7 @@
 	const isCompactVertical = $derived(isCompactVerticalMedia.value)
 	const isCompactHorizontalMedia = useMediaQuery('(max-width: 767px)')
 	const isCompactHorizontal = $derived(isCompactHorizontalMedia.value)
-	const isVeryCompactHorizontal = useMediaQuery('(max-width: 500px)')
+	const isVeryCompactHorizontal = useMediaQuery('(max-width: 600px)')
 
 	const isCompact = $derived(isCompactVertical || isCompactHorizontal)
 

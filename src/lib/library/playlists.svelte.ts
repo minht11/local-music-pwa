@@ -41,6 +41,7 @@ export const createPlaylist = async (name: string): Promise<void> => {
 			message: `Playlist "${truncate(name, 20)}" created`,
 		})
 	} catch {
+		// TODO. Add message if playlist already exists
 		snackbar({
 			id: 'playlist-create-error',
 			// TODO. i18n
@@ -105,4 +106,13 @@ export const removePlaylist = async (id: number, name: string): Promise<void> =>
 			message: 'Failed to remove playlist',
 		})
 	}
+}
+
+export const addTrackToPlaylistInDatabase = async (
+	playlistId: number,
+	trackId: number,
+): Promise<void> => {
+	const db = await getDB()
+
+	await db.put('playlistsTracks', null, [playlistId, trackId])
 }

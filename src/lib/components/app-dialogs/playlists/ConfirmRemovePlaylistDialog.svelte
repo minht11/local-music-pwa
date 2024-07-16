@@ -1,26 +1,21 @@
 <script lang="ts">
+	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import { truncate } from '$lib/helpers/utils'
 	import { removePlaylist } from '$lib/library/playlists.svelte'
 	import { useMainStore } from '$lib/stores/main-store.svelte'
 	import invariant from 'tiny-invariant'
-	import Dialog from '../Dialog.svelte'
 
 	const main = useMainStore()
-
-	const open = {
-		get value() {
-			return main.removePlaylistDialogOpen !== null
-		},
-		set value(_: boolean) {
-			main.removePlaylistDialogOpen = null
-		},
-	}
 </script>
 
-<Dialog
-	bind:open={open.value}
+<CommonDialog
+	openAccessor={{
+		get: () => main.removePlaylistDialogOpen,
+		close: () => {
+			main.removePlaylistDialogOpen = null
+		},
+	}}
 	title={`Are you sure you want to remove "${truncate(main.removePlaylistDialogOpen?.name ?? '', 10)}" playlist?`}
-	class="w-400px"
 	buttons={[
 		{
 			title: m.libraryCancel(),
@@ -34,7 +29,7 @@
 		const data = main.removePlaylistDialogOpen
 		invariant(data !== null, 'Playlist to remove is not set')
 
-		open.value = false
+		main.removePlaylistDialogOpen = null
 		void removePlaylist(data.id, data.name)
 	}}
-></Dialog>
+/>

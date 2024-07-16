@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { dev } from '$app/environment'
 	import Button from '$lib/components/Button.svelte'
-	import Dialog from '$lib/components/Dialog.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Select from '$lib/components/Select.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import Spinner from '$lib/components/Spinner.svelte'
 	import Switch from '$lib/components/Switch.svelte'
 	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
+	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import { initPageQueries } from '$lib/db/db-fast.svelte.ts'
@@ -199,7 +199,7 @@
 						class="flex h-56px gap-8px items-center text-onTertiaryContainer bg-tertiaryContainer/24 pl-16px pr-4px rounded-4px"
 					>
 						<div class="truncate">Tracks without directory</div>
-						<Icon type="information" class="text-onTertiaryContainer/54 !size-16px" />
+						<Icon type="information" class="text-onTertiaryContainer/54 size-16px" />
 					</li> -->
 				</ul>
 
@@ -308,39 +308,42 @@
 
 {#snippet directoryName(name: string | undefined)}
 	<span class="text-tertiary w-fit h-16.5px inline-flex items-center gap-4px">
-		<Icon type="folder" class="!size-12px" />
+		<Icon type="folder" class="size-12px" />
 
 		<span class="truncate inline max-w-[100px] w-fit h-full">{name}</span>
 	</span>
 {/snippet}
 
-<!-- TODO. When closing dialog text changes -->
-<Dialog
-	open={!!reparentDirectory}
+<CommonDialog
+	openAccessor={{
+		get: () => reparentDirectory,
+		close: () => {
+			reparentDirectory = null
+		},
+	}}
 	class="[--dialog-width:340px]"
 	icon="folderHidden"
 	title={m.replaceDirectoryQ()}
-	buttons={[
+	buttons={(data) => [
 		{
 			title: m.cancel(),
 		},
 		{
 			title: m.replace(),
 			action: () => {
-				importReplaceDirectory(reparentDirectory?.existingDir.id!, reparentDirectory?.newDirHandle!)
+				importReplaceDirectory(data.existingDir.id, data.newDirHandle)
 			},
 		},
 	]}
-	onclose={() => {
-		reparentDirectory = null
-	}}
 >
-	<WrapTranslation messageFn={m.replaceDirectoryExplanation}>
-		{#snippet existingDir()}
-			{@render directoryName(reparentDirectory?.existingDir.handle.name)}
-		{/snippet}
-		{#snippet newDir()}
-			{@render directoryName(reparentDirectory?.newDirHandle.name)}
-		{/snippet}
-	</WrapTranslation>
-</Dialog>
+	{#snippet children({ data })}
+		<WrapTranslation messageFn={m.replaceDirectoryExplanation}>
+			{#snippet existingDir()}
+				{@render directoryName(data.existingDir.handle.name)}
+			{/snippet}
+			{#snippet newDir()}
+				{@render directoryName(data.newDirHandle.name)}
+			{/snippet}
+		</WrapTranslation>
+	{/snippet}
+</CommonDialog>

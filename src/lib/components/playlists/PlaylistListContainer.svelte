@@ -1,5 +1,6 @@
 <script lang="ts" context="module">
 	import type { Playlist } from '$lib/db/entities'
+	import type { Snippet } from 'svelte'
 	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import PlaylistListItem from './PlaylistListItem.svelte'
@@ -14,11 +15,12 @@
 <script lang="ts">
 	interface Props {
 		items: number[]
+		iconSnippet?: Snippet<[Playlist]>
 		onItemClick?: (data: TrackItemClick) => void
 		menuItems?: (playlist: Playlist) => MenuItem[]
 	}
 
-	const { items, menuItems, onItemClick }: Props = $props()
+	const { items, iconSnippet, menuItems, onItemClick }: Props = $props()
 </script>
 
 <VirtualContainer size={56} count={items.length} key={(index) => items[index] as number}>
@@ -31,6 +33,7 @@
 			class="virtual-item top-0 left-0 w-full"
 			ariaRowIndex={item.index}
 			{menuItems}
+			{iconSnippet}
 			onclick={(playlist) => {
 				onItemClick?.({
 					playlist,

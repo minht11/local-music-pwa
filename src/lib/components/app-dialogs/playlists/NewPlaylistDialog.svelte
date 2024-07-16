@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Dialog from '$lib/components/Dialog.svelte'
 	import TextField from '$lib/components/TextField.svelte'
+	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import { createPlaylist } from '$lib/library/playlists.svelte'
 	import { useMainStore } from '$lib/stores/main-store.svelte'
 
@@ -17,11 +17,10 @@
 	}
 </script>
 
-<Dialog
+<CommonDialog
 	bind:open={main.createNewPlaylistDialogOpen}
 	icon="addPlaylist"
 	title={m.libraryCreateNewPlaylist()}
-	class="w-400px"
 	buttons={[
 		{
 			title: m.libraryCancel(),
@@ -34,4 +33,4 @@
 	onsubmit={onSubmitHandler}
 >
 	<TextField name="name" placeholder="New playlist name" required minLength={4} maxLength={40} />
-</Dialog>
+</CommonDialog>
