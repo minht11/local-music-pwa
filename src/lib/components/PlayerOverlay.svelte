@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { useMainStore } from '$lib/stores/main-store.svelte'
 	import Button from './Button.svelte'
-	import IconButton from './IconButton.svelte'
 	import Icon from './icon/Icon.svelte'
 	import MainControls from './player/MainControls.svelte'
 	import PlayerArtwork from './player/PlayerArtwork.svelte'
 	import Timeline from './player/Timeline.svelte'
 	import VolumeSlider from './player/VolumeSlider.svelte'
+	import FavoriteButton from './player/buttons/FavoriteButton.svelte'
 	import PlayNextButton from './player/buttons/PlayNextButton.svelte'
 	import PlayToggleButton from './player/buttons/PlayToggleButton.svelte'
 
@@ -61,9 +61,7 @@
 					{/if}
 				</Button>
 
-				{#if track}
-					<IconButton icon="favoriteOutline" />
-				{/if}
+				<FavoriteButton />
 			</div>
 
 			<div class="ml-uto flex gap-8px sm:hidden pr-8px">

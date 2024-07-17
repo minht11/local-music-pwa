@@ -64,10 +64,17 @@ export class PlayerStore {
 			}
 		}, 100)
 
+		let prevTrackId: number | null = null
 		$effect(() => {
 			const track = this.activeTrack
 
 			if (track) {
+				if (prevTrackId === track.id) {
+					return
+				}
+
+				prevTrackId = track.id
+
 				reset.cancel()
 				this.#audio.load(track.file)
 			} else {
@@ -75,14 +82,19 @@ export class PlayerStore {
 					this.playing = false
 				})
 				reset()
+
+				prevTrackId = null
 			}
 		})
 
 		listenForDatabaseChanges((changes) => {
 			for (const change of changes) {
-				const id = change.id
-				if (change.operation === 'delete' && id !== undefined) {
-					const index = this.itemsIds.indexOf(id)
+				if (change.storeName !== 'tracks') {
+					continue
+				}
+
+				if (change.operation === 'delete') {
+					const index = this.itemsIds.indexOf(change.key)
 
 					if (index === -1) {
 						continue

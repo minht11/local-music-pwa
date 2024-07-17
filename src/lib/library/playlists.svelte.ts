@@ -77,9 +77,17 @@ export const updatePlaylistNameInDatabase = async (id: number, name: string): Pr
 
 export const removePlaylistInDatabase = async (id: number): Promise<void> => {
 	const db = await getDB()
+	const tx = db.transaction(['playlists', 'playlistsTracks'], 'readwrite')
+	const tracksStore = tx.objectStore('playlistsTracks')
 
-	await db.delete('playlists', id)
+	await Promise.all([
+		tracksStore.delete(IDBKeyRange.bound([id, 0], [id, Number.POSITIVE_INFINITY])),
+		tx.objectStore('playlists').delete(id),
+		tx.done,
+	])
 
+	// We are not notifying about individual tracks removals
+	// because we are removing the whole playlist
 	notifyAboutDatabaseChanges([
 		{
 			operation: 'delete',
@@ -159,5 +167,41 @@ export const toggleTrackInPlaylistInDatabase = async (
 		await removeTrackFromPlaylistInDatabase(playlistId, trackId)
 	} else {
 		await addTrackToPlaylistInDatabase(playlistId, trackId)
+	}
+}
+
+/** Special type of playlist which user cannot modify */
+export const FAVORITE_PLAYLIST_ID = -1
+
+export const toggleFavoriteTrackInDatabase = async (
+	shouldBeRemoved: boolean,
+	trackId: number,
+): Promise<void> => {
+	if (shouldBeRemoved) {
+		await removeTrackFromPlaylistInDatabase(FAVORITE_PLAYLIST_ID, trackId)
+	} else {
+		await addTrackToPlaylistInDatabase(FAVORITE_PLAYLIST_ID, trackId)
+	}
+}
+
+export const toggleFavoriteTrack = async (
+	shouldBeRemoved: boolean,
+	trackId: number,
+): Promise<void> => {
+	try {
+		await toggleFavoriteTrackInDatabase(shouldBeRemoved, trackId)
+
+		snackbar({
+			id: `track-favorite-toggled-${trackId}`,
+			// TODO. i18n
+			message: shouldBeRemoved ? 'Track removed from favorites' : 'Track added to favorites',
+			duration: 2000,
+		})
+	} catch {
+		snackbar({
+			id: 'track-favorite-toggle-error',
+			// TODO. i18n
+			message: 'Failed to toggle favorite track',
+		})
 	}
 }

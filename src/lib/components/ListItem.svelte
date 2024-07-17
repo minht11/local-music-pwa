@@ -71,6 +71,7 @@
 		<IconButton
 			tabindex={-1}
 			icon="moreVertical"
+			class="text-onSurfaceVariant"
 			onclick={(e) => {
 				e.stopPropagation()
 

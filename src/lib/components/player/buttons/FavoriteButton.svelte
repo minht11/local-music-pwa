@@ -1,0 +1,17 @@
+<script>
+	import IconButton from '$lib/components/IconButton.svelte'
+	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'
+
+	const player = usePlayer()
+
+	const track = $derived(player.activeTrack)
+</script>
+
+{#if track}
+	<IconButton
+		icon={track.favorite ? 'favorite' : 'favoriteOutline'}
+		onclick={() => {
+			void toggleFavoriteTrack(track.favorite, track.id)
+		}}
+	/>
+{/if}

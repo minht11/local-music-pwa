@@ -91,8 +91,6 @@ export const importTrackToDb = async (
 	const track: Track = {
 		...metadata,
 		id: trackId,
-		// TODO. Should this be here?
-		isFavorite: false,
 	}
 
 	const [albumChange, artistsChanges] = await Promise.all([

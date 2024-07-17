@@ -63,10 +63,7 @@ export interface UnknownTrack extends ParsedTrackData {
 	lastScanned: number
 }
 
-export type Track = BaseMusicItem &
-	UnknownTrack & {
-		isFavorite: boolean
-	}
+export type Track = BaseMusicItem & UnknownTrack
 
 export interface Album extends BaseMusicItem {
 	type: typeof MusicItemType.Album

@@ -186,14 +186,17 @@ export const getAllKeys = async <
 	return Object.values(value)
 }
 
-export const getValue = async <Name extends AppStoreNames>(storeName: Name, id?: number) => {
-	if (id === undefined) {
+export const getValue = async <Name extends AppStoreNames>(
+	storeName: Name,
+	key: AppDB[Name]['key'],
+) => {
+	if (key === undefined) {
 		return undefined
 	}
 
 	const db = await getDB()
 
-	return db.get(storeName, id)
+	return db.get(storeName, key)
 }
 
 // TODO. Unused

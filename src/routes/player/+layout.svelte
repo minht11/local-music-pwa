@@ -9,6 +9,7 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
+	import FavoriteButton from '$lib/components/player/buttons/FavoriteButton.svelte'
 	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
 	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
@@ -120,7 +121,7 @@
 				{/if}
 
 				<div class="flex gap-4px ml-auto">
-					<IconButton icon="favorite" />
+					<FavoriteButton />
 
 					{#if layoutMode === 'list'}
 						<IconButton icon="trayFull" as="a" href="/player/queue" />

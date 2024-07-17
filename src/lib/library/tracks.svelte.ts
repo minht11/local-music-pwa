@@ -4,6 +4,7 @@ import type { Track } from '$lib/db/entities'
 import { type AppDB, type AppStoreNames, getDB, getValue } from '$lib/db/get-db'
 import type { IDBPTransaction, IndexNames } from 'idb'
 import invariant from 'tiny-invariant'
+import { FAVORITE_PLAYLIST_ID } from './playlists.svelte'
 
 const trackCacheKey = 'tracks'
 const trackCacheIdKey = (id: number) => [trackCacheKey, id] as const
@@ -105,19 +106,28 @@ export type UseLibraryEntityResult<
 	AllowEmpty extends boolean = false,
 > = AllowEmpty extends true ? AppDB[StoreName]['value'] | undefined : AppDB[StoreName]['value']
 
+const unwrap = <T>(value: T | (() => T)) => {
+	if (typeof value === 'function') {
+		// @ts-expect-error
+		return value()
+	}
+
+	return value
+}
+
 export const createLibraryEntityQuery =
 	<StoreName extends AppStoreNames>(storeName: StoreName) =>
 	<AllowEmpty extends boolean = false>(
-		id: number | (() => number),
+		idGetter: number | (() => number),
 		options: UseTrackOptions<AllowEmpty> = {},
 	) =>
 		createQuery({
-			key: () => [storeName, typeof id === 'function' ? id() : id] as const,
+			key: () => [storeName, unwrap(idGetter)] as const,
 			fetcher: async ([, id]) => {
 				const entity = await getValue(storeName, id)
 
 				if (options.allowEmpty) {
-					return entity as AppDB[StoreName]['value']
+					return entity
 				}
 
 				invariant(entity, `${storeName} with id ${id} not found`)
@@ -125,23 +135,101 @@ export const createLibraryEntityQuery =
 				return entity
 			},
 			onDatabaseChange: (changes, { mutate }) => {
+				const id = unwrap(idGetter)
+
 				for (const change of changes) {
-					if (change.storeName !== storeName) {
+					if (change.storeName !== storeName || change.key !== id) {
 						continue
 					}
 
-					if (change.operation === 'delete' && change.key === id) {
+					if (change.operation === 'delete') {
 						mutate(undefined)
-					}
-
-					if (change.operation === 'update' && change.key === id) {
+					} else if (change.operation === 'update') {
 						mutate(change.value)
 					}
 				}
 			},
 		})
 
-export const useTrack = createLibraryEntityQuery('tracks')
+export interface TrackData extends Track {
+	favorite: boolean
+}
+
+export const useTrack = <AllowEmpty extends boolean = false>(
+	idGetter: number | (() => number),
+	options: UseTrackOptions<AllowEmpty> = {},
+) =>
+	createQuery({
+		key: () => ['tracks', unwrap(idGetter)] as const,
+		fetcher: async ([, id]) => {
+			const [entity, favorite] = await Promise.all([
+				getValue('tracks', id),
+				getValue('playlistsTracks', [FAVORITE_PLAYLIST_ID, id]),
+			])
+
+			if (options.allowEmpty) {
+				if (!entity) {
+					return undefined
+				}
+
+				return {
+					...entity,
+					favorite: !!favorite,
+				} as TrackData
+			}
+
+			invariant(entity, `Tracks with id ${id} not found`)
+
+			return {
+				...entity,
+				favorite: !!favorite,
+			} as TrackData
+		},
+		onDatabaseChange: (changes, { mutate }) => {
+			const id = unwrap(idGetter)
+
+			for (const change of changes) {
+				if (change.storeName === 'playlistsTracks') {
+					const [playlistId, trackId] = change.key
+
+					if (playlistId === FAVORITE_PLAYLIST_ID && trackId === id) {
+						const favorite = change.operation === 'add'
+
+						mutate((prev) => {
+							if (!prev) {
+								return prev
+							}
+
+							return {
+								...prev,
+								favorite,
+							}
+						})
+					}
+				}
+
+				if (change.storeName !== 'tracks' || change.key !== id) {
+					continue
+				}
+
+				if (change.operation === 'delete') {
+					mutate(undefined)
+				} else if (change.operation === 'update') {
+					mutate((prev) => {
+						if (!prev) {
+							return prev
+						}
+
+						return {
+							...change.value,
+							favorite: prev.favorite,
+						}
+					})
+				}
+			}
+		},
+	})
+
 export const useAlbum = createLibraryEntityQuery('albums')
 export const useArtist = createLibraryEntityQuery('artists')
 export const usePlaylist = createLibraryEntityQuery('playlists')
