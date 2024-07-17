@@ -9,7 +9,7 @@
 </script>
 
 <Dialog
-	openAccessor={{
+	open={{
 		get: () => main.addTrackToPlaylistDialogOpen,
 		close: () => {
 			main.addTrackToPlaylistDialogOpen = null

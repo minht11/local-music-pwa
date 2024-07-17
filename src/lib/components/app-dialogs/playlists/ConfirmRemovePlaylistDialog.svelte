@@ -9,7 +9,7 @@
 </script>
 
 <CommonDialog
-	openAccessor={{
+	open={{
 		get: () => main.removePlaylistDialogOpen,
 		close: () => {
 			main.removePlaylistDialogOpen = null

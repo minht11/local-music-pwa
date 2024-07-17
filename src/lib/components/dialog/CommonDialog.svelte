@@ -15,7 +15,7 @@
 
 <script lang="ts" generics="S = void">
 	let {
-		open: openDirect = $bindable(false),
+		open = $bindable(false),
 		buttons,
 		onsubmit,
 		children: externalChildren,
@@ -38,7 +38,7 @@
 	}
 </script>
 
-<Dialog bind:open={openDirect} class={clx(className)} {...props}>
+<Dialog bind:open class={clx(className)} {...props}>
 	{#snippet children({ data, close })}
 		<form method="dialog" class="contents" onsubmit={submitHandler}>
 			{#if externalChildren}

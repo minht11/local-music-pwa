@@ -3,6 +3,7 @@
 	import type { Snippet } from 'svelte'
 	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
+	import type { IconType } from '../icon/icon-types.ts'
 	import PlaylistListItem from './PlaylistListItem.svelte'
 
 	export interface TrackItemClick {
@@ -15,12 +16,12 @@
 <script lang="ts">
 	interface Props {
 		items: number[]
-		iconSnippet?: Snippet<[Playlist]>
+		icon?: Snippet<[Playlist]> | IconType
 		onItemClick?: (data: TrackItemClick) => void
 		menuItems?: (playlist: Playlist) => MenuItem[]
 	}
 
-	const { items, iconSnippet, menuItems, onItemClick }: Props = $props()
+	const { items, icon, menuItems, onItemClick }: Props = $props()
 </script>
 
 <VirtualContainer size={56} count={items.length} key={(index) => items[index] as number}>
@@ -33,7 +34,7 @@
 			class="virtual-item top-0 left-0 w-full"
 			ariaRowIndex={item.index}
 			{menuItems}
-			{iconSnippet}
+			{icon}
 			onclick={(playlist) => {
 				onItemClick?.({
 					playlist,

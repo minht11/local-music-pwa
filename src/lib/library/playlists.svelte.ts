@@ -20,7 +20,7 @@ export const createPlaylistInDatabase = async (name: string): Promise<number> =>
 		{
 			operation: 'add',
 			storeName: 'playlists',
-			id,
+			key: id,
 			value: {
 				...newPlaylist,
 				id,
@@ -69,7 +69,7 @@ export const updatePlaylistNameInDatabase = async (id: number, name: string): Pr
 		{
 			operation: 'update',
 			storeName: 'playlists',
-			id,
+			key: id,
 			value: updatedPlaylist,
 		},
 	])
@@ -84,7 +84,7 @@ export const removePlaylistInDatabase = async (id: number): Promise<void> => {
 		{
 			operation: 'delete',
 			storeName: 'playlists',
-			id,
+			key: id,
 		},
 	])
 }
@@ -114,5 +114,50 @@ export const addTrackToPlaylistInDatabase = async (
 ): Promise<void> => {
 	const db = await getDB()
 
-	await db.put('playlistsTracks', null, [playlistId, trackId])
+	const key = await db.add('playlistsTracks', {
+		playlistId,
+		trackId,
+	})
+
+	notifyAboutDatabaseChanges([
+		{
+			operation: 'add',
+			storeName: 'playlistsTracks',
+			value: {
+				playlistId,
+				trackId,
+			},
+			key,
+		},
+	])
+}
+
+export const removeTrackFromPlaylistInDatabase = async (
+	playlistId: number,
+	trackId: number,
+): Promise<void> => {
+	const db = await getDB()
+
+	const key: [number, number] = [playlistId, trackId]
+	await db.delete('playlistsTracks', key)
+
+	notifyAboutDatabaseChanges([
+		{
+			operation: 'delete',
+			storeName: 'playlistsTracks',
+			key,
+		},
+	])
+}
+
+export const toggleTrackInPlaylistInDatabase = async (
+	shouldBeRemoved: boolean,
+	playlistId: number,
+	trackId: number,
+): Promise<void> => {
+	if (shouldBeRemoved) {
+		await removeTrackFromPlaylistInDatabase(playlistId, trackId)
+	} else {
+		await addTrackToPlaylistInDatabase(playlistId, trackId)
+	}
 }

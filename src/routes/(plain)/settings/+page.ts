@@ -20,10 +20,6 @@ const countQuery = definePageQuery({
 					countDiff += 1
 				} else if (operation === 'delete') {
 					countDiff -= 1
-				} else if (operation === 'clear-all') {
-					countDiff = 0
-
-					mutate(0)
 				}
 			}
 			// TODO. Handle clear all
@@ -46,7 +42,7 @@ const directoriesQuery = definePageQuery({
 		for (const change of changes) {
 			if (change.storeName === 'directories') {
 				if (change.operation === 'delete') {
-					mutate((v) => v?.filter((dir) => dir.id !== change.id))
+					mutate((v) => v?.filter((dir) => dir.id !== change.key))
 				} else if (change.operation === 'add') {
 					mutate((v = []) => [...v, change.value])
 				}

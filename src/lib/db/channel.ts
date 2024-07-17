@@ -1,12 +1,36 @@
-// import { browser } from '$app/environment'
-import type { AppStoreNames } from './get-db.ts'
+import type { AppDB, AppStoreNames } from './get-db.ts'
 
-export interface DBChangeRecord {
-	storeName: AppStoreNames
-	id?: number
-	value?: unknown
-	operation: 'add' | 'update' | 'delete' | 'clear-all'
+type ChangeRecordBaseNonFiltered<StoreName extends AppStoreNames> =
+	| {
+			storeName: StoreName
+			operation: 'add'
+			key: AppDB[StoreName]['key']
+			value: AppDB[StoreName]['value']
+	  }
+	| {
+			storeName: StoreName
+			operation: 'update'
+			key: AppDB[StoreName]['key']
+			value: AppDB[StoreName]['value']
+	  }
+	| {
+			storeName: StoreName
+			key: AppDB[StoreName]['key']
+			operation: 'delete'
+	  }
+
+// For some schemas we want to enforce that only certain operations are allowed.
+type ChangeRecordBase<StoreName extends AppStoreNames> = Exclude<
+	ChangeRecordBaseNonFiltered<StoreName>,
+	{ operation: AppDB[StoreName]['meta']['notAllowedOperations'] }
+>
+
+// Needed for typescript narrowing to work properly
+type DbChangeRecordsMap = {
+	[StoreName in AppStoreNames]: ChangeRecordBase<StoreName>
 }
+
+export type DBChangeRecord = DbChangeRecordsMap[AppStoreNames]
 
 export type DBChangeRecordList = readonly DBChangeRecord[]
 
@@ -48,15 +72,15 @@ export const listenForDatabaseChanges = (handler: (changes: readonly DBChangeRec
 		return () => {}
 	}
 
-	listeners.add(handler)
+	listeners.add(handler as Listener)
 
 	return () => {
-		listeners.delete(handler)
+		listeners.delete(handler as Listener)
 	}
 }
 
 export const notifyAboutDatabaseChanges = (changes: readonly (DBChangeRecord | undefined)[]) => {
-	const filteredChanges = changes.filter(Boolean)
+	const filteredChanges = changes.filter((c) => c !== undefined)
 
 	if (filteredChanges.length === 0) {
 		return

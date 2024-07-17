@@ -73,7 +73,7 @@ export const importDirectory = async (newDirectory: FileSystemDirectoryHandle) =
 
 	notifyAboutDatabaseChanges([
 		{
-			id,
+			key: id,
 			storeName: 'directories',
 			operation: 'add',
 			value: {
@@ -110,7 +110,7 @@ export const importReplaceDirectory = async (
 
 	notifyAboutDatabaseChanges([
 		{
-			id: directoryId,
+			key: directoryId,
 			storeName: 'directories',
 			operation: 'update',
 			value: newDir,
@@ -150,7 +150,7 @@ export const removeDirectory = async (directoryId: number) => {
 
 	notifyAboutDatabaseChanges([
 		{
-			id: directoryId,
+			key: directoryId,
 			storeName: 'directories',
 			operation: 'delete',
 		},

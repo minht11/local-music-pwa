@@ -41,7 +41,7 @@ export const removeTrackRelatedData = async <
 
 	const change: DBChangeRecord = {
 		storeName: entityStoreName,
-		id: entity.id,
+		key: entity.id,
 		operation: 'delete',
 	}
 
@@ -80,7 +80,7 @@ export const removeTrackWithTx = async <
 		{
 			storeName: 'tracks',
 			operation: 'delete',
-			id: trackId,
+			key: trackId,
 		},
 		albumChange,
 		...artistsChanges,
@@ -130,12 +130,12 @@ export const createLibraryEntityQuery =
 						continue
 					}
 
-					if (change.operation === 'delete' && change.id === id) {
+					if (change.operation === 'delete' && change.key === id) {
 						mutate(undefined)
 					}
 
-					if (change.operation === 'update' && change.id === id) {
-						mutate(change.value as AppDB[StoreName]['value'])
+					if (change.operation === 'update' && change.key === id) {
+						mutate(change.value)
 					}
 				}
 			},

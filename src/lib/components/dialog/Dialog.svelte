@@ -10,9 +10,7 @@
 	}
 
 	export interface DialogProps<S> {
-		open?: boolean
-		/** Alternative to open prop, makes dialog to be open when state exists */
-		openAccessor?: DialogOpenAccessor<S>
+		open?: boolean | DialogOpenAccessor<S>
 		title?: string
 		icon?: IconType
 		class?: string
@@ -22,28 +20,27 @@
 
 <script lang="ts" generics="S">
 	let {
-		open: openDirect = $bindable(false),
-		openAccessor,
+		open = $bindable(false),
 		title,
 		icon,
 		class: className,
 		children,
 	}: DialogProps<S> = $props()
 
-	const accessorState = $derived(openAccessor?.get())
+	const openData = $derived(typeof open === 'object' ? open?.get() : undefined)
 	const isOpen = $derived.by(() => {
-		if (openAccessor) {
-			return accessorState !== null
+		if (typeof open === 'object') {
+			return openData !== null
 		} else {
-			return openDirect
+			return open
 		}
 	})
 
 	const close = () => {
-		if (openAccessor) {
-			openAccessor.close()
+		if (typeof open === 'object') {
+			open.close()
 		} else {
-			openDirect = false
+			open = false
 		}
 	}
 
@@ -196,7 +193,7 @@
 
 		<div class="flex flex-col shrink overflow-hidden">
 			{@render children?.({
-				data: accessorState!,
+				data: openData!,
 				close,
 			})}
 		</div>

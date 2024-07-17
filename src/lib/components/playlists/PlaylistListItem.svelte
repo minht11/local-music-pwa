@@ -5,6 +5,7 @@
 	import invariant from 'tiny-invariant'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'
 	import Icon from '../icon/Icon.svelte'
+	import type { IconType } from '../icon/icon-types.ts'
 
 	interface Props {
 		playlistId: number
@@ -12,7 +13,7 @@
 		ariaRowIndex?: number
 		active?: boolean
 		class?: string
-		iconSnippet?: Snippet<[Playlist]>
+		icon?: Snippet<[Playlist]> | IconType
 		menuItems?: (playlist: Playlist) => MenuItem[]
 		onclick?: (playlist: Playlist) => void
 	}
@@ -23,7 +24,7 @@
 		active,
 		class: className,
 		onclick,
-		iconSnippet,
+		icon = 'playlist',
 		ariaRowIndex,
 		menuItems,
 	}: Props = $props()
@@ -55,11 +56,13 @@
 	onclick={() => onclick?.(playlist!)}
 >
 	<div role="cell" class="track-item grow gap-20px items-center">
-		{#if playlist && iconSnippet}
-			{@render iconSnippet(playlist)}
+		{#if typeof icon === 'function'}
+			{#if playlist}
+				{@render icon(playlist)}
+			{/if}
 		{:else}
 			<div class="bg-surfaceContainerHigh p-8px rounded-24px text-onSurfaceVariant/54">
-				<Icon type="playlist" />
+				<Icon type={icon} />
 			</div>
 		{/if}
 

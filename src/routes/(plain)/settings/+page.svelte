@@ -315,7 +315,7 @@
 {/snippet}
 
 <CommonDialog
-	openAccessor={{
+	open={{
 		get: () => reparentDirectory,
 		close: () => {
 			reparentDirectory = null

@@ -1,11 +1,13 @@
 <script lang="ts">
 	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
 	import Separator from '$lib/components/Separator.svelte'
+	import Icon from '$lib/components/icon/Icon.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import { createQuery, defineListQuery } from '$lib/db/db-fast.svelte'
 	import { getDB } from '$lib/db/get-db'
 	import { getEntityIds } from '$lib/library/general'
-	import { addTrackToPlaylistInDatabase } from '$lib/library/playlists.svelte'
+	import { toggleTrackInPlaylistInDatabase } from '$lib/library/playlists.svelte'
+	import { SvelteSet } from 'svelte/reactivity'
 	import invariant from 'tiny-invariant'
 
 	interface Props {
@@ -30,12 +32,9 @@
 			invariant(trackId)
 
 			const db = await getDB()
-
-			// TODO. There should be a way to query only playlist ids directly
-			// without needing a map
 			const items = await db.getAllFromIndex('playlistsTracks', 'trackId', trackId)
 
-			return items.map((item) => item.playlistId)
+			return new SvelteSet(items.map((item) => item.playlistId))
 		},
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {
@@ -43,27 +42,27 @@
 					continue
 				}
 
-				if (change.operation === 'add' || change.operation === 'delete') {
-					actions.refetch()
-				}
+				actions.mutate((prev = new SvelteSet<number>()) => {
+					const [playlistId] = change.key
 
-				if (change.operation === 'clear-all') {
-					actions.refetch()
-				}
+					if (change.operation === 'delete') {
+						prev.delete(playlistId)
+					} else {
+						prev.add(playlistId)
+					}
+
+					return prev
+				})
 			}
 		},
 	})
 
-	$effect(() => {
-		console.log('playlists tracks', trackPlaylists.value)
-	})
+	const isTrackInPlaylist = (playlistId: number) => !!trackPlaylists.value?.has(playlistId)
 
 	const addToPlaylist = async (playlistId: number) => {
-		console.log('Add', trackId, playlistId)
-
 		invariant(trackId, 'Playlist to edit is not set')
 
-		await addTrackToPlaylistInDatabase(trackId, playlistId)
+		await toggleTrackInPlaylistInDatabase(isTrackInPlaylist(playlistId), playlistId, trackId)
 	}
 </script>
 
@@ -77,13 +76,18 @@
 				void addToPlaylist(item.playlist.id)
 			}}
 		>
-			{#snippet iconSnippet(playlist)}
+			{#snippet icon(playlist)}
+				{@const isInPlaylist = isTrackInPlaylist(playlist.id)}
 				<div
 					class={clx(
-						'rounded-full border-2 size-24px',
-						trackPlaylists.value?.includes(playlist.id) ? 'border-primary' : 'border-neutral',
+						'rounded-full border-2 size-24px flex items-center justify-center',
+						isInPlaylist ? 'border-primary bg-primary text-onPrimary' : 'border-neutral',
 					)}
-				></div>
+				>
+					{#if isInPlaylist}
+						<Icon type="check" />
+					{/if}
+				</div>
 			{/snippet}
 		</PlaylistListContainer>
 	{:else}

@@ -16,6 +16,9 @@ export interface AppDB extends DBSchema {
 			directory: number
 			lastScanned: number
 		}
+		meta: {
+			notAllowedOperations: undefined
+		}
 	}
 	albums: {
 		key: number
@@ -26,6 +29,9 @@ export interface AppDB extends DBSchema {
 			artists: string[]
 			year: string
 		}
+		meta: {
+			notAllowedOperations: undefined
+		}
 	}
 	artists: {
 		key: number
@@ -33,6 +39,9 @@ export interface AppDB extends DBSchema {
 		indexes: {
 			id: number
 			name: string
+		}
+		meta: {
+			notAllowedOperations: undefined
 		}
 	}
 	playlists: {
@@ -43,16 +52,32 @@ export interface AppDB extends DBSchema {
 			name: string
 			created: number
 		}
+		meta: {
+			notAllowedOperations: undefined
+		}
 	}
 	playlistsTracks: {
 		key: [playlistId: number, trackId: number]
-		value: null
+		value: {
+			playlistId: number
+			trackId: number
+		}
+		indexes: {
+			playlistId: number
+			trackId: number
+		}
+		meta: {
+			notAllowedOperations: 'update'
+		}
 	}
 	directories: {
 		key: number
 		value: Directory
 		indexes: {
 			id: number
+		}
+		meta: {
+			notAllowedOperations: undefined
 		}
 	}
 }
@@ -133,14 +158,12 @@ export const getDB = () =>
 			}
 
 			if (!objectStoreNames.contains('playlistsTracks')) {
-				e.createObjectStore('playlistsTracks', {
+				const store = e.createObjectStore('playlistsTracks', {
 					keyPath: ['playlistId', 'trackId'],
 				})
 
-				// const store = createStore(e, 'playlistsTracks')
-
-				// store.createIndex('playlistId', 'playlistId', { unique: true })
-				// store.createIndex('trackId', 'trackId', { unique: true })
+				store.createIndex('playlistId', 'playlistId', { unique: false })
+				store.createIndex('trackId', 'trackId', { unique: false })
 			}
 
 			if (!objectStoreNames.contains('directories')) {
@@ -149,6 +172,7 @@ export const getDB = () =>
 		},
 	})
 
+// TODO. Unused
 export const getAllKeys = async <
 	Name extends AppStoreNames,
 	Indexes extends IndexNames<AppDB, Name>,
@@ -172,6 +196,7 @@ export const getValue = async <Name extends AppStoreNames>(storeName: Name, id?:
 	return db.get(storeName, id)
 }
 
+// TODO. Unused
 export const isStoreEmpty = async <Name extends AppStoreNames>(storeName: Name) => {
 	const db = await getDB()
 	const store = db.transaction(storeName).objectStore(storeName)

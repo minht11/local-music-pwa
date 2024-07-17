@@ -306,7 +306,10 @@ export type QueryListOptions<K extends QueryKey> = Omit<
 	'onDatabaseChange' | 'initialValue'
 >
 
-export const defineListQuery = <const StoreName extends AppStoreNames, const K extends QueryKey>(
+export const defineListQuery = <
+	const StoreName extends Exclude<AppStoreNames, 'playlistsTracks'>,
+	const K extends QueryKey,
+>(
 	storeName: () => StoreName,
 	options: QueryListOptions<K>,
 ) =>
@@ -332,14 +335,13 @@ export const defineListQuery = <const StoreName extends AppStoreNames, const K e
 					break
 				}
 
-				const id = change.id
-				if (change.operation === 'delete' && id !== undefined) {
+				if (change.operation === 'delete' && change.key !== undefined) {
 					mutate((value) => {
 						if (!value) {
 							return value
 						}
 
-						const index = value.indexOf(id)
+						const index = value.indexOf(change.key)
 						value.splice(index, 1)
 
 						return value

@@ -38,7 +38,7 @@ const importAlbum = async (tx: Tx, track: Track) => {
 
 	const change: DBChangeRecord = {
 		storeName: 'albums',
-		id: albumId,
+		key: albumId,
 		value: { ...updatedAlbum, id: albumId },
 		operation: existingAlbum ? 'update' : 'add',
 	}
@@ -66,7 +66,7 @@ const importArtist = async (tx: Tx, track: Track) => {
 
 		const change: DBChangeRecord = {
 			storeName: 'artists',
-			id: artistId,
+			key: artistId,
 			value: { ...newArtist, id: artistId },
 			operation: 'add',
 		}
@@ -106,7 +106,7 @@ export const importTrackToDb = async (
 	notifyAboutDatabaseChanges([
 		{
 			storeName: 'tracks',
-			id: trackId,
+			key: trackId,
 			value: track,
 			operation: 'add',
 		},
