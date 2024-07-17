@@ -7,6 +7,9 @@ import invariant from 'tiny-invariant'
 export type AppTheme = 'light' | 'dark'
 export type AppThemeOption = AppTheme | 'auto'
 
+export type AppMotion = 'normal' | 'reduced'
+export type AppMotionOption = AppMotion | 'auto'
+
 export interface ModifyPlaylistOptions {
 	id: number
 	name: string
@@ -39,6 +42,13 @@ export class MainStore {
 	}
 
 	pickColorFromArtwork = $state(true)
+
+	motion: AppMotionOption = $state('auto')
+
+	get isReducedMotion() {
+		// TODO. Add system setting
+		return this.motion === 'reduced'
+	}
 
 	/**
 	 * Controls whatever volume slider is visible.

@@ -81,24 +81,30 @@
 	}
 </script>
 
-<VirtualContainer size={72} count={items.length} key={(index) => items[index] as number}>
-	{#snippet children(item)}
-		{@const trackId = items[item.index] as number}
+{#if items.length === 0}
+	<div class="m-auto self-center justify-self-center w-max h-max text-center">
+		No items to display
+	</div>
+{:else}
+	<VirtualContainer size={72} count={items.length} key={(index) => items[index] as number}>
+		{#snippet children(item)}
+			{@const trackId = items[item.index] as number}
 
-		<TrackListItem
-			{trackId}
-			active={player.activeTrack?.id === trackId}
-			style="transform: translateY({item.start}px)"
-			class="virtual-item top-0 left-0 w-full"
-			ariaRowIndex={item.index}
-			menuItems={() => getMenuItems(trackId)}
-			onclick={(track) => {
-				onItemClick({
-					track,
-					items,
-					index: item.index,
-				})
-			}}
-		/>
-	{/snippet}
-</VirtualContainer>
+			<TrackListItem
+				{trackId}
+				active={player.activeTrack?.id === trackId}
+				style="transform: translateY({item.start}px)"
+				class="virtual-item top-0 left-0 w-full"
+				ariaRowIndex={item.index}
+				menuItems={() => getMenuItems(trackId)}
+				onclick={(track) => {
+					onItemClick({
+						track,
+						items,
+						index: item.index,
+					})
+				}}
+			/>
+		{/snippet}
+	</VirtualContainer>
+{/if}

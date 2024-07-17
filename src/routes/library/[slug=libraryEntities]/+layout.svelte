@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation'
 	import { page } from '$app/stores'
 	import { useRootLayout } from '$lib/app'
 	import Button from '$lib/components/Button.svelte'
@@ -9,6 +10,7 @@
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.js'
+	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 	import type { LayoutParams } from './$types.ts'
 	import Search from './Search.svelte'
@@ -26,7 +28,6 @@
 	type Slug = LayoutParams['slug']
 
 	interface NavItem {
-		// TODO. Remove playlists type
 		slug: Slug
 		title: string
 		icon: IconType
@@ -74,7 +75,6 @@
 	})
 
 	const layout = useRootLayout()
-	// @ts-expect-error snippet is defined
 	layout.bottom = layoutBottom
 </script>
 
@@ -160,26 +160,10 @@
 					{:else if store.storeName === 'playlists'}
 						<PlaylistListContainer
 							items={itemsIds}
-							menuItems={(playlist) => [
-								{
-									label: 'Edit playlist',
-									action: () => {
-										main.editPlaylistDialogOpen = {
-											id: playlist.id,
-											name: playlist.name,
-										}
-									},
-								},
-								{
-									label: 'Remove playlist',
-									action: () => {
-										main.removePlaylistDialogOpen = {
-											id: playlist.id,
-											name: playlist.name,
-										}
-									},
-								},
-							]}
+							menuItems={(playlist) => getPlaylistMenuItems(main, playlist)}
+							onItemClick={({ playlist }) => {
+								void goto(`/library/playlists/${playlist.id}`)
+							}}
 						/>
 					{/if}
 				</div>

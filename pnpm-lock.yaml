@@ -39,8 +39,8 @@ importers:
         specifier: ^10.18.0
         version: 10.18.0
       music-metadata:
-        specifier: ^9.0.1
-        version: 9.0.1
+        specifier: ^9.0.2
+        version: 9.0.2
       tiny-invariant:
         specifier: ^1.3.3
         version: 1.3.3
@@ -91,8 +91,8 @@ importers:
         specifier: ^3.3.3
         version: 3.3.3
       prettier-plugin-svelte:
-        specifier: ^3.2.5
-        version: 3.2.5(prettier@3.3.3)(svelte@5.0.0-next.188)
+        specifier: ^3.2.6
+        version: 3.2.6(prettier@3.3.3)(svelte@5.0.0-next.188)
       svelte:
         specifier: 5.0.0-next.188
         version: 5.0.0-next.188
@@ -1205,8 +1205,8 @@ packages:
   ecdsa-sig-formatter@1.0.11:
     resolution: {integrity: sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==}
 
-  electron-to-chromium@1.4.828:
-    resolution: {integrity: sha512-QOIJiWpQJDHAVO4P58pwb133Cwee0nbvy/MV1CwzZVGpkH1RX33N3vsaWRCpR6bF63AAq366neZrRTu7Qlsbbw==}
+  electron-to-chromium@1.4.829:
+    resolution: {integrity: sha512-5qp1N2POAfW0u1qGAxXEtz6P7bO1m6gpZr5hdf5ve6lxpLM7MpiM4jIPz7xcrNlClQMafbyUDDWjlIQZ1Mw0Rw==}
 
   es6-promise@3.3.1:
     resolution: {integrity: sha512-SOp9Phqvqn7jtEUxPWdWfWoLmyt2VaJ6MpvP9Comy1MceMXqE6bxvaTu4iaxpYYPzhny28Lc+M87/c2cPK6lDg==}
@@ -1251,8 +1251,8 @@ packages:
   fastq@1.17.1:
     resolution: {integrity: sha512-sRVD3lWVIXWg6By68ZN7vho9a1pQcN/WBFaAAsDDFzlJjvoGx0P8z7V1t72grFJfJhu3YPZBuu25f7Kaw2jN1w==}
 
-  file-type@19.1.1:
-    resolution: {integrity: sha512-FF4rVPjylL7HkybFBpnBfcnpdi4MGNSFuk4s4VvTdt1wm9tVMdGmtBhvXyz+nh8565FJ5qDUMIPXR+WHLrfHew==}
+  file-type@19.2.0:
+    resolution: {integrity: sha512-tUgGaVcM7enfk+toLsBbbCP71iIThjBiMWLk1gYUprcY21/uRNnui0Py9oJ5AIXE7EJYfBeJRAl8pNHBmujboQ==}
     engines: {node: '>=18'}
 
   fill-range@7.1.1:
@@ -1535,8 +1535,8 @@ packages:
     resolution: {integrity: sha512-KL8QYUaxq7kUbcl0Yto51rMcYt7E/4N4BG3/c96Iqw1PQrTRspu8Cpx4TZ4Nunib1d4bEkIH3gjCYlP2RLBdow==}
     engines: {node: '>=0.10.0'}
 
-  music-metadata@9.0.1:
-    resolution: {integrity: sha512-5odtm+gw1dgWMH8x5vY8DkvNiLHv2/fNO8RpF7fIqXrDAvla4uihIMX90eS5PamWRzYskrC+/vPFqO181FYGKA==}
+  music-metadata@9.0.2:
+    resolution: {integrity: sha512-KRHocFQbwb08CXOTUhoCsQ8Y7m5WSG4zAJpYqkim/NO7lgrNTYF7AxuRMtOvhRt37fcr3VB7qSkIjpLIXNVdFQ==}
     engines: {node: '>=16.0.0'}
 
   nanoid@3.3.7:
@@ -1649,8 +1649,8 @@ packages:
     resolution: {integrity: sha512-UaOOoWEUYTcaaDe1w0fgHW/sXvFr3RO0l7yI7RUDzkZNZCfwXNO9r3pc14d1EtNppF/SHBrV5hNiZZATpf/vUw==}
     engines: {node: '>=15.0.0'}
 
-  prettier-plugin-svelte@3.2.5:
-    resolution: {integrity: sha512-vP/M/Goc8z4iVIvrwXwbrYVjJgA0Hf8PO1G4LBh/ocSt6vUP6sLvyu9F3ABEGr+dbKyxZjEKLkeFsWy/yYl0HQ==}
+  prettier-plugin-svelte@3.2.6:
+    resolution: {integrity: sha512-Y1XWLw7vXUQQZmgv1JAEiLcErqUniAF2wO7QJsw8BVMvpLET2dI5WpEIEJx1r11iHVdSMzQxivyfrH9On9t2IQ==}
     peerDependencies:
       prettier: ^3.0.0
       svelte: ^3.2.0 || ^4.0.0-next.0 || ^5.0.0-next.0
@@ -1763,8 +1763,8 @@ packages:
   strip-literal@2.1.0:
     resolution: {integrity: sha512-Op+UycaUt/8FbN/Z2TWPBLge3jWrP3xj10f3fnYxf052bKuS3EKs1ZQcVGjnEMdsNVAM+plXRdmjrZ/KgG3Skw==}
 
-  strtok3@7.1.1:
-    resolution: {integrity: sha512-mKX8HA/cdBqMKUr0MMZAFssCkIGoZeSCMXgnt79yKxNFguMLVFgRe6wB+fsL0NmoHDbeyZXczy7vEPSoo3rkzg==}
+  strtok3@8.0.0:
+    resolution: {integrity: sha512-YzsSP+kli3q1tTA04HsfY1GqIapi3vEMN38jJ+aLpFyoev0onI/RuZWBGkQgc7ORynb3LW4cSOP3XtsKV21X6Q==}
     engines: {node: '>=16'}
 
   supports-color@5.5.0:
@@ -1875,8 +1875,8 @@ packages:
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
-  unimport@3.8.0:
-    resolution: {integrity: sha512-leq5bfNxyytAer8cYPi0dR0L6p8ZnZ8NxR9TKsSIbJM47TOxC5qURJXQZ8xuBGqLakUqYO6CvVtf3lWKo9k+8A==}
+  unimport@3.9.0:
+    resolution: {integrity: sha512-H2ftTISja1BonUVdOKRos6HC6dqYDR40dQTZY3zIDJ/5/z4ihncuL0LqLvtxYqUDMib41eAtunQUhXIWTCZ8rA==}
 
   universal-github-app-jwt@1.1.2:
     resolution: {integrity: sha512-t1iB2FmLFE+yyJY9+3wMx0ejB+MQpEVkH0gQv7dR6FZyltyq+ZZO0uDpbopxhrZ3SLEO4dCEkIujOMldEQ2iOA==}
@@ -3090,7 +3090,7 @@ snapshots:
   browserslist@4.23.2:
     dependencies:
       caniuse-lite: 1.0.30001642
-      electron-to-chromium: 1.4.828
+      electron-to-chromium: 1.4.829
       node-releases: 2.0.17
       update-browserslist-db: 1.1.0(browserslist@4.23.2)
 
@@ -3203,7 +3203,7 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
 
-  electron-to-chromium@1.4.828: {}
+  electron-to-chromium@1.4.829: {}
 
   es6-promise@3.3.1: {}
 
@@ -3276,9 +3276,9 @@ snapshots:
     dependencies:
       reusify: 1.0.4
 
-  file-type@19.1.1:
+  file-type@19.2.0:
     dependencies:
-      strtok3: 7.1.1
+      strtok3: 8.0.0
       token-types: 6.0.0
       uint8array-extras: 1.4.0
 
@@ -3514,14 +3514,14 @@ snapshots:
 
   murmurhash3js@3.0.1: {}
 
-  music-metadata@9.0.1:
+  music-metadata@9.0.2:
     dependencies:
       '@tokenizer/token': 0.3.0
       content-type: 1.0.5
       debug: 4.3.5
-      file-type: 19.1.1
+      file-type: 19.2.0
       media-typer: 1.1.0
-      strtok3: 7.1.1
+      strtok3: 8.0.0
       token-types: 6.0.0
       uint8array-extras: 1.4.0
     transitivePeerDependencies:
@@ -3631,7 +3631,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  prettier-plugin-svelte@3.2.5(prettier@3.3.3)(svelte@5.0.0-next.188):
+  prettier-plugin-svelte@3.2.6(prettier@3.3.3)(svelte@5.0.0-next.188):
     dependencies:
       prettier: 3.3.3
       svelte: 5.0.0-next.188
@@ -3750,7 +3750,7 @@ snapshots:
     dependencies:
       js-tokens: 9.0.0
 
-  strtok3@7.1.1:
+  strtok3@8.0.0:
     dependencies:
       '@tokenizer/token': 0.3.0
       peek-readable: 5.1.3
@@ -3855,7 +3855,7 @@ snapshots:
 
   undici-types@5.26.5: {}
 
-  unimport@3.8.0(rollup@4.18.1):
+  unimport@3.9.0(rollup@4.18.1):
     dependencies:
       '@rollup/pluginutils': 5.1.0(rollup@4.18.1)
       acorn: 8.12.1
@@ -3917,7 +3917,7 @@ snapshots:
       local-pkg: 0.5.0
       magic-string: 0.30.10
       minimatch: 9.0.5
-      unimport: 3.8.0(rollup@4.18.1)
+      unimport: 3.9.0(rollup@4.18.1)
       unplugin: 1.11.0
     transitivePeerDependencies:
       - rollup

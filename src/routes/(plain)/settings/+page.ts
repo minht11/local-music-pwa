@@ -22,7 +22,6 @@ const countQuery = definePageQuery({
 					countDiff -= 1
 				}
 			}
-			// TODO. Handle clear all
 		}
 
 		if (countDiff !== 0) {

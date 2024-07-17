@@ -112,7 +112,22 @@
 			name: m.settingsThemeLight(),
 			value: 'light',
 		},
-	]
+	] as const
+
+	const motionOptions = [
+		{
+			name: m.settingsMotionAuto(),
+			value: 'auto',
+		},
+		{
+			name: m.settingsMotionReduced(),
+			value: 'reduced',
+		},
+		{
+			name: m.settingsMotionNormal(),
+			value: 'normal',
+		},
+	] as const
 
 	const themeColor = {
 		get value() {
@@ -293,6 +308,14 @@
 				/>
 			</Button>
 		</div>
+	</div>
+
+	<Separator />
+
+	<div class="flex justify-between items-center p-16px">
+		<div>Motion</div>
+
+		<Select items={motionOptions} key="value" labelKey="name" selected="auto" class="w-200px" />
 	</div>
 
 	<Separator />

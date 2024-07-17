@@ -5,7 +5,7 @@
 	import Icon from './icon/Icon.svelte'
 
 	export interface SelectProps<T, Key extends keyof T, LabelKey extends keyof T> {
-		items: T[]
+		items: readonly T[]
 		key: Key
 		labelKey: LabelKey
 		selected?: T[Key]
@@ -13,7 +13,7 @@
 	}
 </script>
 
-<script lang="ts" generics="T, Key extends keyof T, LabelKey extends keyof T">
+<script lang="ts" generics="T, const Key extends keyof T, const LabelKey extends keyof T">
 	let {
 		items,
 		key,

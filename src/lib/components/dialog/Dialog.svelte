@@ -171,7 +171,7 @@
 			close()
 		}}
 		class={clx(
-			'focus:outline-none overscroll-contain flex select-none flex-col rounded-24px bg-surfaceContainerHigh text-onSurface',
+			'focus:outline-none flex select-none flex-col rounded-24px bg-surfaceContainerHigh text-onSurface',
 			className,
 		)}
 	>
@@ -210,6 +210,7 @@
 		max-height: min(100% - 24px - 24px, var(--dialog-height, 100%), 600px) !important;
 		width: clamp(280px, var(--dialog-width, 400px), 100% - 16px) !important;
 		height: max-content !important;
+		overscroll-behavior: contain;
 	}
 
 	dialog::backdrop {

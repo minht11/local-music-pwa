@@ -6,43 +6,62 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueries } from '$lib/db/db-fast.svelte.js'
+	import type { Playlist } from '$lib/db/entities.js'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.ts'
+	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
+	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 
 	const { data } = $props()
+	const main = useMainStore()
 
 	initPageQueries(data)
 
-	const { albumQuery, tracksQuery, store } = data
+	const { itemQuery, tracksQuery, store } = data
 
-	const album = $derived(albumQuery.value)
+	const item = $derived(itemQuery.value)
 	const tracks = $derived(tracksQuery.value)
 
-	const [artwork] = createManagedArtwork(() => album.image)
+	const [artwork] = createManagedArtwork(() => item.image)
 
 	const player = usePlayer()
 	const menu = useMenu()
 
 	const isWideLayout = useMediaQuery('(min-width: 1154px)')
+
+	const getMenuItems = () => {
+		if (data.slug === 'playlists') {
+			// TODO. Make item type inferable from data.slug
+			return getPlaylistMenuItems(main, item as Playlist)
+		}
+
+		return []
+	}
 </script>
 
 {#if !isWideLayout.value}
 	<Header title={store.singularTitle} mode="fixed" />
 {/if}
 
-<div class="@container">
+<div class="@container grow flex flex-col px-16px">
 	<section
-		class="@2xl:h-224px gap-24px flex flex-col @2xl:flex-row items-center justify-center w-full p-16px"
+		class="@2xl:h-224px gap-24px flex flex-col @2xl:flex-row items-center justify-center w-full py-16px"
 	>
-		<Artwork src={artwork()} class="rounded-16px shrink-0 h-196px @2xl:h-full" />
+		{#if data.slug !== 'playlists'}
+			<Artwork src={artwork()} class="rounded-16px shrink-0 h-196px @2xl:h-full" />
+		{/if}
 
 		<div class="flex flex-col bg-surfaceContainerHigh rounded-16px h-full w-full">
 			<div class="flex flex-col p-16px grow">
-				<h1 class="text-headline-md">{album.name}</h1>
-				<h2 class="text-body-lg">{album.artists.join(', ')}</h2>
+				<div class="flex items-center gap-8px">
+					<Icon type="playlist" class="text-onSurface/54 size-40px" />
+
+					<h1 class="text-headline-md">{item.name}</h1>
+				</div>
+				<!-- <h2 class="text-body-lg">{album.artists.join(', ')}</h2>
 				<div>
 					{album.year} • {tracks.length} tracks
-				</div>
+				</div> -->
 			</div>
 
 			<div class="flex gap-8px mt-auto py-16px pl-16px pr-8px items-center">
@@ -64,7 +83,7 @@
 					onclick={(e) => {
 						e.stopPropagation()
 
-						menu.showFromEvent(e, [], {
+						menu.showFromEvent(e, getMenuItems(), {
 							anchor: true,
 							preferredAlignment: {
 								horizontal: 'right',
@@ -77,7 +96,5 @@
 		</div>
 	</section>
 
-	<div class="px-16px">
-		<TracksListContainer items={tracks} />
-	</div>
+	<TracksListContainer items={tracks} />
 </div>
