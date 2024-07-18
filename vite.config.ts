@@ -1,6 +1,6 @@
 import { paraglide } from '@inlang/paraglide-vite'
 import { sveltekit } from '@sveltejs/kit/vite'
-import UnoCSS from '@unocss/svelte-scoped/vite'
+import UnoCSS from '@unocss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 

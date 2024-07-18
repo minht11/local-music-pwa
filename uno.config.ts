@@ -1,4 +1,5 @@
-import { defineConfig, presetUno } from 'unocss'
+import { presetUno } from '@unocss/preset-uno'
+import { defineConfig } from '@unocss/vite'
 import { DEFAULT_THEME_ARGB, getThemePaletteRgb } from './src/lib/theme.ts'
 
 const generateThemeVariables = async (isDark: boolean) => {

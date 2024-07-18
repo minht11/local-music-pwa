@@ -88,13 +88,16 @@
 		grid-template-columns: var(--grid-cols);
 	}
 
-	@container (theme('containers.sm')) {
+	/* TODO. Use theme directive once https://github.com/unocss/unocss/issues/3999 is resolved. */
+	/* @container (theme('containers.sm')) { */
+	@container (min-width: 24rem) {
 		.track-item {
 			--grid-cols: auto 1.5fr 74px;
 		}
 	}
 
-	@container (theme('containers.4xl')) {
+	/* @container (theme('containers.4xl')) { */
+	@container (min-width: 56rem) {
 		.track-item {
 			--grid-cols: auto 1.5fr minmax(200px, 1fr) 74px;
 		}
