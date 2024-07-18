@@ -145,7 +145,7 @@
 		</Header>
 	{/if}
 
-	<div class="w-full flex flex-col grow">
+	<div class="w-full flex flex-col grow px-16px">
 		{#if layoutMode !== 'details'}
 			<div class="flex items-center h-64px border-b border-onSecondaryContainer/24 px-16px">
 				<div class="text-title-lg mr-auto">

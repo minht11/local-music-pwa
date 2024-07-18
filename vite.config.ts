@@ -9,6 +9,12 @@ export default defineConfig({
 		fs: {
 			allow: ['./.generated'],
 		},
+		warmup: {
+			clientFiles: [
+				'src/lib/components/**/*.svelte',
+				'src/lib/library/import-tracks/importer.ts',
+			],
+		},
 	},
 	build: {
 		modulePreload: {
