@@ -10,7 +10,7 @@ export const extractColorFromImage = (image: ImageData): number | undefined => {
 
 		const pixelsLen = Math.round(imageBytes.length / increment)
 		// Preallocate array because it is faster
-		const pixels = new Array<number>(pixelsLen)
+		const pixels = Array.from<number>({ length: pixelsLen })
 
 		for (let i = 0, realIndex = 0; i < imageBytes.length; i += increment, realIndex += 1) {
 			const r = imageBytes[i] as number

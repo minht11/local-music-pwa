@@ -1,9 +1,12 @@
 import adapter from '@sveltejs/adapter-static'
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'
 
-/** @type {typeof import('@sveltejs/kit').Config }*/
+/** @type {import('@sveltejs/kit').Config }*/
 const config = {
 	preprocess: vitePreprocess(),
+	compilerOptions: {
+		runes: true,
+	},
 	kit: {
 		outDir: './.generated/svelte-kit',
 		adapter: adapter({
@@ -15,6 +18,8 @@ const config = {
 		alias: {
 			$paraglide: './.generated/paraglide',
 		},
+		// TODO. Add csp options
+		// csp
 	},
 }
 
