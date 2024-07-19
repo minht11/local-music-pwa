@@ -61,14 +61,14 @@ export const load: PageLoad = async (event) => {
 
 	const itemQuery = defineDetailsQuery(slug, id)
 
-	const album = await itemQuery.preload()
+	const item = await itemQuery.preload()
 
-	if (!album) {
+	if (!item) {
 		error(404)
 	}
 
 	const tracksQuery = defineListQuery(() => 'albums', {
-		key: () => ['albums-tracks-list', album.name],
+		key: () => [`${slug}-tracks`, item.name],
 		fetcher: async ([, name]) => {
 			const db = await getDB()
 

@@ -24,10 +24,18 @@ export default defineConfig({
 			polyfill: false,
 		},
 		rollupOptions: {
+			// Reduce bundle size a bit by tweaking rollup options
 			output: {
 				// Some chunks will still be smaller than this
 				// because of how svelte kit works.
 				experimentalMinChunkSize: 20 * 1024, // 20kb
+				externalLiveBindings: false,
+				freeze: false,
+				compact: true,
+				generatedCode: {
+					preset: 'es2015',
+					symbols: false,
+				},
 			},
 		},
 		target: 'esnext',
