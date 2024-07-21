@@ -22,7 +22,7 @@ export const clickFocusedElement = (container: Element | Document): boolean => {
 }
 
 // https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus/1600194#1600194
-const focusableElementQuery = `
+const focusableElementLoader = `
   [tabindex]:not([tabindex='-1']),
   a[href]:not([tabindex='-1']),
   area[href]:not([tabindex='-1']),
@@ -35,8 +35,8 @@ const focusableElementQuery = `
 `
 
 export const isElementFocusable = (element: Element): boolean =>
-	element.matches(focusableElementQuery)
+	element.matches(focusableElementLoader)
 
 export const findFocusableElement = (container: Element | Document): HTMLElement | null =>
 	// https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus/1600194#1600194
-	container.querySelector(focusableElementQuery)
+	container.querySelector(focusableElementLoader)

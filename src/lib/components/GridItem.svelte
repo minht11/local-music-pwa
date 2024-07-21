@@ -17,7 +17,7 @@
 
 	const { artwork, class: className, children, ...props }: Props = $props()
 
-	const [artworkSrc] = createManagedArtwork(() => artwork)
+	const artworkSrc = createManagedArtwork(() => artwork)
 </script>
 
 <div

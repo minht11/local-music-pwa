@@ -23,14 +23,14 @@ class Artwork {
 const cache = new WeakMap<Blob, Artwork>()
 const cleanupQueue = new Set<Blob>()
 
-export const createManagedArtwork = (getImage: () => Blob | undefined) => {
+export const createManagedArtwork = (getImage: () => Blob | undefined | null): (() => string) => {
 	const key = Symbol()
 
 	const state = $derived.by(() => {
 		const image = getImage()
 
 		if (!image) {
-			return undefined
+			return null
 		}
 
 		let artwork = cache.get(image)
@@ -75,11 +75,7 @@ export const createManagedArtwork = (getImage: () => Blob | undefined) => {
 		}
 	})
 
-	const release = () => {
-		state && releaseLock(state)
-	}
-
-	return [() => url, release] as const
+	return () => url
 }
 
 if (!import.meta.env.SSR) {
