@@ -37,7 +37,10 @@ export const formatDuration = (seconds: number) => {
 export const throttle = <Fn extends (...args: Parameters<Fn>) => ReturnType<Fn>>(
 	fn: Fn,
 	delay: number,
-) => {
+): {
+	(...args: Parameters<Fn>): ReturnType<Fn>
+	cancel(): void
+} => {
 	let wait = false
 	let timeout: undefined | number
 	let prevValue: ReturnType<Fn> | undefined = undefined
@@ -70,7 +73,10 @@ export const throttle = <Fn extends (...args: Parameters<Fn>) => ReturnType<Fn>>
 export const debounce = <Fn extends (...args: Parameters<Fn>) => ReturnType<Fn>>(
 	fn: Fn,
 	delay: number,
-) => {
+): {
+	(...args: Parameters<Fn>): void
+	cancel(): void
+} => {
 	let timeout: undefined | number
 
 	const debounceFn = (...args: Parameters<Fn>) => {
@@ -102,7 +108,7 @@ export const safeInteger = (num: number, fallback = 0): number => {
 export const clamp = (num: number, min: number, max: number): number =>
 	Math.min(Math.max(num, min), max)
 
-export const shuffleArray = <T>(array: T[]) => {
+export const shuffleArray = <T>(array: T[]): void => {
 	for (let i = array.length - 1; i > 0; i -= 1) {
 		const j = Math.floor(Math.random() * (i + 1))
 		const temp = array[i] as T
@@ -118,4 +124,13 @@ export const truncate = (text: string, length: number): string => {
 	}
 
 	return `${text.slice(0, length)}...`
+}
+
+export const unwrap = <T>(value: T | (() => T)): T => {
+	if (typeof value === 'function') {
+		// @ts-expect-error
+		return value()
+	}
+
+	return value
 }

@@ -8,7 +8,7 @@ export const useMediaQuery = (query: string) => {
 	})
 
 	return {
-		get value() {
+		get value(): boolean {
 			return isMatched
 		},
 	}
