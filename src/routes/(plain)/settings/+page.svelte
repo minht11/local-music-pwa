@@ -10,8 +10,8 @@
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
-	import { initPageQueries } from '$lib/db/db-fast.svelte.ts'
 	import type { Directory } from '$lib/db/entities.ts'
+	import { initPageQueries } from '$lib/db/queries.svelte.ts'
 	import { debounce } from '$lib/helpers/utils.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 	import {
@@ -28,8 +28,8 @@
 
 	const mainStore = useMainStore()
 
-	const count = $derived(data.countQuery.value)
-	const directories = $derived(data.directoriesQuery.value)
+	const count = $derived(data.countLoader.value)
+	const directories = $derived(data.directoriesLoader.value)
 
 	const isFileSystemAccessSupported = true
 

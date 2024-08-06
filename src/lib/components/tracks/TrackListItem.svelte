@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { Track } from '$lib/db/entities'
+	import type { Track } from '$lib/db/entities.ts'
+	import { useTrackData } from '$lib/db/query.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
-	import { formatDuration } from '$lib/helpers/utils'
-	import { useTrack } from '$lib/library/tracks.svelte.ts'
+	import { formatDuration } from '$lib/helpers/utils.ts'
 	import Artwork from '../Artwork.svelte'
 	import ListItem, { type ListMenuFn } from '../ListItem.svelte'
 
@@ -27,9 +27,9 @@
 		menuItems,
 	}: Props = $props()
 
-	const data = useTrack(trackId)
+	const data = useTrackData(trackId)
 
-	const [artwork] = createManagedArtwork(() => data.value?.images?.small)
+	const artworkSrc = createManagedArtwork(() => data.value?.images?.small)
 	const track = $derived(data.value)
 </script>
 
@@ -48,7 +48,7 @@
 >
 	<div role="cell" class="track-item grow gap-20px items-center">
 		<Artwork
-			src={artwork()}
+			src={artworkSrc()}
 			alt={track?.name}
 			class={clx('h-40px w-40px rounded-4px !hidden @sm:!flex', data.loading && 'opacity-50')}
 		/>

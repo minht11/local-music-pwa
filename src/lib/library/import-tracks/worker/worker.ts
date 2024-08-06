@@ -3,7 +3,7 @@
 import { LegacyDirectoryId, MusicItemType, type Track } from '$lib/db/entities'
 import { getDB } from '$lib/db/get-db'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
-import { removeTrack } from '$lib/library/tracks.svelte'
+import { removeTrackWithTx } from '$lib/library/tracks.svelte'
 import { importTrackToDb } from './import-track-to-db.ts'
 import { parseTrack } from './parse/parse-track.ts'
 import type { TrackImportCount, TrackImportMessage, TrackImportOptions } from './types.ts'
@@ -92,8 +92,8 @@ const findTrackByFileHandle = async (handle: FileSystemFileHandle, tracks: Set<T
 }
 const processDirectory = async (newDirHandle: FileSystemDirectoryHandle, directoryId: number) => {
 	const db = await getDB()
-	const tx = db.transaction(['directories', 'tracks'], 'readwrite')
-	const existingTracks = await tx.objectStore('tracks').index('directory').getAll(directoryId)
+	// We do not use one transaction for all operations to commit changes in smaller chunks.
+	const existingTracks = await db.getAllFromIndex('tracks', 'directory')
 
 	// TODO. Add more extensions
 	const handles = await getFileHandlesRecursively(newDirHandle, ['mp3'])
@@ -155,10 +155,11 @@ const processDirectory = async (newDirHandle: FileSystemDirectoryHandle, directo
 		count.current += 1
 	}
 
+	const tx = db.transaction(['directories', 'tracks'], 'readwrite')
 	// If we have any tracks left in the set,
 	// that means they no longer exist in the directory, so we remove them.
 	for (const track of existingTrackSet) {
-		await removeTrack(track.id).catch(console.warn)
+		await removeTrackWithTx(tx, track.id).catch(console.warn)
 		count.removed += 1
 	}
 

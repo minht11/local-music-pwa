@@ -13,15 +13,17 @@ export const persist = <T>(storeName: string, instance: T, keys: (keyof T)[]): v
 		}
 
 		let initial = true
-		$effect(() => {
-			const updatedValue = instance[key]
+		$effect.root(() => {
+			$effect(() => {
+				const updatedValue = instance[key]
 
-			if (initial) {
-				initial = false
-				return
-			}
+				if (initial) {
+					initial = false
+					return
+				}
 
-			localStorage.setItem(fullKey, JSON.stringify(updatedValue))
+				localStorage.setItem(fullKey, JSON.stringify(updatedValue))
+			})
 		})
 	}
 }

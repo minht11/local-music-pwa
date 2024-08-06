@@ -5,8 +5,8 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { initPageQueries } from '$lib/db/db-fast.svelte.js'
-	import type { Playlist } from '$lib/db/entities.js'
+	import type { Album, Playlist } from '$lib/db/entities.ts'
+	import { initPageQueries } from '$lib/db/queries.svelte.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
@@ -17,12 +17,18 @@
 
 	initPageQueries(data)
 
-	const { itemQuery, tracksQuery, store } = data
+	const { itemLoader, tracksLoader, slug, store } = data
 
-	const item = $derived(itemQuery.value)
-	const tracks = $derived(tracksQuery.value)
+	const item = $derived(itemLoader.value)
+	const tracks = $derived(tracksLoader.value)
 
-	const [artwork] = createManagedArtwork(() => item.image)
+	const artworkSrc = createManagedArtwork(() => {
+		if (slug !== 'playlists') {
+			return (item as Album).image
+		}
+
+		return null
+	})
 
 	const player = usePlayer()
 	const menu = useMenu()
@@ -48,7 +54,7 @@
 		class="@2xl:h-224px gap-24px flex flex-col @2xl:flex-row items-center justify-center w-full py-16px"
 	>
 		{#if data.slug !== 'playlists'}
-			<Artwork src={artwork()} class="rounded-16px shrink-0 h-196px @2xl:h-full" />
+			<Artwork src={artworkSrc()} class="rounded-16px shrink-0 h-196px @2xl:h-full" />
 		{/if}
 
 		<div class="flex flex-col bg-surfaceContainerHigh rounded-16px h-full w-full">

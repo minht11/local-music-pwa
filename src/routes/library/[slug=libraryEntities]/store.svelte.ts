@@ -1,31 +1,13 @@
-import { defineListQuery } from '$lib/db/db-fast.svelte'
-import type { AppDB } from '$lib/db/get-db'
-import {
-	type LibraryEntitySortKey,
-	type LibraryEntityStoreName,
-	type SortOrder,
-	getEntityIds,
-} from '$lib/library/general'
-import type { IndexNames } from 'idb'
-
-const defaultData = {
-	order: 'asc',
-	sortBy: 'name',
-}
-
-export const getPersistedData = (key: string) => {
-	const data = localStorage.getItem(`library-page:${key}`)
-
-	return data ? JSON.parse(data) : defaultData
-}
-
-export const setPersistedData = (key: string, data: typeof defaultData) => {
-	localStorage.setItem(`library-page:${key}`, JSON.stringify(data))
-}
+import { persist } from '$lib/helpers/persist.svelte.ts'
+import type {
+	LibraryEntitySortKey,
+	LibraryEntityStoreName,
+	SortOrder,
+} from '$lib/library/general.ts'
 
 export type SortOption<StoreName extends LibraryEntityStoreName> = {
 	name: string
-	key: IndexNames<AppDB, StoreName>
+	key: LibraryEntitySortKey<StoreName>
 }
 
 export interface LibraryStoreOptions<StoreName extends LibraryEntityStoreName> {
@@ -42,45 +24,24 @@ export class LibraryStore<StoreName extends LibraryEntityStoreName> {
 
 	pluralTitle: string
 
-	searchTerm = $state('')
+	searchTerm: string = $state('')
 
-	order = $state<SortOrder>('asc')
+	order: SortOrder = $state<SortOrder>('asc')
 
-	sortOptions = $state<SortOption<StoreName>[]>([])
-	sortByKey = $state<LibraryEntitySortKey<StoreName>>(this.sortOptions[0]?.key ?? 'name')
-	sortBy = $derived(this.sortOptions.find((option) => option.key === this.sortByKey))
+	sortOptions: SortOption<StoreName>[] = $state([])
 
-	#query = defineListQuery(() => this.storeName, {
-		key: () => [
-			'library',
-			this.storeName,
-			this.sortByKey,
-			this.order,
-			this.searchTerm.toLowerCase().trim(),
-		],
-		fetcher: ([, name, sortKey, order, searchTerm]) =>
-			getEntityIds(name, {
-				sort: sortKey,
-				order,
-				searchTerm,
-				searchFn: (value) => value.name.toLowerCase().includes(searchTerm),
-			}),
-	})
+	sortByKey: LibraryEntitySortKey<StoreName> = $state(this.sortOptions[0]?.key ?? 'name')
 
-	preloadData = () => this.#query.preload()
-
-	hydrateQuery = () => {
-		this.#query.hydrate()
-	}
-
-	get items() {
-		return this.#query.value
-	}
+	sortBy: SortOption<StoreName> | undefined = $derived(
+		this.sortOptions.find((option) => option.key === this.sortByKey),
+	)
 
 	constructor(options: LibraryStoreOptions<StoreName>) {
 		this.storeName = options.storeName
 		this.singularTitle = options.singularTitle
 		this.pluralTitle = options.pluralTitle
 		this.sortOptions = options.sortOptions
+
+		persist(`library:${this.storeName}`, this, ['sortByKey'])
 	}
 }

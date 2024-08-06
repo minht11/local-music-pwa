@@ -67,7 +67,9 @@ if (globalThis.window) {
 	})
 }
 
-export const listenForDatabaseChanges = (handler: (changes: readonly DBChangeRecord[]) => void) => {
+export const listenForDatabaseChanges = (
+	handler: (changes: readonly DBChangeRecord[]) => void,
+): (() => void) => {
 	if (import.meta.env.SSR) {
 		return () => {}
 	}
@@ -79,7 +81,9 @@ export const listenForDatabaseChanges = (handler: (changes: readonly DBChangeRec
 	}
 }
 
-export const notifyAboutDatabaseChanges = (changes: readonly (DBChangeRecord | undefined)[]) => {
+export const notifyAboutDatabaseChanges = (
+	changes: readonly (DBChangeRecord | undefined)[],
+): void => {
 	const filteredChanges = changes.filter((c) => c !== undefined)
 
 	if (filteredChanges.length === 0) {

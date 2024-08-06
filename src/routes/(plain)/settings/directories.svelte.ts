@@ -6,10 +6,16 @@ import type { TrackImportOptions } from '$lib/library/import-tracks/worker/types
 import { removeTrackWithTx } from '$lib/library/tracks.svelte'
 import { SvelteSet } from 'svelte/reactivity'
 
+export interface DirectoryStatus {
+	status: 'child' | 'existing' | 'parent'
+	existingDir: Directory
+	newDirHandle: FileSystemDirectoryHandle
+}
+
 export const checkNewDirectoryStatus = async (
 	existingDir: Directory,
 	newDirHandle: FileSystemDirectoryHandle,
-) => {
+): Promise<DirectoryStatus | undefined> => {
 	const paths = await existingDir.handle.resolve(newDirHandle)
 
 	let status: 'child' | 'existing' | 'parent' | undefined
@@ -37,18 +43,18 @@ export const checkNewDirectoryStatus = async (
 class DirectoriesStore {
 	#inProgress = new SvelteSet<number>()
 
-	isInprogress = (id: number) => this.#inProgress.has(id)
+	isInprogress = (id: number): boolean => this.#inProgress.has(id)
 
-	markAsInprogress = (id: number) => {
+	markAsInprogress = (id: number): void => {
 		this.#inProgress.add(id)
 	}
 
-	narkAsDone = (id: number) => {
+	narkAsDone = (id: number): void => {
 		this.#inProgress.delete(id)
 	}
 }
 
-export const directoriesStore = new DirectoriesStore()
+export const directoriesStore: DirectoriesStore = new DirectoriesStore()
 
 const importTracksFromDirectory = async (options: TrackImportOptions) => {
 	const { importTracksFromDirectory: importDir } = await import(
@@ -58,7 +64,7 @@ const importTracksFromDirectory = async (options: TrackImportOptions) => {
 	await importDir(options)
 }
 
-export const importDirectory = async (newDirectory: FileSystemDirectoryHandle) => {
+export const importDirectory = async (newDirectory: FileSystemDirectoryHandle): Promise<void> => {
 	const db = await getDB()
 	const tx = db.transaction('directories', 'readwrite')
 
@@ -95,7 +101,7 @@ export const importDirectory = async (newDirectory: FileSystemDirectoryHandle) =
 export const importReplaceDirectory = async (
 	directoryId: number,
 	newDirHandle: FileSystemDirectoryHandle,
-) => {
+): Promise<void> => {
 	directoriesStore.markAsInprogress(directoryId)
 
 	const db = await getDB()
@@ -126,7 +132,7 @@ export const importReplaceDirectory = async (
 	directoriesStore.narkAsDone(directoryId)
 }
 
-export const removeDirectory = async (directoryId: number) => {
+export const removeDirectory = async (directoryId: number): Promise<void> => {
 	const db = await getDB()
 
 	directoriesStore.markAsInprogress(directoryId)

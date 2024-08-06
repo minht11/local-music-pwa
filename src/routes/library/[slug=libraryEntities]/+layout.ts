@@ -1,3 +1,5 @@
+import { definePageListLoader } from '$lib/db/queries.svelte.ts'
+import { getEntityIds } from '$lib/library/general.ts'
 import type { LayoutLoad } from './$types.ts'
 import { LibraryStore } from './store.svelte'
 
@@ -64,10 +66,27 @@ export const load: LayoutLoad = async (event) => {
 
 	const store = storeMap[slug]()
 
-	await store.preloadData()
+	console.time('definePageListLoader')
+	const query = await definePageListLoader(store.storeName, {
+		key: () => [
+			store.storeName,
+			store.sortByKey,
+			store.order,
+			store.searchTerm.toLowerCase().trim(),
+		],
+		fetcher: ([name, sortKey, order, searchTerm]) =>
+			getEntityIds(name, {
+				sort: sortKey,
+				order,
+				searchTerm,
+				searchFn: (value) => value.name.toLowerCase().includes(searchTerm),
+			}),
+	})
+	console.timeEnd('definePageListLoader')
 
 	return {
 		slug,
+		query,
 		store,
 		title: 'Library',
 		rootLayoutKey: () => slug,

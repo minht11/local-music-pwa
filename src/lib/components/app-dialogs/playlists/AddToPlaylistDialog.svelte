@@ -18,7 +18,7 @@
 	title={'Add to playlist'}
 >
 	{#snippet children({ data: trackId, close })}
-		<AddToPlaylistDialogContent {trackId} />
+		<AddToPlaylistDialogContent {trackId} onclose={close} />
 
 		<Separator />
 		<DialogFooter

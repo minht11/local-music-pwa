@@ -1,7 +1,8 @@
 import { listenForDatabaseChanges } from '$lib/db/channel'
+import type { LoaderResult } from '$lib/db/queries.svelte'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { debounce, shuffleArray } from '$lib/helpers/utils'
-import { useTrack } from '$lib/library/tracks.svelte'
+import { type TrackData, useTrack } from '$lib/library/tracks.svelte'
 import { untrack } from 'svelte'
 import { PlayerAudio } from './audio.svelte'
 
@@ -12,7 +13,7 @@ export interface PlayTrackOptions {
 export class PlayerStore {
 	#audio = new PlayerAudio()
 
-	shuffle = $state(false)
+	shuffle: boolean = $state(false)
 
 	get playing() {
 		return this.#audio.playing
@@ -22,11 +23,11 @@ export class PlayerStore {
 		this.#audio.playing = value
 	}
 
-	get currentTime() {
+	get currentTime(): number {
 		return this.#audio.time.current
 	}
 
-	get duration() {
+	get duration(): number {
 		return this.#audio.time.duration
 	}
 
@@ -42,20 +43,25 @@ export class PlayerStore {
 	#itemsIdsOriginalOrder = $state<number[]>([])
 	#itemsIdsShuffled = $state<number[]>([])
 
-	itemsIds = $derived(this.shuffle ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder)
+	itemsIds: number[] = $derived(
+		this.shuffle ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
+	)
 
-	activeTrackQuery = useTrack(() => this.itemsIds[this.#activeTrackIndex] ?? -1, {
-		allowEmpty: true,
-	})
+	activeTrackLoader: LoaderResult<TrackData, undefined> = useTrack(
+		() => this.itemsIds[this.#activeTrackIndex] ?? -1,
+		{
+			allowEmpty: true,
+		},
+	)
 
-	activeTrack = $derived(this.activeTrackQuery.value)
+	activeTrack: TrackData | undefined = $derived(this.activeTrackLoader.value)
 
-	get activeTrackIndex() {
+	get activeTrackIndex(): number {
 		return this.#activeTrackIndex
 	}
 
 	#artwork = createManagedArtwork(() => this.activeTrack?.images?.full)
-	artworkSrc = $derived(this.#artwork[0]())
+	artworkSrc: string = $derived(this.#artwork())
 
 	constructor() {
 		const reset = debounce(() => {
@@ -116,7 +122,7 @@ export class PlayerStore {
 		})
 	}
 
-	togglePlay = (force?: boolean) => {
+	togglePlay = (force?: boolean): void => {
 		if (!this.activeTrack) {
 			return
 		}
@@ -124,7 +130,7 @@ export class PlayerStore {
 		this.playing = force ?? !this.playing
 	}
 
-	playNext = () => {
+	playNext = (): void => {
 		let newIndex = this.#activeTrackIndex + 1
 		if (newIndex >= this.itemsIds.length) {
 			newIndex = 0
@@ -133,7 +139,7 @@ export class PlayerStore {
 		this.playTrack(newIndex)
 	}
 
-	playPrev = () => {
+	playPrev = (): void => {
 		let newIndex = this.#activeTrackIndex - 1
 		if (newIndex < 0) {
 			newIndex = this.itemsIds.length - 1
@@ -142,7 +148,11 @@ export class PlayerStore {
 		this.playTrack(newIndex)
 	}
 
-	playTrack = (trackIndex: number, queue?: readonly number[], options: PlayTrackOptions = {}) => {
+	playTrack = (
+		trackIndex: number,
+		queue?: readonly number[],
+		options: PlayTrackOptions = {},
+	): void => {
 		if (queue) {
 			this.#itemsIdsOriginalOrder = [...queue]
 		}
@@ -164,5 +174,5 @@ export class PlayerStore {
 		this.togglePlay(true)
 	}
 
-	seek = this.#audio.seek
+	seek: (time: number) => void = this.#audio.seek
 }

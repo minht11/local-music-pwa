@@ -1,18 +1,38 @@
 import { goto } from '$app/navigation'
-import { defineListQuery, definePageQuery } from '$lib/db/db-fast.svelte.ts'
-import { getDB, getValue } from '$lib/db/get-db.ts'
-import { preloadTracks } from '$lib/library/tracks.svelte.ts'
+import { type DbValue, getDB } from '$lib/db/get-db.ts'
+import {
+	type PageLoaderResult,
+	definePageListLoader,
+	definePageLoader,
+} from '$lib/db/queries.svelte.ts'
+import type { LibraryEntityStoreName } from '$lib/library/general.ts'
 import { error } from '@sveltejs/kit'
 import invariant from 'tiny-invariant'
 import type { PageLoad } from './$types.ts'
 
-type DetailsType = 'albums' | 'artists' | 'playlists'
+type DetailsSlug = Exclude<LibraryEntityStoreName, 'tracks'>
 
-const defineDetailsQuery = <T extends DetailsType>(storeName: T, id: number) =>
-	definePageQuery({
+const configMap = {
+	albums: {
+		index: 'album',
+	},
+	artists: {
+		index: 'artists',
+	},
+	playlists: {
+		index: 'playlist',
+	},
+} as const
+
+const defineDetailsLoader = <T extends DetailsSlug>(
+	storeName: T,
+	id: number,
+): PageLoaderResult<DbValue<T>, undefined> => {
+	const query = definePageLoader({
 		key: () => [storeName, id],
 		fetcher: async () => {
-			const item = await getValue(storeName, id)
+			const db = await getDB()
+			const item = await db.get(storeName, id)
 
 			// TODO. Return proper error message
 			invariant(item, 'Item not found')
@@ -32,19 +52,42 @@ const defineDetailsQuery = <T extends DetailsType>(storeName: T, id: number) =>
 				}
 			}
 		},
+		onError: (error) => {
+			// TODO.
+			goto(`/library/${storeName}`)
+		},
 	})
 
-const configMap = {
-	albums: {
-		index: 'album',
-	},
-	artists: {
-		index: 'artists',
-	},
-	playlists: {
-		index: 'playlist',
-	},
-} as const
+	return query
+}
+
+const defineTracksLoader = <Slug extends DetailsSlug>(
+	storeName: Slug,
+	itemName: () => string,
+	id: number,
+): PageLoaderResult<number[], undefined> => {
+	const query = definePageListLoader('tracks', {
+		key: () => [storeName, itemName()],
+		fetcher: async ([, name]) => {
+			const db = await getDB()
+
+			let keys: number[]
+			if (storeName === 'playlists') {
+				const keysResult = await db.getAllKeysFromIndex('playlistsTracks', 'playlistId', id)
+				keys = keysResult.map(([, trackId]) => trackId)
+			} else {
+				const index = configMap[storeName as Exclude<Slug, 'playlists'>].index
+				keys = await db.getAllKeysFromIndex('tracks', index, name)
+			}
+
+			return keys
+		},
+		// TODO.
+		// onDatabaseChange: (changes, { mutate }) => {
+	})
+
+	return query
+}
 
 export const load: PageLoad = async (event) => {
 	const { slug } = event.params
@@ -59,42 +102,16 @@ export const load: PageLoad = async (event) => {
 		error(404)
 	}
 
-	const itemQuery = defineDetailsQuery(slug, id)
+	const itemLoader = await defineDetailsLoader(slug, id)
+	const tracksLoader = await defineTracksLoader(slug, () => itemLoader.value.name, id)
 
-	const item = await itemQuery.preload()
-
-	if (!item) {
-		error(404)
-	}
-
-	const tracksQuery = defineListQuery(() => 'albums', {
-		key: () => [`${slug}-tracks`, item.name],
-		fetcher: async ([, name]) => {
-			const db = await getDB()
-
-			let keys: number[]
-			if (slug === 'playlists') {
-				const keysResult = await db.getAllKeysFromIndex('playlistsTracks', 'playlistId', id)
-				keys = keysResult.map(([, trackId]) => trackId)
-			} else {
-				const index = configMap[slug].index
-				keys = await db.getAllKeysFromIndex('tracks', index, name)
-			}
-
-			return keys
-		},
-		// TODO.
-		// onDatabaseChange: (changes, { mutate }) => {
-	})
-
-	const trackIds = await tracksQuery.preload()
-	await preloadTracks(trackIds, 10)
+	await preloadTracksToDatabaseCache(tracksLoader.value, 10)
 
 	return {
 		slug,
 		libraryType: slug,
 		title: 'Album',
-		itemQuery,
-		tracksQuery,
+		itemLoader,
+		tracksLoader,
 	}
 }

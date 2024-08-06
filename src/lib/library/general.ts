@@ -3,9 +3,9 @@ import type { IDBPIndex, IndexNames } from 'idb'
 
 export type SortOrder = 'asc' | 'desc'
 export type LibraryEntityStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
-export type LibraryEntitySortKey<StoreName extends LibraryEntityStoreName> = IndexNames<
-	AppDB,
-	StoreName
+export type LibraryEntitySortKey<StoreName extends LibraryEntityStoreName> = Exclude<
+	IndexNames<AppDB, StoreName>,
+	symbol
 >
 
 export interface SortOptions<StoreName extends LibraryEntityStoreName> {
@@ -22,7 +22,7 @@ type GetEntityIdsIndex<StoreName extends LibraryEntityStoreName> = IDBPIndex<
 	keyof AppDB[StoreName]['indexes']
 >
 
-export const getEntityIdsWithSearchSlow = async <const StoreName extends LibraryEntityStoreName>(
+const getEntityIdsWithSearchSlow = async <const StoreName extends LibraryEntityStoreName>(
 	storeIndex: GetEntityIdsIndex<StoreName>,
 	searchTerm: string,
 	searchFn: (value: AppDB[StoreName]['value'], term: string) => boolean,
@@ -41,11 +41,10 @@ export const getEntityIdsWithSearchSlow = async <const StoreName extends Library
 export const getEntityIds = async <StoreName extends LibraryEntityStoreName>(
 	store: StoreName,
 	options: SortOptions<StoreName>,
-) => {
+): Promise<number[]> => {
 	const db = await getDB()
 	const storeIndex = db.transaction(store).store.index(options.sort)
 
-	// console.log('storeIndex', options.sort, storeIndex, options.order)
 	const { searchTerm, searchFn } = options
 
 	let data: number[]
@@ -62,34 +61,3 @@ export const getEntityIds = async <StoreName extends LibraryEntityStoreName>(
 
 	return data
 }
-
-// export interface UseEntityOptions<AllowEmpty extends boolean = false> {
-// 	allowEmpty?: AllowEmpty
-// }
-
-// export type UseTrackResult<AllowEmpty extends boolean = false> = AllowEmpty extends true
-// 	? Track | undefined
-// 	: Track
-
-// export const useEntityData = <AllowEmpty extends boolean = false>(
-// 	id: number | (() => number),
-// 	options: UseEntityOptions<AllowEmpty> = {},
-// ) =>
-// 	useDbQuery({
-// 		key: () => (typeof id === 'function' ? id() : id),
-// 		fetcher: async (key): Promise<UseTrackResult<AllowEmpty>> => {
-// 			const track = await getTrack(key)
-
-// 			if (options.allowEmpty) {
-// 				return track as Track
-// 			}
-
-// 			invariant(track, `Track with id ${key} not found`)
-
-// 			return track
-// 		},
-// 		cache: tracksCache,
-// 		onDatabaseChange: () => {},
-// 	})
-
-// export const useValue = <T>(value: T) => {}

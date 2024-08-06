@@ -6,16 +6,10 @@ export interface AppDB extends DBSchema {
 	tracks: {
 		key: number
 		value: Track
-		indexes: {
-			id: number
-			name: string
-			album: string
-			year: string
-			duration: string
-			artists: string[]
-			directory: number
-			lastScanned: number
-		}
+		indexes: Pick<
+			Track,
+			'id' | 'name' | 'album' | 'year' | 'duration' | 'artists' | 'directory' | 'lastScanned'
+		>
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -23,12 +17,7 @@ export interface AppDB extends DBSchema {
 	albums: {
 		key: number
 		value: Album
-		indexes: {
-			id: number
-			name: string
-			artists: string[]
-			year: string
-		}
+		indexes: Pick<Album, 'id' | 'name' | 'artists' | 'year'>
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -36,10 +25,7 @@ export interface AppDB extends DBSchema {
 	artists: {
 		key: number
 		value: Artist
-		indexes: {
-			id: number
-			name: string
-		}
+		indexes: Pick<Artist, 'id' | 'name'>
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -47,11 +33,7 @@ export interface AppDB extends DBSchema {
 	playlists: {
 		key: number
 		value: Playlist
-		indexes: {
-			id: number
-			name: string
-			created: number
-		}
+		indexes: Pick<Playlist, 'id' | 'name' | 'created'>
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -73,9 +55,7 @@ export interface AppDB extends DBSchema {
 	directories: {
 		key: number
 		value: Directory
-		indexes: {
-			id: number
-		}
+		indexes: Pick<Directory, 'id'>
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -110,7 +90,7 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 		autoIncrement: true,
 	})
 
-export const getDB = () =>
+export const getDB = (): Promise<IDBPDatabase<AppDB>> =>
 	// TODO. Reset database version
 	openDB<AppDB>('app-storage', 1, {
 		upgrade(e) {
@@ -172,35 +152,13 @@ export const getDB = () =>
 		},
 	})
 
-// TODO. Unused
-export const getAllKeys = async <
-	Name extends AppStoreNames,
-	Indexes extends IndexNames<AppDB, Name>,
->(
-	storeName: Name,
-	index: Indexes,
-) => {
-	const db = await getDB()
-	const value = await db.getAllKeysFromIndex(storeName, index)
-
-	return Object.values(value)
-}
-
-export const getValue = async <Name extends AppStoreNames>(
-	storeName: Name,
-	key: AppDB[Name]['key'],
-) => {
-	if (key === undefined) {
-		return undefined
-	}
-
-	const db = await getDB()
-
-	return db.get(storeName, key)
-}
+export type DbKey<Name extends AppStoreNames> = AppDB[Name]['key']
+export type DbValue<Name extends AppStoreNames> = AppDB[Name]['value']
 
 // TODO. Unused
-export const isStoreEmpty = async <Name extends AppStoreNames>(storeName: Name) => {
+export const isStoreEmpty = async <Name extends AppStoreNames>(
+	storeName: Name,
+): Promise<boolean> => {
 	const db = await getDB()
 	const store = db.transaction(storeName).objectStore(storeName)
 	const cursor = await store.openKeyCursor()

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Album } from '$lib/db/entities'
+	import { useAlbumData } from '$lib/db/query.ts'
 
-	import { useAlbum } from '$lib/library/tracks.svelte.ts'
 	import GridItem from '../GridItem.svelte'
 
 	interface Props {
@@ -14,7 +14,7 @@
 
 	const { albumId, style, tabindex, class: className, onclick }: Props = $props()
 
-	const data = useAlbum(albumId)
+	const data = useAlbumData(albumId)
 
 	const album = $derived(data.value)
 </script>

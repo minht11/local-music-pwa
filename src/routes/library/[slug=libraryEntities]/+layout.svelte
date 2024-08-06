@@ -9,26 +9,25 @@
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import { initPageQueries } from '$lib/db/queries.svelte.ts'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.js'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
-	import type { LayoutParams } from './$types.ts'
 	import Search from './Search.svelte'
 
 	const { data, children } = $props()
 
+	initPageQueries(data)
+
 	const { store } = data
 	const main = useMainStore()
 
-	store.hydrateQuery()
-	const itemsIds = $derived(store.items)
+	const itemsIds = $derived(data.query.value)
 
 	const slug = $derived(data.slug)
 
-	type Slug = LayoutParams['slug']
-
 	interface NavItem {
-		slug: Slug
+		slug: typeof slug
 		title: string
 		icon: IconType
 	}

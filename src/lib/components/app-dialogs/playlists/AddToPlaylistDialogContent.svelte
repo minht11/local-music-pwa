@@ -3,8 +3,9 @@
 	import Separator from '$lib/components/Separator.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
-	import { createQuery, defineListQuery } from '$lib/db/db-fast.svelte'
+	import { snackbar } from '$lib/components/snackbar/snackbar'
 	import { getDB } from '$lib/db/get-db'
+	import { createListLoader, createLoader } from '$lib/db/queries.svelte.ts'
 	import { getEntityIds } from '$lib/library/general'
 	import { toggleTrackInPlaylistInDatabase } from '$lib/library/playlists.svelte'
 	import { SvelteSet } from 'svelte/reactivity'
@@ -12,21 +13,25 @@
 
 	interface Props {
 		trackId: number
+		onclose: () => void
 	}
 
-	const { trackId }: Props = $props()
+	const { trackId, onclose }: Props = $props()
 
-	// TODO. Should use regular query
-	const query = defineListQuery(() => 'playlists', {
+	const query = createListLoader('playlists', {
 		key: () => ['playlists'],
 		fetcher: () => getEntityIds('playlists', { sort: 'created' }),
+		onError: () => {
+			snackbar({
+				id: 'playlists-loading',
+				// TODO: i18n
+				message: 'Failed to load playlists',
+			})
+			onclose()
+		},
 	})
 
-	query.hydrate()
-
-	const playlists = $derived(query.value)
-
-	const trackPlaylists = createQuery({
+	const trackPlaylists = createLoader({
 		key: () => ['playlists-track', trackId],
 		fetcher: async () => {
 			invariant(trackId)
@@ -42,9 +47,12 @@
 					continue
 				}
 
-				actions.mutate((prev = new SvelteSet<number>()) => {
-					const [playlistId] = change.key
+				const [playlistId, modifiedTrackId] = change.key
+				if (modifiedTrackId !== trackId) {
+					continue
+				}
 
+				actions.mutate((prev = new SvelteSet<number>()) => {
 					if (change.operation === 'delete') {
 						prev.delete(playlistId)
 					} else {
@@ -69,9 +77,10 @@
 <Separator class="mt-24px" />
 
 <ScrollContainer class="overflow-auto grow max-h-400px px-8px py-16px">
-	{#if query.value}
+	<!-- TODO. Check based on query status -->
+	{#if query.status === 'loaded'}
 		<PlaylistListContainer
-			items={playlists}
+			items={query.value}
 			onItemClick={(item) => {
 				void addToPlaylist(item.playlist.id)
 			}}
