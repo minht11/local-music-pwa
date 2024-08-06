@@ -1,8 +1,8 @@
 import { listenForDatabaseChanges } from '$lib/db/channel'
 import type { LoaderResult } from '$lib/db/queries.svelte'
+import { type TrackData, useTrackData } from '$lib/db/query'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { debounce, shuffleArray } from '$lib/helpers/utils'
-import { type TrackData, useTrack } from '$lib/library/tracks.svelte'
 import { untrack } from 'svelte'
 import { PlayerAudio } from './audio.svelte'
 
@@ -47,12 +47,9 @@ export class PlayerStore {
 		this.shuffle ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
 	)
 
-	activeTrackLoader: LoaderResult<TrackData, undefined> = useTrack(
-		() => this.itemsIds[this.#activeTrackIndex] ?? -1,
-		{
-			allowEmpty: true,
-		},
-	)
+	activeTrackLoader = useTrackData(() => this.itemsIds[this.#activeTrackIndex] ?? -1, {
+		allowEmpty: true,
+	})
 
 	activeTrack: TrackData | undefined = $derived(this.activeTrackLoader.value)
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Playlist } from '$lib/db/entities'
-	import { usePlaylist } from '$lib/library/tracks.svelte.ts'
+	import { usePlaylistData } from '$lib/db/query.ts'
 	import type { Snippet } from 'svelte'
 	import invariant from 'tiny-invariant'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'
@@ -29,7 +29,7 @@
 		menuItems,
 	}: Props = $props()
 
-	const data = usePlaylist(playlistId)
+	const data = usePlaylistData(playlistId)
 	const playlist = $derived(data.value)
 
 	const menuItemsWithItem = $derived(

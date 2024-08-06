@@ -105,8 +105,6 @@ export const load: PageLoad = async (event) => {
 	const itemLoader = await defineDetailsLoader(slug, id)
 	const tracksLoader = await defineTracksLoader(slug, () => itemLoader.value.name, id)
 
-	await preloadTracksToDatabaseCache(tracksLoader.value, 10)
-
 	return {
 		slug,
 		libraryType: slug,
