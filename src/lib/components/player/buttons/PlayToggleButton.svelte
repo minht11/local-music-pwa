@@ -6,6 +6,6 @@
 	const player = usePlayer()
 </script>
 
-<IconButton onclick={() => player.togglePlay()}>
+<IconButton disabled={!player.activeTrack} onclick={() => player.togglePlay()}>
 	<PlayPauseIcon playing={player.playing} />
 </IconButton>

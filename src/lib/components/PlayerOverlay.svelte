@@ -29,7 +29,7 @@
 	>
 		<Timeline class="max-sm:hidden" />
 		<div class="flex sm:grid items-center w-full h-min grow grid-cols-[1fr_max-content_1fr]">
-			<div class="flex items-center">
+			<div class="flex items-center grow">
 				<Button
 					as="a"
 					href="/player"
@@ -64,7 +64,7 @@
 				<FavoriteButton />
 			</div>
 
-			<div class="ml-uto flex gap-8px sm:hidden pr-8px">
+			<div class="ml-auto flex gap-8px sm:hidden pr-8px">
 				<PlayToggleButton />
 
 				<PlayNextButton class="max-xss:hidden" />

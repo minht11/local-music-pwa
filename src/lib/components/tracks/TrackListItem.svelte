@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { Track } from '$lib/db/entities.ts'
-	import { useTrackData } from '$lib/db/query.ts'
+	import { type TrackData, useTrackData } from '$lib/db/query.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
 	import { formatDuration } from '$lib/helpers/utils.ts'
+	import invariant from 'tiny-invariant'
 	import Artwork from '../Artwork.svelte'
-	import ListItem, { type ListMenuFn } from '../ListItem.svelte'
+	import ListItem, { type MenuItem } from '../ListItem.svelte'
 
 	interface Props {
 		trackId: number
@@ -13,8 +13,8 @@
 		ariaRowIndex?: number
 		active?: boolean
 		class?: string
-		menuItems?: ListMenuFn
-		onclick?: (track: Track) => void
+		menuItems?: (playlist: TrackData) => MenuItem[]
+		onclick?: (track: TrackData) => void
 	}
 
 	const {
@@ -31,11 +31,20 @@
 
 	const artworkSrc = createManagedArtwork(() => data.value?.images?.small)
 	const track = $derived(data.value)
+
+	const menuItemsWithItem = $derived(
+		menuItems &&
+			(() => {
+				invariant(track)
+
+				return menuItems?.(track)
+			}),
+	)
 </script>
 
 <ListItem
 	{style}
-	{menuItems}
+	menuItems={menuItemsWithItem}
 	tabindex={-1}
 	class={clx(
 		'h-72px text-left',

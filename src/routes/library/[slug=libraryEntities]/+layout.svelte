@@ -5,6 +5,7 @@
 	import Button from '$lib/components/Button.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import AlbumsListContainer from '$lib/components/albums/AlbumsListContainer.svelte'
+	import ArtistListContainer from '$lib/components/entities/artists/ArtistListContainer.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
@@ -156,6 +157,8 @@
 						<TracksListContainer items={itemsIds} />
 					{:else if store.storeName === 'albums'}
 						<AlbumsListContainer items={itemsIds} />
+					{:else if store.storeName === 'artists'}
+						<ArtistListContainer items={itemsIds} />
 					{:else if store.storeName === 'playlists'}
 						<PlaylistListContainer
 							items={itemsIds}

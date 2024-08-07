@@ -1,5 +1,7 @@
 <script lang="ts" context="module">
 	import type { Track } from '$lib/db/entities'
+	import type { TrackData } from '$lib/db/query'
+	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'
 	import { useMainStore } from '$lib/stores/main-store.svelte'
 	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
@@ -37,29 +39,27 @@
 		predefinedKey: PredefinedTrackMenuItems
 	}
 
-	const getMenuItems = (trackId: number) => {
+	const getMenuItems = (track: TrackData) => {
 		const items: PredefinedMenuItem[] = [
 			{
 				predefinedKey: 'addToPlaylist',
 				label: 'Add to playlist',
 				action: () => {
-					main.addTrackToPlaylistDialogOpen = trackId
+					main.addTrackToPlaylistDialogOpen = track.id
 				},
 			},
 			{
 				predefinedKey: 'addToFavorites',
-				label: 'Add to favorites',
+				label: track.favorite ? 'Remove from favorites' : 'Add to favorites',
 				action: () => {
-					// TODO.
-					console.log('Add to favorites')
+					void toggleFavoriteTrack(track.favorite, track.id)
 				},
 			},
 			{
 				predefinedKey: 'addToQueue',
 				label: 'Add to queue',
 				action: () => {
-					// TODO.
-					console.log('Add to queue')
+					player.addToQueue(track.id)
 				},
 			},
 			{
@@ -86,7 +86,7 @@
 		No items to display
 	</div>
 {:else}
-	<VirtualContainer size={72} count={items.length} key={(index) => items[index] as number}>
+	<VirtualContainer size={72} count={items.length} key={(index) => index}>
 		{#snippet children(item)}
 			{@const trackId = items[item.index] as number}
 
@@ -96,7 +96,7 @@
 				style="transform: translateY({item.start}px)"
 				class="virtual-item top-0 left-0 w-full"
 				ariaRowIndex={item.index}
-				menuItems={() => getMenuItems(trackId)}
+				menuItems={(track) => getMenuItems(track)}
 				onclick={(track) => {
 					onItemClick({
 						track,

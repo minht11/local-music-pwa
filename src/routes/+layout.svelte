@@ -1,5 +1,4 @@
 <script lang="ts">
-	import 'uno.css'
 	import { onNavigate } from '$app/navigation'
 	import { navigating, page } from '$app/stores'
 	import { getActiveRipplesCount } from '$lib/actions/ripple'

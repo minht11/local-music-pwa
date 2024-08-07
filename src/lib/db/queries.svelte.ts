@@ -409,7 +409,7 @@ export const definePageListLoader = <
 				storeName === 'artists' ||
 				storeName === 'playlists'
 			) {
-				const preload = Array.from({ length: Math.min(result.length, 20) }, (_, index) =>
+				const preload = Array.from({ length: Math.min(result.length, 12) }, (_, index) =>
 					// biome-ignore lint/style/noNonNullAssertion: index is bound checked
 					prefetchLibraryEntityData(storeName as 'tracks', result[index]!),
 				)

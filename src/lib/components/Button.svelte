@@ -55,6 +55,7 @@
 	class={clx(
 		kind === 'blank' ? 'interactable' : clx('base-button px-24px', KIND_CLASS_MAP[kind]),
 		restProps.class,
+		disabled && '!cursor-default',
 	)}
 >
 	{#if children}

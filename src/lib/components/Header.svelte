@@ -38,12 +38,12 @@
 <div bind:this={scrollThresholdEl} class="h-0 w-full" inert></div>
 
 {#if isFixed}
-	<div class="h-[--app-header-height] shrink-0" aria-hidden="true"></div>
+	<div class="h-[var(--app-header-height)] shrink-0" aria-hidden="true"></div>
 {/if}
 
 <header
 	class={clx(
-		'inset-x-0 top-0 z-10 flex h-[--app-header-height] flex-shrink-0 transition-background-color duration-200 ease-in-out',
+		'inset-x-0 top-0 z-10 flex h-[var(--app-header-height)] flex-shrink-0 transition-background-color duration-200 ease-in-out',
 		isScrolled && 'bg-surfaceContainerHigh',
 		isFixed ? 'fixed' : 'sticky',
 	)}

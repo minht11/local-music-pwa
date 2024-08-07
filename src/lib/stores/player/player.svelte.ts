@@ -1,5 +1,4 @@
 import { listenForDatabaseChanges } from '$lib/db/channel'
-import type { LoaderResult } from '$lib/db/queries.svelte'
 import { type TrackData, useTrackData } from '$lib/db/query'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { debounce, shuffleArray } from '$lib/helpers/utils'
@@ -10,10 +9,14 @@ export interface PlayTrackOptions {
 	shuffle?: boolean
 }
 
+export type PlayerRepeat = 'none' | 'one' | 'all'
+
 export class PlayerStore {
 	#audio = new PlayerAudio()
 
 	shuffle: boolean = $state(false)
+
+	repeat: PlayerRepeat = $state('none')
 
 	get playing() {
 		return this.#audio.playing
@@ -172,4 +175,26 @@ export class PlayerStore {
 	}
 
 	seek: (time: number) => void = this.#audio.seek
+
+	toggleRepeat = (): void => {
+		let { repeat } = this
+
+		if (repeat === 'none') {
+			repeat = 'all'
+		} else if (repeat === 'all') {
+			repeat = 'one'
+		} else {
+			repeat = 'none'
+		}
+
+		this.repeat = repeat
+	}
+
+	addToQueue = (trackId: number): void => {
+		if (this.shuffle) {
+			this.#itemsIdsShuffled.push(trackId)
+		}
+
+		this.#itemsIdsOriginalOrder.push(trackId)
+	}
 }

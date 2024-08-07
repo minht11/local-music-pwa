@@ -66,7 +66,6 @@ export const load: LayoutLoad = async (event) => {
 
 	const store = storeMap[slug]()
 
-	console.time('definePageListLoader')
 	const query = await definePageListLoader(store.storeName, {
 		key: () => [
 			store.storeName,
@@ -82,7 +81,6 @@ export const load: LayoutLoad = async (event) => {
 				searchFn: (value) => value.name.toLowerCase().includes(searchTerm),
 			}),
 	})
-	console.timeEnd('definePageListLoader')
 
 	return {
 		slug,
