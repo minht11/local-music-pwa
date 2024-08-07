@@ -30,7 +30,7 @@ body {
 }
 
 body {
-	font-family: 'Fira Sans', system-ui, sans-serif;
+	font-family: 'avenir', system-ui, sans-serif;
 	-webkit-tap-highlight-color: transparent;
 	display: flex;
 	flex-direction: column;
