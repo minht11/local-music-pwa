@@ -1,9 +1,11 @@
 import { listenForDatabaseChanges } from '$lib/db/channel'
 import { type TrackData, useTrackData } from '$lib/db/query'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
-import { debounce, shuffleArray } from '$lib/helpers/utils'
+import { persist } from '$lib/helpers/persist.svelte.ts'
+import { debounce, shuffleArray, throttle } from '$lib/helpers/utils'
 import { untrack } from 'svelte'
-import { PlayerAudio } from './audio.svelte'
+import { useMainStore } from '../main-store.svelte'
+import { cleanupTrackAudio, loadTrackAudio } from './audio.ts'
 
 export interface PlayTrackOptions {
 	shuffle?: boolean
@@ -12,35 +14,35 @@ export interface PlayTrackOptions {
 export type PlayerRepeat = 'none' | 'one' | 'all'
 
 export class PlayerStore {
-	#audio = new PlayerAudio()
+	#main = useMainStore()
+
+	#audio = new Audio()
 
 	shuffle: boolean = $state(false)
 
 	repeat: PlayerRepeat = $state('none')
 
-	get playing() {
-		return this.#audio.playing
-	}
+	playing = $state(false)
 
-	set playing(value: boolean) {
-		this.#audio.playing = value
-	}
+	currentTime = $state(0)
 
-	get currentTime(): number {
-		return this.#audio.time.current
-	}
+	duration = $state(0)
 
-	get duration(): number {
-		return this.#audio.time.duration
-	}
+	#volume = $state(100)
 
 	get volume() {
-		return this.#audio.volume
+		if (!this.#main.volumeSliderEnabled) {
+			return 100
+		}
+
+		return this.#volume
 	}
 
 	set volume(value: number) {
-		this.#audio.volume = value
+		this.#volume = value
 	}
+
+	muted = $state(false)
 
 	get isQueueEmpty(): boolean {
 		return this.itemsIds.length === 0
@@ -68,9 +70,62 @@ export class PlayerStore {
 	artworkSrc: string = $derived(this.#artwork())
 
 	constructor() {
+		persist('player-audio', this, ['volume'])
+
+		const audio = this.#audio
+
+		$effect(() => {
+			// If audio state matches our state
+			// we do not need to do anything
+			if (audio.paused === !this.playing) {
+				return
+			}
+
+			void audio[this.playing ? 'play' : 'pause']()
+		})
+
+		const onAudioPlayPauseHandler = () => {
+			const currentAudioState = !audio.paused
+
+			if (currentAudioState !== this.playing) {
+				// If our state is out of sync with audio element, sync it.
+				this.playing = currentAudioState
+			}
+		}
+
+		audio.onended = () => {
+			if (this.repeat === 'none') {
+				return
+			}
+
+			if (this.repeat === 'one') {
+				this.playTrack(this.#activeTrackIndex)
+			} else {
+				this.playNext()
+			}
+		}
+
+		audio.onpause = onAudioPlayPauseHandler
+		audio.onplay = onAudioPlayPauseHandler
+
+		audio.ondurationchange = () => {
+			this.duration = audio.duration
+		}
+
+		audio.ontimeupdate = throttle(() => {
+			this.currentTime = audio.currentTime
+		}, 1000)
+
+		$effect(() => {
+			// Humans perceive volume logarithmically
+			// so we adjust the volume to match that perception
+			const k = 0.5
+			audio.volume = (this.volume / 100) ** k
+		})
+
 		const reset = debounce(() => {
 			if (!this.activeTrack) {
-				this.#audio.reset()
+				this.reset()
 			}
 		}, 100)
 
@@ -86,7 +141,7 @@ export class PlayerStore {
 				prevTrackId = track.id
 
 				reset.cancel()
-				this.#audio.load(track.file)
+				void loadTrackAudio(this.#audio, track.file)
 			} else {
 				untrack(() => {
 					this.playing = false
@@ -177,7 +232,10 @@ export class PlayerStore {
 		this.togglePlay(true)
 	}
 
-	seek: (time: number) => void = this.#audio.seek
+	seek = (time: number) => {
+		this.currentTime = time
+		this.#audio.currentTime = time
+	}
 
 	toggleRepeat = (): void => {
 		let { repeat } = this
@@ -217,5 +275,16 @@ export class PlayerStore {
 		this.#itemsIdsOriginalOrder = []
 		this.#itemsIdsShuffled = []
 		this.#activeTrackIndex = -1
+	}
+
+	reset() {
+		if (!this.#audio.src) {
+			return
+		}
+
+		cleanupTrackAudio(this.#audio)
+		this.#audio.src = ''
+		this.currentTime = 0
+		this.duration = 0
 	}
 }
