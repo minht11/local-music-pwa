@@ -1,5 +1,4 @@
 import type { FileEntity } from '$lib/helpers/file-system'
-import { throttle } from '$lib/helpers/utils'
 
 export type PlayerRepeat = 'none' | 'one' | 'all'
 

@@ -122,7 +122,7 @@
 
 <ListDetailsLayout mode={layoutMode} class="max-w-[var(--library-max-width)] w-full mx-auto grow">
 	{#snippet list(mode)}
-		<div class={clx(!data.isHandHeldDevice && 'pl-80px', 'flex flex-col grow')}>
+		<div class={clx(data.isHandHeldDevice ? 'sm:pl-80px' : 'pl-80px', 'flex flex-col grow')}>
 			<div class={clx(mode === 'both' && 'w-400px', 'px-16px grow flex flex-col')}>
 				<Search {store} />
 

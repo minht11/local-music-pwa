@@ -85,7 +85,16 @@ export const tooltip = ((target, message?: string) => {
 	}
 
 	on(target, 'pointerenter', scheduleShowTooltip, { signal })
-	on(target, 'focusin', scheduleShowTooltip, { signal })
+	on(
+		target,
+		'focusin',
+		() => {
+			if (target.matches(':focus-visible')) {
+				scheduleShowTooltip()
+			}
+		},
+		{ signal },
+	)
 
 	on(target, 'pointerleave', hideTooltip, { signal })
 	on(target, 'focusout', hideTooltip, { signal })
