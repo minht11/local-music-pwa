@@ -53,6 +53,6 @@
 	"aboutPrivacy": "Privacy",
 
 	"validationRequired": "Field is required",
-	"validationMinLength": "At least {min} characters required",
-	"validationMaxLength": "At most {max} characters allowed"
+	"validationMinLength": "At least {min} characters are required",
+	"validationMaxLength": "At most {max} characters are allowed"
 }
