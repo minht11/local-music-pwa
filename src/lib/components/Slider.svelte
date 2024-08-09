@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { clamp } from '$lib/helpers/utils'
+	import { clamp } from '$lib/helpers/utils/clamp.ts'
 
 	interface Props {
 		min?: number

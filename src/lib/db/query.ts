@@ -1,4 +1,4 @@
-import { unwrap } from '$lib/helpers/utils.ts'
+import { unwrap } from '$lib/helpers/utils/unwrap.ts'
 import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte.ts'
 import { WeakLRUCache } from 'weak-lru-cache'
 import type { DBChangeRecordList } from './channel.ts'
@@ -98,7 +98,9 @@ const trackConfig: QueryConfig<TrackData> = {
 	},
 }
 
-export const albumConfig: QueryConfig<Album> = {
+export type AlbumData = Album
+
+export const albumConfig: QueryConfig<AlbumData> = {
 	fetch: async (id) => {
 		const db = await getDB()
 		const entity = db.get('albums', id)
@@ -120,8 +122,10 @@ export const albumConfig: QueryConfig<Album> = {
 	},
 }
 
+export type ArtistData = Artist
+
 // TODO. Reuse query config
-const artistConfig: QueryConfig<Artist> = {
+const artistConfig: QueryConfig<ArtistData> = {
 	fetch: async (id) => {
 		const db = await getDB()
 		const entity = db.get('artists', id)
@@ -143,7 +147,9 @@ const artistConfig: QueryConfig<Artist> = {
 	},
 }
 
-const playlistsConfig: QueryConfig<Playlist> = {
+export type PlaylistData = Playlist
+
+const playlistsConfig: QueryConfig<PlaylistData> = {
 	fetch: async (id) => {
 		const db = await getDB()
 		const entity = db.get('playlists', id)
@@ -252,6 +258,7 @@ const createLibraryEntityLoader =
 				})
 			},
 			onDatabaseChange: (changes, { mutate }) => {
+				// @ts-expect-error mutate type is not correct
 				config.onDatabaseChange(unwrap(idGetter), changes, mutate)
 			},
 		})

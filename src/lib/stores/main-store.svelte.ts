@@ -1,5 +1,5 @@
 import { persist } from '$lib/helpers/persist.svelte.ts'
-import { isMobile } from '$lib/helpers/utils'
+import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
 import { argbFromHex } from '@material/material-color-utilities'
 import { getContext, setContext } from 'svelte'
 import invariant from 'tiny-invariant'

@@ -1,4 +1,4 @@
-import { assign } from '$lib/helpers/utils'
+import { assign } from '$lib/helpers/utils/assign.ts'
 import type { MenuAlignment, MenuPosition } from './types.ts'
 
 export const getMeasurementsFromAnchor = (

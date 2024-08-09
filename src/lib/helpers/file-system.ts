@@ -1,4 +1,5 @@
-import { isMobile, wait } from '$lib/helpers/utils'
+import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
+import { wait } from '$lib/helpers/utils/wait.ts'
 
 export const isNativeFileSystemSupported = 'showDirectoryPicker' in globalThis
 

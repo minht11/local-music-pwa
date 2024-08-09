@@ -1,7 +1,7 @@
 <script lang="ts" context="module">
 	import { goto } from '$app/navigation'
 	import type { Album } from '$lib/db/entities'
-	import { safeInteger } from '$lib/helpers/utils'
+	import { safeInteger } from '$lib/helpers/utils/integers.ts'
 	import AlbumGridItem from './AlbumGridItem.svelte'
 
 	export interface AlbumItemClick {
@@ -50,7 +50,7 @@
 	key={(index) => items[index] as number}
 >
 	{#snippet children(item)}
-		{@const    albumId = items[item.index] as number}
+		{@const albumId = items[item.index] as number}
 		<AlbumGridItem
 			{albumId}
 			class="virtual-item top-0"

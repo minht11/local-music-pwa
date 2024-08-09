@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { wait } from '$lib/helpers/utils'
+	import { wait } from '$lib/helpers/utils/wait.ts'
 	import { on } from 'svelte/events'
 	import invariant from 'tiny-invariant'
 

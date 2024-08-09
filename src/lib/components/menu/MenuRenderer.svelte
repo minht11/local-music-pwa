@@ -1,5 +1,5 @@
 <script lang="ts" context="module">
-	import { assign } from '$lib/helpers/utils.ts'
+	import { assign } from '$lib/helpers/utils/assign.ts'
 	import '@a11y/focus-trap'
 	import type { FocusTrap } from '@a11y/focus-trap'
 	import { animate, timeline } from 'motion'

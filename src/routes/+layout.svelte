@@ -6,7 +6,7 @@
 	import PlaylistDialogs from '$lib/components/app-dialogs/PlaylistDialogs.svelte'
 	import MenuRenderer, { initGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
-	import { wait } from '$lib/helpers/utils'
+	import { wait } from '$lib/helpers/utils/wait.ts'
 	import { provideMainStore } from '$lib/stores/main-store.svelte'
 	import { providePlayer } from '$lib/stores/player/store.ts'
 	import { setContext } from 'svelte'

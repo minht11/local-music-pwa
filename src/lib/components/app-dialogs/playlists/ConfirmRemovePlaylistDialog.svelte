@@ -1,6 +1,6 @@
 <script lang="ts">
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
-	import { truncate } from '$lib/helpers/utils'
+	import { truncate } from '$lib/helpers/utils/truncate.ts'
 	import { removePlaylist } from '$lib/library/playlists.svelte'
 	import { useMainStore } from '$lib/stores/main-store.svelte'
 	import invariant from 'tiny-invariant'

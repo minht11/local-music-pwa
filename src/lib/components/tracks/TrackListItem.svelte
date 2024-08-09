@@ -2,7 +2,7 @@
 	import { type TrackData, useTrackData } from '$lib/db/query.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
-	import { formatDuration } from '$lib/helpers/utils.ts'
+	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 	import invariant from 'tiny-invariant'
 	import Artwork from '../Artwork.svelte'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'

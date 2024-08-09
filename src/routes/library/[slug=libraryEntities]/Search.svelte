@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Separator from '$lib/components/Separator.svelte'
-	import { debounce } from '$lib/helpers/utils.ts'
+	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { PageData } from './$types.ts'
 
 	interface Props {

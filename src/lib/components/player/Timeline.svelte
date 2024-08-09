@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatDuration } from '$lib/helpers/utils'
+	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 
 	import Slider from '../Slider.svelte'
 

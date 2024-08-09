@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
 	import { page } from '$app/stores'
-	import { wait } from '$lib/helpers/utils'
+	import { wait } from '$lib/helpers/utils/wait.ts'
 	import IconButton from './IconButton.svelte'
 
 	interface Props {
