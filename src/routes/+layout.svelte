@@ -141,7 +141,7 @@
 	class="fixed flex flex-col bottom-0 overflow-hidden inset-x-0 pointer-events-none [&>*]:pointer-events-auto"
 >
 	<div class="flex flex-col">
-		<SnackbarRenderer bottomOffset={overlayContentHeight} />
+		<SnackbarRenderer />
 
 		{#if !$page.data.noPlayerOverlay}
 			<div bind:clientHeight={overlayContentHeight} class="px-8px pb-8px w-full">
