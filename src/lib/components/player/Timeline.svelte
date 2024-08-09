@@ -36,11 +36,18 @@
 			}
 		},
 	}
+
+	const currentTime = () => formatDuration(seeking ? getTime(seekingValue) : player.currentTime)
 </script>
 
-<div class={clx('flex items-center tabular-nums gap-10px w-full', className)}>
+<div
+	class={clx(
+		'timeline-container grid items-center tabular-nums gap-10px w-full text-nowrap',
+		className,
+	)}
+>
 	<div class="text-body-sm">
-		{formatDuration(seeking ? getTime(seekingValue) : player.currentTime)}
+		{currentTime()}
 	</div>
 
 	<Slider
@@ -57,7 +64,13 @@
 		}}
 	/>
 
-	<div class="text-body-sm">
+	<div class="text-body-sm text-right">
 		{formatDuration(player.duration)}
 	</div>
 </div>
+
+<style>
+	.timeline-container {
+		grid-template-columns: minmax(32px, max-content) 1fr minmax(32px, max-content);
+	}
+</style>

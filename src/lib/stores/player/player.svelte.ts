@@ -197,4 +197,10 @@ export class PlayerStore {
 
 		this.#itemsIdsOriginalOrder.push(trackId)
 	}
+
+	clearQueue = (): void => {
+		this.#itemsIdsOriginalOrder = []
+		this.#itemsIdsShuffled = []
+		this.#activeTrackIndex = -1
+	}
 }

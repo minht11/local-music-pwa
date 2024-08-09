@@ -125,6 +125,8 @@ export class PlayerAudio {
 		}
 		this.#cleanupSource()
 		this.#audio.src = ''
+		this.time.current = 0
+		this.time.duration = 0
 	}
 
 	seek = (time: number) => {

@@ -49,7 +49,7 @@
 		class={clx(
 			layoutMode === 'both' && 'w-400px',
 			layoutMode === 'list' && 'mx-auto w-full',
-			'player-content z-0 bg-secondaryContainerVariant px-8px pb-8px gap-x-24px gap-y-8px overflow-clip items-center grow',
+			'player-content z-0 bg-secondaryContainerVariant px-8px pb-8px gap-x-24px overflow-clip items-center grow',
 			isCompactVertical && !isVeryCompactHorizontal.value && 'player-content-horizontal',
 		)}
 	>
@@ -69,7 +69,7 @@
 		</div>
 
 		<PlayerArtwork
-			class="rounded-16px bg-secondaryContainerVariant m-auto view-transition-pl-artwork [grid-area:artwork] max-h-300px h-full my-auto"
+			class="rounded-16px bg-surfaceContainerHigh m-auto view-transition-pl-artwork [grid-area:artwork] max-h-300px h-full my-auto"
 		/>
 
 		<div class="flex flex-col gap-8px w-full [grid-area:controls]">
@@ -133,7 +133,7 @@
 {/snippet}
 
 {#snippet queueActions()}
-	<IconButton icon="clearQueue" />
+	<IconButton icon="trayRemove" onclick={player.clearQueue} />
 {/snippet}
 
 {#snippet queueSnippet()}
@@ -145,10 +145,12 @@
 		</Header>
 	{/if}
 
-	<div class="w-full flex flex-col grow px-16px">
+	<div class="w-full flex flex-col grow">
 		{#if layoutMode !== 'details'}
 			<div class="flex items-center h-64px border-b border-onSecondaryContainer/24 px-16px">
-				<div class="text-title-lg mr-auto">
+				<div class="w-40px"></div>
+
+				<div class="text-title-lg mx-auto">
 					{m.queue()}
 				</div>
 
@@ -156,27 +158,29 @@
 			</div>
 		{/if}
 
-		{#if player.itemsIds.length === 0}
-			<div class="m-auto text-center flex flex-col items-center">
-				<Icon
-					type="playlistMusic"
-					class="size-140px my-auto opacity-54 color-onSecondaryContainer"
-				/>
+		<div class="p-16px flex grow">
+			{#if player.itemsIds.length === 0}
+				<div class="m-auto text-center flex flex-col items-center">
+					<Icon
+						type="playlistMusic"
+						class="size-140px my-auto opacity-54 color-onSecondaryContainer"
+					/>
 
-				<div class="text-body-lg mb-16px">Your queue is empty</div>
-				<Button kind="outlined" as="a" href="/">Play something here</Button>
-			</div>
-		{:else}
-			<TracksListContainer
-				items={player.itemsIds}
-				predefinedMenuItems={{
-					addToQueue: false,
-				}}
-				onItemClick={({ index }) => {
-					player.playTrack(index)
-				}}
-			/>
-		{/if}
+					<div class="text-body-lg mb-16px">Your queue is empty</div>
+					<Button kind="outlined" as="a" href="/">Play something here</Button>
+				</div>
+			{:else}
+				<TracksListContainer
+					items={player.itemsIds}
+					predefinedMenuItems={{
+						addToQueue: false,
+					}}
+					onItemClick={({ index }) => {
+						player.playTrack(index)
+					}}
+				/>
+			{/if}
+		</div>
 	</div>
 {/snippet}
 
@@ -184,9 +188,13 @@
 
 <ListDetailsLayout
 	mode={layoutMode}
-	class={clx('view-transition-pl-content grow mx-auto w-full max-w-1280px bg-secondaryContainer')}
+	class={clx(
+		'view-transition-pl-content grow mx-auto w-full max-w-1280px',
+		layoutMode === 'both' && 'bg-secondaryContainer',
+	)}
 	list={playerSnippet}
 	details={queueSnippet}
+	noListStableGutter
 	noPlayerOverlayPadding
 />
 

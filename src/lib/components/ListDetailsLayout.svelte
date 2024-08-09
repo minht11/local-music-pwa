@@ -9,9 +9,17 @@
 		details: Snippet<[LayoutMode]>
 		class?: string
 		noPlayerOverlayPadding?: boolean
+		noListStableGutter?: boolean
 	}
 
-	const { mode, list, details, class: className, noPlayerOverlayPadding }: Props = $props()
+	const {
+		mode,
+		list,
+		details,
+		class: className,
+		noListStableGutter,
+		noPlayerOverlayPadding,
+	}: Props = $props()
 </script>
 
 <div class={clx('!flex !flex-col', className)}>
@@ -19,8 +27,9 @@
 		{#if mode === 'both'}
 			<ScrollContainer
 				class={clx(
-					'overflow-y-auto max-h-100vh shrink-0 sticky top-0 overscroll-contain flex flex-col scrollbar-gutter-stable',
+					'overflow-y-auto max-h-100vh shrink-0 sticky top-0 overscroll-contain flex flex-col',
 					!noPlayerOverlayPadding && 'pb-[var(--bottom-overlay-height)]',
+					!noListStableGutter && 'scrollbar-gutter-stable',
 				)}
 			>
 				{@render list(mode)}
