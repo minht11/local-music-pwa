@@ -37,7 +37,7 @@
 					class="flex items-center max-sm:p-8px max-sm:rounded-r-16px rounded-8px grow sm:h-44px pr-8px sm:max-w-180px group"
 				>
 					<div
-						class="player-artwork rounded-8px overflow-hidden shrink-0 relative h-44px w-44px ring-1 ring-inset ring-onSecondaryContainer/40"
+						class="player-artwork bg-secondaryContainerVariant rounded-8px overflow-hidden shrink-0 relative h-44px w-44px ring-1 ring-inset ring-onSecondaryContainer/40"
 					>
 						{#if track}
 							<PlayerArtwork class="wh-full" />

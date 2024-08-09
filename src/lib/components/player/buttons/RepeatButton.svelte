@@ -36,8 +36,8 @@
 					transform: ['rotate(0deg)', 'rotate(180deg)'],
 				},
 				{
-					duration: 400,
-					easing: 'ease-in-out',
+					duration: 300,
+					easing: 'ease-out',
 					fill: 'none',
 				},
 			)

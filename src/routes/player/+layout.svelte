@@ -69,7 +69,7 @@
 		</div>
 
 		<PlayerArtwork
-			class="rounded-16px m-auto view-transition-pl-artwork [grid-area:artwork] max-h-300px h-full my-auto"
+			class="rounded-16px bg-secondaryContainerVariant m-auto view-transition-pl-artwork [grid-area:artwork] max-h-300px h-full my-auto"
 		/>
 
 		<div class="flex flex-col gap-8px w-full [grid-area:controls]">
