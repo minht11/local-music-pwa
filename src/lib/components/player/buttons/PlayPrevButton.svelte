@@ -7,6 +7,11 @@
 	const { class: className }: { class?: string } = $props()
 </script>
 
-<IconButton class={className} onclick={player.playPrev}>
+<IconButton
+	tooltip={m.playerPlayPreviousTrack()}
+	disabled={player.isQueueEmpty}
+	class={className}
+	onclick={player.playPrev}
+>
 	<PlayPreviousNextIcon type="previous" />
 </IconButton>

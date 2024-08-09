@@ -42,6 +42,10 @@ export class PlayerStore {
 		this.#audio.volume = value
 	}
 
+	get isQueueEmpty(): boolean {
+		return this.itemsIds.length === 0
+	}
+
 	#activeTrackIndex = $state(-1)
 	#itemsIdsOriginalOrder = $state<number[]>([])
 	#itemsIdsShuffled = $state<number[]>([])
@@ -165,8 +169,7 @@ export class PlayerStore {
 			const items = [...this.#itemsIdsOriginalOrder]
 			shuffleArray(items)
 
-			this.#itemsIdsOriginalOrder = items
-			this.#itemsIdsShuffled = []
+			this.#itemsIdsShuffled = items
 			this.shuffle = false
 		}
 
@@ -188,6 +191,18 @@ export class PlayerStore {
 		}
 
 		this.repeat = repeat
+	}
+
+	toggleShuffle = (): void => {
+		this.shuffle = !this.shuffle
+
+		if (this.shuffle) {
+			this.#itemsIdsShuffled = [...this.#itemsIdsOriginalOrder]
+			shuffleArray(this.#itemsIdsShuffled)
+			// TODO. Need to adjust active track index
+		} else {
+			this.#itemsIdsShuffled = []
+		}
 	}
 
 	addToQueue = (trackId: number): void => {

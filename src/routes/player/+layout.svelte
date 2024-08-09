@@ -124,7 +124,7 @@
 					<FavoriteButton />
 
 					{#if layoutMode === 'list'}
-						<IconButton icon="trayFull" as="a" href="/player/queue" />
+						<IconButton tooltip={m.playerOpenQueue()} icon="trayFull" as="a" href="/player/queue" />
 					{/if}
 				</div>
 			</div>
@@ -133,7 +133,12 @@
 {/snippet}
 
 {#snippet queueActions()}
-	<IconButton icon="trayRemove" onclick={player.clearQueue} />
+	<IconButton
+		tooltip={m.playerClearQueue()}
+		disabled={player.isQueueEmpty}
+		icon="trayRemove"
+		onclick={player.clearQueue}
+	/>
 {/snippet}
 
 {#snippet queueSnippet()}
@@ -159,7 +164,7 @@
 		{/if}
 
 		<div class="p-16px flex grow">
-			{#if player.itemsIds.length === 0}
+			{#if player.isQueueEmpty}
 				<div class="m-auto text-center flex flex-col items-center">
 					<Icon
 						type="playlistMusic"

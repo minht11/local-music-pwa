@@ -10,6 +10,7 @@
 {#if track}
 	<IconButton
 		icon={track.favorite ? 'favorite' : 'favoriteOutline'}
+		tooltip={track.favorite ? m.trackRemoveFromFavorites() : m.trackAddToFavorites()}
 		onclick={() => {
 			void toggleFavoriteTrack(track.favorite, track.id)
 		}}

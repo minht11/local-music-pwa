@@ -17,6 +17,8 @@
 	"cancel": "Cancel",
 	"replace": "Replace",
 	"queue": "Queue",
+	"goBack": "Go back",
+	"moreOptions": "More options",
 
 	"libraryNoResults": "No results found",
 	"libraryNoResultsExplanation": "Try searching for something else",
@@ -29,6 +31,24 @@
 	"libraryCreate": "Create",
 	"librarySave": "Save",
 	"libraryPlaylistFieldName": "playlist name",
+
+	"trackAddToFavorites": "Add to favorites",
+	"trackRemoveFromFavorites": "Remove from favorites",
+
+	"playerPlayNextTrack": "Play next track",
+	"playerPlayPreviousTrack": "Play previous track",
+	"playerPlay": "Play",
+	"playerPause": "Pause",
+	"playerEnableRepeat": "Enable repeat",
+	"playerEnableRepeatOne": "Enable repeat one",
+	"playerDisableRepeat": "Disable repeat",
+	"playerEnableShuffle": "Enable shuffle",
+	"playerDisableShuffle": "Disable shuffle",
+	"playerOpenFullPlayer": "Open full player",
+	"playerClearQueue": "Clear queue",
+	"playerAddToQueue": "Add to queue",
+	"playerRemoveFromQueue": "Remove from queue",
+	"playerOpenQueue": "Open queue",
 
 	"replaceDirectoryQ": "Replace directory?",
 	"replaceDirectoryExplanation": "The directory {newDir} you're adding is already a parent of {existingDir} which already is in your Library.\n No changes will occur for existing tracks.",

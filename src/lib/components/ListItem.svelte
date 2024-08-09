@@ -72,6 +72,7 @@
 			tabindex={-1}
 			icon="moreVertical"
 			class="text-onSurfaceVariant"
+			tooltip={m.moreOptions()}
 			onclick={(e) => {
 				e.stopPropagation()
 

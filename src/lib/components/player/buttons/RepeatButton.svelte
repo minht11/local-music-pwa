@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { PlayerRepeat } from '$lib/stores/player/player.svelte'
 	import { on } from 'svelte/events'
 	import invariant from 'tiny-invariant'
 	import IconButton from '../../IconButton.svelte'
@@ -51,9 +52,15 @@
 			destroy: cleanup,
 		}
 	}
+
+	const tooltipMap: Record<PlayerRepeat, string> = {
+		none: m.playerEnableRepeat(),
+		all: m.playerEnableRepeatOne(),
+		one: m.playerDisableRepeat(),
+	}
 </script>
 
-<IconButton class={className} onclick={player.toggleRepeat}>
+<IconButton tooltip={tooltipMap[player.repeat]} class={className} onclick={player.toggleRepeat}>
 	<svg
 		use:action
 		class={clx('size-24px fill-current', player.repeat !== 'none' && '')}

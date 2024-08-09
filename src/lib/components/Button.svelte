@@ -1,6 +1,7 @@
 <script context="module" lang="ts">
 	import { clx } from '$lib/helpers/clx'
 	import { ripple } from '../actions/ripple.ts'
+	import { tooltip } from '../actions/tooltip.ts'
 
 	export type AllowedButtonElement = 'button' | 'a'
 	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank'
@@ -18,6 +19,7 @@
 		title?: string
 		tabindex?: number
 		ariaLabel?: string
+		tooltip?: string
 		children?: Snippet
 		onclick?: (event: MouseEvent) => void
 	}
@@ -32,6 +34,7 @@
 		type = 'button',
 		children,
 		ariaLabel,
+		tooltip: tooltipMessage,
 		...restProps
 	}: ButtonProps<As> = $props()
 
@@ -47,6 +50,7 @@
 <svelte:element
 	this={!disabled ? as : 'button'}
 	use:ripple={{ stopPropagation: true }}
+	use:tooltip={tooltipMessage}
 	{...restProps}
 	{type}
 	aria-label={ariaLabel}

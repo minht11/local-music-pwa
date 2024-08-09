@@ -77,12 +77,12 @@
 
 	<Separator vertical class="h-24px my-auto" />
 
-	<IconButton icon="sort" onclick={sortMenuHandler} />
+	<IconButton icon="sort" tooltip="Open sort menu" onclick={sortMenuHandler} />
 
 	<IconButton
 		class={clx(store.order === 'desc' && 'rotate-180', 'transition-transform')}
 		icon="sortAscending"
-		ariaLabel="Toggle sort order"
+		tooltip="Toggle sort order"
 		onclick={() => {
 			store.order = store.order === 'asc' ? 'desc' : 'asc'
 		}}
@@ -90,5 +90,10 @@
 
 	<Separator vertical class="h-24px my-auto" />
 
-	<IconButton ariaLabel="Application menu" icon="moreVertical" onclick={generalMenuHandler} />
+	<IconButton
+		ariaLabel="Application menu"
+		tooltip="Open application menu"
+		icon="moreVertical"
+		onclick={generalMenuHandler}
+	/>
 </div>

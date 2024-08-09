@@ -38,4 +38,4 @@
 	}
 </script>
 
-<IconButton icon="backArrow" class={className} onclick={handleBackClick} />
+<IconButton tooltip={m.goBack()} icon="backArrow" class={className} onclick={handleBackClick} />

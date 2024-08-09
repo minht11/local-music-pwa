@@ -7,6 +7,11 @@
 	const player = usePlayer()
 </script>
 
-<IconButton class={className} onclick={player.playNext}>
+<IconButton
+	tooltip={m.playerPlayNextTrack()}
+	disabled={player.isQueueEmpty}
+	class={className}
+	onclick={player.playNext}
+>
 	<PlayPreviousNextIcon type="next" />
 </IconButton>
