@@ -239,7 +239,7 @@
 		--vt-pl-container-to-radius: var(--vt-pl-container-radius);
 	}
 
-	:global(html[data-view-to='/player']) {
+	:global(html[data-view-to-player]) {
 		--vt-pl-container-from-radius: var(--vt-pl-container-radius);
 		--vt-pl-container-to-radius: 0;
 	}
@@ -259,7 +259,7 @@
 		}
 	}
 
-	:global(html:is([data-view-from='/player'], [data-view-to='/player'])) :global {
+	:global(html:is([data-view-from-player], [data-view-to-player])) :global {
 		&::view-transition-group(pl-container) {
 			background: theme('colors.secondaryContainer');
 			animation:

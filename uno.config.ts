@@ -48,8 +48,6 @@ export default (async () => {
 			],
 		],
 		shortcuts: {
-			'scrollbar-gutter': 'scrollbar-gutter-stable',
-			'wh-full': 'w-full h-full',
 			'text-headline-md': 'text-28px leading-36px tracking-0 font-400',
 			'text-headline-sm': 'text-24px leading-32px tracking-0 font-400',
 			'text-title-lg': 'text-22px leading-28px tracking-0 font-500',

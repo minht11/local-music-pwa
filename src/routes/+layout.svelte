@@ -30,8 +30,16 @@
 			await wait(175)
 		}
 
-		document.documentElement.setAttribute('data-view-from', navigation.from?.route.id ?? '')
-		document.documentElement.setAttribute('data-view-to', navigation.to?.route.id ?? '')
+		// document.documentElement.setAttribute('data-view-from', navigation.from?.route.id ?? '')
+		// document.documentElement.setAttribute('data-view-to', navigation.to?.route.id ?? '')
+
+		const previousRouteWasPlayer = !!navigation.from?.route.id?.startsWith('/player')
+		const currentRouteIsPlayer = !!navigation.to?.route.id?.startsWith('/player')
+
+		document.documentElement.toggleAttribute('data-view-from-player', previousRouteWasPlayer)
+		document.documentElement.toggleAttribute('data-view-to-player', currentRouteIsPlayer)
+		document.documentElement.toggleAttribute('data-view-from-regular', !previousRouteWasPlayer)
+		document.documentElement.toggleAttribute('data-view-to-regular', !currentRouteIsPlayer)
 
 		document.startViewTransition(async () => {
 			resolve()

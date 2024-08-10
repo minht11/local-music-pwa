@@ -41,7 +41,7 @@
 						class="player-artwork bg-surfaceContainerHighest rounded-8px overflow-hidden shrink-0 relative h-44px w-44px"
 					>
 						{#if track}
-							<PlayerArtwork class="wh-full" />
+							<PlayerArtwork class="size-full" />
 						{/if}
 
 						<Icon
@@ -87,7 +87,7 @@
 		grid-template-columns: 1fr max-content 1fr;
 	}
 
-	:global(html:is([data-view-from='/player'], [data-view-to='/player'])) {
+	:global(html:is([data-view-from-player], [data-view-to-player])) {
 		.player-content {
 			view-transition-name: pl-content;
 		}
