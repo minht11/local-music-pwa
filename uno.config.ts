@@ -28,6 +28,11 @@ export default (async () => {
 	return defineConfig({
 		theme: {
 			colors: darkColors.variables,
+			easing: {
+				outgoing40: 'cubic-bezier(.4, 0, 1, 1)',
+				incoming80: 'cubic-bezier(0, 0, .2, 1)',
+				incoming80outgoing40: 'cubic-bezier(0.4, 0, 0.2, 1)',
+			},
 		},
 		extendTheme: [
 			(theme) => ({
