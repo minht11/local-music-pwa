@@ -162,7 +162,7 @@
 	<div class="flex flex-col gap-16px p-16px">
 		{#if !isFileSystemAccessSupported}
 			<div
-				class="flex select-text flex-col gap-16px rounded-8px border border-solid border-outlineVariant p-16px text-onSurfaceVariant"
+				class="flex select-text flex-col gap-16px rounded-8px border border-outlineVariant p-16px text-onSurfaceVariant"
 			>
 				<Icon type="alertCircle" class="shrink-0" />
 				<span>

@@ -87,11 +87,13 @@
 		grid-template-columns: 1fr max-content 1fr;
 	}
 
-	:global(html:is([data-view-from='/player'], [data-view-to='/player'])) .player-content {
-		view-transition-name: pl-content;
-	}
+	:global(html:is([data-view-from='/player'], [data-view-to='/player'])) {
+		.player-content {
+			view-transition-name: pl-content;
+		}
 
-	:global(:is([data-view-from='/player'], [data-view-to='/player'])) .player-artwork {
-		view-transition-name: pl-artwork;
+		.player-artwork {
+			view-transition-name: pl-artwork;
+		}
 	}
 </style>

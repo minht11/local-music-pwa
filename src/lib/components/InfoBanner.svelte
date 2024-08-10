@@ -13,7 +13,7 @@
 
 <div
 	class={clx(
-		'flex select-text flex-col gap-16px rounded-8px border border-solid border-outlineVariant p-16px text-outline sm:flex-row sm:items-center',
+		'flex select-text flex-col gap-16px rounded-8px border border-outlineVariant p-16px text-outline sm:flex-row sm:items-center',
 		restProps.class,
 	)}
 >
