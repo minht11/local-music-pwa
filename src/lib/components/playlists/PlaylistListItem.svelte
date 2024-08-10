@@ -5,7 +5,7 @@
 	import invariant from 'tiny-invariant'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'
 	import Icon from '../icon/Icon.svelte'
-	import type { IconType } from '../icon/icon-types.ts'
+	import type { IconType } from '../icon/Icon.svelte'
 
 	interface Props {
 		playlistId: number

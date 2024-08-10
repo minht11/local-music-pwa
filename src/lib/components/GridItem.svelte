@@ -25,7 +25,7 @@
 	{...props}
 	class={clx(className, 'flex flex-col interactable rounded-8px bg-surfaceContainerHigh')}
 >
-	<Artwork src={artworkSrc()} class="rounded-inherit w-full" />
+	<Artwork src={artworkSrc()} fallbackIcon="person" class="rounded-inherit w-full" />
 
 	<div class="flex flex-col items-center overflow-hidden">
 		{@render children()}

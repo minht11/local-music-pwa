@@ -24,11 +24,11 @@ export class PlayerStore {
 
 	repeat: PlayerRepeat = $state('none')
 
-	playing = $state(false)
+	playing: boolean = $state(false)
 
-	currentTime = $state(0)
+	currentTime: number = $state(0)
 
-	duration = $state(0)
+	duration: number = $state(0)
 
 	#volume = $state(100)
 
@@ -72,7 +72,7 @@ export class PlayerStore {
 	artworkSrc: string = $derived(this.#artwork())
 
 	constructor() {
-		persist('player-audio', this, ['volume'])
+		persist('player', this, ['volume', 'shuffle', 'repeat', 'muted'])
 
 		const audio = this.#audio
 
@@ -96,15 +96,17 @@ export class PlayerStore {
 		}
 
 		audio.onended = () => {
-			if (this.repeat === 'none') {
+			if (this.repeat === 'one') {
+				this.playTrack(this.#activeTrackIndex)
+
 				return
 			}
 
-			if (this.repeat === 'one') {
-				this.playTrack(this.#activeTrackIndex)
-			} else {
-				this.playNext()
+			if (this.repeat === 'none' && this.#activeTrackIndex === this.itemsIds.length - 1) {
+				return
 			}
+
+			this.playNext()
 		}
 
 		audio.onpause = onAudioPlayPauseHandler
@@ -231,6 +233,7 @@ export class PlayerStore {
 		}
 
 		this.#activeTrackIndex = trackIndex
+		this.currentTime = 0
 		this.togglePlay(true)
 	}
 

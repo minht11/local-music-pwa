@@ -3,7 +3,7 @@
 	import type { Snippet } from 'svelte'
 	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
-	import type { IconType } from '../icon/icon-types.ts'
+	import type { IconType } from '../icon/Icon.svelte'
 	import PlaylistListItem from './PlaylistListItem.svelte'
 
 	export interface TrackItemClick {

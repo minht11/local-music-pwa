@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Artwork from '../Artwork.svelte'
-	import type { IconType } from '../icon/icon-types.ts'
+	import type { IconType } from '../icon/Icon.svelte'
 
 	interface Props {
 		fallbackIcon?: IconType | null

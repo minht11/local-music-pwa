@@ -17,7 +17,7 @@
 	<div
 		class={clx(
 			'size-4px rounded-full bg-primary absolute bottom-4px transition-1000 transition-transform transform-origin-center',
-			player.shuffle ? 'scale-0' : 'scale-100',
+			player.shuffle ? 'scale-100' : 'scale-0',
 		)}
 	></div>
 </IconButton>

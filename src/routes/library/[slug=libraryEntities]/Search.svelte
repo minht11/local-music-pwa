@@ -65,7 +65,7 @@
 </script>
 
 <div
-	class="sticky @container top-8px mt-8px mb-16px z-1 bg-surfaceContainerHighest flex w-full rounded-8px px-8px gap-8px items-center ml-auto max-w-500px"
+	class="sticky border border-primary/10 @container top-8px mt-8px mb-16px z-1 bg-surfaceContainerHighest flex w-full rounded-8px px-8px gap-8px items-center ml-auto max-w-500px"
 >
 	<input
 		value={store.searchTerm}

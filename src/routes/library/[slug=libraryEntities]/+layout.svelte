@@ -177,7 +177,7 @@
 		<div
 			class={clx(
 				'h-full rounded-24px pointer-events-auto flex flex-col',
-				layoutMode === 'both' && 'bg-surfaceContainer mx-16px mt-16px',
+				layoutMode === 'both' && 'bg-surfaceContainer mx-16px mt-16px border border-primary/5',
 			)}
 		>
 			{#key $page.url.pathname}
