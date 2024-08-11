@@ -59,7 +59,7 @@
 			class="rounded-16px bg-surfaceContainerHigh m-auto pl-view-artwork [grid-area:artwork] max-h-300px h-full my-auto"
 		/>
 
-		<div class="flex flex-col gap-8px w-full [grid-area:controls]">
+		<div class="flex flex-col gap-8px w-full [grid-area:controls] mt-8px">
 			<div class="w-full bg-surfaceContainerHighest px-16px py-8px rounded-16px">
 				<Timeline class="w-full" />
 			</div>

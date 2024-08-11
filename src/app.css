@@ -54,6 +54,8 @@ html {
 	width: 100%;
 	overflow-y: scroll;
 	overflow-x: hidden;
+	touch-action: manipulation;
+	-webkit-touch-callout: none; /* Disable the iOS popup when long-press on a link */
 	/* Chrome implementation with fixed elements is very buggy */
 	/* scrollbar-gutter: stable; */
 	scroll-padding-top: var(--app-header-height);
@@ -73,7 +75,7 @@ html.dark {
 
 html,
 body {
-	min-height: 100vh;
+	min-height: 100svh;
 }
 
 body {
