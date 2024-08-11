@@ -2,7 +2,7 @@ import { type Snippet, getContext } from 'svelte'
 import invariant from 'tiny-invariant'
 
 export interface RootLayout {
-	bottom: Snippet
+	bottom: Snippet | null
 }
 
 // TODO. Do we still need this?

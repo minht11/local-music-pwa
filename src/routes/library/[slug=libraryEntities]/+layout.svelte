@@ -60,7 +60,14 @@
 	const layoutMode = $derived.by(() => data.layoutMode(isWideLayout, $page.params.id))
 
 	const layout = useRootLayout()
-	layout.bottom = layoutBottom
+
+	$effect.pre(() => {
+		layout.bottom = layoutBottom
+
+		return () => {
+			layout.bottom = null
+		}
+	})
 </script>
 
 {#snippet navItemsSnippet(className: string)}

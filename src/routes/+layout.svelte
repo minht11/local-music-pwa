@@ -27,14 +27,6 @@
 		},
 	})
 
-	$effect.pre(() => {
-		$page.url.pathname
-
-		return () => {
-			bottom = undefined
-		}
-	})
-
 	const updateStyles = async (color: number | undefined | null, isDark: boolean) => {
 		const module = await import('$lib/theme.ts')
 

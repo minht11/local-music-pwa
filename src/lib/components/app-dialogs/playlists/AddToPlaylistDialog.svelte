@@ -32,7 +32,7 @@
 					},
 				},
 				{
-					title: m.libraryCancel(),
+					title: m.libraryClose(),
 				},
 			]}
 			onclose={close}

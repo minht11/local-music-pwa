@@ -30,6 +30,7 @@
 	"libraryCancel": "Cancel",
 	"libraryCreate": "Create",
 	"librarySave": "Save",
+	"libraryClose": "Close",
 	"libraryPlaylistFieldName": "playlist name",
 
 	"trackAddToFavorites": "Add to favorites",
