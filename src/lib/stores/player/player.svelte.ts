@@ -183,6 +183,41 @@ export class PlayerStore {
 				}
 			}
 		})
+
+		const ms = window.navigator.mediaSession
+
+		$effect(() => {
+			const track = this.activeTrack
+
+			if (!track) {
+				ms.metadata = null
+				return
+			}
+
+			ms.metadata = new MediaMetadata({
+				title: track.name,
+				artist: track.artists.join(', '),
+				album: track.album,
+				artwork: [
+					// TODO. This does not work with empty artwork, because it is svg in dom,
+					// but maybe that's fine
+					{ src: this.artworkSrc, sizes: '512x512', type: 'image/jpeg' },
+				],
+			})
+		})
+
+		// Done for minification purposes.
+		const setActionHandler = ms.setActionHandler.bind(ms)
+		setActionHandler('play', this.togglePlay.bind(null, true))
+		setActionHandler('pause', this.togglePlay.bind(null, false))
+		setActionHandler('previoustrack', this.playPrev)
+		setActionHandler('nexttrack', this.playNext)
+		setActionHandler('seekbackward', () => {
+			audio.currentTime = Math.min(audio.currentTime - 10, 0)
+		})
+		setActionHandler('seekforward', () => {
+			audio.currentTime = Math.max(audio.currentTime + 10, audio.duration)
+		})
 	}
 
 	togglePlay = (force?: boolean): void => {
