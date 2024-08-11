@@ -26,9 +26,10 @@ export const setupAppViewTransitions = () => {
 	const handleViewTransition = (
 		to: string | null | undefined,
 		from: string | null | undefined,
+		backNavigationFallback: boolean,
 	) => {
 		let viewType: AppViewTransitionType = 'regular'
-		let backNavigation = false
+		let backNavigation = backNavigationFallback
 
 		if (to && from) {
 			for (const matcher of matchers) {
@@ -36,7 +37,7 @@ export const setupAppViewTransitions = () => {
 
 				if (matched) {
 					viewType = matched.view
-					backNavigation = matched.backNavigation ?? false
+					backNavigation = matched.backNavigation ?? backNavigationFallback
 
 					break
 				}
@@ -63,7 +64,8 @@ export const setupAppViewTransitions = () => {
 			await wait(175)
 		}
 
-		handleViewTransition(nav.to?.route.id, nav.from?.route.id)
+		const backNavigation = nav.delta ? nav.delta < 0 : false
+		handleViewTransition(nav.to?.route.id, nav.from?.route.id, backNavigation)
 
 		document.startViewTransition(() => {
 			resolve()

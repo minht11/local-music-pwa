@@ -165,25 +165,33 @@
 		}
 	}
 
-	@keyframes -global-view-regular-out {
-		to {
-			scale: 1.1;
-		}
-	}
-
 	@keyframes -global-view-regular-fade-in {
 		from {
 			opacity: 0;
 		}
 	}
 
+	@keyframes -global-view-regular-out {
+		to {
+			scale: var(--view-regular-out);
+		}
+	}
+
 	@keyframes -global-view-regular-in {
 		from {
-			scale: 0.9;
+			scale: var(--view-regular-in);
 		}
 	}
 
 	:global(html[data-view-regular]) :global {
+		--view-regular-out: 1.1;
+		--view-regular-in: 0.9;
+
+		&[data-view-back-navigation] {
+			--view-regular-out: 0.9;
+			--view-regular-in: 1.1;
+		}
+
 		&::view-transition-old(root) {
 			animation:
 				view-regular-fade-out 90ms theme('easing.outgoing40') forwards,
