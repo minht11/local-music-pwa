@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
 	import { page } from '$app/stores'
-	import { useRootLayout } from '$lib/app'
+	import { useRootLayout } from '$lib/app.ts'
 	import Button from '$lib/components/Button.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import AlbumsListContainer from '$lib/components/albums/AlbumsListContainer.svelte'
@@ -11,7 +11,6 @@
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueries } from '$lib/db/queries.svelte.ts'
-	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.js'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 	import Search from './Search.svelte'
@@ -20,7 +19,8 @@
 
 	initPageQueries(data)
 
-	const { store } = data
+	// TODO. Look into if cleanup is done
+	const store = $derived(data.store)
 	const main = useMainStore()
 
 	const itemsIds = $derived(data.query.value)
@@ -56,23 +56,8 @@
 		},
 	] satisfies NavItem[]
 
-	const isWideLayout = useMediaQuery('(min-width: 1154px)')
-
-	const layoutMode = $derived.by(() => {
-		if (slug === 'tracks') {
-			return 'list'
-		}
-
-		if (isWideLayout.value) {
-			return 'both'
-		}
-
-		if ($page.params.id) {
-			return 'details'
-		}
-
-		return 'list'
-	})
+	const isWideLayout = $derived.by(data.isWideLayout)
+	const layoutMode = $derived.by(() => data.layoutMode(isWideLayout, $page.params.id))
 
 	const layout = useRootLayout()
 	layout.bottom = layoutBottom
@@ -109,7 +94,7 @@
 	{/if}
 {/snippet}
 
-{#if !(layoutMode === 'details' && !isWideLayout.value)}
+{#if !(layoutMode === 'details' && !isWideLayout)}
 	<div
 		class={clx(
 			'gap-8px fixed z-1 desktop-sidebar flex-col w-max h-max mt-80px [@media(max-height:500px)]:mt-8px',
@@ -164,7 +149,9 @@
 							items={itemsIds}
 							menuItems={(playlist) => getPlaylistMenuItems(main, playlist)}
 							onItemClick={({ playlist }) => {
-								void goto(`/library/playlists/${playlist.id}`)
+								const shouldReplace = $page.route.id === '/library/[slug=libraryEntities]/[id]'
+
+								void goto(`/library/playlists/${playlist.id}`, { replaceState: shouldReplace })
 							}}
 						/>
 					{/if}

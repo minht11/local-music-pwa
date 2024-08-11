@@ -13,6 +13,7 @@
 
 <script lang="ts">
 	import VirtualContainer from '../VirtualContainer.svelte'
+	import { page } from '$app/stores'
 
 	interface Props {
 		items: number[]
@@ -61,7 +62,9 @@
 					transform: translateY({item.start}px);
 				"
 			onclick={() => {
-				goto(`/library/albums/${albumId}`)
+				const shouldReplace = $page.route.id === '/library/[slug=libraryEntities]/[id]'
+
+				goto(`/library/albums/${albumId}`, { replaceState: shouldReplace })
 			}}
 		/>
 	{/snippet}

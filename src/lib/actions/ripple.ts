@@ -5,7 +5,9 @@ import { animateEmpty } from '../helpers/animations.ts'
 const FADE_DURATION = 180
 const SCALE_DURATION = 400
 
-const rippleSpan = document.createElement('span')
+const rippleSpan = import.meta.env.SSR
+	? (null as unknown as HTMLSpanElement)
+	: document.createElement('span')
 const activeRipples = new Map<HTMLSpanElement, boolean>()
 
 export const getActiveRipplesCount = (): number => activeRipples.size
@@ -40,8 +42,10 @@ const onExitHandler = () => {
 	}
 }
 
-document.addEventListener('pointercancel', onExitHandler)
-document.addEventListener('pointerup', onExitHandler)
+if (!import.meta.env.SSR) {
+	document.addEventListener('pointercancel', onExitHandler)
+	document.addEventListener('pointerup', onExitHandler)
+}
 
 const onPointerDownHandler = (e: PointerEvent) => {
 	// Only respond to main click events.

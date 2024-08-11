@@ -90,7 +90,7 @@
 	</div>
 </ListItem>
 
-<style lang="postcss">
+<style>
 	.track-item {
 		--grid-cols: auto 1fr;
 		display: grid;

@@ -1,5 +1,7 @@
 import { definePageListLoader } from '$lib/db/queries.svelte.ts'
 import { getEntityIds } from '$lib/library/general.ts'
+import { windowStore } from '$lib/stores/window-store.svelte.ts'
+import { defineViewTransitionMatcher } from '$lib/view-transitions.ts'
 import type { LayoutLoad } from './$types.ts'
 import { LibraryStore } from './store.svelte'
 
@@ -82,11 +84,54 @@ export const load: LayoutLoad = async (event) => {
 			}),
 	})
 
+	const isWideLayout = () => windowStore.windowWidth > 1154
+	// We pass params here so that inside page we can benefit from $derived caching
+	const layoutMode = (isWide: boolean, itemId: string | undefined) => {
+		if (slug === 'tracks') {
+			return 'list'
+		}
+
+		if (isWide) {
+			return 'both'
+		}
+
+		if (itemId) {
+			return 'details'
+		}
+
+		return 'list'
+	}
+
+	defineViewTransitionMatcher((to, from) => {
+		const libraryRoute = '/library/[slug=libraryEntities]'
+		const detailsRoute = '/library/[slug=libraryEntities]/[id]'
+
+		if (to === libraryRoute && from === libraryRoute) {
+			return { toView: 'library', fromView: 'library' } as const
+		}
+
+		const mode = event.untrack(() => layoutMode(isWideLayout(), event.params.id))
+		if (mode !== 'both') {
+			return null
+		}
+
+		if (
+			(to === detailsRoute && from === libraryRoute) ||
+			(to === libraryRoute && from === detailsRoute) ||
+			(to === detailsRoute && from === detailsRoute)
+		) {
+			return { toView: 'library', fromView: 'library' } as const
+		}
+
+		return null
+	})
+
 	return {
 		slug,
 		query,
 		store,
 		title: 'Library',
-		rootLayoutKey: () => slug,
+		isWideLayout,
+		layoutMode,
 	}
 }

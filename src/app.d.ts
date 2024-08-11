@@ -6,7 +6,6 @@ declare global {
 			noPlayerOverlay?: boolean
 			pageTitle?: string
 			isHandHeldDevice: boolean
-			rootLayoutKey?: (url: URL) => string
 		}
 		// interface Platform {}
 	}

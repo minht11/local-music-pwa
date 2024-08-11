@@ -54,7 +54,7 @@
 		{/if}
 
 		{#if title}
-			<h1 class="view-transition-page-title text-title-lg mr-auto">{title}</h1>
+			<h1 class="text-title-lg mr-auto">{title}</h1>
 		{/if}
 
 		<div class="flex items-center gap-8px">

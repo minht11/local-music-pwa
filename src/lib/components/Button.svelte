@@ -67,7 +67,7 @@
 	{/if}
 </svelte:element>
 
-<style lang="postcss">
+<style>
 	.filled-button {
 		background: theme('colors.primary');
 		color: theme('colors.onPrimary');
@@ -79,7 +79,8 @@
 	}
 
 	:is(.tonal-button, .filled-button)[disabled] {
-		@apply bg-onSurface/12%;
+		/* @apply bg-onSurface/12%; */
+		background: theme('colors.onSurface/12%');
 	}
 
 	.outlined-button {

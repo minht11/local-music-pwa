@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { page } from '$app/stores'
 	import BackButton from '$lib/components/BackButton.svelte'
 	import Button from '$lib/components/Button.svelte'
@@ -16,32 +16,21 @@
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte'
 	import { useMainStore } from '$lib/stores/main-store.svelte'
+	import type { LayoutData } from './$types.d.ts'
+
+	// TODO. We should not need to cast here
+	const { data } = $props() as { data: LayoutData }
 
 	const mainStore = useMainStore()
 	const player = usePlayer()
 	const track = $derived(player.activeTrack)
 
-	const isCompactVerticalMedia = useMediaQuery('(max-height: 600px)')
-	const isCompactVertical = $derived(isCompactVerticalMedia.value)
-	const isCompactHorizontalMedia = useMediaQuery('(max-width: 767px)')
-	const isCompactHorizontal = $derived(isCompactHorizontalMedia.value)
-	const isVeryCompactHorizontal = useMediaQuery('(max-width: 600px)')
+	const sizes = $derived.by(data.sizes)
 
-	const isCompact = $derived(isCompactVertical || isCompactHorizontal)
+	const isCompactVertical = $derived(sizes.isCompactVertical)
 
-	const layoutMode = $derived.by(() => {
-		if (!isCompact) {
-			return 'both'
-		}
-
-		if ($page.url.pathname.endsWith('/queue')) {
-			return 'details'
-		}
-
-		return 'list'
-	})
+	const layoutMode = $derived.by(() => data.layoutMode(sizes.isCompact, $page.url.pathname))
 </script>
 
 {#snippet playerSnippet()}
@@ -50,14 +39,12 @@
 			layoutMode === 'both' && 'w-400px',
 			layoutMode === 'list' && 'mx-auto w-full',
 			'player-content z-0 bg-secondaryContainerVariant px-8px pb-8px gap-x-24px overflow-clip items-center grow',
-			isCompactVertical && !isVeryCompactHorizontal.value && 'player-content-horizontal',
+			isCompactVertical && !sizes.isCompactHorizontal && 'player-content-horizontal',
 		)}
 	>
 		<div
 			class={clx(
-				isCompactVertical && !isVeryCompactHorizontal.value
-					? 'h-56px absolute top-0 left-0'
-					: 'h-64px',
+				isCompactVertical && !sizes.isCompactHorizontal ? 'h-56px absolute top-0 left-0' : 'h-64px',
 				'w-full flex gap-8px items-center justify-between [grid-area:header]',
 			)}
 		>
@@ -69,7 +56,7 @@
 		</div>
 
 		<PlayerArtwork
-			class="rounded-16px bg-surfaceContainerHigh m-auto view-transition-pl-artwork [grid-area:artwork] max-h-300px h-full my-auto"
+			class="rounded-16px bg-surfaceContainerHigh m-auto pl-view-artwork [grid-area:artwork] max-h-300px h-full my-auto"
 		/>
 
 		<div class="flex flex-col gap-8px w-full [grid-area:controls]">
@@ -189,12 +176,12 @@
 	</div>
 {/snippet}
 
-<div class="w-full max-w-1280px invisible view-transition-pl-container mx-auto fixed inset-0"></div>
+<div class="w-full max-w-1280px invisible pl-view-container mx-auto fixed inset-0"></div>
 
 <ListDetailsLayout
 	mode={layoutMode}
 	class={clx(
-		'view-transition-pl-content grow mx-auto w-full max-w-1280px',
+		'pl-view-content grow mx-auto w-full max-w-1280px',
 		layoutMode === 'both' && 'bg-secondaryContainer',
 	)}
 	list={playerSnippet}
@@ -204,6 +191,20 @@
 />
 
 <style lang="postcss">
+	:global(html:is([data-view-from-player], [data-view-to-player])) :global {
+		.pl-view-container {
+			view-transition-name: pl-container;
+		}
+
+		.pl-view-content {
+			view-transition-name: pl-content;
+		}
+
+		.pl-view-artwork {
+			view-transition-name: pl-artwork;
+		}
+	}
+
 	.player-content {
 		display: grid;
 		grid-template-columns: 1fr;

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import IconButton from '$lib/components/IconButton.svelte'
 	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'
 

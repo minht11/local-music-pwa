@@ -1,53 +1,23 @@
 <script lang="ts">
-	import { onNavigate } from '$app/navigation'
 	import { navigating, page } from '$app/stores'
-	import { getActiveRipplesCount } from '$lib/actions/ripple'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import PlaylistDialogs from '$lib/components/app-dialogs/PlaylistDialogs.svelte'
-	import MenuRenderer, { initGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
+	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
-	import { wait } from '$lib/helpers/utils/wait.ts'
 	import { provideMainStore } from '$lib/stores/main-store.svelte'
 	import { providePlayer } from '$lib/stores/player/store.ts'
+	import { setupAppViewTransitions } from '$lib/view-transitions.ts'
 	import { setContext } from 'svelte'
+
+	const mainStore = provideMainStore()
+	const player = providePlayer()
+
+	setupGlobalMenu()
+	setupAppViewTransitions()
 
 	const { children } = $props()
 
 	const pageData = $derived($page.data)
-
-	initGlobalMenu()
-	const mainStore = provideMainStore()
-
-	onNavigate(async (navigation) => {
-		if (!document.startViewTransition) {
-			return
-		}
-
-		const { promise, resolve } = Promise.withResolvers<void>()
-
-		if (getActiveRipplesCount() > 0) {
-			// Allow ripple animations to finish before transitioning
-			await wait(175)
-		}
-
-		// document.documentElement.setAttribute('data-view-from', navigation.from?.route.id ?? '')
-		// document.documentElement.setAttribute('data-view-to', navigation.to?.route.id ?? '')
-
-		const previousRouteWasPlayer = !!navigation.from?.route.id?.startsWith('/player')
-		const currentRouteIsPlayer = !!navigation.to?.route.id?.startsWith('/player')
-
-		document.documentElement.toggleAttribute('data-view-from-player', previousRouteWasPlayer)
-		document.documentElement.toggleAttribute('data-view-to-player', currentRouteIsPlayer)
-		document.documentElement.toggleAttribute('data-view-from-regular', !previousRouteWasPlayer)
-		document.documentElement.toggleAttribute('data-view-to-regular', !currentRouteIsPlayer)
-
-		document.startViewTransition(async () => {
-			resolve()
-			await navigation.complete
-		})
-
-		return promise
-	})
 
 	let bottom = $state<Snippet>()
 
@@ -64,8 +34,6 @@
 			bottom = undefined
 		}
 	})
-
-	const player = providePlayer()
 
 	const updateStyles = async (color: number | undefined | null, isDark: boolean) => {
 		const module = await import('$lib/theme.ts')
@@ -141,9 +109,7 @@
 	</div>
 {/if}
 
-{#key pageData.rootLayoutKey?.() ?? $page.url.pathname}
-	{@render children()}
-{/key}
+{@render children()}
 
 <div
 	class="fixed flex flex-col bottom-0 overflow-hidden inset-x-0 pointer-events-none [&>*]:pointer-events-auto"
@@ -190,6 +156,52 @@
 		}
 		100% {
 			transform: scaleX(0.8);
+		}
+	}
+
+	@keyframes -global-view-regular-fade-out {
+		to {
+			opacity: 0;
+		}
+	}
+
+	@keyframes -global-view-regular-out {
+		to {
+			scale: 1.1;
+		}
+	}
+
+	@keyframes -global-view-regular-fade-in {
+		from {
+			opacity: 0;
+		}
+	}
+
+	@keyframes -global-view-regular-in {
+		from {
+			scale: 0.9;
+		}
+	}
+
+	:global(html[data-view-from-regular][data-view-to-regular]) :global {
+		&::view-transition-old(root) {
+			animation:
+				view-regular-fade-out 90ms theme('easing.outgoing40') forwards,
+				view-regular-out 300ms theme('easing.incoming80outgoing40');
+		}
+
+		&::view-transition-new(root) {
+			animation:
+				view-regular-fade-in 210ms 90ms theme('easing.incoming80') backwards,
+				view-regular-in 300ms theme('easing.incoming80outgoing40');
+		}
+
+		&::view-transition-old(pl-container) {
+			display: none;
+		}
+
+		&::view-transition-new(pl-container) {
+			animation: none;
 		}
 	}
 </style>

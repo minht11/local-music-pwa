@@ -23,7 +23,7 @@
 		value?: MenuInternalData
 	}
 
-	export const initGlobalMenu = () => {
+	export const setupGlobalMenu = () => {
 		const menuState = $state<MenuInternalState>({
 			value: undefined,
 		})

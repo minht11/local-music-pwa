@@ -11,7 +11,7 @@
 	<div class="play-bar flip-y"></div>
 </div>
 
-<style lang="postcss">
+<style>
 	.play-icon {
 		transition: transform 0.2s ease-out;
 	}
