@@ -38,22 +38,19 @@ export const load: LayoutLoad = () => {
 			(previousRouteWasPlayer && nextRouteIsQueue) ||
 			(prevRouteWasQueue && currentRouteIsPlayer)
 
-		let prevView: AppViewTransitionType = 'regular'
-		let nextView: AppViewTransitionType = 'regular'
-		let shouldIntercept = false
-
+		let view: AppViewTransitionType | null = null
+		let backNavigation = false
 		if (previousRouteWasPlayer && !viewBetweenPlayerAndQueue) {
-			prevView = 'player'
-			shouldIntercept = true
+			view = 'player'
+			backNavigation = true
 		}
 
 		if (currentRouteIsPlayer && !viewBetweenPlayerAndQueue) {
-			nextView = 'player'
-			shouldIntercept = true
+			view = 'player'
 		}
 
-		if (shouldIntercept) {
-			return { toView: nextView, fromView: prevView }
+		if (view) {
+			return { view, backNavigation }
 		}
 
 		return null

@@ -183,7 +183,7 @@
 		}
 	}
 
-	:global(html[data-view-from-regular][data-view-to-regular]) :global {
+	:global(html[data-view-regular]) :global {
 		&::view-transition-old(root) {
 			animation:
 				view-regular-fade-out 90ms theme('easing.outgoing40') forwards,

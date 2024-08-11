@@ -87,7 +87,7 @@
 		grid-template-columns: 1fr max-content 1fr;
 	}
 
-	:global(html:is([data-view-from-player], [data-view-to-player])) {
+	:global(html[data-view-player]) {
 		.player-content {
 			view-transition-name: pl-content;
 		}

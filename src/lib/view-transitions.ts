@@ -5,8 +5,8 @@ import { wait } from './helpers/utils/wait.ts'
 export type AppViewTransitionType = 'regular' | 'player' | 'library'
 
 export type AppViewTransitionTypeMatcherResult = {
-	toView: AppViewTransitionType
-	fromView: AppViewTransitionType
+	view: AppViewTransitionType
+	backNavigation?: boolean
 } | null
 
 /** Used to determine which data attributes to add in order to apply correct view transition */
@@ -27,38 +27,28 @@ export const setupAppViewTransitions = () => {
 		to: string | null | undefined,
 		from: string | null | undefined,
 	) => {
-		let fromView: AppViewTransitionType = 'regular'
-		let toView: AppViewTransitionType = 'regular'
+		let viewType: AppViewTransitionType = 'regular'
+		let backNavigation = false
 
 		if (to && from) {
 			for (const matcher of matchers) {
 				const matched = matcher?.(to, from)
 
 				if (matched) {
-					fromView = matched.fromView
-					toView = matched.toView
+					viewType = matched.view
+					backNavigation = matched.backNavigation ?? false
 
 					break
 				}
 			}
 		}
 
-		const toggleViewAttributes = (
-			direction: 'to' | 'from',
-			selectedView: AppViewTransitionType,
-		) => {
-			const views: AppViewTransitionType[] = ['regular', 'player', 'library']
-
-			for (const view of views) {
-				document.documentElement.toggleAttribute(
-					`data-view-${direction}-${view}`,
-					view === selectedView,
-				)
-			}
+		const views: AppViewTransitionType[] = ['regular', 'player', 'library']
+		for (const view of views) {
+			document.documentElement.toggleAttribute(`data-view-${view}`, view === viewType)
 		}
 
-		toggleViewAttributes('from', fromView)
-		toggleViewAttributes('to', toView)
+		document.documentElement.toggleAttribute('data-view-back-navigation', backNavigation)
 	}
 
 	onNavigate(async (nav) => {

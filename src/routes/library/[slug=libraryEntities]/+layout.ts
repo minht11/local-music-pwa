@@ -107,7 +107,7 @@ export const load: LayoutLoad = async (event) => {
 		const detailsRoute = '/library/[slug=libraryEntities]/[id]'
 
 		if (to === libraryRoute && from === libraryRoute) {
-			return { toView: 'library', fromView: 'library' } as const
+			return { view: 'library' } as const
 		}
 
 		const mode = event.untrack(() => layoutMode(isWideLayout(), event.params.id))
@@ -120,7 +120,7 @@ export const load: LayoutLoad = async (event) => {
 			(to === libraryRoute && from === detailsRoute) ||
 			(to === detailsRoute && from === detailsRoute)
 		) {
-			return { toView: 'library', fromView: 'library' } as const
+			return { view: 'library' } as const
 		}
 
 		return null

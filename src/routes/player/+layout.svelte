@@ -191,7 +191,7 @@
 />
 
 <style lang="postcss">
-	:global(html:is([data-view-from-player], [data-view-to-player])) :global {
+	:global(html[data-view-player]) :global {
 		.pl-view-container {
 			view-transition-name: pl-container;
 		}
@@ -234,13 +234,13 @@
 		animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
 	}
 
-	:global(html) {
-		--vt-pl-container-radius: 16px;
+	:global(html[data-view-player][data-view-back-navigation]) {
 		--vt-pl-container-from-radius: 0;
 		--vt-pl-container-to-radius: var(--vt-pl-container-radius);
 	}
 
-	:global(html[data-view-to-player]) {
+	:global(html) {
+		--vt-pl-container-radius: 16px;
 		--vt-pl-container-from-radius: var(--vt-pl-container-radius);
 		--vt-pl-container-to-radius: 0;
 	}
@@ -260,7 +260,7 @@
 		}
 	}
 
-	:global(html:is([data-view-from-player], [data-view-to-player])) :global {
+	:global(html[data-view-player]) :global {
 		&::view-transition-group(pl-container) {
 			background: theme('colors.secondaryContainer');
 			animation:
