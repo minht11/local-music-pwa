@@ -103,14 +103,12 @@
 
 {@render children()}
 
-<div
-	class="fixed flex flex-col bottom-0 overflow-hidden inset-x-0 pointer-events-none [&>*]:pointer-events-auto"
->
+<div class="fixed flex flex-col bottom-0 overflow-hidden inset-x-0 pointer-events-none">
 	<div class="flex flex-col">
 		<SnackbarRenderer />
 
 		{#if !$page.data.noPlayerOverlay}
-			<div bind:clientHeight={overlayContentHeight} class="px-8px pb-8px w-full">
+			<div bind:clientHeight={overlayContentHeight} class="px-8px pb-8px pointer-events-none">
 				<PlayerOverlay />
 			</div>
 		{/if}

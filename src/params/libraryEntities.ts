@@ -1,7 +1,9 @@
 import type { ParamMatcher } from '@sveltejs/kit'
 
-const entities = ['tracks', 'albums', 'artists', 'playlists'] as const
-type Entity = (typeof entities)[number]
+const entities = new Set(['tracks', 'albums', 'artists', 'playlists'] as const)
+
+type TypeFromSet<T extends Set<unknown>> = T extends Set<infer U> ? U : never
+type Entity = TypeFromSet<typeof entities>
 
 export const match = ((param): param is Entity =>
-	entities.includes(param as Entity)) satisfies ParamMatcher
+	entities.has(param as Entity)) satisfies ParamMatcher
