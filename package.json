@@ -22,7 +22,7 @@
 		"@inlang/paraglide-js": "^1.11.2",
 		"@inlang/paraglide-vite": "^1.2.74",
 		"@sveltejs/adapter-static": "^3.0.4",
-		"@sveltejs/kit": "^2.5.22",
+		"@sveltejs/kit": "^2.5.24",
 		"@sveltejs/vite-plugin-svelte": "4.0.0-next.6",
 		"@unocss/postcss": "0.62.2",
 		"@unocss/preset-uno": "0.62.2",
