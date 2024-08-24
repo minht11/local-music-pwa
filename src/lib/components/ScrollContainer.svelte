@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import { getContext, setContext } from 'svelte'
 	import invariant from 'tiny-invariant'
 

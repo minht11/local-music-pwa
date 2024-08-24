@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
 	import Button, { type ButtonKind } from '../Button.svelte'
 
 	export interface DialogButton<S = void> {

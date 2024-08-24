@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import Button, { type AllowedButtonElement, type ButtonProps } from './Button.svelte'
 	import Icon, { type IconType } from './icon/Icon.svelte'
 

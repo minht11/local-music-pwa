@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import { ripple } from '$lib/actions/ripple'
 	import IconButton from './IconButton.svelte'
 	import type { MenuItem } from './menu/types.ts'

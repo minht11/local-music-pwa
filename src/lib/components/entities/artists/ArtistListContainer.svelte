@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import { goto } from '$app/navigation'
 	import { page } from '$app/stores'
 	import type { ArtistData } from '$lib/db/query'

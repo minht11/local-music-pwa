@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export interface HeaderProps {
 		children?: Snippet
 		title?: string

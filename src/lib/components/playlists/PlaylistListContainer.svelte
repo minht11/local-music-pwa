@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Playlist } from '$lib/db/entities'
 	import type { Snippet } from 'svelte'
 	import type { MenuItem } from '../ListItem.svelte'

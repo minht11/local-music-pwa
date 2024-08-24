@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import { ripple } from '$lib/actions/ripple'
 	import { computePosition, flip, shift } from '@floating-ui/dom'
 	import { nanoid } from 'nanoid'

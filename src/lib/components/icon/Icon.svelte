@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import { clx } from '$lib/helpers/clx'
 	import { ICON_PATHS } from './icon-paths.ts'
 

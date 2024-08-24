@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Track } from '$lib/db/entities'
 	import type { TrackData } from '$lib/db/query'
 	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'

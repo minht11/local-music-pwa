@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import { goto } from '$app/navigation'
 	import type { Album } from '$lib/db/entities'
 	import { safeInteger } from '$lib/helpers/utils/integers.ts'

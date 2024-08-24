@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import { assign } from '$lib/helpers/utils/assign.ts'
 	import '@a11y/focus-trap'
 	import type { FocusTrap } from '@a11y/focus-trap'
