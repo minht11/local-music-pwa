@@ -28,7 +28,7 @@
 			<ScrollContainer
 				class={clx(
 					'overflow-y-auto max-h-100vh shrink-0 sticky top-0 overscroll-contain flex flex-col',
-					!noPlayerOverlayPadding && 'pb-[var(--bottom-overlay-height)]',
+					!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
 					!noListStableGutter && 'scrollbar-gutter-stable',
 				)}
 			>
@@ -39,7 +39,7 @@
 		<div
 			class={clx(
 				'w-full grow flex flex-col',
-				!noPlayerOverlayPadding && 'pb-[var(--bottom-overlay-height)]',
+				!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
 			)}
 		>
 			{#if mode === 'both' || mode === 'details'}

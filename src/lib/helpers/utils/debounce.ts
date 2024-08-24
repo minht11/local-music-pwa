@@ -10,15 +10,13 @@ export const debounce = <Fn extends (...args: Parameters<Fn>) => ReturnType<Fn>>
 	const debounceFn = (...args: Parameters<Fn>) => {
 		clearTimeout(timeout)
 
-		timeout = window.setTimeout(() => {
-			fn(...args)
-		}, delay)
+		timeout = window.setTimeout(fn, delay, ...(args as unknown[]))
 	}
 
 	debounceFn.cancel = () => {
 		if (timeout) {
-			timeout = undefined
 			clearTimeout(timeout)
+			timeout = undefined
 		}
 	}
 

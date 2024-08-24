@@ -2,7 +2,47 @@ import { paraglide } from '@inlang/paraglide-vite'
 import { sveltekit } from '@sveltejs/kit/vite'
 import UnoCSS from '@unocss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
-import { defineConfig } from 'vite'
+import { type Plugin, defineConfig } from 'vite'
+
+// https://github.com/vitejs/vite/issues/16719#issuecomment-2308170706
+function workerChunkPlugin(): Plugin {
+	return {
+		name: workerChunkPlugin.name,
+		apply: 'build',
+		enforce: 'pre',
+		async resolveId(source, importer, _options) {
+			// intercept "xxx?worker"
+			if (source?.endsWith('?worker')) {
+				// biome-ignore lint/style/noNonNullAssertion: <explanation>
+				const resolved = await this.resolve(source.split('?')[0]!, importer)
+
+				return `\0${resolved?.id}?worker-chunk`
+			}
+
+			return undefined
+		},
+		load(id) {
+			if (id.startsWith('\0') && id.endsWith('?worker-chunk')) {
+				const referenceId = this.emitFile({
+					type: 'chunk',
+					// biome-ignore lint/style/noNonNullAssertion: <explanation>
+					id: id.slice(1).split('?')[0]!,
+				})
+
+				return `
+					export default function WorkerWrapper() {
+						return new Worker(
+							import.meta.ROLLUP_FILE_URL_${referenceId},
+							{ type: "module" }
+						);
+					}
+				`
+			}
+
+			return undefined
+		},
+	}
+}
 
 export default defineConfig({
 	server: {
@@ -59,6 +99,7 @@ export default defineConfig({
 		},
 	},
 	plugins: [
+		workerChunkPlugin(),
 		UnoCSS(),
 		sveltekit(),
 		AutoImport({

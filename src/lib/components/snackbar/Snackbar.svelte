@@ -14,14 +14,12 @@
 <script lang="ts">
 	const { id, message, duration = 6000, ondismiss }: SnackbarProps = $props()
 
-	const dismiss = () => ondismiss(id)
-
 	$effect(() => {
 		if (!duration) {
 			return
 		}
 
-		const timeoutId = window.setTimeout(dismiss, duration)
+		const timeoutId = window.setTimeout(ondismiss, duration, id)
 
 		return () => {
 			clearTimeout(timeoutId)
