@@ -337,6 +337,14 @@
 	</div>
 </section>
 
+<section class="card mx-auto w-full max-w-[900px] mt-24px text-body-lg">
+	<div class="flex justify-between items-center p-16px">
+		<div>{m.about()}</div>
+
+		<IconButton as="a" href="/about" tooltip={m.about()} icon="chevronRight" />
+	</div>
+</section>
+
 {#snippet directoryName(name: string | undefined)}
 	<span class="text-tertiary w-fit h-16.5px inline-flex items-center gap-4px">
 		<Icon type="folder" class="size-12px" />

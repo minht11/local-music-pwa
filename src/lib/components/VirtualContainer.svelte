@@ -18,7 +18,7 @@
 		gap?: number
 		offsetWidth?: number
 		key: (index: number) => string | number
-		children: Snippet<[VirtualItem<HTMLElement>]>
+		children: Snippet<[VirtualItem]>
 	}
 
 	let {
@@ -172,19 +172,25 @@
 	}
 </script>
 
-<div
-	bind:this={container}
-	bind:offsetWidth
-	role="grid"
-	aria-rowcount={count}
-	style:height={`${($virtualizer?.getTotalSize() ?? 0) - gap}px`}
-	class="contain-strict relative w-full @container rounded-8px outline-offset--2px"
-	tabindex="0"
-	onfocusin={focusinHandler}
-	onfocusout={focusoutHandler}
-	onkeydown={keydownHandler}
->
-	{#each $virtualizer?.getVirtualItems() ?? [] as virtualItem (key(virtualItem.index))}
-		{@render children(virtualItem)}
-	{/each}
-</div>
+{#if count === 0}
+	<div class="m-auto self-center justify-self-center w-max h-max text-center">
+		{m.noItemsToDisplay()}
+	</div>
+{:else}
+	<div
+		bind:this={container}
+		bind:offsetWidth
+		role="grid"
+		aria-rowcount={count}
+		style:height={`${($virtualizer?.getTotalSize() ?? 0) - gap}px`}
+		class="contain-strict relative w-full @container rounded-8px outline-offset--2px"
+		tabindex="0"
+		onfocusin={focusinHandler}
+		onfocusout={focusoutHandler}
+		onkeydown={keydownHandler}
+	>
+		{#each $virtualizer?.getVirtualItems() ?? [] as virtualItem (key(virtualItem.index))}
+			{@render children(virtualItem)}
+		{/each}
+	</div>
+{/if}

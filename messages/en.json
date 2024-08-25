@@ -19,6 +19,7 @@
 	"queue": "Queue",
 	"goBack": "Go back",
 	"moreOptions": "More options",
+	"noItemsToDisplay": "No items to display",
 
 	"libraryNoResults": "No results found",
 	"libraryNoResultsExplanation": "Try searching for something else",
@@ -32,6 +33,9 @@
 	"librarySave": "Save",
 	"libraryClose": "Close",
 	"libraryPlaylistFieldName": "playlist name",
+	"libraryEmpty": "Your library is empty",
+	"libraryStartByAdding": "Start by adding some music",
+	"libraryImportTracks": "Import tracks",
 
 	"trackAddToFavorites": "Add to favorites",
 	"trackRemoveFromFavorites": "Remove from favorites",
@@ -71,6 +75,7 @@
 	"settingsMotionAuto": "Auto",
 	"settingsMotionReduced": "Reduced",
 	"settingsMotionNormal": "Normal",
+	"settingsAbout": "About",
 
 	"about": "About",
 	"aboutSourceCode": "Source code",

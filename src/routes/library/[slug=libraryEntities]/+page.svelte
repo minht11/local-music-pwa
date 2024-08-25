@@ -2,7 +2,7 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 </script>
 
-<div class="flex flex-col gap-16px items-center justify-center m-auto items-center">
+<div class="flex flex-col gap-16px items-center justify-center m-auto items-center py-40px">
 	<Icon type="album" class="size-140px my-auto opacity-54" />
 
 	<div class="flex flex-col relative">

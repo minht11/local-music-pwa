@@ -33,7 +33,7 @@
 		icon: IconType
 	}
 
-	const navItems = [
+	const navItems: NavItem[] = [
 		{
 			slug: 'tracks',
 			title: 'Tracks',
@@ -54,7 +54,7 @@
 			title: 'Playlists',
 			icon: 'playlist',
 		},
-	] satisfies NavItem[]
+	]
 
 	const isWideLayout = $derived.by(data.isWideLayout)
 	const layoutMode = $derived(data.layoutMode(isWideLayout, $page.params.id))
@@ -133,36 +133,47 @@
 					</div>
 				{/if}
 
-				<div class={clx('w-full grow flex flex-col')}>
-					{#if store.searchTerm && itemsIds.length === 0}
-						<div class="flex flex-col relative text-center items-center m-auto">
-							<Icon type="magnify" class="size-140px my-auto opacity-54" />
+				{#if data.tracksCountQuery.value === 0 && store.storeName !== 'playlists'}
+					<div class="flex flex-col items-center my-auto text-center">
+						<div class="text-title-lg mb-4px">{m.libraryEmpty()}</div>
+						{m.libraryStartByAdding()}
+						<Button as="a" href="/settings" class="mt-16px">
+							<Icon type="plus" />
+							{m.libraryImportTracks()}
+						</Button>
+					</div>
+				{:else}
+					<div class={clx('w-full grow flex flex-col')}>
+						{#if store.searchTerm && itemsIds.length === 0}
+							<div class="flex flex-col relative text-center items-center m-auto">
+								<Icon type="magnify" class="size-140px my-auto opacity-54" />
 
-							<div class="text-body-lg">
-								{m.libraryNoResults()}
+								<div class="text-body-lg">
+									{m.libraryNoResults()}
+								</div>
+								<div>
+									{m.libraryNoResultsExplanation()}
+								</div>
 							</div>
-							<div>
-								{m.libraryNoResultsExplanation()}
-							</div>
-						</div>
-					{:else if store.storeName === 'tracks'}
-						<TracksListContainer items={itemsIds} />
-					{:else if store.storeName === 'albums'}
-						<AlbumsListContainer items={itemsIds} />
-					{:else if store.storeName === 'artists'}
-						<ArtistListContainer items={itemsIds} />
-					{:else if store.storeName === 'playlists'}
-						<PlaylistListContainer
-							items={itemsIds}
-							menuItems={(playlist) => getPlaylistMenuItems(main, playlist)}
-							onItemClick={({ playlist }) => {
-								const shouldReplace = $page.route.id === '/library/[slug=libraryEntities]/[id]'
+						{:else if store.storeName === 'tracks'}
+							<TracksListContainer items={itemsIds} />
+						{:else if store.storeName === 'albums'}
+							<AlbumsListContainer items={itemsIds} />
+						{:else if store.storeName === 'artists'}
+							<ArtistListContainer items={itemsIds} />
+						{:else if store.storeName === 'playlists'}
+							<PlaylistListContainer
+								items={itemsIds}
+								menuItems={(playlist) => getPlaylistMenuItems(main, playlist)}
+								onItemClick={({ playlist }) => {
+									const shouldReplace = $page.route.id === '/library/[slug=libraryEntities]/[id]'
 
-								void goto(`/library/playlists/${playlist.id}`, { replaceState: shouldReplace })
-							}}
-						/>
-					{/if}
-				</div>
+									void goto(`/library/playlists/${playlist.id}`, { replaceState: shouldReplace })
+								}}
+							/>
+						{/if}
+					</div>
+				{/if}
 			</div>
 		</div>
 	{/snippet}

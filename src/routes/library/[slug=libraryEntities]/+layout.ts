@@ -1,5 +1,6 @@
 import { definePageListLoader } from '$lib/db/queries.svelte.ts'
 import { getEntityIds } from '$lib/library/general.ts'
+import { useTracksCountLoader } from '$lib/loaders/tracks.ts'
 import { windowStore } from '$lib/stores/window-store.svelte.ts'
 import { defineViewTransitionMatcher } from '$lib/view-transitions.ts'
 import type { LayoutLoad } from './$types.ts'
@@ -68,6 +69,9 @@ export const load: LayoutLoad = async (event) => {
 
 	const store = storeMap[slug]()
 
+	// TODO. Parallelize.
+	const tracksCountQuery = await useTracksCountLoader()
+
 	const query = await definePageListLoader(store.storeName, {
 		key: () => [
 			store.storeName,
@@ -127,6 +131,7 @@ export const load: LayoutLoad = async (event) => {
 	})
 
 	return {
+		tracksCountQuery,
 		slug,
 		query,
 		store,
