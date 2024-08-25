@@ -86,14 +86,6 @@ export const removeTrackInDb = async (id: number): Promise<void> => {
 	removeTrackWithTx(tx, id)
 
 	await tx.done
-
-	notifyAboutDatabaseChanges([
-		{
-			storeName: 'tracks',
-			operation: 'delete',
-			key: id,
-		},
-	])
 }
 
 export const removeTrack = async (id: number): Promise<void> => {

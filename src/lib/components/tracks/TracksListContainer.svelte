@@ -2,6 +2,7 @@
 	import type { Track } from '$lib/db/entities'
 	import type { TrackData } from '$lib/db/query'
 	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'
+	import { removeTrack } from '$lib/library/tracks.svelte'
 	import { useMainStore } from '$lib/stores/main-store.svelte'
 	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
@@ -66,8 +67,7 @@
 				predefinedKey: 'removeFromLibrary',
 				label: 'Remove from library',
 				action: () => {
-					// TODO.
-					console.log('Remove from library')
+					void removeTrack(track.id)
 				},
 			},
 		]
