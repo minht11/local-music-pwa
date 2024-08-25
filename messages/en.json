@@ -55,6 +55,8 @@
 	"replaceDirectoryExplanation": "The directory {newDir} you're adding is already a parent of {existingDir} which already is in your Library.\n No changes will occur for existing tracks.",
 	"directoryIsIncludedInParent": "New \"{newDir}\" is subdirectory of \"{existingDir}\" which is already in your Library. You do not need to add it again.",
 
+	"settingsCurrentTracksInLibrary": "Currently there are {tracksCount} tracks inside your library",
+	"settingsAllDataLocal": "All data is stored on your device",
 	"settingsThemeAuto": "Auto",
 	"settingsThemeLight": "Light",
 	"settingsThemeDark": "Dark",
@@ -65,6 +67,7 @@
 	"settingsPrimaryColor": "Application primary color",
 	"settingsColorPick": "Pick color",
 	"settingsColorReset": "Reset",
+	"settingsMotion": "Motion",
 	"settingsMotionAuto": "Auto",
 	"settingsMotionReduced": "Reduced",
 	"settingsMotionNormal": "Normal",
@@ -72,6 +75,8 @@
 	"about": "About",
 	"aboutSourceCode": "Source code",
 	"aboutPrivacy": "Privacy",
+
+	"errorPageDoesNotExist": "Looks like this page doesn't exist.",
 
 	"validationRequired": "Field is required",
 	"validationMinLength": "At least {min} characters are required",

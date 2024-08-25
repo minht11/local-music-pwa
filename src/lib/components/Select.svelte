@@ -1,6 +1,6 @@
 <script lang="ts" module>
 	import { ripple } from '$lib/actions/ripple'
-	import { computePosition, flip, shift } from '@floating-ui/dom'
+	import { autoUpdate, computePosition, flip, shift } from '@floating-ui/dom'
 	import { nanoid } from 'nanoid'
 	import Icon from './icon/Icon.svelte'
 
@@ -34,20 +34,26 @@
 			return
 		}
 
-		computePosition(target, popup, {
-			placement: 'top-start',
-			middleware: [flip(), shift()],
-		}).then(({ x, y }) => {
+		const updatePosition = async () => {
 			if (!popup || !target) {
 				return
 			}
+
+			const { x, y } = await computePosition(target, popup, {
+				placement: 'bottom-start',
+				middleware: [flip(), shift()],
+			})
 
 			Object.assign(popup.style, {
 				left: `${x}px`,
 				top: `${y}px`,
 				width: `${target.offsetWidth}px`,
 			})
-		})
+		}
+
+		const cleanup = autoUpdate(target, popup, updatePosition)
+
+		return cleanup
 	})
 </script>
 
@@ -90,7 +96,10 @@
 				use:ripple
 				role="option"
 				aria-selected={item[key] === selected}
-				class="overflow-hidden relative h-40px px-16px flex items-center w-full"
+				class={clx(
+					'overflow-hidden relative h-40px px-16px flex items-center w-full',
+					item[key] === selected && 'text-primary',
+				)}
 				onclick={() => {
 					selected = item[key]
 					popup?.hidePopover()

@@ -17,20 +17,16 @@
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { useMainStore } from '$lib/stores/main-store.svelte'
-	import type { LayoutData } from './$types.d.ts'
 
-	// TODO. We should not need to cast here
-	const { data } = $props() as { data: LayoutData }
+	const { data } = $props()
 
 	const mainStore = useMainStore()
 	const player = usePlayer()
 	const track = $derived(player.activeTrack)
 
 	const sizes = $derived.by(data.sizes)
-
 	const isCompactVertical = $derived(sizes.isCompactVertical)
-
-	const layoutMode = $derived.by(() => data.layoutMode(sizes.isCompact, $page.url.pathname))
+	const layoutMode = $derived(data.layoutMode(sizes.isCompact, $page.url.pathname))
 </script>
 
 {#snippet playerSnippet()}

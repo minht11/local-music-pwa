@@ -57,7 +57,7 @@
 	] satisfies NavItem[]
 
 	const isWideLayout = $derived.by(data.isWideLayout)
-	const layoutMode = $derived.by(() => data.layoutMode(isWideLayout, $page.params.id))
+	const layoutMode = $derived(data.layoutMode(isWideLayout, $page.params.id))
 
 	const layout = useRootLayout()
 

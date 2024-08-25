@@ -13,7 +13,7 @@
 	const player = providePlayer()
 
 	setupGlobalMenu()
-	setupAppViewTransitions()
+	setupAppViewTransitions(() => mainStore.isReducedMotion)
 
 	const { children } = $props()
 
@@ -50,7 +50,7 @@
 	let initial = true
 	$effect(() => {
 		mainStore.themeColorSeed
-		const isDark = mainStore.themeIsDark
+		const isDark = mainStore.isReducedMotion
 		const color = mainStore.pickColorFromArtwork ? player.activeTrack?.primaryColor : undefined
 
 		if (initial) {
@@ -66,7 +66,7 @@
 	})
 
 	$effect.pre(() => {
-		document.documentElement.classList.toggle('dark', mainStore.themeIsDark)
+		document.documentElement.classList.toggle('dark', mainStore.isThemeDark)
 	})
 
 	let overlayContentHeight = $state(0)

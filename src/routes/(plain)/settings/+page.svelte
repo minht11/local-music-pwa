@@ -147,13 +147,15 @@
 	<div class="flex gap-24px px-16px pt-16px">
 		<div>
 			<div class="text-body-lg">
-				Currently there are
-				<strong class="rounded-12px tabular-nums bg-tertiary px-8px text-onTertiary">
-					{count}
-				</strong>
-				tracks inside your library
+				<WrapTranslation messageFn={m.settingsCurrentTracksInLibrary}>
+					{#snippet tracksCount()}
+						<strong class="rounded-12px tabular-nums bg-tertiary px-8px text-onTertiary">
+							{count}
+						</strong>
+					{/snippet}
+				</WrapTranslation>
 			</div>
-			<div>All data is stored on your device</div>
+			<div>{m.settingsAllDataLocal()}</div>
 		</div>
 	</div>
 
@@ -265,10 +267,10 @@
 		<div>{m.settingsApplicationTheme()}</div>
 
 		<Select
+			bind:selected={mainStore.theme}
 			items={themeOptions}
 			key="value"
 			labelKey="name"
-			bind:selected={mainStore.theme}
 			class="w-200px"
 		/>
 	</div>
@@ -313,9 +315,15 @@
 	<Separator />
 
 	<div class="flex justify-between items-center p-16px">
-		<div>Motion</div>
+		<div>{m.settingsMotion()}</div>
 
-		<Select items={motionOptions} key="value" labelKey="name" selected="auto" class="w-200px" />
+		<Select
+			bind:selected={mainStore.motion}
+			items={motionOptions}
+			key="value"
+			labelKey="name"
+			class="w-200px"
+		/>
 	</div>
 
 	<Separator />

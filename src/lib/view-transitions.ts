@@ -22,7 +22,7 @@ export const defineViewTransitionMatcher = (callback: AppViewTransitionTypeMatch
 	matchers.length = 2
 }
 
-export const setupAppViewTransitions = () => {
+export const setupAppViewTransitions = (disabled: () => boolean) => {
 	const handleViewTransition = (
 		to: string | null | undefined,
 		from: string | null | undefined,
@@ -53,6 +53,10 @@ export const setupAppViewTransitions = () => {
 	}
 
 	onNavigate(async (nav) => {
+		if (disabled()) {
+			return
+		}
+
 		if (!document.startViewTransition) {
 			return
 		}

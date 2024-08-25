@@ -15,17 +15,33 @@ export interface ModifyPlaylistOptions {
 	name: string
 }
 
+const observeMedia = <T>(query: string, callback: (matched: boolean, initial: boolean) => T) => {
+	const media = window.matchMedia(query)
+
+	media.addEventListener('change', (e) => {
+		callback(e.matches, false)
+	})
+
+	return callback(media.matches, true)
+}
+
 export class MainStore {
 	theme: AppThemeOption = $state('auto')
 
-	#themeMedia = window.matchMedia('(prefers-color-scheme: dark)')
+	#deviceTheme: AppTheme = observeMedia('(prefers-color-scheme: dark)', (matched, initial) => {
+		const value = matched ? 'dark' : 'light'
 
-	#deviceTheme: AppTheme = $state(this.#themeMedia.matches ? 'dark' : 'light')
+		if (!initial) {
+			this.#deviceTheme = value
+		}
 
-	readonly realTheme: AppTheme = $derived(this.theme === 'auto' ? this.#deviceTheme : this.theme)
+		return value
+	})
 
-	get themeIsDark() {
-		return this.realTheme === 'dark'
+	get isThemeDark() {
+		const theme = this.theme === 'auto' ? this.#deviceTheme : this.theme
+
+		return theme === 'dark'
 	}
 
 	themeColorSeed = $state<null | number>(null)
@@ -45,9 +61,23 @@ export class MainStore {
 
 	motion: AppMotionOption = $state('auto')
 
+	#deviceMotion: AppMotion = observeMedia(
+		'(prefers-reduced-motion: reduce)',
+		(matched, initial) => {
+			const value = matched ? 'reduced' : 'normal'
+
+			if (!initial) {
+				this.#deviceMotion = value
+			}
+
+			return value
+		},
+	)
+
 	get isReducedMotion() {
-		// TODO. Add system setting
-		return this.motion === 'reduced'
+		const motion = this.motion === 'auto' ? this.#deviceMotion : this.motion
+
+		return motion === 'reduced'
 	}
 
 	/**
@@ -68,11 +98,7 @@ export class MainStore {
 	addTrackToPlaylistDialogOpen = $state<number | null>(null)
 
 	constructor() {
-		persist('main', this, ['theme', 'pickColorFromArtwork', 'volumeSliderEnabled'])
-
-		window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-			this.#deviceTheme = e.matches ? 'dark' : 'light'
-		})
+		persist('main', this, ['theme', 'motion', 'pickColorFromArtwork', 'volumeSliderEnabled'])
 	}
 }
 
