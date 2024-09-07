@@ -50,7 +50,7 @@
 	let initial = true
 	$effect(() => {
 		mainStore.themeColorSeed
-		const isDark = mainStore.isReducedMotion
+		const isDark = mainStore.isThemeDark
 		const color = mainStore.pickColorFromArtwork ? player.activeTrack?.primaryColor : undefined
 
 		if (initial) {

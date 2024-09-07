@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Playlist } from '$lib/db/entities'
 	import { usePlaylistData } from '$lib/db/query.ts'
+	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
 	import type { Snippet } from 'svelte'
 	import invariant from 'tiny-invariant'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'
@@ -24,7 +25,7 @@
 		active,
 		class: className,
 		onclick,
-		icon = 'playlist',
+		icon,
 		ariaRowIndex,
 		menuItems,
 	}: Props = $props()
@@ -40,6 +41,7 @@
 				return menuItems?.(playlist)
 			}),
 	)
+	const fallbackIcon = () => (playlistId === FAVORITE_PLAYLIST_ID ? 'favorite' : 'playlist')
 </script>
 
 <ListItem
@@ -62,7 +64,7 @@
 			{/if}
 		{:else}
 			<div class="bg-surfaceContainerHigh p-8px rounded-24px text-onSurfaceVariant/54">
-				<Icon type={icon} />
+				<Icon type={icon ?? fallbackIcon()} />
 			</div>
 		{/if}
 

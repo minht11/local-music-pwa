@@ -192,7 +192,7 @@ export const toggleFavoriteTrack = async (
 		await toggleFavoriteTrackInDatabase(shouldBeRemoved, trackId)
 
 		snackbar({
-			id: `track-favorite-toggled-${trackId}`,
+			id: 'track-favorite-toggled',
 			// TODO. i18n
 			message: shouldBeRemoved ? 'Track removed from favorites' : 'Track added to favorites',
 			duration: 2000,
