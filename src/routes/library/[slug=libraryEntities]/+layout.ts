@@ -1,11 +1,8 @@
-import { definePageListLoader } from '$lib/db/queries.svelte.ts'
-import { getEntityIds } from '$lib/library/general.ts'
-import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte.ts'
 import { useTracksCountLoader } from '$lib/loaders/tracks.ts'
 import { windowStore } from '$lib/stores/window-store.svelte.ts'
 import { defineViewTransitionMatcher } from '$lib/view-transitions.ts'
 import type { LayoutLoad } from './$types.ts'
-import { LibraryStore } from './store.svelte'
+import { LibraryStore, defineLibraryListItemsLoader } from './store.svelte'
 
 type LibraryStoreNames = 'tracks' | 'albums' | 'artists' | 'playlists'
 
@@ -70,31 +67,10 @@ export const load: LayoutLoad = async (event) => {
 
 	const store = storeMap[slug]()
 
-	// TODO. Parallelize.
-	const tracksCountQuery = await useTracksCountLoader()
-
-	const query = await definePageListLoader(store.storeName, {
-		key: () => [
-			store.storeName,
-			store.sortByKey,
-			store.order,
-			store.searchTerm.toLowerCase().trim(),
-		],
-		fetcher: async ([name, sortKey, order, searchTerm]) => {
-			const result = await getEntityIds(name, {
-				sort: sortKey,
-				order,
-				searchTerm,
-				searchFn: (value) => value.name.toLowerCase().includes(searchTerm),
-			})
-
-			if (slug === 'playlists') {
-				return [FAVORITE_PLAYLIST_ID, ...result]
-			}
-
-			return result
-		},
-	})
+	const [query, tracksCountQuery] = await Promise.all([
+		defineLibraryListItemsLoader(store),
+		useTracksCountLoader(),
+	])
 
 	const isWideLayout = () => windowStore.windowWidth > 1154
 	// We pass params here so that inside page we can benefit from $derived caching

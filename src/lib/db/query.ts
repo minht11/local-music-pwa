@@ -1,7 +1,7 @@
 import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte.ts'
 import { WeakLRUCache } from 'weak-lru-cache'
 import { type DBChangeRecord, listenForDatabaseChanges } from './channel.ts'
-import { type Album, type Artist, MusicItemType, type Playlist, type Track } from './entities.ts'
+import type { Album, Artist, Playlist, Track } from './entities.ts'
 import { type DbKey, getDB } from './get-db.ts'
 import { type LoaderResult, createLoader } from './queries.svelte.ts'
 
@@ -20,7 +20,7 @@ interface QueryConfig<Result> {
 	onDatabaseChange?: DatabaseChangeHandler<Result | undefined>
 }
 
-type LibraryEntityStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
+export type LibraryEntityStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
 
 type EntityCacheKey<Name extends LibraryEntityStoreName> = `${Name}:${string}`
 
@@ -104,25 +104,37 @@ export const albumConfig: QueryConfig<AlbumData> = {
 	},
 }
 
-export type ArtistData = Artist
+export interface ArtistData extends Artist {
+	// TODO. Do we even need type field?
+	type: 'artist'
+}
 
 // TODO. Reuse query config
 const artistConfig: QueryConfig<ArtistData> = {
 	fetch: async (id) => {
 		const db = await getDB()
-		const entity = db.get('artists', id)
+		const entity = await db.get('artists', id)
 
-		return entity
+		if (!entity) {
+			return undefined
+		}
+
+		return {
+			...entity,
+			type: 'artist',
+		}
 	},
 }
 
-export type PlaylistData = Playlist
+export interface PlaylistData extends Playlist {
+	type: 'playlist'
+}
 
 const playlistsConfig: QueryConfig<PlaylistData> = {
 	fetch: async (id) => {
 		if (id === FAVORITE_PLAYLIST_ID) {
 			return {
-				type: MusicItemType.Playlist,
+				type: 'playlist',
 				id: FAVORITE_PLAYLIST_ID,
 				name: 'Favorites',
 				created: 0,
@@ -130,9 +142,16 @@ const playlistsConfig: QueryConfig<PlaylistData> = {
 		}
 
 		const db = await getDB()
-		const entity = db.get('playlists', id)
+		const entity = await db.get('playlists', id)
 
-		return entity
+		if (!entity) {
+			return undefined
+		}
+
+		return {
+			...entity,
+			type: 'playlist',
+		}
 	},
 }
 

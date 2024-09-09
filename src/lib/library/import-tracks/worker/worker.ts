@@ -1,6 +1,6 @@
 /// <reference lib='WebWorker' />
 
-import { LegacyDirectoryId, MusicItemType, type Track } from '$lib/db/entities'
+import { LegacyDirectoryId, type Track } from '$lib/db/entities'
 import { getDB } from '$lib/db/get-db'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
 import { removeTrackWithTx } from '$lib/library/tracks.svelte'
@@ -29,7 +29,6 @@ const importTrack = async (options: ImportTrackOptions) => {
 		await importTrackToDb(
 			{
 				...metadata,
-				type: MusicItemType.Track,
 				file: options.file,
 				directory: options.directoryId,
 				lastScanned: Date.now(),

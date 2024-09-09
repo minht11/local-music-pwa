@@ -1,6 +1,6 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
 import { notifyAboutDatabaseChanges } from '$lib/db/channel'
-import { MusicItemType, type OmitId, type Playlist } from '$lib/db/entities'
+import type { OmitId, Playlist } from '$lib/db/entities'
 import { getDB } from '$lib/db/get-db'
 import { truncate } from '$lib/helpers/utils/truncate.ts'
 import invariant from 'tiny-invariant'
@@ -9,7 +9,6 @@ export const createPlaylistInDatabase = async (name: string): Promise<number> =>
 	const db = await getDB()
 
 	const newPlaylist: OmitId<Playlist> = {
-		type: MusicItemType.Playlist,
 		name,
 		created: Date.now(),
 	}

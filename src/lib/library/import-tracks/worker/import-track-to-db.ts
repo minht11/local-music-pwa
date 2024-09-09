@@ -1,11 +1,5 @@
 import { type DBChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
-import {
-	type Album,
-	type Artist,
-	MusicItemType,
-	type Track,
-	type UnknownTrack,
-} from '$lib/db/entities'
+import type { Album, Artist, Track, UnknownTrack } from '$lib/db/entities'
 import { type AppDB, getDB } from '$lib/db/get-db'
 import type { IDBPTransaction } from 'idb'
 
@@ -26,7 +20,6 @@ const importAlbum = async (tx: Tx, track: Track) => {
 				image: existingAlbum.image ?? track.images?.full,
 			}
 		: {
-				type: MusicItemType.Album,
 				name: track.album,
 				artists: track.artists,
 				year: track.year,
@@ -58,7 +51,6 @@ const importArtist = async (tx: Tx, track: Track) => {
 		}
 
 		const newArtist: Omit<Artist, 'id'> = {
-			type: MusicItemType.Artist,
 			name: artist,
 		}
 
