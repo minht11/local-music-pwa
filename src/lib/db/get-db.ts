@@ -1,6 +1,6 @@
 import type { DBSchema, IDBPDatabase, IDBPObjectStore, IndexNames, StoreNames } from 'idb'
 import { openDB } from 'idb'
-import type { Album, Artist, Directory, Playlist, Track } from './entities.ts'
+import type { Album, Artist, Directory, Playlist, Track } from './database-types.ts'
 
 export interface AppDB extends DBSchema {
 	tracks: {

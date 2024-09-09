@@ -10,7 +10,7 @@
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
-	import type { Directory } from '$lib/db/entities.ts'
+	import type { Directory } from '$lib/db/database-types.ts'
 	import { initPageQueries } from '$lib/db/queries.svelte.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'

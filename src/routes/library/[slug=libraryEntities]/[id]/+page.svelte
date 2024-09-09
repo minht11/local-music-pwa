@@ -5,7 +5,7 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import type { Album, Playlist } from '$lib/db/entities.ts'
+	import type { Album, Playlist } from '$lib/db/database-types.js'
 	import { initPageQueries } from '$lib/db/queries.svelte.ts'
 	import type { TrackData } from '$lib/db/query.js'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'

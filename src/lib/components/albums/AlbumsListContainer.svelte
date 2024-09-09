@@ -1,6 +1,6 @@
 <script lang="ts" module>
 	import { goto } from '$app/navigation'
-	import type { Album } from '$lib/db/entities'
+	import type { Album } from '$lib/db/database-types'
 	import { safeInteger } from '$lib/helpers/utils/integers.ts'
 	import AlbumGridItem from './AlbumGridItem.svelte'
 

@@ -1,6 +1,6 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
 import { notifyAboutDatabaseChanges } from '$lib/db/channel'
-import type { Directory } from '$lib/db/entities'
+import type { Directory } from '$lib/db/database-types'
 import { getDB } from '$lib/db/get-db'
 import type { TrackImportOptions } from '$lib/library/import-tracks/worker/types'
 import { removeTrackWithTx } from '$lib/library/tracks.svelte'

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Album } from '$lib/db/entities'
+	import type { Album } from '$lib/db/database-types'
 	import { useAlbumData } from '$lib/db/query.ts'
 
 	import GridItem from '../GridItem.svelte'

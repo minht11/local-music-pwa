@@ -1,5 +1,5 @@
 import { type DBChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
-import type { Album, Artist, Track, UnknownTrack } from '$lib/db/entities'
+import type { Album, Artist, Track, UnknownTrack } from '$lib/db/database-types'
 import { type AppDB, getDB } from '$lib/db/get-db'
 import type { IDBPTransaction } from 'idb'
 

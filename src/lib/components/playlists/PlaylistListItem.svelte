@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Playlist } from '$lib/db/entities'
+	import type { Playlist } from '$lib/db/database-types'
 	import { usePlaylistData } from '$lib/db/query.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
 	import type { Snippet } from 'svelte'

@@ -1,6 +1,6 @@
 /// <reference lib='WebWorker' />
 
-import { LegacyDirectoryId, type Track } from '$lib/db/entities'
+import { LegacyDirectoryId, type Track } from '$lib/db/database-types.ts'
 import { getDB } from '$lib/db/get-db'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
 import { removeTrackWithTx } from '$lib/library/tracks.svelte'

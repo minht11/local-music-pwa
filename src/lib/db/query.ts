@@ -1,7 +1,7 @@
 import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte.ts'
 import { WeakLRUCache } from 'weak-lru-cache'
 import { type DBChangeRecord, listenForDatabaseChanges } from './channel.ts'
-import type { Album, Artist, Playlist, Track } from './entities.ts'
+import type { Album, Artist, Playlist, Track } from './database-types.ts'
 import { type DbKey, getDB } from './get-db.ts'
 import { type LoaderResult, createLoader } from './queries.svelte.ts'
 

@@ -1,4 +1,4 @@
-import type { ParsedTrackData } from '$lib/db/entities'
+import type { ParsedTrackData } from '$lib/db/database-types.ts'
 import { parseBlob } from 'music-metadata'
 import { getArtworkRelatedData } from './format-artwork.ts'
 
