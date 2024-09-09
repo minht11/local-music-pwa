@@ -1,5 +1,6 @@
 import { definePageListLoader } from '$lib/db/queries.svelte.ts'
 import { getEntityIds } from '$lib/library/general.ts'
+import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte.ts'
 import { useTracksCountLoader } from '$lib/loaders/tracks.ts'
 import { windowStore } from '$lib/stores/window-store.svelte.ts'
 import { defineViewTransitionMatcher } from '$lib/view-transitions.ts'
@@ -79,13 +80,20 @@ export const load: LayoutLoad = async (event) => {
 			store.order,
 			store.searchTerm.toLowerCase().trim(),
 		],
-		fetcher: ([name, sortKey, order, searchTerm]) =>
-			getEntityIds(name, {
+		fetcher: async ([name, sortKey, order, searchTerm]) => {
+			const result = await getEntityIds(name, {
 				sort: sortKey,
 				order,
 				searchTerm,
 				searchFn: (value) => value.name.toLowerCase().includes(searchTerm),
-			}),
+			})
+
+			if (slug === 'playlists') {
+				return [FAVORITE_PLAYLIST_ID, ...result]
+			}
+
+			return result
+		},
 	})
 
 	const isWideLayout = () => windowStore.windowWidth > 1154

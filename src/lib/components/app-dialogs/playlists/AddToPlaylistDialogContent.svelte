@@ -77,7 +77,6 @@
 <Separator class="mt-24px" />
 
 <ScrollContainer class="overflow-auto grow max-h-400px px-8px py-16px">
-	<!-- TODO. Check based on query status -->
 	{#if query.status === 'loaded'}
 		<PlaylistListContainer
 			items={query.value}

@@ -3,7 +3,7 @@ import { unwrap } from '$lib/helpers/utils/unwrap.ts'
 import { untrack } from 'svelte'
 import { type DBChangeRecordList, listenForDatabaseChanges } from './channel.ts'
 import type { AppStoreNames } from './get-db.ts'
-import { prefetchLibraryEntityData } from './query.ts'
+import { preloadLibraryEntityData } from './query.ts'
 
 export type LoaderStatus = 'loading' | 'loaded' | 'error'
 
@@ -43,9 +43,14 @@ export type LoaderMutate<Result, InitialResult extends Result | undefined> = (
 	value: Result | ((prev: Result | InitialResult) => void),
 ) => void
 
+export type DbChangeActions<Result, InitialResult extends Result | undefined> = {
+	mutate: LoaderMutate<Result, InitialResult>
+	refetch: () => void
+}
+
 export type DatabaseChangeHandler<Result, InitialResult extends Result | undefined = undefined> = (
 	changes: DBChangeRecordList,
-	actions: { mutate: LoaderMutate<Result, InitialResult>; refetch: () => void },
+	actions: DbChangeActions<Result, InitialResult>,
 ) => void
 
 export type LoaderKeyPrimitiveValue = number | string | boolean
@@ -119,14 +124,22 @@ class LoaderImpl<K extends LoaderKey, Result, InitialResult extends Result | und
 		}
 	}
 
-	#load = (key: K, normalizedKey: string) => {
-		const state = this.state
-
-		assign(state, {
-			status: 'loading',
-			error: undefined,
+	#setErrorState = (e: unknown, normalizedKey: string) => {
+		assign(this.state, {
+			status: 'error',
+			value: undefined,
+			error: e,
 			resolvedKey: normalizedKey,
 		})
+		this.options.onError?.(e)
+	}
+
+	#setLoadedState = (value: Result, normalizedKey: string) => {
+		assign(this.state, this.#getLoadedState(value, normalizedKey))
+	}
+
+	#load = (key: K, normalizedKey: string) => {
+		const state = this.state
 
 		try {
 			const result = this.options.fetcher(key)
@@ -134,29 +147,23 @@ class LoaderImpl<K extends LoaderKey, Result, InitialResult extends Result | und
 			if (result instanceof Promise) {
 				result
 					.then((value) => {
-						assign(state, this.#getLoadedState(value, normalizedKey))
-					})
-					.catch((e) => {
+						// We only need to set loading state if it is async
 						assign(state, {
-							status: 'error',
-							value: undefined,
-							error: e,
+							status: 'loading',
+							error: undefined,
 							resolvedKey: normalizedKey,
 						})
-						this.options.onError?.(e)
-					})
-				return
-			}
 
-			assign(state, this.#getLoadedState(result, normalizedKey))
+						this.#setLoadedState(value, normalizedKey)
+					})
+					.catch((e) => {
+						this.#setErrorState(e, normalizedKey)
+					})
+			} else {
+				this.#setLoadedState(result, normalizedKey)
+			}
 		} catch (e) {
-			assign(state, {
-				status: 'error',
-				value: undefined,
-				error: e,
-				resolvedKey: normalizedKey,
-			})
-			this.options.onError?.(e)
+			this.#setErrorState(e, normalizedKey)
 		}
 	}
 
@@ -269,19 +276,13 @@ export const createLoader = <
 
 const pageLoaderImplSymbol: unique symbol = Symbol()
 
-export type PageLoaderResultResolved<
-	Result,
-	InitialResult extends Result | undefined,
-> = LoaderResult<Result, InitialResult> & {
+export type PageLoaderResultResolved<Result> = LoaderResult<Result, Result> & {
 	hydrate(): void
 }
 
-export type PageLoaderResult<Result, InitialResult extends Result | undefined> = Promise<
-	PageLoaderResultResolved<Result, Result>
-> &
-	PageLoaderResultResolved<Result, InitialResult>
+export type PageLoaderResult<Result> = Promise<PageLoaderResultResolved<Result>>
 
-export const definePageLoader = <
+export const definePageLoader = async <
 	const K extends LoaderKey,
 	Result,
 	InitialResult extends Result | undefined = undefined,
@@ -291,40 +292,36 @@ export const definePageLoader = <
 	const query = new LoaderImpl<K, Result, InitialResult>(options)
 	const state = query.state
 
-	const createAccessor = <T extends {}>(target: T) => {
-		Object.assign(target, {
-			hydrate() {
-				query.setupListeners()
-			},
-		})
-
-		const main = createQueryStateAccessor(target, state, {
-			value: {
-				get() {
-					// if (!query.listenersInitialized) {
-					// 	throw new Error('PageLoader not hydrated')
-					// }
-
-					return state.value
-				},
-			},
-		})
-
-		return main
-	}
+	const { resolve, reject, promise } = Promise.withResolvers<PageLoaderResultResolved<Result>>()
 
 	query.load()
-
-	const { resolve, reject, promise } =
-		Promise.withResolvers<PageLoaderResultResolved<Result, InitialResult>>()
-
-	const promiseAugmented = createAccessor(promise)
 
 	const cleanup = $effect.root(() => {
 		$effect(() => {
 			if (state.status === 'loaded') {
 				cleanup()
-				resolve(createAccessor({} as PageLoaderResultResolved<Result, InitialResult>))
+
+				const accessor = createQueryStateAccessor(
+					{
+						hydrate() {
+							query.setupListeners()
+						},
+					},
+					state,
+					{
+						value: {
+							get() {
+								// if (!query.listenersInitialized) {
+								// 	throw new Error('PageLoader not hydrated')
+								// }
+
+								return state.value
+							},
+						},
+					},
+				)
+
+				resolve(accessor as PageLoaderResultResolved<Result>)
 			} else if (state.status === 'error') {
 				cleanup()
 				reject(state.error)
@@ -332,14 +329,77 @@ export const definePageLoader = <
 		})
 	})
 
-	return promiseAugmented as PageLoaderResult<Result, InitialResult>
+	return promise
 }
 
 export const initPageQueries = (data: Record<string, unknown>): void => {
 	for (const query of Object.values(data)) {
 		if (query && typeof query === 'object' && pageLoaderImplSymbol in query) {
-			;(query as unknown as PageLoaderResult<unknown, undefined>).hydrate()
+			;(query as unknown as PageLoaderResultResolved<unknown>).hydrate()
 		}
+	}
+}
+
+export const keysListDatabaseChangeHandler = <
+	const StoreName extends Exclude<AppStoreNames, 'playlistsTracks'>,
+>(
+	storeName: StoreName,
+	changes: DBChangeRecordList,
+	{ mutate, refetch }: DbChangeActions<number[], undefined>,
+) => {
+	let needRefetch = false
+	for (const change of changes) {
+		if (change.storeName !== storeName) {
+			continue
+		}
+
+		if (
+			// We have no way of knowing where should the new item be inserted.
+			// So we just refetch the whole list.
+			change.operation === 'add' ||
+			// If playlist name changes, order might change as well.
+			(storeName === 'playlists' && change.operation === 'update')
+		) {
+			needRefetch = true
+			break
+		}
+
+		if (change.operation === 'delete' && change.key !== undefined) {
+			mutate((value) => {
+				if (!value) {
+					return value
+				}
+
+				const index = value.indexOf(change.key)
+				value.splice(index, 1)
+
+				return value
+			})
+		}
+	}
+
+	if (needRefetch) {
+		refetch()
+	}
+}
+
+export const prefetchLibraryListItems = async <const StoreName extends AppStoreNames>(
+	storeName: StoreName,
+	keys: number[],
+) => {
+	if (
+		storeName === 'tracks' ||
+		storeName === 'albums' ||
+		storeName === 'artists' ||
+		storeName === 'playlists'
+	) {
+		const preload = Array.from({ length: Math.min(keys.length, 12) }, (_, index) =>
+			// biome-ignore lint/style/noNonNullAssertion: index is bound checked
+			preloadLibraryEntityData(storeName as 'tracks', keys[index]!),
+		)
+		await Promise.all(preload)
+	} else if (import.meta.env.DEV) {
+		console.warn(`Cannot prefetch ${storeName} items`)
 	}
 }
 
@@ -348,81 +408,24 @@ export type LoaderListOptions<K extends LoaderKey> = Omit<
 	'onDatabaseChange'
 >
 
-const createDatabaseChangeListKeysHandler = <
-	const StoreName extends Exclude<AppStoreNames, 'playlistsTracks'>,
->(
-	storeName: StoreName,
-) => {
-	const handler: DatabaseChangeHandler<number[]> = (changes, { mutate, refetch }) => {
-		let needRefetch = false
-		for (const change of changes) {
-			if (change.storeName !== storeName) {
-				continue
-			}
-
-			if (
-				// We have no way of knowing where should the new item be inserted.
-				// So we just refetch the whole list.
-				change.operation === 'add' ||
-				// If playlist name changes, order might change as well.
-				(storeName === 'playlists' && change.operation === 'update')
-			) {
-				needRefetch = true
-				break
-			}
-
-			if (change.operation === 'delete' && change.key !== undefined) {
-				mutate((value) => {
-					if (!value) {
-						return value
-					}
-
-					const index = value.indexOf(change.key)
-					value.splice(index, 1)
-
-					return value
-				})
-			}
-		}
-
-		if (needRefetch) {
-			refetch()
-		}
-	}
-
-	return handler
-}
-
 export const definePageListLoader = <
 	const StoreName extends Exclude<AppStoreNames, 'playlistsTracks'>,
 	const K extends LoaderKey,
 >(
 	storeName: StoreName | (() => StoreName),
 	options: LoaderListOptions<K>,
-): PageLoaderResult<number[], undefined> =>
+): PageLoaderResult<number[]> =>
 	definePageLoader({
 		...options,
 		fetcher: async (key) => {
 			const result = await options.fetcher(key)
-			if (
-				storeName === 'tracks' ||
-				storeName === 'albums' ||
-				storeName === 'artists' ||
-				storeName === 'playlists'
-			) {
-				const preload = Array.from({ length: Math.min(result.length, 12) }, (_, index) =>
-					// biome-ignore lint/style/noNonNullAssertion: index is bound checked
-					prefetchLibraryEntityData(storeName as 'tracks', result[index]!),
-				)
-				await Promise.all(preload)
-			}
+			await prefetchLibraryListItems(unwrap(storeName), result)
 
 			return result
 		},
-		onDatabaseChange: createDatabaseChangeListKeysHandler(unwrap(storeName)),
+		onDatabaseChange: keysListDatabaseChangeHandler.bind(null, unwrap(storeName)),
 	})
 
-// TODO. Preload item values
 export const createListLoader = <
 	const StoreName extends Exclude<AppStoreNames, 'playlistsTracks'>,
 	const K extends LoaderKey,
@@ -432,7 +435,11 @@ export const createListLoader = <
 ): LoaderResult<number[], undefined> =>
 	createLoader({
 		...options,
-		onDatabaseChange: createDatabaseChangeListKeysHandler(storeName),
-	})
+		fetcher: async (key) => {
+			const result = await options.fetcher(key)
+			await prefetchLibraryListItems(storeName, result)
 
-// export const combineQuery =
+			return result
+		},
+		onDatabaseChange: keysListDatabaseChangeHandler.bind(null, storeName),
+	})

@@ -7,8 +7,10 @@
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import type { Album, Playlist } from '$lib/db/entities.ts'
 	import { initPageQueries } from '$lib/db/queries.svelte.ts'
+	import type { TrackData } from '$lib/db/query.js'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.ts'
+	import { removeTrackFromPlaylistInDatabase } from '$lib/library/playlists.svelte.js'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 
@@ -36,24 +38,33 @@
 	const isWideLayout = useMediaQuery('(min-width: 1154px)')
 
 	const getMenuItems = () => {
-		if (data.slug === 'playlists') {
-			// TODO. Make item type inferable from data.slug
+		if (slug === 'playlists') {
 			return getPlaylistMenuItems(main, item as Playlist)
 		}
 
 		return []
 	}
+
+	const trackMenuItems = (track: TrackData) => [
+		{
+			label: 'Remove from playlist',
+			action: () => {
+				// TODO. Error handling
+				removeTrackFromPlaylistInDatabase(item.id, track.id)
+			},
+		},
+	]
 </script>
 
 {#if !isWideLayout.value}
 	<Header title={store.singularTitle} mode="fixed" />
 {/if}
 
-<div class="@container grow flex flex-col px-16px">
+<div class="@container grow flex flex-col px-16px pb-16px">
 	<section
 		class="@2xl:h-224px relative gap-24px overflow-clip flex flex-col @2xl:flex-row items-center justify-center w-full py-16px"
 	>
-		{#if data.slug !== 'playlists'}
+		{#if slug !== 'playlists'}
 			<Artwork src={artworkSrc()} class="rounded-16px shrink-0 h-196px @2xl:h-full" />
 		{/if}
 
@@ -118,5 +129,8 @@
 		</div>
 	</section>
 
-	<TracksListContainer items={tracks} />
+	<TracksListContainer
+		items={tracks}
+		menuItems={slug === 'playlists' ? trackMenuItems : undefined}
+	/>
 </div>

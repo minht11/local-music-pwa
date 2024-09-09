@@ -47,31 +47,23 @@ export const createManagedArtwork = (getImage: () => Blob | undefined | null): (
 
 	const url = $derived(state?.url ?? '')
 
-	const releaseLock = (state: Artwork) => {
-		if (!state) {
-			return
-		}
-
-		if (state.refs.size === 1) {
-			cleanupQueue.add(state.image)
-		}
-
-		if (import.meta.env.DEV) {
-			if (!state.refs.has(key)) {
-				console.warn('Trying to release artwork that is not in use', state)
-			}
-		}
-
-		state.refs.delete(key)
-	}
-
 	$effect(() => {
 		if (!state) {
 			return
 		}
 
 		return () => {
-			releaseLock(state)
+			if (state.refs.size === 1) {
+				cleanupQueue.add(state.image)
+			}
+
+			if (import.meta.env.DEV) {
+				if (!state.refs.has(key)) {
+					console.warn('Trying to release artwork that is not in use', state)
+				}
+			}
+
+			state.refs.delete(key)
 		}
 	})
 
@@ -86,13 +78,11 @@ if (!import.meta.env.SSR) {
 			if (!cached) {
 				continue
 			}
-
 			if (cached.refs.size === 0) {
 				cache.delete(blob)
 				URL.revokeObjectURL(cached.url)
 			}
 		}
-
 		cleanupQueue.clear()
 	}, thirtySeconds)
 }

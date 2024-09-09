@@ -2,13 +2,13 @@ import { goto } from '$app/navigation'
 import { type DbValue, getDB } from '$lib/db/get-db.ts'
 import {
 	type PageLoaderResult,
-	definePageListLoader,
 	definePageLoader,
+	keysListDatabaseChangeHandler,
 } from '$lib/db/queries.svelte.ts'
+import { getLibraryEntityData } from '$lib/db/query.ts'
 import type { LibraryEntityStoreName } from '$lib/library/general.ts'
-import { error } from '@sveltejs/kit'
-import invariant from 'tiny-invariant'
-import type { PageLoad } from './$types.ts'
+import { error, redirect } from '@sveltejs/kit'
+import type { PageLoad } from './$types.d.ts'
 
 type DetailsSlug = Exclude<LibraryEntityStoreName, 'tracks'>
 
@@ -24,18 +24,24 @@ const configMap = {
 	},
 } as const
 
+class DbItemNotFound extends Error {
+	constructor() {
+		super('DbItemNotFound')
+	}
+}
+
 const defineDetailsLoader = <T extends DetailsSlug>(
 	storeName: T,
 	id: number,
-): PageLoaderResult<DbValue<T>, undefined> => {
+): PageLoaderResult<DbValue<T>> => {
 	const query = definePageLoader({
 		key: () => [storeName, id],
 		fetcher: async () => {
-			const db = await getDB()
-			const item = await db.get(storeName, id)
+			const item = await getLibraryEntityData(storeName, id)
 
-			// TODO. Return proper error message
-			invariant(item, 'Item not found')
+			if (!item) {
+				throw new DbItemNotFound()
+			}
 
 			return item
 		},
@@ -48,13 +54,15 @@ const defineDetailsLoader = <T extends DetailsSlug>(
 						break
 					}
 
-					actions.mutate(change.value)
+					// It is fine to refetch because value almost always will be in cache
+					actions.refetch()
 				}
 			}
 		},
 		onError: (error) => {
-			// TODO.
-			goto(`/library/${storeName}`)
+			if (error instanceof DbItemNotFound) {
+				goto(`/library/${storeName}`, { replaceState: true })
+			}
 		},
 	})
 
@@ -65,8 +73,8 @@ const defineTracksLoader = <Slug extends DetailsSlug>(
 	storeName: Slug,
 	itemName: () => string,
 	id: number,
-): PageLoaderResult<number[], undefined> => {
-	const query = definePageListLoader('tracks', {
+): PageLoaderResult<number[]> => {
+	const query = definePageLoader({
 		key: () => [storeName, itemName()],
 		fetcher: async ([, name]) => {
 			const db = await getDB()
@@ -82,8 +90,26 @@ const defineTracksLoader = <Slug extends DetailsSlug>(
 
 			return keys
 		},
-		// TODO.
-		// onDatabaseChange: (changes, { mutate }) => {
+		onDatabaseChange: (changes, actions) => {
+			if (storeName !== 'playlists') {
+				return keysListDatabaseChangeHandler(storeName, changes, actions)
+			}
+
+			for (const change of changes) {
+				if (change.storeName === 'playlistsTracks') {
+					const [playlistId, trackId] = change.key
+
+					if (playlistId === id) {
+						if (change.operation === 'delete') {
+							actions.mutate((keys = []) => keys.filter((key) => key !== trackId))
+						} else if (change.operation === 'add') {
+							// We can't know the order
+							actions.refetch()
+						}
+					}
+				}
+			}
+		},
 	})
 
 	return query
@@ -93,7 +119,7 @@ export const load: PageLoad = async (event) => {
 	const { slug } = event.params
 
 	if (slug === 'tracks') {
-		error(404)
+		redirect(301, '/library/tracks')
 	}
 
 	const id = Number(event.params.id)

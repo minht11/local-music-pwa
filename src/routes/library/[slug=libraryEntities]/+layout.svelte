@@ -11,6 +11,7 @@
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueries } from '$lib/db/queries.svelte.ts'
+	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 	import Search from './Search.svelte'
@@ -164,7 +165,9 @@
 						{:else if store.storeName === 'playlists'}
 							<PlaylistListContainer
 								items={itemsIds}
-								menuItems={(playlist) => getPlaylistMenuItems(main, playlist)}
+								menuItems={(playlist) =>
+									// TODO. Hide the menu items for the favorite playlist
+									playlist.id === FAVORITE_PLAYLIST_ID ? [] : getPlaylistMenuItems(main, playlist)}
 								onItemClick={({ playlist }) => {
 									const shouldReplace = $page.route.id === '/library/[slug=libraryEntities]/[id]'
 

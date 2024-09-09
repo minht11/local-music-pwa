@@ -1,34 +1,33 @@
-import { unwrap } from '$lib/helpers/utils/unwrap.ts'
 import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte.ts'
 import { WeakLRUCache } from 'weak-lru-cache'
-import type { DBChangeRecordList } from './channel.ts'
-import type { Album, Artist, Playlist, Track } from './entities.ts'
+import { type DBChangeRecord, listenForDatabaseChanges } from './channel.ts'
+import { type Album, type Artist, MusicItemType, type Playlist, type Track } from './entities.ts'
 import { type DbKey, getDB } from './get-db.ts'
 import { type LoaderResult, createLoader } from './queries.svelte.ts'
 
-export type LoaderMutate<Result, InitialResult extends Result | undefined> = (
+type LoaderMutate<Result, InitialResult extends Result | undefined> = (
 	value: Result | ((prev: Result | InitialResult) => void),
 ) => void
 
 export type DatabaseChangeHandler<Result> = (
 	id: number,
-	changes: DBChangeRecordList,
+	changes: DBChangeRecord,
 	mutate: LoaderMutate<Result | undefined, undefined>,
 ) => void
 
-export interface QueryConfig<Result> {
+interface QueryConfig<Result> {
 	fetch: (id: number) => Promise<Result | undefined>
-	onDatabaseChange: DatabaseChangeHandler<Result | undefined>
+	onDatabaseChange?: DatabaseChangeHandler<Result | undefined>
 }
 
 type LibraryEntityStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
 
-type EntityCacheKey<Name extends LibraryEntityStoreName> = `${Name}-${string}`
+type EntityCacheKey<Name extends LibraryEntityStoreName> = `${Name}:${string}`
 
 const getEntityCacheKey = <Name extends LibraryEntityStoreName>(
 	storeName: Name,
 	key: DbKey<Name>,
-): EntityCacheKey<Name> => `${storeName}-${key}`
+): EntityCacheKey<Name> => `${storeName}:${key}`
 
 export interface TrackData extends Track {
 	favorite: boolean
@@ -53,47 +52,43 @@ const trackConfig: QueryConfig<TrackData> = {
 			favorite: !!favorite,
 		} as TrackData
 	},
-	onDatabaseChange: (id, changes, mutate) => {
-		for (const change of changes) {
-			if (change.storeName === 'playlistsTracks') {
-				const [playlistId, trackId] = change.key
+	onDatabaseChange: (id, change, mutate) => {
+		if (change.storeName === 'playlistsTracks') {
+			const [playlistId, trackId] = change.key
 
-				if (playlistId === FAVORITE_PLAYLIST_ID && trackId === id) {
-					const favorite = change.operation === 'add'
+			if (playlistId === FAVORITE_PLAYLIST_ID && trackId === id) {
+				const favorite = change.operation === 'add'
 
-					mutate((prev) => {
-						if (!prev) {
-							return prev
-						}
-
-						return {
-							...prev,
-							favorite,
-						}
-					})
-				}
-			}
-
-			if (change.storeName !== 'tracks' || change.key !== id) {
-				continue
-			}
-
-			if (change.operation === 'delete') {
-				mutate(undefined)
-			} else if (change.operation === 'update') {
 				mutate((prev) => {
 					if (!prev) {
 						return prev
 					}
 
-					// TODO. Clear cache
-
 					return {
-						...change.value,
-						favorite: prev.favorite,
+						...prev,
+						favorite,
 					}
 				})
 			}
+		}
+
+		if (change.storeName !== 'tracks' || change.key !== id) {
+			return
+		}
+
+		if (change.operation === 'delete') {
+			mutate(undefined)
+		} else if (change.operation === 'update') {
+			mutate((prev) => {
+				if (!prev) {
+					return prev
+				}
+
+				return {
+					...change.value,
+					favorite: prev.favorite,
+				}
+			})
 		}
 	},
 }
@@ -107,19 +102,6 @@ export const albumConfig: QueryConfig<AlbumData> = {
 
 		return entity
 	},
-	onDatabaseChange: (id, changes, mutate) => {
-		for (const change of changes) {
-			if (change.storeName !== 'albums' || change.key !== id) {
-				continue
-			}
-
-			if (change.operation === 'delete') {
-				mutate(undefined)
-			} else if (change.operation === 'update') {
-				mutate(change.value)
-			}
-		}
-	},
 }
 
 export type ArtistData = Artist
@@ -132,46 +114,28 @@ const artistConfig: QueryConfig<ArtistData> = {
 
 		return entity
 	},
-	onDatabaseChange: (id, changes, mutate) => {
-		for (const change of changes) {
-			if (change.storeName !== 'artists' || change.key !== id) {
-				continue
-			}
-
-			if (change.operation === 'delete') {
-				mutate(undefined)
-			} else if (change.operation === 'update') {
-				mutate(change.value)
-			}
-		}
-	},
 }
 
 export type PlaylistData = Playlist
 
 const playlistsConfig: QueryConfig<PlaylistData> = {
 	fetch: async (id) => {
+		if (id === FAVORITE_PLAYLIST_ID) {
+			return {
+				type: MusicItemType.Playlist,
+				id: FAVORITE_PLAYLIST_ID,
+				name: 'Favorites',
+				created: 0,
+			}
+		}
+
 		const db = await getDB()
 		const entity = db.get('playlists', id)
 
 		return entity
 	},
-	onDatabaseChange: (id, changes, mutate) => {
-		for (const change of changes) {
-			if (change.storeName !== 'playlists' || change.key !== id) {
-				continue
-			}
-
-			if (change.operation === 'delete') {
-				mutate(undefined)
-			} else if (change.operation === 'update') {
-				mutate(change.value)
-			}
-		}
-	},
 }
 
-// TODO. Rename camelCase
 const LIBRARY_ENTITIES_DATA_MAP = {
 	tracks: trackConfig,
 	albums: albumConfig,
@@ -192,13 +156,62 @@ type QueryValue = {
 // IMPORTANT. Only store whole entities in entityCache instead of any value
 // that can be accessed in query.
 const entityCache = new WeakLRUCache<
-	`${LibraryEntityStoreName}-${string}`,
-	QueryValue[keyof QueryValue]
+	EntityCacheKey<LibraryEntityStoreName>,
+	QueryValue[keyof QueryValue] | Promise<QueryValue[keyof QueryValue]>
 >({
 	cacheSize: 10_000,
 })
 
-export const prefetchLibraryEntityData = async (storeName: LibraryEntityStoreName, id: number) => {
+if (!import.meta.env.SSR) {
+	type Value = QueryValue[LibraryEntityStoreName]
+	type MutateCallback = Value | undefined | ((prev: Value | undefined) => Value)
+	const mutateFn = (key: EntityCacheKey<LibraryEntityStoreName>, v: MutateCallback) => {
+		let value = entityCache.getValue(key) as Value
+		if (typeof v === 'function') {
+			const accessor = v as (prev: Value | undefined) => Value
+			value = accessor(value)
+		}
+
+		if (value) {
+			entityCache.setValue(key, value)
+		} else {
+			entityCache.delete(key)
+		}
+	}
+
+	listenForDatabaseChanges((changes) => {
+		for (const key of entityCache.keys()) {
+			const [storeName, stringId] = key.split(':') as [LibraryEntityStoreName, string]
+			const id = Number(stringId)
+
+			const onDatabaseChange = LIBRARY_ENTITIES_DATA_MAP[storeName].onDatabaseChange
+			const mutate = mutateFn.bind(null, key)
+
+			for (const change of changes) {
+				if (onDatabaseChange) {
+					onDatabaseChange(id, change, mutate)
+					continue
+				}
+
+				if (change.storeName !== storeName || change.key !== id) {
+					continue
+				}
+
+				if (change.operation === 'delete') {
+					mutate(undefined)
+				} else if (change.operation === 'update') {
+					if (import.meta.env.DEV && storeName === 'tracks') {
+						console.warn('Basic update operation should not be used for tracks')
+					}
+
+					mutate(change.value as Exclude<Value, Track>)
+				}
+			}
+		}
+	})
+}
+
+export const preloadLibraryEntityData = async (storeName: LibraryEntityStoreName, id: number) => {
 	try {
 		// If we already have value in cache do not fetch it again
 		const key = getEntityCacheKey(storeName, id)
@@ -215,6 +228,58 @@ export const prefetchLibraryEntityData = async (storeName: LibraryEntityStoreNam
 	} catch {
 		// Ignore
 	}
+}
+
+const getLibraryEntityDataInternal = async <
+	StoreName extends LibraryEntityStoreName,
+	AllowEmpty extends boolean = false,
+>(
+	storeName: StoreName,
+	id: number,
+	config: (typeof LIBRARY_ENTITIES_DATA_MAP)[StoreName],
+	allowEmpty?: AllowEmpty,
+) => {
+	type Value = LibraryEntityData<StoreName, AllowEmpty>
+
+	const key = getEntityCacheKey(storeName, id)
+	const cachedValue = entityCache.getValue(key) as Value
+
+	if (cachedValue) {
+		return cachedValue
+	}
+
+	const promise = config
+		.fetch(id)
+		.then((value) => {
+			if (value) {
+				entityCache.setValue(key, value)
+			} else if (!allowEmpty) {
+				throw new Error(`${storeName} with id ${id} not found`)
+			}
+
+			return value as Value
+		})
+		.catch((error) => {
+			entityCache.delete(key)
+			throw error
+		})
+
+	entityCache.setValue(key, promise as Promise<TrackData>)
+
+	return promise
+}
+
+export const getLibraryEntityData = <
+	StoreName extends LibraryEntityStoreName,
+	AllowEmpty extends boolean = false,
+>(
+	storeName: StoreName,
+	id: number,
+	options: UseTrackOptions<AllowEmpty> = {},
+): Promise<LibraryEntityData<StoreName, AllowEmpty>> => {
+	const config = LIBRARY_ENTITIES_DATA_MAP[storeName]
+
+	return getLibraryEntityDataInternal(storeName, id, config, options.allowEmpty)
 }
 
 export interface UseTrackOptions<AllowEmpty extends boolean = false> {
@@ -234,32 +299,14 @@ const createLibraryEntityLoader =
 	): LoaderResult<LibraryEntityData<StoreName, AllowEmpty>, undefined> => {
 		const config = LIBRARY_ENTITIES_DATA_MAP[storeName]
 
-		type Value = LibraryEntityData<StoreName, AllowEmpty>
-
 		return createLoader({
 			eager: true,
 			key: idGetter,
-			fetcher: (id) => {
-				const key = getEntityCacheKey(storeName, id)
-				const cachedValue = entityCache.getValue(key) as Value
-
-				if (cachedValue) {
-					return cachedValue
-				}
-
-				return config.fetch(id).then((value) => {
-					if (value) {
-						entityCache.setValue(key, value)
-					} else if (!options.allowEmpty) {
-						throw new Error(`${storeName} with id ${id} not found`)
-					}
-
-					return value as Value
-				})
-			},
-			onDatabaseChange: (changes, { mutate }) => {
-				// @ts-expect-error mutate type is not correct
-				config.onDatabaseChange(unwrap(idGetter), changes, mutate)
+			fetcher: (id) =>
+				getLibraryEntityDataInternal(storeName, id, config, options.allowEmpty),
+			onDatabaseChange: (_, { refetch }) => {
+				// It is fine to refetch because value almost always will be in cache
+				void refetch()
 			},
 		})
 	}

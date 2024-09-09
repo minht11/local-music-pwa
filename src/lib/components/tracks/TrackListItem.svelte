@@ -3,8 +3,10 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
+	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'
 	import invariant from 'tiny-invariant'
 	import Artwork from '../Artwork.svelte'
+	import IconButton from '../IconButton.svelte'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'
 
 	interface Props {
@@ -72,6 +74,7 @@
 		{:else if track}
 			<div class="flex flex-col truncate">
 				<div class={clx(active ? 'text-primary' : 'color-onSurface', 'truncate')}>
+					{track.id}
 					{track.name}
 				</div>
 				<div class="truncate overflow-hidden">
@@ -86,6 +89,16 @@
 			<div class="hidden @sm:block tabular-nums">
 				{formatDuration(track.duration)}
 			</div>
+
+			<IconButton
+				class="hidden @sm:flex"
+				tabindex={-1}
+				icon={track.favorite ? 'favorite' : 'favoriteOutline'}
+				onclick={(e) => {
+					e.stopPropagation()
+					void toggleFavoriteTrack(track.favorite, track.id)
+				}}
+			/>
 		{/if}
 	</div>
 </ListItem>
@@ -101,14 +114,14 @@
 	/* @container (theme('containers.sm')) { */
 	@container (min-width: 24rem) {
 		.track-item {
-			--grid-cols: auto 1.5fr 74px;
+			--grid-cols: auto 1.5fr 74px 44px;
 		}
 	}
 
 	/* @container (theme('containers.4xl')) { */
 	@container (min-width: 56rem) {
 		.track-item {
-			--grid-cols: auto 1.5fr minmax(200px, 1fr) 74px;
+			--grid-cols: auto 1.5fr minmax(200px, 1fr) 74px 44px;
 		}
 	}
 </style>

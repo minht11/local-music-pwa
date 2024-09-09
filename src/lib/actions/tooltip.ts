@@ -97,6 +97,8 @@ export const tooltip = ((target, message?: string) => {
 	)
 
 	on(target, 'pointerleave', hideTooltip, { signal })
+	// Makes so tooltip is hidden just before view transitions starts
+	on(target, 'pointerup', hideTooltip, { signal })
 	on(target, 'focusout', hideTooltip, { signal })
 
 	return {

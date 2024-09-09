@@ -31,10 +31,16 @@
 	interface Props {
 		items: number[]
 		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItems, boolean>>
+		menuItems?: (track: TrackData) => MenuItem[]
 		onItemClick?: (data: TrackItemClick) => void
 	}
 
-	const { items, predefinedMenuItems = {}, onItemClick = defaultOnItemClick }: Props = $props()
+	const {
+		items,
+		menuItems,
+		predefinedMenuItems = {},
+		onItemClick = defaultOnItemClick,
+	}: Props = $props()
 
 	interface PredefinedMenuItem extends MenuItem {
 		predefinedKey: PredefinedTrackMenuItems
@@ -72,39 +78,35 @@
 			},
 		]
 
-		return items.filter((item) => {
+		const predefinedItems = items.filter((item) => {
 			// By default, all predefined menu items are enabled.
 			const isExplicitlyDisabled = predefinedMenuItems[item.predefinedKey] === false
 
 			return !isExplicitlyDisabled
 		})
+
+		return [...predefinedItems, ...(menuItems ? menuItems(track) : [])]
 	}
 </script>
 
-{#if items.length === 0}
-	<div class="m-auto self-center justify-self-center w-max h-max text-center">
-		No items to display
-	</div>
-{:else}
-	<VirtualContainer size={72} count={items.length} key={(index) => index}>
-		{#snippet children(item)}
-			{@const trackId = items[item.index] as number}
+<VirtualContainer size={72} count={items.length} key={(index) => items[index] ?? -1}>
+	{#snippet children(item)}
+		{@const trackId = items[item.index] as number}
 
-			<TrackListItem
-				{trackId}
-				active={player.activeTrack?.id === trackId}
-				style="transform: translateY({item.start}px)"
-				class="virtual-item top-0 left-0 w-full"
-				ariaRowIndex={item.index}
-				menuItems={(track) => getMenuItems(track)}
-				onclick={(track) => {
-					onItemClick({
-						track,
-						items,
-						index: item.index,
-					})
-				}}
-			/>
-		{/snippet}
-	</VirtualContainer>
-{/if}
+		<TrackListItem
+			{trackId}
+			active={player.activeTrack?.id === trackId}
+			style="transform: translateY({item.start}px)"
+			class="virtual-item top-0 left-0 w-full"
+			ariaRowIndex={item.index}
+			menuItems={(track) => getMenuItems(track)}
+			onclick={(track) => {
+				onItemClick({
+					track,
+					items,
+					index: item.index,
+				})
+			}}
+		/>
+	{/snippet}
+</VirtualContainer>
