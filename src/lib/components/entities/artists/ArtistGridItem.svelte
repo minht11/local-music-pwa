@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type ArtistData, useArtistData } from '$lib/db/query.ts'
+	import { type ArtistData, createArtistQuery } from '$lib/db/entity'
 
 	import GridItem from '../../GridItem.svelte'
 
@@ -13,7 +13,7 @@
 
 	const { artistId, style, tabindex, class: className, onclick }: Props = $props()
 
-	const data = useArtistData(artistId)
+	const data = createArtistQuery(artistId)
 
 	const artist = $derived(data.value)
 </script>

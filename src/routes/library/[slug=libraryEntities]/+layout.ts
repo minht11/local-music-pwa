@@ -1,10 +1,8 @@
-import { useTracksCountLoader } from '$lib/loaders/tracks.ts'
+import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
 import { windowStore } from '$lib/stores/window-store.svelte.ts'
 import { defineViewTransitionMatcher } from '$lib/view-transitions.ts'
 import type { LayoutLoad } from './$types.ts'
-import { LibraryStore, defineLibraryListItemsLoader } from './store.svelte'
-
-type LibraryStoreNames = 'tracks' | 'albums' | 'artists' | 'playlists'
+import { defineLibraryPageData } from './store.svelte'
 
 const nameSortOption = {
 	name: 'Name',
@@ -12,64 +10,52 @@ const nameSortOption = {
 } as const
 
 const storeMap = {
-	tracks: () =>
-		new LibraryStore({
-			storeName: 'tracks',
-			singularTitle: m.track(),
-			pluralTitle: m.tracks(),
-			sortOptions: [
-				nameSortOption,
-				{
-					name: 'Artist',
-					key: 'artists',
-				},
-				{
-					name: 'Album',
-					key: 'album',
-				},
-				{
-					name: 'Duration',
-					key: 'duration',
-				},
-				{
-					name: 'Year',
-					key: 'year',
-				},
-			],
-		}),
-	albums: () =>
-		new LibraryStore({
-			storeName: 'albums',
-			singularTitle: m.album(),
-			pluralTitle: m.albums(),
-			sortOptions: [nameSortOption],
-		}),
-	artists: () =>
-		new LibraryStore({
-			storeName: 'artists',
-			singularTitle: m.artist(),
-			pluralTitle: m.artists(),
-			sortOptions: [nameSortOption],
-		}),
-	playlists: () =>
-		new LibraryStore({
-			storeName: 'playlists',
-			singularTitle: m.playlist(),
-			pluralTitle: m.playlists(),
-			sortOptions: [nameSortOption],
-		}),
-} satisfies {
-	[K in LibraryStoreNames]: () => LibraryStore<K>
-}
+	tracks: defineLibraryPageData('tracks', {
+		singularTitle: m.track(),
+		pluralTitle: m.tracks(),
+		sortOptions: [
+			nameSortOption,
+			{
+				name: 'Artist',
+				key: 'artists',
+			},
+			{
+				name: 'Album',
+				key: 'album',
+			},
+			{
+				name: 'Duration',
+				key: 'duration',
+			},
+			{
+				name: 'Year',
+				key: 'year',
+			},
+		],
+	}),
+	albums: defineLibraryPageData('albums', {
+		singularTitle: m.album(),
+		pluralTitle: m.albums(),
+		sortOptions: [nameSortOption],
+	}),
+	artists: defineLibraryPageData('artists', {
+		singularTitle: m.artist(),
+		pluralTitle: m.artists(),
+		sortOptions: [nameSortOption],
+	}),
+	playlists: defineLibraryPageData('playlists', {
+		singularTitle: m.playlist(),
+		pluralTitle: m.playlists(),
+		sortOptions: [nameSortOption],
+	}),
+} as const
 
 export const load: LayoutLoad = async (event) => {
 	const { slug } = event.params
 
-	const store = storeMap[slug]()
-
-	const [query, tracksCountQuery] = await Promise.all([
-		defineLibraryListItemsLoader(store),
-		useTracksCountLoader(),
+	const [data, tracksCountQuery] = await Promise.all([
+		storeMap[slug](),
+		createTracksCountPageQuery(),
 	])
 
 	const isWideLayout = () => windowStore.windowWidth > 1154
@@ -115,10 +101,9 @@ export const load: LayoutLoad = async (event) => {
 	})
 
 	return {
+		...data,
 		tracksCountQuery,
 		slug,
-		query,
-		store,
 		title: 'Library',
 		isWideLayout,
 		layoutMode,

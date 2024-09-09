@@ -5,7 +5,7 @@
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar'
 	import { getDB } from '$lib/db/get-db'
-	import { createListLoader, createLoader } from '$lib/db/queries.svelte.ts'
+	import { createListQuery, createQuery } from '$lib/db/query.svelte'
 	import { getEntityIds } from '$lib/library/general'
 	import { toggleTrackInPlaylistInDatabase } from '$lib/library/playlists.svelte'
 	import { SvelteSet } from 'svelte/reactivity'
@@ -18,7 +18,7 @@
 
 	const { trackId, onclose }: Props = $props()
 
-	const query = createListLoader('playlists', {
+	const query = createListQuery('playlists', {
 		key: () => ['playlists'],
 		fetcher: () => getEntityIds('playlists', { sort: 'created' }),
 		onError: () => {
@@ -31,7 +31,7 @@
 		},
 	})
 
-	const trackPlaylists = createLoader({
+	const trackPlaylists = createQuery({
 		key: () => ['playlists-track', trackId],
 		fetcher: async () => {
 			invariant(trackId)

@@ -6,8 +6,8 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import type { Album, Playlist } from '$lib/db/database-types.js'
-	import { initPageQueries } from '$lib/db/queries.svelte.ts'
-	import type { TrackData } from '$lib/db/query.js'
+	import type { TrackData } from '$lib/db/entity.js'
+	import { initPageQueries } from '$lib/db/query.svelte.js'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.ts'
 	import { removeTrackFromPlaylistInDatabase } from '$lib/library/playlists.svelte.js'
@@ -19,13 +19,13 @@
 
 	initPageQueries(data)
 
-	const { itemLoader, tracksLoader, slug, store } = data
+	const { itemQuery, tracksQuery } = data
 
-	const item = $derived(itemLoader.value)
-	const tracks = $derived(tracksLoader.value)
+	const item = $derived(itemQuery.value)
+	const tracks = $derived(tracksQuery.value)
 
 	const artworkSrc = createManagedArtwork(() => {
-		if (slug !== 'playlists') {
+		if (data.storeName !== 'playlists') {
 			return (item as Album).image
 		}
 
@@ -38,7 +38,7 @@
 	const isWideLayout = useMediaQuery('(min-width: 1154px)')
 
 	const getMenuItems = () => {
-		if (slug === 'playlists') {
+		if (data.storeName === 'playlists') {
 			return getPlaylistMenuItems(main, item as Playlist)
 		}
 
@@ -57,14 +57,14 @@
 </script>
 
 {#if !isWideLayout.value}
-	<Header title={store.singularTitle} mode="fixed" />
+	<Header title={data.singularTitle} mode="fixed" />
 {/if}
 
 <div class="@container grow flex flex-col px-16px pb-16px">
 	<section
 		class="@2xl:h-224px relative gap-24px overflow-clip flex flex-col @2xl:flex-row items-center justify-center w-full py-16px"
 	>
-		{#if slug !== 'playlists'}
+		{#if data.storeName !== 'playlists'}
 			<Artwork src={artworkSrc()} class="rounded-16px shrink-0 h-196px @2xl:h-full" />
 		{/if}
 
@@ -131,6 +131,6 @@
 
 	<TracksListContainer
 		items={tracks}
-		menuItems={slug === 'playlists' ? trackMenuItems : undefined}
+		menuItems={data.storeName === 'playlists' ? trackMenuItems : undefined}
 	/>
 </div>

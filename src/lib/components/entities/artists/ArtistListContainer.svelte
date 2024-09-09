@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	import { goto } from '$app/navigation'
 	import { page } from '$app/stores'
-	import type { ArtistData } from '$lib/db/query'
+	import type { ArtistData } from '$lib/db/entity'
 	import { safeInteger } from '$lib/helpers/utils/integers.ts'
 	import VirtualContainer from '../../VirtualContainer.svelte'
 	import ArtistGridItem from './ArtistGridItem.svelte'

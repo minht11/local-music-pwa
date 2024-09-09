@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Playlist } from '$lib/db/database-types'
-	import { usePlaylistData } from '$lib/db/query.ts'
+	import { createPlaylistQuery } from '$lib/db/entity'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
 	import type { Snippet } from 'svelte'
 	import invariant from 'tiny-invariant'
@@ -30,7 +30,7 @@
 		menuItems,
 	}: Props = $props()
 
-	const data = usePlaylistData(playlistId)
+	const data = createPlaylistQuery(playlistId)
 	const playlist = $derived(data.value)
 
 	const menuItemsWithItem = $derived(

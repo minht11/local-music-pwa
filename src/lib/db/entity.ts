@@ -3,16 +3,16 @@ import { WeakLRUCache } from 'weak-lru-cache'
 import { type DBChangeRecord, listenForDatabaseChanges } from './channel.ts'
 import type { Album, Artist, Playlist, Track } from './database-types.ts'
 import { type DbKey, getDB } from './get-db.ts'
-import { type LoaderResult, createLoader } from './queries.svelte.ts'
+import { type QueryResult, createQuery } from './query.svelte.ts'
 
-type LoaderMutate<Result, InitialResult extends Result | undefined> = (
+type QueryMutate<Result, InitialResult extends Result | undefined> = (
 	value: Result | ((prev: Result | InitialResult) => void),
 ) => void
 
 export type DatabaseChangeHandler<Result> = (
 	id: number,
 	changes: DBChangeRecord,
-	mutate: LoaderMutate<Result | undefined, undefined>,
+	mutate: QueryMutate<Result | undefined, undefined>,
 ) => void
 
 interface QueryConfig<Result> {
@@ -20,11 +20,11 @@ interface QueryConfig<Result> {
 	onDatabaseChange?: DatabaseChangeHandler<Result | undefined>
 }
 
-export type LibraryEntityStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
+export type EntityStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
 
-type EntityCacheKey<Name extends LibraryEntityStoreName> = `${Name}:${string}`
+type EntityCacheKey<Name extends EntityStoreName> = `${Name}:${string}`
 
-const getEntityCacheKey = <Name extends LibraryEntityStoreName>(
+const getEntityCacheKey = <Name extends EntityStoreName>(
 	storeName: Name,
 	key: DbKey<Name>,
 ): EntityCacheKey<Name> => `${storeName}:${key}`
@@ -104,31 +104,17 @@ export const albumConfig: QueryConfig<AlbumData> = {
 	},
 }
 
-export interface ArtistData extends Artist {
-	// TODO. Do we even need type field?
-	type: 'artist'
-}
+export type ArtistData = Artist
 
 // TODO. Reuse query config
 const artistConfig: QueryConfig<ArtistData> = {
 	fetch: async (id) => {
 		const db = await getDB()
-		const entity = await db.get('artists', id)
-
-		if (!entity) {
-			return undefined
-		}
-
-		return {
-			...entity,
-			type: 'artist',
-		}
+		return db.get('artists', id)
 	},
 }
 
-export interface PlaylistData extends Playlist {
-	type: 'playlist'
-}
+export type PlaylistData = Playlist
 
 const playlistsConfig: QueryConfig<PlaylistData> = {
 	fetch: async (id) => {
@@ -142,16 +128,7 @@ const playlistsConfig: QueryConfig<PlaylistData> = {
 		}
 
 		const db = await getDB()
-		const entity = await db.get('playlists', id)
-
-		if (!entity) {
-			return undefined
-		}
-
-		return {
-			...entity,
-			type: 'playlist',
-		}
+		return db.get('playlists', id)
 	},
 }
 
@@ -175,16 +152,16 @@ type QueryValue = {
 // IMPORTANT. Only store whole entities in entityCache instead of any value
 // that can be accessed in query.
 const entityCache = new WeakLRUCache<
-	EntityCacheKey<LibraryEntityStoreName>,
+	EntityCacheKey<EntityStoreName>,
 	QueryValue[keyof QueryValue] | Promise<QueryValue[keyof QueryValue]>
 >({
 	cacheSize: 10_000,
 })
 
 if (!import.meta.env.SSR) {
-	type Value = QueryValue[LibraryEntityStoreName]
+	type Value = QueryValue[EntityStoreName]
 	type MutateCallback = Value | undefined | ((prev: Value | undefined) => Value)
-	const mutateFn = (key: EntityCacheKey<LibraryEntityStoreName>, v: MutateCallback) => {
+	const mutateFn = (key: EntityCacheKey<EntityStoreName>, v: MutateCallback) => {
 		let value = entityCache.getValue(key) as Value
 		if (typeof v === 'function') {
 			const accessor = v as (prev: Value | undefined) => Value
@@ -200,7 +177,7 @@ if (!import.meta.env.SSR) {
 
 	listenForDatabaseChanges((changes) => {
 		for (const key of entityCache.keys()) {
-			const [storeName, stringId] = key.split(':') as [LibraryEntityStoreName, string]
+			const [storeName, stringId] = key.split(':') as [EntityStoreName, string]
 			const id = Number(stringId)
 
 			const onDatabaseChange = LIBRARY_ENTITIES_DATA_MAP[storeName].onDatabaseChange
@@ -208,6 +185,8 @@ if (!import.meta.env.SSR) {
 
 			for (const change of changes) {
 				if (onDatabaseChange) {
+					// TODO. Fix type
+					// @ts-expect-error
 					onDatabaseChange(id, change, mutate)
 					continue
 				}
@@ -230,7 +209,7 @@ if (!import.meta.env.SSR) {
 	})
 }
 
-export const preloadLibraryEntityData = async (storeName: LibraryEntityStoreName, id: number) => {
+export const preloadEntityData = async (storeName: EntityStoreName, id: number) => {
 	try {
 		// If we already have value in cache do not fetch it again
 		const key = getEntityCacheKey(storeName, id)
@@ -249,8 +228,17 @@ export const preloadLibraryEntityData = async (storeName: LibraryEntityStoreName
 	}
 }
 
-const getLibraryEntityDataInternal = async <
-	StoreName extends LibraryEntityStoreName,
+export type EntityQueryData<
+	StoreName extends EntityStoreName,
+	AllowEmpty extends boolean = false,
+> = AllowEmpty extends true ? QueryValue[StoreName] | undefined : QueryValue[StoreName]
+
+export interface EntityQueryOptions<AllowEmpty extends boolean = false> {
+	allowEmpty?: AllowEmpty
+}
+
+const getEntityDataInternal = async <
+	StoreName extends EntityStoreName,
 	AllowEmpty extends boolean = false,
 >(
 	storeName: StoreName,
@@ -258,7 +246,7 @@ const getLibraryEntityDataInternal = async <
 	config: (typeof LIBRARY_ENTITIES_DATA_MAP)[StoreName],
 	allowEmpty?: AllowEmpty,
 ) => {
-	type Value = LibraryEntityData<StoreName, AllowEmpty>
+	type Value = EntityQueryData<StoreName, AllowEmpty>
 
 	const key = getEntityCacheKey(storeName, id)
 	const cachedValue = entityCache.getValue(key) as Value
@@ -288,41 +276,31 @@ const getLibraryEntityDataInternal = async <
 	return promise
 }
 
-export const getLibraryEntityData = <
-	StoreName extends LibraryEntityStoreName,
+export const getEntityData = <
+	StoreName extends EntityStoreName,
 	AllowEmpty extends boolean = false,
 >(
 	storeName: StoreName,
 	id: number,
-	options: UseTrackOptions<AllowEmpty> = {},
-): Promise<LibraryEntityData<StoreName, AllowEmpty>> => {
+	options: EntityQueryOptions<AllowEmpty> = {},
+): Promise<EntityQueryData<StoreName, AllowEmpty>> => {
 	const config = LIBRARY_ENTITIES_DATA_MAP[storeName]
 
-	return getLibraryEntityDataInternal(storeName, id, config, options.allowEmpty)
+	return getEntityDataInternal(storeName, id, config, options.allowEmpty)
 }
 
-export interface UseTrackOptions<AllowEmpty extends boolean = false> {
-	allowEmpty?: AllowEmpty
-}
-
-export type LibraryEntityData<
-	StoreName extends LibraryEntityStoreName,
-	AllowEmpty extends boolean = false,
-> = AllowEmpty extends true ? QueryValue[StoreName] | undefined : QueryValue[StoreName]
-
-const createLibraryEntityLoader =
-	<StoreName extends LibraryEntityStoreName>(storeName: StoreName) =>
+const defineEntityQuery =
+	<StoreName extends EntityStoreName>(storeName: StoreName) =>
 	<AllowEmpty extends boolean = false>(
 		idGetter: number | (() => number),
-		options: UseTrackOptions<AllowEmpty> = {},
-	): LoaderResult<LibraryEntityData<StoreName, AllowEmpty>, undefined> => {
+		options: EntityQueryOptions<AllowEmpty> = {},
+	): QueryResult<EntityQueryData<StoreName, AllowEmpty>, undefined> => {
 		const config = LIBRARY_ENTITIES_DATA_MAP[storeName]
 
-		return createLoader({
+		return createQuery({
 			eager: true,
 			key: idGetter,
-			fetcher: (id) =>
-				getLibraryEntityDataInternal(storeName, id, config, options.allowEmpty),
+			fetcher: (id) => getEntityDataInternal(storeName, id, config, options.allowEmpty),
 			onDatabaseChange: (_, { refetch }) => {
 				// It is fine to refetch because value almost always will be in cache
 				void refetch()
@@ -330,7 +308,7 @@ const createLibraryEntityLoader =
 		})
 	}
 
-export const useTrackData = createLibraryEntityLoader('tracks')
-export const useAlbumData = createLibraryEntityLoader('albums')
-export const useArtistData = createLibraryEntityLoader('artists')
-export const usePlaylistData = createLibraryEntityLoader('playlists')
+export const createTrackQuery = defineEntityQuery('tracks')
+export const createAlbumQuery = defineEntityQuery('albums')
+export const createArtistQuery = defineEntityQuery('artists')
+export const createPlaylistQuery = defineEntityQuery('playlists')

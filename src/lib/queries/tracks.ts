@@ -1,8 +1,8 @@
 import { getDB } from '$lib/db/get-db'
-import { definePageLoader } from '$lib/db/queries.svelte'
+import { createPageQuery } from '$lib/db/query.svelte'
 
-export const useTracksCountLoader = () =>
-	definePageLoader({
+export const createTracksCountPageQuery = () =>
+	createPageQuery({
 		key: [],
 		fetcher: async () => {
 			const db = await getDB()

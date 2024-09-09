@@ -11,7 +11,7 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import type { Directory } from '$lib/db/database-types.ts'
-	import { initPageQueries } from '$lib/db/queries.svelte.ts'
+	import { initPageQueries } from '$lib/db/query.svelte.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 	import {
@@ -28,8 +28,8 @@
 
 	const mainStore = useMainStore()
 
-	const count = $derived(data.countLoader.value)
-	const directories = $derived(data.directoriesLoader.value)
+	const count = $derived(data.countQuery.value)
+	const directories = $derived(data.directoriesQuery.value)
 
 	const isFileSystemAccessSupported = true
 

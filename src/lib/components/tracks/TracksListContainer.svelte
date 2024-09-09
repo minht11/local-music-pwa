@@ -1,6 +1,6 @@
 <script lang="ts" module>
 	import type { Track } from '$lib/db/database-types'
-	import type { TrackData } from '$lib/db/query'
+	import type { TrackData } from '$lib/db/entity'
 	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'
 	import { removeTrack } from '$lib/library/tracks.svelte'
 	import { useMainStore } from '$lib/stores/main-store.svelte'

@@ -2,49 +2,49 @@ import { assign } from '$lib/helpers/utils/assign.ts'
 import { unwrap } from '$lib/helpers/utils/unwrap.ts'
 import { untrack } from 'svelte'
 import { type DBChangeRecordList, listenForDatabaseChanges } from './channel.ts'
+import { preloadEntityData } from './entity.ts'
 import type { AppStoreNames } from './get-db.ts'
-import { preloadLibraryEntityData } from './query.ts'
 
-export type LoaderStatus = 'loading' | 'loaded' | 'error'
+export type QueryStatus = 'loading' | 'loaded' | 'error'
 
-type LoaderBaseState = {
-	status: LoaderStatus
+type QueryBaseState = {
+	status: QueryStatus
 }
 
-type LoaderLoadedState<Result> = {
+type QueryLoadedState<Result> = {
 	status: 'loaded'
 	loading: false
 	value: Result
 	error: undefined
 }
 
-type LoaderLoadingState<Result, InitialResult extends Result | undefined> = {
+type QueryLoadingState<Result, InitialResult extends Result | undefined> = {
 	status: 'loading'
 	loading: true
 	value: Result | InitialResult
 	error: undefined
 }
 
-type LoaderErrorState<Result, InitialResult extends Result | undefined> = {
+type QueryErrorState<Result, InitialResult extends Result | undefined> = {
 	status: 'error'
 	loading: false
 	value: Result | InitialResult
 	error: unknown
 }
 
-export type LoaderState<Result, InitialResult extends Result | undefined> = LoaderBaseState &
+export type QueryState<Result, InitialResult extends Result | undefined> = QueryBaseState &
 	(
-		| LoaderLoadedState<Result>
-		| LoaderLoadingState<Result, InitialResult>
-		| LoaderErrorState<Result, InitialResult>
+		| QueryLoadedState<Result>
+		| QueryLoadingState<Result, InitialResult>
+		| QueryErrorState<Result, InitialResult>
 	)
 
-export type LoaderMutate<Result, InitialResult extends Result | undefined> = (
+export type QueryMutate<Result, InitialResult extends Result | undefined> = (
 	value: Result | ((prev: Result | InitialResult) => void),
 ) => void
 
 export type DbChangeActions<Result, InitialResult extends Result | undefined> = {
-	mutate: LoaderMutate<Result, InitialResult>
+	mutate: QueryMutate<Result, InitialResult>
 	refetch: () => void
 }
 
@@ -53,13 +53,13 @@ export type DatabaseChangeHandler<Result, InitialResult extends Result | undefin
 	actions: DbChangeActions<Result, InitialResult>,
 ) => void
 
-export type LoaderKeyPrimitiveValue = number | string | boolean
-export type LoaderKey = LoaderKeyPrimitiveValue | LoaderKeyPrimitiveValue[]
+export type QueryKeyPrimitiveValue = number | string | boolean
+export type QueryKey = QueryKeyPrimitiveValue | QueryKeyPrimitiveValue[]
 
-const normalizeKey = <const K extends LoaderKey>(key: K) => JSON.stringify(key)
+const normalizeKey = <const K extends QueryKey>(key: K) => JSON.stringify(key)
 
-export interface LoaderOptions<
-	K extends LoaderKey,
+export interface QueryOptions<
+	K extends QueryKey,
 	Result,
 	InitialResult extends Result | undefined,
 > {
@@ -71,29 +71,29 @@ export interface LoaderOptions<
 	eager?: boolean
 }
 
-type LoaderStateInternal<Result, InitialResult extends Result | undefined> = Omit<
-	LoaderState<Result, InitialResult>,
+type QueryStateInternal<Result, InitialResult extends Result | undefined> = Omit<
+	QueryState<Result, InitialResult>,
 	'loading'
 > & {
 	resolvedKey: string | undefined
 }
 
-class LoaderImpl<K extends LoaderKey, Result, InitialResult extends Result | undefined> {
+class QueryImpl<K extends QueryKey, Result, InitialResult extends Result | undefined> {
 	/** Marks if database and key listeners initialized */
 	listenersInitialized = false
 
 	// biome-ignore lint/style/noNonNullAssertion: assignment is done in constructor
-	state: LoaderStateInternal<Result, InitialResult> = $state()!
+	state: QueryStateInternal<Result, InitialResult> = $state()!
 
-	options: LoaderOptions<K, Result, InitialResult>
+	options: QueryOptions<K, Result, InitialResult>
 
-	constructor(options: LoaderOptions<K, Result, InitialResult>) {
+	constructor(options: QueryOptions<K, Result, InitialResult>) {
 		this.options = options
 
 		// @ts-ignore TODO
 		const value = options.initialValue
 
-		const resolvedState: LoaderStateInternal<Result, InitialResult> =
+		const resolvedState: QueryStateInternal<Result, InitialResult> =
 			value !== undefined
 				? this.#getLoadedState(value as Result, normalizeKey(this.#getKey()))
 				: {
@@ -112,10 +112,7 @@ class LoaderImpl<K extends LoaderKey, Result, InitialResult extends Result | und
 		return typeof key === 'function' ? key() : key
 	}
 
-	#getLoadedState(
-		value: Result,
-		resolvedKey: string,
-	): LoaderStateInternal<Result, InitialResult> {
+	#getLoadedState(value: Result, resolvedKey: string): QueryStateInternal<Result, InitialResult> {
 		return {
 			status: 'loaded',
 			value,
@@ -219,14 +216,14 @@ class LoaderImpl<K extends LoaderKey, Result, InitialResult extends Result | und
 	}
 }
 
-export type LoaderResult<Result, InitialResult extends Result | undefined> = LoaderState<
+export type QueryResult<Result, InitialResult extends Result | undefined> = QueryState<
 	Result,
 	InitialResult
 >
 
 const createQueryStateAccessor = <T, Result, InitialResult extends Result | undefined>(
 	target: T,
-	state: LoaderImpl<'', Result, InitialResult>['state'],
+	state: QueryImpl<'', Result, InitialResult>['state'],
 	additionalProperties?: Record<string, { get(): unknown }>,
 ) =>
 	Object.defineProperties(target, {
@@ -250,20 +247,20 @@ const createQueryStateAccessor = <T, Result, InitialResult extends Result | unde
 				return state.status === 'loading'
 			},
 		},
-		[pageLoaderImplSymbol]: {
+		[pageQueryImplSymbol]: {
 			value: true,
 		},
 		...additionalProperties,
 	})
 
-export const createLoader = <
-	const K extends LoaderKey,
+export const createQuery = <
+	const K extends QueryKey,
 	Result,
 	InitialResult extends Result | undefined,
 >(
-	options: LoaderOptions<K, Result, InitialResult>,
+	options: QueryOptions<K, Result, InitialResult>,
 ) => {
-	const query = new LoaderImpl<K, Result, InitialResult>(options)
+	const query = new QueryImpl<K, Result, InitialResult>(options)
 	const state = query.state
 
 	if (options.eager) {
@@ -271,28 +268,32 @@ export const createLoader = <
 	}
 	query.setupListeners()
 
-	return createQueryStateAccessor({}, state) as LoaderResult<Result, InitialResult>
+	return createQueryStateAccessor({}, state) as QueryResult<Result, InitialResult>
 }
 
-const pageLoaderImplSymbol: unique symbol = Symbol()
+const pageQueryImplSymbol: unique symbol = Symbol()
 
-export type PageLoaderResultResolved<Result> = LoaderResult<Result, Result> & {
+export type PageQueryResultResolved<Result> = QueryResult<Result, Result> & {
 	hydrate(): void
 }
 
-export type PageLoaderResult<Result> = Promise<PageLoaderResultResolved<Result>>
+export type PageQueryResult<Result> = Promise<PageQueryResultResolved<Result>>
 
-export const definePageLoader = async <
-	const K extends LoaderKey,
+/**
+ * Create a page query which should load data inside load function
+ * and then listen for database changes once page is loaded.
+ */
+export const createPageQuery = async <
+	const K extends QueryKey,
 	Result,
 	InitialResult extends Result | undefined = undefined,
 >(
-	options: LoaderOptions<K, Result, InitialResult>,
+	options: QueryOptions<K, Result, InitialResult>,
 ) => {
-	const query = new LoaderImpl<K, Result, InitialResult>(options)
+	const query = new QueryImpl<K, Result, InitialResult>(options)
 	const state = query.state
 
-	const { resolve, reject, promise } = Promise.withResolvers<PageLoaderResultResolved<Result>>()
+	const { resolve, reject, promise } = Promise.withResolvers<PageQueryResultResolved<Result>>()
 
 	query.load()
 
@@ -312,7 +313,7 @@ export const definePageLoader = async <
 						value: {
 							get() {
 								// if (!query.listenersInitialized) {
-								// 	throw new Error('PageLoader not hydrated')
+								// 	throw new Error('PageQuery not hydrated')
 								// }
 
 								return state.value
@@ -321,7 +322,7 @@ export const definePageLoader = async <
 					},
 				)
 
-				resolve(accessor as PageLoaderResultResolved<Result>)
+				resolve(accessor as PageQueryResultResolved<Result>)
 			} else if (state.status === 'error') {
 				cleanup()
 				reject(state.error)
@@ -334,8 +335,8 @@ export const definePageLoader = async <
 
 export const initPageQueries = (data: Record<string, unknown>): void => {
 	for (const query of Object.values(data)) {
-		if (query && typeof query === 'object' && pageLoaderImplSymbol in query) {
-			;(query as unknown as PageLoaderResultResolved<unknown>).hydrate()
+		if (query && typeof query === 'object' && pageQueryImplSymbol in query) {
+			;(query as unknown as PageQueryResultResolved<unknown>).hydrate()
 		}
 	}
 }
@@ -383,7 +384,7 @@ export const keysListDatabaseChangeHandler = <
 	}
 }
 
-export const prefetchLibraryListItems = async <const StoreName extends AppStoreNames>(
+const prefetchLibraryListItems = async <const StoreName extends AppStoreNames>(
 	storeName: StoreName,
 	keys: number[],
 ) => {
@@ -395,7 +396,7 @@ export const prefetchLibraryListItems = async <const StoreName extends AppStoreN
 	) {
 		const preload = Array.from({ length: Math.min(keys.length, 12) }, (_, index) =>
 			// biome-ignore lint/style/noNonNullAssertion: index is bound checked
-			preloadLibraryEntityData(storeName as 'tracks', keys[index]!),
+			preloadEntityData(storeName as 'tracks', keys[index]!),
 		)
 		await Promise.all(preload)
 	} else if (import.meta.env.DEV) {
@@ -403,19 +404,19 @@ export const prefetchLibraryListItems = async <const StoreName extends AppStoreN
 	}
 }
 
-export type LoaderListOptions<K extends LoaderKey> = Omit<
-	LoaderOptions<K, number[], undefined>,
+export type QueryListOptions<K extends QueryKey> = Omit<
+	QueryOptions<K, number[], undefined>,
 	'onDatabaseChange'
 >
 
-export const definePageListLoader = <
+export const createPageListQuery = <
 	const StoreName extends Exclude<AppStoreNames, 'playlistsTracks'>,
-	const K extends LoaderKey,
+	const K extends QueryKey,
 >(
 	storeName: StoreName | (() => StoreName),
-	options: LoaderListOptions<K>,
-): PageLoaderResult<number[]> =>
-	definePageLoader({
+	options: QueryListOptions<K>,
+): PageQueryResult<number[]> =>
+	createPageQuery({
 		...options,
 		fetcher: async (key) => {
 			const result = await options.fetcher(key)
@@ -426,14 +427,14 @@ export const definePageListLoader = <
 		onDatabaseChange: keysListDatabaseChangeHandler.bind(null, unwrap(storeName)),
 	})
 
-export const createListLoader = <
+export const createListQuery = <
 	const StoreName extends Exclude<AppStoreNames, 'playlistsTracks'>,
-	const K extends LoaderKey,
+	const K extends QueryKey,
 >(
 	storeName: StoreName,
-	options: LoaderListOptions<K>,
-): LoaderResult<number[], undefined> =>
-	createLoader({
+	options: QueryListOptions<K>,
+): QueryResult<number[], undefined> =>
+	createQuery({
 		...options,
 		fetcher: async (key) => {
 			const result = await options.fetcher(key)

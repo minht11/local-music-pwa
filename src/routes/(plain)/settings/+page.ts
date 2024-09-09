@@ -1,10 +1,10 @@
 import { getDB } from '$lib/db/get-db'
-import { definePageLoader } from '$lib/db/queries.svelte.ts'
-import { useTracksCountLoader } from '$lib/loaders/tracks.ts'
+import { createPageQuery } from '$lib/db/query.svelte.ts'
+import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
 import type { PageLoad } from './$types.ts'
 
-const useDirectoriesLoader = () =>
-	definePageLoader({
+const useDirectoriesQuery = () =>
+	createPageQuery({
 		key: [],
 		fetcher: async () => {
 			const db = await getDB()
@@ -27,11 +27,14 @@ const useDirectoriesLoader = () =>
 	})
 
 export const load: PageLoad = async () => {
-	const [count, directories] = await Promise.all([useTracksCountLoader(), useDirectoriesLoader()])
+	const [count, directories] = await Promise.all([
+		createTracksCountPageQuery(),
+		useDirectoriesQuery(),
+	])
 
 	return {
-		countLoader: count,
-		directoriesLoader: directories,
+		countQuery: count,
+		directoriesQuery: directories,
 		backButton: true,
 		title: 'Settings',
 	}

@@ -1,11 +1,11 @@
 import { goto } from '$app/navigation'
+import { getEntityData } from '$lib/db/entity.ts'
 import { type DbValue, getDB } from '$lib/db/get-db.ts'
 import {
-	type PageLoaderResult,
-	definePageLoader,
+	type PageQueryResult,
+	createPageQuery,
 	keysListDatabaseChangeHandler,
-} from '$lib/db/queries.svelte.ts'
-import { getLibraryEntityData } from '$lib/db/query.ts'
+} from '$lib/db/query.svelte.ts'
 import type { LibraryEntityStoreName } from '$lib/library/general.ts'
 import { error, redirect } from '@sveltejs/kit'
 import type { PageLoad } from './$types.d.ts'
@@ -30,14 +30,14 @@ class DbItemNotFound extends Error {
 	}
 }
 
-const defineDetailsLoader = <T extends DetailsSlug>(
+const createDetailsPageQuery = <T extends DetailsSlug>(
 	storeName: T,
 	id: number,
-): PageLoaderResult<DbValue<T>> => {
-	const query = definePageLoader({
+): PageQueryResult<DbValue<T>> => {
+	const query = createPageQuery({
 		key: () => [storeName, id],
 		fetcher: async () => {
-			const item = await getLibraryEntityData(storeName, id)
+			const item = await getEntityData(storeName, id)
 
 			if (!item) {
 				throw new DbItemNotFound()
@@ -69,12 +69,12 @@ const defineDetailsLoader = <T extends DetailsSlug>(
 	return query
 }
 
-const defineTracksLoader = <Slug extends DetailsSlug>(
+const createTracksPageQuery = <Slug extends DetailsSlug>(
 	storeName: Slug,
 	itemName: () => string,
 	id: number,
-): PageLoaderResult<number[]> => {
-	const query = definePageLoader({
+): PageQueryResult<number[]> => {
+	const query = createPageQuery({
 		key: () => [storeName, itemName()],
 		fetcher: async ([, name]) => {
 			const db = await getDB()
@@ -128,14 +128,14 @@ export const load: PageLoad = async (event) => {
 		error(404)
 	}
 
-	const itemLoader = await defineDetailsLoader(slug, id)
-	const tracksLoader = await defineTracksLoader(slug, () => itemLoader.value.name, id)
+	const itemQuery = await createDetailsPageQuery(slug, id)
+	const tracksQuery = await createTracksPageQuery(slug, () => itemQuery.value.name, id)
 
 	return {
 		slug,
 		libraryType: slug,
 		title: 'Album',
-		itemLoader,
-		tracksLoader,
+		itemQuery,
+		tracksQuery,
 	}
 }

@@ -10,7 +10,7 @@
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { initPageQueries } from '$lib/db/queries.svelte.ts'
+	import { initPageQueries } from '$lib/db/query.svelte.js'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
@@ -21,10 +21,9 @@
 	initPageQueries(data)
 
 	// TODO. Look into if cleanup is done
-	const store = $derived(data.store)
 	const main = useMainStore()
 
-	const itemsIds = $derived(data.query.value)
+	const itemsIds = $derived(data.itemsQuery.value)
 
 	const slug = $derived(data.slug)
 
@@ -117,9 +116,9 @@
 	{#snippet list(mode)}
 		<div class={clx(data.isHandHeldDevice ? 'sm:pl-80px' : 'pl-80px', 'flex flex-col grow')}>
 			<div class={clx(mode === 'both' && 'w-400px', 'px-16px grow flex flex-col')}>
-				<Search {store} />
+				<Search store={data.store} />
 
-				{#if store.storeName === 'playlists'}
+				{#if data.storeName === 'playlists'}
 					<div class="flex items-center justify-end mb-16px">
 						<Button
 							kind="outlined"
@@ -134,7 +133,7 @@
 					</div>
 				{/if}
 
-				{#if data.tracksCountQuery.value === 0 && store.storeName !== 'playlists'}
+				{#if data.tracksCountQuery.value === 0 && data.storeName !== 'playlists'}
 					<div class="flex flex-col items-center my-auto text-center">
 						<div class="text-title-lg mb-4px">{m.libraryEmpty()}</div>
 						{m.libraryStartByAdding()}
@@ -145,7 +144,7 @@
 					</div>
 				{:else}
 					<div class={clx('w-full grow flex flex-col')}>
-						{#if store.searchTerm && itemsIds.length === 0}
+						{#if data.store.searchTerm && itemsIds.length === 0}
 							<div class="flex flex-col relative text-center items-center m-auto">
 								<Icon type="magnify" class="size-140px my-auto opacity-54" />
 
@@ -156,13 +155,13 @@
 									{m.libraryNoResultsExplanation()}
 								</div>
 							</div>
-						{:else if store.storeName === 'tracks'}
+						{:else if data.storeName === 'tracks'}
 							<TracksListContainer items={itemsIds} />
-						{:else if store.storeName === 'albums'}
+						{:else if data.storeName === 'albums'}
 							<AlbumsListContainer items={itemsIds} />
-						{:else if store.storeName === 'artists'}
+						{:else if data.storeName === 'artists'}
 							<ArtistListContainer items={itemsIds} />
-						{:else if store.storeName === 'playlists'}
+						{:else if data.storeName === 'playlists'}
 							<PlaylistListContainer
 								items={itemsIds}
 								menuItems={(playlist) =>

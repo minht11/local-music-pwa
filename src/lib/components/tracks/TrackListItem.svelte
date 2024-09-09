@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type TrackData, useTrackData } from '$lib/db/query.ts'
+	import { type TrackData, createTrackQuery } from '$lib/db/entity'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
@@ -29,7 +29,7 @@
 		menuItems,
 	}: Props = $props()
 
-	const data = useTrackData(trackId)
+	const data = createTrackQuery(trackId)
 
 	const artworkSrc = createManagedArtwork(() => data.value?.images?.small)
 	const track = $derived(data.value)

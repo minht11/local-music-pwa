@@ -1,8 +1,11 @@
+import type { EntityStoreName } from '$lib/db/entity'
 import { type AppDB, getDB } from '$lib/db/get-db'
 import type { IDBPIndex, IndexNames } from 'idb'
 
+// TODO. Move these to entity.ts
+
 export type SortOrder = 'asc' | 'desc'
-export type LibraryEntityStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
+export type LibraryEntityStoreName = EntityStoreName
 export type LibraryEntitySortKey<StoreName extends LibraryEntityStoreName> = Exclude<
 	IndexNames<AppDB, StoreName>,
 	symbol

@@ -1,5 +1,5 @@
 import { listenForDatabaseChanges } from '$lib/db/channel'
-import { type TrackData, useTrackData } from '$lib/db/query'
+import { type TrackData, createTrackQuery } from '$lib/db/entity.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { shuffleArray } from '$lib/helpers/utils/array.ts'
@@ -58,11 +58,11 @@ export class PlayerStore {
 		this.shuffle ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
 	)
 
-	activeTrackLoader = useTrackData(() => this.itemsIds[this.#activeTrackIndex] ?? -1, {
+	activeTrackQuery = createTrackQuery(() => this.itemsIds[this.#activeTrackIndex] ?? -1, {
 		allowEmpty: true,
 	})
 
-	activeTrack: TrackData | undefined = $derived(this.activeTrackLoader.value)
+	activeTrack: TrackData | undefined = $derived(this.activeTrackQuery.value)
 
 	get activeTrackIndex(): number {
 		return this.#activeTrackIndex
