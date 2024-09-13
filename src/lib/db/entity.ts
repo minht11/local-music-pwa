@@ -211,18 +211,9 @@ if (!import.meta.env.SSR) {
 
 export const preloadEntityData = async (storeName: EntityStoreName, id: number) => {
 	try {
-		// If we already have value in cache do not fetch it again
-		const key = getEntityCacheKey(storeName, id)
-		if (entityCache.has(key)) {
-			return
-		}
-
 		const config = LIBRARY_ENTITIES_DATA_MAP[storeName]
-		const result = await config.fetch(id)
-
-		if (result) {
-			entityCache.setValue(key, result)
-		}
+		// getEntityDataInternal will fetch data and store it inside cache
+		await getEntityDataInternal(storeName, id, config)
 	} catch {
 		// Ignore
 	}
@@ -235,6 +226,19 @@ export type EntityQueryData<
 
 export interface EntityQueryOptions<AllowEmpty extends boolean = false> {
 	allowEmpty?: AllowEmpty
+}
+
+const unwrapEntityValue = <T, AllowEmpty extends boolean = false>(
+	value: T,
+	id: number,
+	storeName: string,
+	allowEmpty?: AllowEmpty,
+) => {
+	if (!(value || allowEmpty)) {
+		throw new Error(`${storeName} with id ${id} not found`)
+	}
+
+	return value
 }
 
 const getEntityDataInternal = async <
@@ -252,19 +256,17 @@ const getEntityDataInternal = async <
 	const cachedValue = entityCache.getValue(key) as Value
 
 	if (cachedValue) {
-		return cachedValue
+		if (cachedValue instanceof Promise) {
+			return cachedValue.then((value) => unwrapEntityValue(value, id, storeName, allowEmpty))
+		}
+
+		return unwrapEntityValue(cachedValue, id, storeName, allowEmpty)
 	}
 
 	const promise = config
 		.fetch(id)
 		.then((value) => {
-			if (value) {
-				entityCache.setValue(key, value)
-			} else if (!allowEmpty) {
-				throw new Error(`${storeName} with id ${id} not found`)
-			}
-
-			return value as Value
+			return unwrapEntityValue(value, id, storeName, allowEmpty)
 		})
 		.catch((error) => {
 			entityCache.delete(key)

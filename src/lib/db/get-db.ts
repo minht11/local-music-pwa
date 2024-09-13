@@ -154,14 +154,3 @@ export const getDB = (): Promise<IDBPDatabase<AppDB>> =>
 
 export type DbKey<Name extends AppStoreNames> = AppDB[Name]['key']
 export type DbValue<Name extends AppStoreNames> = AppDB[Name]['value']
-
-// TODO. Unused
-export const isStoreEmpty = async <Name extends AppStoreNames>(
-	storeName: Name,
-): Promise<boolean> => {
-	const db = await getDB()
-	const store = db.transaction(storeName).objectStore(storeName)
-	const cursor = await store.openKeyCursor()
-
-	return !cursor
-}

@@ -19,7 +19,6 @@
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"declaration": true,
-		"emitDeclarationOnly": true,
 		"isolatedDeclarations": false,
 		"types": [
 			"@types/dom-navigation",

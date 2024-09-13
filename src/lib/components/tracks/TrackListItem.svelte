@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { type TrackData, createTrackQuery } from '$lib/db/entity'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
-
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'
 	import invariant from 'tiny-invariant'
@@ -70,7 +69,10 @@
 				<div class="h-4px rounded-2px bg-onSurface/10 w-80%"></div>
 			</div>
 		{:else if data.error}
-			Error loading track
+			<!-- TODO. Alow removing failed tracks -->
+			<div class="text-error">
+				Error loading track with id {trackId}
+			</div>
 		{:else if track}
 			<div class="flex flex-col truncate">
 				<div class={clx(active ? 'text-primary' : 'color-onSurface', 'truncate')}>
