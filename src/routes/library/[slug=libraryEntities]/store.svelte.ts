@@ -1,3 +1,4 @@
+import type { DbValue } from '$lib/db/get-db'
 import { createPageListQuery } from '$lib/db/query.svelte'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import {
@@ -41,9 +42,18 @@ class LibraryStore<StoreName extends LibraryEntityStoreName> {
 	}
 }
 
+export type LibrarySearchFn<StoreName extends LibraryEntityStoreName> = (
+	value: DbValue<StoreName>,
+	searchTerm: string,
+) => boolean
+
+const defaultSearchFn: LibrarySearchFn<LibraryEntityStoreName> = (value, searchTerm) =>
+	value.name.toLowerCase().includes(searchTerm)
+
 export const defineLibraryPageData = <StoreName extends LibraryEntityStoreName>(
 	storeName: StoreName,
 	options: DefineLibraryPageOptions<StoreName>,
+	searchFn: LibrarySearchFn<StoreName> = defaultSearchFn,
 ) => {
 	return async () => {
 		const store = new LibraryStore(storeName, options.sortOptions)
@@ -60,10 +70,10 @@ export const defineLibraryPageData = <StoreName extends LibraryEntityStoreName>(
 					sort: sortKey,
 					order,
 					searchTerm,
-					searchFn: (value) => value.name.toLowerCase().includes(searchTerm),
+					searchFn: (value) => searchFn(value, searchTerm),
 				})
 
-				if (store) {
+				if (storeName === 'playlists') {
 					return [FAVORITE_PLAYLIST_ID, ...result]
 				}
 

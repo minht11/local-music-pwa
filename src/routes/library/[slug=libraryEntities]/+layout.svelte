@@ -10,7 +10,7 @@
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { initPageQueries } from '$lib/db/query.svelte.js'
+	import { initPageQueriesDynamic } from '$lib/db/query.svelte.js'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
@@ -18,7 +18,10 @@
 
 	const { data, children } = $props()
 
-	initPageQueries(data)
+	initPageQueriesDynamic(
+		() => data.storeName,
+		() => data,
+	)
 
 	// TODO. Look into if cleanup is done
 	const main = useMainStore()
@@ -116,7 +119,7 @@
 	{#snippet list(mode)}
 		<div class={clx(data.isHandHeldDevice ? 'sm:pl-80px' : 'pl-80px', 'flex flex-col grow')}>
 			<div class={clx(mode === 'both' && 'w-400px', 'px-16px grow flex flex-col')}>
-				<Search store={data.store} />
+				<Search name={data.pluralTitle} store={data.store} />
 
 				{#if data.storeName === 'playlists'}
 					<div class="flex items-center justify-end mb-16px">

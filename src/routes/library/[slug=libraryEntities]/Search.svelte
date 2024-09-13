@@ -6,10 +6,11 @@
 	import type { PageData } from './$types.ts'
 
 	interface Props {
+		name: string
 		store: PageData['store']
 	}
 
-	const { store }: Props = $props()
+	const { name, store }: Props = $props()
 
 	const searchHandler = debounce((e: InputEvent) => {
 		const term = (e.target as HTMLInputElement).value
@@ -68,9 +69,8 @@
 	class="sticky border border-primary/10 @container top-8px mt-8px mb-16px z-1 bg-surfaceContainerHighest flex w-full rounded-8px px-8px gap-8px items-center ml-auto max-w-500px"
 >
 	<input
-		value={store.searchTerm}
 		type="text"
-		placeholder="Search tracks"
+		placeholder={`${m.librarySearch()} ${name.toLowerCase()}`}
 		class="h-48px w-240px pl-8px grow placeholder:text-onSurface/54 text-body-md bg-transparent focus:outline-none"
 		oninput={(e) => searchHandler(e as unknown as InputEvent)}
 	/>

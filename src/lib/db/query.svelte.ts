@@ -312,6 +312,7 @@ export const createPageQuery = async <
 					{
 						value: {
 							get() {
+								// TODO. Do we need this?
 								// if (!query.listenersInitialized) {
 								// 	throw new Error('PageQuery not hydrated')
 								// }
@@ -339,6 +340,19 @@ export const initPageQueries = (data: Record<string, unknown>): void => {
 			;(query as unknown as PageQueryResultResolved<unknown>).hydrate()
 		}
 	}
+}
+
+export const initPageQueriesDynamic = (
+	source: () => unknown,
+	data: () => Record<string, unknown>,
+) => {
+	$effect.pre(() => {
+		source() // track changes
+
+		untrack(() => {
+			initPageQueries(data())
+		})
+	})
 }
 
 export const keysListDatabaseChangeHandler = <

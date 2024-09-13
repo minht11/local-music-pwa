@@ -9,30 +9,40 @@ const nameSortOption = {
 	key: 'name',
 } as const
 
+const hasText = (target: string | undefined | null, term: string) =>
+	target?.toLowerCase().includes(term)
+
 const storeMap = {
-	tracks: defineLibraryPageData('tracks', {
-		singularTitle: m.track(),
-		pluralTitle: m.tracks(),
-		sortOptions: [
-			nameSortOption,
-			{
-				name: 'Artist',
-				key: 'artists',
-			},
-			{
-				name: 'Album',
-				key: 'album',
-			},
-			{
-				name: 'Duration',
-				key: 'duration',
-			},
-			{
-				name: 'Year',
-				key: 'year',
-			},
-		],
-	}),
+	tracks: defineLibraryPageData(
+		'tracks',
+		{
+			singularTitle: m.track(),
+			pluralTitle: m.tracks(),
+			sortOptions: [
+				nameSortOption,
+				{
+					name: 'Artist',
+					key: 'artists',
+				},
+				{
+					name: 'Album',
+					key: 'album',
+				},
+				{
+					name: 'Duration',
+					key: 'duration',
+				},
+				{
+					name: 'Year',
+					key: 'year',
+				},
+			],
+		},
+		(value, searchTerm) =>
+			hasText(value.name, searchTerm) ||
+			hasText(value.album, searchTerm) ||
+			value.artists.some((artist) => hasText(artist, searchTerm)),
+	),
 	albums: defineLibraryPageData('albums', {
 		singularTitle: m.album(),
 		pluralTitle: m.albums(),
