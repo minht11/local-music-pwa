@@ -9,8 +9,11 @@ const nameSortOption = {
 	key: 'name',
 } as const
 
-const hasText = (target: string | undefined | null, term: string) =>
+const includesTerm = (target: string | undefined | null, term: string) =>
 	target?.toLowerCase().includes(term)
+
+const artistsIncludesTerms = (artists: string[] | undefined, term: string) =>
+	artists?.some((artist) => includesTerm(artist, term)) ?? false
 
 const storeMap = {
 	tracks: defineLibraryPageData(
@@ -39,15 +42,20 @@ const storeMap = {
 			],
 		},
 		(value, searchTerm) =>
-			hasText(value.name, searchTerm) ||
-			hasText(value.album, searchTerm) ||
-			value.artists.some((artist) => hasText(artist, searchTerm)),
+			includesTerm(value.name, searchTerm) ||
+			includesTerm(value.album, searchTerm) ||
+			artistsIncludesTerms(value.artists, searchTerm),
 	),
-	albums: defineLibraryPageData('albums', {
-		singularTitle: m.album(),
-		pluralTitle: m.albums(),
-		sortOptions: [nameSortOption],
-	}),
+	albums: defineLibraryPageData(
+		'albums',
+		{
+			singularTitle: m.album(),
+			pluralTitle: m.albums(),
+			sortOptions: [nameSortOption],
+		},
+		(value, searchTerm) =>
+			includesTerm(value.name, searchTerm) || artistsIncludesTerms(value.artists, searchTerm),
+	),
 	artists: defineLibraryPageData('artists', {
 		singularTitle: m.artist(),
 		pluralTitle: m.artists(),

@@ -23,6 +23,11 @@ export const defineViewTransitionMatcher = (callback: AppViewTransitionTypeMatch
 }
 
 export const setupAppViewTransitions = (disabled: () => boolean) => {
+	/**
+	 * @param to - to view name
+	 * @param from - from view name
+	 * @param backNavigationFallback - when not explicitly specified this param will determine if view should be animated as going back to.
+	 */
 	const handleViewTransition = (
 		to: string | null | undefined,
 		from: string | null | undefined,

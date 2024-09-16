@@ -42,14 +42,8 @@
 
 	const onImportTracksHandler = async () => {
 		const directory = await showDirectoryPicker({
-			// startIn: 'music',
 			mode: 'read',
 		})
-
-		// // TODO. Testing stuff
-		// if (window) {
-		// 	return await importDirectory(directory)
-		// }
 
 		let data: Awaited<ReturnType<typeof checkNewDirectoryStatus>> | undefined
 		for (const existingDir of directories) {
