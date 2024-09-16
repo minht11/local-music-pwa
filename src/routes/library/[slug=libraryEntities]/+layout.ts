@@ -122,7 +122,6 @@ export const load: LayoutLoad = async (event) => {
 		...data,
 		tracksCountQuery,
 		slug,
-		title: 'Library',
 		isWideLayout,
 		layoutMode,
 	}

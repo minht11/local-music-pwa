@@ -134,7 +134,6 @@ export const load: PageLoad = async (event) => {
 	return {
 		slug,
 		libraryType: slug,
-		title: 'Album',
 		itemQuery,
 		tracksQuery,
 	}

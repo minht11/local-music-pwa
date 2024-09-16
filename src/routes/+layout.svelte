@@ -79,10 +79,6 @@
 	})
 </script>
 
-<svelte:head>
-	<title>{pageData.pageTitle || pageData.title}</title>
-</svelte:head>
-
 <svelte:window
 	onkeydown={(e) => {
 		if (e.key === ' ') {

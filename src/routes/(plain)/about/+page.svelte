@@ -1,6 +1,3 @@
-<script lang="ts">
-</script>
-
 <section class="select-text m-auto flex flex-col items-center">
 	<div class="text-headline-md mb-16px">Snae Player</div>
 

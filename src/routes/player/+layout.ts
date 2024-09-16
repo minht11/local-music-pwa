@@ -57,7 +57,6 @@ export const load: LayoutLoad = () => {
 	})
 
 	return {
-		title: 'Player',
 		noPlayerOverlay: true,
 		sizes,
 		layoutMode,

@@ -5,9 +5,6 @@ import type { LayoutLoad } from './$types.ts'
 
 export const ssr = false
 
-export const load: LayoutLoad = () => {
-	return {
-		title: '',
-		isHandHeldDevice: isMobile(),
-	}
-}
+export const load: LayoutLoad = () => ({
+	isHandHeldDevice: isMobile(),
+})

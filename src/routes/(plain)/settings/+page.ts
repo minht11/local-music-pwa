@@ -35,7 +35,6 @@ export const load: PageLoad = async () => {
 	return {
 		countQuery: count,
 		directoriesQuery: directories,
-		backButton: true,
 		title: 'Settings',
 	}
 }
