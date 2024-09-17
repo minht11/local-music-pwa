@@ -76,7 +76,6 @@
 		{:else if track}
 			<div class="flex flex-col truncate">
 				<div class={clx(active ? 'text-primary' : 'color-onSurface', 'truncate')}>
-					{track.id}
 					{track.name}
 				</div>
 				<div class="truncate overflow-hidden">

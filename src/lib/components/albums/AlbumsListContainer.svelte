@@ -48,7 +48,7 @@
 	count={items.length}
 	size={sizes.height}
 	lanes={sizes.columns}
-	key={(index) => items[index] as number}
+	key={(index) => `${items[index]}-${index}`}
 >
 	{#snippet children(item)}
 		{@const albumId = items[item.index] as number}

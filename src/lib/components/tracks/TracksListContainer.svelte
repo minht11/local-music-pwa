@@ -89,7 +89,7 @@
 	}
 </script>
 
-<VirtualContainer size={72} count={items.length} key={(index) => items[index] ?? -1}>
+<VirtualContainer size={72} count={items.length} key={(index) => `${items[index]}-${index}`}>
 	{#snippet children(item)}
 		{@const trackId = items[item.index] as number}
 

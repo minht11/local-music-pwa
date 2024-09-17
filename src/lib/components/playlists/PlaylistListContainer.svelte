@@ -24,7 +24,7 @@
 	const { items, icon, menuItems, onItemClick }: Props = $props()
 </script>
 
-<VirtualContainer size={56} count={items.length} key={(index) => items[index] as number}>
+<VirtualContainer size={56} count={items.length} key={(index) => `${items[index]}-${index}`}>
 	{#snippet children(item)}
 		{@const playlistId = items[item.index] as number}
 
