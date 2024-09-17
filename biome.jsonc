@@ -14,7 +14,8 @@
 			"pnpm-lock.yaml",
 			"./src/paraglide/**",
 			"**/*.html",
-			"**/*.svg"
+			"**/*.svg",
+			"**/*.css"
 		]
 	},
 	"formatter": {
@@ -27,10 +28,12 @@
 		"rules": {
 			"recommended": true,
 			"complexity": {
-				"useSimplifiedLogicExpression": "error"
+				"useSimplifiedLogicExpression": "error",
+				"useDateNow": "error"
 			},
 			"correctness": {
-				"noUndeclaredVariables": "error"
+				"noUndeclaredVariables": "error",
+				"useImportExtensions": "error"
 			},
 			"style": {
 				"noNegationElse": "error",
@@ -44,19 +47,18 @@
 						"requireAscii": true,
 						"filenameCases": ["kebab-case", "export", "PascalCase"]
 					}
-				}
-			},
-			"suspicious": {
-				"noMisrefactoredShorthandAssign": "error",
-				"useAwait": "error"
-			},
-			"nursery": {
-				"useImportExtensions": "error",
-				"useDateNow": "error",
-				"useErrorMessage": "error",
+				},
 				"useThrowNewError": "error",
 				"useThrowOnlyError": "error",
 				"useConsistentBuiltinInstantiation": "error"
+			},
+			"suspicious": {
+				"noMisrefactoredShorthandAssign": "error",
+				"useAwait": "error",
+				"useErrorMessage": "error"
+			},
+			"nursery": {
+				"noDynamicNamespaceImportAccess": "error"
 			}
 		}
 	},
@@ -103,7 +105,7 @@
 			}
 		},
 		{
-			"include": ["src/routes/*.svelte", "src/params"],
+			"include": ["src/params"],
 			"linter": {
 				"rules": {
 					"style": {

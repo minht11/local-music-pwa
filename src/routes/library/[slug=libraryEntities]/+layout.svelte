@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
 	import { page } from '$app/stores'
-	import { useRootLayout } from '$lib/app.ts'
 	import Button from '$lib/components/Button.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import AlbumsListContainer from '$lib/components/albums/AlbumsListContainer.svelte'
@@ -11,6 +10,7 @@
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueriesDynamic } from '$lib/db/query.svelte.js'
+	import { useSetBottomBar } from '$lib/layout-bottom-bar.svelte.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
@@ -62,15 +62,7 @@
 	const isWideLayout = $derived.by(data.isWideLayout)
 	const layoutMode = $derived(data.layoutMode(isWideLayout, $page.params.id))
 
-	const layout = useRootLayout()
-
-	$effect.pre(() => {
-		layout.bottom = layoutBottom
-
-		return () => {
-			layout.bottom = null
-		}
-	})
+	useSetBottomBar(() => layoutBottom)
 </script>
 
 {#snippet navItemsSnippet(className: string)}
@@ -97,7 +89,7 @@
 {#snippet layoutBottom()}
 	{#if data.isHandHeldDevice}
 		<div
-			class="grid sm:hidden grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer w-full h-64px"
+			class="pointer-events-auto grid sm:hidden grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer w-full h-64px"
 		>
 			{@render navItemsSnippet('h-full')}
 		</div>

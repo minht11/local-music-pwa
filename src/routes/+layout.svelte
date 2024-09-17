@@ -4,28 +4,19 @@
 	import PlaylistDialogs from '$lib/components/app-dialogs/PlaylistDialogs.svelte'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
+	import { setupBottomBar } from '$lib/layout-bottom-bar.svelte'
 	import { provideMainStore } from '$lib/stores/main-store.svelte'
 	import { providePlayer } from '$lib/stores/player/store.ts'
 	import { setupAppViewTransitions } from '$lib/view-transitions.ts'
-	import { setContext } from 'svelte'
 
 	const mainStore = provideMainStore()
 	const player = providePlayer()
 
 	setupGlobalMenu()
 	setupAppViewTransitions(() => mainStore.isReducedMotion)
+	const bottomBar = setupBottomBar()
 
 	const { children } = $props()
-
-	const pageData = $derived($page.data)
-
-	let bottom = $state<Snippet>()
-
-	setContext('root-layout', {
-		set bottom(val: Snippet | undefined) {
-			bottom = val
-		},
-	})
 
 	const updateStyles = async (color: number | undefined | null, isDark: boolean) => {
 		const module = await import('$lib/theme.ts')
@@ -109,8 +100,8 @@
 			</div>
 		{/if}
 
-		{#if bottom}
-			{@render bottom()}
+		{#if bottomBar.snippet}
+			{@render bottomBar.snippet()}
 		{/if}
 	</div>
 </div>
