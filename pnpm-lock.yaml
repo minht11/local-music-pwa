@@ -19,7 +19,7 @@ importers:
         version: 0.3.0
       '@tanstack/svelte-virtual':
         specifier: ^3.10.8
-        version: 3.10.8(svelte@5.0.0-next.249)
+        version: 3.10.8(svelte@5.0.0-next.257)
       '@types/dom-navigation':
         specifier: ^1.0.4
         version: 1.0.4
@@ -45,15 +45,15 @@ importers:
         specifier: ^1.3.3
         version: 1.3.3
       valibot:
-        specifier: ^0.42.0
-        version: 0.42.0(typescript@5.6.2)
+        specifier: ^0.42.1
+        version: 0.42.1(typescript@5.6.2)
       weak-lru-cache:
         specifier: ^1.2.2
         version: 1.2.2
     devDependencies:
       '@biomejs/biome':
-        specifier: 1.9.1
-        version: 1.9.1
+        specifier: 1.9.2
+        version: 1.9.2
       '@inlang/paraglide-js':
         specifier: ^1.11.2
         version: 1.11.2
@@ -62,13 +62,13 @@ importers:
         version: 1.2.74
       '@sveltejs/adapter-static':
         specifier: ^3.0.5
-        version: 3.0.5(@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0)))
+        version: 3.0.5(@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0)))
       '@sveltejs/kit':
         specifier: ^2.5.28
-        version: 2.5.28(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))
+        version: 2.5.28(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))
       '@sveltejs/vite-plugin-svelte':
         specifier: 4.0.0-next.7
-        version: 4.0.0-next.7(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))
+        version: 4.0.0-next.7(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))
       '@unocss/postcss':
         specifier: 0.62.4
         version: 0.62.4(postcss@8.4.47)
@@ -77,7 +77,7 @@ importers:
         version: 0.62.4
       '@unocss/vite':
         specifier: 0.62.4
-        version: 0.62.4(rollup@4.21.3)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))
+        version: 0.62.4(rollup@4.21.3)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))
       nanoid:
         specifier: ^5.0.7
         version: 5.0.7
@@ -92,13 +92,13 @@ importers:
         version: 3.3.3
       prettier-plugin-svelte:
         specifier: ^3.2.6
-        version: 3.2.6(prettier@3.3.3)(svelte@5.0.0-next.249)
+        version: 3.2.6(prettier@3.3.3)(svelte@5.0.0-next.257)
       svelte:
-        specifier: 5.0.0-next.249
-        version: 5.0.0-next.249
+        specifier: 5.0.0-next.257
+        version: 5.0.0-next.257
       svelte-check:
         specifier: ^4.0.2
-        version: 4.0.2(picomatch@4.0.2)(svelte@5.0.0-next.249)(typescript@5.6.2)
+        version: 4.0.2(picomatch@4.0.2)(svelte@5.0.0-next.257)(typescript@5.6.2)
       terser:
         specifier: ^5.33.0
         version: 5.33.0
@@ -109,8 +109,8 @@ importers:
         specifier: ^0.18.3
         version: 0.18.3(rollup@4.21.3)(webpack-sources@3.2.3)
       vite:
-        specifier: ^5.4.6
-        version: 5.4.6(@types/node@22.5.5)(terser@5.33.0)
+        specifier: ^5.4.7
+        version: 5.4.7(@types/node@22.5.5)(terser@5.33.0)
 
 packages:
 
@@ -124,55 +124,55 @@ packages:
   '@antfu/utils@0.7.10':
     resolution: {integrity: sha512-+562v9k4aI80m1+VuMHehNJWLOFjBnXn3tdOitzD0il5b7smkSBal4+a3oKiQTbrwMmN/TBUMDvbdoWDehgOww==}
 
-  '@biomejs/biome@1.9.1':
-    resolution: {integrity: sha512-Ps0Rg0zg3B1zpx+zQHMz5b0n0PBNCAaXttHEDTVrJD5YXR6Uj3T+abTDgeS3wsu4z5i2whqcE1lZxGyWH4bZYg==}
+  '@biomejs/biome@1.9.2':
+    resolution: {integrity: sha512-4j2Gfwft8Jqp1X0qLYvK4TEy4xhTo4o6rlvJPsjPeEame8gsmbGQfOPBkw7ur+7/Z/f0HZmCZKqbMvR7vTXQYQ==}
     engines: {node: '>=14.21.3'}
     hasBin: true
 
-  '@biomejs/cli-darwin-arm64@1.9.1':
-    resolution: {integrity: sha512-js0brHswq/BoeKgfSEUJYOjUOlML6p65Nantti+PsoQ61u9+YVGIZ7325LK7iUpDH8KVJT+Bx7K2b/6Q//W1Pw==}
+  '@biomejs/cli-darwin-arm64@1.9.2':
+    resolution: {integrity: sha512-rbs9uJHFmhqB3Td0Ro+1wmeZOHhAPTL3WHr8NtaVczUmDhXkRDWScaxicG9+vhSLj1iLrW47itiK6xiIJy6vaA==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [darwin]
 
-  '@biomejs/cli-darwin-x64@1.9.1':
-    resolution: {integrity: sha512-2zVyjUg5rN0k8XrytkubQWLbp2r/AS5wPhXs4vgVjvqbLnzo32EGX8p61gzroF2dH9DCUCfskdrigCGqNdEbpg==}
+  '@biomejs/cli-darwin-x64@1.9.2':
+    resolution: {integrity: sha512-BlfULKijNaMigQ9GH9fqJVt+3JTDOSiZeWOQtG/1S1sa8Lp046JHG3wRJVOvekTPL9q/CNFW1NVG8J0JN+L1OA==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [darwin]
 
-  '@biomejs/cli-linux-arm64-musl@1.9.1':
-    resolution: {integrity: sha512-L/JmXKvhsZ1lTgqOr3tWkzuY/NRppdIscHeC9aaiR72WjnBgJS94mawl9BWmGB3aWBc0q6oSDWnBS7617EMMmA==}
+  '@biomejs/cli-linux-arm64-musl@1.9.2':
+    resolution: {integrity: sha512-ZATvbUWhNxegSALUnCKWqetTZqrK72r2RsFD19OK5jXDj/7o1hzI1KzDNG78LloZxftrwr3uI9SqCLh06shSZw==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [linux]
 
-  '@biomejs/cli-linux-arm64@1.9.1':
-    resolution: {integrity: sha512-QgxwfnG+r2aer5RNGR67Ey91Tv7xXW8E9YckHhwuyWjdLEvKWkrSJrhVG/6ub0kVvTSNkYOuT/7/jMOFBuUbRA==}
+  '@biomejs/cli-linux-arm64@1.9.2':
+    resolution: {integrity: sha512-T8TJuSxuBDeQCQzxZu2o3OU4eyLumTofhCxxFd3+aH2AEWVMnH7Z/c3QP1lHI5RRMBP9xIJeMORqDQ5j+gVZzw==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [linux]
 
-  '@biomejs/cli-linux-x64-musl@1.9.1':
-    resolution: {integrity: sha512-gY+eFLIAW45v3WicQHicvjRfA0ntMZHx7h937bXwBMFNFoKmB6rMi6+fKQ6/hiS6juhsFxZdZIz20m15s49J6A==}
+  '@biomejs/cli-linux-x64-musl@1.9.2':
+    resolution: {integrity: sha512-CjPM6jT1miV5pry9C7qv8YJk0FIZvZd86QRD3atvDgfgeh9WQU0k2Aoo0xUcPdTnoz0WNwRtDicHxwik63MmSg==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [linux]
 
-  '@biomejs/cli-linux-x64@1.9.1':
-    resolution: {integrity: sha512-F0INygtzI2L2n2R1KtYHGr3YWDt9Up1zrUluwembM+iJ1dXN3qzlSb7deFUsSJm4FaIPriqs6Xa56ukdQW6UeQ==}
+  '@biomejs/cli-linux-x64@1.9.2':
+    resolution: {integrity: sha512-T0cPk3C3Jr2pVlsuQVTBqk2qPjTm8cYcTD9p/wmR9MeVqui1C/xTVfOIwd3miRODFMrJaVQ8MYSXnVIhV9jTjg==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [linux]
 
-  '@biomejs/cli-win32-arm64@1.9.1':
-    resolution: {integrity: sha512-7Jahxar3OB+aTPOgXisMJmMKMsjcK+UmdlG3UIOQjzN/ZFEsPV+GT3bfrVjZDQaCw/zes0Cqd7VTWFjFTC/+MQ==}
+  '@biomejs/cli-win32-arm64@1.9.2':
+    resolution: {integrity: sha512-2x7gSty75bNIeD23ZRPXyox6Z/V0M71ObeJtvQBhi1fgrvPdtkEuw7/0wEHg6buNCubzOFuN9WYJm6FKoUHfhg==}
     engines: {node: '>=14.21.3'}
     cpu: [arm64]
     os: [win32]
 
-  '@biomejs/cli-win32-x64@1.9.1':
-    resolution: {integrity: sha512-liSRWjWzFhyG7s1jg/Bbv9FL+ha/CEd5tFO3+dFIJNplL4TnvAivtyfRVi/tu/pNjISbV1k9JwdBewtAKAgA0w==}
+  '@biomejs/cli-win32-x64@1.9.2':
+    resolution: {integrity: sha512-JC3XvdYcjmu1FmAehVwVV0SebLpeNTnO2ZaMdGCSOdS7f8O9Fq14T2P1gTG1Q29Q8Dt1S03hh0IdVpIZykOL8g==}
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
@@ -1508,8 +1508,8 @@ packages:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
 
-  svelte@5.0.0-next.249:
-    resolution: {integrity: sha512-vbGir3ScQJjdKyWjhLi4aXc0DpilL4zVzC8UdEksoUhvP6OcaXrTC3aitHfSmdQ+FDntDLUWtytZMA01nRBs6Q==}
+  svelte@5.0.0-next.257:
+    resolution: {integrity: sha512-fiTimH9UbJ0aNUcsOyaRgq4MZdmgN6lv3sQ2sOMv9V6haK0emsmYCm8Pw10+ej6FhXGALxuWvNdoi7VKMaeIIA==}
     engines: {node: '>=18'}
 
   terser@5.33.0:
@@ -1610,16 +1610,16 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  valibot@0.42.0:
-    resolution: {integrity: sha512-igMdmHXxDiQY714ssh9bGisMqJ2yg7sko1KOmv/omnrIacGtP6mGrbvVT1IuV1bDrHyG9ybgpHwG1UElDiDCLg==}
+  valibot@0.42.1:
+    resolution: {integrity: sha512-3keXV29Ar5b//Hqi4MbSdV7lfVp6zuYLZuA9V1PvQUsXqogr+u5lvLPLk3A4f74VUXDnf/JfWMN6sB+koJ/FFw==}
     peerDependencies:
       typescript: '>=5'
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  vite@5.4.6:
-    resolution: {integrity: sha512-IeL5f8OO5nylsgzd9tq4qD2QqI0k2CQLGrWD0rCN0EQJZpBK5vJAx0I+GDkMOXxQX/OfFHMuLIx6ddAxGX/k+Q==}
+  vite@5.4.7:
+    resolution: {integrity: sha512-5l2zxqMEPVENgvzTuBpHer2awaetimj2BGkhBPdnwKbPNOlHsODU+oiazEZzLK7KhAnOrO+XGYJYn4ZlUhDtDQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -1684,39 +1684,39 @@ snapshots:
 
   '@antfu/utils@0.7.10': {}
 
-  '@biomejs/biome@1.9.1':
+  '@biomejs/biome@1.9.2':
     optionalDependencies:
-      '@biomejs/cli-darwin-arm64': 1.9.1
-      '@biomejs/cli-darwin-x64': 1.9.1
-      '@biomejs/cli-linux-arm64': 1.9.1
-      '@biomejs/cli-linux-arm64-musl': 1.9.1
-      '@biomejs/cli-linux-x64': 1.9.1
-      '@biomejs/cli-linux-x64-musl': 1.9.1
-      '@biomejs/cli-win32-arm64': 1.9.1
-      '@biomejs/cli-win32-x64': 1.9.1
+      '@biomejs/cli-darwin-arm64': 1.9.2
+      '@biomejs/cli-darwin-x64': 1.9.2
+      '@biomejs/cli-linux-arm64': 1.9.2
+      '@biomejs/cli-linux-arm64-musl': 1.9.2
+      '@biomejs/cli-linux-x64': 1.9.2
+      '@biomejs/cli-linux-x64-musl': 1.9.2
+      '@biomejs/cli-win32-arm64': 1.9.2
+      '@biomejs/cli-win32-x64': 1.9.2
 
-  '@biomejs/cli-darwin-arm64@1.9.1':
+  '@biomejs/cli-darwin-arm64@1.9.2':
     optional: true
 
-  '@biomejs/cli-darwin-x64@1.9.1':
+  '@biomejs/cli-darwin-x64@1.9.2':
     optional: true
 
-  '@biomejs/cli-linux-arm64-musl@1.9.1':
+  '@biomejs/cli-linux-arm64-musl@1.9.2':
     optional: true
 
-  '@biomejs/cli-linux-arm64@1.9.1':
+  '@biomejs/cli-linux-arm64@1.9.2':
     optional: true
 
-  '@biomejs/cli-linux-x64-musl@1.9.1':
+  '@biomejs/cli-linux-x64-musl@1.9.2':
     optional: true
 
-  '@biomejs/cli-linux-x64@1.9.1':
+  '@biomejs/cli-linux-x64@1.9.2':
     optional: true
 
-  '@biomejs/cli-win32-arm64@1.9.1':
+  '@biomejs/cli-win32-arm64@1.9.2':
     optional: true
 
-  '@biomejs/cli-win32-x64@1.9.1':
+  '@biomejs/cli-win32-x64@1.9.2':
     optional: true
 
   '@csstools/selector-resolve-nested@2.0.0(postcss-selector-parser@6.1.2)':
@@ -2297,13 +2297,13 @@ snapshots:
 
   '@sinclair/typebox@0.31.28': {}
 
-  '@sveltejs/adapter-static@3.0.5(@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0)))':
+  '@sveltejs/adapter-static@3.0.5(@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0)))':
     dependencies:
-      '@sveltejs/kit': 2.5.28(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))
+      '@sveltejs/kit': 2.5.28(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))
 
-  '@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))':
+  '@sveltejs/kit@2.5.28(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 4.0.0-next.7(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))
+      '@sveltejs/vite-plugin-svelte': 4.0.0-next.7(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))
       '@types/cookie': 0.6.0
       cookie: 0.6.0
       devalue: 5.0.0
@@ -2315,36 +2315,36 @@ snapshots:
       sade: 1.8.1
       set-cookie-parser: 2.7.0
       sirv: 2.0.4
-      svelte: 5.0.0-next.249
+      svelte: 5.0.0-next.257
       tiny-glob: 0.2.9
-      vite: 5.4.6(@types/node@22.5.5)(terser@5.33.0)
+      vite: 5.4.7(@types/node@22.5.5)(terser@5.33.0)
 
-  '@sveltejs/vite-plugin-svelte-inspector@3.0.0-next.3(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))':
+  '@sveltejs/vite-plugin-svelte-inspector@3.0.0-next.3(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 4.0.0-next.7(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))
+      '@sveltejs/vite-plugin-svelte': 4.0.0-next.7(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))
       debug: 4.3.7
-      svelte: 5.0.0-next.249
-      vite: 5.4.6(@types/node@22.5.5)(terser@5.33.0)
+      svelte: 5.0.0-next.257
+      vite: 5.4.7(@types/node@22.5.5)(terser@5.33.0)
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))':
+  '@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 3.0.0-next.3(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.249)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))
+      '@sveltejs/vite-plugin-svelte-inspector': 3.0.0-next.3(@sveltejs/vite-plugin-svelte@4.0.0-next.7(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0)))(svelte@5.0.0-next.257)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))
       debug: 4.3.7
       deepmerge: 4.3.1
       kleur: 4.1.5
       magic-string: 0.30.11
-      svelte: 5.0.0-next.249
-      vite: 5.4.6(@types/node@22.5.5)(terser@5.33.0)
-      vitefu: 1.0.2(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))
+      svelte: 5.0.0-next.257
+      vite: 5.4.7(@types/node@22.5.5)(terser@5.33.0)
+      vitefu: 1.0.2(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))
     transitivePeerDependencies:
       - supports-color
 
-  '@tanstack/svelte-virtual@3.10.8(svelte@5.0.0-next.249)':
+  '@tanstack/svelte-virtual@3.10.8(svelte@5.0.0-next.257)':
     dependencies:
       '@tanstack/virtual-core': 3.10.8
-      svelte: 5.0.0-next.249
+      svelte: 5.0.0-next.257
 
   '@tanstack/virtual-core@3.10.8': {}
 
@@ -2429,7 +2429,7 @@ snapshots:
       '@unocss/core': 0.62.4
       magic-string: 0.30.11
 
-  '@unocss/vite@0.62.4(rollup@4.21.3)(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0))':
+  '@unocss/vite@0.62.4(rollup@4.21.3)(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@rollup/pluginutils': 5.1.0(rollup@4.21.3)
@@ -2439,7 +2439,7 @@ snapshots:
       chokidar: 3.6.0
       magic-string: 0.30.11
       tinyglobby: 0.2.6
-      vite: 5.4.6(@types/node@22.5.5)(terser@5.33.0)
+      vite: 5.4.7(@types/node@22.5.5)(terser@5.33.0)
     transitivePeerDependencies:
       - rollup
       - supports-color
@@ -2930,10 +2930,10 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  prettier-plugin-svelte@3.2.6(prettier@3.3.3)(svelte@5.0.0-next.249):
+  prettier-plugin-svelte@3.2.6(prettier@3.3.3)(svelte@5.0.0-next.257):
     dependencies:
       prettier: 3.3.3
-      svelte: 5.0.0-next.249
+      svelte: 5.0.0-next.257
 
   prettier@3.3.3: {}
 
@@ -3027,19 +3027,19 @@ snapshots:
       '@tokenizer/token': 0.3.0
       peek-readable: 5.2.0
 
-  svelte-check@4.0.2(picomatch@4.0.2)(svelte@5.0.0-next.249)(typescript@5.6.2):
+  svelte-check@4.0.2(picomatch@4.0.2)(svelte@5.0.0-next.257)(typescript@5.6.2):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       chokidar: 3.6.0
       fdir: 6.3.0(picomatch@4.0.2)
       picocolors: 1.1.0
       sade: 1.8.1
-      svelte: 5.0.0-next.249
+      svelte: 5.0.0-next.257
       typescript: 5.6.2
     transitivePeerDependencies:
       - picomatch
 
-  svelte@5.0.0-next.249:
+  svelte@5.0.0-next.257:
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@jridgewell/sourcemap-codec': 1.5.0
@@ -3170,11 +3170,11 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  valibot@0.42.0(typescript@5.6.2):
+  valibot@0.42.1(typescript@5.6.2):
     optionalDependencies:
       typescript: 5.6.2
 
-  vite@5.4.6(@types/node@22.5.5)(terser@5.33.0):
+  vite@5.4.7(@types/node@22.5.5)(terser@5.33.0):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.47
@@ -3184,9 +3184,9 @@ snapshots:
       fsevents: 2.3.3
       terser: 5.33.0
 
-  vitefu@1.0.2(vite@5.4.6(@types/node@22.5.5)(terser@5.33.0)):
+  vitefu@1.0.2(vite@5.4.7(@types/node@22.5.5)(terser@5.33.0)):
     optionalDependencies:
-      vite: 5.4.6(@types/node@22.5.5)(terser@5.33.0)
+      vite: 5.4.7(@types/node@22.5.5)(terser@5.33.0)
 
   weak-lru-cache@1.2.2: {}
 
