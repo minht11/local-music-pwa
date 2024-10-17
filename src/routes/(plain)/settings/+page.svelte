@@ -279,30 +279,38 @@
 		<div class="mr-auto">{m.settingsPrimaryColor()}</div>
 
 		<div class="flex gap-8px max-sm:w-full">
-			<Button
-				kind="outlined"
-				class="max-sm:w-full"
-				disabled={!mainStore.themeColorSeedHex}
-				onclick={() => {
-					mainStore.themeColorSeedHex = null
-				}}
-			>
-				{m.settingsColorReset()}
-			</Button>
+			{#if mainStore.themeColorSeedHex}
+				<Button
+					kind="outlined"
+					class="max-sm:w-full"
+					disabled={!mainStore.themeColorSeedHex}
+					onclick={() => {
+						mainStore.themeColorSeedHex = null
+					}}
+				>
+					{m.settingsColorReset()}
+				</Button>
+			{/if}
 
-			<Button kind="toned" class="max-sm:w-full">
-				<div class="rounded-full p-4px" style={`background: ${mainStore.themeColorSeedHex}`}>
+			<div class="flex relative">
+				<Button kind="toned" class="max-sm:w-full">
 					<Icon type="eyedropper" class="size-20px" />
-				</div>
 
-				{m.settingsColorPick()}
+					{m.settingsColorPick()}
 
-				<input
-					type="color"
-					bind:value={themeColor.value}
-					class="appearance-none w-full h-full absolute inset-0 opacity-0 cursor-pointer"
-				/>
-			</Button>
+					<input
+						type="color"
+						bind:value={themeColor.value}
+						class="appearance-none w-full h-full absolute inset-0 opacity-0 cursor-pointer"
+					/>
+				</Button>
+				{#if mainStore.themeColorSeedHex}
+					<div
+						class="absolute pointer-events-none -top-4px -right-4px rounded-full border-2 border-inverseSurface size-24px flex items-center justify-center"
+						style={`background: ${mainStore.themeColorSeedHex}`}
+					></div>
+				{/if}
+			</div>
 		</div>
 	</div>
 

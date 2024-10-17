@@ -38,7 +38,7 @@
 					class="flex items-center max-sm:p-8px max-sm:rounded-r-16px rounded-8px grow sm:h-44px pr-8px sm:max-w-180px group"
 				>
 					<div
-						class="player-artwork bg-surfaceContainerHighest rounded-8px overflow-hidden shrink-0 relative h-44px w-44px"
+						class="player-artwork -z-1 bg-surfaceContainerHighest rounded-8px overflow-hidden shrink-0 relative h-44px w-44px"
 					>
 						{#if track}
 							<PlayerArtwork class="size-full" />
@@ -47,7 +47,7 @@
 						<Icon
 							type="chevronUp"
 							class={clx(
-								'm-auto shrink-0 absolute inset-0',
+								'm-auto shrink-0 absolute inset-0 pl-overlay-chevron-up-icon',
 								track &&
 									'bg-tertiary text-onTertiary rounded-full scale-0 transition-transform transition-opacity transition-200 [.group:hover_&]:scale-100',
 							)}
@@ -95,5 +95,24 @@
 		.player-artwork {
 			view-transition-name: pl-artwork;
 		}
+
+		:global(.pl-overlay-chevron-up-icon) {
+			view-transition-name: pl-chevron-up;
+		}
+	}
+
+	::view-transition-old(pl-chevron-up) {
+		display: none;
+	}
+
+	@keyframes -global-view-pl-chevron-up-fade-in {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
+	}
+
+	::view-transition-new(pl-chevron-up) {
+		animation: view-pl-chevron-up-fade-in 125ms 275ms linear backwards;
 	}
 </style>

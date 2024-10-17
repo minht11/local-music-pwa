@@ -71,7 +71,7 @@
 </script>
 
 <svelte:window
-	onkeydown={(e) => {
+	on:keydown={(e) => {
 		if (e.key === ' ') {
 			e.preventDefault()
 
@@ -95,7 +95,7 @@
 		<SnackbarRenderer />
 
 		{#if !$page.data.noPlayerOverlay}
-			<div bind:clientHeight={overlayContentHeight} class="px-8px pb-8px pointer-events-none">
+			<div bind:clientHeight={overlayContentHeight} class="px-16px pb-8px pointer-events-none">
 				<PlayerOverlay />
 			</div>
 		{/if}
