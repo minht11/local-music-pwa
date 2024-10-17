@@ -1,5 +1,6 @@
 <script module lang="ts">
 	import { clx } from '$lib/helpers/clx'
+	import type { Snippet } from 'svelte'
 	import { ripple } from '../actions/ripple.ts'
 	import { tooltip } from '../actions/tooltip.ts'
 

@@ -1,4 +1,5 @@
 <script lang="ts" module>
+	import type { Snippet } from 'svelte'
 	import Button, { type AllowedButtonElement, type ButtonProps } from './Button.svelte'
 	import Icon, { type IconType } from './icon/Icon.svelte'
 
