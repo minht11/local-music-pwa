@@ -10,11 +10,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"biome-check": "biome check ./src",
-		"lint": "biome lint ./src",
-		"lint-fix": "biome check ./src --apply",
+		"biome-fix": "biome check ./src --write",
 		"format-prettier-fix": "prettier --write ./src",
-		"format": "biome format ./src",
-		"format-fix": "biome format ./src --write",
 		"compile-i18n": "paraglide-js compile --project ./project.inlang"
 	},
 	"devDependencies": {
