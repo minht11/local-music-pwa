@@ -71,20 +71,6 @@
 		<div
 			class="flex flex-col z-0 bg-surfaceContainerHigh rounded-16px h-full w-full overflow-clip relative"
 		>
-			<div class="absolute inset-0 filter-blur-40px -z-1">
-				<div
-					class="absolute size-250px @xl:size-300px bg-tertiaryContainer -top-100px -right-100px rounded-full"
-				></div>
-
-				<div
-					class="absolute size-250px bg-tertiaryContainer top-140px right-160px rounded-full"
-				></div>
-
-				<div
-					class="absolute size-250px bg-tertiaryContainer top-50px -left-100px rounded-full"
-				></div>
-			</div>
-
 			<div class="flex flex-col p-16px grow">
 				<div class="flex items-center gap-8px">
 					<Icon type="playlist" class="text-onSurface/54 size-40px" />
@@ -99,7 +85,7 @@
 
 			<div class="flex gap-8px mt-auto py-16px pl-16px pr-8px items-center">
 				<Button
-					kind="filled"
+					kind="toned"
 					class="mr-auto"
 					onclick={() => {
 						player.playTrack(0, tracks, {

@@ -4,13 +4,19 @@ import type { IDBPTransaction, IndexNames } from 'idb'
 
 type LibraryStoreName = 'tracks' | 'albums' | 'artists'
 
+type TrackOperationsTransaction = IDBPTransaction<
+	AppDB,
+	('directories' | 'tracks' | 'albums' | 'artists' | 'playlistsTracks')[],
+	'readwrite'
+>
+
 const removeTrackRelatedData = async <
 	StoreName extends LibraryStoreName,
 	EntityIndexName extends IndexNames<AppDB, StoreName>,
 	EntityValue extends AppDB[StoreName]['indexes'][EntityIndexName],
 	IndexName extends IndexNames<AppDB, 'tracks'>,
 >(
-	tx: IDBPTransaction<AppDB, ('directories' | 'tracks' | 'albums' | 'artists')[], 'readwrite'>,
+	tx: TrackOperationsTransaction,
 	trackIndex: IndexName,
 	entityStoreName: StoreName,
 	entityIndex: EntityIndexName,
@@ -42,14 +48,30 @@ const removeTrackRelatedData = async <
 	return change
 }
 
-export const removeTrackWithTx = async <
-	Tx extends IDBPTransaction<
-		AppDB,
-		('directories' | 'tracks' | 'albums' | 'artists')[],
-		'readwrite'
-	>,
->(
-	tx: Tx,
+const removeTrackFromPlaylistsInDatabase = async (trackId: number) => {
+	const db = await getDB()
+	const tx = db.transaction(['playlists', 'playlistsTracks'], 'readwrite')
+
+	const store = tx.objectStore('playlistsTracks')
+
+	const range = IDBKeyRange.bound([0, trackId], [Number.POSITIVE_INFINITY, trackId])
+	const tracks = await store.getAll(range)
+
+	await store.delete(range)
+
+	const changes = tracks.map(
+		(t): DBChangeRecord => ({
+			operation: 'delete',
+			storeName: 'playlistsTracks',
+			key: [t.playlistId, t.trackId],
+		}),
+	)
+
+	return changes
+}
+
+export const removeTrackWithTx = async (
+	tx: TrackOperationsTransaction,
 	trackId: number,
 ): Promise<void> => {
 	const tracksStore = tx.objectStore('tracks')
@@ -59,8 +81,9 @@ export const removeTrackWithTx = async <
 		return
 	}
 
-	const [albumChange, ...artistsChanges] = await Promise.all([
+	const [albumChange, playlistChanges, ...artistsChanges] = await Promise.all([
 		removeTrackRelatedData(tx, 'album', 'albums', 'name', track.album),
+		removeTrackFromPlaylistsInDatabase(trackId),
 		...track.artists.map((artist) =>
 			removeTrackRelatedData(tx, 'artists', 'artists', 'name', artist),
 		),
@@ -76,14 +99,14 @@ export const removeTrackWithTx = async <
 		},
 		albumChange,
 		...artistsChanges,
-		// TODO. Remove from playlists.
+		...playlistChanges,
 	])
 }
 
 export const removeTrackInDb = async (id: number): Promise<void> => {
 	const db = await getDB()
 
-	const tx = db.transaction(['tracks', 'albums', 'artists'], 'readwrite')
+	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
 	removeTrackWithTx(tx, id)
 
 	await tx.done

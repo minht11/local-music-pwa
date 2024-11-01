@@ -136,7 +136,10 @@ export const removeDirectory = async (directoryId: number): Promise<void> => {
 	const db = await getDB()
 
 	directoriesStore.markAsInprogress(directoryId)
-	const tx = db.transaction(['directories', 'tracks', 'albums', 'artists'], 'readwrite')
+	const tx = db.transaction(
+		['directories', 'tracks', 'albums', 'artists', 'playlistsTracks'],
+		'readwrite',
+	)
 
 	const [directoryName, tracksToBeRemoved] = await Promise.all([
 		tx

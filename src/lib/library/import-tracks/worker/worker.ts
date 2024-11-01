@@ -154,7 +154,10 @@ const processDirectory = async (newDirHandle: FileSystemDirectoryHandle, directo
 		count.current += 1
 	}
 
-	const tx = db.transaction(['directories', 'tracks'], 'readwrite')
+	const tx = db.transaction(
+		['directories', 'tracks', 'albums', 'artists', 'playlistsTracks'],
+		'readwrite',
+	)
 	// If we have any tracks left in the set,
 	// that means they no longer exist in the directory, so we remove them.
 	for (const track of existingTrackSet) {
