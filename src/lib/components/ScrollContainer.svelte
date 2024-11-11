@@ -1,6 +1,5 @@
 <script lang="ts" module>
 	import { getContext, setContext } from 'svelte'
-	import invariant from 'tiny-invariant'
 
 	type ScrollTargetElement = Element | Window | null
 
@@ -9,20 +8,12 @@
 	export const useScrollTarget = () => {
 		const nodeGetter = getContext<() => ScrollTargetElement>(contextKey)
 
-		if (nodeGetter) {
-			return {
-				get scrollTarget() {
-					const node = nodeGetter()
-
-					invariant(node, 'Scroll target is not defined')
-
-					return node
-				},
-			}
-		}
-
 		return {
-			scrollTarget: window,
+			get scrollTarget() {
+				const node = nodeGetter()
+
+				return node ?? window
+			},
 		}
 	}
 </script>
