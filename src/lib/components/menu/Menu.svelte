@@ -41,12 +41,12 @@
 	}}
 />
 
-<div onclick={close} aria-hidden="true" class="absolute inset-0 pointer-events-auto"></div>
+<div onclick={close} aria-hidden="true" class="pointer-events-auto absolute inset-0"></div>
 <focus-trap
 	bind:this={menuEl}
 	role="menu"
 	tabindex="-1"
-	class="pointer-events-auto flex flex-col absolute bg-surface rounded-4px py-8px bg-surfaceContainerHigh overscroll-contain shadow-2xl"
+	class="pointer-events-auto absolute flex flex-col overscroll-contain rounded-sm bg-surface bg-surfaceContainerHigh py-2 shadow-2xl"
 	onkeydown={(e: KeyboardEvent) => {
 		if (e.key === 'ArrowDown') {
 			e.preventDefault()
@@ -64,7 +64,7 @@
 			role="menuitem"
 			tabindex="0"
 			class={clx(
-				'flex items-center grow h-40px gap-16px px-16px text-body-md relative interactable',
+				'interactable relative flex h-10 grow items-center gap-4 px-4 text-body-md',
 				item.selected && 'bg-surfaceVariant text-primary',
 			)}
 			use:ripple
@@ -74,7 +74,7 @@
 			}}
 		>
 			{#if item.icon}
-				<Icon type={item.icon} class="mr-16px" />
+				<Icon type={item.icon} class="mr-4" />
 			{/if}
 
 			{item.label}

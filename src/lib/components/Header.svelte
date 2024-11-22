@@ -45,21 +45,21 @@
 
 <header
 	class={clx(
-		'inset-x-0 top-0 z-10 flex h-[var(--app-header-height)] flex-shrink-0 transition-background-color duration-200 ease-in-out',
+		'transition-background-color ease-in-out inset-x-0 top-0 z-10 flex h-[var(--app-header-height)] shrink-0 duration-200',
 		isScrolled && 'bg-surfaceContainerHigh',
 		isFixed ? 'fixed' : 'sticky',
 	)}
 >
-	<div class="max-w-1280px flex mx-auto w-full items-center pl-24px pr-8px">
+	<div class="mx-auto flex w-full max-w-320 items-center pr-2 pl-6">
 		{#if !noBackButton}
-			<BackButton class="mr-8px" />
+			<BackButton class="mr-2" />
 		{/if}
 
 		{#if title}
-			<h1 class="text-title-lg mr-auto">{title}</h1>
+			<h1 class="mr-auto text-title-lg">{title}</h1>
 		{/if}
 
-		<div class="flex items-center gap-8px">
+		<div class="flex items-center gap-2">
 			{@render children?.()}
 		</div>
 	</div>

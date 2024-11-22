@@ -173,7 +173,7 @@
 </script>
 
 {#if count === 0}
-	<div class="m-auto self-center justify-self-center w-max h-max text-center">
+	<div class="m-auto h-max w-max self-center justify-self-center text-center">
 		{m.noItemsToDisplay()}
 	</div>
 {:else}
@@ -183,7 +183,7 @@
 		role="grid"
 		aria-rowcount={count}
 		style:height={`${($virtualizer?.getTotalSize() ?? 0) - gap}px`}
-		class="contain-strict relative w-full @container rounded-8px outline-offset--2px"
+		class="@container relative w-full rounded-lg -outline-offset-2 contain-strict"
 		tabindex="0"
 		onfocusin={focusinHandler}
 		onfocusout={focusoutHandler}

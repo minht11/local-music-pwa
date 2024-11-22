@@ -42,7 +42,7 @@
 
 <div
 	class={clx(
-		'timeline-container grid items-center tabular-nums gap-10px w-full text-nowrap',
+		'timeline-container grid w-full items-center gap-2.5 text-nowrap tabular-nums',
 		className,
 	)}
 >
@@ -64,7 +64,7 @@
 		}}
 	/>
 
-	<div class="text-body-sm text-right">
+	<div class="text-right text-body-sm">
 		{formatDuration(player.duration)}
 	</div>
 </div>

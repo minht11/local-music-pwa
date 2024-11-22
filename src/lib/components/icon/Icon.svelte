@@ -19,7 +19,7 @@
 	width="24"
 	height="24"
 	viewBox="0 0 24 24"
-	class={clx('fill-current pointer-events-none shrink-0', className)}
+	class={clx('pointer-events-none shrink-0 fill-current', className)}
 >
 	<path d={ICON_PATHS[type]} />
 </svg>

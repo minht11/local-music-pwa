@@ -60,7 +60,7 @@
 <button
 	bind:this={target}
 	class={clx(
-		'border border-outlineVariant h-40px rounded-4px pl-16px pr-8px gap-8px appearance-none relative overflow-hidden flex items-center',
+		'relative flex h-10 appearance-none items-center gap-2 overflow-hidden rounded-sm border border-outlineVariant pr-2 pl-4',
 		className,
 	)}
 	use:ripple
@@ -76,7 +76,7 @@
 		Select item
 	{/if}
 
-	<Icon type="menuDown" class="size-20px ml-auto" />
+	<Icon type="menuDown" class="ml-auto size-5" />
 </button>
 
 <div
@@ -85,7 +85,7 @@
 	aria-orientation="vertical"
 	role="listbox"
 	popover="auto"
-	class="bg-surfaceContainerHighest py-8px px-0 rounded-4px shadow-xl hidden popover-open:flex flex-col absolute m-0"
+	class="popover-open:flex absolute m-0 hidden flex-col rounded-sm bg-surfaceContainerHighest px-0 py-2 shadow-xl"
 	ontoggle={(e) => {
 		isOpen = e.newState === 'open'
 	}}
@@ -97,7 +97,7 @@
 				role="option"
 				aria-selected={item[key] === selected}
 				class={clx(
-					'overflow-hidden relative h-40px px-16px flex items-center w-full',
+					'relative flex h-10 w-full items-center overflow-hidden px-4',
 					item[key] === selected && 'text-primary',
 				)}
 				onclick={() => {

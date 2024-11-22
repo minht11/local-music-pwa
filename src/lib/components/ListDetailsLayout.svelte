@@ -27,7 +27,7 @@
 		{#if mode === 'both'}
 			<ScrollContainer
 				class={clx(
-					'overflow-y-auto max-h-100vh shrink-0 sticky top-0 overscroll-contain flex flex-col',
+					'max-h-100vh sticky top-0 flex shrink-0 flex-col overflow-y-auto overscroll-contain',
 					!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
 					!noListStableGutter && 'scrollbar-gutter-stable',
 				)}
@@ -38,7 +38,7 @@
 
 		<div
 			class={clx(
-				'w-full grow flex flex-col',
+				'flex w-full grow flex-col',
 				!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
 			)}
 		>

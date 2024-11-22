@@ -44,7 +44,8 @@
 		toned: 'tonal-button',
 		outlined: 'outlined-button',
 		flat: 'flat-button',
-	}
+		blank: '',
+	} as const
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -58,7 +59,10 @@
 	{href}
 	disabled={disabled === true ? true : undefined}
 	class={clx(
-		kind === 'blank' ? 'interactable' : clx('base-button px-24px', KIND_CLASS_MAP[kind]),
+		'interactable',
+		KIND_CLASS_MAP[kind],
+		kind !== 'blank' &&
+			'base-button interactable flex h-10 items-center justify-center gap-2 rounded-3xl px-6 text-label-lg',
 		restProps.class,
 		disabled && '!cursor-default',
 	)}
@@ -70,40 +74,39 @@
 
 <style>
 	.filled-button {
-		background: theme('colors.primary');
-		color: theme('colors.onPrimary');
+		background: var(--color-primary);
+		color: var(--color-onPrimary);
 	}
 
 	.tonal-button {
-		background: theme('colors.secondaryContainer');
-		color: theme('colors.onSecondaryContainer');
+		background: var(--color-secondaryContainer);
+		color: var(--color-onSecondaryContainer);
 	}
 
 	:is(.tonal-button, .filled-button)[disabled] {
-		/* @apply bg-onSurface/12%; */
-		background: theme('colors.onSurface/12%');
+		background-color: color-mix(in oklch, var(--color-onSurface) 12%, transparent) transparent;
 	}
 
 	.outlined-button {
-		color: theme('colors.primary');
-		border: 1px solid theme('colors.outline');
+		color: var(--color-primary);
+		border: 1px solid var(--color-outline);
 	}
 
 	.flat-button {
-		color: theme('colors.primary');
-		padding-left: 12px;
-		padding-right: 12px;
+		color: var(--color-primary);
+		padding-left: calc(var(--spacing) * 3);
+		padding-right: calc(var(--spacing) * 3);
 	}
 
 	.base-button[disabled] {
 		cursor: default;
-		background-color: theme('colors.onSurface/38%');
-		border-color: theme('colors.onSurface/38%');
+		background-color: color-mix(in oklch, var(--color-onSurface) 38%, transparent) transparent;
+		border-color: color-mix(in oklch, var(--color-onSurface) 38%, transparent) transparent;
 	}
 
 	.base-button:focus-visible,
 	.base-button:hover:focus-visible {
-		outline: 2px solid theme('colors.onSurface') !important;
-		outline-offset: -2px;
+		outline: calc(var(--spacing) * 0.5) solid var(--color-onSurface) !important;
+		outline-offset: calc(var(--spacing) * -0.5);
 	}
 </style>

@@ -54,7 +54,7 @@
 
 <div class="text-field-container">
 	<div
-		class="h-56px flex flex-col rounded-4px border border-outline focus-within:border-primary [&:has(input:user-invalid)]:border-error text-onSurface p-1px focus-within:p-0 focus-within:border-2px"
+		class="rounded-px focus-within:border-0.5 flex h-14 flex-col border border-outline p-px text-onSurface focus-within:border-primary focus-within:p-0 [&:has(input:user-invalid)]:border-error"
 	>
 		<input
 			bind:this={input}
@@ -63,11 +63,11 @@
 			{id}
 			{type}
 			{required}
-			class="w-full placeholder:text-onSurfaceVariant appearance-none grow border-none outline-none bg-transparent px-14px"
+			class="w-full grow appearance-none border-none bg-transparent px-3.5 outline-none placeholder:text-onSurfaceVariant"
 			{placeholder}
 		/>
 	</div>
-	<div class="text-field-error text-body-sm text-error px-16px mt-4px hidden">
+	<div class="text-field-error mt-1 hidden px-4 text-body-sm text-error">
 		{validation.issues?.at(0)?.message ?? ''}
 	</div>
 </div>

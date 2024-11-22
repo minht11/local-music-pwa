@@ -16,7 +16,7 @@
 
 	<div
 		class={clx(
-			'size-4px rounded-full bg-primary absolute bottom-4px transition-1000 transition-transform transform-origin-center',
+			'transition-1000 transform-origin-center absolute bottom-1 size-1 rounded-full bg-primary transition-transform',
 			player.shuffle ? 'scale-100' : 'scale-0',
 		)}
 	></div>

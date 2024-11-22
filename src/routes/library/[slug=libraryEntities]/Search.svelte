@@ -66,16 +66,16 @@
 </script>
 
 <div
-	class="sticky border border-primary/10 @container top-8px mt-8px mb-16px z-1 bg-surfaceContainerHighest flex w-full rounded-8px px-8px gap-8px items-center ml-auto max-w-500px"
+	class="@container sticky top-2 z-1 mt-2 mb-4 ml-auto flex w-full max-w-125 items-center gap-2 rounded-lg border border-primary/10 bg-surfaceContainerHighest px-2"
 >
 	<input
 		type="text"
 		placeholder={`${m.librarySearch()} ${name.toLowerCase()}`}
-		class="h-48px w-240px pl-8px grow placeholder:text-onSurface/54 text-body-md bg-transparent focus:outline-none"
+		class="h-12 w-60 grow bg-transparent pl-2 text-body-md placeholder:text-onSurface/54 focus:outline-none"
 		oninput={(e) => searchHandler(e as unknown as InputEvent)}
 	/>
 
-	<Separator vertical class="h-24px my-auto" />
+	<Separator vertical class="my-auto h-6" />
 
 	<IconButton icon="sort" tooltip="Open sort menu" onclick={sortMenuHandler} />
 
@@ -88,7 +88,7 @@
 		}}
 	/>
 
-	<Separator vertical class="h-24px my-auto" />
+	<Separator vertical class="my-auto h-6" />
 
 	<IconButton
 		ariaLabel="Application menu"

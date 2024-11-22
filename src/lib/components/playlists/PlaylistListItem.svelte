@@ -49,7 +49,7 @@
 	menuItems={menuItemsWithItem}
 	tabindex={-1}
 	class={clx(
-		'h-56px text-left',
+		'h-14 text-left',
 		active ? 'bg-onSurfaceVariant/10 text-onSurfaceVariant' : '',
 		className,
 	)}
@@ -57,20 +57,20 @@
 	{ariaRowIndex}
 	onclick={() => onclick?.(playlist!)}
 >
-	<div role="cell" class="track-item grow gap-20px items-center">
+	<div role="cell" class="track-item grow items-center gap-5">
 		{#if typeof icon === 'function'}
 			{#if playlist}
 				{@render icon(playlist)}
 			{/if}
 		{:else}
-			<div class="bg-surfaceContainerHigh p-8px rounded-24px text-onSurfaceVariant/54">
+			<div class="rounded-3xl bg-surfaceContainerHigh p-2 text-onSurfaceVariant/54">
 				<Icon type={icon ?? fallbackIcon()} />
 			</div>
 		{/if}
 
 		{#if data.loading === true}
 			<div>
-				<div class="h-8px rounded-2px bg-onSurface/10"></div>
+				<div class="h-2 rounded-xs bg-onSurface/10"></div>
 			</div>
 		{:else if data.error}
 			Error loading track

@@ -28,9 +28,9 @@
 </script>
 
 <div
-	class="bg-inverseSurface text-inverseOnSurface rounded-8px gap-8px flex items-center pr-6px pl-16px py-6px"
+	class="flex items-center gap-2 rounded-lg bg-inverseSurface py-1.5 pr-1.5 pl-4 text-inverseOnSurface"
 >
-	<div class="min-h-12px py-8px">
+	<div class="min-h-3 py-2">
 		{message}
 	</div>
 </div>

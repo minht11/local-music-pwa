@@ -60,20 +60,20 @@
 	<Header title={data.singularTitle} mode="fixed" />
 {/if}
 
-<div class="@container grow flex flex-col px-16px pb-16px">
+<div class="@container flex grow flex-col px-4 pb-4">
 	<section
-		class="@2xl:h-224px relative gap-24px overflow-clip flex flex-col @2xl:flex-row items-center justify-center w-full py-16px"
+		class="relative flex w-full flex-col items-center justify-center gap-6 overflow-clip py-4 @2xl:h-56 @2xl:flex-row"
 	>
 		{#if data.storeName !== 'playlists'}
-			<Artwork src={artworkSrc()} class="rounded-16px shrink-0 h-196px @2xl:h-full" />
+			<Artwork src={artworkSrc()} class="h-49 shrink-0 rounded-2xl @2xl:h-full" />
 		{/if}
 
 		<div
-			class="flex flex-col z-0 bg-surfaceContainerHigh rounded-16px h-full w-full overflow-clip relative"
+			class="relative z-0 flex h-full w-full flex-col overflow-clip rounded-2xl bg-surfaceContainerHigh"
 		>
-			<div class="flex flex-col p-16px grow">
-				<div class="flex items-center gap-8px">
-					<Icon type="playlist" class="text-onSurface/54 size-40px" />
+			<div class="flex grow flex-col p-4">
+				<div class="flex items-center gap-2">
+					<Icon type="playlist" class="size-10 text-onSurface/54" />
 
 					<h1 class="text-headline-md">{item.name}</h1>
 				</div>
@@ -83,7 +83,7 @@
 				</div> -->
 			</div>
 
-			<div class="flex gap-8px mt-auto py-16px pl-16px pr-8px items-center">
+			<div class="mt-auto flex items-center gap-2 py-4 pr-2 pl-4">
 				<Button
 					kind="toned"
 					class="mr-auto"

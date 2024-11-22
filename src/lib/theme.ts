@@ -1,11 +1,4 @@
-import {
-	type CorePalette,
-	Hct,
-	argbFromHex,
-	blueFromArgb,
-	greenFromArgb,
-	redFromArgb,
-} from '@material/material-color-utilities'
+import { type CorePalette, Hct, argbFromHex, hexFromArgb } from '@material/material-color-utilities'
 
 export { argbFromHex }
 
@@ -13,11 +6,10 @@ type Tone = keyof CorePalette
 
 type ColorTokenInput = readonly [tone: Tone, light: number, dark: number]
 
-export interface ColorTokensInput {
+interface ColorTokensInput {
 	[key: string]: ColorTokenInput
 }
 
-/** @type {import('./types').ColorTokensInput} */
 const COLOR_TOKENS_GENERATION_MAP = {
 	primary: ['a1', 40, 80],
 	onPrimary: ['a1', 100, 20],
@@ -58,8 +50,7 @@ const COLOR_TOKENS_GENERATION_MAP = {
 
 export const DEFAULT_THEME_ARGB = /*#__PURE__*/ argbFromHex('#4c9e29')
 
-type Rgb = [r: number, g: number, b: number]
-export type ThemePaletteRgb = Record<keyof typeof COLOR_TOKENS_GENERATION_MAP, Rgb>
+export type ThemePaletteMap = Record<keyof typeof COLOR_TOKENS_GENERATION_MAP, string>
 
 const createTonalPalette = (hue: number, chroma: number) => ({
 	tone: (tone: number) => Hct.from(hue, chroma, tone).toInt(),
@@ -69,7 +60,7 @@ interface TonalPalette {
 	tone(argb: number): number
 }
 
-export const getThemePaletteRgb = (argb: number, isDark: boolean) => {
+export const getThemePaletteRgb = (argb: number, isDark: boolean): ThemePaletteMap => {
 	const hct = Hct.fromInt(argb)
 	const hue = hct.hue
 	const chroma = hct.chroma
@@ -92,24 +83,22 @@ export const getThemePaletteRgb = (argb: number, isDark: boolean) => {
 		const tone = isDark ? dark : light
 		const argbValue = palette[toneName].tone(tone)
 
-		const rgb: Rgb = [redFromArgb(argbValue), greenFromArgb(argbValue), blueFromArgb(argbValue)]
-
-		return [key, rgb] as [string, Rgb]
+		return [key, hexFromArgb(argbValue)] as [string, string]
 	})
 
-	return Object.fromEntries(transformedEntries) as ThemePaletteRgb
+	return Object.fromEntries(transformedEntries) as ThemePaletteMap
 }
 
-export const clearThemeCssVariables = () => {
+export const clearThemeCssVariables = (): void => {
 	for (const key of Object.keys(COLOR_TOKENS_GENERATION_MAP)) {
-		document.documentElement.style.removeProperty(`--color-${key}`)
+		document.documentElement.style.removeProperty(`--theme-color-${key}`)
 	}
 }
 
-export const setThemeCssVariables = (argb: number, isDark: boolean) => {
+export const setThemeCssVariables = (argb: number, isDark: boolean): void => {
 	const palette = getThemePaletteRgb(argb, isDark)
 
-	for (const [key, rgb] of Object.entries(palette)) {
-		document.documentElement.style.setProperty(`--color-${key}`, rgb.join(' '))
+	for (const [key, hex] of Object.entries(palette)) {
+		document.documentElement.style.setProperty(`--theme-color-${key}`, hex)
 	}
 }

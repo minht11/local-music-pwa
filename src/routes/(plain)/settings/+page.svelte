@@ -137,13 +137,13 @@
 	}, 400)
 </script>
 
-<section class="card mx-auto w-full max-w-[900px]">
-	<div class="flex gap-24px px-16px pt-16px">
+<section class="card container-lg mx-auto w-full max-w-[var(--settings-max-width)]">
+	<div class="flex gap-6 px-4 pt-4">
 		<div>
 			<div class="text-body-lg">
 				<WrapTranslation messageFn={m.settingsCurrentTracksInLibrary}>
 					{#snippet tracksCount()}
-						<strong class="rounded-12px tabular-nums bg-tertiary px-8px text-onTertiary">
+						<strong class="rounded-xl bg-tertiary px-2 text-onTertiary tabular-nums">
 							{count}
 						</strong>
 					{/snippet}
@@ -153,12 +153,12 @@
 		</div>
 	</div>
 
-	<Separator class="mt-16px" />
+	<Separator class="mt-4" />
 
-	<div class="flex flex-col gap-16px p-16px">
+	<div class="flex flex-col gap-4 p-4">
 		{#if !isFileSystemAccessSupported}
 			<div
-				class="flex select-text flex-col gap-16px rounded-8px border border-outlineVariant p-16px text-onSurfaceVariant"
+				class="flex flex-col gap-4 rounded-lg border border-outlineVariant p-4 text-onSurfaceVariant select-text"
 			>
 				<Icon type="alertCircle" class="shrink-0" />
 				<span>
@@ -177,20 +177,20 @@
 			</div>
 		{:else}
 			<div class="flex flex-col">
-				<div class="text-title-sm mb-16px">Directories</div>
+				<div class="mb-4 text-title-sm">Directories</div>
 
-				<ul class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-8px">
+				<ul class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
 					{#each directories as dir}
 						<li
-							class="flex h-56px gap-8px items-center text-onTertiaryContainer bg-tertiaryContainer/56 pl-16px pr-4px rounded-4px"
+							class="flex h-14 items-center gap-2 rounded-sm bg-tertiaryContainer/56 pr-1 pl-4 text-onTertiaryContainer"
 						>
 							<div class="truncate">
 								{dir.handle.name}
 							</div>
 
-							<div class="ml-auto flex gap-4px items-center">
+							<div class="ml-auto flex items-center gap-1">
 								{#if directoriesStore.isInprogress(dir.id)}
-									<Spinner class="w-20px h-20px ml-8px mr-10px" />
+									<Spinner class="mr-2.5 ml-2 h-5 w-5" />
 								{:else}
 									<IconButton icon="cached" title="Rescan" />
 									<IconButton
@@ -207,14 +207,14 @@
 						<div class="mx-auto col-span-full">No directories added</div>
 					{/each}
 					<!-- <li
-						class="flex h-56px gap-8px items-center text-onTertiaryContainer bg-tertiaryContainer/24 pl-16px pr-4px rounded-4px"
+						class="flex h-14 gap-2 items-center text-onTertiaryContainer bg-tertiaryContainer/24 pl-4 pr-1 rounded-sm"
 					>
 						<div class="truncate">Tracks without directory</div>
-						<Icon type="information" class="text-onTertiaryContainer/54 size-16px" />
+						<Icon type="information" class="text-onTertiaryContainer/54 size-4" />
 					</li> -->
 				</ul>
 
-				<div class="flex flex-col sm:flex-row gap-8px mt-16px">
+				<div class="mt-4 flex flex-col gap-2 sm:flex-row">
 					{#if directories.length > 0}
 						<Button kind="outlined">
 							<Icon type="trashOutline" />
@@ -243,10 +243,10 @@
 </section>
 
 {#if dev}
-	<section class="card mx-auto w-full max-w-[900px] mt-24px text-body-lg p-16px">
+	<section class="card mx-auto mt-6 w-full max-w-[var(--settings-max-width)] p-4 text-body-lg">
 		<div>Development panel</div>
 
-		<div class="flex gap-8px mt-16px">
+		<div class="mt-4 flex gap-2">
 			<Button kind="toned">Import directory handle</Button>
 			<Button kind="toned">Import file handle</Button>
 			<Button kind="toned">Import file</Button>
@@ -254,10 +254,10 @@
 	</section>
 {/if}
 
-<section class="card mx-auto w-full max-w-[900px] mt-24px text-body-lg">
-	<div class="text-title-sm px-16px pt-16px">{m.settingsAppearance()}</div>
+<section class="card mx-auto mt-6 w-full max-w-[var(--settings-max-width)] text-body-lg">
+	<div class="px-4 pt-4 text-title-sm">{m.settingsAppearance()}</div>
 
-	<div class="flex justify-between items-center p-16px">
+	<div class="flex items-center justify-between p-4">
 		<div>{m.settingsApplicationTheme()}</div>
 
 		<Select
@@ -265,20 +265,20 @@
 			items={themeOptions}
 			key="value"
 			labelKey="name"
-			class="w-200px"
+			class="w-25"
 		/>
 	</div>
 
-	<div class="flex justify-between items-center p-16px">
+	<div class="flex items-center justify-between p-4">
 		<div>{m.settingPickColorFromArtwork()}</div>
 
 		<Switch bind:checked={mainStore.pickColorFromArtwork} />
 	</div>
 
-	<div class="flex flex-col sm:flex-row items-center p-16px gap-x-8px gap-y-16px">
+	<div class="flex flex-col items-center gap-x-2 gap-y-4 p-4 sm:flex-row">
 		<div class="mr-auto">{m.settingsPrimaryColor()}</div>
 
-		<div class="flex gap-8px max-sm:w-full">
+		<div class="flex gap-2 max-sm:w-full">
 			{#if mainStore.themeColorSeedHex}
 				<Button
 					kind="outlined"
@@ -292,21 +292,21 @@
 				</Button>
 			{/if}
 
-			<div class="flex relative">
+			<div class="relative flex">
 				<Button kind="toned" class="max-sm:w-full">
-					<Icon type="eyedropper" class="size-20px" />
+					<Icon type="eyedropper" class="size-5" />
 
 					{m.settingsColorPick()}
 
 					<input
 						type="color"
 						bind:value={themeColor.value}
-						class="appearance-none w-full h-full absolute inset-0 opacity-0 cursor-pointer"
+						class="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0"
 					/>
 				</Button>
 				{#if mainStore.themeColorSeedHex}
 					<div
-						class="absolute pointer-events-none -top-4px -right-4px rounded-full border-2 border-inverseSurface size-24px flex items-center justify-center"
+						class="pointer-events-none absolute -top-1 -right-1 flex size-6 items-center justify-center rounded-full border-2 border-inverseSurface"
 						style={`background: ${mainStore.themeColorSeedHex}`}
 					></div>
 				{/if}
@@ -316,7 +316,7 @@
 
 	<Separator />
 
-	<div class="flex justify-between items-center p-16px">
+	<div class="flex items-center justify-between p-4">
 		<div>{m.settingsMotion()}</div>
 
 		<Select
@@ -324,13 +324,13 @@
 			items={motionOptions}
 			key="value"
 			labelKey="name"
-			class="w-200px"
+			class="w-25"
 		/>
 	</div>
 
 	<Separator />
 
-	<div class="flex justify-between items-center p-16px">
+	<div class="flex items-center justify-between p-4">
 		<div>
 			{m.settingsDisplayVolumeSlider()}
 		</div>
@@ -339,8 +339,8 @@
 	</div>
 </section>
 
-<section class="card mx-auto w-full max-w-[900px] mt-24px text-body-lg">
-	<div class="flex justify-between items-center p-16px">
+<section class="card mx-auto mt-6 w-full max-w-[var(--settings-max-width)] text-body-lg">
+	<div class="flex items-center justify-between p-4">
 		<div>{m.about()}</div>
 
 		<IconButton as="a" href="/about" tooltip={m.about()} icon="chevronRight" />
@@ -348,10 +348,10 @@
 </section>
 
 {#snippet directoryName(name: string | undefined)}
-	<span class="text-tertiary w-fit h-16.5px inline-flex items-center gap-4px">
-		<Icon type="folder" class="size-12px" />
+	<span class="inline-flex h-[calc(var(--spacing)*4.125)] w-fit items-center gap-1 text-tertiary">
+		<Icon type="folder" class="size-3" />
 
-		<span class="truncate inline max-w-[100px] w-fit h-full">{name}</span>
+		<span class="inline h-full w-fit max-w-25 truncate">{name}</span>
 	</span>
 {/snippet}
 
@@ -362,7 +362,7 @@
 			reparentDirectory = null
 		},
 	}}
-	class="[--dialog-width:340px]"
+	class="[--dialog-width:calc(var(--spacing)*85)]"
 	icon="folderHidden"
 	title={m.replaceDirectoryQ()}
 	buttons={(data) => [
@@ -388,3 +388,9 @@
 		</WrapTranslation>
 	{/snippet}
 </CommonDialog>
+
+<style>
+	:root {
+		--settings-max-width: calc(var(--spacing) * 225);
+	}
+</style>

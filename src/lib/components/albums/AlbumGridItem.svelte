@@ -35,14 +35,14 @@
 >
 	{#if data.loading === true}
 		<div>
-			<div class="h-8px rounded-2px bg-onSurface/10 mb-8px"></div>
-			<div class="h-4px rounded-2px bg-onSurface/10 w-80%"></div>
+			<div class="mb-2 h-2 rounded-xs bg-onSurface/10"></div>
+			<div class="h-1 w-1/8 rounded-xs bg-onSurface/10"></div>
 		</div>
 	{:else if data.error}
 		Error loading album
 	{:else if album}
-		<div class="flex flex-col h-72px text-onSurfaceVariant px-8px justify-center text-center">
-			<div class="text-onSurface truncate">
+		<div class="flex h-18 flex-col justify-center px-2 text-center text-onSurfaceVariant">
+			<div class="truncate text-onSurface">
 				{album.name}
 			</div>
 			<div class="truncate">

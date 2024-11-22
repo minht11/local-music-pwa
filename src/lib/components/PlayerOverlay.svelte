@@ -20,25 +20,25 @@
 
 <div
 	class={clx(
-		'view-transition-pl-container pointer-events-auto border border-primary/10 overflow-hidden max-w-900px mx-auto justify-between sm:h-auto rounded-16px sm:rounded-24px bg-secondaryContainer text-onSecondaryContainer',
+		'view-transition-pl-container pointer-events-auto mx-auto max-w-225 justify-between overflow-hidden rounded-2xl border border-primary/10 bg-secondaryContainer text-onSecondaryContainer sm:h-auto sm:rounded-3xl',
 		className,
 	)}
 >
 	<div
-		class="player-content h-full justify-between gap-16px flex flex-col items-center w-full sm:px-16px sm:pt-8px sm:pb-16px"
+		class="player-content flex h-full w-full flex-col items-center justify-between gap-4 sm:px-4 sm:pt-2 sm:pb-4"
 	>
 		<Timeline class="max-sm:hidden" />
-		<div class="flex sm:grid items-center w-full h-min grow grid-cols-[1fr_max-content_1fr]">
-			<div class="flex items-center grow">
+		<div class="flex h-min w-full grow grid-cols-[1fr_max-content_1fr] items-center sm:grid">
+			<div class="flex grow items-center">
 				<Button
 					as="a"
 					href="/player"
 					kind="blank"
 					tooltip={m.playerOpenFullPlayer()}
-					class="flex items-center max-sm:p-8px max-sm:rounded-r-16px rounded-8px grow sm:h-44px pr-8px sm:max-w-180px group"
+					class="max-sm:rounded-r-4 group flex grow items-center rounded-lg pr-2 max-sm:p-2 sm:h-11 sm:max-w-45"
 				>
 					<div
-						class="player-artwork -z-1 bg-surfaceContainerHighest rounded-8px overflow-hidden shrink-0 relative h-44px w-44px"
+						class="player-artwork relative -z-1 size-11 shrink-0 overflow-hidden rounded-lg bg-surfaceContainerHighest"
 					>
 						{#if track}
 							<PlayerArtwork class="size-full" />
@@ -47,15 +47,15 @@
 						<Icon
 							type="chevronUp"
 							class={clx(
-								'm-auto shrink-0 absolute inset-0 pl-overlay-chevron-up-icon',
+								'pl-overlay-chevron-up-icon absolute inset-0 m-auto shrink-0',
 								track &&
-									'bg-tertiary text-onTertiary rounded-full scale-0 transition-transform transition-opacity transition-200 [.group:hover_&]:scale-100',
+									'transition-200 scale-0 rounded-full bg-tertiary text-onTertiary transition-[transform,opacity] [.group:hover_&]:scale-100',
 							)}
 						/>
 					</div>
 
 					{#if track}
-						<div class="min-w-0 ml-16px mr-4px">
+						<div class="mr-1 ml-4 min-w-0">
 							<div class="truncate text-body-md">{track.name}</div>
 							<div class="truncate text-body-sm">{track.artists}</div>
 						</div>
@@ -65,7 +65,7 @@
 				<FavoriteButton />
 			</div>
 
-			<div class="ml-auto flex gap-8px sm:hidden pr-8px">
+			<div class="ml-auto flex gap-2 pr-2 sm:hidden">
 				<PlayToggleButton />
 
 				<PlayNextButton class="max-xss:hidden" />
@@ -73,7 +73,7 @@
 
 			<MainControls class="max-sm:hidden" />
 
-			<div class="flex items-center gap-8px ml-auto max-sm:hidden pr-8px">
+			<div class="ml-auto flex items-center gap-2 pr-2 max-sm:hidden">
 				{#if mainStore.volumeSliderEnabled}
 					<VolumeSlider />
 				{/if}
@@ -108,7 +108,7 @@
 	@keyframes -global-view-pl-chevron-up-fade-in {
 		from {
 			opacity: 0;
-			transform: translateY(8px);
+			transform: translateY(calc(var(--spacing) * 2));
 		}
 	}
 

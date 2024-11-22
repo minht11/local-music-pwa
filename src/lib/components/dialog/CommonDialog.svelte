@@ -42,7 +42,7 @@
 	{#snippet children({ data, close })}
 		<form method="dialog" class="contents" onsubmit={submitHandler}>
 			{#if externalChildren}
-				<div data-dialog-content class="mt-16px px-24px flex-grow text-onSurfaceVariant">
+				<div data-dialog-content class="mt-4 grow px-6 text-onSurfaceVariant">
 					{@render externalChildren({ data, close })}
 				</div>
 			{/if}

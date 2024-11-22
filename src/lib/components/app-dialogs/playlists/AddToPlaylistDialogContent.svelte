@@ -74,9 +74,9 @@
 	}
 </script>
 
-<Separator class="mt-24px" />
+<Separator class="mt-6" />
 
-<ScrollContainer class="overflow-auto grow max-h-400px px-8px py-16px">
+<ScrollContainer class="max-h-100 grow overflow-auto px-2 py-4">
 	{#if query.status === 'loaded'}
 		<PlaylistListContainer
 			items={query.value}
@@ -88,7 +88,7 @@
 				{@const isInPlaylist = isTrackInPlaylist(playlist.id)}
 				<div
 					class={clx(
-						'rounded-full border-2 size-24px flex items-center justify-center',
+						'flex size-6 items-center justify-center rounded-full border-2',
 						isInPlaylist ? 'border-primary bg-primary text-onPrimary' : 'border-neutral',
 					)}
 				>

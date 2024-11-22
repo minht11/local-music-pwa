@@ -8,7 +8,7 @@
 	const { class: className }: { class?: string } = $props()
 </script>
 
-<div class={clx('flex gap-8px items-center', className)}>
+<div class={clx('flex items-center gap-2', className)}>
 	<ShuffleButton />
 
 	<PlayPrevButton />

@@ -12,8 +12,8 @@
 
 <div
 	class={clx(
-		'w-52px h-32px border-2 cursor-pointer shrink-0 flex items-center rounded-32px transition-all duration-150',
-		checked ? 'border-transparent bg-primary' : 'border-outline bg-surface bg-surfaceContainerHigh',
+		'h-32px flex w-13 shrink-0 cursor-pointer items-center rounded-4xl border-2 transition-all duration-150',
+		checked ? 'border-transparent bg-primary' : 'border-outline bg-surfaceContainerHigh',
 	)}
 	tabindex="0"
 	role="switch"
@@ -28,8 +28,8 @@
 	<input type="checkbox" bind:checked class="hidden" />
 	<div
 		class={clx(
-			'h-16px w-16px rounded-full ml-6px transition-all duration-150',
-			checked ? 'bg-onPrimary translate-x-20px scale-150' : 'bg-outline',
+			'ml-1.5 h-4 w-4 rounded-full transition-all duration-150',
+			checked ? 'translate-x-5 scale-150 bg-onPrimary' : 'bg-outline',
 		)}
 	></div>
 </div>

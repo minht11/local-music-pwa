@@ -9,8 +9,8 @@
 
 <Header title={pageData.title} mode="fixed" />
 
-<div class="flex flex-col px-16px grow">
+<div class="flex grow flex-col px-4">
 	{@render children()}
 </div>
 
-<div class="h-[var(--bottom-overlay-height)] shrink-0 mt-16px"></div>
+<div class="mt-4 h-[var(--bottom-overlay-height)] shrink-0"></div>

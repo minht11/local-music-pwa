@@ -17,7 +17,7 @@
 
 <div
 	class={clx(
-		'ring-1 ring-surface/40 bg-surfaceContainerHighest aspect-1/1 flex overflow-hidden contain-strict',
+		'flex aspect-1/1 overflow-hidden bg-surfaceContainerHighest ring-1 ring-surface/40 contain-strict',
 		className,
 	)}
 >
@@ -26,7 +26,7 @@
 			{src}
 			{alt}
 			loading="eager"
-			class="object-cover w-full h-full"
+			class="h-full w-full object-cover"
 			draggable="false"
 			onerror={() => {
 				error = true
@@ -36,7 +36,7 @@
 			}}
 		/>
 	{:else if fallbackIcon !== null}
-		<Icon type={fallbackIcon} class="m-auto size-60%" />
+		<Icon type={fallbackIcon} class="m-auto size-1/6" />
 	{/if}
 
 	{#if children}

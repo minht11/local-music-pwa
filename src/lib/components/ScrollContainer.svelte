@@ -10,7 +10,7 @@
 
 		return {
 			get scrollTarget() {
-				const node = nodeGetter()
+				const node = nodeGetter?.()
 
 				return node ?? window
 			},

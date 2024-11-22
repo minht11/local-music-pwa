@@ -1,8 +1,8 @@
-<section class="select-text m-auto flex flex-col items-center">
-	<div class="text-headline-md mb-16px">Snae Player</div>
+<section class="m-auto flex flex-col items-center select-text">
+	<div class="mb-4 text-headline-md">Snae Player</div>
 
 	<div
-		class="flex justify-between bg-surfaceContainerLowest px-16px py-8px rounded-8px gap-16px border border-primary/10"
+		class="flex justify-between gap-4 rounded-lg border border-primary/10 bg-surfaceContainerLowest px-4 py-2"
 	>
 		<a href="https://github.com/minht11/local-music-pwa" target="_blank" class="link">
 			{m.aboutSourceCode()}

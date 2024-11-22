@@ -1,9 +1,13 @@
 import { paraglide } from '@inlang/paraglide-vite'
 import { sveltekit } from '@sveltejs/kit/vite'
-import UnoCSS from '@unocss/vite'
+import tailwindcss from '@tailwindcss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
-import { workerChunkPlugin } from './lib/worker-chunk-plugin.ts'
+import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
+import { workerChunkPlugin } from './lib/vite-plugin-worker-chunk.ts'
+
+const a = import.meta.dirname
+console.log(a)
 
 export default defineConfig({
 	server: {
@@ -61,7 +65,10 @@ export default defineConfig({
 	},
 	plugins: [
 		workerChunkPlugin(),
-		UnoCSS(),
+		themeColorsPlugin({
+			output: `${import.meta.dirname}/.generated/theme-colors.css`,
+		}),
+		tailwindcss(),
 		sveltekit(),
 		AutoImport({
 			dts: './.generated/types/auto-imports.d.ts',

@@ -32,41 +32,41 @@
 {#snippet playerSnippet()}
 	<div
 		class={clx(
-			layoutMode === 'both' && 'w-400px',
+			layoutMode === 'both' && 'w-100',
 			layoutMode === 'list' && 'mx-auto w-full',
-			'player-content z-0 bg-secondaryContainerVariant px-8px pb-8px gap-x-24px overflow-clip items-center grow',
+			'player-content z-0 grow items-center gap-x-6 overflow-clip bg-secondaryContainerVariant px-2 pb-2',
 			isCompactVertical && !sizes.isCompactHorizontal && 'player-content-horizontal',
 		)}
 	>
 		<div
 			class={clx(
-				isCompactVertical && !sizes.isCompactHorizontal ? 'h-56px absolute top-0 left-0' : 'h-64px',
-				'w-full flex gap-8px items-center justify-between [grid-area:header]',
+				isCompactVertical && !sizes.isCompactHorizontal ? 'absolute top-0 left-0 h-14' : 'h-16',
+				'flex w-full items-center justify-between gap-2 [grid-area:header]',
 			)}
 		>
 			<BackButton />
 
 			<div class="text-title-lg">Player</div>
 
-			<div class="w-40px"></div>
+			<div class="w-10"></div>
 		</div>
 
 		<PlayerArtwork
-			class="rounded-16px bg-surfaceContainerHigh m-auto pl-view-artwork [grid-area:artwork] max-h-300px h-full my-auto"
+			class="pl-view-artwork m-auto my-auto h-full max-h-75 rounded-2xl bg-surfaceContainerHigh [grid-area:artwork]"
 		/>
 
-		<div class="flex flex-col gap-8px w-full [grid-area:controls] mt-8px">
-			<div class="w-full bg-surfaceContainerHighest px-16px py-8px rounded-16px">
+		<div class="mt-2 flex w-full flex-col gap-2 [grid-area:controls]">
+			<div class="w-full rounded-2xl bg-surfaceContainerHighest px-4 py-2">
 				<Timeline class="w-full" />
 			</div>
 
 			<div
 				class={clx(
-					'bg-secondaryContainer flex flex-col px-16px gap-24px rounded-16px w-full [grid-area:header]',
-					mainStore.volumeSliderEnabled ? 'pt-32px pb-16px' : 'py-32px',
+					'flex w-full flex-col gap-6 rounded-2xl bg-secondaryContainer px-4 [grid-area:header]',
+					mainStore.volumeSliderEnabled ? 'pt-8 pb-4' : 'py-8',
 				)}
 			>
-				<div class="flex items-center gap-8px my-auto justify-between">
+				<div class="my-auto flex items-center justify-between gap-2">
 					<ShuffleButton />
 
 					<PlayPrevButton />
@@ -79,7 +79,7 @@
 				</div>
 
 				{#if mainStore.volumeSliderEnabled}
-					<div class="flex items-center gap-8px">
+					<div class="flex items-center gap-2">
 						<IconButton icon="volumeMid" />
 
 						<Slider bind:value={player.volume} />
@@ -89,21 +89,19 @@
 				{/if}
 			</div>
 
-			<div
-				class="w-full bg-secondaryContainer px-16px rounded-16px flex items-center h-72px shrink-0"
-			>
+			<div class="flex h-18 w-full shrink-0 items-center rounded-2xl bg-secondaryContainer px-4">
 				{#if track}
-					<div class="text-body-lg mr-8px min-w-24px text-center tabular-nums">
+					<div class="mr-2 min-w-6 text-center text-body-lg tabular-nums">
 						{player.activeTrackIndex}
 					</div>
 
-					<div class="overflow-hidden grid">
-						<div class="truncate text-body-lg truncate">{track.name}</div>
-						<div class="truncate text-body-md truncate">{track.artists}</div>
+					<div class="grid overflow-hidden">
+						<div class="truncate text-body-lg">{track.name}</div>
+						<div class="truncate text-body-md">{track.artists}</div>
 					</div>
 				{/if}
 
-				<div class="flex gap-4px ml-auto">
+				<div class="ml-auto flex gap-1">
 					<FavoriteButton />
 
 					{#if layoutMode === 'list'}
@@ -133,12 +131,12 @@
 		</Header>
 	{/if}
 
-	<div class="w-full flex flex-col grow">
+	<div class="flex w-full grow flex-col">
 		{#if layoutMode !== 'details'}
-			<div class="flex items-center h-64px border-b border-onSecondaryContainer/24 px-16px">
-				<div class="w-40px"></div>
+			<div class="flex h-16 items-center border-b border-onSecondaryContainer/24 px-4">
+				<div class="w-10"></div>
 
-				<div class="text-title-lg mx-auto">
+				<div class="mx-auto text-title-lg">
 					{m.queue()}
 				</div>
 
@@ -146,15 +144,15 @@
 			</div>
 		{/if}
 
-		<div class="p-16px flex grow">
+		<div class="flex grow p-4">
 			{#if player.isQueueEmpty}
-				<div class="m-auto text-center flex flex-col items-center">
+				<div class="m-auto flex flex-col items-center text-center">
 					<Icon
 						type="playlistMusic"
-						class="size-140px my-auto opacity-54 color-onSecondaryContainer"
+						class="color-onSecondaryContainer my-auto size-35 opacity-54"
 					/>
 
-					<div class="text-body-lg mb-16px">Your queue is empty</div>
+					<div class="mb-4 text-body-lg">Your queue is empty</div>
 					<Button kind="outlined" as="a" href="/">Play something here</Button>
 				</div>
 			{:else}
@@ -172,12 +170,12 @@
 	</div>
 {/snippet}
 
-<div class="w-full max-w-1280px invisible pl-view-container mx-auto fixed inset-0"></div>
+<div class="pl-view-container invisible fixed inset-0 mx-auto w-full max-w-320"></div>
 
 <ListDetailsLayout
 	mode={layoutMode}
 	class={clx(
-		'pl-view-content grow mx-auto w-full max-w-1280px',
+		'pl-view-content mx-auto w-full max-w-320 grow',
 		layoutMode === 'both' && 'bg-secondaryContainer',
 	)}
 	list={playerSnippet}
@@ -186,7 +184,7 @@
 	noPlayerOverlayPadding
 />
 
-<style lang="postcss">
+<style>
 	:global(html[data-view-player]) :global {
 		.pl-view-container {
 			view-transition-name: pl-container;
@@ -204,12 +202,14 @@
 	.player-content {
 		display: grid;
 		grid-template-columns: 1fr;
-		grid-template-rows: max-content minmax(140px, 1fr) auto;
+		grid-template-rows: max-content minmax(calc(var(--spacing) * 35), 1fr) auto;
 		grid-template-areas: 'header' 'artwork' 'controls';
 	}
 
 	.player-content-horizontal {
-		grid-template-columns: 1fr minmax(0, 300px) minmax(0, 500px) 1fr;
+		grid-template-columns:
+			1fr minmax(0, calc(var(--spacing) * 75)) minmax(0, calc(var(--spacing) * 125))
+			1fr;
 		grid-template-rows: max-content 1fr;
 		grid-template-areas:
 			'header header header header'
@@ -236,14 +236,15 @@
 	}
 
 	:global(html) {
-		--vt-pl-container-radius: 16px;
+		--vt-pl-container-radius: var(--radius-2xl);
 		--vt-pl-container-from-radius: var(--vt-pl-container-radius);
 		--vt-pl-container-to-radius: 0;
 	}
 
-	@screen sm {
+	/* TODO. Try to use variable from TW config */
+	@media (width >= 24rem) {
 		:global(html) {
-			--vt-pl-container-radius: 24px;
+			--vt-pl-container-radius: var(--radius-3xl);
 		}
 	}
 
@@ -258,7 +259,7 @@
 
 	:global(html[data-view-player]) :global {
 		&::view-transition-group(pl-container) {
-			background: theme('colors.secondaryContainer');
+			background: var(--color-secondaryContainer);
 			animation:
 				view-player-container-rounded 400ms cubic-bezier(0.2, 0, 0, 1),
 				-ua-view-transition-group-anim-pl-container 400ms cubic-bezier(0.2, 0, 0, 1);

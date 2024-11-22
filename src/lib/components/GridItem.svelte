@@ -23,7 +23,7 @@
 <div
 	use:ripple
 	{...props}
-	class={clx(className, 'flex flex-col interactable rounded-8px bg-surfaceContainerHigh')}
+	class={clx(className, 'interactable flex flex-col rounded-lg bg-surfaceContainerHigh')}
 >
 	<Artwork src={artworkSrc()} fallbackIcon="person" class="rounded-inherit w-full" />
 

@@ -21,11 +21,11 @@
 </script>
 
 {#if buttons?.length}
-	<div data-dialog-footer class="flex justify-end gap-8px p-24px">
+	<div data-dialog-footer class="flex justify-end gap-2 p-6">
 		{#each buttons as button}
 			<Button
 				kind={button.kind ?? 'flat'}
-				class={clx('min-w-60px', button.align === 'left' && 'mr-auto')}
+				class={clx('min-w-15', button.align === 'left' && 'mr-auto')}
 				type={button.type !== 'close' ? button.type : 'button'}
 				onclick={() => {
 					button.action?.(state as S)

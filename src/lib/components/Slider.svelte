@@ -82,36 +82,36 @@
 	const getTransform = (calc = '') => `transform: translateX(calc(${progressPercentage}% ${calc}));`
 </script>
 
-<div class="flex w-full relative select-none" bind:clientWidth={trackWidth}>
+<div class="relative flex w-full select-none" bind:clientWidth={trackWidth}>
 	<input
 		type="range"
 		bind:value
 		{disabled}
 		{min}
 		{max}
-		class="h-44px opacity-0 appearance-none disabled:cursor-auto grow w-full"
+		class="h-11 w-full grow appearance-none opacity-0 disabled:cursor-auto"
 		onpointerdown={() => onSeekStart?.()}
 		onpointerup={() => onSeekEnd?.()}
 	/>
 
 	<div
-		class="absolute h-full left-0 top-0 w-[calc(100%-4px)] pointer-events-none mr-8px"
+		class="pointer-events-none absolute top-0 left-0 mr-2 h-full w-[calc(100%-4px)]"
 		style={getTransform()}
 	>
-		<div class="thumb h-full w-4px transition-transform bg-primary rounded-8px"></div>
+		<div class="thumb h-full w-1 rounded-lg bg-primary transition-transform"></div>
 	</div>
 
 	<div
-		class="w-[calc(100%-4px)] contain-strict overflow-clip absolute h-16px my-auto inset-0 pointer-events-none transition-border-radius duration-100ms mr-8px"
+		class="transition-border-radius duration-100ms pointer-events-none absolute inset-0 my-auto mr-2 h-4 w-[calc(100%-4px)] overflow-clip contain-strict"
 		style={getBarBorder()}
 	>
 		<div
-			class="absolute -left-full rounded-r-2px inset-y-0 w-full h-16px my-auto bg-primary"
+			class="rounded-r-0.5 absolute inset-y-0 -left-full my-auto h-4 w-full bg-primary"
 			style={getTransform('- 6px')}
 		></div>
 
 		<div
-			class="absolute left-0 top-0 rounded-l-2px w-full bg-primary/30 h-full pointer-events-none"
+			class="rounded-l-0.5 pointer-events-none absolute top-0 left-0 h-full w-full bg-primary/30"
 			style={getTransform('+ 10px')}
 		></div>
 	</div>

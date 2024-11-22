@@ -35,7 +35,7 @@
 		}
 
 		const surfaceRgb = window.getComputedStyle(document.body).getPropertyValue('--color-surface')
-		element.setAttribute('content', `rgb(${surfaceRgb})`)
+		element.setAttribute('content', surfaceRgb)
 	}
 
 	let initial = true
@@ -81,21 +81,21 @@
 />
 
 {#if $navigating}
-	<div class="page-loading-indicator fixed z-20 top-0 inset-x-0 bg-tertiary/40 h-4px">
+	<div class="page-loading-indicator fixed inset-x-0 top-0 z-20 h-1 bg-tertiary/40">
 		<div
-			class="page-loading-indicator-bar h-4px w-full origin-top-left overflow-hidden bg-onTertiaryContainer"
+			class="page-loading-indicator-bar h-1 w-full origin-top-left overflow-hidden bg-onTertiaryContainer"
 		></div>
 	</div>
 {/if}
 
 {@render children()}
 
-<div class="fixed flex flex-col bottom-0 overflow-hidden inset-x-0 pointer-events-none">
+<div class="pointer-events-none fixed inset-x-0 bottom-0 flex flex-col overflow-hidden">
 	<div class="flex flex-col">
 		<SnackbarRenderer />
 
 		{#if !$page.data.noPlayerOverlay}
-			<div bind:clientHeight={overlayContentHeight} class="px-16px pb-8px pointer-events-none">
+			<div bind:clientHeight={overlayContentHeight} class="pointer-events-none px-4 pb-2">
 				<PlayerOverlay />
 			</div>
 		{/if}
@@ -106,7 +106,7 @@
 	</div>
 </div>
 
-<div class="fixed inset-0 z-10 pointer-events-none">
+<div class="pointer-events-none fixed inset-0 z-10">
 	<MenuRenderer />
 </div>
 
@@ -171,14 +171,14 @@
 
 		&::view-transition-old(root) {
 			animation:
-				view-regular-fade-out 90ms theme('easing.outgoing40') forwards,
-				view-regular-out 300ms theme('easing.incoming80outgoing40');
+				view-regular-fade-out 90ms var(--ease-outgoing40) forwards,
+				view-regular-out 300ms var(--ease-incoming80outgoing40);
 		}
 
 		&::view-transition-new(root) {
 			animation:
-				view-regular-fade-in 210ms 90ms theme('easing.incoming80') backwards,
-				view-regular-in 300ms theme('easing.incoming80outgoing40');
+				view-regular-fade-in 210ms 90ms var(--ease-incoming80) backwards,
+				view-regular-in 300ms var(--ease-incoming80outgoing40);
 		}
 
 		&::view-transition-old(pl-container) {

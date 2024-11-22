@@ -72,11 +72,11 @@
 			href={`/library/${item.slug}`}
 			kind="blank"
 			title={item.title}
-			class={clx('shrink-0 flex justify-center items-center', className)}
+			class={clx('flex shrink-0 items-center justify-center', className)}
 		>
 			<div
 				class={clx(
-					'flex items-center justify-center p-8px rounded-full',
+					'flex items-center justify-center rounded-full p-2',
 					item.slug === slug && 'bg-secondaryContainer text-onSecondaryContainer',
 				)}
 			>
@@ -89,7 +89,7 @@
 {#snippet layoutBottom()}
 	{#if data.isHandHeldDevice}
 		<div
-			class="pointer-events-auto grid sm:hidden grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer w-full h-64px"
+			class="pointer-events-auto grid h-16 w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer sm:hidden"
 		>
 			{@render navItemsSnippet('h-full')}
 		</div>
@@ -99,22 +99,22 @@
 {#if !(layoutMode === 'details' && !isWideLayout)}
 	<div
 		class={clx(
-			'gap-8px fixed z-1 desktop-sidebar flex-col w-max h-max mt-80px [@media(max-height:500px)]:mt-8px',
+			'desktop-sidebar fixed z-1 mt-20 h-max w-max flex-col gap-2 [@media(max-height:500px)]:mt-2',
 			data.isHandHeldDevice ? 'hidden sm:flex' : 'flex',
 		)}
 	>
-		{@render navItemsSnippet('h-56px w-80px')}
+		{@render navItemsSnippet('h-14 w-20')}
 	</div>
 {/if}
 
-<ListDetailsLayout mode={layoutMode} class="max-w-[var(--library-max-width)] w-full mx-auto grow">
+<ListDetailsLayout mode={layoutMode} class="mx-auto w-full max-w-[var(--library-max-width)] grow">
 	{#snippet list(mode)}
-		<div class={clx(data.isHandHeldDevice ? 'sm:pl-80px' : 'pl-80px', 'flex flex-col grow')}>
-			<div class={clx(mode === 'both' && 'w-400px', 'px-16px grow flex flex-col')}>
+		<div class={clx(data.isHandHeldDevice ? 'sm:pl-20' : 'pl-20', 'flex grow flex-col')}>
+			<div class={clx(mode === 'both' && 'w-100', 'flex grow flex-col px-4')}>
 				<Search name={data.pluralTitle} store={data.store} />
 
 				{#if data.storeName === 'playlists'}
-					<div class="flex items-center justify-end mb-16px">
+					<div class="mb-4 flex items-center justify-end">
 						<Button
 							kind="outlined"
 							onclick={() => {
@@ -129,19 +129,19 @@
 				{/if}
 
 				{#if data.tracksCountQuery.value === 0 && data.storeName !== 'playlists'}
-					<div class="flex flex-col items-center my-auto text-center">
-						<div class="text-title-lg mb-4px">{m.libraryEmpty()}</div>
+					<div class="my-auto flex flex-col items-center text-center">
+						<div class="mb-1 text-title-lg">{m.libraryEmpty()}</div>
 						{m.libraryStartByAdding()}
-						<Button as="a" href="/settings" class="mt-16px">
+						<Button as="a" href="/settings" class="mt-4">
 							<Icon type="plus" />
 							{m.libraryImportTracks()}
 						</Button>
 					</div>
 				{:else}
-					<div class={clx('w-full grow flex flex-col')}>
+					<div class={clx('flex w-full grow flex-col')}>
 						{#if data.store.searchTerm && itemsIds.length === 0}
-							<div class="flex flex-col relative text-center items-center m-auto">
-								<Icon type="magnify" class="size-140px my-auto opacity-54" />
+							<div class="relative m-auto flex flex-col items-center text-center">
+								<Icon type="magnify" class="my-auto size-35 opacity-54" />
 
 								<div class="text-body-lg">
 									{m.libraryNoResults()}
@@ -178,8 +178,8 @@
 	{#snippet details()}
 		<div
 			class={clx(
-				'h-full rounded-24px pointer-events-auto flex flex-col',
-				layoutMode === 'both' && 'bg-surfaceContainer mx-16px mt-16px border border-primary/5',
+				'pointer-events-auto flex h-full flex-col rounded-3xl',
+				layoutMode === 'both' && 'mx-4 mt-4 border border-primary/5 bg-surfaceContainer',
 			)}
 		>
 			{#key $page.url.pathname}
@@ -191,7 +191,7 @@
 
 <style>
 	:root {
-		--library-max-width: 1600px;
+		--library-max-width: calc(var(--spacing) * 400);
 	}
 	.desktop-sidebar {
 		left: max(0px, (100% - var(--library-max-width)) / 2);

@@ -42,7 +42,7 @@
 	{tabindex}
 	class={clx(
 		className,
-		'cursor-pointer hover:bg-onSurface/10 rounded-8px overflow-hidden pl-16px pr-8px flex items-center',
+		'flex cursor-pointer items-center overflow-hidden rounded-lg pr-2 pl-4 hover:bg-onSurface/10',
 	)}
 	role="row"
 	aria-label={ariaLabel}

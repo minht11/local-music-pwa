@@ -48,7 +48,7 @@
 	menuItems={menuItemsWithItem}
 	tabindex={-1}
 	class={clx(
-		'h-72px text-left',
+		'h-18 text-left',
 		active ? 'bg-onSurfaceVariant/10 text-onSurfaceVariant' : 'color-onSurfaceVariant',
 		className,
 	)}
@@ -56,17 +56,17 @@
 	{ariaRowIndex}
 	onclick={() => onclick?.(track!)}
 >
-	<div role="cell" class="track-item grow gap-20px items-center">
+	<div role="cell" class="track-item grow items-center gap-5">
 		<Artwork
 			src={artworkSrc()}
 			alt={track?.name}
-			class={clx('h-40px w-40px rounded-4px !hidden @sm:!flex', data.loading && 'opacity-50')}
+			class={clx('!hidden h-10 w-10 rounded-sm @sm:!flex', data.loading && 'opacity-50')}
 		/>
 
 		{#if data.loading === true}
 			<div>
-				<div class="h-8px rounded-2px bg-onSurface/10 mb-8px"></div>
-				<div class="h-4px rounded-2px bg-onSurface/10 w-80%"></div>
+				<div class="mb-2 h-2 rounded-xs bg-onSurface/10"></div>
+				<div class="h-1 w-1/8 rounded-xs bg-onSurface/10"></div>
 			</div>
 		{:else if data.error}
 			<!-- TODO. Alow removing failed tracks -->
@@ -87,7 +87,7 @@
 				{track.album}
 			</div>
 
-			<div class="hidden @sm:block tabular-nums">
+			<div class="hidden tabular-nums @sm:block">
 				{formatDuration(track.duration)}
 			</div>
 
@@ -111,8 +111,6 @@
 		grid-template-columns: var(--grid-cols);
 	}
 
-	/* TODO. Use theme directive once https://github.com/unocss/unocss/issues/3999 is resolved. */
-	/* @container (theme('containers.sm')) { */
 	@container (min-width: 24rem) {
 		.track-item {
 			--grid-cols: auto 1.5fr 74px 44px;

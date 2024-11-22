@@ -172,14 +172,14 @@
 			close()
 		}}
 		class={clx(
-			'focus:outline-none flex select-none flex-col rounded-24px bg-surfaceContainerHigh text-onSurface',
+			'flex flex-col rounded-3xl bg-surfaceContainerHigh text-onSurface select-none focus:outline-none',
 			className,
 		)}
 	>
 		<header
 			bind:this={dialogHeader}
 			class={clx(
-				'flex flex-col gap-16px px-24px pt-24px',
+				'flex flex-col gap-4 px-6 pt-6',
 				icon && 'items-center justify-center text-center',
 			)}
 		>
@@ -192,7 +192,7 @@
 			{/if}
 		</header>
 
-		<div class="flex flex-col shrink overflow-hidden">
+		<div class="flex shrink flex-col overflow-hidden">
 			{@render children?.({
 				data: openData!,
 				close,
@@ -208,8 +208,16 @@
 			but keep it inside window bounds
 		*/
 		max-width: initial !important;
-		max-height: min(100% - 24px - 24px, var(--dialog-height, 100%), 600px) !important;
-		width: clamp(280px, var(--dialog-width, 400px), 100% - 16px) !important;
+		max-height: min(
+			100% - var(--spacing) * 6 * 2,
+			var(--dialog-height, 100%),
+			var(--spacing) * 150
+		) !important;
+		width: clamp(
+			var(--dialog-width, calc(var(--spacing) * 70)),
+			var(--dialog-width, calc(var(--spacing) * 100)),
+			100% - var(--spacing) * 4
+		) !important;
 		height: max-content !important;
 		overscroll-behavior: contain;
 	}

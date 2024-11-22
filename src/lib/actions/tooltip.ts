@@ -5,7 +5,7 @@ import { on } from 'svelte/events'
 const tooltipTemplate = document.createElement('div')
 tooltipTemplate.setAttribute('role', 'tooltip')
 tooltipTemplate.className =
-	'tooltip-enter bg-inverseSurface text-nowrap flex items-center inset-0 m-0 text-body-sm min-h-24px text-inverseOnSurface px-8px rounded-4px'
+	'tooltip-enter bg-inverseSurface text-nowrap flex items-center inset-0 m-0 text-body-sm min-h-6 text-inverseOnSurface px-2 rounded-sm'
 tooltipTemplate.popover = 'manual'
 
 export const tooltip = ((target, message?: string) => {

@@ -63,7 +63,7 @@
 <IconButton tooltip={tooltipMap[player.repeat]} class={className} onclick={player.toggleRepeat}>
 	<svg
 		use:action
-		class={clx('size-24px fill-current', player.repeat !== 'none' && '')}
+		class={clx('size-6 fill-current', player.repeat !== 'none' && '')}
 		viewBox="0 0 24 24"
 	>
 		<path
@@ -73,7 +73,7 @@
 		/>
 		<path
 			class={clx(
-				'transition-transform transform-origin-center',
+				'transform-origin-center transition-transform',
 				player.repeat === 'one' ? 'scale-100' : 'scale-0',
 			)}
 			d="M 13,15 V 9.0000002 H 12 L 10,10 v 1 h 1.5 v 4 z"
@@ -81,7 +81,7 @@
 	</svg>
 	<div
 		class={clx(
-			'size-4px rounded-full bg-primary absolute bottom-4px transition-1000 transition-transform transform-origin-center',
+			'transition-1000 transform-origin-center absolute bottom-1 size-1 rounded-full bg-primary transition-transform',
 			player.repeat === 'none' ? 'scale-0' : 'scale-100',
 		)}
 	></div>
