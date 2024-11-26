@@ -194,6 +194,6 @@
 		--library-max-width: calc(var(--spacing) * 400);
 	}
 	.desktop-sidebar {
-		left: max(0px, (100% - var(--library-max-width)) / 2);
+		left: max(0, (100% - var(--library-max-width)) / 2);
 	}
 </style>

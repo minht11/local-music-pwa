@@ -123,7 +123,7 @@
 	}
 
 	input::-webkit-slider-thumb {
-		height: 44px;
+		height: calc(var(--spacing) * 11);
 		cursor: pointer;
 	}
 </style>

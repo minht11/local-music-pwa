@@ -14,7 +14,7 @@
 
 {#if snackbarItems.length !== 0}
 	<div
-		class="max-w-500px pointer-events-auto mx-auto flex w-full flex-col gap-2 bg-transparent px-2 pb-4"
+		class="pointer-events-auto mx-auto flex w-full max-w-125 flex-col gap-2 bg-transparent px-2 pb-4"
 	>
 		{#each snackbarItems as item (item.id)}
 			<div class="top-auto" animate:flip={{ duration: 140 }}>
