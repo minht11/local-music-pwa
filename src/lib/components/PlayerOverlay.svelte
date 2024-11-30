@@ -108,7 +108,7 @@
 	@keyframes -global-view-pl-chevron-up-fade-in {
 		from {
 			opacity: 0;
-			transform: translateY(calc(var(--spacing) * 2));
+			transform: translateY(var(--spacing-2));
 		}
 	}
 

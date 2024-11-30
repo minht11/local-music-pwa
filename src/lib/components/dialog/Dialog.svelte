@@ -1,6 +1,6 @@
 <script module lang="ts">
+	import { type AnimationSequence, timeline } from '$lib/helpers/animations.ts'
 	import { clx } from '$lib/helpers/clx'
-	import { type TimelineSegment, timeline } from 'motion'
 	import type { Snippet } from 'svelte'
 	import type { AnimationConfig } from 'svelte/animate'
 	import Icon, { type IconType } from '../icon/Icon.svelte'
@@ -48,8 +48,8 @@
 	let dialogHeader = $state<HTMLElement>()!
 
 	const getParts = () => {
-		const dialogBody = dialogHeader.querySelector('[data-dialog-content]') as HTMLElement
-		const dialogFooter = dialogHeader.querySelector('[data-dialog-footer]') as HTMLElement
+		const dialogBody = dialogHeader.querySelector<HTMLElement>('[data-dialog-content]')
+		const dialogFooter = dialogHeader.querySelector<HTMLElement>('[data-dialog-footer]')
 
 		return { dialogBody, dialogFooter }
 	}
@@ -70,31 +70,37 @@
 	const animateIn = (dialog: HTMLDialogElement) => {
 		const { dialogBody, dialogFooter } = getParts()
 
-		const fade = (el?: HTMLElement) =>
-			el ? ([el, { opacity: [0, 1] }, { duration: 0.3, at: '<' }] satisfies TimelineSegment) : null
+		const fade = (el: HTMLElement | null): AnimationSequence | null =>
+			el ? [el, { opacity: [0, 1] }, { duration: 300, at: '<' }] : null
 
 		animateBackdrop(dialog)
 
-		const frames = [
+		const frames: readonly AnimationSequence[] = [
 			[
 				dialog,
 				{
-					y: [-20, 0],
+					transform: ['translateY(-20px)', 'none'],
 					clipPath: ['inset(0% 0% 100% 0% round 24px)', 'inset(0% 0% 0% 0% round 24px)'],
 				},
 				{
-					duration: 0.4,
+					duration: 400,
 				},
-			] satisfies TimelineSegment,
+			] satisfies AnimationSequence,
 			fade(dialogHeader),
-			fade(dialogBody),
-			fade(dialogFooter),
-			[dialogFooter, { y: [-60, 0] }, { duration: 0.4, at: 0 }] satisfies TimelineSegment,
-		].filter((x) => x !== null)
+			dialogBody && fade(dialogBody),
+			dialogFooter && fade(dialogFooter),
+			// TODO at 0
+			dialogFooter &&
+				([
+					dialogFooter,
+					{ transform: ['translateY(-60px)', 'none'] },
+					{ duration: 400, at: '<' },
+				] satisfies AnimationSequence),
+		].filter((x) => x !== null && x !== undefined)
 
 		timeline(frames, {
 			defaultOptions: {
-				easing: [0.2, 0, 0, 1],
+				easing: 'cubic-bezier(0.2, 0, 0, 1)',
 			},
 		})
 	}
@@ -102,34 +108,40 @@
 	const animateOut = (dialog: HTMLDialogElement) => {
 		const { dialogBody, dialogFooter } = getParts()
 
-		const fade = (el: HTMLElement) =>
-			[el, { opacity: [1, 0] }, { duration: 0.3, at: '<' }] satisfies TimelineSegment
+		const fade = (el: HTMLElement | null): AnimationSequence | null =>
+			el ? [el, { opacity: [1, 0] }, { duration: 300, at: '<' }] : null
 
 		animateBackdrop(dialog, true)
 
-		const frames = [
+		const frames: readonly AnimationSequence[] = [
 			[
 				dialog,
 				{
-					y: [0, -20],
+					transform: ['none', 'translateY(-20px)'],
 					clipPath: ['inset(0% 0% 0% 0% round 24px)', 'inset(0% 0% 100% 0% round 24px)'],
 				},
 				{
-					duration: 0.4,
+					duration: 400,
 				},
-			] satisfies TimelineSegment,
-			[dialogFooter, { y: [0, -60] }, { duration: 0.4, at: 0 }] satisfies TimelineSegment,
+			] satisfies AnimationSequence,
+			// TODO at 0
+			dialogFooter &&
+				([
+					dialogFooter,
+					{ transform: ['none', 'translateY(-60px)'] },
+					{ duration: 400, at: '<' },
+				] satisfies AnimationSequence),
 			fade(dialogFooter),
 			fade(dialogBody),
 			fade(dialogHeader),
-		].filter((x) => x !== null) as TimelineSegment[]
+		].filter((x) => x !== null)
 
+		// TODO. Duration 300ms
 		return timeline(frames, {
 			defaultOptions: {
-				easing: [0.2, 0, 0, 1],
+				easing: 'cubic-bezier(0.2, 0, 0, 1)',
 			},
-			duration: 0.3,
-		}).finished
+		})
 	}
 
 	const onOpenAction = (dialog: HTMLDialogElement) => {
@@ -172,7 +184,7 @@
 			close()
 		}}
 		class={clx(
-			'flex flex-col rounded-3xl bg-surfaceContainerHigh text-onSurface select-none focus:outline-none',
+			'm-auto flex flex-col rounded-3xl bg-surfaceContainerHigh text-onSurface select-none focus:outline-none',
 			className,
 		)}
 	>

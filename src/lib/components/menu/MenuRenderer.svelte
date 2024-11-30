@@ -1,8 +1,8 @@
 <script lang="ts" module>
 	import { assign } from '$lib/helpers/utils/assign.ts'
 	import '@a11y/focus-trap'
+	import { timeline } from '$lib/helpers/animations.ts'
 	import type { FocusTrap } from '@a11y/focus-trap'
-	import { animate, timeline } from 'motion'
 	import { setContext } from 'svelte'
 	import { getContext } from 'svelte'
 	import invariant from 'tiny-invariant'
@@ -112,7 +112,7 @@
 					opacity: [0, 1],
 				},
 				{
-					duration: 0.045,
+					duration: 45,
 					easing: 'linear',
 				},
 			],
@@ -122,15 +122,15 @@
 					transform: ['scale(.8)', 'none'],
 				},
 				{
-					duration: 0.15,
+					duration: 150,
 					// incoming 80
-					easing: [0, 0, 0.2, 1],
-					at: 0,
+					easing: 'cubic-bezier(0, 0, 0.2, 1)',
+					at: '<',
 				},
 			],
 		])
 
-		ani.finished.then(() => {
+		ani.then(() => {
 			menuEl?.focus()
 		})
 	}
@@ -150,16 +150,18 @@
 		})
 
 		// Restore focus to the element that opened the menu
-		animate(
-			menuEl,
-			{
-				opacity: [1, 0],
-			},
-			{
-				duration: 0.1,
-				easing: 'linear',
-			},
-		).finished.then(() => {
+		timeline([
+			[
+				menuEl,
+				{
+					opacity: [1, 0],
+				},
+				{
+					duration: 100,
+					easing: 'linear',
+				},
+			],
+		]).then(() => {
 			// Check if menu is still closing.
 			if (closing) {
 				context.value = undefined

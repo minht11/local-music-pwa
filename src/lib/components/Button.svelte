@@ -94,8 +94,8 @@
 
 	.flat-button {
 		color: var(--color-primary);
-		padding-left: calc(var(--spacing) * 3);
-		padding-right: calc(var(--spacing) * 3);
+		padding-left: var(--spacing-3);
+		padding-right: var(--spacing-3);
 	}
 
 	.base-button[disabled] {

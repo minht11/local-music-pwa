@@ -54,7 +54,7 @@
 
 <div class="text-field-container">
 	<div
-		class="rounded-px focus-within:border-0.5 flex h-14 flex-col border border-outline p-px text-onSurface focus-within:border-primary focus-within:p-0 [&:has(input:user-invalid)]:border-error"
+		class="flex h-14 flex-col rounded-md border border-outline p-px text-onSurface focus-within:border-2 focus-within:border-primary focus-within:p-0 [&:has(input:user-invalid)]:border-error"
 	>
 		<input
 			bind:this={input}
