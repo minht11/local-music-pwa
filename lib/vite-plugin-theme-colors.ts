@@ -1,10 +1,12 @@
 import { writeFileSync } from 'node:fs'
 import type { Plugin } from 'vite'
-import { DEFAULT_THEME_ARGB, type ThemePaletteMap, getThemePaletteRgb } from '../src/lib/theme.ts'
+import { type ThemePaletteMap, getDefaultThemeArgb,getThemePaletteRgb } from '../src/lib/theme.ts'
 
 const generateThemeVariables = () => {
-	const tokensLight = getThemePaletteRgb(DEFAULT_THEME_ARGB, false)
-	const tokensDark = getThemePaletteRgb(DEFAULT_THEME_ARGB, true)
+	const argb = getDefaultThemeArgb()
+
+	const tokensLight = getThemePaletteRgb(argb, false)
+	const tokensDark = getThemePaletteRgb(argb, true)
 
 	const entries = Object.entries(tokensLight) as [keyof ThemePaletteMap, string][]
 	const variables = entries

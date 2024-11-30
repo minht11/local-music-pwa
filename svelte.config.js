@@ -22,7 +22,7 @@ const config = {
 			directives: {
 				'default-src': ['none'],
 				'script-src': ['self', 'https://gc.zgo.at/'],
-				'style-src': ['self'],
+				'style-src': ['self', 'unsafe-inline'],
 				'img-src': ['self', 'blob:', 'https://snaeplayer.goatcounter.com/count'],
 				'media-src': ['self', 'blob:'],
 				'font-src': ['self'],

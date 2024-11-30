@@ -29,6 +29,9 @@ export default defineConfig({
 			polyfill: false,
 		},
 		rollupOptions: {
+			treeshake: {
+				preset: 'smallest',
+			},
 			// Reduce bundle size a bit by tweaking rollup options
 			output: {
 				// Some chunks will still be smaller than this
@@ -40,6 +43,14 @@ export default defineConfig({
 				generatedCode: {
 					preset: 'es2015',
 					symbols: false,
+				},
+				manualChunks: (id) => {
+					// Merge all css into a single file
+					if (id.includes('type=style&lang.css') || id.endsWith('.css')) {
+						return 'app.css'
+					}
+
+					return null
 				},
 			},
 		},
@@ -56,11 +67,6 @@ export default defineConfig({
 				unsafe_methods: true,
 				unsafe_arrows: true,
 			},
-			// mangle: {
-			// 	properties: {
-			// 		regex: /^_/,
-			// 	},
-			// },
 		},
 	},
 	plugins: [
@@ -80,14 +86,8 @@ export default defineConfig({
 				},
 				{
 					'$lib/helpers/clx.ts': ['clx'],
-				},
-				{
 					'$paraglide/messages': [['*', 'm']],
-				},
-				{
 					'$lib/stores/player/store': ['usePlayer'],
-				},
-				{
 					'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
 				},
 			],
