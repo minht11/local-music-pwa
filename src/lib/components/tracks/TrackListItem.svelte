@@ -28,7 +28,7 @@
 		menuItems,
 	}: Props = $props()
 
-	const data = createTrackQuery(trackId)
+	const data = createTrackQuery(() => trackId)
 
 	const artworkSrc = createManagedArtwork(() => data.value?.images?.small)
 	const track = $derived(data.value)

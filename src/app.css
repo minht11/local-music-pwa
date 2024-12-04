@@ -47,8 +47,8 @@
 }
 
 @theme {
-	--breakpoint-xs: 105rem;
-	--breakpoint-xss: 80rem;
+	--breakpoint-xs: 24rem;
+	--breakpoint-xss: 20rem;
 
 	--ease-*: initial;
 	--ease-outgoing40: cubic-bezier(0.4, 0, 1, 1);

@@ -70,6 +70,8 @@ const trackConfig: QueryConfig<TrackData> = {
 					}
 				})
 			}
+
+			return
 		}
 
 		if (change.storeName !== 'tracks' || change.key !== id) {
@@ -310,7 +312,7 @@ const defineEntityQuery =
 		})
 	}
 
-export const createTrackQuery = defineEntityQuery('tracks')
-export const createAlbumQuery = defineEntityQuery('albums')
-export const createArtistQuery = defineEntityQuery('artists')
-export const createPlaylistQuery = defineEntityQuery('playlists')
+export const createTrackQuery = /* @__PURE__ */ defineEntityQuery('tracks')
+export const createAlbumQuery = /* @__PURE__ */ defineEntityQuery('albums')
+export const createArtistQuery = /* @__PURE__ */ defineEntityQuery('artists')
+export const createPlaylistQuery = /* @__PURE__ */ defineEntityQuery('playlists')

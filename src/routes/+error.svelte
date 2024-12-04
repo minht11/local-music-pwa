@@ -5,7 +5,7 @@
 	const is404 = $derived($page.status === 404)
 </script>
 
-<div class="max-w-260px m-auto flex w-full flex-col items-center p-4 text-center">
+<div class="m-auto flex w-full max-w-65 flex-col items-center p-4 text-center">
 	<h1 class="text-headline-md">
 		{#if is404}
 			404
