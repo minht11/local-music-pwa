@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/stores'
+	import { page } from '$app/state'
 	import Button from '$lib/components/Button.svelte'
 
-	const is404 = $derived($page.status === 404)
+	const is404 = $derived(page.status === 404)
 </script>
 
 <div class="m-auto flex w-full max-w-65 flex-col items-center p-4 text-center">
@@ -10,7 +10,7 @@
 		{#if is404}
 			404
 		{:else}
-			{$page.error?.message}
+			{page.error?.message}
 		{/if}
 	</h1>
 

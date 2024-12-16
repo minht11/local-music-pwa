@@ -1,13 +1,11 @@
 <script lang="ts">
-	import { page } from '$app/stores'
+	import { page } from '$app/state'
 	import Header from '$lib/components/Header.svelte'
 
 	const { children } = $props()
-
-	const pageData = $derived($page.data)
 </script>
 
-<Header title={pageData.title} mode="fixed" />
+<Header title={page.data.title} mode="fixed" />
 
 <div class="flex grow flex-col px-4">
 	{@render children()}

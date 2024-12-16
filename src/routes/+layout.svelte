@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { navigating, page } from '$app/stores'
+	import { navigating, page } from '$app/state'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import PlaylistDialogs from '$lib/components/app-dialogs/PlaylistDialogs.svelte'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
@@ -80,7 +80,7 @@
 	}}
 />
 
-{#if $navigating}
+{#if navigating}
 	<div class="page-loading-indicator fixed inset-x-0 top-0 z-20 h-1 bg-tertiary/40">
 		<div
 			class="page-loading-indicator-bar h-1 w-full origin-top-left overflow-hidden bg-onTertiaryContainer"
@@ -94,7 +94,7 @@
 	<div class="flex flex-col">
 		<SnackbarRenderer />
 
-		{#if !$page.data.noPlayerOverlay}
+		{#if !page.data.noPlayerOverlay}
 			<div bind:clientHeight={overlayContentHeight} class="pointer-events-none px-4 pb-2">
 				<PlayerOverlay />
 			</div>

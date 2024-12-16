@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
-	import { page } from '$app/stores'
+	import { page } from '$app/state'
 	import Button from '$lib/components/Button.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import AlbumsListContainer from '$lib/components/albums/AlbumsListContainer.svelte'
@@ -60,7 +60,7 @@
 	]
 
 	const isWideLayout = $derived.by(data.isWideLayout)
-	const layoutMode = $derived(data.layoutMode(isWideLayout, $page.params.id))
+	const layoutMode = $derived(data.layoutMode(isWideLayout, page.params.id))
 
 	useSetBottomBar(() => layoutBottom)
 </script>

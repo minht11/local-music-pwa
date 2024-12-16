@@ -1,6 +1,6 @@
 <script lang="ts" module>
 	import { goto } from '$app/navigation'
-	import { page } from '$app/stores'
+	import { page } from '$app/state'
 	import type { ArtistData } from '$lib/db/entity'
 	import { safeInteger } from '$lib/helpers/utils/integers.ts'
 	import VirtualContainer from '../../VirtualContainer.svelte'
@@ -61,7 +61,7 @@
 					transform: translateY({item.start}px);
 				"
 			onclick={() => {
-				const shouldReplace = $page.route.id === '/library/[slug=libraryEntities]/[id]'
+				const shouldReplace = page.route.id === '/library/[slug=libraryEntities]/[id]'
 
 				goto(`/library/artists/${artistId}`, { replaceState: shouldReplace })
 			}}

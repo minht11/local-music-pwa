@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores'
+	import { page } from '$app/state'
 	import BackButton from '$lib/components/BackButton.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import Header from '$lib/components/Header.svelte'
@@ -26,7 +26,7 @@
 
 	const sizes = $derived.by(data.sizes)
 	const isCompactVertical = $derived(sizes.isCompactVertical)
-	const layoutMode = $derived(data.layoutMode(sizes.isCompact, $page.url.pathname))
+	const layoutMode = $derived(data.layoutMode(sizes.isCompact, page.url.pathname))
 </script>
 
 {#snippet playerSnippet()}

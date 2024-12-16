@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
-	import { page } from '$app/stores'
+	import { page } from '$app/state'
 	import { wait } from '$lib/helpers/utils/wait.ts'
 	import IconButton from './IconButton.svelte'
 
@@ -21,7 +21,7 @@
 			return
 		}
 
-		const path = $page.url.pathname
+		const path = page.url.pathname
 		window.history.back()
 		// If there are no entries inside history back button
 		// won't work and user will be stuck.
@@ -31,7 +31,7 @@
 		// To prevent this check if URL changed, after short delay,
 		// if it didn't back button most likely didn't do anything.
 		wait(50).then(() => {
-			if (path === $page.url.pathname) {
+			if (path === page.url.pathname) {
 				goto('/')
 			}
 		})
