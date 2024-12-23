@@ -185,8 +185,6 @@
 />
 
 <style>
-	@import '../../app.css' reference;
-
 	:global(html[data-view-player]) :global {
 		.pl-view-container {
 			view-transition-name: pl-container;
@@ -243,7 +241,9 @@
 		--vt-pl-container-to-radius: 0;
 	}
 
-	@media (width >= theme(--breakpoint-xs)) {
+	/* TODO. Try to use variable from TW config */
+	@media (width >= 24rem) {
+		/* @media (width >= theme(--breakpoint-xs)) { */
 		:global(html) {
 			background-color: red !important;
 			--vt-pl-container-radius: var(--radius-3xl);

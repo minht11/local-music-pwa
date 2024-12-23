@@ -86,7 +86,6 @@
 					"$effect",
 					"$derived",
 					"m",
-					"$page",
 					"$props",
 					"$bindable",
 					"usePlayer"

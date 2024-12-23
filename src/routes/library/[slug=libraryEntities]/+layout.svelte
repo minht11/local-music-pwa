@@ -163,7 +163,7 @@
 									// TODO. Hide the menu items for the favorite playlist
 									playlist.id === FAVORITE_PLAYLIST_ID ? [] : getPlaylistMenuItems(main, playlist)}
 								onItemClick={({ playlist }) => {
-									const shouldReplace = $page.route.id === '/library/[slug=libraryEntities]/[id]'
+									const shouldReplace = page.route.id === '/library/[slug=libraryEntities]/[id]'
 
 									void goto(`/library/playlists/${playlist.id}`, { replaceState: shouldReplace })
 								}}
@@ -182,7 +182,7 @@
 				layoutMode === 'both' && 'mx-4 mt-4 border border-primary/5 bg-surfaceContainer',
 			)}
 		>
-			{#key $page.url.pathname}
+			{#key page.url.pathname}
 				{@render children?.()}
 			{/key}
 		</div>
