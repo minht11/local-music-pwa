@@ -245,7 +245,6 @@
 	@media (width >= 24rem) {
 		/* @media (width >= theme(--breakpoint-xs)) { */
 		:global(html) {
-			background-color: red !important;
 			--vt-pl-container-radius: var(--radius-3xl);
 		}
 	}

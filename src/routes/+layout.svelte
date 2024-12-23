@@ -80,7 +80,7 @@
 	}}
 />
 
-{#if navigating}
+{#if navigating?.to}
 	<div class="page-loading-indicator fixed inset-x-0 top-0 z-20 h-1 bg-tertiary/40">
 		<div
 			class="page-loading-indicator-bar h-1 w-full origin-top-left overflow-hidden bg-onTertiaryContainer"
