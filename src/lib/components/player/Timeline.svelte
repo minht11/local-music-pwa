@@ -24,20 +24,16 @@
 		player.seek(getTime(val))
 	}
 
-	let timeline = {
-		get value() {
-			return seeking ? seekingValue : value
-		},
-		set value(val) {
-			if (seeking) {
-				seekingValue = val
-			} else {
-				playerSeek(val)
-			}
-		},
-	}
-
 	const currentTime = () => formatDuration(seeking ? getTime(seekingValue) : player.currentTime)
+
+	const getSliderValue = () => (seeking ? seekingValue : value)
+	const setSliderValue = (val: number) => {
+		if (seeking) {
+			seekingValue = val
+		} else {
+			playerSeek(val)
+		}
+	}
 </script>
 
 <div
@@ -53,7 +49,7 @@
 	<Slider
 		disabled={!player.activeTrack}
 		{max}
-		bind:value={timeline.value}
+		bind:value={getSliderValue, setSliderValue}
 		onSeekStart={() => {
 			seeking = true
 		}}

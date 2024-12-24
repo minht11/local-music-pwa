@@ -123,15 +123,6 @@
 		},
 	] as const
 
-	const themeColor = {
-		get value() {
-			return mainStore.themeColorSeedHex
-		},
-		set value(value: string | null) {
-			updateMainColor(value)
-		},
-	}
-
 	const updateMainColor = debounce((value: string | null) => {
 		mainStore.themeColorSeedHex = value
 	}, 400)
@@ -300,7 +291,7 @@
 
 					<input
 						type="color"
-						bind:value={themeColor.value}
+						bind:value={() => mainStore.themeColorSeedHex, (value) => updateMainColor(value)}
 						class="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0"
 					/>
 				</Button>
