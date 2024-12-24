@@ -9,10 +9,10 @@
 	import type { TrackData } from '$lib/db/entity.js'
 	import { initPageQueries } from '$lib/db/query.svelte.js'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
-	import { useMediaQuery } from '$lib/helpers/use-media-query.svelte.ts'
 	import { removeTrackFromPlaylistInDatabase } from '$lib/library/playlists.svelte.js'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
+	import { MediaQuery } from 'svelte/reactivity'
 
 	const { data } = $props()
 	const main = useMainStore()
@@ -35,7 +35,7 @@
 	const player = usePlayer()
 	const menu = useMenu()
 
-	const isWideLayout = useMediaQuery('(min-width: 1154px)')
+	const isWideLayout = new MediaQuery('(min-width: 1154px)')
 
 	const getMenuItems = () => {
 		if (data.storeName === 'playlists') {
@@ -56,7 +56,7 @@
 	]
 </script>
 
-{#if !isWideLayout.value}
+{#if !isWideLayout.current}
 	<Header title={data.singularTitle} mode="fixed" />
 {/if}
 

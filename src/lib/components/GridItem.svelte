@@ -25,7 +25,7 @@
 	{...props}
 	class={[className, 'interactable flex flex-col rounded-lg bg-surfaceContainerHigh']}
 >
-	<Artwork src={artworkSrc()} fallbackIcon="person" class="rounded-inherit w-full" />
+	<Artwork src={artworkSrc()} fallbackIcon="person" class="w-full rounded-[inherit]" />
 
 	<div class="flex flex-col items-center overflow-hidden">
 		{@render children()}

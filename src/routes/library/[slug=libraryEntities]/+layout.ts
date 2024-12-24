@@ -1,6 +1,6 @@
 import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
-import { windowStore } from '$lib/stores/window-store.svelte.ts'
 import { defineViewTransitionMatcher } from '$lib/view-transitions.ts'
+import { innerWidth } from 'svelte/reactivity/window'
 import type { LayoutLoad } from './$types.ts'
 import { defineLibraryPageData } from './store.svelte'
 
@@ -76,7 +76,7 @@ export const load: LayoutLoad = async (event) => {
 		createTracksCountPageQuery(),
 	])
 
-	const isWideLayout = () => windowStore.windowWidth > 1154
+	const isWideLayout = () => (innerWidth.current ?? 0) > 1154
 	// We pass params here so that inside page we can benefit from $derived caching
 	const layoutMode = (isWide: boolean, itemId: string | undefined) => {
 		if (slug === 'tracks') {

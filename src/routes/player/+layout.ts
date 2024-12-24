@@ -1,11 +1,11 @@
-import { windowStore } from '$lib/stores/window-store.svelte.ts'
 import { type AppViewTransitionType, defineViewTransitionMatcher } from '$lib/view-transitions.ts'
+import { innerHeight, innerWidth } from 'svelte/reactivity/window'
 import type { LayoutLoad } from './$types.ts'
 
 export const load: LayoutLoad = () => {
 	const sizes = () => {
-		const isCompactVertical = windowStore.windowHeight < 600
-		const isCompactHorizontal = windowStore.windowWidth < 768
+		const isCompactVertical = (innerHeight.current ?? 0) < 600
+		const isCompactHorizontal = (innerWidth.current ?? 0) < 768
 		const isCompact = isCompactVertical || isCompactHorizontal
 
 		return {

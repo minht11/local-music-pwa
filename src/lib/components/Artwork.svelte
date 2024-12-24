@@ -36,7 +36,7 @@
 			}}
 		/>
 	{:else if fallbackIcon !== null}
-		<Icon type={fallbackIcon} class="m-auto size-1/6" />
+		<Icon type={fallbackIcon} class="m-auto size-2/3" />
 	{/if}
 
 	{#if children}

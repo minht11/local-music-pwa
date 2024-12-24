@@ -2,6 +2,8 @@ import { persist } from '$lib/helpers/persist.svelte.ts'
 import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
 import { argbFromHex } from '@material/material-color-utilities'
 import { getContext, setContext } from 'svelte'
+import { prefersReducedMotion } from 'svelte/motion'
+import { MediaQuery } from 'svelte/reactivity'
 import invariant from 'tiny-invariant'
 
 export type AppTheme = 'light' | 'dark'
@@ -15,33 +17,17 @@ export interface ModifyPlaylistOptions {
 	name: string
 }
 
-const observeMedia = <T>(query: string, callback: (matched: boolean, initial: boolean) => T) => {
-	const media = window.matchMedia(query)
-
-	media.addEventListener('change', (e) => {
-		callback(e.matches, false)
-	})
-
-	return callback(media.matches, true)
-}
-
 export class MainStore {
 	theme: AppThemeOption = $state('auto')
 
-	#deviceTheme: AppTheme = observeMedia('(prefers-color-scheme: dark)', (matched, initial) => {
-		const value = matched ? 'dark' : 'light'
-
-		if (!initial) {
-			this.#deviceTheme = value
-		}
-
-		return value
-	})
+	#deviceThemeDark = new MediaQuery('(prefers-color-scheme: dark)')
 
 	get isThemeDark() {
-		const theme = this.theme === 'auto' ? this.#deviceTheme : this.theme
+		if (this.theme === 'auto') {
+			return this.#deviceThemeDark.current
+		}
 
-		return theme === 'dark'
+		return this.theme === 'dark'
 	}
 
 	themeColorSeed = $state<null | number>(null)
@@ -61,21 +47,8 @@ export class MainStore {
 
 	motion: AppMotionOption = $state('auto')
 
-	#deviceMotion: AppMotion = observeMedia(
-		'(prefers-reduced-motion: reduce)',
-		(matched, initial) => {
-			const value = matched ? 'reduced' : 'normal'
-
-			if (!initial) {
-				this.#deviceMotion = value
-			}
-
-			return value
-		},
-	)
-
 	get isReducedMotion() {
-		const motion = this.motion === 'auto' ? this.#deviceMotion : this.motion
+		const motion = this.motion === 'auto' ? prefersReducedMotion.current : this.motion
 
 		return motion === 'reduced'
 	}
