@@ -64,12 +64,12 @@
 	<svg use:action class="size-6 fill-current" viewBox="0 0 24 24">
 		<path
 			data-arrows
-			class="transform-origin-center"
+			class="origin-center"
 			d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"
 		/>
 		<path
 			class={[
-				'transform-origin-center transition-transform',
+				'origin-center transition-transform',
 				player.repeat === 'one' ? 'scale-100' : 'scale-0',
 			]}
 			d="M 13,15 V 9.0000002 H 12 L 10,10 v 1 h 1.5 v 4 z"
@@ -77,7 +77,7 @@
 	</svg>
 	<div
 		class={[
-			'transition-1000 transform-origin-center absolute bottom-1 size-1 rounded-full bg-primary transition-transform',
+			'absolute bottom-1 size-1 origin-center rounded-full bg-primary transition-transform duration-1000',
 			player.repeat === 'none' ? 'scale-0' : 'scale-100',
 		]}
 	></div>

@@ -49,7 +49,7 @@
 							class={[
 								'pl-overlay-chevron-up-icon absolute inset-0 m-auto shrink-0',
 								track &&
-									'transition-200 scale-0 rounded-full bg-tertiary text-onTertiary transition-[transform,opacity] [.group:hover_&]:scale-100',
+									'scale-0 rounded-full bg-tertiary text-onTertiary transition-[transform,opacity] duration-200 [.group:hover_&]:scale-100',
 							]}
 						/>
 					</div>
