@@ -38,7 +38,7 @@
 	}
 </script>
 
-<Dialog bind:open class={clx(className)} {...props}>
+<Dialog bind:open class={className} {...props}>
 	{#snippet children({ data, close })}
 		<form method="dialog" class="contents" onsubmit={submitHandler}>
 			{#if externalChildren}

@@ -63,10 +63,10 @@
 		<button
 			role="menuitem"
 			tabindex="0"
-			class={clx(
+			class={[
 				'interactable relative flex h-10 grow items-center gap-4 px-4 text-body-md',
 				item.selected && 'bg-surfaceVariant text-primary',
-			)}
+			]}
 			use:ripple
 			onclick={() => {
 				item.action()

@@ -1,5 +1,4 @@
 <script module lang="ts">
-	import { clx } from '$lib/helpers/clx'
 	import type { Snippet } from 'svelte'
 	import { ripple } from '../actions/ripple.ts'
 	import { tooltip } from '../actions/tooltip.ts'
@@ -16,7 +15,7 @@
 		type?: 'button' | 'submit' | 'reset'
 		disabled?: boolean
 		href?: ButtonHref<As>
-		class?: string
+		class?: ClassNameValue
 		title?: string
 		tabindex?: number
 		ariaLabel?: string
@@ -58,14 +57,14 @@
 	aria-label={ariaLabel}
 	{href}
 	disabled={disabled === true ? true : undefined}
-	class={clx(
+	class={[
 		'interactable',
 		KIND_CLASS_MAP[kind],
 		kind !== 'blank' &&
 			'base-button interactable flex h-10 items-center justify-center gap-2 rounded-3xl px-6 text-label-lg',
 		restProps.class,
 		disabled && '!cursor-default',
-	)}
+	]}
 >
 	{#if children}
 		{@render children()}

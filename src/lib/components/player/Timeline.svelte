@@ -3,7 +3,7 @@
 
 	import Slider from '../Slider.svelte'
 
-	const { class: className }: { class?: string } = $props()
+	const { class: className }: { class?: ClassNameValue } = $props()
 
 	const player = usePlayer()
 
@@ -41,10 +41,10 @@
 </script>
 
 <div
-	class={clx(
+	class={[
 		'timeline-container grid w-full items-center gap-2.5 text-nowrap tabular-nums',
 		className,
-	)}
+	]}
 >
 	<div class="text-body-sm">
 		{currentTime()}

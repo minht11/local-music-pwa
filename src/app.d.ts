@@ -1,3 +1,5 @@
+import type { HTMLAttributes } from 'svelte/elements'
+
 declare global {
 	namespace App {
 		// interface Error {}
@@ -8,6 +10,8 @@ declare global {
 		}
 		// interface Platform {}
 	}
+
+	export type ClassNameValue = HTMLAttributes<HTMLElement>['class']
 }
 
 interface Navigator {

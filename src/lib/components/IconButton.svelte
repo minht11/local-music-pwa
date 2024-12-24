@@ -16,11 +16,11 @@
 <Button
 	{...rest}
 	kind="blank"
-	class={clx(
+	class={[
 		'flex size-11 shrink-0 items-center justify-center rounded-full',
 		rest.class,
 		rest.disabled && 'opacity-54',
-	)}
+	]}
 >
 	{#if children}
 		{@render children()}

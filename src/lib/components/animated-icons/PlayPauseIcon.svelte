@@ -6,7 +6,7 @@
 	const { playing = false }: Props = $props()
 </script>
 
-<div class={clx('play-icon relative z-1 h-6 w-6', playing && 'playing rotate-90')}>
+<div class={['play-icon relative z-1 h-6 w-6', playing && 'playing rotate-90']}>
 	<div class="play-bar"></div>
 	<div class="play-bar flip-y"></div>
 </div>

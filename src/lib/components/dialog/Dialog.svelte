@@ -1,6 +1,5 @@
 <script module lang="ts">
 	import { type AnimationSequence, timeline } from '$lib/helpers/animations.ts'
-	import { clx } from '$lib/helpers/clx'
 	import type { Snippet } from 'svelte'
 	import type { AnimationConfig } from 'svelte/animate'
 	import Icon, { type IconType } from '../icon/Icon.svelte'
@@ -14,7 +13,7 @@
 		open?: boolean | DialogOpenAccessor<S>
 		title?: string
 		icon?: IconType
-		class?: string
+		class?: ClassNameValue
 		children?: Snippet<[{ data: S; close: () => void }]>
 	}
 </script>
@@ -183,17 +182,14 @@
 			// There is no way to prevent dialog close event
 			close()
 		}}
-		class={clx(
+		class={[
 			'm-auto flex flex-col rounded-3xl bg-surfaceContainerHigh text-onSurface select-none focus:outline-none',
 			className,
-		)}
+		]}
 	>
 		<header
 			bind:this={dialogHeader}
-			class={clx(
-				'flex flex-col gap-4 px-6 pt-6',
-				icon && 'items-center justify-center text-center',
-			)}
+			class={['flex flex-col gap-4 px-6 pt-6', icon && 'items-center justify-center text-center']}
 		>
 			{#if icon}
 				<Icon type={icon} class="text-secondary" />

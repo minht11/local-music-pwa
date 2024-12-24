@@ -59,10 +59,10 @@
 
 <button
 	bind:this={target}
-	class={clx(
+	class={[
 		'relative flex h-10 appearance-none items-center gap-2 overflow-hidden rounded-sm border border-outlineVariant pr-2 pl-4',
 		className,
-	)}
+	]}
 	use:ripple
 	role="combobox"
 	aria-controls="popupId"
@@ -96,10 +96,10 @@
 				use:ripple
 				role="option"
 				aria-selected={item[key] === selected}
-				class={clx(
+				class={[
 					'relative flex h-10 w-full items-center overflow-hidden px-4',
 					item[key] === selected && 'text-primary',
-				)}
+				]}
 				onclick={() => {
 					selected = item[key]
 					popup?.hidePopover()

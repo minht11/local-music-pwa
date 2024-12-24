@@ -4,7 +4,7 @@
 	import invariant from 'tiny-invariant'
 	import IconButton from '../../IconButton.svelte'
 
-	const { class: className }: { class?: string } = $props()
+	const { class: className }: { class?: ClassNameValue } = $props()
 
 	const player = usePlayer()
 
@@ -61,28 +61,24 @@
 </script>
 
 <IconButton tooltip={tooltipMap[player.repeat]} class={className} onclick={player.toggleRepeat}>
-	<svg
-		use:action
-		class={clx('size-6 fill-current', player.repeat !== 'none' && '')}
-		viewBox="0 0 24 24"
-	>
+	<svg use:action class="size-6 fill-current" viewBox="0 0 24 24">
 		<path
 			data-arrows
 			class="transform-origin-center"
 			d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"
 		/>
 		<path
-			class={clx(
+			class={[
 				'transform-origin-center transition-transform',
 				player.repeat === 'one' ? 'scale-100' : 'scale-0',
-			)}
+			]}
 			d="M 13,15 V 9.0000002 H 12 L 10,10 v 1 h 1.5 v 4 z"
 		/>
 	</svg>
 	<div
-		class={clx(
+		class={[
 			'transition-1000 transform-origin-center absolute bottom-1 size-1 rounded-full bg-primary transition-transform',
 			player.repeat === 'none' ? 'scale-0' : 'scale-100',
-		)}
+		]}
 	></div>
 </IconButton>

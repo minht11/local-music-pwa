@@ -7,7 +7,7 @@
 		mode: LayoutMode
 		list: Snippet<[LayoutMode]>
 		details: Snippet<[LayoutMode]>
-		class?: string
+		class?: ClassNameValue
 		noPlayerOverlayPadding?: boolean
 		noListStableGutter?: boolean
 	}
@@ -22,25 +22,25 @@
 	}: Props = $props()
 </script>
 
-<div class={clx('!flex !flex-col', className)}>
+<div class={['!flex !flex-col', className]}>
 	<div class="flex h-full grow">
 		{#if mode === 'both'}
 			<ScrollContainer
-				class={clx(
+				class={[
 					'max-h-100vh sticky top-0 flex shrink-0 flex-col overflow-y-auto overscroll-contain',
 					!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
 					!noListStableGutter && 'scrollbar-gutter-stable',
-				)}
+				]}
 			>
 				{@render list(mode)}
 			</ScrollContainer>
 		{/if}
 
 		<div
-			class={clx(
+			class={[
 				'flex w-full grow flex-col',
 				!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
-			)}
+			]}
 		>
 			{#if mode === 'both' || mode === 'details'}
 				{@render details(mode)}

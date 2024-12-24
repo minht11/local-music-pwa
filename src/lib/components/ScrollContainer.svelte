@@ -20,7 +20,7 @@
 
 <script lang="ts">
 	interface Props {
-		class?: string
+		class?: ClassNameValue
 		children: Snippet
 	}
 

@@ -13,7 +13,7 @@
 		style?: string
 		ariaRowIndex?: number
 		active?: boolean
-		class?: string
+		class?: ClassNameValue
 		icon?: Snippet<[Playlist]> | IconType
 		menuItems?: (playlist: Playlist) => MenuItem[]
 		onclick?: (playlist: Playlist) => void
@@ -48,11 +48,11 @@
 	{style}
 	menuItems={menuItemsWithItem}
 	tabindex={-1}
-	class={clx(
+	class={[
 		'h-14 text-left',
 		active ? 'bg-onSurfaceVariant/10 text-onSurfaceVariant' : '',
 		className,
-	)}
+	]}
 	ariaLabel={`Play ${playlist?.name}`}
 	{ariaRowIndex}
 	onclick={() => onclick?.(playlist!)}

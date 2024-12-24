@@ -49,7 +49,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class={clx(flipIcon && 'flip-x', 'grid')}
+	class={[flipIcon && 'flip-x', 'grid']}
 	data-icon-animating={isAnimating ? '' : undefined}
 	use:action
 >

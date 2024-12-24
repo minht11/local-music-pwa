@@ -5,10 +5,10 @@
 	import RepeatButton from './buttons/RepeatButton.svelte'
 	import ShuffleButton from './buttons/ShuffleButton.svelte'
 
-	const { class: className }: { class?: string } = $props()
+	const { class: className }: { class?: ClassNameValue } = $props()
 </script>
 
-<div class={clx('flex items-center gap-2', className)}>
+<div class={['flex items-center gap-2', className]}>
 	<ShuffleButton />
 
 	<PlayPrevButton />

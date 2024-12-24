@@ -5,7 +5,7 @@
 
 	interface Props {
 		artwork?: Blob
-		class?: string
+		class?: ClassNameValue
 		style?: string
 		children: Snippet
 		tabindex?: number
@@ -23,7 +23,7 @@
 <div
 	use:ripple
 	{...props}
-	class={clx(className, 'interactable flex flex-col rounded-lg bg-surfaceContainerHigh')}
+	class={[className, 'interactable flex flex-col rounded-lg bg-surfaceContainerHigh']}
 >
 	<Artwork src={artworkSrc()} fallbackIcon="person" class="rounded-inherit w-full" />
 

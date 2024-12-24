@@ -1,12 +1,11 @@
 <script lang="ts" module>
-	import { clx } from '$lib/helpers/clx'
 	import { ICON_PATHS } from './icon-paths.ts'
 
 	export type IconType = keyof typeof ICON_PATHS
 
 	export interface IconProps {
 		type: IconType
-		class?: string
+		class?: ClassNameValue
 	}
 </script>
 
@@ -19,7 +18,7 @@
 	width="24"
 	height="24"
 	viewBox="0 0 24 24"
-	class={clx('pointer-events-none shrink-0 fill-current', className)}
+	class={['pointer-events-none shrink-0 fill-current', className]}
 >
 	<path d={ICON_PATHS[type]} />
 </svg>

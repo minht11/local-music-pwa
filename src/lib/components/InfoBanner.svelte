@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { clx } from '$lib/helpers/clx'
 	import Icon, { type IconType } from './icon/Icon.svelte'
 
 	interface Props {
@@ -12,10 +11,10 @@
 </script>
 
 <div
-	class={clx(
+	class={[
 		'flex flex-col gap-4 rounded-lg border border-outlineVariant p-4 text-outline select-text sm:flex-row sm:items-center',
 		restProps.class,
-	)}
+	]}
 >
 	<Icon type={icon} class="shrink-0 text-outline" />
 

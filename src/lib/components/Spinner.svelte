@@ -8,13 +8,7 @@
 	const { class: className }: Props = $props()
 </script>
 
-<svg
-	class={clx('spinner', className)}
-	fill="transparent"
-	width="40"
-	height="40"
-	viewBox="0 0 66 66"
->
+<svg class={['spinner', className]} fill="transparent" width="40" height="40" viewBox="0 0 66 66">
 	<circle class="path" cx="33" cy="33" r="30" />
 </svg>
 

@@ -19,10 +19,10 @@
 </script>
 
 <div
-	class={clx(
+	class={[
 		'view-transition-pl-container pointer-events-auto mx-auto max-w-225 justify-between overflow-hidden rounded-2xl border border-primary/10 bg-secondaryContainer text-onSecondaryContainer sm:h-auto sm:rounded-3xl',
 		className,
-	)}
+	]}
 >
 	<div
 		class="player-content flex h-full w-full flex-col items-center justify-between gap-4 sm:px-4 sm:pt-2 sm:pb-4"
@@ -46,11 +46,11 @@
 
 						<Icon
 							type="chevronUp"
-							class={clx(
+							class={[
 								'pl-overlay-chevron-up-icon absolute inset-0 m-auto shrink-0',
 								track &&
 									'transition-200 scale-0 rounded-full bg-tertiary text-onTertiary transition-[transform,opacity] [.group:hover_&]:scale-100',
-							)}
+							]}
 						/>
 					</div>
 

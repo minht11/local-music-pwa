@@ -9,9 +9,9 @@
 
 <div
 	role="separator"
-	class={clx(
+	class={[
 		className,
 		'shrink-0 self-stretch border-outlineVariant',
 		vertical ? 'w-0 border-r' : 'h-0 border-b',
-	)}
+	]}
 ></div>

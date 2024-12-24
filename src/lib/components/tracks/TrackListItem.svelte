@@ -13,7 +13,7 @@
 		style?: string
 		ariaRowIndex?: number
 		active?: boolean
-		class?: string
+		class?: ClassNameValue
 		menuItems?: (playlist: TrackData) => MenuItem[]
 		onclick?: (track: TrackData) => void
 	}
@@ -47,11 +47,11 @@
 	{style}
 	menuItems={menuItemsWithItem}
 	tabindex={-1}
-	class={clx(
+	class={[
 		'h-18 text-left',
 		active ? 'bg-onSurfaceVariant/10 text-onSurfaceVariant' : 'color-onSurfaceVariant',
 		className,
-	)}
+	]}
 	ariaLabel={`Play ${track?.name}`}
 	{ariaRowIndex}
 	onclick={() => onclick?.(track!)}
@@ -60,7 +60,7 @@
 		<Artwork
 			src={artworkSrc()}
 			alt={track?.name}
-			class={clx('!hidden h-10 w-10 rounded-sm @sm:!flex', data.loading && 'opacity-50')}
+			class={['!hidden h-10 w-10 rounded-sm @sm:!flex', data.loading && 'opacity-50']}
 		/>
 
 		{#if data.loading === true}
@@ -75,7 +75,7 @@
 			</div>
 		{:else if track}
 			<div class="flex flex-col truncate">
-				<div class={clx(active ? 'text-primary' : 'color-onSurface', 'truncate')}>
+				<div class={[active ? 'text-primary' : 'color-onSurface', 'truncate']}>
 					{track.name}
 				</div>
 				<div class="truncate overflow-hidden">

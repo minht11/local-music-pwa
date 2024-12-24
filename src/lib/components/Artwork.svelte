@@ -16,10 +16,10 @@
 </script>
 
 <div
-	class={clx(
+	class={[
 		'flex aspect-1/1 overflow-hidden bg-surfaceContainerHighest ring-1 ring-surface/40 contain-strict',
 		className,
-	)}
+	]}
 >
 	{#if src && !error}
 		<img

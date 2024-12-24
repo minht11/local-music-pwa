@@ -31,18 +31,18 @@
 
 {#snippet playerSnippet()}
 	<div
-		class={clx(
+		class={[
 			layoutMode === 'both' && 'w-100',
 			layoutMode === 'list' && 'mx-auto w-full',
 			'player-content z-0 grow items-center gap-x-6 overflow-clip bg-secondaryContainerVariant px-2 pb-2',
 			isCompactVertical && !sizes.isCompactHorizontal && 'player-content-horizontal',
-		)}
+		]}
 	>
 		<div
-			class={clx(
+			class={[
 				isCompactVertical && !sizes.isCompactHorizontal ? 'absolute top-0 left-0 h-14' : 'h-16',
 				'flex w-full items-center justify-between gap-2 [grid-area:header]',
-			)}
+			]}
 		>
 			<BackButton />
 
@@ -61,10 +61,10 @@
 			</div>
 
 			<div
-				class={clx(
+				class={[
 					'flex w-full flex-col gap-6 rounded-2xl bg-secondaryContainer px-4 [grid-area:header]',
 					mainStore.volumeSliderEnabled ? 'pt-8 pb-4' : 'py-8',
-				)}
+				]}
 			>
 				<div class="my-auto flex items-center justify-between gap-2">
 					<ShuffleButton />
@@ -174,10 +174,10 @@
 
 <ListDetailsLayout
 	mode={layoutMode}
-	class={clx(
+	class={[
 		'pl-view-content mx-auto w-full max-w-320 grow',
 		layoutMode === 'both' && 'bg-secondaryContainer',
-	)}
+	]}
 	list={playerSnippet}
 	details={queueSnippet}
 	noListStableGutter

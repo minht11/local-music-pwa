@@ -85,7 +85,6 @@ export default defineConfig({
 					type: true,
 				},
 				{
-					'$lib/helpers/clx.ts': ['clx'],
 					'$paraglide/messages': [['*', 'm']],
 					'$lib/stores/player/store': ['usePlayer'],
 					'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],

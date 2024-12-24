@@ -87,10 +87,10 @@
 			{#snippet icon(playlist)}
 				{@const isInPlaylist = isTrackInPlaylist(playlist.id)}
 				<div
-					class={clx(
+					class={[
 						'flex size-6 items-center justify-center rounded-full border-2',
 						isInPlaylist ? 'border-primary bg-primary text-onPrimary' : 'border-neutral',
-					)}
+					]}
 				>
 					{#if isInPlaylist}
 						<Icon type="check" />

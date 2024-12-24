@@ -11,7 +11,7 @@
 <script lang="ts">
 	interface Props {
 		style?: string
-		class?: string
+		class?: ClassNameValue
 		ariaLabel?: string
 		ariaRowIndex?: number
 		tabindex?: number
@@ -40,10 +40,10 @@
 	use:ripple
 	{style}
 	{tabindex}
-	class={clx(
+	class={[
 		className,
 		'flex cursor-pointer items-center overflow-hidden rounded-lg pr-2 pl-4 hover:bg-onSurface/10',
-	)}
+	]}
 	role="row"
 	aria-label={ariaLabel}
 	aria-rowindex={ariaRowIndex}

@@ -72,13 +72,13 @@
 			href={`/library/${item.slug}`}
 			kind="blank"
 			title={item.title}
-			class={clx('flex shrink-0 items-center justify-center', className)}
+			class={['flex shrink-0 items-center justify-center', className]}
 		>
 			<div
-				class={clx(
+				class={[
 					'flex items-center justify-center rounded-full p-2',
 					item.slug === slug && 'bg-secondaryContainer text-onSecondaryContainer',
-				)}
+				]}
 			>
 				<Icon type={item.icon} />
 			</div>
@@ -98,10 +98,10 @@
 
 {#if !(layoutMode === 'details' && !isWideLayout)}
 	<div
-		class={clx(
+		class={[
 			'desktop-sidebar fixed z-1 mt-20 h-max w-max flex-col gap-2 [@media(max-height:500px)]:mt-2',
 			data.isHandHeldDevice ? 'hidden sm:flex' : 'flex',
-		)}
+		]}
 	>
 		{@render navItemsSnippet('h-14 w-20')}
 	</div>
@@ -109,8 +109,8 @@
 
 <ListDetailsLayout mode={layoutMode} class="mx-auto w-full max-w-[var(--library-max-width)] grow">
 	{#snippet list(mode)}
-		<div class={clx(data.isHandHeldDevice ? 'sm:pl-20' : 'pl-20', 'flex grow flex-col')}>
-			<div class={clx(mode === 'both' && 'w-100', 'flex grow flex-col px-4')}>
+		<div class={[data.isHandHeldDevice ? 'sm:pl-20' : 'pl-20', 'flex grow flex-col']}>
+			<div class={[mode === 'both' && 'w-100', 'flex grow flex-col px-4']}>
 				<Search name={data.pluralTitle} store={data.store} />
 
 				{#if data.storeName === 'playlists'}
@@ -138,7 +138,7 @@
 						</Button>
 					</div>
 				{:else}
-					<div class={clx('flex w-full grow flex-col')}>
+					<div class={['flex w-full grow flex-col']}>
 						{#if data.store.searchTerm && itemsIds.length === 0}
 							<div class="relative m-auto flex flex-col items-center text-center">
 								<Icon type="magnify" class="my-auto size-35 opacity-54" />
@@ -177,10 +177,10 @@
 
 	{#snippet details()}
 		<div
-			class={clx(
+			class={[
 				'pointer-events-auto flex h-full flex-col rounded-3xl',
 				layoutMode === 'both' && 'mx-4 mt-4 border border-primary/5 bg-surfaceContainer',
-			)}
+			]}
 		>
 			{#key page.url.pathname}
 				{@render children?.()}

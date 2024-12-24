@@ -25,7 +25,7 @@
 		{#each buttons as button}
 			<Button
 				kind={button.kind ?? 'flat'}
-				class={clx('min-w-15', button.align === 'left' && 'mr-auto')}
+				class={['min-w-15', button.align === 'left' && 'mr-auto']}
 				type={button.type !== 'close' ? button.type : 'button'}
 				onclick={() => {
 					button.action?.(state as S)

@@ -3,7 +3,7 @@
 
 	export interface HeaderProps {
 		children?: Snippet
-		title?: string
+		title?: ClassNameValue
 		noBackButton?: boolean
 		mode?: 'fixed' | 'sticky'
 	}
@@ -44,11 +44,11 @@
 {/if}
 
 <header
-	class={clx(
+	class={[
 		'transition-background-color ease-in-out inset-x-0 top-0 z-10 flex h-[var(--app-header-height)] shrink-0 duration-200',
 		isScrolled && 'bg-surfaceContainerHigh',
 		isFixed ? 'fixed' : 'sticky',
-	)}
+	]}
 >
 	<div class="mx-auto flex w-full max-w-320 items-center pr-2 pl-6">
 		{#if !noBackButton}

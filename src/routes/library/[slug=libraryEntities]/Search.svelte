@@ -80,7 +80,7 @@
 	<IconButton icon="sort" tooltip="Open sort menu" onclick={sortMenuHandler} />
 
 	<IconButton
-		class={clx(store.order === 'desc' && 'rotate-180', 'transition-transform')}
+		class={[store.order === 'desc' && 'rotate-180', 'transition-transform']}
 		icon="sortAscending"
 		tooltip="Toggle sort order"
 		onclick={() => {
