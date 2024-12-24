@@ -133,7 +133,7 @@ body {
 @layer base {
 	* {
 		scrollbar-width: thin;
-		scrollbar-color: color-mix(in oklch, var(--color-secondary) 30%, transparent) transparent;
+		scrollbar-color: color-mix(in oklch, var(--color-secondary) 30%, transparent);
 	}
 
 	:where(:focus) {

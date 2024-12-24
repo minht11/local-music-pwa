@@ -83,7 +83,7 @@
 	}
 
 	:is(.tonal-button, .filled-button)[disabled] {
-		background-color: color-mix(in oklch, var(--color-onSurface) 12%, transparent) transparent;
+		background-color: color-mix(in oklch, var(--color-onSurface) 12%, transparent);
 	}
 
 	.outlined-button {
@@ -99,8 +99,8 @@
 
 	.base-button[disabled] {
 		cursor: default;
-		background-color: color-mix(in oklch, var(--color-onSurface) 38%, transparent) transparent;
-		border-color: color-mix(in oklch, var(--color-onSurface) 38%, transparent) transparent;
+		background-color: color-mix(in oklch, var(--color-onSurface) 38%, transparent);
+		border-color: color-mix(in oklch, var(--color-onSurface) 38%, transparent);
 	}
 
 	.base-button:focus-visible,

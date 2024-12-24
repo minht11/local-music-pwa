@@ -69,7 +69,7 @@ export class PlayerStore {
 	}
 
 	#artwork = createManagedArtwork(() => this.activeTrack?.images?.full)
-	artworkSrc: string = $derived(this.#artwork())
+	artworkSrc: string = $derived.by(this.#artwork)
 
 	constructor() {
 		persist('player', this, ['volume', 'shuffle', 'repeat', 'muted'])
