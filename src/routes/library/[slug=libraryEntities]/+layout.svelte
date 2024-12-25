@@ -159,9 +159,10 @@
 						{:else if data.storeName === 'playlists'}
 							<PlaylistListContainer
 								items={itemsIds}
-								menuItems={(playlist) =>
-									// TODO. Hide the menu items for the favorite playlist
-									playlist.id === FAVORITE_PLAYLIST_ID ? [] : getPlaylistMenuItems(main, playlist)}
+								menuItems={{
+									disabled: (playlist) => playlist.id === FAVORITE_PLAYLIST_ID,
+									items: (playlist) => getPlaylistMenuItems(main, playlist),
+								}}
 								onItemClick={({ playlist }) => {
 									const shouldReplace = page.route.id === '/library/[slug=libraryEntities]/[id]'
 

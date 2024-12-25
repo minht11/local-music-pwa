@@ -1,10 +1,9 @@
 <script lang="ts" module>
 	import type { Playlist } from '$lib/db/database-types'
 	import type { Snippet } from 'svelte'
-	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import type { IconType } from '../icon/Icon.svelte'
-	import PlaylistListItem from './PlaylistListItem.svelte'
+	import PlaylistListItem, { type MenuItemsConfig } from './PlaylistListItem.svelte'
 
 	export interface TrackItemClick {
 		playlist: Playlist
@@ -18,7 +17,7 @@
 		items: number[]
 		icon?: Snippet<[Playlist]> | IconType
 		onItemClick?: (data: TrackItemClick) => void
-		menuItems?: (playlist: Playlist) => MenuItem[]
+		menuItems?: MenuItemsConfig
 	}
 
 	const { items, icon, menuItems, onItemClick }: Props = $props()

@@ -1,13 +1,22 @@
-<script lang="ts">
+<script lang="ts" module>
 	import type { Playlist } from '$lib/db/database-types'
 	import { createPlaylistQuery } from '$lib/db/entity'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
 	import type { Snippet } from 'svelte'
-	import invariant from 'tiny-invariant'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'
 	import Icon from '../icon/Icon.svelte'
 	import type { IconType } from '../icon/Icon.svelte'
 
+	export type MenuItemsSelector = (playlist: Playlist) => MenuItem[]
+	export type MenuItemsConfig =
+		| {
+				disabled?: (playlist: Playlist) => boolean
+				items: MenuItemsSelector
+		  }
+		| MenuItemsSelector
+</script>
+
+<script lang="ts">
 	interface Props {
 		playlistId: number
 		style?: string
@@ -15,7 +24,7 @@
 		active?: boolean
 		class?: ClassNameValue
 		icon?: Snippet<[Playlist]> | IconType
-		menuItems?: (playlist: Playlist) => MenuItem[]
+		menuItems?: MenuItemsConfig
 		onclick?: (playlist: Playlist) => void
 	}
 
@@ -33,14 +42,18 @@
 	const data = createPlaylistQuery(playlistId)
 	const playlist = $derived(data.value)
 
-	const menuItemsWithItem = $derived(
-		menuItems &&
-			(() => {
-				invariant(playlist)
+	const menuItemsWithItem = $derived.by(() => {
+		if (!playlist) {
+			return undefined
+		}
 
-				return menuItems?.(playlist)
-			}),
-	)
+		if (typeof menuItems === 'object') {
+			return menuItems.disabled?.(playlist) ? undefined : () => menuItems.items(playlist)
+		}
+
+		return () => menuItems?.(playlist) ?? []
+	})
+
 	const fallbackIcon = () => (playlistId === FAVORITE_PLAYLIST_ID ? 'favorite' : 'playlist')
 </script>
 
