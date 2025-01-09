@@ -1,6 +1,6 @@
 import { writeFileSync } from 'node:fs'
 import type { Plugin } from 'vite'
-import { type ThemePaletteMap, getDefaultThemeArgb,getThemePaletteRgb } from '../src/lib/theme.ts'
+import { type ThemePaletteMap, getDefaultThemeArgb, getThemePaletteRgb } from '../src/lib/theme.ts'
 
 const generateThemeVariables = () => {
 	const argb = getDefaultThemeArgb()
@@ -31,7 +31,7 @@ export const themeColorsPlugin = (options: Options): Plugin => ({
 		const variables = await generateThemeVariables()
 
 		const content = `
-			@theme inline {
+			@theme {
 				--color-*: initial;
 				--color-transparent: transparent;
 				--color-current: currentColor;
