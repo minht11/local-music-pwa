@@ -102,7 +102,7 @@
 	</div>
 
 	<div
-		class="transition-border-radius duration-100ms pointer-events-none absolute inset-0 my-auto mr-2 h-4 w-[calc(100%-4px)] overflow-clip contain-strict"
+		class="pointer-events-none absolute inset-0 my-auto mr-2 h-4 w-[calc(100%-4px)] overflow-clip transition-[border-radius] duration-50 contain-strict"
 		style={getBarBorder()}
 	>
 		<div

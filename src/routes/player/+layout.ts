@@ -28,24 +28,23 @@ export const load: LayoutLoad = () => {
 	}
 
 	defineViewTransitionMatcher((to, from) => {
-		const previousRouteWasPlayer = from?.startsWith('/player')
-		const currentRouteIsPlayer = to?.startsWith('/player')
+		const prevRouteWasPlayer = from?.startsWith('/player')
+		const nextRouteIsPlayer = to?.startsWith('/player')
 
 		const prevRouteWasQueue = from?.endsWith('/queue')
 		const nextRouteIsQueue = to?.endsWith('/queue')
 
 		const viewBetweenPlayerAndQueue =
-			(previousRouteWasPlayer && nextRouteIsQueue) ||
-			(prevRouteWasQueue && currentRouteIsPlayer)
+			(prevRouteWasPlayer && nextRouteIsQueue) || (prevRouteWasQueue && nextRouteIsPlayer)
 
 		let view: AppViewTransitionType | null = null
 		let backNavigation = false
-		if (previousRouteWasPlayer && !viewBetweenPlayerAndQueue) {
+		if (prevRouteWasPlayer && !viewBetweenPlayerAndQueue) {
 			view = 'player'
 			backNavigation = true
 		}
 
-		if (currentRouteIsPlayer && !viewBetweenPlayerAndQueue) {
+		if (nextRouteIsPlayer && !viewBetweenPlayerAndQueue) {
 			view = 'player'
 		}
 

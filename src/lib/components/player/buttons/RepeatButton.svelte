@@ -3,6 +3,7 @@
 	import { on } from 'svelte/events'
 	import invariant from 'tiny-invariant'
 	import IconButton from '../../IconButton.svelte'
+	import ActiveIndicator from './ActiveIndicator.svelte'
 
 	const { class: className }: { class?: ClassNameValue } = $props()
 
@@ -75,10 +76,6 @@
 			d="M 13,15 V 9.0000002 H 12 L 10,10 v 1 h 1.5 v 4 z"
 		/>
 	</svg>
-	<div
-		class={[
-			'absolute bottom-1 size-1 origin-center rounded-full bg-primary transition-transform duration-1000',
-			player.repeat === 'none' ? 'scale-0' : 'scale-100',
-		]}
-	></div>
+
+	<ActiveIndicator active={player.repeat !== 'none'} />
 </IconButton>

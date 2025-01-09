@@ -43,7 +43,7 @@
 	const playlist = $derived(data.value)
 
 	const menuItemsWithItem = $derived.by(() => {
-		if (!playlist) {
+		if (!playlist || !menuItems) {
 			return undefined
 		}
 
@@ -51,7 +51,7 @@
 			return menuItems.disabled?.(playlist) ? undefined : () => menuItems.items(playlist)
 		}
 
-		return () => menuItems?.(playlist) ?? []
+		return () => menuItems(playlist)
 	})
 
 	const fallbackIcon = () => (playlistId === FAVORITE_PLAYLIST_ID ? 'favorite' : 'playlist')

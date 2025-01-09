@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import IconButton from '../../IconButton.svelte'
+	import ActiveIndicator from './ActiveIndicator.svelte'
 
 	const { class: className }: { class?: ClassNameValue } = $props()
 
@@ -14,10 +15,5 @@
 >
 	<Icon type="shuffle" />
 
-	<div
-		class={[
-			'absolute bottom-1 size-1 origin-center rounded-full bg-primary transition-transform duration-1000',
-			player.shuffle ? 'scale-100' : 'scale-0',
-		]}
-	></div>
+	<ActiveIndicator active={player.shuffle} />
 </IconButton>
