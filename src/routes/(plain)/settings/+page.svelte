@@ -380,7 +380,9 @@
 </CommonDialog>
 
 <style>
+	@reference '../../../app.css';
+
 	:root {
-		--settings-max-width: calc(var(--spacing) * 225);
+		--settings-max-width: --spacing(225);
 	}
 </style>

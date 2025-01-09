@@ -184,6 +184,8 @@
 />
 
 <style>
+	@reference '../../app.css';
+
 	:global(html[data-view-player]) :global {
 		.pl-view-container {
 			view-transition-name: pl-container;
@@ -201,13 +203,13 @@
 	.player-content {
 		display: grid;
 		grid-template-columns: 1fr;
-		grid-template-rows: max-content minmax(calc(var(--spacing) * 35), 1fr) auto;
+		grid-template-rows: max-content minmax(--spacing(35), 1fr) auto;
 		grid-template-areas: 'header' 'artwork' 'controls';
 	}
 
 	.player-content-horizontal {
 		grid-template-columns:
-			1fr minmax(0, calc(var(--spacing) * 75)) minmax(0, calc(var(--spacing) * 125))
+			1fr minmax(0, --spacing(75)) minmax(0, --spacing(125))
 			1fr;
 		grid-template-rows: max-content 1fr;
 		grid-template-areas:

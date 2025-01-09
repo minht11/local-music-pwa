@@ -59,12 +59,6 @@
 	--text-*: initial;
 }
 
-:root {
-	/* TODO. Remove this in favor of --spacing() */
-	--spacing-2: --spacing(2);
-	--spacing-3: --spacing(3);
-}
-
 html {
 	background-color: var(--color-surface);
 	color: var(--color-onSurface);
@@ -308,8 +302,8 @@ body {
 	}
 
 	.ripple {
-		width: var(--spacing);
-		height: var(--spacing);
+		width: 1px;
+		height: 1px;
 		position: absolute;
 		border-radius: 50%;
 		opacity: 0.2;

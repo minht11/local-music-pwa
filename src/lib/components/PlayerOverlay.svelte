@@ -82,6 +82,8 @@
 </div>
 
 <style>
+	@reference '../../app.css';
+
 	.controls {
 		grid-template-columns: 1fr max-content 1fr;
 	}
@@ -107,7 +109,7 @@
 	@keyframes -global-view-pl-chevron-up-fade-in {
 		from {
 			opacity: 0;
-			transform: translateY(var(--spacing-2));
+			transform: translateY(--spacing(2));
 		}
 	}
 

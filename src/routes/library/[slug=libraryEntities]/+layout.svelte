@@ -189,8 +189,10 @@
 </ListDetailsLayout>
 
 <style>
+	@reference '../../../app.css';
+
 	:root {
-		--library-max-width: calc(var(--spacing) * 400);
+		--library-max-width: --spacing(400);
 	}
 	.desktop-sidebar {
 		left: max(0, (100% - var(--library-max-width)) / 2);

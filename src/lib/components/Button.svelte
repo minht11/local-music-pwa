@@ -72,6 +72,8 @@
 </svelte:element>
 
 <style>
+	@reference '../../app.css';
+
 	.filled-button {
 		background: var(--color-primary);
 		color: var(--color-onPrimary);
@@ -82,10 +84,6 @@
 		color: var(--color-onSecondaryContainer);
 	}
 
-	:is(.tonal-button, .filled-button)[disabled] {
-		background-color: color-mix(in oklch, var(--color-onSurface) 12%, transparent);
-	}
-
 	.outlined-button {
 		color: var(--color-primary);
 		border: 1px solid var(--color-outline);
@@ -93,19 +91,23 @@
 
 	.flat-button {
 		color: var(--color-primary);
-		padding-left: var(--spacing-3);
-		padding-right: var(--spacing-3);
+		padding-left: --spacing(3);
+		padding-right: --spacing(3);
 	}
 
 	.base-button[disabled] {
 		cursor: default;
-		background-color: color-mix(in oklch, var(--color-onSurface) 38%, transparent);
-		border-color: color-mix(in oklch, var(--color-onSurface) 38%, transparent);
+		background-color: --alpha(var(--color-onSurface), 38%);
+		border-color: --alpha(var(--color-onSurface), 38%);
+	}
+
+	:is(.tonal-button, .filled-button)[disabled] {
+		background-color: --alpha(var(--color-onSurface), 12%);
 	}
 
 	.base-button:focus-visible,
 	.base-button:hover:focus-visible {
-		outline: calc(var(--spacing) * 0.5) solid var(--color-onSurface) !important;
-		outline-offset: calc(var(--spacing) * -0.5);
+		outline: --spacing(0.5) solid var(--color-onSurface) !important;
+		outline-offset: --spacing(-0.5);
 	}
 </style>

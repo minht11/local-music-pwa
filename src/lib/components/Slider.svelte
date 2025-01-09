@@ -118,12 +118,14 @@
 </div>
 
 <style>
+	@reference '../../app.css';
+
 	input:active ~ div > .thumb {
 		transform: scaleX(0.5);
 	}
 
 	input::-webkit-slider-thumb {
-		height: calc(var(--spacing) * 11);
+		height: --spacing(11);
 		cursor: pointer;
 	}
 </style>

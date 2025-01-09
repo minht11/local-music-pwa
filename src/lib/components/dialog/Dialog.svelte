@@ -210,21 +210,19 @@
 {/if}
 
 <style>
+	@reference '../../../app.css';
+
 	dialog {
 		/*
 			We want to allow user of dialog to specify their preferred height
 			but keep it inside window bounds
 		*/
 		max-width: initial !important;
-		max-height: min(
-			100% - var(--spacing) * 6 * 2,
-			var(--dialog-height, 100%),
-			var(--spacing) * 150
-		) !important;
+		max-height: min(100% - --spacing(6) * 2, var(--dialog-height, 100%), --spacing(150)) !important;
 		width: clamp(
-			var(--dialog-width, calc(var(--spacing) * 70)),
-			var(--dialog-width, calc(var(--spacing) * 100)),
-			100% - var(--spacing) * 4
+			var(--dialog-width, --spacing(70)),
+			var(--dialog-width, --spacing(100)),
+			100% - --spacing(4)
 		) !important;
 		height: max-content !important;
 		overscroll-behavior: contain;
