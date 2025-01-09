@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { wait } from '$lib/helpers/utils/wait.ts'
 	import { on } from 'svelte/events'
-	import invariant from 'tiny-invariant'
 
 	interface Props {
 		type: 'next' | 'previous'

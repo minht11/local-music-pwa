@@ -3,7 +3,7 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'
-	import invariant from 'tiny-invariant'
+
 	import Artwork from '../Artwork.svelte'
 	import IconButton from '../IconButton.svelte'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'

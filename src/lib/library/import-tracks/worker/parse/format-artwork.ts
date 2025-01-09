@@ -1,4 +1,3 @@
-import invariant from 'tiny-invariant'
 import { extractColorFromImage } from './color-from-image.ts'
 
 const isSafari = () => {

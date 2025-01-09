@@ -2,7 +2,6 @@
 	import Separator from '$lib/components/Separator.svelte'
 	import Dialog from '$lib/components/dialog/Dialog.svelte'
 	import DialogFooter from '$lib/components/dialog/DialogFooter.svelte'
-	import { useMainStore } from '$lib/stores/main-store.svelte'
 	import AddToPlaylistDialogContent from './AddToPlaylistDialogContent.svelte'
 
 	const main = useMainStore()

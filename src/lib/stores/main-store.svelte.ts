@@ -4,7 +4,6 @@ import { argbFromHex } from '@material/material-color-utilities'
 import { getContext, setContext } from 'svelte'
 import { prefersReducedMotion } from 'svelte/motion'
 import { MediaQuery } from 'svelte/reactivity'
-import invariant from 'tiny-invariant'
 
 export type AppTheme = 'light' | 'dark'
 export type AppThemeOption = AppTheme | 'auto'

@@ -13,7 +13,6 @@
 	import type { Directory } from '$lib/db/database-types.ts'
 	import { initPageQueries } from '$lib/db/query.svelte.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
-	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 	import {
 		checkNewDirectoryStatus,
 		directoriesStore,

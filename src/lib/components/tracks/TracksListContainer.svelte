@@ -3,7 +3,6 @@
 	import type { TrackData } from '$lib/db/entity'
 	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'
 	import { removeTrack } from '$lib/library/tracks.svelte'
-	import { useMainStore } from '$lib/stores/main-store.svelte'
 	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import TrackListItem from './TrackListItem.svelte'

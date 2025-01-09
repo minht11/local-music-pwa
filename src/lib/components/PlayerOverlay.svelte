@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { useMainStore } from '$lib/stores/main-store.svelte'
 	import Button from './Button.svelte'
 	import Icon from './icon/Icon.svelte'
 	import MainControls from './player/MainControls.svelte'

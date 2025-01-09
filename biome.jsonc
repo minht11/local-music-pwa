@@ -69,7 +69,7 @@
 			"jsxQuoteStyle": "single",
 			"indentWidth": 4
 		},
-		"globals": ["Snippet", "$state", "$effect", "$derived", "m"]
+		"globals": ["$state", "$effect", "$derived", "m", "invariant", "usePlayer", "useMainStore"]
 	},
 	"json": {
 		"formatter": {

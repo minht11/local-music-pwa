@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PlayerRepeat } from '$lib/stores/player/player.svelte'
 	import { on } from 'svelte/events'
-	import invariant from 'tiny-invariant'
+
 	import IconButton from '../../IconButton.svelte'
 	import ActiveIndicator from './ActiveIndicator.svelte'
 

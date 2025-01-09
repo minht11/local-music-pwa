@@ -2,8 +2,6 @@
 	import TextField from '$lib/components/TextField.svelte'
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import { updatePlaylistNameInDatabase } from '$lib/library/playlists.svelte'
-	import { useMainStore } from '$lib/stores/main-store.svelte'
-	import invariant from 'tiny-invariant'
 
 	const main = useMainStore()
 

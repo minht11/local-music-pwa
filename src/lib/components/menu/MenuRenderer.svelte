@@ -5,7 +5,7 @@
 	import type { FocusTrap } from '@a11y/focus-trap'
 	import { setContext } from 'svelte'
 	import { getContext } from 'svelte'
-	import invariant from 'tiny-invariant'
+
 	import Menu from './Menu.svelte'
 	import { getMeasurementsFromAnchor } from './positioning.ts'
 	import { positionMenu } from './positioning.ts'

@@ -16,7 +16,6 @@
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { useMainStore } from '$lib/stores/main-store.svelte'
 
 	const { data } = $props()
 

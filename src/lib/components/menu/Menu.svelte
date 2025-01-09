@@ -3,7 +3,7 @@
 	import '@a11y/focus-trap'
 	import type { FocusTrap } from '@a11y/focus-trap'
 	import { untrack } from 'svelte'
-	import invariant from 'tiny-invariant'
+
 	import Icon from '../icon/Icon.svelte'
 	import type { MenuItem } from './types.ts'
 

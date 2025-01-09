@@ -1,5 +1,5 @@
 import { getContext, setContext } from 'svelte'
-import invariant from 'tiny-invariant'
+
 import { PlayerStore } from './player.svelte'
 
 const playerContext = Symbol('player')

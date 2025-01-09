@@ -13,7 +13,6 @@
 	import { useSetBottomBar } from '$lib/layout-bottom-bar.svelte.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
-	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 	import Search from './Search.svelte'
 
 	const { data, children } = $props()
@@ -23,7 +22,6 @@
 		() => data,
 	)
 
-	// TODO. Look into if cleanup is done
 	const main = useMainStore()
 
 	const itemsIds = $derived(data.itemsQuery.value)

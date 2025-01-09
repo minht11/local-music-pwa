@@ -11,7 +11,6 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { removeTrackFromPlaylistInDatabase } from '$lib/library/playlists.svelte.js'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
-	import { useMainStore } from '$lib/stores/main-store.svelte.ts'
 	import { MediaQuery } from 'svelte/reactivity'
 
 	const { data } = $props()

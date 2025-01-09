@@ -3,7 +3,6 @@ import { notifyAboutDatabaseChanges } from '$lib/db/channel'
 import type { OmitId, Playlist } from '$lib/db/database-types'
 import { getDB } from '$lib/db/get-db'
 import { truncate } from '$lib/helpers/utils/truncate.ts'
-import invariant from 'tiny-invariant'
 
 export const createPlaylistInDatabase = async (name: string): Promise<number> => {
 	const db = await getDB()

@@ -1,5 +1,3 @@
-import invariant from 'tiny-invariant'
-
 export const persist = <T>(storeName: string, instance: T, keys: (keyof T)[]): void => {
 	for (const key of keys) {
 		invariant(typeof key === 'string', 'Key must be a string')

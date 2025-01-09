@@ -9,7 +9,6 @@
 	import { getEntityIds } from '$lib/library/general'
 	import { toggleTrackInPlaylistInDatabase } from '$lib/library/playlists.svelte'
 	import { SvelteSet } from 'svelte/reactivity'
-	import invariant from 'tiny-invariant'
 
 	interface Props {
 		trackId: number

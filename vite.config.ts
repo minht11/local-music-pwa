@@ -6,9 +6,6 @@ import { defineConfig } from 'vite'
 import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
 import { workerChunkPlugin } from './lib/vite-plugin-worker-chunk.ts'
 
-const a = import.meta.dirname
-console.log(a)
-
 export default defineConfig({
 	server: {
 		fs: {
@@ -80,14 +77,11 @@ export default defineConfig({
 			dts: './.generated/types/auto-imports.d.ts',
 			imports: [
 				{
-					from: 'svelte',
-					imports: ['Snippet'],
-					type: true,
-				},
-				{
 					'$paraglide/messages': [['*', 'm']],
 					'$lib/stores/player/store': ['usePlayer'],
+					'$lib/stores/main-store.svelte': ['useMainStore'],
 					'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
+					'tiny-invariant': [['default', 'invariant']],
 				},
 			],
 		}),

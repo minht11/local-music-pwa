@@ -7,7 +7,7 @@
 		createVirtualizer,
 		createWindowVirtualizer,
 	} from '@tanstack/svelte-virtual'
-	import { untrack } from 'svelte'
+	import { type Snippet, untrack } from 'svelte'
 	import type { Readable } from 'svelte/store'
 	import { useScrollTarget } from './ScrollContainer.svelte'
 
