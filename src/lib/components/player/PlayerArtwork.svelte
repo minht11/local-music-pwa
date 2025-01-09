@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte'
 	import Artwork from '../Artwork.svelte'
 	import type { IconType } from '../icon/Icon.svelte'
 

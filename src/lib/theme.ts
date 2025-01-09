@@ -92,7 +92,7 @@ export const getThemePaletteRgb = (argb: number, isDark: boolean): ThemePaletteM
 
 export const clearThemeCssVariables = (): void => {
 	for (const key of Object.keys(COLOR_TOKENS_GENERATION_MAP)) {
-		document.documentElement.style.removeProperty(`--theme-color-${key}`)
+		document.documentElement.style.removeProperty(`--color-${key}`)
 	}
 }
 
@@ -100,6 +100,6 @@ export const setThemeCssVariables = (argb: number, isDark: boolean): void => {
 	const palette = getThemePaletteRgb(argb, isDark)
 
 	for (const [key, hex] of Object.entries(palette)) {
-		document.documentElement.style.setProperty(`--theme-color-${key}`, hex)
+		document.documentElement.style.setProperty(`--color-${key}`, hex)
 	}
 }

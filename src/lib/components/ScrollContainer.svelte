@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import { getContext, setContext } from 'svelte'
+	import { type Snippet, getContext, setContext } from 'svelte'
 
 	type ScrollTargetElement = Element | Window | null
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte'
 	import Icon, { type IconType } from './icon/Icon.svelte'
 
 	interface Props {
