@@ -60,13 +60,9 @@
 }
 
 :root {
-	--spacing-2: calc(var(--spacing) * 2);
-	--spacing-3: calc(var(--spacing) * 3);
-	--spacing-4: calc(var(--spacing) * 4);
-	--spacing-5: calc(var(--spacing) * 5);
-	--spacing-6: calc(var(--spacing) * 6);
-	--spacing-7: calc(var(--spacing) * 7);
-	--spacing-8: calc(var(--spacing) * 8);
+	/* TODO. Remove this in favor of --spacing() */
+	--spacing-2: --spacing(2);
+	--spacing-3: --spacing(3);
 }
 
 html {
@@ -84,7 +80,7 @@ html {
 	/* scrollbar-gutter: stable; */
 	scroll-padding-top: var(--app-header-height);
 	scroll-padding-bottom: var(--bottom-overlay-height);
-	--app-header-height: calc(var(--spacing) * 16);
+	--app-header-height: --spacing(16);
 }
 
 html.dark {
@@ -133,7 +129,7 @@ body {
 @layer base {
 	* {
 		scrollbar-width: thin;
-		scrollbar-color: color-mix(in oklch, var(--color-secondary) 30%, transparent);
+		scrollbar-color: --alpha(var(--color-secondary), 30%);
 	}
 
 	:where(:focus) {
@@ -216,78 +212,78 @@ body {
 }
 
 @utility text-headline-md {
-	font-size: calc(var(--spacing) * 7);
-	line-height: calc(var(--spacing) * 9);
+	font-size: --spacing(7);
+	line-height: --spacing(9);
 	letter-spacing: 0;
 	font-weight: 400;
 }
 
 @utility text-headline-sm {
-	font-size: calc(var(--spacing) * 6);
-	line-height: calc(var(--spacing) * 8);
+	font-size: --spacing(6);
+	line-height: --spacing(8);
 	letter-spacing: 0;
 	font-weight: 400;
 }
 
 @utility text-title-lg {
-	font-size: calc(var(--spacing) * 5.5);
-	line-height: calc(var(--spacing) * 7);
+	font-size: --spacing(5.5);
+	line-height: --spacing(7);
 	letter-spacing: 0;
 	font-weight: 500;
 }
 
 @utility text-title-md {
-	font-size: calc(var(--spacing) * 4);
-	line-height: calc(var(--spacing) * 6);
+	font-size: --spacing(4);
+	line-height: --spacing(6);
 	letter-spacing: 0.15px;
 	font-weight: 500;
 }
 
 @utility text-title-sm {
-	font-size: calc(var(--spacing) * 3.5);
-	line-height: calc(var(--spacing) * 5);
+	font-size: --spacing(3.5);
+	line-height: --spacing(5);
 	letter-spacing: 0.1px;
 	font-weight: 500;
 }
 
 @utility text-label-lg {
-	font-size: calc(var(--spacing) * 3.5);
-	line-height: calc(var(--spacing) * 5);
+	font-size: --spacing(3.5);
+	line-height: --spacing(5);
 	letter-spacing: 0.1px;
 	font-weight: 500;
 }
 
 @utility text-label-md {
 	font-size: 12px;
-	line-height: calc(var(--spacing) * 4);
+	line-height: --spacing(4);
 	letter-spacing: 0.5px;
 	font-weight: 500;
 }
 
 @utility text-label-sm {
 	font-size: 11px;
-	line-height: calc(var(--spacing) * 4);
+	line-height: --spacing(4);
 	letter-spacing: 0.5px;
 	font-weight: 500;
 }
 
 @utility text-body-lg {
-	font-size: calc(var(--spacing) * 4);
-	line-height: calc(var(--spacing) * 6);
+	font-size: --spacing(4);
+	line-height: --spacing(6);
 	letter-spacing: 0.15px;
 	font-weight: 400;
 }
 
 @utility text-body-md {
-	font-size: calc(var(--spacing) * 3.5);
-	line-height: calc(var(--spacing) * 5);
+	font-size: --spacing(3.5);
+	line-height: --spacing(5);
 	letter-spacing: 0.25px;
 	font-weight: 400;
 }
 
 @utility text-body-sm {
-	font-size: var(--spacing-3);
-	line-height: calc(var(--spacing) * 4);
+	font-size: --spacing(3);
+	line-height: --spacing(4);
 	letter-spacing: 0.4px;
 	font-weight: 400;
 }
@@ -301,7 +297,7 @@ body {
 		background-color: var(--color-surfaceContainer);
 		display: flex;
 		flex-direction: column;
-		border-radius: calc(var(--spacing) * 2);
+		border-radius: --spacing(2);
 		color: var(--color-onSurface);
 	}
 
