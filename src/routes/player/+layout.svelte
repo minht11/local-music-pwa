@@ -242,9 +242,7 @@
 		--vt-pl-container-to-radius: 0;
 	}
 
-	/* TODO. Try to use variable from TW config */
-	@media (width >= 24rem) {
-		/* @media (width >= theme(--breakpoint-xs)) { */
+	@media (width >= --theme(--breakpoint-xs)) {
 		:global(html) {
 			--vt-pl-container-radius: var(--radius-3xl);
 		}

@@ -21,5 +21,9 @@
 	"editor.formatOnSave": true,
 	"eslint.useESLintClass": true,
 	"npm.packageManager": "pnpm",
-	"typescript.tsdk": "node_modules/typescript/lib"
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"files.associations": {
+		"*.css": "tailwindcss"
+	},
+	"css.lint.unknownAtRules": "ignore"
 }
