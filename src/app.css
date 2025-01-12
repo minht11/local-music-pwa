@@ -302,8 +302,8 @@ body {
 	}
 
 	.ripple {
-		width: 1px;
-		height: 1px;
+		width: --spacing(1);
+		height: --spacing(1);
 		position: absolute;
 		border-radius: 50%;
 		opacity: 0.2;

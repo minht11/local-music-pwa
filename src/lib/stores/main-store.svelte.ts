@@ -1,6 +1,5 @@
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
-import { argbFromHex } from '@material/material-color-utilities'
 import { getContext, setContext } from 'svelte'
 import { prefersReducedMotion } from 'svelte/motion'
 import { MediaQuery } from 'svelte/reactivity'
@@ -29,21 +28,6 @@ export class MainStore {
 		return this.theme === 'dark'
 	}
 
-	themeColorSeed = $state<null | number>(null)
-
-	#hexColorSeed = $state<string | null>(null)
-
-	get themeColorSeedHex() {
-		return this.#hexColorSeed
-	}
-
-	set themeColorSeedHex(value: string | null) {
-		this.#hexColorSeed = value
-		this.themeColorSeed = value ? argbFromHex(value) : null
-	}
-
-	pickColorFromArtwork = $state(true)
-
 	motion: AppMotionOption = $state('auto')
 
 	get isReducedMotion() {
@@ -51,6 +35,10 @@ export class MainStore {
 
 		return motion === 'reduced'
 	}
+
+	pickColorFromArtwork = $state(true)
+
+	customThemePaletteHex = $state<null | string>(null)
 
 	/**
 	 * Controls whatever volume slider is visible.
@@ -70,7 +58,13 @@ export class MainStore {
 	addTrackToPlaylistDialogOpen = $state<number | null>(null)
 
 	constructor() {
-		persist('main', this, ['theme', 'motion', 'pickColorFromArtwork', 'volumeSliderEnabled'])
+		persist('main', this, [
+			'theme',
+			'motion',
+			'pickColorFromArtwork',
+			'customThemePaletteHex',
+			'volumeSliderEnabled',
+		])
 	}
 }
 

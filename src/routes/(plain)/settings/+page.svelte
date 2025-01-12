@@ -123,7 +123,7 @@
 	] as const
 
 	const updateMainColor = debounce((value: string | null) => {
-		mainStore.themeColorSeedHex = value
+		mainStore.customThemePaletteHex = value
 	}, 400)
 </script>
 
@@ -268,37 +268,47 @@
 	<div class="flex flex-col items-center gap-x-2 gap-y-4 p-4 sm:flex-row">
 		<div class="mr-auto">{m.settingsPrimaryColor()}</div>
 
-		<div class="flex gap-2 max-sm:w-full">
-			{#if mainStore.themeColorSeedHex}
+		<div class="flex items-center gap-2 max-sm:w-full">
+			{#if mainStore.customThemePaletteHex}
 				<Button
 					kind="outlined"
 					class="max-sm:w-full"
-					disabled={!mainStore.themeColorSeedHex}
+					disabled={!mainStore.customThemePaletteHex}
 					onclick={() => {
-						mainStore.themeColorSeedHex = null
+						mainStore.customThemePaletteHex = null
 					}}
 				>
 					{m.settingsColorReset()}
 				</Button>
 			{/if}
 
-			<div class="relative flex">
-				<Button kind="toned" class="max-sm:w-full">
-					<Icon type="eyedropper" class="size-5" />
+			<Button kind="toned" class="max-sm:w-full">
+				<Icon type="eyedropper" class="size-5" />
 
-					{m.settingsColorPick()}
+				{m.settingsColorPick()}
 
-					<input
-						type="color"
-						bind:value={() => mainStore.themeColorSeedHex, (value) => updateMainColor(value)}
-						class="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0"
-					/>
-				</Button>
-				{#if mainStore.themeColorSeedHex}
-					<div
-						class="pointer-events-none absolute -top-1 -right-1 flex size-6 items-center justify-center rounded-full border-2 border-inverseSurface"
-						style={`background: ${mainStore.themeColorSeedHex}`}
-					></div>
+				<input
+					type="color"
+					bind:value={() => mainStore.customThemePaletteHex ?? '#000000',
+					(value) => updateMainColor(value)}
+					class="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0"
+				/>
+			</Button>
+
+			<div
+				class="pointer-events-none size-9 items-center justify-center overflow-clip rounded-md border border-outline"
+				style={mainStore.customThemePaletteHex && `background: ${mainStore.customThemePaletteHex}`}
+			>
+				{#if mainStore.customThemePaletteHex === null}
+					<svg
+						class="size-full stroke-[0.2] text-outline"
+						viewBox="0 0 10 10"
+						fill="none"
+						stroke="currentColor"
+					>
+						<line x1="0" y1="0" x2="10" y2="10" />
+						<line x1="0" y1="10" x2="10" y2="0" />
+					</svg>
 				{/if}
 			</div>
 		</div>

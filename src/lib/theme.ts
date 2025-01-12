@@ -1,3 +1,4 @@
+// biome-ignore lint/nursery/noRestrictedImports: Main module for theme utilities
 import { type CorePalette, Hct, argbFromHex, hexFromArgb } from '@material/material-color-utilities'
 
 export { argbFromHex }

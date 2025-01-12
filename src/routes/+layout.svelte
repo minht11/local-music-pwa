@@ -8,57 +8,17 @@
 	import { provideMainStore } from '$lib/stores/main-store.svelte'
 	import { providePlayer } from '$lib/stores/player/store.ts'
 	import { setupAppViewTransitions } from '$lib/view-transitions.ts'
+	import { setupTheme } from './layout/setup-theme.svelte.ts'
 
 	const mainStore = provideMainStore()
 	const player = providePlayer()
 
+	setupTheme()
 	setupGlobalMenu()
 	setupAppViewTransitions(() => mainStore.isReducedMotion)
 	const bottomBar = setupBottomBar()
 
 	const { children } = $props()
-
-	const updateStyles = async (color: number | undefined | null, isDark: boolean) => {
-		const module = await import('$lib/theme.ts')
-
-		if (color) {
-			module.setThemeCssVariables(color, isDark)
-		} else {
-			module.clearThemeCssVariables()
-		}
-	}
-
-	const updateWindowTileBarColor = () => {
-		const element = document.querySelector('meta[name="theme-color"]')
-		if (!element) {
-			return
-		}
-
-		const surfaceRgb = window.getComputedStyle(document.body).getPropertyValue('--color-surface')
-		element.setAttribute('content', surfaceRgb)
-	}
-
-	let initial = true
-	$effect(() => {
-		mainStore.themeColorSeed
-		const isDark = mainStore.isThemeDark
-		const color = mainStore.pickColorFromArtwork ? player.activeTrack?.primaryColor : undefined
-
-		if (initial) {
-			initial = false
-			updateWindowTileBarColor()
-
-			return
-		}
-
-		updateStyles(color ?? mainStore.themeColorSeed, isDark).then(() => {
-			updateWindowTileBarColor()
-		})
-	})
-
-	$effect.pre(() => {
-		document.documentElement.classList.toggle('dark', mainStore.isThemeDark)
-	})
 
 	let overlayContentHeight = $state(0)
 
