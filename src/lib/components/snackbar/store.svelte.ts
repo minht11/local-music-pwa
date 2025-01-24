@@ -5,4 +5,4 @@ export interface SnackbarOptions {
 	controls?: 'spinner' | false
 }
 
-export const snackbarItems = $state<SnackbarOptions[]>([])
+export const snackbarItems: SnackbarOptions[] = $state([])

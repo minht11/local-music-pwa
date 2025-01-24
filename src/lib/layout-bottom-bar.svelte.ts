@@ -14,7 +14,7 @@ export const setupBottomBar = () => {
 	setContext(key, state)
 
 	return {
-		get snippet() {
+		get snippet(): BottomBarState['snippet'] {
 			return state.snippet
 		},
 	}

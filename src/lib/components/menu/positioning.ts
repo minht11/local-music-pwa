@@ -5,7 +5,12 @@ export const getMeasurementsFromAnchor = (
 	menuRect: DOMRect,
 	anchor: Element,
 	align?: MenuAlignment,
-) => {
+): {
+	top: number
+	left: number
+	originY: number
+	originX: number
+} => {
 	const { horizontal: horizontalAlign = 'left', vertical: verticalAlign = 'top' } = align || {}
 
 	const anchorRect = anchor.getBoundingClientRect()
@@ -34,7 +39,7 @@ interface MenuPositioning extends MenuPosition {
 	height: number
 }
 
-export const positionMenu = (menuEl: HTMLElement, pos: MenuPositioning) => {
+export const positionMenu = (menuEl: HTMLElement, pos: MenuPositioning): void => {
 	// Menu can't be placed outside of window bounds.
 	const top = Math.min(pos.top, window.innerHeight - pos.height)
 	const left = Math.min(pos.left, window.innerWidth - pos.width)

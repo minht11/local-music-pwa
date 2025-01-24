@@ -134,7 +134,12 @@ const playlistsConfig: QueryConfig<PlaylistData> = {
 	},
 }
 
-const LIBRARY_ENTITIES_DATA_MAP = {
+const LIBRARY_ENTITIES_DATA_MAP: {
+	readonly tracks: QueryConfig<TrackData>
+	readonly albums: QueryConfig<Album>
+	readonly artists: QueryConfig<Artist>
+	readonly playlists: QueryConfig<Playlist>
+} = {
 	tracks: trackConfig,
 	albums: albumConfig,
 	artists: artistConfig,
@@ -211,7 +216,7 @@ if (!import.meta.env.SSR) {
 	})
 }
 
-export const preloadEntityData = async (storeName: EntityStoreName, id: number) => {
+export const preloadEntityData = async (storeName: EntityStoreName, id: number): Promise<void> => {
 	try {
 		const config = LIBRARY_ENTITIES_DATA_MAP[storeName]
 		// getEntityDataInternal will fetch data and store it inside cache

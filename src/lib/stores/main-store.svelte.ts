@@ -20,7 +20,7 @@ export class MainStore {
 
 	#deviceThemeDark = new MediaQuery('(prefers-color-scheme: dark)')
 
-	get isThemeDark() {
+	get isThemeDark(): boolean {
 		if (this.theme === 'auto') {
 			return this.#deviceThemeDark.current
 		}
@@ -30,32 +30,32 @@ export class MainStore {
 
 	motion: AppMotionOption = $state('auto')
 
-	get isReducedMotion() {
+	get isReducedMotion(): boolean {
 		const motion = this.motion === 'auto' ? prefersReducedMotion.current : this.motion
 
 		return motion === 'reduced'
 	}
 
-	pickColorFromArtwork = $state(true)
+	pickColorFromArtwork: boolean = $state(true)
 
-	customThemePaletteHex = $state<null | string>(null)
+	customThemePaletteHex: string | null = $state(null)
 
 	/**
 	 * Controls whatever volume slider is visible.
 	 * The initial value is false for mobile devices and true for desktop.
 	 * User can change this setting.
 	 */
-	volumeSliderEnabled = $state(!isMobile())
+	volumeSliderEnabled: boolean = $state(!isMobile())
 
-	createNewPlaylistDialogOpen = $state(false)
-
-	/** Contains playlist id while dialog is open */
-	editPlaylistDialogOpen = $state<ModifyPlaylistOptions | null>(null)
+	createNewPlaylistDialogOpen: boolean = $state(false)
 
 	/** Contains playlist id while dialog is open */
-	removePlaylistDialogOpen = $state<ModifyPlaylistOptions | null>(null)
+	editPlaylistDialogOpen: ModifyPlaylistOptions | null = $state(null)
 
-	addTrackToPlaylistDialogOpen = $state<number | null>(null)
+	/** Contains playlist id while dialog is open */
+	removePlaylistDialogOpen: ModifyPlaylistOptions | null = $state(null)
+
+	addTrackToPlaylistDialogOpen: number | null = $state(null)
 
 	constructor() {
 		persist('main', this, [
@@ -70,7 +70,7 @@ export class MainStore {
 
 const mainContext = Symbol('main-store')
 
-export const provideMainStore = () => {
+export const provideMainStore = (): MainStore => {
 	const main = new MainStore()
 
 	setContext(mainContext, main)
@@ -78,7 +78,7 @@ export const provideMainStore = () => {
 	return main
 }
 
-export const useMainStore = () => {
+export const useMainStore = (): MainStore => {
 	const main = getContext<MainStore>(mainContext)
 
 	invariant(main, 'No main store found')

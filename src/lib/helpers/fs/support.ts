@@ -1,1 +1,1 @@
-export const isSystemFsSupported = window?.showDirectoryPicker !== undefined
+export const isSystemFsSupported: boolean = window?.showDirectoryPicker !== undefined

@@ -26,14 +26,17 @@ const getTrackFile = async (track: FileEntity) => {
 	return track.getFile()
 }
 
-export const cleanupTrackAudio = (audio: HTMLAudioElement) => {
+export const cleanupTrackAudio = (audio: HTMLAudioElement): void => {
 	const currentSrc = audio.src
 	if (currentSrc) {
 		URL.revokeObjectURL(currentSrc)
 	}
 }
 
-export const loadTrackAudio = async (audio: HTMLAudioElement, entity: FileEntity) => {
+export const loadTrackAudio = async (
+	audio: HTMLAudioElement,
+	entity: FileEntity,
+): Promise<void> => {
 	const file = await getTrackFile(entity)
 
 	if (!file) {

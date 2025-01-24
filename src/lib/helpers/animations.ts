@@ -1,5 +1,7 @@
-export const animateEmpty = (element: Element, options: number | KeyframeAnimationOptions) =>
-	element.animate(null, options)
+export const animateEmpty = (
+	element: Element,
+	options: number | KeyframeAnimationOptions,
+): Animation => element.animate(null, options)
 
 export interface SequenceKeyframeAnimationOptions extends KeyframeAnimationOptions {
 	/** '<' means start at the same time as previous animation */
@@ -19,7 +21,7 @@ export interface AnimationSequenceOptions {
 export const timeline = async (
 	sequence: readonly AnimationSequence[],
 	sequenceOptions: AnimationSequenceOptions = {},
-) => {
+): Promise<Animation[]> => {
 	const animations: readonly [Animation, runWithPrevious: boolean][] = sequence.map(
 		([element, keyframes, options]) => {
 			const animation = element.animate(keyframes, {

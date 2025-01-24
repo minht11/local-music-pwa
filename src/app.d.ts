@@ -12,15 +12,15 @@ declare global {
 	}
 
 	export type ClassNameValue = HTMLAttributes<HTMLElement>['class']
-}
 
-interface Navigator {
-	// Optional because Safari and Firefox don't support it
-	userAgentData?: {
-		mobile: boolean
-		brands: {
-			brand: string
-			version: string
-		}[]
+	interface Navigator {
+		// Optional because Safari and Firefox don't support it
+		userAgentData?: {
+			mobile: boolean
+			brands: {
+				brand: string
+				version: string
+			}[]
+		}
 	}
 }

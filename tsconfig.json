@@ -1,8 +1,7 @@
 {
 	"extends": "./.generated/svelte-kit/tsconfig.json",
 	"compilerOptions": {
-		"allowJs": true,
-		"checkJs": true,
+		"allowJs": false,
 		"moduleDetection": "force",
 		"allowImportingTsExtensions": true,
 		"forceConsistentCasingInFileNames": true,
@@ -19,7 +18,7 @@
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"declaration": true,
-		"isolatedDeclarations": false,
+		"isolatedDeclarations": true,
 		"types": [
 			"@types/dom-navigation",
 			"@types/wicg-file-system-access",

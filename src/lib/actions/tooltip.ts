@@ -8,12 +8,12 @@ tooltipTemplate.className =
 	'tooltip-enter bg-inverseSurface text-nowrap flex items-center inset-0 m-0 text-body-sm min-h-6 text-inverseOnSurface px-2 rounded-sm'
 tooltipTemplate.popover = 'manual'
 
-export const tooltip = ((target, message?: string) => {
+export const tooltip: Action<HTMLElement, string | undefined> = (target, message) => {
 	if (!message) {
 		return
 	}
 
-	let messageValue = message
+	let messageValue: string | undefined = message
 
 	// Remove attribute to prevent default browser tooltip
 	target.setAttribute('title', message)
@@ -32,7 +32,7 @@ export const tooltip = ((target, message?: string) => {
 	}
 
 	const showTooltip = () => {
-		if (element) {
+		if (element || !messageValue) {
 			return
 		}
 
@@ -102,7 +102,7 @@ export const tooltip = ((target, message?: string) => {
 	on(target, 'focusout', hideTooltip, { signal })
 
 	return {
-		update: (newMessage: string) => {
+		update: (newMessage) => {
 			messageValue = newMessage
 			if (element && newMessage) {
 				element.textContent = newMessage
@@ -115,4 +115,4 @@ export const tooltip = ((target, message?: string) => {
 			hideTooltip()
 		},
 	}
-}) satisfies Action<HTMLElement, string>
+}

@@ -3,15 +3,49 @@ import { type CorePalette, Hct, argbFromHex, hexFromArgb } from '@material/mater
 
 export { argbFromHex }
 
-type Tone = keyof CorePalette
+type ColorToken =
+	| 'primary'
+	| 'onPrimary'
+	| 'primaryContainer'
+	| 'onPrimaryContainer'
+	| 'secondary'
+	| 'onSecondary'
+	| 'secondaryContainer'
+	| 'secondaryContainerVariant'
+	| 'onSecondaryContainer'
+	| 'tertiary'
+	| 'onTertiary'
+	| 'tertiaryContainer'
+	| 'onTertiaryContainer'
+	| 'error'
+	| 'onError'
+	| 'errorContainer'
+	| 'onErrorContainer'
+	| 'surface'
+	| 'onSurface'
+	| 'surfaceVariant'
+	| 'onSurfaceVariant'
+	| 'surfaceContainerHighest'
+	| 'surfaceContainerHigh'
+	| 'surfaceContainer'
+	| 'surfaceContainerLow'
+	| 'surfaceContainerLowest'
+	| 'surfaceBright'
+	| 'surfaceDim'
+	| 'outline'
+	| 'outlineVariant'
+	| 'shadow'
+	| 'scrim'
+	| 'inverseSurface'
+	| 'inverseOnSurface'
+	| 'inversePrimary'
 
+type Tone = keyof CorePalette
 type ColorTokenInput = readonly [tone: Tone, light: number, dark: number]
 
-interface ColorTokensInput {
-	[key: string]: ColorTokenInput
-}
+type ColorTokensInputMap = Record<ColorToken, ColorTokenInput>
 
-const COLOR_TOKENS_GENERATION_MAP = {
+const COLOR_TOKENS_GENERATION_MAP: ColorTokensInputMap = {
 	primary: ['a1', 40, 80],
 	onPrimary: ['a1', 100, 20],
 	primaryContainer: ['a1', 90, 30],
@@ -47,12 +81,12 @@ const COLOR_TOKENS_GENERATION_MAP = {
 	inverseSurface: ['n1', 20, 90],
 	inverseOnSurface: ['n1', 95, 10],
 	inversePrimary: ['a1', 80, 40],
-} as const satisfies ColorTokensInput
+}
 
 /*@__NO_SIDE_EFFECTS__*/
-export const getDefaultThemeArgb = () => argbFromHex('#4c9e29')
+export const getDefaultThemeArgb = (): number => argbFromHex('#4c9e29')
 
-export type ThemePaletteMap = Record<keyof typeof COLOR_TOKENS_GENERATION_MAP, string>
+export type ThemePaletteMap = Record<ColorToken, string>
 
 const createTonalPalette = (hue: number, chroma: number) => ({
 	tone: (tone: number) => Hct.from(hue, chroma, tone).toInt(),

@@ -4,7 +4,7 @@ import { PlayerStore } from './player.svelte'
 
 const playerContext = Symbol('player')
 
-export const providePlayer = () => {
+export const providePlayer = (): PlayerStore => {
 	const player = new PlayerStore()
 
 	setContext(playerContext, player)
@@ -12,7 +12,7 @@ export const providePlayer = () => {
 	return player
 }
 
-export const usePlayer = () => {
+export const usePlayer = (): PlayerStore => {
 	const player = getContext<PlayerStore>(playerContext)
 
 	invariant(player, 'No player found')

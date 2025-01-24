@@ -17,12 +17,12 @@ export type AppViewTransitionTypeMatcher = (
 
 const matchers: (AppViewTransitionTypeMatcher | undefined)[] = []
 
-export const defineViewTransitionMatcher = (callback: AppViewTransitionTypeMatcher) => {
+export const defineViewTransitionMatcher = (callback: AppViewTransitionTypeMatcher): void => {
 	matchers.unshift(callback)
 	matchers.length = 2
 }
 
-export const setupAppViewTransitions = (disabled: () => boolean) => {
+export const setupAppViewTransitions = (disabled: () => boolean): void => {
 	/**
 	 * @param to - to view name
 	 * @param from - from view name

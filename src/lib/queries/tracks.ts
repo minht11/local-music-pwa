@@ -1,7 +1,7 @@
 import { getDB } from '$lib/db/get-db'
-import { createPageQuery } from '$lib/db/query.svelte'
+import { type PageQueryResultResolved, createPageQuery } from '$lib/db/query.svelte'
 
-export const createTracksCountPageQuery = () =>
+export const createTracksCountPageQuery = (): Promise<PageQueryResultResolved<number>> =>
 	createPageQuery({
 		key: [],
 		fetcher: async () => {

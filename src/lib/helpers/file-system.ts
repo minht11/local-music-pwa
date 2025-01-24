@@ -1,14 +1,14 @@
 import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
 import { wait } from '$lib/helpers/utils/wait.ts'
 
-export const isNativeFileSystemSupported = 'showDirectoryPicker' in globalThis
+export const isNativeFileSystemSupported: boolean = 'showDirectoryPicker' in globalThis
 
 export type FileEntity = File | FileSystemFileHandle
 
 export const getFileHandlesRecursively = async (
 	directory: FileSystemDirectoryHandle,
 	extensions: string[],
-) => {
+): Promise<FileSystemFileHandle[]> => {
 	const files: FileSystemFileHandle[] = []
 
 	for await (const handle of directory.values()) {

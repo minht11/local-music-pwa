@@ -1,5 +1,6 @@
 import { listenForDatabaseChanges } from '$lib/db/channel'
 import { type TrackData, createTrackQuery } from '$lib/db/entity.ts'
+import type { QueryResult } from '$lib/db/query.svelte.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { shuffleArray } from '$lib/helpers/utils/array.ts'
@@ -44,7 +45,7 @@ export class PlayerStore {
 		this.#volume = value
 	}
 
-	muted = $state(false)
+	muted: boolean = $state(false)
 
 	get isQueueEmpty(): boolean {
 		return this.itemsIds.length === 0
@@ -58,9 +59,12 @@ export class PlayerStore {
 		this.shuffle ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
 	)
 
-	activeTrackQuery = createTrackQuery(() => this.itemsIds[this.#activeTrackIndex] ?? -1, {
-		allowEmpty: true,
-	})
+	activeTrackQuery: QueryResult<TrackData | undefined, undefined> = createTrackQuery(
+		() => this.itemsIds[this.#activeTrackIndex] ?? -1,
+		{
+			allowEmpty: true,
+		},
+	)
 
 	activeTrack: TrackData | undefined = $derived(this.activeTrackQuery.value)
 
@@ -272,7 +276,7 @@ export class PlayerStore {
 		this.togglePlay(true)
 	}
 
-	seek = (time: number) => {
+	seek = (time: number): void => {
 		this.currentTime = time
 		this.#audio.currentTime = time
 	}
@@ -317,7 +321,7 @@ export class PlayerStore {
 		this.#activeTrackIndex = -1
 	}
 
-	reset() {
+	reset = (): void => {
 		if (!this.#audio.src) {
 			return
 		}
