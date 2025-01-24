@@ -1,4 +1,4 @@
-import { paraglide } from '@inlang/paraglide-vite'
+import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -85,7 +85,7 @@ export default defineConfig({
 				},
 			],
 		}),
-		paraglide({
+		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './.generated/paraglide',
 		}),

@@ -17,22 +17,21 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"@inlang/paraglide-js": "^1.11.7",
-		"@inlang/paraglide-vite": "^1.3.4",
+		"@inlang/paraglide-js": "2.0.0-beta.12",
 		"@sveltejs/adapter-static": "^3.0.8",
-		"@sveltejs/kit": "^2.15.2",
+		"@sveltejs/kit": "^2.16.1",
 		"@sveltejs/vite-plugin-svelte": "5.0.3",
-		"@tailwindcss/vite": "4.0.0-beta.9",
+		"@tailwindcss/vite": "4.0.0",
 		"prettier": "^3.4.2",
-		"prettier-plugin-svelte": "^3.3.2",
-		"prettier-plugin-tailwindcss": "^0.6.9",
-		"svelte": "^5.17.3",
-		"svelte-check": "^4.1.3",
-		"tailwindcss": "4.0.0-beta.9",
+		"prettier-plugin-svelte": "^3.3.3",
+		"prettier-plugin-tailwindcss": "^0.6.11",
+		"svelte": "^5.19.2",
+		"svelte-check": "^4.1.4",
+		"tailwindcss": "4.0.0",
 		"terser": "^5.37.0",
 		"typescript": "^5.7.3",
 		"unplugin-auto-import": "^19.0.0",
-		"vite": "^6.0.7"
+		"vite": "^6.0.11"
 	},
 	"dependencies": {
 		"@a11y/focus-trap": "^1.0.5",
@@ -43,14 +42,14 @@
 		"@types/dom-view-transitions": "^1.0.5",
 		"@types/wicg-file-system-access": "^2023.10.5",
 		"idb": "^8.0.1",
-		"music-metadata": "^10.6.5",
+		"music-metadata": "^10.7.0",
 		"nanoid": "^5.0.9",
 		"tiny-invariant": "^1.3.3",
-		"valibot": "1.0.0-beta.11",
+		"valibot": "1.0.0-beta.14",
 		"weak-lru-cache": "^1.2.2"
 	},
 	"engines": {
-		"node": "20.18.0"
+		"node": "22.13.1"
 	},
 	"packageManager": "pnpm@10.0.0"
 }
