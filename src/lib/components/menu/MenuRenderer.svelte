@@ -5,7 +5,6 @@
 	import type { FocusTrap } from '@a11y/focus-trap'
 	import { setContext } from 'svelte'
 	import { getContext } from 'svelte'
-
 	import Menu from './Menu.svelte'
 	import { getMeasurementsFromAnchor } from './positioning.ts'
 	import { positionMenu } from './positioning.ts'
@@ -23,7 +22,7 @@
 		value?: MenuInternalData
 	}
 
-	export const setupGlobalMenu = () => {
+	export const setupGlobalMenu = (): void => {
 		const menuState = $state<MenuInternalState>({
 			value: undefined,
 		})
@@ -39,12 +38,17 @@
 		return state
 	}
 
-	export const useMenu = () => {
+	export interface MenuAPI {
+		show: (items: MenuItem[], targetElement: HTMLElement, options: MenuOptions) => void
+		showFromEvent: (e: MouseEvent, items: MenuItem[], options: MenuOptions) => void
+	}
+
+	export const useMenu = (): MenuAPI => {
 		const state = getMenuContext()
 
 		invariant(state, 'useMenu must be used within a MenuProvider')
 
-		const showMenu = (items: MenuItem[], targetElement: HTMLElement, options: MenuOptions) => {
+		const showMenu: MenuAPI['show'] = (items, targetElement, options) => {
 			assign(state, {
 				value: {
 					items,
@@ -54,7 +58,7 @@
 			})
 		}
 
-		const showMenuFromEvent = (e: MouseEvent, items: MenuItem[], options: MenuOptions) => {
+		const showMenuFromEvent: MenuAPI['showFromEvent'] = (e, items, options) => {
 			const { target } = e
 
 			invariant(target instanceof HTMLElement, 'target is not an HTMLElement')
