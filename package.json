@@ -51,5 +51,19 @@
 	"engines": {
 		"node": "22.13.1"
 	},
-	"packageManager": "pnpm@10.0.0"
+	"packageManager": "pnpm@10.1.0",
+	"pnpm": {
+		"overrides": {
+			"@ianvs/prettier-plugin-sort-imports": "-",
+			"@trivago/prettier-plugin-sort-imports": "-",
+			"prettier-plugin-organize-imports": "-",
+			"prettier-plugin-css-order": "-",
+			"prettier-plugin-import-sort": "-",
+			"prettier-plugin-jsdoc": "-",
+			"prettier-plugin-multiline-arrays": "-",
+			"prettier-plugin-organize-attributes": "-",
+			"prettier-plugin-style-order": "-",
+			"prettier-plugin-sort-imports": "-"
+		}
+	}
 }
