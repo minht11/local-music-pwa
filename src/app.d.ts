@@ -6,7 +6,6 @@ declare global {
 		// interface Locals {}
 		interface PageData {
 			noPlayerOverlay?: boolean
-			isHandHeldDevice: boolean
 		}
 		// interface Platform {}
 	}

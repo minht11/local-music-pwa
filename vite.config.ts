@@ -1,3 +1,5 @@
+import { readdirSync, statSync } from 'node:fs'
+import path from 'node:path'
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
@@ -93,5 +95,23 @@ export default defineConfig({
 				experimentalEmitTs: true,
 			},
 		}),
+		{
+			async closeBundle() {
+				const dirSize = async (directory: string) => {
+					const files = readdirSync(directory)
+					const stats = files.map((file) => statSync(path.join(directory, file)))
+
+					let size = 0
+					for await (const stat of stats) {
+						size += stat.size
+					}
+
+					return size
+				}
+
+				const size = await dirSize('./build/_app/immutable/chunks')
+				console.log('Size of chunks:', size / 1024, 'KB')
+			},
+		},
 	],
 }) as unknown

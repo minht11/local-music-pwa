@@ -10,6 +10,7 @@
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueriesDynamic } from '$lib/db/query.svelte.js'
+	import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
 	import { useSetBottomBar } from '$lib/layout-bottom-bar.svelte.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
@@ -21,6 +22,8 @@
 		() => data.storeName,
 		() => data,
 	)
+
+	const isHandHeldDevice = isMobile()
 
 	const main = useMainStore()
 
@@ -85,7 +88,7 @@
 {/snippet}
 
 {#snippet layoutBottom()}
-	{#if data.isHandHeldDevice}
+	{#if isHandHeldDevice}
 		<div
 			class="pointer-events-auto grid h-16 w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer sm:hidden"
 		>
@@ -98,7 +101,7 @@
 	<div
 		class={[
 			'desktop-sidebar fixed z-1 mt-20 h-max w-max flex-col gap-2 [@media(max-height:500px)]:mt-2',
-			data.isHandHeldDevice ? 'hidden sm:flex' : 'flex',
+			isHandHeldDevice ? 'hidden sm:flex' : 'flex',
 		]}
 	>
 		{@render navItemsSnippet('h-14 w-20')}
@@ -107,7 +110,7 @@
 
 <ListDetailsLayout mode={layoutMode} class="mx-auto w-full max-w-[var(--library-max-width)] grow">
 	{#snippet list(mode)}
-		<div class={[data.isHandHeldDevice ? 'sm:pl-20' : 'pl-20', 'flex grow flex-col']}>
+		<div class={[isHandHeldDevice ? 'sm:pl-20' : 'pl-20', 'flex grow flex-col']}>
 			<div class={[mode === 'both' && 'w-100', 'flex grow flex-col px-4']}>
 				<Search name={data.pluralTitle} store={data.store} />
 
