@@ -3,7 +3,7 @@ import { createPageQuery } from '$lib/db/query.svelte.ts'
 import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
 import type { PageLoad } from './$types.ts'
 
-const useDirectoriesQuery = () =>
+const createDirectoriesPageQuery = () =>
 	createPageQuery({
 		key: [],
 		fetcher: async () => {
@@ -29,7 +29,7 @@ const useDirectoriesQuery = () =>
 export const load: PageLoad = async () => {
 	const [count, directories] = await Promise.all([
 		createTracksCountPageQuery(),
-		useDirectoriesQuery(),
+		createDirectoriesPageQuery(),
 	])
 
 	return {
