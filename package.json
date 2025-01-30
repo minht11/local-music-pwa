@@ -64,6 +64,9 @@
 			"prettier-plugin-organize-attributes": "-",
 			"prettier-plugin-style-order": "-",
 			"prettier-plugin-sort-imports": "-"
+		},
+		"patchedDependencies": {
+			"@material/material-color-utilities": "patches/@material__material-color-utilities.patch"
 		}
 	}
 }

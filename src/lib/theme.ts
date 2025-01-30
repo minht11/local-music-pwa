@@ -1,5 +1,11 @@
-// biome-ignore lint/nursery/noRestrictedImports: Main module for theme utilities
-import { type CorePalette, Hct, argbFromHex, hexFromArgb } from '@material/material-color-utilities'
+import {
+	Cam16,
+	type CorePalette,
+	HctSolver,
+	argbFromHex,
+	hexFromArgb,
+	// biome-ignore lint/nursery/noRestrictedImports: Main module for theme utilities
+} from '@material/material-color-utilities'
 
 export { argbFromHex }
 
@@ -89,7 +95,7 @@ export const getDefaultThemeArgb = (): number => argbFromHex('#4c9e29')
 export type ThemePaletteMap = Record<ColorToken, string>
 
 const createTonalPalette = (hue: number, chroma: number) => ({
-	tone: (tone: number) => Hct.from(hue, chroma, tone).toInt(),
+	tone: (tone: number) => HctSolver.solveToInt(hue, chroma, tone),
 })
 
 interface TonalPalette {
@@ -97,9 +103,9 @@ interface TonalPalette {
 }
 
 export const getThemePaletteRgb = (argb: number, isDark: boolean): ThemePaletteMap => {
-	const hct = Hct.fromInt(argb)
-	const hue = hct.hue
-	const chroma = hct.chroma
+	const cam16 = Cam16.fromInt(argb)
+	const hue = cam16.hue
+	const chroma = cam16.chroma
 
 	// We do not use material-color-utilities CorePalette because of large bundle size
 	// and because its color scheme is bit outdated with the current design guidelines

@@ -16,6 +16,11 @@ overrides:
   prettier-plugin-style-order: '-'
   prettier-plugin-sort-imports: '-'
 
+patchedDependencies:
+  '@material/material-color-utilities':
+    hash: 11fcdd2d0c1b26018b2646dc931948ce22d82ee106bff932bf0ee91c940a5986
+    path: patches/@material__material-color-utilities.patch
+
 importers:
 
   .:
@@ -28,7 +33,7 @@ importers:
         version: 1.6.13
       '@material/material-color-utilities':
         specifier: ^0.3.0
-        version: 0.3.0
+        version: 0.3.0(patch_hash=11fcdd2d0c1b26018b2646dc931948ce22d82ee106bff932bf0ee91c940a5986)
       '@tanstack/svelte-virtual':
         specifier: ^3.11.3
         version: 3.11.3(svelte@5.19.6)
@@ -1530,7 +1535,7 @@ snapshots:
 
   '@lix-js/server-api-schema@0.1.1': {}
 
-  '@material/material-color-utilities@0.3.0': {}
+  '@material/material-color-utilities@0.3.0(patch_hash=11fcdd2d0c1b26018b2646dc931948ce22d82ee106bff932bf0ee91c940a5986)': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
