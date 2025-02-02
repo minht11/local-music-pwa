@@ -191,11 +191,5 @@
 
 {#if data}
 	<div class="pointer-events-auto absolute inset-0"></div>
-	<Menu
-		items={data.items}
-		onopen={(el) => {
-			openMenu(el)
-		}}
-		onclose={closeMenu}
-	/>
+	<Menu items={data.items} onopen={openMenu} onclose={closeMenu} />
 {/if}

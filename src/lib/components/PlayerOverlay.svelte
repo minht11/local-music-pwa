@@ -84,6 +84,10 @@
 <style>
 	@reference '../../app.css';
 
+	.view-transition-pl-container {
+		view-transition-name: pl-container;
+	}
+
 	.controls {
 		grid-template-columns: 1fr max-content 1fr;
 	}
