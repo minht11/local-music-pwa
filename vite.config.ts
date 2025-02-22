@@ -90,10 +90,7 @@ export default defineConfig({
 		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './.generated/paraglide',
-			compilerOptions: {
-				experimentalUseTsImports: true,
-				experimentalEmitTs: true,
-			},
+			strategy: ['baseLocale'],
 		}),
 		{
 			async closeBundle() {

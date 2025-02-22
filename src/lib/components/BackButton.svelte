@@ -15,7 +15,7 @@
 			if (window.navigation.canGoBack) {
 				window.navigation.back()
 			} else {
-				goto('/')
+				void goto('/')
 			}
 
 			return
@@ -30,9 +30,9 @@
 		// this is the first entry in history.
 		// To prevent this check if URL changed, after short delay,
 		// if it didn't back button most likely didn't do anything.
-		wait(50).then(() => {
+		void wait(50).then(() => {
 			if (path === page.url.pathname) {
-				goto('/')
+				void goto('/')
 			}
 		})
 	}
