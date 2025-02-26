@@ -1,11 +1,10 @@
 import { ICON_PATHS } from '$lib/components/icon/icon-paths'
 import type { Handle } from '@sveltejs/kit'
 
-const getSvgSymbol = (name: string, path: string) => `
-<symbol id="system-icon-${name}">
+const getSvgSymbol = (name: string, path: string) =>
+	`<symbol id="system-icon-${name}">
 	<path d="${path}" />
-</symbol>
-`
+</symbol>`
 
 export const handle: Handle = ({ event, resolve }) => {
 	return resolve(event, {
@@ -19,10 +18,9 @@ export const handle: Handle = ({ event, resolve }) => {
 				`
 					<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
 						<defs>
-							${icons.map(([name, path]) => getSvgSymbol(name, path)).join('\n')}
+							${icons.map(([name, path]) => getSvgSymbol(name, path)).join('')}
 						</defs>
-					</svg>
-				`,
+					</svg>`,
 			)
 		},
 	})
