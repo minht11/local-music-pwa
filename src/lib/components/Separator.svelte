@@ -1,7 +1,7 @@
 <script lang="ts">
 	interface Props {
 		vertical?: boolean
-		class?: string
+		class?: ClassValue
 	}
 
 	const { vertical, class: className }: Props = $props()

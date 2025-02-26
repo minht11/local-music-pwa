@@ -1,11 +1,10 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte'
 	import Icon from './icon/Icon.svelte'
 	import type { IconType } from './icon/Icon.svelte'
 
 	interface Props {
 		src: string
-		class?: string
+		class?: ClassValue
 		alt?: string
 		fallbackIcon?: IconType | null
 		children?: Snippet

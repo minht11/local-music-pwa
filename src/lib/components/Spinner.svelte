@@ -2,7 +2,7 @@
 	// Spinner from https://codepen.io/mrrocks/pen/EiplA
 
 	interface Props {
-		class?: string
+		class?: ClassValue
 	}
 
 	const { class: className }: Props = $props()

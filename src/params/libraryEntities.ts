@@ -1,9 +1,7 @@
-import type { ParamMatcher } from '@sveltejs/kit'
+const libraryEntitiesPaths = ['tracks', 'albums', 'artists', 'playlists'] as const
+type LibraryEntitiesPath = typeof libraryEntitiesPaths[number]
 
-const entities = new Set(['tracks', 'albums', 'artists', 'playlists'] as const)
+const entities = new Set(libraryEntitiesPaths)
 
-type TypeFromSet<T extends Set<unknown>> = T extends Set<infer U> ? U : never
-type Entity = TypeFromSet<typeof entities>
-
-export const match = ((param): param is Entity =>
-	entities.has(param as Entity)) satisfies ParamMatcher
+export const match = (param): param is LibraryEntitiesPath =>
+	entities.has(param as LibraryEntitiesPath)

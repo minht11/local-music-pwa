@@ -1,6 +1,5 @@
 <script lang="ts" module>
 	import type { Playlist } from '$lib/db/database-types'
-	import type { Snippet } from 'svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import type { IconType } from '../icon/Icon.svelte'
 	import PlaylistListItem, { type MenuItemsConfig } from './PlaylistListItem.svelte'

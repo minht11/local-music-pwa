@@ -8,7 +8,7 @@
 		albumId: number
 		style?: string
 		tabindex?: number
-		class?: string
+		class?: ClassValue
 		onclick?: (album: Album) => void
 	}
 

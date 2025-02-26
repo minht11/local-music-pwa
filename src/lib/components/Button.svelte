@@ -1,5 +1,4 @@
 <script module lang="ts">
-	import type { Snippet } from 'svelte'
 	import { ripple } from '../actions/ripple.ts'
 	import { tooltip } from '../actions/tooltip.ts'
 
@@ -15,7 +14,7 @@
 		type?: 'button' | 'submit' | 'reset'
 		disabled?: boolean
 		href?: ButtonHref<As>
-		class?: ClassNameValue
+		class?: ClassValue
 		title?: string
 		tabindex?: number
 		ariaLabel?: string

@@ -1,6 +1,5 @@
 <script module lang="ts">
 	import { type AnimationSequence, timeline } from '$lib/helpers/animations.ts'
-	import type { Snippet } from 'svelte'
 	import type { AnimationConfig } from 'svelte/animate'
 	import Icon, { type IconType } from '../icon/Icon.svelte'
 
@@ -13,7 +12,7 @@
 		open?: boolean | DialogOpenAccessor<S>
 		title?: string
 		icon?: IconType
-		class?: ClassNameValue
+		class?: ClassValue
 		children?: Snippet<[{ data: S; close: () => void }]>
 	}
 </script>

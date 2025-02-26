@@ -5,7 +5,7 @@
 	import RepeatButton from './buttons/RepeatButton.svelte'
 	import ShuffleButton from './buttons/ShuffleButton.svelte'
 
-	const { class: className }: { class?: ClassNameValue } = $props()
+	const { class: className }: { class?: ClassValue } = $props()
 </script>
 
 <div class={['flex items-center gap-2', className]}>

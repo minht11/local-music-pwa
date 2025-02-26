@@ -3,7 +3,7 @@
 
 	import Slider from '../Slider.svelte'
 
-	const { class: className }: { class?: ClassNameValue } = $props()
+	const { class: className }: { class?: ClassValue } = $props()
 
 	const player = usePlayer()
 

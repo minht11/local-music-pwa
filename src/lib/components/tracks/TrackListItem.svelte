@@ -13,7 +13,7 @@
 		style?: string
 		ariaRowIndex?: number
 		active?: boolean
-		class?: ClassNameValue
+		class?: ClassValue
 		menuItems?: (playlist: TrackData) => MenuItem[]
 		onclick?: (track: TrackData) => void
 	}

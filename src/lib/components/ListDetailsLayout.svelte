@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte'
 	import ScrollContainer from './ScrollContainer.svelte'
 
 	type LayoutMode = 'both' | 'list' | 'details'
@@ -8,7 +7,7 @@
 		mode: LayoutMode
 		list: Snippet<[LayoutMode]>
 		details: Snippet<[LayoutMode]>
-		class?: ClassNameValue
+		class?: ClassValue
 		noPlayerOverlayPadding?: boolean
 		noListStableGutter?: boolean
 	}

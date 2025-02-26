@@ -5,7 +5,7 @@
 	import IconButton from '../../IconButton.svelte'
 	import ActiveIndicator from './ActiveIndicator.svelte'
 
-	const { class: className }: { class?: ClassNameValue } = $props()
+	const { class: className }: { class?: ClassValue } = $props()
 
 	const player = usePlayer()
 

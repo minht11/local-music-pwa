@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { ripple } from '$lib/actions/ripple'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
-	import type { Snippet } from 'svelte'
 	import Artwork from './Artwork.svelte'
 
 	interface Props {
 		artwork?: Blob
-		class?: ClassNameValue
+		class?: ClassValue
 		style?: string
 		children: Snippet
 		tabindex?: number

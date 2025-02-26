@@ -5,7 +5,7 @@
 
 	export interface IconProps {
 		type: IconType
-		class?: ClassNameValue
+		class?: ClassValue
 	}
 </script>
 

@@ -1,9 +1,7 @@
 <script lang="ts" module>
-	import type { Snippet } from 'svelte'
-
 	export interface HeaderProps {
 		children?: Snippet
-		title?: ClassNameValue
+		title?: string
 		noBackButton?: boolean
 		mode?: 'fixed' | 'sticky'
 	}

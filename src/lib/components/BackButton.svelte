@@ -5,7 +5,7 @@
 	import IconButton from './IconButton.svelte'
 
 	interface Props {
-		class?: string
+		class?: ClassValue
 	}
 
 	const { class: className }: Props = $props()

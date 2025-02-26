@@ -7,7 +7,7 @@
 		artistId: number
 		style?: string
 		tabindex?: number
-		class?: string
+		class?: ClassValue
 		onclick?: (artist: ArtistData) => void
 	}
 

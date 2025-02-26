@@ -1,6 +1,4 @@
 <script lang="ts" generics="Params extends Record<string, unknown>">
-	import type { Snippet } from 'svelte'
-
 	type Props = {
 		[K in keyof Params]: Snippet
 	} & {

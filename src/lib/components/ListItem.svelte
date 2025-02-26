@@ -1,6 +1,5 @@
 <script lang="ts" module>
 	import { ripple } from '$lib/actions/ripple'
-	import type { Snippet } from 'svelte'
 	import IconButton from './IconButton.svelte'
 	import type { MenuItem } from './menu/types.ts'
 
@@ -12,7 +11,7 @@
 <script lang="ts">
 	interface Props {
 		style?: string
-		class?: ClassNameValue
+		class?: ClassValue
 		ariaLabel?: string
 		ariaRowIndex?: number
 		tabindex?: number

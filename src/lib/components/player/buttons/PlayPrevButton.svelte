@@ -4,7 +4,7 @@
 
 	const player = usePlayer()
 
-	const { class: className }: { class?: string } = $props()
+	const { class: className }: { class?: ClassValue } = $props()
 </script>
 
 <IconButton

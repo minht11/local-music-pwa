@@ -9,7 +9,7 @@
 	import PlayNextButton from './player/buttons/PlayNextButton.svelte'
 	import PlayToggleButton from './player/buttons/PlayToggleButton.svelte'
 
-	const { class: className }: { class?: string } = $props()
+	const { class: className }: { class?: ClassValue } = $props()
 
 	const mainStore = useMainStore()
 	const player = usePlayer()

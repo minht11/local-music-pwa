@@ -1,4 +1,5 @@
-import type { HTMLAttributes } from 'svelte/elements'
+import type { Snippet as SnippetInternal } from 'svelte'
+import type { ClassValue as ClassValueInternal, HTMLAttributes } from 'svelte/elements'
 
 declare global {
 	namespace App {
@@ -10,7 +11,10 @@ declare global {
 		// interface Platform {}
 	}
 
-	export type ClassNameValue = HTMLAttributes<HTMLElement>['class']
+	// Not using unplugin auto import because because when used getting error:
+	// Exported variable 'Foo' has or is using private name 'ParentChild'
+	type ClassValue = ClassValueInternal
+	type Snippet<Parameters extends unknown[] = []> = SnippetInternal<Parameters>
 
 	interface Navigator {
 		// Optional because Safari and Firefox don't support it

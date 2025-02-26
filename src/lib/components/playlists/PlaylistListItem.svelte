@@ -2,7 +2,6 @@
 	import type { Playlist } from '$lib/db/database-types'
 	import { createPlaylistQuery } from '$lib/db/entity'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
-	import type { Snippet } from 'svelte'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'
 	import Icon from '../icon/Icon.svelte'
 	import type { IconType } from '../icon/Icon.svelte'
@@ -22,7 +21,7 @@
 		style?: string
 		ariaRowIndex?: number
 		active?: boolean
-		class?: ClassNameValue
+		class?: ClassValue
 		icon?: Snippet<[Playlist]> | IconType
 		menuItems?: MenuItemsConfig
 		onclick?: (playlist: Playlist) => void

@@ -9,7 +9,7 @@
 		key: Key
 		labelKey: LabelKey
 		selected?: T[Key]
-		class?: string
+		class?: ClassValue
 	}
 </script>
 

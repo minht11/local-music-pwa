@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import { type Snippet, getContext, setContext } from 'svelte'
+	import { getContext, setContext } from 'svelte'
 
 	type ScrollTargetElement = Element | Window | null
 
@@ -20,7 +20,7 @@
 
 <script lang="ts">
 	interface Props {
-		class?: ClassNameValue
+		class?: ClassValue
 		children: Snippet
 	}
 
