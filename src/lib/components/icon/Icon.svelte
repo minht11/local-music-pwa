@@ -1,7 +1,7 @@
 <script lang="ts" module>
-	import { ICON_PATHS } from './icon-paths.ts'
+	import type { IconType } from './icon-paths.ts'
 
-	export type IconType = keyof typeof ICON_PATHS
+	export type { IconType }
 
 	export interface IconProps {
 		type: IconType
@@ -20,5 +20,5 @@
 	viewBox="0 0 24 24"
 	class={['pointer-events-none shrink-0 fill-current', className]}
 >
-	<path d={ICON_PATHS[type]} />
+	<use href={`#system-icon-${type}`} />
 </svg>
