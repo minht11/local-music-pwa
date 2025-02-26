@@ -18,12 +18,7 @@ export interface TrackImportMessage {
 
 export type TrackImportOptions =
 	| {
-			action: 'directory-replace'
-			dirId: number
-			dirHandle: FileSystemDirectoryHandle
-	  }
-	| {
-			action: 'directory-add'
+			action: 'directory-add' | 'directory-rescan'
 			dirId: number
 			dirHandle: FileSystemDirectoryHandle
 	  }

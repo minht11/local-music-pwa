@@ -97,13 +97,14 @@ const trackConfig: QueryConfig<TrackData> = {
 
 export type AlbumData = Album
 
-export const albumConfig: QueryConfig<AlbumData> = {
+const albumConfig: QueryConfig<AlbumData> = {
 	fetch: async (id) => {
 		const db = await getDB()
 		const entity = db.get('albums', id)
 
 		return entity
 	},
+	//  TODO. ADD onDatabaseChange
 }
 
 export type ArtistData = Artist
@@ -114,6 +115,7 @@ const artistConfig: QueryConfig<ArtistData> = {
 		const db = await getDB()
 		return db.get('artists', id)
 	},
+	//  TODO. ADD onDatabaseChange
 }
 
 export type PlaylistData = Playlist
@@ -132,6 +134,7 @@ const playlistsConfig: QueryConfig<PlaylistData> = {
 		const db = await getDB()
 		return db.get('playlists', id)
 	},
+	//  TODO. ADD onDatabaseChange
 }
 
 const LIBRARY_ENTITIES_DATA_MAP: {

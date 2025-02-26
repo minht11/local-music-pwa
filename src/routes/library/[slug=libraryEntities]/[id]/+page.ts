@@ -61,7 +61,7 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 		},
 		onError: (error) => {
 			if (error instanceof DbItemNotFound) {
-				goto(`/library/${storeName}`, { replaceState: true })
+				void goto(`/library/${storeName}`, { replaceState: true })
 			}
 		},
 	})
@@ -117,13 +117,11 @@ const createTracksPageQuery = <Slug extends DetailsSlug>(
 
 export const load: PageLoad = async (event) => {
 	const { slug } = event.params
-
 	if (slug === 'tracks') {
 		redirect(301, '/library/tracks')
 	}
 
 	const id = Number(event.params.id)
-
 	if (!Number.isFinite(id)) {
 		error(404)
 	}

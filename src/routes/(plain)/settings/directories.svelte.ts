@@ -107,10 +107,10 @@ export const importReplaceDirectory = async (
 	const db = await getDB()
 	const tx = db.transaction('directories', 'readwrite')
 
-	const newDir = {
+	const newDir: Directory = {
 		id: directoryId,
 		handle: newDirHandle,
-	} satisfies Directory
+	}
 
 	await Promise.all([tx.objectStore('directories').put(newDir), tx.done])
 
@@ -124,7 +124,7 @@ export const importReplaceDirectory = async (
 	])
 
 	await importTracksFromDirectory({
-		action: 'directory-replace',
+		action: 'directory-rescan',
 		dirId: directoryId,
 		dirHandle: newDirHandle,
 	})

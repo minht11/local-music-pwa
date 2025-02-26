@@ -1,12 +1,12 @@
 /// <reference lib='WebWorker' />
 
-import { LegacyDirectoryId, type Track } from '$lib/db/database-types.ts'
+import type { Track } from '$lib/db/database-types.ts'
 import { getDB } from '$lib/db/get-db'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
 import { removeTrackWithTx } from '$lib/library/tracks.svelte'
 import { importTrackToDb } from './import-track-to-db.ts'
 import { parseTrack } from './parse/parse-track.ts'
-import type { TrackImportCount, TrackImportMessage, TrackImportOptions } from './types.ts'
+import type { TrackImportMessage, TrackImportOptions } from './types.ts'
 
 declare const self: DedicatedWorkerGlobalScope
 
@@ -45,36 +45,36 @@ const importTrack = async (options: ImportTrackOptions) => {
 	}
 }
 
-// const processTracks = async (inputFiles: FileEntity[], directoryId: number) => {
-// 	let imported = 0
-// 	let current = 0
+class StatusTracker {
+	newlyImported = 0
 
-// const sendMsg = (finished: boolean) => {
-// 	const message: TrackImportMessage = {
-// 		finished,
-// 		count: {
-// 			imported,
-// 			current,
-// 			total: inputFiles.length,
-// 		},
-// 	}
+	existingUpdated = 0
 
-// 	self.postMessage(message)
-// }
+	removed = 0
 
-// 	for (const file of inputFiles) {
-// 		const success = await importTrack(file, directoryId)
-// 		if (success) {
-// 			imported += 1
-// 		}
+	current = 0
 
-// 		current += 1
-// 		sendMsg(false)
-// 	}
+	total = 0
 
-// 	sendMsg(true)
-// 	self.close()
-// }
+	constructor(total: number) {
+		this.total = total
+	}
+
+	sendMsg = (finished: boolean) => {
+		const message: TrackImportMessage = {
+			finished,
+			count: {
+				newlyImported: this.newlyImported,
+				existingUpdated: this.existingUpdated,
+				removed: this.removed,
+				current: this.current,
+				total: this.total,
+			},
+		}
+
+		self.postMessage(message)
+	}
+}
 
 const findTrackByFileHandle = async (handle: FileSystemFileHandle, tracks: Set<Track>) => {
 	for (const track of tracks) {
@@ -89,69 +89,61 @@ const findTrackByFileHandle = async (handle: FileSystemFileHandle, tracks: Set<T
 
 	return null
 }
-const processDirectory = async (newDirHandle: FileSystemDirectoryHandle, directoryId: number) => {
+
+const scanExistingDirectory = async (
+	newDirHandle: FileSystemDirectoryHandle,
+	directoryId: number,
+) => {
 	const db = await getDB()
-	// We do not use one transaction for all operations to commit changes in smaller chunks.
-	const existingTracks = await db.getAllFromIndex('tracks', 'directory')
 
 	// TODO. Add more extensions
 	const handles = await getFileHandlesRecursively(newDirHandle, ['mp3'])
+	const tracker = new StatusTracker(handles.length)
 
-	const count: TrackImportCount = {
-		newlyImported: 0,
-		existingUpdated: 0,
-		removed: 0,
-		current: 0,
-		total: handles.length,
-	}
-
-	const sendMsg = (finished: boolean) => {
-		const message: TrackImportMessage = {
-			finished,
-			count,
-		}
-
-		self.postMessage(message)
-	}
-
-	const existingTrackSet = new Set(existingTracks)
+	const existingTracks = new Set(
+		// We do not use one transaction for all operations to commit changes in smaller chunks.
+		await db.getAllFromIndex('tracks', 'directory'),
+	)
 
 	for (const handle of handles) {
-		// TODO. This whole block should be wrapped in a try-catch block.
-		const existingTrack = await findTrackByFileHandle(handle, existingTrackSet)
+		try {
+			// TODO. This whole block should be wrapped in a try-catch block.
+			const existingTrack = await findTrackByFileHandle(handle, existingTracks)
+			const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
 
-		const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
-		let existingTrackId = undefined
+			let existingTrackId = undefined
+			if (existingTrack) {
+				existingTracks.delete(existingTrack)
 
-		if (existingTrack) {
-			existingTrackSet.delete(existingTrack)
+				// We only scan files that have been modified since the last scan.
+				if (unwrappedFile.lastModified <= existingTrack.lastScanned) {
+					continue
+				}
 
-			// We only scan files that have been modified since the last scan.
-			if (unwrappedFile.lastModified <= existingTrack.lastScanned) {
-				continue
+				existingTrackId = existingTrack.id
 			}
 
-			existingTrackId = existingTrack.id
-		}
+			const success = await importTrack({
+				unwrappedFile,
+				file: handle,
+				directoryId,
+				trackId: existingTrackId,
+			})
 
-		const success = await importTrack({
-			unwrappedFile,
-			file: handle,
-			directoryId,
-			trackId: existingTrackId,
-		})
-
-		if (success) {
-			if (existingTrackId) {
-				count.existingUpdated += 1
-			} else {
-				count.newlyImported += 1
+			if (success) {
+				if (existingTrackId) {
+					tracker.existingUpdated += 1
+				} else {
+					tracker.newlyImported += 1
+				}
 			}
+		} catch {
+			// we ignore errors and just move on to the next track.
 		}
 
-		sendMsg(false)
+		tracker.sendMsg(false)
 
-		count.current += 1
+		tracker.current += 1
 	}
 
 	const tx = db.transaction(
@@ -160,20 +152,49 @@ const processDirectory = async (newDirHandle: FileSystemDirectoryHandle, directo
 	)
 	// If we have any tracks left in the set,
 	// that means they no longer exist in the directory, so we remove them.
-	for (const track of existingTrackSet) {
+	for (const track of existingTracks) {
 		await removeTrackWithTx(tx, track.id).catch(console.warn)
-		count.removed += 1
+		tracker.removed += 1
 	}
 
-	sendMsg(true)
+	tracker.sendMsg(true)
+}
+
+const scanNewDirectory = async (newDirHandle: FileSystemDirectoryHandle, directoryId: number) => {
+	// TODO. Add more extensions
+	const handles = await getFileHandlesRecursively(newDirHandle, ['mp3'])
+
+	const tracker = new StatusTracker(handles.length)
+
+	for (const handle of handles) {
+		tracker.current += 1
+
+		const unwrappedFile = await handle.getFile()
+
+		const success = await importTrack({
+			unwrappedFile,
+			file: handle,
+			directoryId,
+			trackId: undefined,
+		})
+
+		if (success) {
+			tracker.newlyImported += 1
+		}
+
+		tracker.sendMsg(false)
+	}
+
+	tracker.sendMsg(true)
 }
 
 self.addEventListener('message', async (event: MessageEvent<TrackImportOptions>) => {
 	const options = event.data
 
-	if (options.action === 'directory-replace' || options.action === 'directory-add') {
-		// TODO.
-		await processDirectory(options.dirHandle, options.dirId ?? LegacyDirectoryId.File)
+	if (options.action === 'directory-add') {
+		await scanNewDirectory(options.dirHandle, options.dirId)
+	} else if (options.action === 'directory-rescan') {
+		await scanExistingDirectory(options.dirHandle, options.dirId)
 	} else {
 		throw new Error('Unsupported action')
 	}
