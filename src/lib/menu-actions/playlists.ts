@@ -1,6 +1,6 @@
 import type { MenuItem } from '$lib/components/ListItem.svelte'
 import type { Playlist } from '$lib/db/database-types'
-import type { MainStore } from '$lib/stores/main-store.svelte'
+import type { MainStore } from '$lib/stores/main/store.svelte.ts'
 
 export const getPlaylistMenuItems = (main: MainStore, playlist: Playlist): MenuItem[] => [
 	{

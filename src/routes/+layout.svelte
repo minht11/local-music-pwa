@@ -5,13 +5,21 @@
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 	import { setupBottomBar } from '$lib/layout-bottom-bar.svelte'
-	import { provideMainStore } from '$lib/stores/main-store.svelte'
-	import { providePlayer } from '$lib/stores/player/store.ts'
+	import { MainStore } from '$lib/stores/main/store.svelte.ts'
+	import { MAIN_STORE_CONTEXT } from '$lib/stores/main/use-store.ts'
+	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
+	import { PLAYER_STORE_CONTEXT } from '$lib/stores/player/store.ts'
 	import { setupAppViewTransitions } from '$lib/view-transitions.ts'
+	import { setContext } from 'svelte'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'
 
-	const mainStore = provideMainStore()
-	const player = providePlayer()
+	// These context keys are in different files from their implementation
+	// to allow better trees shaking and inlining
+	const mainStore = new MainStore()
+	setContext(MAIN_STORE_CONTEXT, mainStore)
+
+	const player = new PlayerStore()
+	setContext(PLAYER_STORE_CONTEXT, player)
 
 	setupTheme()
 	setupGlobalMenu()

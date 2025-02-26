@@ -1,6 +1,5 @@
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
-import { getContext, setContext } from 'svelte'
 import { prefersReducedMotion } from 'svelte/motion'
 import { MediaQuery } from 'svelte/reactivity'
 
@@ -66,22 +65,4 @@ export class MainStore {
 			'volumeSliderEnabled',
 		])
 	}
-}
-
-const mainContext = Symbol('main-store')
-
-export const provideMainStore = (): MainStore => {
-	const main = new MainStore()
-
-	setContext(mainContext, main)
-
-	return main
-}
-
-export const useMainStore = (): MainStore => {
-	const main = getContext<MainStore>(mainContext)
-
-	invariant(main, 'No main store found')
-
-	return main
 }

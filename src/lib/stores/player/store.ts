@@ -1,21 +1,6 @@
-import { getContext, setContext } from 'svelte'
+import { getContext } from 'svelte'
+import type { PlayerStore } from './player.svelte'
 
-import { PlayerStore } from './player.svelte'
+export const PLAYER_STORE_CONTEXT: unique symbol = Symbol()
 
-const playerContext = Symbol('player')
-
-export const providePlayer = (): PlayerStore => {
-	const player = new PlayerStore()
-
-	setContext(playerContext, player)
-
-	return player
-}
-
-export const usePlayer = (): PlayerStore => {
-	const player = getContext<PlayerStore>(playerContext)
-
-	invariant(player, 'No player found')
-
-	return player
-}
+export const usePlayer = (): PlayerStore => getContext<PlayerStore>(PLAYER_STORE_CONTEXT)

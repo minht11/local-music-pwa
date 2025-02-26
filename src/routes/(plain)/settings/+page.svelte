@@ -13,6 +13,7 @@
 	import type { Directory } from '$lib/db/database-types.ts'
 	import { initPageQueries } from '$lib/db/query.svelte.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
+	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
 	import {
 		checkNewDirectoryStatus,
 		directoriesStore,
@@ -92,7 +93,7 @@
 		}
 	}
 
-	const themeOptions = [
+	const themeOptions: { name: string; value: AppThemeOption }[] = [
 		{
 			name: m.settingsThemeAuto(),
 			value: 'auto',
@@ -105,9 +106,9 @@
 			name: m.settingsThemeLight(),
 			value: 'light',
 		},
-	] as const
+	]
 
-	const motionOptions = [
+	const motionOptions: { name: string; value: AppMotionOption }[] = [
 		{
 			name: m.settingsMotionAuto(),
 			value: 'auto',
@@ -120,7 +121,7 @@
 			name: m.settingsMotionNormal(),
 			value: 'normal',
 		},
-	] as const
+	]
 
 	const updateMainColor = debounce((value: string | null) => {
 		mainStore.customThemePaletteHex = value
@@ -289,8 +290,9 @@
 
 				<input
 					type="color"
-					bind:value={() => mainStore.customThemePaletteHex ?? '#000000',
-					(value) => updateMainColor(value)}
+					bind:value={
+						() => mainStore.customThemePaletteHex ?? '#000000', (value) => updateMainColor(value)
+					}
 					class="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0"
 				/>
 			</Button>

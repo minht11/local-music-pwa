@@ -81,7 +81,7 @@ export default defineConfig({
 				{
 					'$paraglide/messages': [['*', 'm']],
 					'$lib/stores/player/store': ['usePlayer'],
-					'$lib/stores/main-store.svelte': ['useMainStore'],
+					'$lib/stores/main/use-store.ts': ['useMainStore'],
 					'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
 					'tiny-invariant': [['default', 'invariant']],
 				},
@@ -93,6 +93,8 @@ export default defineConfig({
 			strategy: ['baseLocale'],
 		}),
 		{
+			apply: 'build',
+			enforce: 'post',
 			async closeBundle() {
 				const dirSize = async (directory: string) => {
 					const files = readdirSync(directory)

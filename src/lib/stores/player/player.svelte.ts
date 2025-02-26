@@ -7,7 +7,6 @@ import { shuffleArray } from '$lib/helpers/utils/array.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { throttle } from '$lib/helpers/utils/throttle.ts'
 import { untrack } from 'svelte'
-import { useMainStore } from '../main-store.svelte'
 import { cleanupTrackAudio, loadTrackAudio } from './audio.ts'
 
 export interface PlayTrackOptions {
