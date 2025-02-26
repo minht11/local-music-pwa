@@ -198,6 +198,7 @@ export const createEntitiesStore = () => {
       'wav',
       'flac',
       'm4a',
+      'opus',
     ])
 
     // User canceled directory picker.
