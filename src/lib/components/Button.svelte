@@ -7,7 +7,6 @@
 
 	export type ButtonHref<As extends AllowedButtonElement> = As extends 'a' ? string : never
 
-	// prettier-ignore
 	export interface ButtonProps<As extends AllowedButtonElement> {
 		as?: As
 		kind?: ButtonKind

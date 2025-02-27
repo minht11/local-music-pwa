@@ -89,13 +89,11 @@ class QueryImpl<K extends QueryKey, Result, InitialResult extends Result | undef
 
 	constructor(options: QueryOptions<K, Result, InitialResult>) {
 		this.options = options
-
-		// @ts-ignore TODO
 		const value = options.initialValue
 
 		const resolvedState: QueryStateInternal<Result, InitialResult> =
 			value !== undefined
-				? this.#getLoadedState(value as Result, normalizeKey(this.#getKey()))
+				? this.#getLoadedState(value, normalizeKey(this.#getKey()))
 				: {
 						status: 'loading',
 						error: undefined,
@@ -289,7 +287,7 @@ export const createPageQuery = async <
 	InitialResult extends Result | undefined = undefined,
 >(
 	options: QueryOptions<K, Result, InitialResult>,
-) => {
+): PageQueryResult<Result> => {
 	const query = new QueryImpl<K, Result, InitialResult>(options)
 	const state = query.state
 
@@ -345,7 +343,7 @@ export const initPageQueries = (data: Record<string, unknown>): void => {
 export const initPageQueriesDynamic = (
 	source: () => unknown,
 	data: () => Record<string, unknown>,
-) => {
+): void => {
 	$effect.pre(() => {
 		source() // track changes
 
@@ -361,7 +359,7 @@ export const keysListDatabaseChangeHandler = <
 	storeName: StoreName,
 	changes: DBChangeRecordList,
 	{ mutate, refetch }: DbChangeActions<number[], undefined>,
-) => {
+): void => {
 	let needRefetch = false
 	for (const change of changes) {
 		if (change.storeName !== storeName) {
