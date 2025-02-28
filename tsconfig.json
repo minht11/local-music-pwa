@@ -19,6 +19,8 @@
 		"allowUnusedLabels": false,
 		"declaration": true,
 		"isolatedDeclarations": true,
+		"libReplacement": false,
+		"erasableSyntaxOnly": true,
 		"types": [
 			"@types/dom-navigation",
 			"@types/wicg-file-system-access",

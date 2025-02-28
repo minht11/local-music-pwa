@@ -18,7 +18,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"@inlang/paraglide-js": "2.0.0-beta.20",
+		"@inlang/paraglide-js": "2.0.0-beta.26",
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.17.3",
 		"@sveltejs/vite-plugin-svelte": "5.0.3",
@@ -26,12 +26,12 @@
 		"prettier": "^3.5.2",
 		"prettier-plugin-svelte": "^3.3.3",
 		"prettier-plugin-tailwindcss": "^0.6.11",
-		"svelte": "^5.20.4",
+		"svelte": "^5.20.5",
 		"svelte-check": "^4.1.4",
 		"tailwindcss": "^4.0.9",
 		"terser": "^5.39.0",
-		"typescript": "^5.7.3",
-		"unplugin-auto-import": "^19.1.0",
+		"typescript": "^5.8.2",
+		"unplugin-auto-import": "^19.1.1",
 		"vite": "^6.2.0"
 	},
 	"dependencies": {
@@ -69,9 +69,6 @@
 		"patchedDependencies": {
 			"@material/material-color-utilities": "patches/@material__material-color-utilities.patch"
 		},
-		"onlyBuiltDependencies": [
-			"@biomejs/biome",
-			"esbuild"
-		]
+		"onlyBuiltDependencies": ["@biomejs/biome", "esbuild"]
 	}
 }

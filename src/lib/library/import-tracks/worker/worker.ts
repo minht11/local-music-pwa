@@ -90,14 +90,15 @@ const findTrackByFileHandle = async (handle: FileSystemFileHandle, tracks: Set<T
 	return null
 }
 
+const SUPPORTED_EXTENSIONS = ['aac', 'mp3', 'ogg', 'wav', 'flac', 'm4a', 'opus']
+
 const scanExistingDirectory = async (
 	newDirHandle: FileSystemDirectoryHandle,
 	directoryId: number,
 ) => {
 	const db = await getDB()
 
-	// TODO. Add more extensions
-	const handles = await getFileHandlesRecursively(newDirHandle, ['mp3'])
+	const handles = await getFileHandlesRecursively(newDirHandle, SUPPORTED_EXTENSIONS)
 	const tracker = new StatusTracker(handles.length)
 
 	const existingTracks = new Set(
@@ -107,7 +108,6 @@ const scanExistingDirectory = async (
 
 	for (const handle of handles) {
 		try {
-			// TODO. This whole block should be wrapped in a try-catch block.
 			const existingTrack = await findTrackByFileHandle(handle, existingTracks)
 			const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
 
@@ -161,25 +161,28 @@ const scanExistingDirectory = async (
 }
 
 const scanNewDirectory = async (newDirHandle: FileSystemDirectoryHandle, directoryId: number) => {
-	// TODO. Add more extensions
-	const handles = await getFileHandlesRecursively(newDirHandle, ['mp3'])
+	const handles = await getFileHandlesRecursively(newDirHandle, SUPPORTED_EXTENSIONS)
 
 	const tracker = new StatusTracker(handles.length)
 
 	for (const handle of handles) {
 		tracker.current += 1
 
-		const unwrappedFile = await handle.getFile()
+		try {
+			const unwrappedFile = await handle.getFile()
 
-		const success = await importTrack({
-			unwrappedFile,
-			file: handle,
-			directoryId,
-			trackId: undefined,
-		})
+			const success = await importTrack({
+				unwrappedFile,
+				file: handle,
+				directoryId,
+				trackId: undefined,
+			})
 
-		if (success) {
-			tracker.newlyImported += 1
+			if (success) {
+				tracker.newlyImported += 1
+			}
+		} catch {
+			// we ignore errors and just move on to the next track
 		}
 
 		tracker.sendMsg(false)

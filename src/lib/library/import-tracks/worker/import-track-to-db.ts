@@ -45,7 +45,6 @@ const importArtist = async (tx: Tx, track: Track) => {
 
 	for (const artist of track.artists) {
 		const existingArtist = await store.index('name').get(artist)
-
 		if (existingArtist) {
 			continue
 		}
