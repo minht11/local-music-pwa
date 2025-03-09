@@ -1,8 +1,6 @@
 <script lang="ts" module>
-	import { assign } from '$lib/helpers/utils/assign.ts'
-	import '@a11y/focus-trap'
 	import { timeline } from '$lib/helpers/animations.ts'
-	import type { FocusTrap } from '@a11y/focus-trap'
+	import { assign } from '$lib/helpers/utils/assign.ts'
 	import { setContext } from 'svelte'
 	import { getContext } from 'svelte'
 	import Menu from './Menu.svelte'
@@ -79,14 +77,14 @@
 
 	let closing = false
 
-	const openMenu = (menuEl: FocusTrap) => {
+	const openMenu = (menuEl: HTMLDialogElement) => {
 		closing = false
 
 		invariant(data, 'data is undefined')
-		invariant(menuEl, 'menuEl is undefined')
 
 		const { options } = data
 
+		menuEl.showModal()
 		const baseRect = menuEl.getBoundingClientRect()
 		const rect = {
 			...baseRect,
@@ -149,14 +147,8 @@
 
 		closing = true
 
-		data.targetElement.focus({
-			preventScroll: true,
-		})
-
-		// Restore focus to the element that opened the menu
-		timeline([
-			[
-				menuEl,
+		void menuEl
+			.animate(
 				{
 					opacity: [1, 0],
 				},
@@ -164,17 +156,28 @@
 					duration: 100,
 					easing: 'linear',
 				},
-			],
-		]).then(() => {
-			// Check if menu is still closing.
-			if (closing) {
+			)
+			.finished.then(() => {
+				// Check if menu is still closing.
+				if (!closing) {
+					return
+				}
+
+				// Save the element that opened the menu
+				const target = data.targetElement
 				context.value = undefined
-			}
-		})
+
+				setTimeout(() => {
+					// Restore focus to the element that opened the menu
+					target.focus({
+						preventScroll: true,
+					})
+				}, 0)
+			})
 	}
 
 	const globalContextMenuHandler = (e: MouseEvent) => {
-		const el = e.composedPath()[0]
+		const el = e.composedPath().at(0)
 
 		// Allow standard browser context menu on input[type='text'] elements,
 		// because creating custom menu for copy & paste
@@ -190,6 +193,5 @@
 <svelte:window oncontextmenu={globalContextMenuHandler} />
 
 {#if data}
-	<div class="pointer-events-auto absolute inset-0"></div>
 	<Menu items={data.items} onopen={openMenu} onclose={closeMenu} />
 {/if}

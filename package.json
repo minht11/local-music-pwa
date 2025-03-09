@@ -35,7 +35,6 @@
 		"vite": "^6.2.1"
 	},
 	"dependencies": {
-		"@a11y/focus-trap": "^1.0.5",
 		"@floating-ui/dom": "^1.6.13",
 		"@material/material-color-utilities": "^0.3.0",
 		"@tanstack/svelte-virtual": "^3.13.2",
