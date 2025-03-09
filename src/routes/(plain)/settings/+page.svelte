@@ -168,44 +168,44 @@
 			</div>
 		{:else}
 			<div class="flex flex-col">
-				<div class="mb-4 text-title-sm">Directories</div>
+				{#if directories.length > 0}
+					<div class="mb-4 text-title-sm">Directories</div>
 
-				<ul class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-					{#each directories as dir}
-						<li
-							class="flex h-14 items-center gap-2 rounded-sm bg-tertiaryContainer/56 pr-1 pl-4 text-onTertiaryContainer"
-						>
-							<div class="truncate">
-								{dir.handle.name}
-							</div>
+					<ul class="mb-4 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+						{#each directories as dir}
+							<li
+								class="flex h-14 items-center gap-2 rounded-sm bg-tertiaryContainer/56 pr-1 pl-4 text-onTertiaryContainer"
+							>
+								<div class="truncate">
+									{dir.handle.name}
+								</div>
 
-							<div class="ml-auto flex items-center gap-1">
-								{#if directoriesStore.isInprogress(dir.id)}
-									<Spinner class="mr-2.5 ml-2 h-5 w-5" />
-								{:else}
-									<IconButton icon="cached" title="Rescan" />
-									<IconButton
-										icon="trashOutline"
-										title="Remove"
-										onclick={() => {
-											removeDirectory(dir.id)
-										}}
-									/>
-								{/if}
-							</div>
-						</li>
-					{:else}
-						<div class="mx-auto col-span-full">No directories added</div>
-					{/each}
-					<!-- <li
+								<div class="ml-auto flex items-center gap-1">
+									{#if directoriesStore.isInprogress(dir.id)}
+										<Spinner class="mr-2.5 ml-2 h-5 w-5" />
+									{:else}
+										<IconButton icon="cached" tooltip="Rescan" />
+										<IconButton
+											icon="trashOutline"
+											tooltip="Remove"
+											onclick={() => {
+												removeDirectory(dir.id)
+											}}
+										/>
+									{/if}
+								</div>
+							</li>
+						{/each}
+						<!-- <li
 						class="flex h-14 gap-2 items-center text-onTertiaryContainer bg-tertiaryContainer/24 pl-4 pr-1 rounded-sm"
 					>
 						<div class="truncate">Tracks without directory</div>
 						<Icon type="information" class="text-onTertiaryContainer/54 size-4" />
 					</li> -->
-				</ul>
+					</ul>
+				{/if}
 
-				<div class="mt-4 flex flex-col gap-2 sm:flex-row">
+				<div class="flex flex-col gap-2 sm:flex-row">
 					{#if directories.length > 0}
 						<Button kind="outlined">
 							<Icon type="trashOutline" />
@@ -267,7 +267,16 @@
 	</div>
 
 	<div class="flex flex-col items-center gap-x-2 gap-y-4 p-4 sm:flex-row">
-		<div class="mr-auto">{m.settingsPrimaryColor()}</div>
+		<div class="mr-auto flex items-center gap-2">
+			{m.settingsPrimaryColor()}
+
+			{#if mainStore.customThemePaletteHex}
+				<div
+					class="pointer-events-none size-6 shrink-0 items-center justify-center rounded-md ring ring-outline/40"
+					style:background={mainStore.customThemePaletteHex}
+				></div>
+			{/if}
+		</div>
 
 		<div class="flex items-center gap-2 max-sm:w-full">
 			{#if mainStore.customThemePaletteHex}
@@ -290,29 +299,10 @@
 
 				<input
 					type="color"
-					bind:value={
-						() => mainStore.customThemePaletteHex ?? '#000000', (value) => updateMainColor(value)
-					}
+					bind:value={() => mainStore.customThemePaletteHex ?? '#000000', (value) => updateMainColor(value)}
 					class="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0"
 				/>
 			</Button>
-
-			<div
-				class="pointer-events-none size-9 items-center justify-center overflow-clip rounded-md border border-outline"
-				style={mainStore.customThemePaletteHex && `background: ${mainStore.customThemePaletteHex}`}
-			>
-				{#if mainStore.customThemePaletteHex === null}
-					<svg
-						class="size-full stroke-[0.2] text-outline"
-						viewBox="0 0 10 10"
-						fill="none"
-						stroke="currentColor"
-					>
-						<line x1="0" y1="0" x2="10" y2="10" />
-						<line x1="0" y1="10" x2="10" y2="0" />
-					</svg>
-				{/if}
-			</div>
 		</div>
 	</div>
 

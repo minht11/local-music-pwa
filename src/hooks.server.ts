@@ -16,7 +16,7 @@ export const handle: Handle = ({ event, resolve }) => {
 			return html.replace(
 				'%snae.svg-icons-paths%',
 				`
-					<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+					<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display: none;">
 						<defs>
 							${icons.map(([name, path]) => getSvgSymbol(name, path)).join('')}
 						</defs>

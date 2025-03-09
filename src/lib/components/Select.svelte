@@ -60,7 +60,7 @@
 <button
 	bind:this={target}
 	class={[
-		'relative flex h-10 appearance-none items-center gap-2 overflow-hidden rounded-sm border border-outlineVariant pr-2 pl-4',
+		'relative flex h-10 cursor-pointer appearance-none items-center gap-2 overflow-hidden rounded-sm border border-outlineVariant pr-2 pl-4',
 		className,
 	]}
 	use:ripple
@@ -85,7 +85,7 @@
 	aria-orientation="vertical"
 	role="listbox"
 	popover="auto"
-	class="popover-open:flex absolute m-0 hidden flex-col rounded-sm bg-surfaceContainerHighest px-0 py-2 shadow-xl"
+	class="absolute m-0 hidden flex-col rounded-sm bg-surfaceContainerHighest px-0 py-2 shadow-xl open:flex"
 	ontoggle={(e) => {
 		isOpen = e.newState === 'open'
 	}}
@@ -97,7 +97,7 @@
 				role="option"
 				aria-selected={item[key] === selected}
 				class={[
-					'relative flex h-10 w-full items-center overflow-hidden px-4',
+					'interactable flex h-10 w-full cursor-pointer items-center overflow-hidden px-4',
 					item[key] === selected && 'text-primary',
 				]}
 				onclick={() => {
@@ -110,3 +110,22 @@
 		{/each}
 	{/if}
 </div>
+
+<style>
+[popover]:popover-open {
+  	opacity: 1;
+}
+
+[popover] {
+  	opacity: 0;
+  	transition-property: opacity, overlay, display;
+	transition-duration: 0.2s;
+	transition-behavior: allow-discrete;
+}
+
+@starting-style {
+  	[popover]:popover-open {
+    	opacity: 0;
+	}
+}
+</style>

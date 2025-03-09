@@ -98,6 +98,7 @@
 
 				<IconButton
 					icon="moreVertical"
+					tooltip="More"
 					onclick={(e) => {
 						e.stopPropagation()
 

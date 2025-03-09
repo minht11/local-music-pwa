@@ -7,17 +7,19 @@
 		class?: ClassValue
 		alt?: string
 		fallbackIcon?: IconType | null
+		noFallbackBg?: boolean
 		children?: Snippet
 	}
 
-	const { src, fallbackIcon = 'musicNote', class: className, alt, children }: Props = $props()
+	const { src, fallbackIcon = 'musicNote', noFallbackBg, class: className, alt, children }: Props = $props()
 
 	let error = $state(false)
 </script>
 
 <div
 	class={[
-		'flex aspect-1/1 overflow-hidden bg-surfaceContainerHighest ring-1 ring-surface/40 contain-strict',
+		'flex aspect-1/1 overflow-hidden ring-1 ring-surface/40 contain-strict',
+		!noFallbackBg && 'bg-surfaceContainerHighest',
 		className,
 	]}
 >

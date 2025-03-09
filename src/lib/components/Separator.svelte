@@ -9,6 +9,7 @@
 
 <div
 	role="separator"
+	aria-orientation={vertical ? 'vertical' : 'horizontal'}
 	class={[
 		className,
 		'shrink-0 self-stretch border-outlineVariant',

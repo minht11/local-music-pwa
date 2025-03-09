@@ -51,7 +51,7 @@
 		</div>
 
 		<PlayerArtwork
-			class="pl-view-artwork m-auto my-auto h-full max-h-75 rounded-2xl bg-surfaceContainerHigh [grid-area:artwork]"
+			class="pl-view-artwork m-auto my-auto h-full max-h-75 rounded-2xl bg-onSecondary [grid-area:artwork]"
 		/>
 
 		<div class="mt-2 flex w-full flex-col gap-2 [grid-area:controls]">
@@ -79,11 +79,11 @@
 
 				{#if mainStore.volumeSliderEnabled}
 					<div class="flex items-center gap-2">
-						<IconButton icon="volumeMid" />
+						<IconButton icon="volumeMid" tooltip="Decrease volume" />
 
 						<Slider bind:value={player.volume} />
 
-						<IconButton icon="volumeHigh" />
+						<IconButton icon="volumeHigh" tooltip="Increase volume" />
 					</div>
 				{/if}
 			</div>

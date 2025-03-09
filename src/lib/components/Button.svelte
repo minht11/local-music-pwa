@@ -14,7 +14,6 @@
 		disabled?: boolean
 		href?: ButtonHref<As>
 		class?: ClassValue
-		title?: string
 		tabindex?: number
 		ariaLabel?: string
 		tooltip?: string
@@ -97,6 +96,7 @@
 		cursor: default;
 		background-color: --alpha(var(--color-onSurface) / 38%);
 		border-color: --alpha(var(--color-onSurface) / 38%);
+		color: --alpha(var(--color-onSurface) / 38%);
 	}
 
 	:is(.tonal-button, .filled-button)[disabled] {

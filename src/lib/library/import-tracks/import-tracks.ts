@@ -2,6 +2,8 @@ import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 import { startImportingTracks } from './importer.ts'
 import type { TrackImportOptions } from './worker/types.ts'
 
+export type { TrackImportOptions }
+
 export const importTracksFromDirectory = async (options: TrackImportOptions): Promise<void> => {
 	const snackbarId = 'import-tracks'
 	snackbar({

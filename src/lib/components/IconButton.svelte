@@ -3,6 +3,7 @@
 	import Icon, { type IconType } from './icon/Icon.svelte'
 
 	interface IconButtonProps<As extends AllowedButtonElement> extends ButtonProps<As> {
+		tooltip: string
 		icon?: IconType
 		children?: Snippet
 	}

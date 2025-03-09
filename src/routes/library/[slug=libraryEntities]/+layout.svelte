@@ -72,7 +72,7 @@
 			as="a"
 			href={`/library/${item.slug}`}
 			kind="blank"
-			title={item.title}
+			tooltip={item.title}
 			class={['flex shrink-0 items-center justify-center', className]}
 		>
 			<div
@@ -116,12 +116,9 @@
 
 				{#if data.storeName === 'playlists'}
 					<div class="mb-4 flex items-center justify-end">
-						<Button
-							kind="outlined"
-							onclick={() => {
+						<Button kind="outlined" onclick={() => {
 								main.createNewPlaylistDialogOpen = true
-							}}
-						>
+							}}>
 							<Icon type="plus" />
 
 							{m.libraryNewPlaylist()}

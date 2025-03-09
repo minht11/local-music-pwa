@@ -37,7 +37,7 @@
 					class="max-sm:rounded-r-4 group flex grow items-center rounded-lg pr-2 max-sm:p-2 sm:h-11 sm:max-w-45"
 				>
 					<div
-						class="player-artwork relative -z-1 size-11 shrink-0 overflow-hidden rounded-lg bg-surfaceContainerHighest"
+						class="player-artwork relative -z-1 size-11 shrink-0 overflow-hidden rounded-lg bg-onSecondary"
 					>
 						{#if track}
 							<PlayerArtwork class="size-full" />
@@ -113,11 +113,11 @@
 	@keyframes -global-view-pl-chevron-up-fade-in {
 		from {
 			opacity: 0;
-			transform: translateY(--spacing(2));
+			transform: scale(0);
 		}
 	}
 
 	::view-transition-new(pl-chevron-up) {
-		animation: view-pl-chevron-up-fade-in 125ms 275ms linear backwards;
+		animation: view-pl-chevron-up-fade-in 125ms 225ms linear backwards;
 	}
 </style>
