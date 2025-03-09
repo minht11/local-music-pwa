@@ -155,12 +155,6 @@
 			duration: 300,
 		}
 	}
-
-	$effect(() => {
-		if (isOpen) {
-			window.dispatchEvent(new CustomEvent('dialog-opened'))
-		}
-	})
 </script>
 
 {#if isOpen}

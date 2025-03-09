@@ -1,7 +1,6 @@
 <script lang="ts" module>
 	import { ripple } from '$lib/actions/ripple'
 	import { autoUpdate, computePosition, flip, shift } from '@floating-ui/dom'
-	import { nanoid } from 'nanoid'
 	import Icon from './icon/Icon.svelte'
 
 	export interface SelectProps<T, Key extends keyof T, LabelKey extends keyof T> {
@@ -24,7 +23,7 @@
 
 	const selectedItem = $derived(items.find((item) => item[key] === selected))
 
-	const popupId = nanoid()
+	const popupId = crypto.randomUUID()
 	let target = $state<HTMLButtonElement | null>(null)
 	let popup = $state<HTMLDivElement | null>(null)
 	let isOpen = $state(false)

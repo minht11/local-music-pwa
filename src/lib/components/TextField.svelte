@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { nanoid } from 'nanoid'
 	import * as v from 'valibot'
 
 	interface TextFieldProps {
@@ -22,7 +21,7 @@
 		required,
 	}: TextFieldProps = $props()
 
-	const id = nanoid(6)
+	const id = crypto.randomUUID()
 
 	const ValidationsSchema = $derived.by(() => {
 		const validators: unknown[] = [v.string()]
