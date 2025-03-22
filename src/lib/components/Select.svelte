@@ -111,20 +111,20 @@
 </div>
 
 <style>
-[popover]:popover-open {
-  	opacity: 1;
-}
-
-[popover] {
-  	opacity: 0;
-  	transition-property: opacity, overlay, display;
-	transition-duration: 0.2s;
-	transition-behavior: allow-discrete;
-}
-
-@starting-style {
-  	[popover]:popover-open {
-    	opacity: 0;
+	[popover]:popover-open {
+		opacity: 1;
 	}
-}
+
+	[popover] {
+		opacity: 0;
+		transition-property: opacity, overlay, display;
+		transition-duration: 0.2s;
+		transition-behavior: allow-discrete;
+	}
+
+	@starting-style {
+		[popover]:popover-open {
+			opacity: 0;
+		}
+	}
 </style>
