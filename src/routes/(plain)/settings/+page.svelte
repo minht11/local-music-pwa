@@ -192,18 +192,6 @@
 	</div>
 </section>
 
-{#if dev}
-	<section class="card mx-auto mt-6 w-full max-w-[var(--settings-max-width)] p-4 text-body-lg">
-		<div>Development panel</div>
-
-		<div class="mt-4 flex flex-wrap gap-2">
-			<Button kind="toned">Import directory handle</Button>
-			<Button kind="toned">Import file handle</Button>
-			<Button kind="toned">Import file</Button>
-		</div>
-	</section>
-{/if}
-
 <section class="card mx-auto mt-6 w-full max-w-[var(--settings-max-width)] text-body-lg">
 	<div class="px-4 pt-4 text-title-sm">{m.settingsAppearance()}</div>
 

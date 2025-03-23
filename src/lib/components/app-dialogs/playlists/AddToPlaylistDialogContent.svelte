@@ -97,7 +97,5 @@
 				</div>
 			{/snippet}
 		</PlaylistListContainer>
-	{:else}
-		Loading or no data TODO
 	{/if}
 </ScrollContainer>

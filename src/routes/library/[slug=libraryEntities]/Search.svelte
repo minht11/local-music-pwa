@@ -70,6 +70,7 @@
 >
 	<input
 		type="text"
+		name="search"
 		placeholder={`${m.librarySearch()} ${name.toLowerCase()}`}
 		class="h-12 w-60 grow bg-transparent pl-2 text-body-md placeholder:text-onSurface/54 focus:outline-none"
 		oninput={(e) => searchHandler(e as unknown as InputEvent)}

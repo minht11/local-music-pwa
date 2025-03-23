@@ -34,7 +34,7 @@
 					{dir.legacy ? 'Tracks without directory' : dir.handle.name}
 				</div>
 				<div class="text-body-sm">
-					{dir.count}
+					{dir.count} tracks
 				</div>
 			</div>
 

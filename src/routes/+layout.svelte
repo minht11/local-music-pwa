@@ -59,11 +59,10 @@
 {@render children()}
 
 <div class="pointer-events-none fixed inset-x-0 bottom-0 flex flex-col overflow-hidden">
-	<div class="flex flex-col">
-		<SnackbarRenderer />
-
+	<SnackbarRenderer />
+	<div bind:clientHeight={overlayContentHeight} class="flex flex-col">
 		{#if !page.data.noPlayerOverlay}
-			<div bind:clientHeight={overlayContentHeight} class="pointer-events-none px-4 pb-2">
+			<div class="pointer-events-none px-4 pb-2">
 				<PlayerOverlay />
 			</div>
 		{/if}
