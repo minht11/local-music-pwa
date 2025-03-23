@@ -3,9 +3,13 @@ import type { Album, Artist, Track, UnknownTrack } from '$lib/db/database-types'
 import { type AppDB, getDB } from '$lib/db/get-db'
 import type { IDBPTransaction } from 'idb'
 
-type Tx = IDBPTransaction<AppDB, ('tracks' | 'albums' | 'artists')[], 'readwrite'>
+type ImportTrackTx = IDBPTransaction<
+	AppDB,
+	('tracks' | 'albums' | 'artists' | 'playlistsTracks')[],
+	'readwrite'
+>
 
-const importAlbum = async (tx: Tx, track: Track) => {
+const importAlbum = async (tx: ImportTrackTx, track: Track) => {
 	if (!track.album) {
 		return
 	}
@@ -17,13 +21,13 @@ const importAlbum = async (tx: Tx, track: Track) => {
 		? {
 				...existingAlbum,
 				year: existingAlbum.year ?? track.year,
-				image: existingAlbum.image ?? track.images?.full,
+				image: existingAlbum.image ?? track.image?.full,
 			}
 		: {
 				name: track.album,
 				artists: track.artists,
 				year: track.year,
-				image: track.images?.full,
+				image: track.image?.full,
 			}
 
 	// Id will be auto-generated
@@ -39,7 +43,7 @@ const importAlbum = async (tx: Tx, track: Track) => {
 	return change
 }
 
-const importArtist = async (tx: Tx, track: Track) => {
+const importArtist = async (tx: ImportTrackTx, track: Track) => {
 	const store = tx.objectStore('artists')
 	const changes: DBChangeRecord[] = []
 
@@ -71,13 +75,11 @@ const importArtist = async (tx: Tx, track: Track) => {
 export const importTrackToDb = async (
 	metadata: UnknownTrack,
 	existingTrackId: number | undefined,
-): Promise<void> => {
+): Promise<number> => {
 	const db = await getDB()
+	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
 
-	const tx = db.transaction(['tracks', 'albums', 'artists'], 'readwrite')
-	const tracksStore = tx.objectStore('tracks')
-
-	const trackId = await tracksStore.put(metadata as Track, existingTrackId)
+	const trackId = await tx.objectStore('tracks').put(metadata as Track, existingTrackId)
 
 	const track: Track = {
 		...metadata,
@@ -90,16 +92,16 @@ export const importTrackToDb = async (
 		tx.done,
 	])
 
-	// TODO. Check if track already exists.
-
 	notifyAboutDatabaseChanges([
 		{
 			storeName: 'tracks',
 			key: trackId,
 			value: track,
-			operation: 'add',
+			operation: existingTrackId === trackId ? 'update' : 'add',
 		},
 		albumChange,
 		...artistsChanges,
 	])
+
+	return trackId
 }

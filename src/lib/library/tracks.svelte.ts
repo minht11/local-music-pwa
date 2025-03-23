@@ -81,15 +81,16 @@ export const removeTrackWithTx = async (
 		return
 	}
 
-	const [albumChange, playlistChanges, ...artistsChanges] = await Promise.all([
+	const [albumChange, playlistChanges, _, ...artistsChanges] = await Promise.all([
 		removeTrackRelatedData(tx, 'album', 'albums', 'name', track.album),
 		removeTrackFromPlaylistsInDatabase(trackId),
+		tracksStore.delete(trackId),
 		...track.artists.map((artist) =>
 			removeTrackRelatedData(tx, 'artists', 'artists', 'name', artist),
 		),
 	])
 
-	await tracksStore.delete(trackId)
+	// await tracksStore.delete(trackId)
 
 	notifyAboutDatabaseChanges([
 		{

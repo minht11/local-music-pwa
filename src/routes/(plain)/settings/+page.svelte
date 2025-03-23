@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { dev } from '$app/environment'
+	import { tooltip } from '$lib/actions/tooltip.ts'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Select from '$lib/components/Select.svelte'
@@ -10,16 +11,19 @@
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
-	import type { Directory } from '$lib/db/database-types.ts'
+	import { type Directory, LEGACY_NO_NATIVE_DIRECTORY } from '$lib/db/database-types.ts'
 	import { initPageQueries } from '$lib/db/query.svelte.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
+	import DirectoriesList from './components/DirectoriesList.svelte'
+	import MissingFsApiBanner from './components/MissingFsApiBanner.svelte'
 	import {
 		checkNewDirectoryStatus,
 		directoriesStore,
 		importDirectory,
 		importReplaceDirectory,
 		removeDirectory,
+		rescanDirectory,
 	} from './directories.svelte.ts'
 
 	const { data } = $props()
@@ -31,7 +35,7 @@
 	const count = $derived(data.countQuery.value)
 	const directories = $derived(data.directoriesQuery.value)
 
-	const isFileSystemAccessSupported = true
+	const isFileSystemAccessSupported = window.showDirectoryPicker !== undefined
 
 	interface ReparentDirectory {
 		existingDir: Directory
@@ -126,108 +130,63 @@
 	const updateMainColor = debounce((value: string | null) => {
 		mainStore.customThemePaletteHex = value
 	}, 400)
+
+	let inProgress = false
 </script>
 
 <section class="card container-lg mx-auto w-full max-w-[var(--settings-max-width)]">
-	<div class="flex gap-6 px-4 pt-4">
-		<div>
-			<div class="text-body-lg">
-				<WrapTranslation messageFn={m.settingsCurrentTracksInLibrary}>
-					{#snippet tracksCount()}
-						<strong class="rounded-xl bg-tertiary px-2 text-onTertiary tabular-nums">
-							{count}
-						</strong>
-					{/snippet}
-				</WrapTranslation>
-			</div>
-			<div>{m.settingsAllDataLocal()}</div>
+	<div class="px-4 pt-4">
+		<div class="text-body-lg">
+			<WrapTranslation messageFn={m.settingsCurrentTracksInLibrary}>
+				{#snippet tracksCount()}
+					<strong class="rounded-xl bg-tertiary px-2 text-onTertiary tabular-nums">
+						{count}
+					</strong>
+				{/snippet}
+			</WrapTranslation>
 		</div>
+		<div>{m.settingsAllDataLocal()}</div>
 	</div>
 
 	<Separator class="mt-4" />
 
-	<div class="flex flex-col gap-4 p-4">
+	<div class="flex flex-col p-4">
 		{#if !isFileSystemAccessSupported}
-			<div
-				class="flex flex-col gap-4 rounded-lg border border-outlineVariant p-4 text-onSurfaceVariant select-text"
-			>
-				<Icon type="alertCircle" class="shrink-0" />
-				<span>
-					Your browser currently does not support&nbsp
-					<a
-						class="link inline-block"
-						target="_blank"
-						rel="noopener noreferrer"
-						href="https://wicg.github.io/file-system-access/"
-					>
-						required FS features
-					</a>, so in order for this app to work,
-					<strong>each track (music file) copy must be saved inside browser storage</strong>, that
-					might consume a lot of your device's storage.
-				</span>
+			<MissingFsApiBanner />
+		{:else if directories.length > 0}
+			<div class="mb-4 text-title-sm">Directories</div>
+
+			<DirectoriesList disabled={inProgress} {directories} />
+		{/if}
+
+		{#if inProgress}
+			<div class="ml-auto flex min-h-10 items-center gap-4">
+				Scan in progress
+				<Spinner class="size-8" />
 			</div>
 		{:else}
-			<div class="flex flex-col">
+			<div class="flex min-h-10 flex-col items-center gap-2 sm:flex-row">
 				{#if directories.length > 0}
-					<div class="mb-4 text-title-sm">Directories</div>
+					<Button kind="outlined">
+						<Icon type="trashOutline" />
 
-					<ul class="mb-4 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-						{#each directories as dir}
-							<li
-								class="flex h-14 items-center gap-2 rounded-sm bg-tertiaryContainer/56 pr-1 pl-4 text-onTertiaryContainer"
-							>
-								<div class="truncate">
-									{dir.handle.name}
-								</div>
+						Remove all
+					</Button>
 
-								<div class="ml-auto flex items-center gap-1">
-									{#if directoriesStore.isInprogress(dir.id)}
-										<Spinner class="mr-2.5 ml-2 h-5 w-5" />
-									{:else}
-										<IconButton icon="cached" tooltip="Rescan" />
-										<IconButton
-											icon="trashOutline"
-											tooltip="Remove"
-											onclick={() => {
-												removeDirectory(dir.id)
-											}}
-										/>
-									{/if}
-								</div>
-							</li>
-						{/each}
-						<!-- <li
-						class="flex h-14 gap-2 items-center text-onTertiaryContainer bg-tertiaryContainer/24 pl-4 pr-1 rounded-sm"
-					>
-						<div class="truncate">Tracks without directory</div>
-						<Icon type="information" class="text-onTertiaryContainer/54 size-4" />
-					</li> -->
-					</ul>
+					<Button kind="outlined">
+						<Icon type="cached" />
+
+						Rescan all
+					</Button>
 				{/if}
 
-				<div class="flex flex-col gap-2 sm:flex-row">
-					{#if directories.length > 0}
-						<Button kind="outlined">
-							<Icon type="trashOutline" />
-
-							Remove all
-						</Button>
-
-						<Button kind="outlined">
-							<Icon type="cached" />
-
-							Rescan all
-						</Button>
+				<Button kind="toned" class="sm:ml-auto" onclick={onImportTracksHandler}>
+					{#if isFileSystemAccessSupported}
+						Add directory
+					{:else}
+						Import tracks
 					{/if}
-
-					<Button kind="toned" class="sm:ml-auto" onclick={onImportTracksHandler}>
-						{#if isFileSystemAccessSupported}
-							Add directory
-						{:else}
-							Import tracks
-						{/if}
-					</Button>
-				</div>
+				</Button>
 			</div>
 		{/if}
 	</div>
@@ -237,7 +196,7 @@
 	<section class="card mx-auto mt-6 w-full max-w-[var(--settings-max-width)] p-4 text-body-lg">
 		<div>Development panel</div>
 
-		<div class="mt-4 flex gap-2">
+		<div class="mt-4 flex flex-wrap gap-2">
 			<Button kind="toned">Import directory handle</Button>
 			<Button kind="toned">Import file handle</Button>
 			<Button kind="toned">Import file</Button>
@@ -299,7 +258,9 @@
 
 				<input
 					type="color"
-					bind:value={() => mainStore.customThemePaletteHex ?? '#000000', (value) => updateMainColor(value)}
+					bind:value={
+						() => mainStore.customThemePaletteHex ?? '#000000', (value) => updateMainColor(value)
+					}
 					class="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0"
 				/>
 			</Button>
@@ -340,7 +301,7 @@
 </section>
 
 {#snippet directoryName(name: string | undefined)}
-	<span class="inline-flex h-[calc(var(--spacing)*4.125)] w-fit items-center gap-1 text-tertiary">
+	<span class="inline-flex h-[--spacing(4.125)] w-fit items-center gap-1 text-tertiary">
 		<Icon type="folder" class="size-3" />
 
 		<span class="inline h-full w-fit max-w-25 truncate">{name}</span>
@@ -354,7 +315,7 @@
 			reparentDirectory = null
 		},
 	}}
-	class="[--dialog-width:calc(var(--spacing)*85)]"
+	class="[--dialog-width:--spacing(85)]"
 	icon="folderHidden"
 	title={m.replaceDirectoryQ()}
 	buttons={(data) => [

@@ -1,9 +1,9 @@
 /// <reference lib='WebWorker' />
 
-import type { Track } from '$lib/db/database-types.ts'
+import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/db/database-types.ts'
 import { getDB } from '$lib/db/get-db'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
-import { removeTrackWithTx } from '$lib/library/tracks.svelte'
+import { removeTrackInDb } from '$lib/library/tracks.svelte'
 import { importTrackToDb } from './import-track-to-db.ts'
 import { parseTrack } from './parse/parse-track.ts'
 import type { TrackImportMessage, TrackImportOptions } from './types.ts'
@@ -18,39 +18,35 @@ interface ImportTrackOptions {
 	trackId?: number
 }
 
-const importTrack = async (options: ImportTrackOptions) => {
+const importTrack = async (options: ImportTrackOptions): Promise<number | null> => {
 	try {
 		const metadata = await parseTrack(options.unwrappedFile)
-
 		if (!metadata) {
-			return false
+			return null
 		}
 
-		await importTrackToDb(
+		const id = await importTrackToDb(
 			{
 				...metadata,
 				file: options.file,
 				directory: options.directoryId,
+				fileName: options.file.name,
 				lastScanned: Date.now(),
 			},
 			options.trackId,
 		)
 
-		return true
+		return id
 	} catch (err) {
 		// We ignore errors and just skip the track.
 		console.error(err)
 
-		return false
+		return null
 	}
 }
 
 class StatusTracker {
 	newlyImported = 0
-
-	existingUpdated = 0
-
-	removed = 0
 
 	current = 0
 
@@ -65,8 +61,6 @@ class StatusTracker {
 			finished,
 			count: {
 				newlyImported: this.newlyImported,
-				existingUpdated: this.existingUpdated,
-				removed: this.removed,
 				current: this.current,
 				total: this.total,
 			},
@@ -76,11 +70,40 @@ class StatusTracker {
 	}
 }
 
-const findTrackByFileHandle = async (handle: FileSystemFileHandle, tracks: Set<Track>) => {
+const findTrackByFileHandle = async (handle: FileSystemFileHandle, tracks: Track[]) => {
 	for (const track of tracks) {
-		if (track.file.name === handle.name) {
-			const isSame = await handle.isSameEntry(track.file as FileSystemFileHandle)
+		const isSame = await handle.isSameEntry(track.file as FileSystemFileHandle)
+		if (isSame) {
+			return track
+		}
+	}
 
+	return null
+}
+
+const findTrackByMixedFileEntity = async (handle: FileEntity, tracks: Track[]) => {
+	for (const track of tracks) {
+		const existingFile = track.file
+		// If file name is changed we can be sure it's not the same file anymore
+		if (existingFile.name !== handle.name) {
+			continue
+		}
+
+		// No reliable way to compare two Files,
+		// so we compare their names and size
+		if (
+			existingFile instanceof File &&
+			handle instanceof File &&
+			existingFile.size === handle.size
+		) {
+			return track
+		}
+
+		if (
+			existingFile instanceof FileSystemFileHandle &&
+			handle instanceof FileSystemFileHandle
+		) {
+			const isSame = await handle.isSameEntry(existingFile)
 			if (isSame) {
 				return track
 			}
@@ -92,48 +115,59 @@ const findTrackByFileHandle = async (handle: FileSystemFileHandle, tracks: Set<T
 
 const SUPPORTED_EXTENSIONS = ['aac', 'mp3', 'ogg', 'wav', 'flac', 'm4a', 'opus']
 
-const scanExistingDirectory = async (
-	newDirHandle: FileSystemDirectoryHandle,
-	directoryId: number,
-) => {
+const scanExistingDirectory = async (handles: FileEntity[], directoryId: number) => {
 	const db = await getDB()
 
-	const handles = await getFileHandlesRecursively(newDirHandle, SUPPORTED_EXTENSIONS)
 	const tracker = new StatusTracker(handles.length)
+	const scannedTracksIds = new Set<number>()
 
-	const existingTracks = new Set(
-		// We do not use one transaction for all operations to commit changes in smaller chunks.
-		await db.getAllFromIndex('tracks', 'directory'),
-	)
+	const findTrackFn =
+		directoryId === LEGACY_NO_NATIVE_DIRECTORY
+			? findTrackByMixedFileEntity
+			: findTrackByFileHandle
 
+	console.time('SCAN_EXISTING_DIR')
 	for (const handle of handles) {
+		tracker.current += 1
+
 		try {
-			const existingTrack = await findTrackByFileHandle(handle, existingTracks)
+			// Real FS might have multiple files with the same name
+			// but in the database we keep flat structure
+			const possibleExistingTracks = await db.getAllFromIndex('tracks', 'path', [
+				directoryId,
+				handle.name,
+			])
+			const existingTrack = await findTrackFn(
+				// If `LEGACY_NO_NATIVE_DIRECTORY` is used this will be a `File`
+				// in all other cases it will be a `FileSystemFileHandle`
+				handle as FileSystemFileHandle,
+				possibleExistingTracks,
+			)
+
 			const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
 
 			let existingTrackId = undefined
 			if (existingTrack) {
-				existingTracks.delete(existingTrack)
-
-				// We only scan files that have been modified since the last scan.
+				// File was not modified since last scan
 				if (unwrappedFile.lastModified <= existingTrack.lastScanned) {
+					scannedTracksIds.add(existingTrack.id)
 					continue
 				}
 
 				existingTrackId = existingTrack.id
 			}
 
-			const success = await importTrack({
+			const trackId = await importTrack({
 				unwrappedFile,
 				file: handle,
 				directoryId,
 				trackId: existingTrackId,
 			})
 
-			if (success) {
-				if (existingTrackId) {
-					tracker.existingUpdated += 1
-				} else {
+			if (trackId !== null) {
+				scannedTracksIds.add(trackId)
+
+				if (existingTrackId !== undefined) {
 					tracker.newlyImported += 1
 				}
 			}
@@ -142,43 +176,38 @@ const scanExistingDirectory = async (
 		}
 
 		tracker.sendMsg(false)
-
-		tracker.current += 1
 	}
 
-	const tx = db.transaction(
-		['directories', 'tracks', 'albums', 'artists', 'playlistsTracks'],
-		'readwrite',
-	)
-	// If we have any tracks left in the set,
-	// that means they no longer exist in the directory, so we remove them.
-	for (const track of existingTracks) {
-		await removeTrackWithTx(tx, track.id).catch(console.warn)
-		tracker.removed += 1
+	// After importing is done, we remove tracks that were not scanned
+	// meaning they do not exist in the actual FS anymore
+	const tracksIdsInDirectory = await db.getAllKeysFromIndex('tracks', 'directory', directoryId)
+	for (const trackId of tracksIdsInDirectory) {
+		if (!scannedTracksIds.has(trackId)) {
+			await removeTrackInDb(trackId).catch(console.warn)
+		}
 	}
+	console.timeEnd('SCAN_EXISTING_DIR')
 
 	tracker.sendMsg(true)
 }
 
-const scanNewDirectory = async (newDirHandle: FileSystemDirectoryHandle, directoryId: number) => {
-	const handles = await getFileHandlesRecursively(newDirHandle, SUPPORTED_EXTENSIONS)
+const scanNewDirectory = async (files: FileEntity[], directoryId: number) => {
+	const tracker = new StatusTracker(files.length)
 
-	const tracker = new StatusTracker(handles.length)
-
-	for (const handle of handles) {
+	console.time('SCAN_NEW_DIR')
+	for (const handle of files) {
 		tracker.current += 1
 
 		try {
-			const unwrappedFile = await handle.getFile()
-
-			const success = await importTrack({
+			const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
+			const trackId = await importTrack({
 				unwrappedFile,
 				file: handle,
 				directoryId,
 				trackId: undefined,
 			})
 
-			if (success) {
+			if (trackId !== null) {
 				tracker.newlyImported += 1
 			}
 		} catch {
@@ -187,6 +216,7 @@ const scanNewDirectory = async (newDirHandle: FileSystemDirectoryHandle, directo
 
 		tracker.sendMsg(false)
 	}
+	console.timeEnd('SCAN_NEW_DIR')
 
 	tracker.sendMsg(true)
 }
@@ -195,10 +225,28 @@ self.addEventListener('message', async (event: MessageEvent<TrackImportOptions>)
 	const options = event.data
 
 	if (options.action === 'directory-add') {
-		await scanNewDirectory(options.dirHandle, options.dirId)
-	} else if (options.action === 'directory-rescan') {
-		await scanExistingDirectory(options.dirHandle, options.dirId)
-	} else {
-		throw new Error('Unsupported action')
+		const handles = await getFileHandlesRecursively(options.dirHandle, SUPPORTED_EXTENSIONS)
+		await scanNewDirectory(handles, options.dirId)
+
+		return
+	}
+
+	if (options.action === 'directory-rescan') {
+		const handles = await getFileHandlesRecursively(options.dirHandle, SUPPORTED_EXTENSIONS)
+		await scanExistingDirectory(handles, options.dirId)
+
+		return
+	}
+
+	if (options.action === 'legacy-files-migrate-from-prev-app-version') {
+		await scanNewDirectory(options.files, LEGACY_NO_NATIVE_DIRECTORY)
+
+		return
+	}
+
+	if (options.action === 'legacy-files-add') {
+		await scanExistingDirectory(options.files, LEGACY_NO_NATIVE_DIRECTORY)
+
+		return
 	}
 })

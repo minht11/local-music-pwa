@@ -30,7 +30,7 @@
 
 	const data = createTrackQuery(() => trackId)
 
-	const artworkSrc = createManagedArtwork(() => data.value?.images?.small)
+	const artworkSrc = createManagedArtwork(() => data.value?.image?.small)
 	const track = $derived(data.value)
 
 	const menuItemsWithItem = $derived(

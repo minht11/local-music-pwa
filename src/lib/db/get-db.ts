@@ -8,8 +8,18 @@ export interface AppDB extends DBSchema {
 		value: Track
 		indexes: Pick<
 			Track,
-			'id' | 'name' | 'album' | 'year' | 'duration' | 'artists' | 'directory' | 'lastScanned'
-		>
+			| 'id'
+			| 'name'
+			| 'album'
+			| 'year'
+			| 'duration'
+			| 'artists'
+			| 'directory'
+			| 'fileName'
+			| 'lastScanned'
+		> & {
+			path: [directoryId: number, fileName: string]
+		}
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -104,9 +114,16 @@ export const getDB = (): Promise<IDBPDatabase<AppDB>> =>
 					'album',
 					'year',
 					'duration',
-					'directory',
 					'lastScanned',
+					'directory',
 				])
+
+				store.createIndex('path', ['directory', 'fileName'], {
+					// We keep flat folder structure in the database
+					// but in actual FS multiple files with same name
+					// can exist in different directories
+					unique: false,
+				})
 
 				store.createIndex('artists', 'artists', {
 					unique: false,

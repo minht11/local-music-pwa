@@ -27,7 +27,7 @@
 		{#if mode === 'both'}
 			<ScrollContainer
 				class={[
-					'max-h-100vh sticky top-0 flex shrink-0 flex-col overflow-y-auto overscroll-contain',
+					'sticky top-0 flex max-h-[100vh] shrink-0 flex-col overflow-y-auto overscroll-contain',
 					!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
 					!noListStableGutter && 'scrollbar-gutter-stable',
 				]}

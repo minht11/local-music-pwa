@@ -28,7 +28,7 @@ const getSmallImageDimensions = (
 }
 
 export type ArtworkRelatedData = {
-	images: {
+	image: {
 		optimized: boolean
 		full: Blob
 		small: Blob
@@ -67,7 +67,7 @@ export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRel
 		const primaryColor = extractColorFromImage(ctx.getImageData(0, 0, smallWidth, smallHeight))
 
 		return {
-			images: {
+			image: {
 				optimized: true,
 				full: minifiedImage,
 				small,
@@ -78,7 +78,7 @@ export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRel
 		console.error('Failed to optimize artwork', err)
 
 		return {
-			images: {
+			image: {
 				optimized: false,
 				full: imageBlob,
 				small: imageBlob,

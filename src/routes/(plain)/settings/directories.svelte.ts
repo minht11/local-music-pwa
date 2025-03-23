@@ -64,16 +64,12 @@ const importTracksFromDirectory = async (options: TrackImportOptions) => {
 	await importDir(options)
 }
 
-export const importDirectory = async (newDirectory: FileSystemDirectoryHandle): Promise<void> => {
+export const importDirectory = async (dirHandle: FileSystemDirectoryHandle): Promise<void> => {
+	// TODO. Need try catch.
 	const db = await getDB()
-	const tx = db.transaction('directories', 'readwrite')
-
-	const [id] = await Promise.all([
-		tx.objectStore('directories').add({
-			handle: newDirectory,
-		} as Directory),
-		tx.done,
-	])
+	const id = await db.add('directories', {
+		handle: dirHandle,
+	} as Directory)
 
 	directoriesStore.markAsInprogress(id)
 
@@ -83,7 +79,7 @@ export const importDirectory = async (newDirectory: FileSystemDirectoryHandle): 
 			storeName: 'directories',
 			operation: 'add',
 			value: {
-				handle: newDirectory,
+				handle: dirHandle,
 				id,
 			},
 		},
@@ -92,10 +88,26 @@ export const importDirectory = async (newDirectory: FileSystemDirectoryHandle): 
 	await importTracksFromDirectory({
 		action: 'directory-add',
 		dirId: id,
-		dirHandle: newDirectory,
+		dirHandle: dirHandle,
 	})
 
 	directoriesStore.narkAsDone(id)
+}
+
+export const rescanDirectory = async (
+	dirId: number,
+	dirHandle: FileSystemDirectoryHandle,
+): Promise<void> => {
+	// TODO. Need try catch.
+	directoriesStore.markAsInprogress(dirId)
+
+	await importTracksFromDirectory({
+		action: 'directory-rescan',
+		dirId,
+		dirHandle,
+	})
+
+	directoriesStore.narkAsDone(dirId)
 }
 
 export const importReplaceDirectory = async (

@@ -71,7 +71,7 @@ export class PlayerStore {
 		return this.#activeTrackIndex
 	}
 
-	#artwork = createManagedArtwork(() => this.activeTrack?.images?.full)
+	#artwork = createManagedArtwork(() => this.activeTrack?.image?.full)
 	artworkSrc: string = $derived.by(this.#artwork)
 
 	constructor() {

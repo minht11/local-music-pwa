@@ -2,15 +2,13 @@ import type { FileEntity } from '$lib/helpers/file-system'
 
 export type OmitId<T> = Omit<T, 'id'>
 
-export const LegacyDirectoryId = {
-	/** File copied into indexeddb */
-	File: -1,
-	/**
-	 * 	Handles to files in environments where no directory access is possible
-	 *  or saved in previous versions of the app
-	 */
-	FileHandle: -2,
-}
+/**
+ * Used in browsers where `showDirectoryPicker` is not supported.
+ * `file` field is gonna be `File` in those browsers,
+ * or if user has tracks from previous application version
+ * where directories were not used `FileSystemHandle`.
+ */
+export const LEGACY_NO_NATIVE_DIRECTORY = -1
 
 export const MusicItemKey = {
 	NAME: 'name',
@@ -37,8 +35,7 @@ export interface ParsedTrackData {
 	genre: string[]
 	trackNo?: number
 	trackOf?: number
-	// TODO. Rename this field to image
-	images?: {
+	image?: {
 		optimized: boolean
 		small: Blob
 		full: Blob
@@ -48,8 +45,9 @@ export interface ParsedTrackData {
 
 export interface UnknownTrack extends ParsedTrackData {
 	file: FileEntity
-	directory: number
 	lastScanned: number
+	fileName: string
+	directory: number
 }
 
 export type Track = BaseMusicItem & UnknownTrack

@@ -1,26 +1,53 @@
+import { type Directory, LEGACY_NO_NATIVE_DIRECTORY } from '$lib/db/database-types.ts'
 import { getDB } from '$lib/db/get-db'
 import { createPageQuery } from '$lib/db/query.svelte.ts'
 import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
 import type { PageLoad } from './$types.ts'
 
+export type DirectoryWithCount = { count: number } & (
+	| {
+			id: typeof LEGACY_NO_NATIVE_DIRECTORY
+			legacy: true
+	  }
+	| (Directory & { legacy?: false })
+)
+
 const createDirectoriesPageQuery = () =>
 	createPageQuery({
 		key: [],
-		fetcher: async () => {
+		fetcher: async (): Promise<DirectoryWithCount[]> => {
 			const db = await getDB()
+			const directories = await db.getAll('directories')
+			const tx = db.transaction('tracks')
+			const directoriesIndex = tx.objectStore('tracks').index('directory')
 
-			return db.getAll('directories')
+			const directoriesWithCount = await Promise.all([
+				...directories.map(async (directory) => ({
+					...directory,
+					count: await directoriesIndex.count(directory.id),
+				})),
+				directoriesIndex.count(LEGACY_NO_NATIVE_DIRECTORY).then(
+					(count): DirectoryWithCount => ({
+						id: LEGACY_NO_NATIVE_DIRECTORY,
+						legacy: true,
+						count,
+					}),
+				),
+			])
+
+			const legacyDir = directoriesWithCount.at(-1)
+			if (legacyDir && legacyDir.count === 0) {
+				// Remove the legacy directory if it has no tracks
+				directoriesWithCount.pop()
+			}
+
+			return directoriesWithCount
 		},
-		onDatabaseChange: (changes, { refetch, mutate }) => {
+		onDatabaseChange: (changes, { refetch }) => {
 			for (const change of changes) {
-				if (change.storeName === 'directories') {
-					if (change.operation === 'delete') {
-						mutate((v) => v?.filter((dir) => dir.id !== change.key))
-					} else if (change.operation === 'add') {
-						mutate((v = []) => [...v, change.value])
-					} else if (change.operation === 'update') {
-						refetch()
-					}
+				if (change.storeName === 'tracks' || change.storeName === 'directories') {
+					// TODO. This could be optimized
+					refetch()
 				}
 			}
 		},

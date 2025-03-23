@@ -69,7 +69,7 @@
 	bind:this={menuEl}
 	role="application"
 	tabindex="-1"
-	class="pointer-events-auto absolute overscroll-contain rounded-sm bg-surfaceContainerHigh shadow-2xl backdrop:bg-transparent"
+	class="pointer-events-auto fixed overscroll-contain rounded-sm bg-surfaceContainerHigh shadow-2xl backdrop:bg-transparent"
 	onpointerdown={pointerDownHandler}
 	onkeydown={keydownHandler}
 	onclose={() => {
