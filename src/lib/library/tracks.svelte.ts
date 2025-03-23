@@ -27,7 +27,6 @@ const removeTrackRelatedData = async <
 	}
 
 	const tracksWithEntityCount = await tx.objectStore('tracks').index(trackIndex).count()
-
 	if (tracksWithEntityCount > 1) {
 		return
 	}
@@ -70,13 +69,11 @@ const removeTrackFromPlaylistsInDatabase = async (trackId: number) => {
 	return changes
 }
 
-export const removeTrackWithTx = async (
-	tx: TrackOperationsTransaction,
-	trackId: number,
-): Promise<void> => {
-	const tracksStore = tx.objectStore('tracks')
-	const track = await tracksStore.get(trackId)
+const removeTrackWithTx = async (trackId: number): Promise<void> => {
+	const db = await getDB()
+	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
 
+	const track = await tx.objectStore('tracks').get(trackId)
 	if (!track) {
 		return
 	}
@@ -84,13 +81,13 @@ export const removeTrackWithTx = async (
 	const [albumChange, playlistChanges, _, ...artistsChanges] = await Promise.all([
 		removeTrackRelatedData(tx, 'album', 'albums', 'name', track.album),
 		removeTrackFromPlaylistsInDatabase(trackId),
-		tracksStore.delete(trackId),
+		tx.done,
 		...track.artists.map((artist) =>
 			removeTrackRelatedData(tx, 'artists', 'artists', 'name', artist),
 		),
 	])
 
-	// await tracksStore.delete(trackId)
+	await db.delete('tracks', trackId)
 
 	notifyAboutDatabaseChanges([
 		{
@@ -104,13 +101,13 @@ export const removeTrackWithTx = async (
 	])
 }
 
-export const removeTrackInDb = async (id: number): Promise<void> => {
-	const db = await getDB()
-
-	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
-	removeTrackWithTx(tx, id)
-
-	await tx.done
+export const removeTrackInDb = async (id: number): Promise<boolean> => {
+	try {
+		await removeTrackWithTx(id)
+		return true
+	} catch (error) {
+		return false
+	}
 }
 
 export const removeTrack = async (id: number): Promise<void> => {

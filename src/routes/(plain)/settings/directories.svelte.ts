@@ -3,7 +3,7 @@ import { notifyAboutDatabaseChanges } from '$lib/db/channel'
 import type { Directory } from '$lib/db/database-types'
 import { getDB } from '$lib/db/get-db'
 import type { TrackImportOptions } from '$lib/library/import-tracks/worker/types'
-import { removeTrackWithTx } from '$lib/library/tracks.svelte'
+import { removeTrackInDb } from '$lib/library/tracks.svelte'
 import { SvelteSet } from 'svelte/reactivity'
 
 export interface DirectoryStatus {
@@ -49,7 +49,7 @@ class DirectoriesStore {
 		this.#inProgress.add(id)
 	}
 
-	narkAsDone = (id: number): void => {
+	markAsDone = (id: number): void => {
 		this.#inProgress.delete(id)
 	}
 }
@@ -91,14 +91,28 @@ export const importDirectory = async (dirHandle: FileSystemDirectoryHandle): Pro
 		dirHandle: dirHandle,
 	})
 
-	directoriesStore.narkAsDone(id)
+	directoriesStore.markAsDone(id)
 }
 
 export const rescanDirectory = async (
 	dirId: number,
 	dirHandle: FileSystemDirectoryHandle,
 ): Promise<void> => {
-	// TODO. Need try catch.
+	let permission = await dirHandle.queryPermission()
+	if (permission === 'prompt') {
+		permission = await dirHandle.requestPermission()
+	}
+
+	if (permission !== 'granted') {
+		snackbar({
+			id: 'dir-rescan-permission-denied',
+			// TODO. i18n
+			message: 'Permission denied.',
+		})
+
+		return
+	}
+
 	directoriesStore.markAsInprogress(dirId)
 
 	await importTracksFromDirectory({
@@ -107,7 +121,7 @@ export const rescanDirectory = async (
 		dirHandle,
 	})
 
-	directoriesStore.narkAsDone(dirId)
+	directoriesStore.markAsDone(dirId)
 }
 
 export const importReplaceDirectory = async (
@@ -141,17 +155,14 @@ export const importReplaceDirectory = async (
 		dirHandle: newDirHandle,
 	})
 
-	directoriesStore.narkAsDone(directoryId)
+	directoriesStore.markAsDone(directoryId)
 }
 
 export const removeDirectory = async (directoryId: number): Promise<void> => {
 	const db = await getDB()
 
 	directoriesStore.markAsInprogress(directoryId)
-	const tx = db.transaction(
-		['directories', 'tracks', 'albums', 'artists', 'playlistsTracks'],
-		'readwrite',
-	)
+	const tx = db.transaction(['directories', 'tracks'])
 
 	const [directoryName, tracksToBeRemoved] = await Promise.all([
 		tx
@@ -162,12 +173,11 @@ export const removeDirectory = async (directoryId: number): Promise<void> => {
 	])
 
 	for (const trackId of tracksToBeRemoved) {
-		await removeTrackWithTx(tx, trackId)
+		await removeTrackInDb(trackId)
 	}
+	await db.delete('directories', directoryId)
 
-	await Promise.all([tx.objectStore('directories').delete(directoryId), tx.done])
-
-	directoriesStore.narkAsDone(directoryId)
+	directoriesStore.markAsDone(directoryId)
 
 	notifyAboutDatabaseChanges([
 		{

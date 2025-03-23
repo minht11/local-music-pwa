@@ -1,6 +1,7 @@
 import { type Directory, LEGACY_NO_NATIVE_DIRECTORY } from '$lib/db/database-types.ts'
 import { getDB } from '$lib/db/get-db'
 import { createPageQuery } from '$lib/db/query.svelte.ts'
+import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
 import type { PageLoad } from './$types.ts'
 
@@ -11,6 +12,10 @@ export type DirectoryWithCount = { count: number } & (
 	  }
 	| (Directory & { legacy?: false })
 )
+
+const debouncedRefetch = debounce((refetch: () => void) => {
+	refetch()
+}, 100)
 
 const createDirectoriesPageQuery = () =>
 	createPageQuery({
@@ -46,8 +51,9 @@ const createDirectoriesPageQuery = () =>
 		onDatabaseChange: (changes, { refetch }) => {
 			for (const change of changes) {
 				if (change.storeName === 'tracks' || change.storeName === 'directories') {
-					// TODO. This could be optimized
-					refetch()
+					// While tracks are being imported/removed, the count may change frequently
+					debouncedRefetch(refetch)
+					break
 				}
 			}
 		},

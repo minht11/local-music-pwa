@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { dev } from '$app/environment'
-	import { tooltip } from '$lib/actions/tooltip.ts'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Select from '$lib/components/Select.svelte'
@@ -11,7 +9,7 @@
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
-	import { type Directory, LEGACY_NO_NATIVE_DIRECTORY } from '$lib/db/database-types.ts'
+	import { type Directory } from '$lib/db/database-types.ts'
 	import { initPageQueries } from '$lib/db/query.svelte.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
@@ -19,11 +17,8 @@
 	import MissingFsApiBanner from './components/MissingFsApiBanner.svelte'
 	import {
 		checkNewDirectoryStatus,
-		directoriesStore,
 		importDirectory,
 		importReplaceDirectory,
-		removeDirectory,
-		rescanDirectory,
 	} from './directories.svelte.ts'
 
 	const { data } = $props()
