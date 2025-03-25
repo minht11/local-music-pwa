@@ -1,5 +1,5 @@
 import type { DbValue } from '$lib/db/get-db'
-import { createPageListQuery } from '$lib/db/query.svelte'
+import { type PageQueryResultResolved, createPageListQuery } from '$lib/db/query.svelte'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import {
 	type LibraryEntitySortKey,
@@ -55,7 +55,14 @@ export const defineLibraryPageData = <StoreName extends LibraryEntityStoreName>(
 	options: DefineLibraryPageOptions<StoreName>,
 	searchFn: LibrarySearchFn<StoreName> = defaultSearchFn,
 ) => {
-	return async () => {
+	return async (): Promise<{
+		storeName: StoreName
+		itemsQuery: PageQueryResultResolved<number[]>
+		store: LibraryStore<StoreName>
+		singularTitle: string
+		pluralTitle: string
+		sortOptions: SortOption<StoreName>[]
+	}> => {
 		const store = new LibraryStore(storeName, options.sortOptions)
 
 		const itemsQuery = await createPageListQuery(storeName, {

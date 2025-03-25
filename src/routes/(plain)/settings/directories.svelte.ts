@@ -45,6 +45,8 @@ class DirectoriesStore {
 
 	isInprogress = (id: number): boolean => this.#inProgress.has(id)
 
+	progress = (): boolean => this.#inProgress.size > 0
+
 	markAsInprogress = (id: number): void => {
 		this.#inProgress.add(id)
 	}
@@ -125,44 +127,74 @@ export const rescanDirectory = async (
 }
 
 export const importReplaceDirectory = async (
-	directoryId: number,
+	dirIds: number[],
 	newDirHandle: FileSystemDirectoryHandle,
 ): Promise<void> => {
-	directoriesStore.markAsInprogress(directoryId)
+	// We pick first id and make it the parents new id.
+	const directoryId = dirIds[0]
+	invariant(directoryId)
+	// directoriesStore.markAsInprogress(directoryId)
 
 	const db = await getDB()
-	const tx = db.transaction('directories', 'readwrite')
+	const tx = db.transaction(['directories', 'tracks'], 'readwrite')
 
-	const newDir: Directory = {
-		id: directoryId,
-		handle: newDirHandle,
-	}
+	console.log('dirIds', dirIds)
 
-	await Promise.all([tx.objectStore('directories').put(newDir), tx.done])
+	const promises = dirIds.map((existingDirId, index) => {
+		if (index === 0) {
+			const newDir: Directory = {
+				id: directoryId,
+				handle: newDirHandle,
+			}
+			return tx.objectStore('directories').put(newDir)
+		}
+		// Update all tracks to point to the new directory.
+		const p = tx
+			.objectStore('tracks')
+			.index('directory')
+			.openCursor(existingDirId)
+			.then(async (c) => {
+				let cursor = c
 
-	notifyAboutDatabaseChanges([
-		{
-			key: directoryId,
-			storeName: 'directories',
-			operation: 'update',
-			value: newDir,
-		},
-	])
+				while (cursor) {
+					const track = cursor.value
+					track.directory = directoryId
+					await cursor.update(track)
+					cursor = await cursor.continue()
+				}
+			})
 
-	await importTracksFromDirectory({
-		action: 'directory-rescan',
-		dirId: directoryId,
-		dirHandle: newDirHandle,
+		return Promise.all([p, tx.objectStore('directories').delete(existingDirId)])
 	})
 
-	directoriesStore.markAsDone(directoryId)
+	await Promise.all([...promises, tx.done])
+
+	// notifyAboutDatabaseChanges([
+	// 	{
+	// 		key: directoryId,
+	// 		storeName: 'directories',
+	// 		operation: 'update',
+	// 		value: newDir,
+	// 	},
+	// ])
+
+	// await importTracksFromDirectory({
+	// 	action: 'directory-rescan',
+	// 	dirId: directoryId,
+	// 	dirHandle: newDirHandle,
+	// })
+
+	// directoriesStore.markAsDone(directoryId)
 }
 
 export const removeDirectory = async (directoryId: number): Promise<void> => {
 	const db = await getDB()
 
 	directoriesStore.markAsInprogress(directoryId)
-	const tx = db.transaction(['directories', 'tracks'])
+	const tx = db.transaction(
+		['directories', 'tracks', 'albums', 'artists', 'playlistsTracks'],
+		'readwrite',
+	)
 
 	const [directoryName, tracksToBeRemoved] = await Promise.all([
 		tx

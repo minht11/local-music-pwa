@@ -6,20 +6,13 @@
 	import Spinner from '$lib/components/Spinner.svelte'
 	import Switch from '$lib/components/Switch.svelte'
 	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
-	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
-	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
-	import { type Directory } from '$lib/db/database-types.ts'
 	import { initPageQueries } from '$lib/db/query.svelte.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
 	import DirectoriesList from './components/DirectoriesList.svelte'
 	import MissingFsApiBanner from './components/MissingFsApiBanner.svelte'
-	import {
-		checkNewDirectoryStatus,
-		importDirectory,
-		importReplaceDirectory,
-	} from './directories.svelte.ts'
+	import { directoriesStore } from './directories.svelte.ts'
 
 	const { data } = $props()
 
@@ -31,66 +24,6 @@
 	const directories = $derived(data.directoriesQuery.value)
 
 	const isFileSystemAccessSupported = window.showDirectoryPicker !== undefined
-
-	interface ReparentDirectory {
-		existingDir: Directory
-		newDirHandle: FileSystemDirectoryHandle
-	}
-
-	let reparentDirectory = $state<ReparentDirectory | null>(null)
-
-	const onImportTracksHandler = async () => {
-		const directory = await showDirectoryPicker({
-			mode: 'read',
-		})
-
-		let data: Awaited<ReturnType<typeof checkNewDirectoryStatus>> | undefined
-		for (const existingDir of directories) {
-			const result = await checkNewDirectoryStatus(existingDir, directory)
-
-			if (result) {
-				data = result
-				break
-			}
-		}
-
-		if (!data) {
-			await importDirectory(directory)
-
-			return
-		}
-
-		const { status, existingDir, newDirHandle } = data
-
-		const existingDirName = existingDir.handle.name
-		const newDirName = newDirHandle.name
-
-		if (status === 'existing') {
-			snackbar({
-				id: 'directory-already-included',
-				message: `Directory '${directory.name}' is already included`,
-			})
-
-			return
-		}
-
-		if (status === 'child') {
-			snackbar({
-				id: 'directory-added',
-				message: m.directoryIsIncludedInParent({
-					existingDir: existingDirName,
-					newDir: newDirName,
-				}),
-			})
-
-			return
-		}
-
-		reparentDirectory = {
-			existingDir,
-			newDirHandle,
-		}
-	}
 
 	const themeOptions: { name: string; value: AppThemeOption }[] = [
 		{
@@ -126,7 +59,7 @@
 		mainStore.customThemePaletteHex = value
 	}, 400)
 
-	let inProgress = false
+	let inProgress = $derived(directoriesStore.progress())
 </script>
 
 <section class="card container-lg mx-auto w-full max-w-[var(--settings-max-width)]">
@@ -148,40 +81,20 @@
 	<div class="flex flex-col p-4">
 		{#if !isFileSystemAccessSupported}
 			<MissingFsApiBanner />
-		{:else if directories.length > 0}
+
+			<Button kind="toned" class="mt-4 sm:ml-auto">Import tracks</Button>
+		{:else}
 			<div class="mb-4 text-title-sm">Directories</div>
 
 			<DirectoriesList disabled={inProgress} {directories} />
 		{/if}
 
 		{#if inProgress}
-			<div class="ml-auto flex min-h-10 items-center gap-4">
+			<div
+				class="mt-4 flex w-full items-center justify-center gap-4 rounded-md bg-tertiaryContainer/20 py-4"
+			>
 				Scan in progress
 				<Spinner class="size-8" />
-			</div>
-		{:else}
-			<div class="flex min-h-10 flex-col items-center gap-2 sm:flex-row">
-				{#if directories.length > 0}
-					<Button kind="outlined">
-						<Icon type="trashOutline" />
-
-						Remove all
-					</Button>
-
-					<Button kind="outlined">
-						<Icon type="cached" />
-
-						Rescan all
-					</Button>
-				{/if}
-
-				<Button kind="toned" class="sm:ml-auto" onclick={onImportTracksHandler}>
-					{#if isFileSystemAccessSupported}
-						Add directory
-					{:else}
-						Import tracks
-					{/if}
-				</Button>
 			</div>
 		{/if}
 	</div>
@@ -282,48 +195,6 @@
 		<IconButton as="a" href="/about" tooltip={m.about()} icon="chevronRight" />
 	</div>
 </section>
-
-{#snippet directoryName(name: string | undefined)}
-	<span class="inline-flex h-[--spacing(4.125)] w-fit items-center gap-1 text-tertiary">
-		<Icon type="folder" class="size-3" />
-
-		<span class="inline h-full w-fit max-w-25 truncate">{name}</span>
-	</span>
-{/snippet}
-
-<CommonDialog
-	open={{
-		get: () => reparentDirectory,
-		close: () => {
-			reparentDirectory = null
-		},
-	}}
-	class="[--dialog-width:--spacing(85)]"
-	icon="folderHidden"
-	title={m.replaceDirectoryQ()}
-	buttons={(data) => [
-		{
-			title: m.cancel(),
-		},
-		{
-			title: m.replace(),
-			action: () => {
-				importReplaceDirectory(data.existingDir.id, data.newDirHandle)
-			},
-		},
-	]}
->
-	{#snippet children({ data })}
-		<WrapTranslation messageFn={m.replaceDirectoryExplanation}>
-			{#snippet existingDir()}
-				{@render directoryName(data.existingDir.handle.name)}
-			{/snippet}
-			{#snippet newDir()}
-				{@render directoryName(data.newDirHandle.name)}
-			{/snippet}
-		</WrapTranslation>
-	{/snippet}
-</CommonDialog>
 
 <style>
 	@reference '../../../app.css';
