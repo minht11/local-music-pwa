@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
-	import Button from '$lib/components/Button.svelte'
-	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import AlbumsListContainer from '$lib/components/albums/AlbumsListContainer.svelte'
+	import Button from '$lib/components/Button.svelte'
 	import ArtistListContainer from '$lib/components/entities/artists/ArtistListContainer.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
+	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueriesDynamic } from '$lib/db/query.svelte.js'
@@ -116,9 +116,12 @@
 
 				{#if data.storeName === 'playlists'}
 					<div class="mb-4 flex items-center justify-end">
-						<Button kind="outlined" onclick={() => {
+						<Button
+							kind="outlined"
+							onclick={() => {
 								main.createNewPlaylistDialogOpen = true
-							}}>
+							}}
+						>
 							<Icon type="plus" />
 
 							{m.libraryNewPlaylist()}

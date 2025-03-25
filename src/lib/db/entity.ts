@@ -3,7 +3,7 @@ import { WeakLRUCache } from 'weak-lru-cache'
 import { type DBChangeRecord, listenForDatabaseChanges } from './channel.ts'
 import type { Album, Artist, Playlist, Track } from './database-types.ts'
 import { type DbKey, getDB } from './get-db.ts'
-import { type QueryResult, createQuery } from './query.svelte.ts'
+import { createQuery, type QueryResult } from './query.svelte.ts'
 
 type QueryMutate<Result, InitialResult extends Result | undefined> = (
 	value: Result | ((prev: Result | InitialResult) => void),

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
+	import Icon from '$lib/components/icon/Icon.svelte'
 	import Select from '$lib/components/Select.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import Spinner from '$lib/components/Spinner.svelte'
 	import Switch from '$lib/components/Switch.svelte'
 	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
-	import Icon from '$lib/components/icon/Icon.svelte'
 	import { initPageQueries } from '$lib/db/query.svelte.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'

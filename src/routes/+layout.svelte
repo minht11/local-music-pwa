@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { navigating, page } from '$app/state'
-	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import PlaylistDialogs from '$lib/components/app-dialogs/PlaylistDialogs.svelte'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
+	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 	import { setupBottomBar } from '$lib/layout-bottom-bar.svelte'
 	import { MainStore } from '$lib/stores/main/store.svelte.ts'

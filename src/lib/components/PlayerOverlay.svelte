@@ -1,13 +1,13 @@
 <script lang="ts">
 	import Button from './Button.svelte'
 	import Icon from './icon/Icon.svelte'
+	import FavoriteButton from './player/buttons/FavoriteButton.svelte'
+	import PlayNextButton from './player/buttons/PlayNextButton.svelte'
+	import PlayToggleButton from './player/buttons/PlayToggleButton.svelte'
 	import MainControls from './player/MainControls.svelte'
 	import PlayerArtwork from './player/PlayerArtwork.svelte'
 	import Timeline from './player/Timeline.svelte'
 	import VolumeSlider from './player/VolumeSlider.svelte'
-	import FavoriteButton from './player/buttons/FavoriteButton.svelte'
-	import PlayNextButton from './player/buttons/PlayNextButton.svelte'
-	import PlayToggleButton from './player/buttons/PlayToggleButton.svelte'
 
 	const { class: className }: { class?: ClassValue } = $props()
 

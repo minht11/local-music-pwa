@@ -1,45 +1,47 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-	"organizeImports": {
-		"enabled": true
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
 	},
 	"files": {
-		"ignore": [
-			"node_modules/**",
-			"dist/**",
-			"build/**",
-			".generated/**",
-			"**/*.DS_Store",
-			"**/*.env.*",
-			"pnpm-lock.yaml",
-			"./src/paraglide/**",
-			"**/*.html",
-			"**/*.svg",
-			"**/*.css"
+		"includes": [
+			"**",
+			"!**/node_modules/**",
+			"!**/dist/**",
+			"!**/build/**",
+			"!**/.generated/**",
+			"!**/*.DS_Store",
+			"!**/*.env.*",
+			"!**/pnpm-lock.yaml",
+			"!src/paraglide/**",
+			"!**/*.html",
+			"!**/*.svg",
+			"!**/*.css",
+			"!src/lib/components/WrapTranslation.svelte"
 		]
 	},
 	"formatter": {
 		"enabled": true,
 		"lineWidth": 100,
-		"ignore": ["**/*.svelte"]
+		"includes": ["!**/*.svelte"]
 	},
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true,
-			"complexity": {
-				"useSimplifiedLogicExpression": "error",
-				"useDateNow": "error"
-			},
-			"correctness": {
-				"noUndeclaredVariables": "error",
-				"useImportExtensions": "error"
-			},
 			"style": {
 				"noNegationElse": "error",
 				"useBlockStatements": "error",
 				"useCollapsedElseIf": "error",
-				"useShorthandArrayType": "error",
+				"useConsistentArrayType": {
+					"level": "error",
+					"options": {
+						"syntax": "shorthand"
+					}
+				},
 				"useShorthandAssign": "error",
 				"useFilenamingConvention": {
 					"level": "error",
@@ -50,12 +52,31 @@
 				},
 				"useThrowNewError": "error",
 				"useThrowOnlyError": "error",
-				"useConsistentBuiltinInstantiation": "error"
+				"useConsistentBuiltinInstantiation": "error",
+				"useLiteralEnumMembers": "error",
+				"noCommaOperator": "error",
+				"useNodejsImportProtocol": "error",
+				"useAsConstAssertion": "error",
+				"useNumericLiterals": "error",
+				"useEnumInitializers": "error",
+				"useSelfClosingElements": "error",
+				"useSingleVarDeclarator": "error",
+				"noUnusedTemplateLiteral": "error",
+				"useNumberNamespace": "error",
+				"noInferrableTypes": "error",
+				"useExponentiationOperator": "error",
+				"useTemplate": "error",
+				"noParameterAssign": "error",
+				"noNonNullAssertion": "error",
+				"useDefaultParameterLast": "error",
+				"noArguments": "error",
+				"useExportType": "error",
+				"noUselessElse": "error",
+				"useShorthandFunctionType": "error"
 			},
-			"suspicious": {
-				"noMisrefactoredShorthandAssign": "error",
-				"useAwait": "error",
-				"useErrorMessage": "error"
+			"correctness": {
+				"noUndeclaredVariables": "error",
+				"useImportExtensions": "error"
 			},
 			"nursery": {
 				"noDynamicNamespaceImportAccess": "error",
@@ -67,6 +88,15 @@
 						}
 					}
 				}
+			},
+			"complexity": {
+				"useSimplifiedLogicExpression": "error",
+				"useDateNow": "error"
+			},
+			"suspicious": {
+				"noMisrefactoredShorthandAssign": "error",
+				"useAwait": "error",
+				"useErrorMessage": "error"
 			}
 		}
 	},
@@ -86,7 +116,7 @@
 	},
 	"overrides": [
 		{
-			"include": ["*.svelte"],
+			"includes": ["**/*.svelte"],
 			"javascript": {
 				"globals": [
 					"Snippet",
@@ -112,7 +142,7 @@
 			}
 		},
 		{
-			"include": ["src/params"],
+			"includes": ["**/src/params/**"],
 			"linter": {
 				"rules": {
 					"style": {

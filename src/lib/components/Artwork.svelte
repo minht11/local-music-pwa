@@ -11,7 +11,14 @@
 		children?: Snippet
 	}
 
-	const { src, fallbackIcon = 'musicNote', noFallbackBg, class: className, alt, children }: Props = $props()
+	const {
+		src,
+		fallbackIcon = 'musicNote',
+		noFallbackBg,
+		class: className,
+		alt,
+		children,
+	}: Props = $props()
 
 	let error = $state(false)
 </script>

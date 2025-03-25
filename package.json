@@ -17,7 +17,7 @@
 		"compile-i18n": "paraglide-js compile --project ./project.inlang"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"@biomejs/biome": "2.0.0-beta.1",
 		"@inlang/paraglide-js": "2.0.5",
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.20.2",
@@ -67,6 +67,9 @@
 		"patchedDependencies": {
 			"@material/material-color-utilities": "patches/@material__material-color-utilities.patch"
 		},
-		"onlyBuiltDependencies": ["@biomejs/biome", "esbuild"]
+		"onlyBuiltDependencies": [
+			"@biomejs/biome",
+			"esbuild"
+		]
 	}
 }

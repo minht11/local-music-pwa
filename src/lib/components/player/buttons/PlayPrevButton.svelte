@@ -1,6 +1,6 @@
 <script lang="ts">
-	import IconButton from '../../IconButton.svelte'
 	import PlayPreviousNextIcon from '../../animated-icons/PlayPreviousNextIcon.svelte'
+	import IconButton from '../../IconButton.svelte'
 
 	const player = usePlayer()
 

@@ -1,5 +1,5 @@
 import { listenForDatabaseChanges } from '$lib/db/channel'
-import { type TrackData, createTrackQuery } from '$lib/db/entity.ts'
+import { createTrackQuery, type TrackData } from '$lib/db/entity.ts'
 import type { QueryResult } from '$lib/db/query.svelte.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { persist } from '$lib/helpers/persist.svelte.ts'

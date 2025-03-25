@@ -175,7 +175,9 @@ body {
 		z-index: -1;
 		pointer-events: none;
 		opacity: 0;
-		transition: opacity 0.2s linear, display 0.2s allow-discrete;
+		transition:
+			opacity 0.2s linear,
+			display 0.2s allow-discrete;
 	}
 
 	@media (any-hover: hover) {
@@ -202,7 +204,7 @@ body {
 
 	@starting-style {
 		&::after {
-		  opacity: 0 !important;
+			opacity: 0 !important;
 		}
 	}
 }

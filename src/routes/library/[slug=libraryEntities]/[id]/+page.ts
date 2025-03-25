@@ -2,9 +2,9 @@ import { goto } from '$app/navigation'
 import { getEntityData } from '$lib/db/entity.ts'
 import { type DbValue, getDB } from '$lib/db/get-db.ts'
 import {
-	type PageQueryResult,
 	createPageQuery,
 	keysListDatabaseChangeHandler,
+	type PageQueryResult,
 } from '$lib/db/query.svelte.ts'
 import type { LibraryEntityStoreName } from '$lib/library/general.ts'
 import { error, redirect } from '@sveltejs/kit'

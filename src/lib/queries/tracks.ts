@@ -1,5 +1,5 @@
 import { getDB } from '$lib/db/get-db'
-import { type PageQueryResult, createPageQuery } from '$lib/db/query.svelte'
+import { createPageQuery, type PageQueryResult } from '$lib/db/query.svelte'
 
 export const createTracksCountPageQuery = (): PageQueryResult<number> =>
 	createPageQuery({

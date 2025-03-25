@@ -1,8 +1,8 @@
 <script lang="ts">
-	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
-	import Separator from '$lib/components/Separator.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
+	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
+	import Separator from '$lib/components/Separator.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar'
 	import { getDB } from '$lib/db/get-db'
 	import { createListQuery, createQuery } from '$lib/db/query.svelte'

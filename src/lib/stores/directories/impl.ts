@@ -1,6 +1,6 @@
 import {
-	type TrackImportOptions,
 	importTracksFromDirectory,
+	type TrackImportOptions,
 } from '$lib/library/import-tracks/import-tracks'
 
 const channel = new BroadcastChannel('directories-changes')

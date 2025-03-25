@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Button from '../../Button.svelte'
 	import PlayPauseIcon from '../../animated-icons/PlayPauseIcon.svelte'
+	import Button from '../../Button.svelte'
 
 	const player = usePlayer()
 </script>

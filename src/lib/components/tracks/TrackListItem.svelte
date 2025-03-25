@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type TrackData, createTrackQuery } from '$lib/db/entity'
+	import { createTrackQuery, type TrackData } from '$lib/db/entity'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'

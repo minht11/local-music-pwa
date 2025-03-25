@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { doesElementHasFocus, findFocusedElement } from '$lib/helpers/focus'
 	import {
+		createVirtualizer,
+		createWindowVirtualizer,
 		type SvelteVirtualizer,
 		type VirtualItem,
 		type VirtualizerOptions,
-		createVirtualizer,
-		createWindowVirtualizer,
 	} from '@tanstack/svelte-virtual'
 	import { untrack } from 'svelte'
 	import type { Readable } from 'svelte/store'
