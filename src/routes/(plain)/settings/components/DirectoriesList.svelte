@@ -12,7 +12,7 @@
 		checkNewDirectoryStatus,
 		importDirectory,
 		importReplaceDirectory,
-		removeDirectory,
+		removeDirectoryWithSnackbar,
 		rescanDirectory,
 	} from '../directories.svelte.ts'
 
@@ -111,7 +111,7 @@
 						icon="cached"
 						tooltip="Rescan"
 						onclick={() => {
-							rescanDirectory(dir.id, dir.handle)
+							void rescanDirectory(dir.id, dir.handle)
 						}}
 					/>
 				{/if}
@@ -120,7 +120,7 @@
 					icon="trashOutline"
 					tooltip="Remove"
 					onclick={() => {
-						removeDirectory(dir.id)
+						void removeDirectoryWithSnackbar(dir.id)
 					}}
 				/>
 			</div>

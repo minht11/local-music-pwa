@@ -79,6 +79,7 @@
 				"useImportExtensions": "error"
 			},
 			"nursery": {
+				"noFloatingPromises": "error",
 				"noDynamicNamespaceImportAccess": "error",
 				"noRestrictedImports": {
 					"level": "error",

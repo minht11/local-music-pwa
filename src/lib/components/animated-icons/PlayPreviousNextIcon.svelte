@@ -37,7 +37,7 @@
 				return
 			}
 
-			animate()
+			void animate()
 		})
 
 		return {

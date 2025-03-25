@@ -3,7 +3,7 @@ import { notifyAboutDatabaseChanges } from '$lib/db/channel'
 import type { Directory } from '$lib/db/database-types'
 import { getDB } from '$lib/db/get-db'
 import type { TrackImportOptions } from '$lib/library/import-tracks/worker/types'
-import { removeTrackInDb } from '$lib/library/tracks.svelte'
+import { removeTrack } from '$lib/library/tracks.svelte'
 import { SvelteSet } from 'svelte/reactivity'
 
 export interface DirectoryStatus {
@@ -187,7 +187,7 @@ export const importReplaceDirectory = async (
 	// directoriesStore.markAsDone(directoryId)
 }
 
-export const removeDirectory = async (directoryId: number): Promise<void> => {
+const removeDirectory = async (directoryId: number): Promise<string | undefined> => {
 	const db = await getDB()
 
 	directoriesStore.markAsInprogress(directoryId)
@@ -205,7 +205,7 @@ export const removeDirectory = async (directoryId: number): Promise<void> => {
 	])
 
 	for (const trackId of tracksToBeRemoved) {
-		await removeTrackInDb(trackId)
+		await removeTrack(trackId)
 	}
 	await db.delete('directories', directoryId)
 
@@ -219,8 +219,22 @@ export const removeDirectory = async (directoryId: number): Promise<void> => {
 		},
 	])
 
-	snackbar({
-		id: `dir-removed-${directoryId}`,
-		message: directoryName ? `Directory "${directoryName}" removed.` : 'Directory removed.',
-	})
+	return directoryName
+}
+
+export const removeDirectoryWithSnackbar = async (id: number): Promise<void> => {
+	removeDirectory(id).then(
+		(name) => {
+			snackbar({
+				id: `dir-removed-${id}`,
+				message: name ? `Directory "${name}" removed.` : 'Directory removed.',
+			})
+		},
+		() => {
+			snackbar({
+				id: `dir-removed-${id}`,
+				message: 'Failed to remove directory',
+			})
+		},
+	)
 }

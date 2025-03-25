@@ -1,3 +1,4 @@
+import { snackbar } from '$lib/components/snackbar/snackbar'
 import { type DBChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
 import { type AppDB, getDB } from '$lib/db/get-db'
 import type { IDBPTransaction, IndexNames } from 'idb'
@@ -69,7 +70,7 @@ const removeTrackFromPlaylistsInDatabase = async (trackId: number) => {
 	return changes
 }
 
-const removeTrackWithTx = async (trackId: number): Promise<void> => {
+export const removeTrack = async (trackId: number): Promise<void> => {
 	const db = await getDB()
 	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
 
@@ -101,19 +102,18 @@ const removeTrackWithTx = async (trackId: number): Promise<void> => {
 	])
 }
 
-export const removeTrackInDb = async (id: number): Promise<boolean> => {
-	try {
-		await removeTrackWithTx(id)
-		return true
-	} catch (error) {
-		return false
-	}
-}
-
-export const removeTrack = async (id: number): Promise<void> => {
-	try {
-		await removeTrackInDb(id)
-	} catch (error) {
-		console.error(error)
-	}
-}
+export const removeTrackWithSnackbar = async (id: number): Promise<void> =>
+	removeTrack(id).then(
+		() => {
+			snackbar({
+				id: 'track-removed',
+				message: 'Track removed',
+			})
+		},
+		() => {
+			snackbar({
+				id: 'track-removed-error',
+				message: 'Failed to remove track',
+			})
+		},
+	)
