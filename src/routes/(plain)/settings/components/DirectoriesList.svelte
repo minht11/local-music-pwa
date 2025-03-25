@@ -10,9 +10,9 @@
 	import type { DirectoryWithCount } from '../+page.ts'
 	import {
 		checkNewDirectoryStatus,
-		importDirectory,
-		importReplaceDirectory,
-		removeDirectoryWithSnackbar,
+		importNewDirectory,
+		removeDirectory,
+		replaceDirectories,
 		rescanDirectory,
 	} from '../directories.svelte.ts'
 
@@ -74,7 +74,7 @@
 				newDirHandle: directory,
 			}
 		} else {
-			await importDirectory(directory)
+			void importNewDirectory(directory)
 		}
 	}
 </script>
@@ -120,7 +120,7 @@
 					icon="trashOutline"
 					tooltip="Remove"
 					onclick={() => {
-						void removeDirectoryWithSnackbar(dir.id)
+						void removeDirectory(dir.id)
 					}}
 				/>
 			</div>
@@ -168,7 +168,7 @@
 			title: m.replace(),
 			action: () => {
 				const ids = data.childDirs.map((dir) => dir.id)
-				importReplaceDirectory(ids, data.newDirHandle)
+				void replaceDirectories(data.newDirHandle, ids)
 			},
 		},
 	]}

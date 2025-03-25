@@ -40,23 +40,21 @@ export const checkNewDirectoryStatus = async (
 	return undefined
 }
 
-class DirectoriesStore {
-	#inProgress = new SvelteSet<number>()
+let counter = 0
+let pendingTasks = new SvelteSet<number>()
+export const isDatabaseOperationInProgress = (): boolean => pendingTasks.size > 0
 
-	isInprogress = (id: number): boolean => this.#inProgress.has(id)
+const lockDatabase = async <T = void>(action: () => Promise<T>): Promise<T> => {
+	const id = counter
+	counter += 1
+	pendingTasks.add(id)
 
-	progress = (): boolean => this.#inProgress.size > 0
-
-	markAsInprogress = (id: number): void => {
-		this.#inProgress.add(id)
-	}
-
-	markAsDone = (id: number): void => {
-		this.#inProgress.delete(id)
+	try {
+		return await navigator.locks.request('database', () => action())
+	} finally {
+		pendingTasks.delete(id)
 	}
 }
-
-export const directoriesStore: DirectoriesStore = new DirectoriesStore()
 
 const importTracksFromDirectory = async (options: TrackImportOptions) => {
 	const { importTracksFromDirectory: importDir } = await import(
@@ -66,14 +64,11 @@ const importTracksFromDirectory = async (options: TrackImportOptions) => {
 	await importDir(options)
 }
 
-export const importDirectory = async (dirHandle: FileSystemDirectoryHandle): Promise<void> => {
-	// TODO. Need try catch.
+const importNewDirectoryImpl = async (dirHandle: FileSystemDirectoryHandle): Promise<void> => {
 	const db = await getDB()
 	const id = await db.add('directories', {
 		handle: dirHandle,
 	} as Directory)
-
-	directoriesStore.markAsInprogress(id)
 
 	notifyAboutDatabaseChanges([
 		{
@@ -92,10 +87,37 @@ export const importDirectory = async (dirHandle: FileSystemDirectoryHandle): Pro
 		dirId: id,
 		dirHandle: dirHandle,
 	})
-
-	directoriesStore.markAsDone(id)
 }
 
+/**
+ * This function will never throw an error, instead it will show a snackbar.
+ */
+export const importNewDirectory = async (handle: FileSystemDirectoryHandle): Promise<void> => {
+	try {
+		await lockDatabase(() => importNewDirectoryImpl(handle))
+
+		snackbar('Directory imported.')
+	} catch (error) {
+		console.error(error)
+
+		snackbar('Failed to import directory')
+	}
+}
+
+const rescanDirectoryImpl = async (
+	dirId: number,
+	dirHandle: FileSystemDirectoryHandle,
+): Promise<void> => {
+	await importTracksFromDirectory({
+		action: 'directory-rescan',
+		dirId,
+		dirHandle,
+	})
+}
+
+/**
+ * This function will never throw an error, instead it will show a snackbar.
+ */
 export const rescanDirectory = async (
 	dirId: number,
 	dirHandle: FileSystemDirectoryHandle,
@@ -106,45 +128,36 @@ export const rescanDirectory = async (
 	}
 
 	if (permission !== 'granted') {
-		snackbar({
-			id: 'dir-rescan-permission-denied',
-			// TODO. i18n
-			message: 'Permission denied.',
-		})
+		snackbar('You need to grant permission to the directory in order to rescan it.')
 
 		return
 	}
 
-	directoriesStore.markAsInprogress(dirId)
+	try {
+		await lockDatabase(() => rescanDirectoryImpl(dirId, dirHandle))
+	} catch (error) {
+		console.error(error)
 
-	await importTracksFromDirectory({
-		action: 'directory-rescan',
-		dirId,
-		dirHandle,
-	})
-
-	directoriesStore.markAsDone(dirId)
+		snackbar('Failed to rescan directory')
+	}
 }
 
-export const importReplaceDirectory = async (
+const replaceDirectoriesImpl = async (
+	parentDirHandle: FileSystemDirectoryHandle,
 	dirIds: number[],
-	newDirHandle: FileSystemDirectoryHandle,
 ): Promise<void> => {
 	// We pick first id and make it the parents new id.
 	const directoryId = dirIds[0]
 	invariant(directoryId)
-	// directoriesStore.markAsInprogress(directoryId)
 
 	const db = await getDB()
 	const tx = db.transaction(['directories', 'tracks'], 'readwrite')
-
-	console.log('dirIds', dirIds)
 
 	const promises = dirIds.map((existingDirId, index) => {
 		if (index === 0) {
 			const newDir: Directory = {
 				id: directoryId,
-				handle: newDirHandle,
+				handle: parentDirHandle,
 			}
 			return tx.objectStore('directories').put(newDir)
 		}
@@ -167,35 +180,46 @@ export const importReplaceDirectory = async (
 		return Promise.all([p, tx.objectStore('directories').delete(existingDirId)])
 	})
 
-	await Promise.all([...promises, tx.done])
+	const [newDir] = await Promise.all([...promises, tx.done])
 
-	// notifyAboutDatabaseChanges([
-	// 	{
-	// 		key: directoryId,
-	// 		storeName: 'directories',
-	// 		operation: 'update',
-	// 		value: newDir,
-	// 	},
-	// ])
+	notifyAboutDatabaseChanges([
+		{
+			key: directoryId,
+			storeName: 'directories',
+			operation: 'update',
+			value: newDir,
+		},
+	])
 
-	// await importTracksFromDirectory({
-	// 	action: 'directory-rescan',
-	// 	dirId: directoryId,
-	// 	dirHandle: newDirHandle,
-	// })
-
-	// directoriesStore.markAsDone(directoryId)
+	await importTracksFromDirectory({
+		action: 'directory-rescan',
+		dirId: directoryId,
+		dirHandle: parentDirHandle,
+	})
 }
 
-const removeDirectory = async (directoryId: number): Promise<string | undefined> => {
+/**
+ * This function will never throw an error, instead it will show a snackbar.
+ */
+export const replaceDirectories = async (
+	parentDirHandle: FileSystemDirectoryHandle,
+	dirsIds: number[],
+): Promise<void> => {
+	try {
+		await lockDatabase(() => replaceDirectoriesImpl(parentDirHandle, dirsIds))
+
+		snackbar('Directory imported.')
+	} catch (error) {
+		console.error(error)
+
+		snackbar('Failed to import directory')
+	}
+}
+
+const removeDirectoryImpl = async (directoryId: number): Promise<string | undefined> => {
 	const db = await getDB()
 
-	directoriesStore.markAsInprogress(directoryId)
-	const tx = db.transaction(
-		['directories', 'tracks', 'albums', 'artists', 'playlistsTracks'],
-		'readwrite',
-	)
-
+	const tx = db.transaction(['directories', 'tracks'])
 	const [directoryName, tracksToBeRemoved] = await Promise.all([
 		tx
 			.objectStore('directories')
@@ -209,8 +233,6 @@ const removeDirectory = async (directoryId: number): Promise<string | undefined>
 	}
 	await db.delete('directories', directoryId)
 
-	directoriesStore.markAsDone(directoryId)
-
 	notifyAboutDatabaseChanges([
 		{
 			key: directoryId,
@@ -222,19 +244,16 @@ const removeDirectory = async (directoryId: number): Promise<string | undefined>
 	return directoryName
 }
 
-export const removeDirectoryWithSnackbar = async (id: number): Promise<void> => {
-	removeDirectory(id).then(
-		(name) => {
-			snackbar({
-				id: `dir-removed-${id}`,
-				message: name ? `Directory "${name}" removed.` : 'Directory removed.',
-			})
-		},
-		() => {
-			snackbar({
-				id: `dir-removed-${id}`,
-				message: 'Failed to remove directory',
-			})
-		},
-	)
+/**
+ * This function will never throw an error, instead it will show a snackbar.
+ */
+export const removeDirectory = async (id: number): Promise<void> => {
+	try {
+		const dirName = await lockDatabase(() => removeDirectoryImpl(id))
+
+		snackbar(dirName ? `Directory "${dirName}" removed.` : 'Directory removed.')
+	} catch {
+		console.error('Failed to remove directory')
+		snackbar('Failed to remove directory')
+	}
 }
