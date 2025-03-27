@@ -18,7 +18,7 @@
 	const { trackId, onclose }: Props = $props()
 
 	const query = createListQuery('playlists', {
-		key: () => ['playlists'],
+		key: ['playlists'],
 		fetcher: () => getEntityIds('playlists', { sort: 'created' }),
 		onError: () => {
 			snackbar({
@@ -67,8 +67,6 @@
 	const isTrackInPlaylist = (playlistId: number) => !!trackPlaylists.value?.has(playlistId)
 
 	const addToPlaylist = async (playlistId: number) => {
-		invariant(trackId, 'Playlist to edit is not set')
-
 		await toggleTrackInPlaylistInDatabase(isTrackInPlaylist(playlistId), playlistId, trackId)
 	}
 </script>

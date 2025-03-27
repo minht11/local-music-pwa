@@ -42,7 +42,10 @@ export const checkNewDirectoryStatus = async (
 
 let counter = 0
 let pendingTasks = new SvelteSet<number>()
-export const isDatabaseOperationInProgress = (): boolean => pendingTasks.size > 0
+/**
+ * Returns $state boolean whatever database operation is pending.
+ */
+export const isDatabaseOperationPending = (): boolean => pendingTasks.size > 0
 
 const lockDatabase = async <T = void>(action: () => Promise<T>): Promise<T> => {
 	const id = counter

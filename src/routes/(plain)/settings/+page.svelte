@@ -8,11 +8,12 @@
 	import Switch from '$lib/components/Switch.svelte'
 	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
 	import { initPageQueries } from '$lib/db/query.svelte.ts'
+	import { Debounced } from '$lib/helpers/debounced.svelte.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
 	import DirectoriesList from './components/DirectoriesList.svelte'
 	import MissingFsApiBanner from './components/MissingFsApiBanner.svelte'
-	import { directoriesStore } from './directories.svelte.ts'
+	import { isDatabaseOperationPending } from './directories.svelte.ts'
 
 	const { data } = $props()
 
@@ -59,7 +60,10 @@
 		mainStore.customThemePaletteHex = value
 	}, 400)
 
-	let inProgress = $derived(directoriesStore.progress())
+	// We debounce state updates, because some DB operations can be very fast
+	// and we don't want to show pending UI for a split second
+	const isDatabasePendingGetter = new Debounced(() => isDatabaseOperationPending(), 150)
+	const isDatabasePending = $derived(isDatabasePendingGetter.current)
 </script>
 
 <section class="card container-lg mx-auto w-full max-w-[var(--settings-max-width)]">
@@ -86,10 +90,10 @@
 		{:else}
 			<div class="mb-4 text-title-sm">Directories</div>
 
-			<DirectoriesList disabled={inProgress} {directories} />
+			<DirectoriesList disabled={isDatabasePending} {directories} />
 		{/if}
 
-		{#if inProgress}
+		{#if isDatabasePending}
 			<div
 				class="mt-4 flex w-full items-center justify-center gap-4 rounded-md bg-tertiaryContainer/20 py-4"
 			>

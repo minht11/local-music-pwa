@@ -1,5 +1,6 @@
 <script lang="ts" module>
 	import { ripple } from '$lib/actions/ripple'
+	import { assign } from '$lib/helpers/utils/assign'
 	import { autoUpdate, computePosition, flip, shift } from '@floating-ui/dom'
 	import Icon from './icon/Icon.svelte'
 
@@ -43,7 +44,7 @@
 				middleware: [flip(), shift()],
 			})
 
-			Object.assign(popup.style, {
+			assign(popup.style, {
 				left: `${x}px`,
 				top: `${y}px`,
 				width: `${target.offsetWidth}px`,

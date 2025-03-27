@@ -1,6 +1,3 @@
-export const toggleReverseArray = <T>(items: T[], condition = false): T[] =>
-	condition ? [...items].reverse() : items
-
 export const shuffleArray = <T>(array: T[]): void => {
 	for (let i = array.length - 1; i > 0; i -= 1) {
 		const j = Math.floor(Math.random() * (i + 1))

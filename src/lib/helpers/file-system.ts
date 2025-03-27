@@ -33,9 +33,7 @@ export const getFilesFromLegacyInputEvent = (e: Event, extensions: string[]): Fi
 		return []
 	}
 
-	return Array.from(files).filter((file) =>
-		extensions.some((ext) => file.name.endsWith(`.${ext}`)),
-	)
+	return Array.from(files).filter((file) => extensions.some((ext) => file.name.endsWith(`.${ext}`)))
 }
 
 export const getFilesFromDirectory = async (extensions: string[]): Promise<FileEntity[] | null> => {
@@ -64,14 +62,16 @@ export const getFilesFromDirectory = async (extensions: string[]): Promise<FileE
 		directoryElement.setAttribute('directory', '')
 	}
 
-	return new Promise((resolve) => {
-		directoryElement.addEventListener('change', (e) => {
-			resolve(getFilesFromLegacyInputEvent(e, extensions))
-		})
-		// In some cases event listener might not be registered yet
-		// because of event loop racing.
-		wait(100).then(() => {
-			directoryElement.click()
-		})
+	const { promise, resolve } = Promise.withResolvers<FileEntity[]>()
+
+	directoryElement.addEventListener('change', (e) => {
+		resolve(getFilesFromLegacyInputEvent(e, extensions))
 	})
+
+	// In some cases event listener might not be registered yet
+	// because of event loop racing.
+	await wait(100)
+	directoryElement.click()
+
+	return promise
 }

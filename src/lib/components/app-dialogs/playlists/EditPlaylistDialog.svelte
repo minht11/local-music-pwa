@@ -1,21 +1,21 @@
 <script lang="ts">
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import TextField from '$lib/components/TextField.svelte'
-	import { updatePlaylistNameInDatabase } from '$lib/library/playlists.svelte'
+	import { updatePlaylistName } from '$lib/library/playlists.svelte'
 
 	const main = useMainStore()
-
 	const data = $derived(main.editPlaylistDialogOpen)
 
-	const onSubmitHandler = async (event: SubmitEvent) => {
+	const submitHandler = async (event: SubmitEvent) => {
 		invariant(data !== null, 'Playlist to edit is not set')
 
 		const formData = new FormData(event.target as HTMLFormElement)
 		const name = formData.get('name') as string
 
-		await updatePlaylistNameInDatabase(data.id, name)
-
-		main.editPlaylistDialogOpen = null
+		const success = await updatePlaylistName(data.id, name)
+		if (success) {
+			main.editPlaylistDialogOpen = null
+		}
 	}
 </script>
 
@@ -37,7 +37,7 @@
 			type: 'submit',
 		},
 	]}
-	onsubmit={onSubmitHandler}
+	onsubmit={submitHandler}
 >
 	<TextField
 		value={data?.name}

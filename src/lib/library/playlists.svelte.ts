@@ -4,7 +4,7 @@ import type { OmitId, Playlist } from '$lib/db/database-types'
 import { getDB } from '$lib/db/get-db'
 import { truncate } from '$lib/helpers/utils/truncate.ts'
 
-export const createPlaylistInDatabase = async (name: string): Promise<number> => {
+export const dbCreatePlaylist = async (name: string): Promise<number> => {
 	const db = await getDB()
 
 	const newPlaylist: OmitId<Playlist> = {
@@ -31,24 +31,15 @@ export const createPlaylistInDatabase = async (name: string): Promise<number> =>
 
 export const createPlaylist = async (name: string): Promise<void> => {
 	try {
-		const id = await createPlaylistInDatabase(name)
+		await dbCreatePlaylist(name)
 
-		snackbar({
-			id: `playlist-created-${id}`,
-			// TODO. i18n
-			message: `Playlist "${truncate(name, 20)}" created`,
-		})
-	} catch {
-		// TODO. Add message if playlist already exists
-		snackbar({
-			id: 'playlist-create-error',
-			// TODO. i18n
-			message: 'Failed to create playlist',
-		})
+		snackbar(m.libraryPlaylistCreated(truncate(name, 20)))
+	} catch (error) {
+		snackbar.unexpectedError(error)
 	}
 }
 
-export const updatePlaylistNameInDatabase = async (id: number, name: string): Promise<void> => {
+const dbUpdatePlaylistName = async (id: number, name: string): Promise<void> => {
 	const db = await getDB()
 
 	const tx = db.transaction('playlists', 'readwrite')
@@ -73,7 +64,24 @@ export const updatePlaylistNameInDatabase = async (id: number, name: string): Pr
 	])
 }
 
-export const removePlaylistInDatabase = async (id: number): Promise<void> => {
+export const updatePlaylistName = async (id: number, name: string): Promise<boolean> => {
+	try {
+		await dbUpdatePlaylistName(id, name)
+
+		snackbar({
+			id: `playlist-updated-${id}`,
+			message: m.libraryPlaylistUpdated(truncate(name, 20)),
+		})
+
+		return true
+	} catch (error) {
+		snackbar.unexpectedError(error)
+
+		return false
+	}
+}
+
+const dbRemovePlaylist = async (id: number): Promise<void> => {
 	const db = await getDB()
 	const tx = db.transaction(['playlists', 'playlistsTracks'], 'readwrite')
 	const tracksStore = tx.objectStore('playlistsTracks')
@@ -97,7 +105,7 @@ export const removePlaylistInDatabase = async (id: number): Promise<void> => {
 
 export const removePlaylist = async (id: number, name: string): Promise<void> => {
 	try {
-		await removePlaylistInDatabase(id)
+		await dbRemovePlaylist(id)
 
 		snackbar({
 			id: `playlist-removed-${id}`,
@@ -105,12 +113,8 @@ export const removePlaylist = async (id: number, name: string): Promise<void> =>
 			message: `Playlist "${truncate(name, 20)}" removed`,
 			duration: 3000,
 		})
-	} catch {
-		snackbar({
-			id: 'playlist-remove-error',
-			// TODO. i18n
-			message: 'Failed to remove playlist',
-		})
+	} catch (error) {
+		snackbar.unexpectedError(error)
 	}
 }
 
@@ -171,7 +175,7 @@ export const toggleTrackInPlaylistInDatabase = async (
 /** Special type of playlist which user cannot modify */
 export const FAVORITE_PLAYLIST_ID = -1
 
-export const toggleFavoriteTrackInDatabase = async (
+export const dbToggleFavoriteTrack = async (
 	shouldBeRemoved: boolean,
 	trackId: number,
 ): Promise<void> => {
@@ -187,7 +191,7 @@ export const toggleFavoriteTrack = async (
 	trackId: number,
 ): Promise<void> => {
 	try {
-		await toggleFavoriteTrackInDatabase(shouldBeRemoved, trackId)
+		await dbToggleFavoriteTrack(shouldBeRemoved, trackId)
 
 		snackbar({
 			id: 'track-favorite-toggled',
@@ -195,11 +199,7 @@ export const toggleFavoriteTrack = async (
 			message: shouldBeRemoved ? 'Track removed from favorites' : 'Track added to favorites',
 			duration: 2000,
 		})
-	} catch {
-		snackbar({
-			id: 'track-favorite-toggle-error',
-			// TODO. i18n
-			message: 'Failed to toggle favorite track',
-		})
+	} catch (error) {
+		snackbar.unexpectedError(error)
 	}
 }

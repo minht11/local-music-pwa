@@ -1,3 +1,4 @@
+import { assign } from '$lib/helpers/utils/assign.ts'
 import type { Action } from 'svelte/action'
 import { on } from 'svelte/events'
 import { animateEmpty } from '../helpers/animations.ts'
@@ -73,7 +74,7 @@ const onPointerDownHandler = (e: PointerEvent) => {
 	const posX = e.clientX - rect.left
 	const posY = e.clientY - rect.top
 
-	Object.assign(ripple.style, {
+	assign(ripple.style, {
 		top: `${posY - realRadius}px`,
 		left: `${posX - realRadius}px`,
 	})

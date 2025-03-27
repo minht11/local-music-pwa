@@ -57,8 +57,11 @@
 	"playerOpenQueue": "Open queue",
 
 	"replaceDirectoryQ": "Replace directory?",
-	"replaceDirectoryExplanation": "The directory {newDir} you're adding is a parent of {existingDirs} which already exists in your Library.\n No changes will occur for existing tracks.",
+	"replaceDirectoryExplanation": "The directory {newDir} you're adding is a parent of {existingDirs} which already exists in your Library.\n No changes will occur for existing tracks in your library.",
 	"directoryIsIncludedInParent": "\"{newDir}\" is subdirectory of \"{existingDir}\" which is already in your Library. You do not need to add it again.",
+
+	"libraryPlaylistCreated": "Playlist \"{playlistName}\" created",
+	"libraryPlaylistUpdated": "Playlist updated",
 
 	"settingsCurrentTracksInLibrary": "Currently there are {tracksCount} tracks inside your library",
 	"settingsAllDataLocal": "All data is stored on your device",
@@ -83,6 +86,7 @@
 	"aboutPrivacy": "Privacy",
 
 	"errorPageDoesNotExist": "Looks like this page doesn't exist.",
+	"errorUnexpected": "An unexpected error occurred.",
 
 	"validationRequired": "Field is required",
 	"validationMinLength": "At least {min} characters are required",
