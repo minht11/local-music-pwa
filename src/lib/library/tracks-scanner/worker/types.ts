@@ -1,6 +1,6 @@
 import type { FileEntity } from '$lib/helpers/file-system'
 
-export interface TrackImportCount {
+export interface TracksScanResult {
 	/** Count of many tracks were newly added */
 	newlyImported: number
 	/** Index of currently scanned track */
@@ -9,12 +9,12 @@ export interface TrackImportCount {
 	total: number
 }
 
-export interface TrackImportMessage {
+export interface TracksScanMessage {
 	finished: boolean
-	count: TrackImportCount
+	count: TracksScanResult
 }
 
-export type TrackImportOptions =
+export type TracksScanOptions =
 	| {
 			action: 'directory-add' | 'directory-rescan'
 			dirId: number

@@ -81,6 +81,13 @@
 	"settingsMotionNormal": "Normal",
 	"settingsAbout": "About",
 
+	"settingsGrantDirectoryAccess": "You need to allow the app access to the directory, via browser permission so it can scan its contents",
+	"settingsDirectoryRemoved": "Directory removed",
+	"settingsPreparingForScan": "Preparing for the scan",
+	"settingsScanInProgress": "Scanning tracks. {current} of {total}",
+	"settingsScanNoNewTracks": "No new tracks were found",
+	"settingsScanNewOrUpdatedTracks": "Found {newTracks} new or updated tracks",
+
 	"about": "About",
 	"aboutSourceCode": "Source code",
 	"aboutPrivacy": "Privacy",

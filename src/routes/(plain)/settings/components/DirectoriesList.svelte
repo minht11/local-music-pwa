@@ -14,7 +14,7 @@
 		removeDirectory,
 		replaceDirectories,
 		rescanDirectory,
-	} from '../directories.svelte.ts'
+	} from '../tracks/scanner-operations.ts'
 
 	interface Props {
 		disabled: boolean

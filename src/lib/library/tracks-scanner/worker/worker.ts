@@ -6,7 +6,7 @@ import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-sy
 import { removeTrack } from '$lib/library/tracks.svelte'
 import { importTrackToDb } from './import-track-to-db.ts'
 import { parseTrack } from './parse/parse-track.ts'
-import type { TrackImportMessage, TrackImportOptions } from './types.ts'
+import type { TracksScanMessage, TracksScanOptions } from './types.ts'
 
 declare const self: DedicatedWorkerGlobalScope
 
@@ -57,7 +57,7 @@ class StatusTracker {
 	}
 
 	sendMsg = (finished: boolean) => {
-		const message: TrackImportMessage = {
+		const message: TracksScanMessage = {
 			finished,
 			count: {
 				newlyImported: this.newlyImported,
@@ -221,7 +221,7 @@ const scanNewDirectory = async (files: FileEntity[], directoryId: number) => {
 	tracker.sendMsg(true)
 }
 
-self.addEventListener('message', async (event: MessageEvent<TrackImportOptions>) => {
+self.addEventListener('message', async (event: MessageEvent<TracksScanOptions>) => {
 	const options = event.data
 
 	if (options.action === 'directory-add') {

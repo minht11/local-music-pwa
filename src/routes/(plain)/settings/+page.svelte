@@ -13,7 +13,7 @@
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
 	import DirectoriesList from './components/DirectoriesList.svelte'
 	import MissingFsApiBanner from './components/MissingFsApiBanner.svelte'
-	import { isDatabaseOperationPending } from './directories.svelte.ts'
+	import { isDatabaseOperationPending } from './tracks/lock-database.ts'
 
 	const { data } = $props()
 
