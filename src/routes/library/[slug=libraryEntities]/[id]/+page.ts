@@ -1,5 +1,5 @@
 import { goto } from '$app/navigation'
-import { getEntityData } from '$lib/db/entity.ts'
+import { getEntityData, NoEntityFoundError } from '$lib/db/entity.ts'
 import { type DbValue, getDB } from '$lib/db/get-db.ts'
 import {
 	createPageQuery,
@@ -24,27 +24,13 @@ const configMap = {
 	},
 } as const
 
-class DbItemNotFound extends Error {
-	constructor() {
-		super('DbItemNotFound')
-	}
-}
-
 const createDetailsPageQuery = <T extends DetailsSlug>(
 	storeName: T,
 	id: number,
 ): PageQueryResult<DbValue<T>> => {
 	const query = createPageQuery({
 		key: () => [storeName, id],
-		fetcher: async () => {
-			const item = await getEntityData(storeName, id)
-
-			if (!item) {
-				throw new DbItemNotFound()
-			}
-
-			return item
-		},
+		fetcher: () => getEntityData(storeName, id),
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {
 				if (change.storeName === storeName && change.key === id) {
@@ -60,7 +46,7 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 			}
 		},
 		onError: (error) => {
-			if (error instanceof DbItemNotFound) {
+			if (error instanceof NoEntityFoundError) {
 				void goto(`/library/${storeName}`, { replaceState: true })
 			}
 		},

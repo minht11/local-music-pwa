@@ -238,14 +238,21 @@ export interface EntityQueryOptions<AllowEmpty extends boolean = false> {
 	allowEmpty?: AllowEmpty
 }
 
+export class NoEntityFoundError extends Error {
+	constructor(storeName: EntityStoreName, id: number) {
+		super(`${storeName} with id ${id} not found`)
+		this.name = 'NoEntityFoundError'
+	}
+}
+
 const unwrapEntityValue = <T, AllowEmpty extends boolean = false>(
 	value: T,
 	id: number,
-	storeName: string,
+	storeName: EntityStoreName,
 	allowEmpty?: AllowEmpty,
 ) => {
 	if (!(value || allowEmpty)) {
-		throw new Error(`${storeName} with id ${id} not found`)
+		throw new NoEntityFoundError(storeName, id)
 	}
 
 	return value
