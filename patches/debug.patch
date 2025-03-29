@@ -1,0 +1,443 @@
+diff --git a/package.json b/package.json
+index 60dfcf57cae4075ae91eb6a9c8ce99356f920b69..095c4b967913e1b57fe5a1a6d00635f24fde0901 100644
+--- a/package.json
++++ b/package.json
+@@ -1,65 +1,66 @@
+ {
+-  "name": "debug",
+-  "version": "4.4.0",
+-  "repository": {
+-    "type": "git",
+-    "url": "git://github.com/debug-js/debug.git"
+-  },
+-  "description": "Lightweight debugging utility for Node.js and the browser",
+-  "keywords": [
+-    "debug",
+-    "log",
+-    "debugger"
+-  ],
+-  "files": [
+-    "src",
+-    "LICENSE",
+-    "README.md"
+-  ],
+-  "author": "Josh Junon (https://github.com/qix-)",
+-  "contributors": [
+-    "TJ Holowaychuk <tj@vision-media.ca>",
+-    "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io)",
+-    "Andrew Rhyne <rhyneandrew@gmail.com>"
+-  ],
+-  "license": "MIT",
+-  "scripts": {
+-    "lint": "xo",
+-    "test": "npm run test:node && npm run test:browser && npm run lint",
+-    "test:node": "istanbul cover _mocha -- test.js test.node.js",
+-    "test:browser": "karma start --single-run",
+-    "test:coverage": "cat ./coverage/lcov.info | coveralls"
+-  },
+-  "dependencies": {
+-    "ms": "^2.1.3"
+-  },
+-  "devDependencies": {
+-    "brfs": "^2.0.1",
+-    "browserify": "^16.2.3",
+-    "coveralls": "^3.0.2",
+-    "istanbul": "^0.4.5",
+-    "karma": "^3.1.4",
+-    "karma-browserify": "^6.0.0",
+-    "karma-chrome-launcher": "^2.2.0",
+-    "karma-mocha": "^1.3.0",
+-    "mocha": "^5.2.0",
+-    "mocha-lcov-reporter": "^1.2.0",
+-    "sinon": "^14.0.0",
+-    "xo": "^0.23.0"
+-  },
+-  "peerDependenciesMeta": {
+-    "supports-color": {
+-      "optional": true
+-    }
+-  },
+-  "main": "./src/index.js",
+-  "browser": "./src/browser.js",
+-  "engines": {
+-    "node": ">=6.0"
+-  },
+-  "xo": {
+-    "rules": {
+-      "import/extensions": "off"
+-    }
+-  }
++	"name": "debug",
++	"version": "4.4.0",
++	"repository": {
++		"type": "git",
++		"url": "git://github.com/debug-js/debug.git"
++	},
++	"sideEffects": false,
++	"description": "Lightweight debugging utility for Node.js and the browser",
++	"keywords": [
++		"debug",
++		"log",
++		"debugger"
++	],
++	"files": [
++		"src",
++		"LICENSE",
++		"README.md"
++	],
++	"author": "Josh Junon (https://github.com/qix-)",
++	"contributors": [
++		"TJ Holowaychuk <tj@vision-media.ca>",
++		"Nathan Rajlich <nathan@tootallnate.net> (http://n8.io)",
++		"Andrew Rhyne <rhyneandrew@gmail.com>"
++	],
++	"license": "MIT",
++	"scripts": {
++		"lint": "xo",
++		"test": "npm run test:node && npm run test:browser && npm run lint",
++		"test:node": "istanbul cover _mocha -- test.js test.node.js",
++		"test:browser": "karma start --single-run",
++		"test:coverage": "cat ./coverage/lcov.info | coveralls"
++	},
++	"dependencies": {
++		"ms": "^2.1.3"
++	},
++	"devDependencies": {
++		"brfs": "^2.0.1",
++		"browserify": "^16.2.3",
++		"coveralls": "^3.0.2",
++		"istanbul": "^0.4.5",
++		"karma": "^3.1.4",
++		"karma-browserify": "^6.0.0",
++		"karma-chrome-launcher": "^2.2.0",
++		"karma-mocha": "^1.3.0",
++		"mocha": "^5.2.0",
++		"mocha-lcov-reporter": "^1.2.0",
++		"sinon": "^14.0.0",
++		"xo": "^0.23.0"
++	},
++	"peerDependenciesMeta": {
++		"supports-color": {
++			"optional": true
++		}
++	},
++	"main": "./src/index.js",
++	"browser": "./src/browser.js",
++	"engines": {
++		"node": ">=6.0"
++	},
++	"xo": {
++		"rules": {
++			"import/extensions": "off"
++		}
++	}
+ }
+diff --git a/src/browser.js b/src/browser.js
+index df8e179e8b5d9b1d215e4bb06beca85272031859..8db6904f2198f6f90a4f47100779dbeb2d3783ff 100644
+--- a/src/browser.js
++++ b/src/browser.js
+@@ -1,107 +1,20 @@
+ /* eslint-env browser */
+ 
+-/**
+- * This is the web browser implementation of `debug()`.
+- */
++/*@__NO_SIDE_EFFECTS__*/
++const noop = () => {}
+ 
+-exports.formatArgs = formatArgs;
+-exports.save = save;
+-exports.load = load;
+-exports.useColors = useColors;
+-exports.storage = localstorage();
+-exports.destroy = (() => {
+-	let warned = false;
+-
+-	return () => {
+-		if (!warned) {
+-			warned = true;
+-			console.warn('Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.');
+-		}
+-	};
+-})();
++exports.formatArgs = noop
++exports.save = noop
++exports.load = noop
++exports.useColors = noop
++exports.storage = noop
++exports.destroy = noop
+ 
+ /**
+  * Colors.
+  */
+ 
+-exports.colors = [
+-	'#0000CC',
+-	'#0000FF',
+-	'#0033CC',
+-	'#0033FF',
+-	'#0066CC',
+-	'#0066FF',
+-	'#0099CC',
+-	'#0099FF',
+-	'#00CC00',
+-	'#00CC33',
+-	'#00CC66',
+-	'#00CC99',
+-	'#00CCCC',
+-	'#00CCFF',
+-	'#3300CC',
+-	'#3300FF',
+-	'#3333CC',
+-	'#3333FF',
+-	'#3366CC',
+-	'#3366FF',
+-	'#3399CC',
+-	'#3399FF',
+-	'#33CC00',
+-	'#33CC33',
+-	'#33CC66',
+-	'#33CC99',
+-	'#33CCCC',
+-	'#33CCFF',
+-	'#6600CC',
+-	'#6600FF',
+-	'#6633CC',
+-	'#6633FF',
+-	'#66CC00',
+-	'#66CC33',
+-	'#9900CC',
+-	'#9900FF',
+-	'#9933CC',
+-	'#9933FF',
+-	'#99CC00',
+-	'#99CC33',
+-	'#CC0000',
+-	'#CC0033',
+-	'#CC0066',
+-	'#CC0099',
+-	'#CC00CC',
+-	'#CC00FF',
+-	'#CC3300',
+-	'#CC3333',
+-	'#CC3366',
+-	'#CC3399',
+-	'#CC33CC',
+-	'#CC33FF',
+-	'#CC6600',
+-	'#CC6633',
+-	'#CC9900',
+-	'#CC9933',
+-	'#CCCC00',
+-	'#CCCC33',
+-	'#FF0000',
+-	'#FF0033',
+-	'#FF0066',
+-	'#FF0099',
+-	'#FF00CC',
+-	'#FF00FF',
+-	'#FF3300',
+-	'#FF3333',
+-	'#FF3366',
+-	'#FF3399',
+-	'#FF33CC',
+-	'#FF33FF',
+-	'#FF6600',
+-	'#FF6633',
+-	'#FF9900',
+-	'#FF9933',
+-	'#FFCC00',
+-	'#FFCC33'
+-];
++exports.colors = /* @__PURE__ */ []
+ 
+ /**
+  * Currently only WebKit-based Web Inspectors, Firefox >= v31,
+@@ -116,28 +29,48 @@ function useColors() {
+ 	// NB: In an Electron preload script, document will be defined but not fully
+ 	// initialized. Since we know we're in Chrome, we'll just detect this case
+ 	// explicitly
+-	if (typeof window !== 'undefined' && window.process && (window.process.type === 'renderer' || window.process.__nwjs)) {
+-		return true;
++	if (
++		typeof window !== 'undefined' &&
++		window.process &&
++		(window.process.type === 'renderer' || window.process.__nwjs)
++	) {
++		return true
+ 	}
+ 
+ 	// Internet Explorer and Edge do not support colors.
+-	if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
+-		return false;
++	if (
++		typeof navigator !== 'undefined' &&
++		navigator.userAgent &&
++		navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)
++	) {
++		return false
+ 	}
+ 
+-	let m;
++	let m
+ 
+ 	// Is webkit? http://stackoverflow.com/a/16459606/376773
+ 	// document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
+ 	// eslint-disable-next-line no-return-assign
+-	return (typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance) ||
++	return (
++		(typeof document !== 'undefined' &&
++			document.documentElement &&
++			document.documentElement.style &&
++			document.documentElement.style.WebkitAppearance) ||
+ 		// Is firebug? http://stackoverflow.com/a/398120/376773
+-		(typeof window !== 'undefined' && window.console && (window.console.firebug || (window.console.exception && window.console.table))) ||
++		(typeof window !== 'undefined' &&
++			window.console &&
++			(window.console.firebug || (window.console.exception && window.console.table))) ||
+ 		// Is firefox >= v31?
+ 		// https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+-		(typeof navigator !== 'undefined' && navigator.userAgent && (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) && parseInt(m[1], 10) >= 31) ||
++		(typeof navigator !== 'undefined' &&
++			navigator.userAgent &&
++			(m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) &&
++			parseInt(m[1], 10) >= 31) ||
+ 		// Double check webkit in userAgent just in case we are in a worker
+-		(typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/));
++		(typeof navigator !== 'undefined' &&
++			navigator.userAgent &&
++			navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/))
++	)
+ }
+ 
+ /**
+@@ -147,38 +80,40 @@ function useColors() {
+  */
+ 
+ function formatArgs(args) {
+-	args[0] = (this.useColors ? '%c' : '') +
++	args[0] =
++		(this.useColors ? '%c' : '') +
+ 		this.namespace +
+ 		(this.useColors ? ' %c' : ' ') +
+ 		args[0] +
+ 		(this.useColors ? '%c ' : ' ') +
+-		'+' + module.exports.humanize(this.diff);
++		'+' +
++		module.exports.humanize(this.diff)
+ 
+ 	if (!this.useColors) {
+-		return;
++		return
+ 	}
+ 
+-	const c = 'color: ' + this.color;
+-	args.splice(1, 0, c, 'color: inherit');
++	const c = 'color: ' + this.color
++	args.splice(1, 0, c, 'color: inherit')
+ 
+ 	// The final "%c" is somewhat tricky, because there could be other
+ 	// arguments passed either before or after the %c, so we need to
+ 	// figure out the correct index to insert the CSS into
+-	let index = 0;
+-	let lastC = 0;
+-	args[0].replace(/%[a-zA-Z%]/g, match => {
++	let index = 0
++	let lastC = 0
++	args[0].replace(/%[a-zA-Z%]/g, (match) => {
+ 		if (match === '%%') {
+-			return;
++			return
+ 		}
+-		index++;
++		index++
+ 		if (match === '%c') {
+ 			// We only are interested in the *last* %c
+ 			// (the user may have provided their own)
+-			lastC = index;
++			lastC = index
+ 		}
+-	});
++	})
+ 
+-	args.splice(lastC, 0, c);
++	args.splice(lastC, 0, c)
+ }
+ 
+ /**
+@@ -189,7 +124,7 @@ function formatArgs(args) {
+  *
+  * @api public
+  */
+-exports.log = console.debug || console.log || (() => {});
++exports.log = console.debug || console.log || (() => {})
+ 
+ /**
+  * Save `namespaces`.
+@@ -200,9 +135,9 @@ exports.log = console.debug || console.log || (() => {});
+ function save(namespaces) {
+ 	try {
+ 		if (namespaces) {
+-			exports.storage.setItem('debug', namespaces);
++			exports.storage.setItem('debug', namespaces)
+ 		} else {
+-			exports.storage.removeItem('debug');
++			exports.storage.removeItem('debug')
+ 		}
+ 	} catch (error) {
+ 		// Swallow
+@@ -217,9 +152,9 @@ function save(namespaces) {
+  * @api private
+  */
+ function load() {
+-	let r;
++	let r
+ 	try {
+-		r = exports.storage.getItem('debug');
++		r = exports.storage.getItem('debug')
+ 	} catch (error) {
+ 		// Swallow
+ 		// XXX (@Qix-) should we be logging these?
+@@ -227,10 +162,10 @@ function load() {
+ 
+ 	// If debug isn't set in LS, and we're in Electron, try to load $DEBUG
+ 	if (!r && typeof process !== 'undefined' && 'env' in process) {
+-		r = process.env.DEBUG;
++		r = process.env.DEBUG
+ 	}
+ 
+-	return r;
++	return r
+ }
+ 
+ /**
+@@ -248,25 +183,19 @@ function localstorage() {
+ 	try {
+ 		// TVMLKit (Apple TV JS Runtime) does not have a window object, just localStorage in the global context
+ 		// The Browser also has localStorage in the global context.
+-		return localStorage;
++		return localStorage
+ 	} catch (error) {
+ 		// Swallow
+ 		// XXX (@Qix-) should we be logging these?
+ 	}
+ }
+ 
+-module.exports = require('./common')(exports);
++// module.exports = require('./common')(exports)
+ 
+-const {formatters} = module.exports;
++// const { formatters } = module.exports
+ 
+ /**
+  * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
+  */
+ 
+-formatters.j = function (v) {
+-	try {
+-		return JSON.stringify(v);
+-	} catch (error) {
+-		return '[UnexpectedJSONParseError]: ' + error.message;
+-	}
+-};
++formatters.j = noop

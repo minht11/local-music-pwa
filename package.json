@@ -65,7 +65,8 @@
 			"prettier-plugin-sort-imports": "-"
 		},
 		"patchedDependencies": {
-			"@material/material-color-utilities": "patches/@material__material-color-utilities.patch"
+			"@material/material-color-utilities": "patches/@material__material-color-utilities.patch",
+			"debug": "patches/debug.patch"
 		},
 		"onlyBuiltDependencies": [
 			"@biomejs/biome",
