@@ -28,11 +28,11 @@ export const load: LayoutLoad = () => {
 	}
 
 	defineViewTransitionMatcher((to, from) => {
-		const prevRouteWasPlayer = from?.startsWith('/player')
-		const nextRouteIsPlayer = to?.startsWith('/player')
+		const prevRouteWasPlayer = from.startsWith('/(app)/player')
+		const nextRouteIsPlayer = to.startsWith('/(app)/player')
 
-		const prevRouteWasQueue = from?.endsWith('/queue')
-		const nextRouteIsQueue = to?.endsWith('/queue')
+		const prevRouteWasQueue = from.endsWith('/queue')
+		const nextRouteIsQueue = to.endsWith('/queue')
 
 		const viewBetweenPlayerAndQueue =
 			(prevRouteWasPlayer && nextRouteIsQueue) || (prevRouteWasQueue && nextRouteIsPlayer)

@@ -15,18 +15,20 @@
 	]
 </script>
 
-<header class="flex h-16 w-full items-center justify-between bg-surfaceContainerHigh px-4">
-	<div class="text-title-md">Snae player</div>
+<header class="w-full items-center bg-surfaceContainerHigh">
+	<div class="content-width flex h-16 w-full items-center justify-between">
+		<div class="text-title-md">Snae player</div>
 
-	<Button as="a" href="/library/tracks" kind="toned">Open the app</Button>
+		<Button as="a" href="/library/tracks" kind="toned">Open app</Button>
+	</div>
 </header>
 
-<section class="flex flex-col items-center bg-surfaceContainer px-10 py-20">
+<section class="content-width-using-grid justify-items-center bg-surfaceContainer px-10 py-20">
 	<h1 class="mx-auto max-w-200 text-center text-headline-sm sm:text-headline-md">
 		Play your local music files right in your browser
 	</h1>
 
-	<Button as="a" href="/library/tracks" class="mt-6 w-full max-w-50">Open the app</Button>
+	<Button as="a" href="/library/tracks" class="mt-6 w-full max-w-50">Go to the app</Button>
 </section>
 
 <section class="content-width mt-6">
@@ -55,5 +57,11 @@
 		padding-right: 24px;
 		margin-left: auto;
 		margin-right: auto;
+	}
+
+	.content-width-using-grid {
+		display: grid;
+		grid-template-columns: minmax(0, var(--content-max-width));
+		justify-content: center;
 	}
 </style>

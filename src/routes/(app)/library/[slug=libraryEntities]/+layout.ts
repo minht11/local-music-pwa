@@ -1,5 +1,5 @@
 import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
-import { defineViewTransitionMatcher } from '$lib/view-transitions.ts'
+import { defineViewTransitionMatcher, type RouteId } from '$lib/view-transitions.ts'
 import { innerWidth } from 'svelte/reactivity/window'
 import type { LayoutLoad } from './$types.ts'
 import { defineLibraryPageData } from './store.svelte'
@@ -95,8 +95,8 @@ export const load: LayoutLoad = async (event) => {
 	}
 
 	defineViewTransitionMatcher((to, from) => {
-		const libraryRoute = '/library/[slug=libraryEntities]'
-		const detailsRoute = '/library/[slug=libraryEntities]/[id]'
+		const libraryRoute: RouteId = '/(app)/library/[slug=libraryEntities]'
+		const detailsRoute: RouteId = '/(app)/library/[slug=libraryEntities]/[id]'
 
 		if (to === libraryRoute && from === libraryRoute) {
 			return { view: 'library' } as const

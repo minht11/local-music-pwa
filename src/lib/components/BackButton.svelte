@@ -10,12 +10,16 @@
 
 	const { class: className }: Props = $props()
 
+	const goHome = () => {
+		void goto('/library/tracks')
+	}
+
 	const handleBackClick = () => {
 		if (window.navigation !== undefined) {
 			if (window.navigation.canGoBack) {
 				window.navigation.back()
 			} else {
-				void goto('/')
+				goHome()
 			}
 
 			return
@@ -32,7 +36,7 @@
 		// if it didn't back button most likely didn't do anything.
 		void wait(50).then(() => {
 			if (path === page.url.pathname) {
-				void goto('/')
+				goHome()
 			}
 		})
 	}

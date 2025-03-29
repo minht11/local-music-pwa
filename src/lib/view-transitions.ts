@@ -1,4 +1,5 @@
 import { onNavigate } from '$app/navigation'
+import type { LayoutLoadEvent } from '../routes/(app)/$types'
 import { getActiveRipplesCount } from './actions/ripple.ts'
 import { wait } from './helpers/utils/wait.ts'
 
@@ -9,10 +10,12 @@ export type AppViewTransitionTypeMatcherResult = {
 	backNavigation?: boolean
 } | null
 
+export type RouteId = LayoutLoadEvent['route']['id']
+
 /** Used to determine which data attributes to add in order to apply correct view transition */
 export type AppViewTransitionTypeMatcher = (
-	to: string,
-	from: string,
+	to: RouteId,
+	from: RouteId,
 ) => AppViewTransitionTypeMatcherResult
 
 const matchers: (AppViewTransitionTypeMatcher | undefined)[] = []
@@ -38,7 +41,7 @@ export const setupAppViewTransitions = (disabled: () => boolean): void => {
 
 		if (to && from) {
 			for (const matcher of matchers) {
-				const matched = matcher?.(to, from)
+				const matched = matcher?.(to as RouteId, from as RouteId)
 
 				if (matched) {
 					viewType = matched.view

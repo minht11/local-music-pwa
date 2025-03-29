@@ -66,7 +66,7 @@
 	const isDatabasePending = $derived(isDatabasePendingGetter.current)
 </script>
 
-<section class="card container-lg mx-auto w-full max-w-[var(--settings-max-width)]">
+<section class="card container-lg settings-max-width mx-auto w-full">
 	<div class="px-4 pt-4">
 		<div class="text-body-lg">
 			<WrapTranslation messageFn={m.settingsCurrentTracksInLibrary}>
@@ -104,7 +104,7 @@
 	</div>
 </section>
 
-<section class="card mx-auto mt-6 w-full max-w-[var(--settings-max-width)] text-body-lg">
+<section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
 	<div class="px-4 pt-4 text-title-sm">{m.settingsAppearance()}</div>
 
 	<div class="flex items-center justify-between p-4">
@@ -115,7 +115,7 @@
 			items={themeOptions}
 			key="value"
 			labelKey="name"
-			class="w-25"
+			class="w-35"
 		/>
 	</div>
 
@@ -177,7 +177,7 @@
 			items={motionOptions}
 			key="value"
 			labelKey="name"
-			class="w-25"
+			class="w-35"
 		/>
 	</div>
 
@@ -192,7 +192,7 @@
 	</div>
 </section>
 
-<section class="card mx-auto mt-6 w-full max-w-[var(--settings-max-width)] text-body-lg">
+<section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
 	<div class="flex items-center justify-between p-4">
 		<div>{m.about()}</div>
 
@@ -203,7 +203,7 @@
 <style>
 	@reference '../../../../app.css';
 
-	:root {
-		--settings-max-width: --spacing(225);
+	.settings-max-width {
+		max-width: --spacing(225);
 	}
 </style>
