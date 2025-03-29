@@ -2,14 +2,22 @@ import { autoPlacement, autoUpdate, computePosition, offset } from '@floating-ui
 import type { Action } from 'svelte/action'
 import { on } from 'svelte/events'
 
-const tooltipTemplate = document.createElement('div')
-tooltipTemplate.setAttribute('role', 'tooltip')
-tooltipTemplate.className =
-	'tooltip-enter bg-inverseSurface text-nowrap flex items-center inset-0 m-0 text-body-sm min-h-6 text-inverseOnSurface px-2 rounded-sm'
-tooltipTemplate.popover = 'manual'
+let tooltipTemplate: HTMLDivElement | null = null
+const getTooltipTemplate = () => {
+	if (tooltipTemplate === null) {
+		tooltipTemplate = document.createElement('div')
+		tooltipTemplate.setAttribute('role', 'tooltip')
+		tooltipTemplate.className =
+			'tooltip-enter bg-inverseSurface text-nowrap flex items-center inset-0 m-0 text-body-sm min-h-6 text-inverseOnSurface px-2 rounded-sm'
+		tooltipTemplate.popover = 'manual'
+	}
+
+	return tooltipTemplate.cloneNode() as HTMLDivElement
+}
+
 
 export const tooltip: Action<HTMLElement, string | undefined> = (target, message) => {
-	if (!message) {
+	if (!message || import.meta.env.SSR) {
 		return
 	}
 
@@ -38,7 +46,7 @@ export const tooltip: Action<HTMLElement, string | undefined> = (target, message
 
 		target.removeAttribute('title')
 
-		element = element ?? (tooltipTemplate.cloneNode() as HTMLElement)
+		element = element ?? getTooltipTemplate()
 		element.textContent = messageValue
 
 		document.body.appendChild(element)

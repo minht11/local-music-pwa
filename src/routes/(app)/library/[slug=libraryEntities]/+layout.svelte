@@ -192,7 +192,7 @@
 </ListDetailsLayout>
 
 <style>
-	@reference '../../../app.css';
+	@reference '../../../../app.css';
 
 	:root {
 		--library-max-width: --spacing(400);

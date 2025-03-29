@@ -120,7 +120,7 @@
 <style>
 	@reference '../../app.css';
 
-	input:active ~ div > .thumb {
+	input:is(:active, :focus-visible) ~ div > .thumb {
 		transform: scaleX(0.5);
 	}
 

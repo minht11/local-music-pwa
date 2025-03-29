@@ -184,7 +184,7 @@
 />
 
 <style>
-	@reference '../../app.css';
+	@reference '../../../app.css';
 
 	:global(html[data-view-player]) :global {
 		.pl-view-container {

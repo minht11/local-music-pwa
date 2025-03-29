@@ -201,7 +201,7 @@
 </section>
 
 <style>
-	@reference '../../../app.css';
+	@reference '../../../../app.css';
 
 	:root {
 		--settings-max-width: --spacing(225);

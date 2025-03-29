@@ -17,7 +17,7 @@ export const scanTracks = async (options: TracksScanOptions): Promise<void> => {
 	const result = await startTrackScanning(options, (data) => {
 		snackbar({
 			id: snackbarId,
-			message: m.settingsScanningTracks({
+			message: m.settingsScanInProgress({
 				current: data.current,
 				total: data.total,
 			}),

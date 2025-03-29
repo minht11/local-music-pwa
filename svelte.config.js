@@ -10,11 +10,9 @@ const config = {
 	kit: {
 		outDir: './.generated/svelte-kit',
 		adapter: adapter({
-			fallback: 'index.html',
+			fallback: '200.html',
 		}),
-		prerender: {
-			entries: [],
-		},
+		// prerender:
 		alias: {
 			$paraglide: './.generated/paraglide',
 		},

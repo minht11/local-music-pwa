@@ -327,7 +327,10 @@ const defineEntityQuery =
 		})
 	}
 
-export const createTrackQuery = /* @__PURE__ */ defineEntityQuery('tracks')
-export const createAlbumQuery = /* @__PURE__ */ defineEntityQuery('albums')
-export const createArtistQuery = /* @__PURE__ */ defineEntityQuery('artists')
-export const createPlaylistQuery = /* @__PURE__ */ defineEntityQuery('playlists')
+type DefineEntityQuery<StoreName extends EntityStoreName> = typeof defineEntityQuery<StoreName>
+type EntityQuery<StoreName extends EntityStoreName> = ReturnType<DefineEntityQuery<StoreName>>
+
+export const createTrackQuery: EntityQuery<'tracks'> = /* @__PURE__ */ defineEntityQuery('tracks')
+export const createAlbumQuery: EntityQuery<'albums'> = /* @__PURE__ */ defineEntityQuery('albums')
+export const createArtistQuery: EntityQuery<'artists'> = /* @__PURE__ */ defineEntityQuery('artists')
+export const createPlaylistQuery: EntityQuery<'playlists'> = /* @__PURE__ */ defineEntityQuery('playlists')

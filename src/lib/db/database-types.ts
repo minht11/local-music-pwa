@@ -10,17 +10,6 @@ export type OmitId<T> = Omit<T, 'id'>
  */
 export const LEGACY_NO_NATIVE_DIRECTORY = -1
 
-export const MusicItemKey = {
-	NAME: 'name',
-	ArtistS: 'artists',
-	Album: 'album',
-	YEAR: 'year',
-	DURATION: 'duration',
-	DATE_CREATED: 'dateCreated',
-} as const
-
-export type MusicItemKey = (typeof MusicItemKey)[keyof typeof MusicItemKey]
-
 export interface BaseMusicItem {
 	id: number
 	name: string
