@@ -1,7 +1,7 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
-import { type DBChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
+import { type DatabaseChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
+import { getDatabase } from '$lib/db/database'
 import type { Directory } from '$lib/db/database-types'
-import { getDB } from '$lib/db/get-db'
 import { removeTrack } from '$lib/library/tracks.svelte'
 import { lockDatabase } from './lock-database.ts'
 import { scanTracks } from './scan-tracks.ts'
@@ -41,7 +41,7 @@ export const checkNewDirectoryStatus = async (
 }
 
 const dbImportNewDirectory = async (dirHandle: FileSystemDirectoryHandle): Promise<void> => {
-	const db = await getDB()
+	const db = await getDatabase()
 	const id = await db.add('directories', {
 		handle: dirHandle,
 	} as Directory)
@@ -110,7 +110,7 @@ const dbReplaceDirectories = async (
 	// We pick last id and make it the parents new id.
 	invariant(directoryId)
 
-	const db = await getDB()
+	const db = await getDatabase()
 	const tx = db.transaction(['directories', 'tracks'], 'readwrite')
 
 	const newDir: Directory = {
@@ -118,7 +118,7 @@ const dbReplaceDirectories = async (
 		handle: parentDirHandle,
 	}
 
-	const replaceHandlePromise = tx.objectStore('directories').put(newDir).then((): DBChangeRecord => ({
+	const replaceHandlePromise = tx.objectStore('directories').put(newDir).then((): DatabaseChangeRecord => ({
 		key: directoryId,
 		storeName: 'directories',
 		operation: 'add',
@@ -126,7 +126,7 @@ const dbReplaceDirectories = async (
 	}))
 	
 	const promises = dirIds.map(
-		async (existingDirId): Promise<DBChangeRecord[]> => {
+		async (existingDirId): Promise<DatabaseChangeRecord[]> => {
 			// Update all tracks to point to the new directory.
 			const updatedTracksPromise = tx
 				.objectStore('tracks')
@@ -135,7 +135,7 @@ const dbReplaceDirectories = async (
 				.then(async (c) => {
 					let cursor = c
 
-					const trackChangeRecords: DBChangeRecord[] = []
+					const trackChangeRecords: DatabaseChangeRecord[] = []
 					while (cursor) {
 						const track = cursor.value
 						track.directory = directoryId
@@ -157,7 +157,7 @@ const dbReplaceDirectories = async (
 				.objectStore('directories')
 				.delete(existingDirId)
 				.then(
-					(): DBChangeRecord => ({
+					(): DatabaseChangeRecord => ({
 						key: existingDirId,
 						storeName: 'directories',
 						operation: 'delete',
@@ -193,7 +193,7 @@ export const replaceDirectories = async (
 }
 
 const dbRemoveDirectory = async (directoryId: number): Promise<void> => {
-	const db = await getDB()
+	const db = await getDatabase()
 
 	const tx = db.transaction(['directories', 'tracks'])
 	const [tracksToBeRemoved] = await Promise.all([

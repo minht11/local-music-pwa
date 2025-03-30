@@ -1,6 +1,6 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
-import { type DBChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
-import { type AppDB, getDB } from '$lib/db/get-db'
+import { type DatabaseChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
+import { type AppDB, getDatabase } from '$lib/db/database'
 import type { IDBPTransaction, IndexNames } from 'idb'
 
 type LibraryStoreName = 'tracks' | 'albums' | 'artists'
@@ -39,7 +39,7 @@ const removeTrackRelatedData = async <
 		return
 	}
 
-	const change: DBChangeRecord = {
+	const change: DatabaseChangeRecord = {
 		storeName: entityStoreName,
 		key: entity.id,
 		operation: 'delete',
@@ -49,7 +49,7 @@ const removeTrackRelatedData = async <
 }
 
 const removeTrackFromPlaylistsInDatabase = async (trackId: number) => {
-	const db = await getDB()
+	const db = await getDatabase()
 	const tx = db.transaction(['playlists', 'playlistsTracks'], 'readwrite')
 
 	const store = tx.objectStore('playlistsTracks')
@@ -60,7 +60,7 @@ const removeTrackFromPlaylistsInDatabase = async (trackId: number) => {
 	await store.delete(range)
 
 	const changes = tracks.map(
-		(t): DBChangeRecord => ({
+		(t): DatabaseChangeRecord => ({
 			operation: 'delete',
 			storeName: 'playlistsTracks',
 			key: [t.playlistId, t.trackId],
@@ -71,7 +71,7 @@ const removeTrackFromPlaylistsInDatabase = async (trackId: number) => {
 }
 
 export const removeTrack = async (trackId: number): Promise<void> => {
-	const db = await getDB()
+	const db = await getDatabase()
 	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
 
 	const track = await tx.objectStore('tracks').get(trackId)

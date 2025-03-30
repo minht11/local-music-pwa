@@ -1,4 +1,4 @@
-import type { DbValue } from "$lib/db/get-db"
+import type { DbValue } from "$lib/db/database"
 import type { LibraryEntitySortKey } from "$lib/library/general"
 
 type LibrarySlug = 'tracks' | 'albums' | 'artists' | 'playlists'

@@ -1,6 +1,6 @@
-import { type DBChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
+import { type DatabaseChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
+import { type AppDB, getDatabase } from '$lib/db/database'
 import type { Album, Artist, Track, UnknownTrack } from '$lib/db/database-types'
-import { type AppDB, getDB } from '$lib/db/get-db'
 import type { IDBPTransaction } from 'idb'
 
 type ImportTrackTx = IDBPTransaction<
@@ -33,7 +33,7 @@ const importAlbum = async (tx: ImportTrackTx, track: Track) => {
 	// Id will be auto-generated
 	const albumId = await store.put(updatedAlbum as Album)
 
-	const change: DBChangeRecord = {
+	const change: DatabaseChangeRecord = {
 		storeName: 'albums',
 		key: albumId,
 		value: { ...updatedAlbum, id: albumId },
@@ -45,7 +45,7 @@ const importAlbum = async (tx: ImportTrackTx, track: Track) => {
 
 const importArtist = async (tx: ImportTrackTx, track: Track) => {
 	const store = tx.objectStore('artists')
-	const changes: DBChangeRecord[] = []
+	const changes: DatabaseChangeRecord[] = []
 
 	for (const artist of track.artists) {
 		const existingArtist = await store.index('name').get(artist)
@@ -59,7 +59,7 @@ const importArtist = async (tx: ImportTrackTx, track: Track) => {
 
 		const artistId = await store.put(newArtist as Artist)
 
-		const change: DBChangeRecord = {
+		const change: DatabaseChangeRecord = {
 			storeName: 'artists',
 			key: artistId,
 			value: { ...newArtist, id: artistId },
@@ -76,7 +76,7 @@ export const importTrackToDb = async (
 	metadata: UnknownTrack,
 	existingTrackId: number | undefined,
 ): Promise<number> => {
-	const db = await getDB()
+	const db = await getDatabase()
 	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
 
 	const trackId = await tx.objectStore('tracks').put(metadata as Track, existingTrackId)

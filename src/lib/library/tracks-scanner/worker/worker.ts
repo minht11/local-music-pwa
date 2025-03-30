@@ -1,7 +1,7 @@
 /// <reference lib='WebWorker' />
 
+import { getDatabase } from '$lib/db/database'
 import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/db/database-types.ts'
-import { getDB } from '$lib/db/get-db'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
 import { removeTrack } from '$lib/library/tracks.svelte'
 import { importTrackToDb } from './import-track-to-db.ts'
@@ -116,7 +116,7 @@ const findTrackByMixedFileEntity = async (handle: FileEntity, tracks: Track[]) =
 const SUPPORTED_EXTENSIONS = ['aac', 'mp3', 'ogg', 'wav', 'flac', 'm4a', 'opus']
 
 const scanExistingDirectory = async (handles: FileEntity[], directoryId: number) => {
-	const db = await getDB()
+	const db = await getDatabase()
 
 	const tracker = new StatusTracker(handles.length)
 	const scannedTracksIds = new Set<number>()

@@ -1,9 +1,9 @@
 import { assign } from '$lib/helpers/utils/assign.ts'
 import { unwrap } from '$lib/helpers/utils/unwrap.ts'
 import { untrack } from 'svelte'
-import { type DBChangeRecordList, listenForDatabaseChanges } from './channel.ts'
+import { type DatabaseChangeRecordList, listenForDatabaseChanges } from './channel.ts'
+import type { AppStoreNames } from './database.ts'
 import { preloadEntityData } from './entity.ts'
-import type { AppStoreNames } from './get-db.ts'
 
 export type QueryStatus = 'loading' | 'loaded' | 'error'
 
@@ -49,7 +49,7 @@ export type DbChangeActions<Result, InitialResult extends Result | undefined> = 
 }
 
 export type DatabaseChangeHandler<Result, InitialResult extends Result | undefined = undefined> = (
-	changes: DBChangeRecordList,
+	changes: DatabaseChangeRecordList,
 	actions: DbChangeActions<Result, InitialResult>,
 ) => void
 
@@ -357,7 +357,7 @@ export const keysListDatabaseChangeHandler = <
 	const StoreName extends Exclude<AppStoreNames, 'playlistsTracks'>,
 >(
 	storeName: StoreName,
-	changes: DBChangeRecordList,
+	changes: DatabaseChangeRecordList,
 	{ mutate, refetch }: DbChangeActions<number[], undefined>,
 ): void => {
 	let needRefetch = false

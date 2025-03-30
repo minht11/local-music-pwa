@@ -1,5 +1,5 @@
+import { type AppDB, getDatabase } from '$lib/db/database'
 import type { EntityStoreName } from '$lib/db/entity'
-import { type AppDB, getDB } from '$lib/db/get-db'
 import type { IDBPIndex, IndexNames } from 'idb'
 
 // TODO. Move these to entity.ts
@@ -45,7 +45,7 @@ export const getEntityIds = async <StoreName extends LibraryEntityStoreName>(
 	store: StoreName,
 	options: SortOptions<StoreName>,
 ): Promise<number[]> => {
-	const db = await getDB()
+	const db = await getDatabase()
 	const storeIndex = db.transaction(store).store.index(options.sort)
 
 	const { searchTerm, searchFn } = options

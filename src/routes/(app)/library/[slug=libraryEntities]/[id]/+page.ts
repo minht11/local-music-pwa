@@ -1,6 +1,6 @@
 import { goto } from '$app/navigation'
+import { type DbValue, getDatabase } from '$lib/db/database.ts'
 import { getEntityData, NoEntityFoundError } from '$lib/db/entity.ts'
-import { type DbValue, getDB } from '$lib/db/get-db.ts'
 import {
 	createPageQuery,
 	keysListDatabaseChangeHandler,
@@ -64,7 +64,7 @@ const createTracksPageQuery = <Slug extends DetailsSlug>(
 	const query = createPageQuery({
 		key: () => [storeName, itemName()],
 		fetcher: async ([, name]) => {
-			const db = await getDB()
+			const db = await getDatabase()
 
 			let keys: number[]
 			if (storeName === 'playlists') {

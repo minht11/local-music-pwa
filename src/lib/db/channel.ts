@@ -1,4 +1,4 @@
-import type { AppDB, AppStoreNames } from './get-db.ts'
+import type { AppDB, AppStoreNames } from './database.ts'
 
 type ChangeRecordBaseNonFiltered<StoreName extends AppStoreNames> =
 	| {
@@ -30,29 +30,30 @@ type DbChangeRecordsMap = {
 	[StoreName in AppStoreNames]: ChangeRecordBase<StoreName>
 }
 
-export type DBChangeRecord = DbChangeRecordsMap[AppStoreNames]
+export type DatabaseChangeRecord = DbChangeRecordsMap[AppStoreNames]
 
-export type DBChangeRecordList = readonly DBChangeRecord[]
+export type DatabaseChangeRecordList = readonly DatabaseChangeRecord[]
 
 // We need to notify our local frame and all other frames about database changes.
 // Including web workers, other tabs, etc.
 const crossChannel = new BroadcastChannel('db-changes')
 const localChannel = new EventTarget()
 
-type Listener = (changes: readonly DBChangeRecord[]) => void
+type Listener = (changes: readonly DatabaseChangeRecord[]) => void
 
 // It is faster to manually store listeners in a Set, than registering 2 EventTargets.
 const listeners = new Set<Listener>()
 
 // TODO. https://github.com/sveltejs/kit/issues/12394
+// We only want listeners to be registered in the main thread.
 if (globalThis.window) {
-	const notifyListeners = (changes: readonly DBChangeRecord[]) => {
+	const notifyListeners = (changes: readonly DatabaseChangeRecord[]) => {
 		for (const listener of listeners) {
 			listener(changes)
 		}
 	}
 
-	localChannel.addEventListener('message', (e: CustomEventInit<DBChangeRecord[]>) => {
+	localChannel.addEventListener('message', (e: CustomEventInit<DatabaseChangeRecord[]>) => {
 		const changes = e.detail
 
 		if (!changes) {
@@ -62,30 +63,29 @@ if (globalThis.window) {
 		notifyListeners(changes)
 	})
 
-	crossChannel.addEventListener('message', (e: MessageEvent<DBChangeRecord[]>) => {
+	crossChannel.addEventListener('message', (e: MessageEvent<DatabaseChangeRecord[]>) => {
 		notifyListeners(e.data)
 	})
 }
 
 export const listenForDatabaseChanges = (
-	handler: (changes: readonly DBChangeRecord[]) => void,
+	handler: (changes: readonly DatabaseChangeRecord[]) => void,
 ): (() => void) => {
 	if (import.meta.env.SSR) {
 		return () => {}
 	}
 
-	listeners.add(handler as Listener)
+	listeners.add(handler)
 
 	return () => {
-		listeners.delete(handler as Listener)
+		listeners.delete(handler)
 	}
 }
 
 export const notifyAboutDatabaseChanges = (
-	changes: readonly (DBChangeRecord | undefined)[],
+	changes: readonly (DatabaseChangeRecord | undefined)[],
 ): void => {
 	const filteredChanges = changes.filter((c) => c !== undefined)
-
 	if (filteredChanges.length === 0) {
 		return
 	}

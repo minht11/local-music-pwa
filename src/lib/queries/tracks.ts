@@ -1,11 +1,11 @@
-import { getDB } from '$lib/db/get-db'
+import { getDatabase } from '$lib/db/database'
 import { createPageQuery, type PageQueryResult } from '$lib/db/query.svelte'
 
 export const createTracksCountPageQuery = (): PageQueryResult<number> =>
 	createPageQuery({
 		key: [],
 		fetcher: async () => {
-			const db = await getDB()
+			const db = await getDatabase()
 
 			return db.count('tracks')
 		},

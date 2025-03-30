@@ -100,7 +100,7 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 		autoIncrement: true,
 	})
 
-export const getDB = (): Promise<IDBPDatabase<AppDB>> =>
+export const getDatabase = (): Promise<IDBPDatabase<AppDB>> =>
 	// TODO. Reset database version
 	openDB<AppDB>('app-storage', 1, {
 		upgrade(e) {

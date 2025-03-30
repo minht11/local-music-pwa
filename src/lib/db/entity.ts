@@ -1,8 +1,8 @@
 import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte.ts'
 import { WeakLRUCache } from 'weak-lru-cache'
-import { type DBChangeRecord, listenForDatabaseChanges } from './channel.ts'
+import { type DatabaseChangeRecord, listenForDatabaseChanges } from './channel.ts'
+import { type DbKey, getDatabase } from './database.ts'
 import type { Album, Artist, Playlist, Track } from './database-types.ts'
-import { type DbKey, getDB } from './get-db.ts'
 import { createQuery, type QueryResult } from './query.svelte.ts'
 
 type QueryMutate<Result, InitialResult extends Result | undefined> = (
@@ -11,7 +11,7 @@ type QueryMutate<Result, InitialResult extends Result | undefined> = (
 
 export type DatabaseChangeHandler<Result> = (
 	id: number,
-	changes: DBChangeRecord,
+	changes: DatabaseChangeRecord,
 	mutate: QueryMutate<Result | undefined, undefined>,
 ) => void
 
@@ -35,7 +35,7 @@ export interface TrackData extends Track {
 
 const trackConfig: QueryConfig<TrackData> = {
 	fetch: async (id) => {
-		const db = await getDB()
+		const db = await getDatabase()
 		const tx = db.transaction(['tracks', 'playlistsTracks'], 'readonly')
 
 		const [entity, favorite] = await Promise.all([
@@ -99,7 +99,7 @@ export type AlbumData = Album
 
 const albumConfig: QueryConfig<AlbumData> = {
 	fetch: async (id) => {
-		const db = await getDB()
+		const db = await getDatabase()
 		const entity = db.get('albums', id)
 
 		return entity
@@ -112,7 +112,7 @@ export type ArtistData = Artist
 // TODO. Reuse query config
 const artistConfig: QueryConfig<ArtistData> = {
 	fetch: async (id) => {
-		const db = await getDB()
+		const db = await getDatabase()
 		return db.get('artists', id)
 	},
 	//  TODO. ADD onDatabaseChange
@@ -131,7 +131,7 @@ const playlistsConfig: QueryConfig<PlaylistData> = {
 			}
 		}
 
-		const db = await getDB()
+		const db = await getDatabase()
 		return db.get('playlists', id)
 	},
 	//  TODO. ADD onDatabaseChange

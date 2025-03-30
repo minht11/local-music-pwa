@@ -4,7 +4,7 @@
 	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar'
-	import { getDB } from '$lib/db/get-db'
+	import { getDatabase } from '$lib/db/database'
 	import { createListQuery, createQuery } from '$lib/db/query.svelte'
 	import { getEntityIds } from '$lib/library/general'
 	import { toggleTrackInPlaylistInDatabase } from '$lib/library/playlists.svelte'
@@ -35,7 +35,7 @@
 		fetcher: async () => {
 			invariant(trackId)
 
-			const db = await getDB()
+			const db = await getDatabase()
 			const items = await db.getAllFromIndex('playlistsTracks', 'trackId', trackId)
 
 			return new SvelteSet(items.map((item) => item.playlistId))

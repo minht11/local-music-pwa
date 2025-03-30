@@ -1,11 +1,11 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
 import { notifyAboutDatabaseChanges } from '$lib/db/channel'
+import { getDatabase } from '$lib/db/database'
 import type { OmitId, Playlist } from '$lib/db/database-types'
-import { getDB } from '$lib/db/get-db'
 import { truncate } from '$lib/helpers/utils/truncate.ts'
 
 export const dbCreatePlaylist = async (name: string): Promise<number> => {
-	const db = await getDB()
+	const db = await getDatabase()
 
 	const newPlaylist: OmitId<Playlist> = {
 		name,
@@ -42,7 +42,7 @@ export const createPlaylist = async (name: string): Promise<void> => {
 }
 
 const dbUpdatePlaylistName = async (id: number, name: string): Promise<void> => {
-	const db = await getDB()
+	const db = await getDatabase()
 
 	const tx = db.transaction('playlists', 'readwrite')
 	const existingPlaylist = await tx.store.get(id)
@@ -84,7 +84,7 @@ export const updatePlaylistName = async (id: number, name: string): Promise<bool
 }
 
 const dbRemovePlaylist = async (id: number): Promise<void> => {
-	const db = await getDB()
+	const db = await getDatabase()
 	const tx = db.transaction(['playlists', 'playlistsTracks'], 'readwrite')
 	const tracksStore = tx.objectStore('playlistsTracks')
 
@@ -124,7 +124,7 @@ export const addTrackToPlaylistInDatabase = async (
 	playlistId: number,
 	trackId: number,
 ): Promise<void> => {
-	const db = await getDB()
+	const db = await getDatabase()
 
 	const key = await db.add('playlistsTracks', {
 		playlistId,
@@ -148,7 +148,7 @@ export const removeTrackFromPlaylistInDatabase = async (
 	playlistId: number,
 	trackId: number,
 ): Promise<void> => {
-	const db = await getDB()
+	const db = await getDatabase()
 
 	const key: [number, number] = [playlistId, trackId]
 	await db.delete('playlistsTracks', key)
