@@ -33,7 +33,9 @@ export const createPlaylist = async (name: string): Promise<void> => {
 	try {
 		await dbCreatePlaylist(name)
 
-		snackbar(m.libraryPlaylistCreated(truncate(name, 20)))
+		snackbar(m.libraryPlaylistCreated({
+			playlistName: truncate(name, 20),
+		}))
 	} catch (error) {
 		snackbar.unexpectedError(error)
 	}

@@ -5,6 +5,7 @@ import {
 	createPageQuery,
 	keysListDatabaseChangeHandler,
 	type PageQueryResult,
+	type PageQueryResultResolved,
 } from '$lib/db/query.svelte.ts'
 import type { LibraryEntityStoreName } from '$lib/library/general.ts'
 import { error, redirect } from '@sveltejs/kit'
@@ -101,7 +102,14 @@ const createTracksPageQuery = <Slug extends DetailsSlug>(
 	return query
 }
 
-export const load: PageLoad = async (event) => {
+interface LoadResult {
+	slug: DetailsSlug
+	libraryType: DetailsSlug
+	itemQuery: PageQueryResultResolved<DbValue<DetailsSlug>>
+	tracksQuery: PageQueryResultResolved<number[]>
+}
+
+export const load: PageLoad = async (event): Promise<LoadResult> => {
 	const { slug } = event.params
 	if (slug === 'tracks') {
 		redirect(301, '/library/tracks')

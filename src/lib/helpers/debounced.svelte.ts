@@ -1,4 +1,4 @@
-import { debounce } from './utils/debounce'
+import { debounce } from './utils/debounce.ts'
 
 export type Getter<T> = () => T
 

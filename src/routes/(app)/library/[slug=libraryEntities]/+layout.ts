@@ -1,84 +1,81 @@
+import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
+import { createPageListQuery, type PageQueryResultResolved } from '$lib/db/query.svelte.ts'
+import {
+	getEntityIds,
+	type LibraryEntityStoreName,
+} from '$lib/library/general.ts'
+import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte.ts'
 import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
 import { defineViewTransitionMatcher, type RouteId } from '$lib/view-transitions.ts'
 import { innerWidth } from 'svelte/reactivity/window'
 import type { LayoutLoad } from './$types.ts'
-import { defineLibraryPageData } from './store.svelte'
+import {
+	configsMap,
+	type LibraryRouteConfig,
+	type LibrarySearchFn,
+} from './config.ts'
+import { LibraryStore } from './store.svelte.ts'
 
-const nameSortOption = {
-	name: 'Name',
-	key: 'name',
-} as const
+const defaultSearchFn: LibrarySearchFn<{ name: string }> = (value, searchTerm) =>
+	value.name.toLowerCase().includes(searchTerm)
 
-const includesTerm = (target: string | undefined | null, term: string) =>
-	target?.toLowerCase().includes(term)
+type LoadDataResult<Slug extends LibraryEntityStoreName> = {
+	[ExactSlug in Slug]: LibraryRouteConfig<ExactSlug> & {
+		store: LibraryStore<ExactSlug>
+		itemsIdsQuery: PageQueryResultResolved<number[]>
+		tracksCountQuery: PageQueryResultResolved<number>
+	}
+}[Slug]
 
-const artistsIncludesTerms = (artists: string[] | undefined, term: string) =>
-	artists?.some((artist) => includesTerm(artist, term)) ?? false
+const loadData = async <Slug extends LibraryEntityStoreName>(slug: Slug): Promise<LoadDataResult<Slug>> => {
+	const config = configsMap[slug]
+	const searchFn = config.search ?? defaultSearchFn
+	const store = new LibraryStore(slug)
 
-const storeMap = {
-	tracks: defineLibraryPageData(
-		'tracks',
-		{
-			singularTitle: m.track(),
-			pluralTitle: m.tracks(),
-			sortOptions: [
-				nameSortOption,
-				{
-					name: 'Artist',
-					key: 'artists',
-				},
-				{
-					name: 'Album',
-					key: 'album',
-				},
-				{
-					name: 'Duration',
-					key: 'duration',
-				},
-				{
-					name: 'Year',
-					key: 'year',
-				},
-			],
+	const itemsIdsQueryPromise = createPageListQuery(slug, {
+		key: () => [slug, store.sortByKey, store.order, store.searchTerm],
+		fetcher: async ([name, sortKey, order, searchTerm]) => {
+			const result = await getEntityIds(name, {
+				sort: sortKey,
+				order,
+				searchTerm,
+				searchFn: (value) => searchFn(value, searchTerm),
+			})
+
+			if (slug === 'playlists') {
+				return [FAVORITE_PLAYLIST_ID, ...result]
+			}
+
+			return result
 		},
-		(value, searchTerm) =>
-			includesTerm(value.name, searchTerm) ||
-			includesTerm(value.album, searchTerm) ||
-			artistsIncludesTerms(value.artists, searchTerm),
-	),
-	albums: defineLibraryPageData(
-		'albums',
-		{
-			singularTitle: m.album(),
-			pluralTitle: m.albums(),
-			sortOptions: [nameSortOption],
-		},
-		(value, searchTerm) =>
-			includesTerm(value.name, searchTerm) || artistsIncludesTerms(value.artists, searchTerm),
-	),
-	artists: defineLibraryPageData('artists', {
-		singularTitle: m.artist(),
-		pluralTitle: m.artists(),
-		sortOptions: [nameSortOption],
-	}),
-	playlists: defineLibraryPageData('playlists', {
-		singularTitle: m.playlist(),
-		pluralTitle: m.playlists(),
-		sortOptions: [nameSortOption],
-	}),
-} as const
+	})
 
-export const load: LayoutLoad = async (event) => {
-	const { slug } = event.params
-
-	const [data, tracksCountQuery] = await Promise.all([
-		storeMap[slug](),
+	const [itemsIdsQuery, tracksCountQuery] = await Promise.all([
+		await itemsIdsQueryPromise,
 		createTracksCountPageQuery(),
 	])
 
+	return {
+		...config,
+		store,
+		itemsIdsQuery,
+		tracksCountQuery,
+	}
+}
+
+type LoadResult = LoadDataResult<LibraryEntityStoreName> & {
+	isWideLayout: () => boolean
+	layoutMode: (isWide: boolean, itemId: string | undefined) => LayoutMode
+}
+
+export const load: LayoutLoad = async (event): Promise<LoadResult> => {
+	const { slug } = event.params
+	console.log('slug22', slug)
+	const data = await loadData(slug)
+
 	const isWideLayout = () => (innerWidth.current ?? 0) > 1154
 	// We pass params here so that inside page we can benefit from $derived caching
-	const layoutMode = (isWide: boolean, itemId: string | undefined) => {
+	const layoutMode = (isWide: boolean, itemId: string | undefined): LayoutMode => {
 		if (slug === 'tracks') {
 			return 'list'
 		}
@@ -99,7 +96,7 @@ export const load: LayoutLoad = async (event) => {
 		const detailsRoute: RouteId = '/(app)/library/[slug=libraryEntities]/[id]'
 
 		if (to === libraryRoute && from === libraryRoute) {
-			return { view: 'library' } as const
+			return { view: 'library' }
 		}
 
 		const mode = event.untrack(() => layoutMode(isWideLayout(), event.params.id))
@@ -112,7 +109,7 @@ export const load: LayoutLoad = async (event) => {
 			(to === libraryRoute && from === detailsRoute) ||
 			(to === detailsRoute && from === detailsRoute)
 		) {
-			return { view: 'library' } as const
+			return { view: 'library' }
 		}
 
 		return null
@@ -120,8 +117,6 @@ export const load: LayoutLoad = async (event) => {
 
 	return {
 		...data,
-		tracksCountQuery,
-		slug,
 		isWideLayout,
 		layoutMode,
 	}

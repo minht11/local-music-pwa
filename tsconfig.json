@@ -1,7 +1,7 @@
 {
 	"extends": "./.generated/svelte-kit/tsconfig.json",
 	"compilerOptions": {
-		"allowJs": false,
+		"allowJs": true,
 		"moduleDetection": "force",
 		"allowImportingTsExtensions": true,
 		"forceConsistentCasingInFileNames": true,
@@ -18,7 +18,7 @@
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"declaration": true,
-		"isolatedDeclarations": true,
+		"isolatedDeclarations": false,
 		"libReplacement": false,
 		"erasableSyntaxOnly": true,
 		"types": [

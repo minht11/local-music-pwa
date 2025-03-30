@@ -19,17 +19,15 @@
 	const { data, children } = $props()
 
 	initPageQueriesDynamic(
-		() => data.storeName,
+		() => data.slug,
 		() => data,
 	)
 
-	const isHandHeldDevice = isMobile()
-
 	const main = useMainStore()
 
-	const itemsIds = $derived(data.itemsQuery.value)
-
+	const itemsIds = $derived(data.itemsIdsQuery.value)
 	const slug = $derived(data.slug)
+	const isHandHeldDevice = isMobile()
 
 	interface NavItem {
 		slug: typeof slug
@@ -112,9 +110,9 @@
 	{#snippet list(mode)}
 		<div class={[isHandHeldDevice ? 'sm:pl-20' : 'pl-20', 'flex grow flex-col']}>
 			<div class={[mode === 'both' && 'w-100', 'flex grow flex-col px-4']}>
-				<Search name={data.pluralTitle} store={data.store} />
+				<Search name={data.pluralTitle()} sortOptions={data.sortOptions} store={data.store} />
 
-				{#if data.storeName === 'playlists'}
+				{#if slug === 'playlists'}
 					<div class="mb-4 flex items-center justify-end">
 						<Button
 							kind="outlined"
@@ -129,7 +127,7 @@
 					</div>
 				{/if}
 
-				{#if data.tracksCountQuery.value === 0 && data.storeName !== 'playlists'}
+				{#if data.tracksCountQuery.value === 0 && slug !== 'playlists'}
 					<div class="my-auto flex flex-col items-center text-center">
 						<div class="mb-1 text-title-lg">{m.libraryEmpty()}</div>
 						{m.libraryStartByAdding()}
@@ -140,7 +138,7 @@
 					</div>
 				{:else}
 					<div class={['flex w-full grow flex-col']}>
-						{#if data.store.searchTerm && itemsIds.length === 0}
+						{#if slug && itemsIds.length === 0}
 							<div class="relative m-auto flex flex-col items-center text-center">
 								<Icon type="magnify" class="my-auto size-35 opacity-54" />
 
@@ -151,13 +149,13 @@
 									{m.libraryNoResultsExplanation()}
 								</div>
 							</div>
-						{:else if data.storeName === 'tracks'}
+						{:else if slug === 'tracks'}
 							<TracksListContainer items={itemsIds} />
-						{:else if data.storeName === 'albums'}
+						{:else if slug === 'albums'}
 							<AlbumsListContainer items={itemsIds} />
-						{:else if data.storeName === 'artists'}
+						{:else if slug === 'artists'}
 							<ArtistListContainer items={itemsIds} />
-						{:else if data.storeName === 'playlists'}
+						{:else if slug === 'playlists'}
 							<PlaylistListContainer
 								items={itemsIds}
 								menuItems={{
@@ -191,7 +189,7 @@
 	{/snippet}
 </ListDetailsLayout>
 
-<style>
+<style lang="postcss">
 	@reference '../../../../app.css';
 
 	:root {

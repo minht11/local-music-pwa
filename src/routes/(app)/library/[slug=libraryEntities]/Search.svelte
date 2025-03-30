@@ -7,10 +7,11 @@
 
 	interface Props {
 		name: string
+		sortOptions: PageData['sortOptions']
 		store: PageData['store']
 	}
 
-	const { name, store }: Props = $props()
+	const { name, sortOptions, store }: Props = $props()
 
 	const searchHandler = debounce((e: InputEvent) => {
 		const term = (e.target as HTMLInputElement).value
@@ -47,7 +48,7 @@
 	}
 
 	const sortMenuHandler = (e: MouseEvent) => {
-		const menuItems = store.sortOptions.map((option) => ({
+		const menuItems = sortOptions().map((option) => ({
 			label: option.name,
 			selected: store.sortByKey === option.key,
 			action: () => {

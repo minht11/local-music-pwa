@@ -1,3 +1,3 @@
 import type { PageLoad } from './$types.ts'
 
-export const load: PageLoad = () => {}
+export const load: PageLoad = (): void => {}

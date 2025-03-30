@@ -1,6 +1,6 @@
 import { type Directory, LEGACY_NO_NATIVE_DIRECTORY } from '$lib/db/database-types.ts'
 import { getDB } from '$lib/db/get-db'
-import { createPageQuery } from '$lib/db/query.svelte.ts'
+import { createPageQuery, type PageQueryResultResolved } from '$lib/db/query.svelte.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
 import type { PageLoad } from './$types.ts'
@@ -59,7 +59,13 @@ const createDirectoriesPageQuery = () =>
 		},
 	})
 
-export const load: PageLoad = async () => {
+interface LoadResult {
+	countQuery: PageQueryResultResolved<number>
+	directoriesQuery: PageQueryResultResolved<DirectoryWithCount[]>
+	title: string
+}
+
+export const load: PageLoad = async (): Promise<LoadResult> => {
 	const [count, directories] = await Promise.all([
 		createTracksCountPageQuery(),
 		createDirectoriesPageQuery(),

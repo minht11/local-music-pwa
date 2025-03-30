@@ -81,7 +81,7 @@
 	</div>
 </div>
 
-<style>
+<style lang="postcss">
 	@reference '../../app.css';
 
 	.view-transition-pl-container {

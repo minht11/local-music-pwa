@@ -1,9 +1,22 @@
+import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
 import { type AppViewTransitionType, defineViewTransitionMatcher } from '$lib/view-transitions.ts'
 import { innerHeight, innerWidth } from 'svelte/reactivity/window'
 import type { LayoutLoad } from './$types.ts'
 
-export const load: LayoutLoad = () => {
-	const sizes = () => {
+interface LayoutSizes {
+	isCompactVertical: boolean
+	isCompactHorizontal: boolean
+	isCompact: boolean
+}
+
+interface LoadResult {
+	noPlayerOverlay: boolean
+	sizes: () => LayoutSizes
+	layoutMode: (isCompact: boolean, pathname: string) => LayoutMode
+}
+
+export const load: LayoutLoad = (): LoadResult => {
+	const sizes = (): LayoutSizes => {
 		const isCompactVertical = (innerHeight.current ?? 0) < 600
 		const isCompactHorizontal = (innerWidth.current ?? 0) < 768
 		const isCompact = isCompactVertical || isCompactHorizontal
@@ -15,7 +28,7 @@ export const load: LayoutLoad = () => {
 		}
 	}
 
-	const layoutMode = (isCompact: boolean, pathname: string) => {
+	const layoutMode = (isCompact: boolean, pathname: string): LayoutMode => {
 		if (!isCompact) {
 			return 'both'
 		}

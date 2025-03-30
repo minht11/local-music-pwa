@@ -24,7 +24,7 @@
 	const tracks = $derived(tracksQuery.value)
 
 	const artworkSrc = createManagedArtwork(() => {
-		if (data.storeName !== 'playlists') {
+		if (data.slug !== 'playlists') {
 			return (item as Album).image
 		}
 
@@ -37,7 +37,7 @@
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
 
 	const getMenuItems = () => {
-		if (data.storeName === 'playlists') {
+		if (data.slug === 'playlists') {
 			return getPlaylistMenuItems(main, item as Playlist)
 		}
 
@@ -56,14 +56,14 @@
 </script>
 
 {#if !isWideLayout.current}
-	<Header title={data.singularTitle} mode="fixed" />
+	<Header title={data.singularTitle()} mode="fixed" />
 {/if}
 
 <div class="@container flex grow flex-col px-4 pb-4">
 	<section
 		class="relative flex w-full flex-col items-center justify-center gap-6 overflow-clip py-4 @2xl:h-56 @2xl:flex-row"
 	>
-		{#if data.storeName !== 'playlists'}
+		{#if data.slug !== 'playlists'}
 			<Artwork src={artworkSrc()} class="h-49 shrink-0 rounded-2xl @2xl:h-full" />
 		{/if}
 
@@ -117,6 +117,6 @@
 
 	<TracksListContainer
 		items={tracks}
-		menuItems={data.storeName === 'playlists' ? trackMenuItems : undefined}
+		menuItems={data.slug === 'playlists' ? trackMenuItems : undefined}
 	/>
 </div>

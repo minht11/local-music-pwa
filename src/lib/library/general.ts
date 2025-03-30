@@ -22,7 +22,7 @@ type GetEntityIdsIndex<StoreName extends LibraryEntityStoreName> = IDBPIndex<
 	AppDB,
 	[StoreName],
 	StoreName,
-	keyof AppDB[StoreName]['indexes']
+	keyof AppDB[StoreName]['indexes'] & string
 >
 
 const getEntityIdsWithSearchSlow = async <const StoreName extends LibraryEntityStoreName>(
