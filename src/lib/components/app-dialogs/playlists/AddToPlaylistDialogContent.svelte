@@ -5,9 +5,10 @@
 	import Separator from '$lib/components/Separator.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar'
 	import { getDatabase } from '$lib/db/database'
-	import { createListQuery, createQuery } from '$lib/db/query/query.ts'
-	import { getEntityIds } from '$lib/library/general'
-	import { toggleTrackInPlaylistInDatabase } from '$lib/library/playlists'
+	import { createQuery } from '$lib/db/query/query.ts'
+	import { getLibraryItemIds } from '$lib/library/get/keys.ts'
+	import { createLibraryItemKeysQuery } from '$lib/library/get/keys-queries.ts'
+	import { toggleTrackInPlaylistInDatabase } from '$lib/library/playlists-actions'
 	import { SvelteSet } from 'svelte/reactivity'
 
 	interface Props {
@@ -17,9 +18,9 @@
 
 	const { trackId, onclose }: Props = $props()
 
-	const query = createListQuery('playlists', {
+	const query = createLibraryItemKeysQuery('playlists', {
 		key: ['playlists'],
-		fetcher: () => getEntityIds('playlists', { sort: 'created' }),
+		fetcher: () => getLibraryItemIds('playlists', { sort: 'created' }),
 		onError: () => {
 			snackbar({
 				id: 'playlists-loading',

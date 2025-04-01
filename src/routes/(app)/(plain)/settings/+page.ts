@@ -2,7 +2,7 @@ import { getDatabase } from '$lib/db/database'
 import { type Directory, LEGACY_NO_NATIVE_DIRECTORY } from '$lib/db/database-types.ts'
 import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
-import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
+import { createTracksCountPageQuery } from '$lib/library/tracks-queries.ts'
 import type { PageLoad } from './$types.ts'
 
 export type DirectoryWithCount = { count: number } & (

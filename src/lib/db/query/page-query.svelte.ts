@@ -1,6 +1,4 @@
-import { unwrap } from '$lib/helpers/utils/unwrap.ts'
 import { untrack } from 'svelte'
-import type { AppStoreNames } from '../database.ts'
 import {
 	type QueryBaseOptions,
 	QueryImpl,
@@ -9,7 +7,8 @@ import {
 	QueryResultBox,
 	type QueryStateInternal,
 } from './base-query.svelte.ts'
-import { keysListDatabaseChangeHandler, prefetchLibraryListItems } from './helpers.ts'
+
+export type { QueryKey } from './base-query.svelte.ts'
 
 export type PageQueryResult<Result> = QueryResult<Result> & {
 	value: Result
@@ -40,9 +39,9 @@ export const createPageQuery = async <const K extends QueryKey, Result>(
 ): Promise<PageQueryResult<Result>> => {
 	const query = new QueryImpl<K, Result>(options)
 	const { state } = query
-	
+
 	await query.load()
-	
+
 	if (state.error) {
 		throw state.error
 	}
@@ -85,26 +84,3 @@ export const initPageQueriesDynamic = (
 		})
 	})
 }
-
-export type PageQueryListOptions<K extends QueryKey> = Omit<
-	PageQueryOptions<K, number[]>,
-	'onDatabaseChange'
->
-
-export const createPageListQuery = <
-	const StoreName extends Exclude<AppStoreNames, 'playlistsTracks'>,
-	const K extends QueryKey,
->(
-	storeName: StoreName | (() => StoreName),
-	options: PageQueryListOptions<K>,
-): Promise<PageQueryResult<number[]>> =>
-	createPageQuery({
-		...options,
-		fetcher: async (key) => {
-			const result = await options.fetcher(key)
-			await prefetchLibraryListItems(unwrap(storeName), result)
-
-			return result
-		},
-		onDatabaseChange: keysListDatabaseChangeHandler.bind(null, unwrap(storeName)),
-	})

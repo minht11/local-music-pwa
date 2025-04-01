@@ -3,7 +3,7 @@ import { getDatabase } from '$lib/db/database'
 import type { Directory } from '$lib/db/database-types'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/listener.ts'
 import { lockDatabase } from '$lib/db/lock-database.ts'
-import { dbRemoveTrack } from '$lib/library/tracks.ts'
+import { dbRemoveTrack } from '$lib/library/tracks-actions.ts'
 import { scanTracks } from './scan-tracks.ts'
 
 export interface DirectoryStatus {

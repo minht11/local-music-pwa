@@ -1,8 +1,7 @@
 <script lang="ts" module>
-	import type { Track } from '$lib/db/database-types'
-	import type { TrackData } from '$lib/db/entity'
-	import { toggleFavoriteTrack } from '$lib/library/playlists'
-	import { removeTrack } from '$lib/library/tracks'
+	import type { TrackData } from '$lib/library/get/value.ts'
+	import { toggleFavoriteTrack } from '$lib/library/playlists-actions'
+	import { removeTrack } from '$lib/library/tracks-actions'
 	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import TrackListItem from './TrackListItem.svelte'
@@ -13,7 +12,7 @@
 		| 'removeFromLibrary'
 		| 'addToFavorites'
 	export interface TrackItemClick {
-		track: Track
+		track: TrackData
 		items: number[]
 		index: number
 	}

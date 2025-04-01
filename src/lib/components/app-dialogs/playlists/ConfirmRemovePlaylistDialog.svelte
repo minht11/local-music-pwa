@@ -1,7 +1,7 @@
 <script lang="ts">
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import { truncate } from '$lib/helpers/utils/truncate.ts'
-	import { removePlaylist } from '$lib/library/playlists'
+	import { removePlaylist } from '$lib/library/playlists-actions'
 
 	const main = useMainStore()
 </script>

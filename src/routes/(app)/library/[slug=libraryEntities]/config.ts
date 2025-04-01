@@ -1,19 +1,18 @@
 import type { DbValue } from "$lib/db/database"
-import type { LibraryEntitySortKey } from "$lib/library/general"
-
-type LibrarySlug = 'tracks' | 'albums' | 'artists' | 'playlists'
+import type { LibraryItemSortKey } from "$lib/library/get/keys.ts"
+import type { LibraryItemStoreName } from "$lib/library/types"
 
 export type LibrarySearchFn<Value> = (
 	value: Value,
 	searchTerm: string,
 ) => boolean
 
-export type SortOption<StoreName extends LibrarySlug> = {
+export type SortOption<Store extends LibraryItemStoreName> = {
 	name: string
-	key: LibraryEntitySortKey<StoreName>
+	key: LibraryItemSortKey<Store>
 }
 
-export interface LibraryRouteConfig<Slug extends LibrarySlug> {
+export interface LibraryRouteConfig<Slug extends LibraryItemStoreName> {
 	slug: Slug
 	singularTitle: () => string
 	pluralTitle: () => string
@@ -105,7 +104,7 @@ const playlistConfig: LibraryRouteConfig<'playlists'> = {
 }
 
 export type LibraryRouteConfigsMap = {
-	[key in LibrarySlug]: LibraryRouteConfig<key>
+	[Slug in LibraryItemStoreName]: LibraryRouteConfig<Slug>
 }
 
 export const configsMap: LibraryRouteConfigsMap = {

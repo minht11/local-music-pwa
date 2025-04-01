@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Album } from '$lib/db/database-types'
-	import { createAlbumQuery } from '$lib/db/entity'
+	import { createAlbumQuery } from '$lib/library/get/value-queries.ts'
 
 	import GridItem from '../GridItem.svelte'
 

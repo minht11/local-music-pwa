@@ -12,7 +12,7 @@
 	import { initPageQueriesDynamic } from '$lib/db/query/page-query.svelte.ts'
 	import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
 	import { useSetBottomBar } from '$lib/layout-bottom-bar.svelte.ts'
-	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.ts'
+	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.js'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import Search from './Search.svelte'
 

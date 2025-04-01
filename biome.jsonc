@@ -27,7 +27,7 @@
 	"formatter": {
 		"enabled": true,
 		"lineWidth": 100,
-		"includes": ["!**/*.svelte"]
+		"includes": ["!**/*.svelte", "**/*.svelte.ts"]
 	},
 	"linter": {
 		"enabled": true,

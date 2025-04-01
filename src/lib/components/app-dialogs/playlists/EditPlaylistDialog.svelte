@@ -1,7 +1,7 @@
 <script lang="ts">
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import TextField from '$lib/components/TextField.svelte'
-	import { updatePlaylistName } from '$lib/library/playlists'
+	import { updatePlaylistName } from '$lib/library/playlists-actions'
 
 	const main = useMainStore()
 	const data = $derived(main.editPlaylistDialogOpen)

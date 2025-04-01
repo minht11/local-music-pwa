@@ -1,9 +1,8 @@
-import { snackbar } from '$lib/components/snackbar/snackbar'
-import { type AppDB, getDatabase } from '$lib/db/database'
+import { snackbar } from '$lib/components/snackbar/snackbar.ts'
+import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/listener.ts'
 import type { IDBPTransaction, IndexNames } from 'idb'
-
-type LibraryStoreName = 'tracks' | 'albums' | 'artists'
+import type { LibraryItemStoreName } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<
 	AppDB,
@@ -12,36 +11,35 @@ type TrackOperationsTransaction = IDBPTransaction<
 >
 
 const removeTrackRelatedData = async <
-	StoreName extends LibraryStoreName,
-	EntityIndexName extends IndexNames<AppDB, StoreName>,
-	EntityValue extends AppDB[StoreName]['indexes'][EntityIndexName],
+	Store extends Exclude<LibraryItemStoreName, 'playlists'>,
+	ItemIndexName extends IndexNames<AppDB, Store>,
+	ItemValue extends AppDB[Store]['indexes'][ItemIndexName],
 	IndexName extends IndexNames<AppDB, 'tracks'>,
 >(
 	tx: TrackOperationsTransaction,
 	trackIndex: IndexName,
-	entityStoreName: StoreName,
-	entityIndex: EntityIndexName,
-	entityValue?: EntityValue,
+	itemStoreName: Store,
+	itemIndex: ItemIndexName,
+	itemValue?: ItemValue,
 ) => {
-	if (!entityValue) {
+	if (!itemValue) {
 		return
 	}
 
-	const tracksWithEntityCount = await tx.objectStore('tracks').index(trackIndex).count()
-	if (tracksWithEntityCount > 1) {
+	const tracksWithItemCount = await tx.objectStore('tracks').index(trackIndex).count()
+	if (tracksWithItemCount > 1) {
 		return
 	}
 
-	const store = tx.objectStore(entityStoreName)
-	const entity = await store.index(entityIndex).get(IDBKeyRange.only(entityValue))
-
-	if (!entity) {
+	const store = tx.objectStore(itemStoreName)
+	const item = await store.index(itemIndex).get(IDBKeyRange.only(itemValue))
+	if (!item) {
 		return
 	}
 
 	const change: DatabaseChangeDetails = {
-		storeName: entityStoreName,
-		key: entity.id,
+		storeName: itemStoreName,
+		key: item.id,
 		operation: 'delete',
 	}
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type ArtistData, createArtistQuery } from '$lib/db/entity'
+	import { type ArtistData, createArtistQuery } from '$lib/library/get/value-queries.ts'
 
 	import GridItem from '../../GridItem.svelte'
 

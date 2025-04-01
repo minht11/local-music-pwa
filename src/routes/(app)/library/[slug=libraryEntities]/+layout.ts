@@ -1,11 +1,10 @@
 import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
-import { createPageListQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
 import {
-	getEntityIds,
-	type LibraryEntityStoreName,
-} from '$lib/library/general.ts'
-import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.ts'
-import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
+	getLibraryItemIds,
+} from '$lib/library/get/keys.ts'
+import { createLibraryItemKeysPageQuery, type PageQueryResult } from '$lib/library/get/keys-queries.ts'
+import { createTracksCountPageQuery } from '$lib/library/tracks-queries.ts'
+import { FAVORITE_PLAYLIST_ID, type LibraryItemStoreName } from '$lib/library/types.ts'
 import { defineViewTransitionMatcher, type RouteId } from '$lib/view-transitions.ts'
 import { innerWidth } from 'svelte/reactivity/window'
 import type { LayoutLoad } from './$types.ts'
@@ -19,7 +18,7 @@ import { LibraryStore } from './store.svelte.ts'
 const defaultSearchFn: LibrarySearchFn<{ name: string }> = (value, searchTerm) =>
 	value.name.toLowerCase().includes(searchTerm)
 
-type LoadDataResult<Slug extends LibraryEntityStoreName> = {
+type LoadDataResult<Slug extends LibraryItemStoreName> = {
 	[ExactSlug in Slug]: LibraryRouteConfig<ExactSlug> & {
 		store: LibraryStore<ExactSlug>
 		itemsIdsQuery: PageQueryResult<number[]>
@@ -27,15 +26,15 @@ type LoadDataResult<Slug extends LibraryEntityStoreName> = {
 	}
 }[Slug]
 
-const loadData = async <Slug extends LibraryEntityStoreName>(slug: Slug): Promise<LoadDataResult<Slug>> => {
+const loadData = async <Slug extends LibraryItemStoreName>(slug: Slug): Promise<LoadDataResult<Slug>> => {
 	const config = configsMap[slug]
 	const searchFn = config.search ?? defaultSearchFn
 	const store = new LibraryStore(slug)
 
-	const itemsIdsQueryPromise = createPageListQuery(slug, {
+	const itemsIdsQueryPromise = createLibraryItemKeysPageQuery(slug, {
 		key: () => [slug, store.sortByKey, store.order, store.searchTerm],
 		fetcher: async ([name, sortKey, order, searchTerm]) => {
-			const result = await getEntityIds(name, {
+			const result = await getLibraryItemIds(name, {
 				sort: sortKey,
 				order,
 				searchTerm,
@@ -63,7 +62,7 @@ const loadData = async <Slug extends LibraryEntityStoreName>(slug: Slug): Promis
 	}
 }
 
-type LoadResult = LoadDataResult<LibraryEntityStoreName> & {
+type LoadResult = LoadDataResult<LibraryItemStoreName> & {
 	isWideLayout: () => boolean
 	layoutMode: (isWide: boolean, itemId: string | undefined) => LayoutMode
 }

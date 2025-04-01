@@ -1,8 +1,8 @@
 <script lang="ts" module>
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
-	import type { ArtistData } from '$lib/db/entity'
 	import { safeInteger } from '$lib/helpers/utils/integers.ts'
+	import type { ArtistData } from '$lib/library/get/value.ts'
 	import VirtualContainer from '../../VirtualContainer.svelte'
 	import ArtistGridItem from './ArtistGridItem.svelte'
 

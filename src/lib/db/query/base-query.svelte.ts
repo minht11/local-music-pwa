@@ -65,7 +65,7 @@ export class QueryImpl<K extends QueryKey, Result> {
 		value: undefined,
 	})
 
-    resolvedKey: string | undefined = undefined
+	resolvedKey: string | undefined = undefined
 
 	options: QueryBaseOptions<K, Result>
 
@@ -80,7 +80,7 @@ export class QueryImpl<K extends QueryKey, Result> {
 	}
 
 	#setErrorState = (e: unknown, normalizedKey: string) => {
-        this.resolvedKey = normalizedKey
+		this.resolvedKey = normalizedKey
 		assign(this.state, {
 			status: 'error',
 			value: undefined,
@@ -90,7 +90,7 @@ export class QueryImpl<K extends QueryKey, Result> {
 	}
 
 	#setLoadedState = (value: Result, normalizedKey: string) => {
-        this.resolvedKey = normalizedKey
+		this.resolvedKey = normalizedKey
 		assign(this.state, {
 			status: 'loaded',
 			value,
@@ -167,7 +167,7 @@ export class QueryImpl<K extends QueryKey, Result> {
 								value = accessor(this.state.value)
 							}
 
-                            this.#setLoadedState(value as Result, normalizeKey(this.#getKey()))
+							this.#setLoadedState(value as Result, normalizeKey(this.#getKey()))
 						},
 						refetch: async () => {
 							await this.load()

@@ -60,8 +60,8 @@
 		mainStore.customThemePaletteHex = value
 	}, 400)
 
-	// We debounce state updates, because some DB operations can be very fast
-	// and we don't want to show pending UI for a split second
+	// We debounce state updates, because some DB operations can be very fast.
+	// This prevents UI from flickering
 	const isDatabasePendingGetter = new Debounced(() => isDatabaseOperationPending(), 150)
 	const isDatabasePending = $derived(isDatabasePendingGetter.current)
 </script>

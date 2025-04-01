@@ -6,10 +6,10 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import type { Album, Playlist } from '$lib/db/database-types.ts'
-	import type { TrackData } from '$lib/db/entity.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
-	import { removeTrackFromPlaylistInDatabase } from '$lib/library/playlists.ts'
+	import type { TrackData } from '$lib/library/get/value.ts'
+	import { removeTrackFromPlaylistInDatabase } from '$lib/library/playlists-actions.js'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { MediaQuery } from 'svelte/reactivity'
 

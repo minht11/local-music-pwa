@@ -3,7 +3,7 @@
 import { getDatabase } from '$lib/db/database'
 import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/db/database-types.ts'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
-import { dbRemoveTrack } from '$lib/library/tracks.ts'
+import { dbRemoveTrack } from '$lib/library/tracks-actions.ts'
 import { importTrackToDb } from './import-track-to-db.ts'
 import { parseTrack } from './parse/parse-track.ts'
 import type { TracksScanMessage, TracksScanOptions } from './types.ts'

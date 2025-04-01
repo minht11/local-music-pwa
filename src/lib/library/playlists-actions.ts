@@ -3,6 +3,9 @@ import { getDatabase } from '$lib/db/database'
 import type { OmitId, Playlist } from '$lib/db/database-types'
 import { dispatchDatabaseChangedEvent } from '$lib/db/listener.ts'
 import { truncate } from '$lib/helpers/utils/truncate.ts'
+import { FAVORITE_PLAYLIST_ID } from './types.ts'
+
+export { FAVORITE_PLAYLIST_ID } from './types.ts'
 
 export const dbCreatePlaylist = async (name: string): Promise<number> => {
 	const db = await getDatabase()
@@ -163,9 +166,6 @@ export const toggleTrackInPlaylistInDatabase = async (
 		await addTrackToPlaylistInDatabase(playlistId, trackId)
 	}
 }
-
-/** Special type of playlist which user cannot modify */
-export const FAVORITE_PLAYLIST_ID = -1
 
 export const dbToggleFavoriteTrack = async (
 	shouldBeRemoved: boolean,
