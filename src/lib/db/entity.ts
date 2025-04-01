@@ -1,8 +1,8 @@
 import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.ts'
 import { WeakLRUCache } from 'weak-lru-cache'
-import { type DatabaseChangeDetails, onDatabaseChange } from './channel.ts'
 import { type DbKey, getDatabase } from './database.ts'
 import type { Album, Artist, Playlist, Track } from './database-types.ts'
+import { type DatabaseChangeDetails, onDatabaseChange } from './listener.ts'
 import type { QueryMutate } from './query/base-query.svelte.ts'
 import { createQuery, type QueryResult } from './query/query.ts'
 

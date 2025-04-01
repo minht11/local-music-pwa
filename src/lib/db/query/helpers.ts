@@ -1,6 +1,6 @@
-import type { DatabaseChangeDetailsList } from '../channel.ts'
 import type { AppStoreNames } from '../database.ts'
 import { preloadEntityData } from '../entity.ts'
+import type { DatabaseChangeDetailsList } from '../listener.ts'
 import type { DbChangeActions } from './base-query.svelte.ts'
 
 // TODO. Circular imports

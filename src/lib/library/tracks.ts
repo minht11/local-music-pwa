@@ -1,6 +1,6 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
-import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/channel'
 import { type AppDB, getDatabase } from '$lib/db/database'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/listener.ts'
 import type { IDBPTransaction, IndexNames } from 'idb'
 
 type LibraryStoreName = 'tracks' | 'albums' | 'artists'

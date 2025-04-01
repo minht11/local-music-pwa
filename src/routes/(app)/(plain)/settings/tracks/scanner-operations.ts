@@ -1,7 +1,7 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
-import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/channel'
 import { getDatabase } from '$lib/db/database'
 import type { Directory } from '$lib/db/database-types'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/listener.ts'
 import { lockDatabase } from '$lib/db/lock-database.ts'
 import { dbRemoveTrack } from '$lib/library/tracks.ts'
 import { scanTracks } from './scan-tracks.ts'

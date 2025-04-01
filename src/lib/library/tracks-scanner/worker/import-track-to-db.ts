@@ -1,6 +1,6 @@
-import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/channel'
 import { type AppDB, getDatabase } from '$lib/db/database'
 import type { Album, Artist, Track, UnknownTrack } from '$lib/db/database-types'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/listener.ts'
 import type { IDBPTransaction } from 'idb'
 
 type ImportTrackTx = IDBPTransaction<

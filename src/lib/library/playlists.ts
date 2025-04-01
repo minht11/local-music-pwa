@@ -1,7 +1,7 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
-import { dispatchDatabaseChangedEvent } from '$lib/db/channel'
 import { getDatabase } from '$lib/db/database'
 import type { OmitId, Playlist } from '$lib/db/database-types'
+import { dispatchDatabaseChangedEvent } from '$lib/db/listener.ts'
 import { truncate } from '$lib/helpers/utils/truncate.ts'
 
 export const dbCreatePlaylist = async (name: string): Promise<number> => {
