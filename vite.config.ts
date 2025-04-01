@@ -93,6 +93,7 @@ export default defineConfig({
 			strategy: ['baseLocale'],
 		}),
 		{
+			name: 'log-chunks-size',
 			apply: 'build',
 			enforce: 'post',
 			async closeBundle() {

@@ -27,7 +27,7 @@ const configMap = {
 const createDetailsPageQuery = <T extends DetailsSlug>(
 	storeName: T,
 	id: number,
-): PageQueryResult<DbValue<T>> => {
+): Promise<PageQueryResult<DbValue<T>>> => {
 	const query = createPageQuery({
 		key: () => [storeName, id],
 		fetcher: () => getEntityData(storeName, id),
@@ -59,7 +59,7 @@ const createTracksPageQuery = <Slug extends DetailsSlug>(
 	storeName: Slug,
 	itemName: () => string,
 	id: number,
-): PageQueryResult<number[]> => {
+): Promise<PageQueryResult<number[]>> => {
 	const query = createPageQuery({
 		key: () => [storeName, itemName()],
 		fetcher: async ([, name]) => {
