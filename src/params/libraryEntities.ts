@@ -1,7 +1,7 @@
-const libraryEntitiesPaths = ['tracks', 'albums', 'artists', 'playlists'] as const
-type LibraryEntitiesPath = typeof libraryEntitiesPaths[number]
+const libraryEntitiesSlugs = ['tracks', 'albums', 'artists', 'playlists'] as const
+type LibraryEntitiesSlug = typeof libraryEntitiesSlugs[number]
 
-const entities = new Set(libraryEntitiesPaths)
+const entities = new Set(libraryEntitiesSlugs)
 
-export const match = (param): param is LibraryEntitiesPath =>
-	entities.has(param as LibraryEntitiesPath)
+export const match = (param): param is LibraryEntitiesSlug =>
+	entities.has(param as LibraryEntitiesSlug)

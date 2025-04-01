@@ -1,10 +1,10 @@
 import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
-import { createPageListQuery, type PageQueryResultResolved } from '$lib/db/query.svelte.ts'
+import { createPageListQuery, type PageQueryResult } from '$lib/db/query/page-query.ts'
 import {
 	getEntityIds,
 	type LibraryEntityStoreName,
 } from '$lib/library/general.ts'
-import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte.ts'
+import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.ts'
 import { createTracksCountPageQuery } from '$lib/queries/tracks.ts'
 import { defineViewTransitionMatcher, type RouteId } from '$lib/view-transitions.ts'
 import { innerWidth } from 'svelte/reactivity/window'
@@ -22,8 +22,8 @@ const defaultSearchFn: LibrarySearchFn<{ name: string }> = (value, searchTerm) =
 type LoadDataResult<Slug extends LibraryEntityStoreName> = {
 	[ExactSlug in Slug]: LibraryRouteConfig<ExactSlug> & {
 		store: LibraryStore<ExactSlug>
-		itemsIdsQuery: PageQueryResultResolved<number[]>
-		tracksCountQuery: PageQueryResultResolved<number>
+		itemsIdsQuery: PageQueryResult<number[]>
+		tracksCountQuery: PageQueryResult<number>
 	}
 }[Slug]
 

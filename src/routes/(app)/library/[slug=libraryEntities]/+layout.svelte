@@ -9,10 +9,10 @@
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { initPageQueriesDynamic } from '$lib/db/query.svelte.js'
+	import { initPageQueriesDynamic } from '$lib/db/query/page-query.ts'
 	import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
 	import { useSetBottomBar } from '$lib/layout-bottom-bar.svelte.ts'
-	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte'
+	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.js'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import Search from './Search.svelte'
 

@@ -1,8 +1,8 @@
 <script lang="ts" module>
 	import type { Track } from '$lib/db/database-types'
 	import type { TrackData } from '$lib/db/entity'
-	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'
-	import { removeTrackWithSnackbar } from '$lib/library/tracks.svelte'
+	import { toggleFavoriteTrack } from '$lib/library/playlists'
+	import { removeTrack } from '$lib/library/tracks'
 	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import TrackListItem from './TrackListItem.svelte'
@@ -72,7 +72,7 @@
 				predefinedKey: 'removeFromLibrary',
 				label: 'Remove from library',
 				action: () => {
-					void removeTrackWithSnackbar(track.id)
+					void removeTrack(track.id)
 				},
 			},
 		]

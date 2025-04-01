@@ -1,7 +1,7 @@
 <script lang="ts">
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import TextField from '$lib/components/TextField.svelte'
-	import { createPlaylist } from '$lib/library/playlists.svelte'
+	import { createPlaylist } from '$lib/library/playlists'
 
 	const main = useMainStore()
 

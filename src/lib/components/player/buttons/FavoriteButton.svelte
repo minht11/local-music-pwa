@@ -1,6 +1,6 @@
 <script lang="ts">
 	import IconButton from '$lib/components/IconButton.svelte'
-	import { toggleFavoriteTrack } from '$lib/library/playlists.svelte'
+	import { toggleFavoriteTrack } from '$lib/library/playlists'
 
 	const player = usePlayer()
 

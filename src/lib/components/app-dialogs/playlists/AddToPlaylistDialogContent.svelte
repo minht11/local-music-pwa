@@ -5,9 +5,9 @@
 	import Separator from '$lib/components/Separator.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar'
 	import { getDatabase } from '$lib/db/database'
-	import { createListQuery, createQuery } from '$lib/db/query.svelte'
+	import { createListQuery, createQuery } from '$lib/db/query/query.ts'
 	import { getEntityIds } from '$lib/library/general'
-	import { toggleTrackInPlaylistInDatabase } from '$lib/library/playlists.svelte'
+	import { toggleTrackInPlaylistInDatabase } from '$lib/library/playlists'
 	import { SvelteSet } from 'svelte/reactivity'
 
 	interface Props {

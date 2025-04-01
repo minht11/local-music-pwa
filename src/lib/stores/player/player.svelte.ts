@@ -1,6 +1,6 @@
 import { listenForDatabaseChanges } from '$lib/db/channel'
 import { createTrackQuery, type TrackData } from '$lib/db/entity.ts'
-import type { QueryResult } from '$lib/db/query.svelte.ts'
+import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { shuffleArray } from '$lib/helpers/utils/array.ts'

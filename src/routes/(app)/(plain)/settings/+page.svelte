@@ -7,13 +7,13 @@
 	import Spinner from '$lib/components/Spinner.svelte'
 	import Switch from '$lib/components/Switch.svelte'
 	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
-	import { initPageQueries } from '$lib/db/query.svelte.ts'
+	import { initPageQueries } from '$lib/db/query/page-query.ts'
 	import { Debounced } from '$lib/helpers/debounced.svelte.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
+	import { isDatabaseOperationPending } from '../../../../lib/db/lock-database.ts'
 	import DirectoriesList from './components/DirectoriesList.svelte'
 	import MissingFsApiBanner from './components/MissingFsApiBanner.svelte'
-	import { isDatabaseOperationPending } from './tracks/lock-database.ts'
 
 	const { data } = $props()
 

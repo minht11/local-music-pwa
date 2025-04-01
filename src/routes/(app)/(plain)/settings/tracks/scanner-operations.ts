@@ -2,8 +2,8 @@ import { snackbar } from '$lib/components/snackbar/snackbar'
 import { type DatabaseChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
 import { getDatabase } from '$lib/db/database'
 import type { Directory } from '$lib/db/database-types'
-import { removeTrack } from '$lib/library/tracks.svelte'
-import { lockDatabase } from './lock-database.ts'
+import { lockDatabase } from '$lib/db/lock-database.ts'
+import { dbRemoveTrack } from '$lib/library/tracks.ts'
 import { scanTracks } from './scan-tracks.ts'
 
 export interface DirectoryStatus {
@@ -201,7 +201,7 @@ const dbRemoveDirectory = async (directoryId: number): Promise<void> => {
 	])
 
 	for (const trackId of tracksToBeRemoved) {
-		await removeTrack(trackId)
+		await dbRemoveTrack(trackId)
 	}
 	await db.delete('directories', directoryId)
 

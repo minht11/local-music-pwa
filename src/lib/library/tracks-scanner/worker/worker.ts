@@ -3,7 +3,7 @@
 import { getDatabase } from '$lib/db/database'
 import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/db/database-types.ts'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
-import { removeTrack } from '$lib/library/tracks.svelte'
+import { dbRemoveTrack } from '$lib/library/tracks.ts'
 import { importTrackToDb } from './import-track-to-db.ts'
 import { parseTrack } from './parse/parse-track.ts'
 import type { TracksScanMessage, TracksScanOptions } from './types.ts'
@@ -183,7 +183,7 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 	const tracksIdsInDirectory = await db.getAllKeysFromIndex('tracks', 'directory', directoryId)
 	for (const trackId of tracksIdsInDirectory) {
 		if (!scannedTracksIds.has(trackId)) {
-			await removeTrack(trackId).catch(console.warn)
+			await dbRemoveTrack(trackId).catch(console.warn)
 		}
 	}
 	console.timeEnd('SCAN_EXISTING_DIR')

@@ -1,12 +1,11 @@
 import { goto } from '$app/navigation'
 import { type DbValue, getDatabase } from '$lib/db/database.ts'
 import { getEntityData, NoEntityFoundError } from '$lib/db/entity.ts'
+import { keysListDatabaseChangeHandler } from '$lib/db/query/helpers.ts'
 import {
 	createPageQuery,
-	keysListDatabaseChangeHandler,
 	type PageQueryResult,
-	type PageQueryResultResolved,
-} from '$lib/db/query.svelte.ts'
+} from '$lib/db/query/page-query.ts'
 import type { LibraryEntityStoreName } from '$lib/library/general.ts'
 import { error, redirect } from '@sveltejs/kit'
 import type { PageLoad } from './$types.d.ts'
@@ -105,8 +104,8 @@ const createTracksPageQuery = <Slug extends DetailsSlug>(
 interface LoadResult {
 	slug: DetailsSlug
 	libraryType: DetailsSlug
-	itemQuery: PageQueryResultResolved<DbValue<DetailsSlug>>
-	tracksQuery: PageQueryResultResolved<number[]>
+	itemQuery: PageQueryResult<DbValue<DetailsSlug>>
+	tracksQuery: PageQueryResult<number[]>
 }
 
 export const load: PageLoad = async (event): Promise<LoadResult> => {

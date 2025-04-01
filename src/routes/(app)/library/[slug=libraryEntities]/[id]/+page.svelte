@@ -7,9 +7,9 @@
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import type { Album, Playlist } from '$lib/db/database-types.js'
 	import type { TrackData } from '$lib/db/entity.js'
-	import { initPageQueries } from '$lib/db/query.svelte.js'
+	import { initPageQueries } from '$lib/db/query/page-query.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
-	import { removeTrackFromPlaylistInDatabase } from '$lib/library/playlists.svelte.js'
+	import { removeTrackFromPlaylistInDatabase } from '$lib/library/playlists.js'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { MediaQuery } from 'svelte/reactivity'
 

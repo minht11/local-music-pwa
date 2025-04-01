@@ -70,7 +70,7 @@ const removeTrackFromPlaylistsInDatabase = async (trackId: number) => {
 	return changes
 }
 
-export const removeTrack = async (trackId: number): Promise<void> => {
+export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 	const db = await getDatabase()
 	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
 
@@ -102,8 +102,8 @@ export const removeTrack = async (trackId: number): Promise<void> => {
 	])
 }
 
-export const removeTrackWithSnackbar = async (id: number): Promise<void> =>
-	removeTrack(id).then(
+export const removeTrack = async (id: number): Promise<void> =>
+	dbRemoveTrack(id).then(
 		() => {
 			snackbar({
 				id: 'track-removed',

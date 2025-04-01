@@ -1,9 +1,9 @@
-import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.svelte.ts'
+import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.ts'
 import { WeakLRUCache } from 'weak-lru-cache'
 import { type DatabaseChangeRecord, listenForDatabaseChanges } from './channel.ts'
 import { type DbKey, getDatabase } from './database.ts'
 import type { Album, Artist, Playlist, Track } from './database-types.ts'
-import { createQuery, type QueryResult } from './query.svelte.ts'
+import { createQuery, type QueryResult } from './query/query.ts'
 
 type QueryMutate<Result, InitialResult extends Result | undefined> = (
 	value: Result | ((prev: Result | InitialResult) => void),
