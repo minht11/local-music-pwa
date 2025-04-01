@@ -1,5 +1,5 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
-import { notifyAboutDatabaseChanges } from '$lib/db/channel'
+import { dispatchDatabaseChangedEvent } from '$lib/db/channel'
 import { getDatabase } from '$lib/db/database'
 import type { OmitId, Playlist } from '$lib/db/database-types'
 import { truncate } from '$lib/helpers/utils/truncate.ts'
@@ -14,17 +14,15 @@ export const dbCreatePlaylist = async (name: string): Promise<number> => {
 
 	const id = await db.add('playlists', newPlaylist as Playlist)
 
-	notifyAboutDatabaseChanges([
-		{
-			operation: 'add',
-			storeName: 'playlists',
-			key: id,
-			value: {
-				...newPlaylist,
-				id,
-			},
+	dispatchDatabaseChangedEvent({
+		operation: 'add',
+		storeName: 'playlists',
+		key: id,
+		value: {
+			...newPlaylist,
+			id,
 		},
-	])
+	})
 
 	return id
 }
@@ -56,14 +54,12 @@ const dbUpdatePlaylistName = async (id: number, name: string): Promise<void> => 
 
 	await tx.store.put(updatedPlaylist)
 
-	notifyAboutDatabaseChanges([
-		{
-			operation: 'update',
-			storeName: 'playlists',
-			key: id,
-			value: updatedPlaylist,
-		},
-	])
+	dispatchDatabaseChangedEvent({
+		operation: 'update',
+		storeName: 'playlists',
+		key: id,
+		value: updatedPlaylist,
+	})
 }
 
 export const updatePlaylistName = async (id: number, name: string): Promise<boolean> => {
@@ -96,13 +92,11 @@ const dbRemovePlaylist = async (id: number): Promise<void> => {
 
 	// We are not notifying about individual tracks removals
 	// because we are removing the whole playlist
-	notifyAboutDatabaseChanges([
-		{
-			operation: 'delete',
-			storeName: 'playlists',
-			key: id,
-		},
-	])
+	dispatchDatabaseChangedEvent({
+		operation: 'delete',
+		storeName: 'playlists',
+		key: id,
+	})
 }
 
 export const removePlaylist = async (id: number, name: string): Promise<void> => {
@@ -131,17 +125,15 @@ export const addTrackToPlaylistInDatabase = async (
 		trackId,
 	})
 
-	notifyAboutDatabaseChanges([
-		{
-			operation: 'add',
-			storeName: 'playlistsTracks',
-			value: {
-				playlistId,
-				trackId,
-			},
-			key,
+	dispatchDatabaseChangedEvent({
+		operation: 'add',
+		storeName: 'playlistsTracks',
+		value: {
+			playlistId,
+			trackId,
 		},
-	])
+		key,
+	})
 }
 
 export const removeTrackFromPlaylistInDatabase = async (
@@ -153,13 +145,11 @@ export const removeTrackFromPlaylistInDatabase = async (
 	const key: [number, number] = [playlistId, trackId]
 	await db.delete('playlistsTracks', key)
 
-	notifyAboutDatabaseChanges([
-		{
-			operation: 'delete',
-			storeName: 'playlistsTracks',
-			key,
-		},
-	])
+	dispatchDatabaseChangedEvent({
+		operation: 'delete',
+		storeName: 'playlistsTracks',
+		key,
+	})
 }
 
 export const toggleTrackInPlaylistInDatabase = async (

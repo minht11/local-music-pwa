@@ -1,6 +1,6 @@
-import type { DatabaseChangeRecordList } from '../channel.ts'
+import type { DatabaseChangeDetailsList } from '../channel.ts'
 import type { AppStoreNames } from '../database.ts'
-import { preloadEntityData } from '../entity'
+import { preloadEntityData } from '../entity.ts'
 import type { DbChangeActions } from './base-query.svelte.ts'
 
 // TODO. Circular imports
@@ -29,8 +29,8 @@ export const keysListDatabaseChangeHandler = <
     const StoreName extends Exclude<AppStoreNames, 'playlistsTracks'>,
 >(
     storeName: StoreName,
-    changes: DatabaseChangeRecordList,
-    { mutate, refetch }: DbChangeActions<number[], undefined>,
+    changes: DatabaseChangeDetailsList,
+    { mutate, refetch }: DbChangeActions<number[]>,
 ): void => {
     let needRefetch = false
     for (const change of changes) {

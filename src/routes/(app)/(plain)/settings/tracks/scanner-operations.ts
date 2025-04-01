@@ -1,5 +1,5 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
-import { type DatabaseChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/channel'
 import { getDatabase } from '$lib/db/database'
 import type { Directory } from '$lib/db/database-types'
 import { lockDatabase } from '$lib/db/lock-database.ts'
@@ -46,17 +46,15 @@ const dbImportNewDirectory = async (dirHandle: FileSystemDirectoryHandle): Promi
 		handle: dirHandle,
 	} as Directory)
 
-	notifyAboutDatabaseChanges([
-		{
-			key: id,
-			storeName: 'directories',
-			operation: 'add',
-			value: {
-				handle: dirHandle,
-				id,
-			},
+	dispatchDatabaseChangedEvent({
+		key: id,
+		storeName: 'directories',
+		operation: 'add',
+		value: {
+			handle: dirHandle,
+			id,
 		},
-	])
+	})
 
 	await scanTracks({
 		action: 'directory-add',
@@ -118,7 +116,7 @@ const dbReplaceDirectories = async (
 		handle: parentDirHandle,
 	}
 
-	const replaceHandlePromise = tx.objectStore('directories').put(newDir).then((): DatabaseChangeRecord => ({
+	const replaceHandlePromise = tx.objectStore('directories').put(newDir).then((): DatabaseChangeDetails => ({
 		key: directoryId,
 		storeName: 'directories',
 		operation: 'add',
@@ -126,7 +124,7 @@ const dbReplaceDirectories = async (
 	}))
 	
 	const promises = dirIds.map(
-		async (existingDirId): Promise<DatabaseChangeRecord[]> => {
+		async (existingDirId): Promise<DatabaseChangeDetails[]> => {
 			// Update all tracks to point to the new directory.
 			const updatedTracksPromise = tx
 				.objectStore('tracks')
@@ -135,7 +133,7 @@ const dbReplaceDirectories = async (
 				.then(async (c) => {
 					let cursor = c
 
-					const trackChangeRecords: DatabaseChangeRecord[] = []
+					const trackChangeRecords: DatabaseChangeDetails[] = []
 					while (cursor) {
 						const track = cursor.value
 						track.directory = directoryId
@@ -157,7 +155,7 @@ const dbReplaceDirectories = async (
 				.objectStore('directories')
 				.delete(existingDirId)
 				.then(
-					(): DatabaseChangeRecord => ({
+					(): DatabaseChangeDetails => ({
 						key: existingDirId,
 						storeName: 'directories',
 						operation: 'delete',
@@ -172,7 +170,7 @@ const dbReplaceDirectories = async (
 	const [_, ...changes] = await Promise.all([tx.done, replaceHandlePromise, ...promises])
 	console.log('REPLACE_DIRS', changes, changes.flat())
 
-	notifyAboutDatabaseChanges(changes.flat())
+	dispatchDatabaseChangedEvent(changes.flat())
 
 	await scanTracks({
 		action: 'directory-rescan',
@@ -205,13 +203,11 @@ const dbRemoveDirectory = async (directoryId: number): Promise<void> => {
 	}
 	await db.delete('directories', directoryId)
 
-	notifyAboutDatabaseChanges([
-		{
-			key: directoryId,
-			storeName: 'directories',
-			operation: 'delete',
-		},
-	])
+	dispatchDatabaseChangedEvent({
+		key: directoryId,
+		storeName: 'directories',
+		operation: 'delete',
+	})
 }
 
 export const removeDirectory = async (id: number): Promise<void> => {

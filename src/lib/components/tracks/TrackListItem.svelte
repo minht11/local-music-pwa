@@ -63,7 +63,7 @@
 			class={['!hidden h-10 w-10 rounded-sm @xs:!flex', data.loading && 'opacity-50']}
 		/>
 
-		{#if data.loading === true}
+		{#if data.loading}
 			<div>
 				<div class="mb-2 h-2 rounded-xs bg-onSurface/10"></div>
 				<div class="h-1 w-1/8 rounded-xs bg-onSurface/10"></div>

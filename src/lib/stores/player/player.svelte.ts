@@ -1,4 +1,4 @@
-import { listenForDatabaseChanges } from '$lib/db/channel'
+import { onDatabaseChange } from '$lib/db/channel'
 import { createTrackQuery, type TrackData } from '$lib/db/entity.ts'
 import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
@@ -58,7 +58,7 @@ export class PlayerStore {
 		this.shuffle ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
 	)
 
-	activeTrackQuery: QueryResult<TrackData | undefined, undefined> = createTrackQuery(
+	activeTrackQuery: QueryResult<TrackData | undefined> = createTrackQuery(
 		() => this.itemsIds[this.#activeTrackIndex] ?? -1,
 		{
 			allowEmpty: true,
@@ -159,7 +159,7 @@ export class PlayerStore {
 			}
 		})
 
-		listenForDatabaseChanges((changes) => {
+		onDatabaseChange((changes) => {
 			for (const change of changes) {
 				if (change.storeName !== 'tracks') {
 					continue

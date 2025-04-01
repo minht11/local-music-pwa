@@ -80,7 +80,7 @@
 			</div>
 		{/if}
 
-		{#if data.loading === true}
+		{#if data.loading}
 			<div>
 				<div class="h-2 rounded-xs bg-onSurface/10"></div>
 			</div>

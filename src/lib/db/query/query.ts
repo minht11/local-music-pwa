@@ -1,30 +1,37 @@
 import type { AppStoreNames } from '../database.ts'
 import {
+	type QueryBaseOptions,
 	QueryImpl,
 	type QueryKey,
-	type QueryListOptions,
-	type QueryOptions,
-	QueryResult,
+	type QueryResult,
+	QueryResultBox,
 } from './base-query.svelte.ts'
 import { keysListDatabaseChangeHandler, prefetchLibraryListItems } from './helpers.ts'
 
-export type { QueryListOptions, QueryOptions, QueryResult } from './base-query.svelte.ts'
+export type { QueryResult } from './base-query.svelte.ts'
 
-export const createQuery = <
-	const K extends QueryKey,
-	Result,
-	InitialResult extends Result | undefined,
->(
-	options: QueryOptions<K, Result, InitialResult>,
-) => {
-	const query = new QueryImpl<K, Result, InitialResult>(options)
+export interface QueryOptions<K extends QueryKey, Result>  extends QueryBaseOptions<K, Result> {
+	/**
+	 * Whether to load the query immediately
+	 * @default false
+	 */
+	eager?: boolean
+}
+
+export const createQuery = <const K extends QueryKey, Result>(options: QueryOptions<K, Result>) => {
+	const query = new QueryImpl<K, Result>(options)
 	if (options.eager) {
-		query.load()
+		void query.load()
 	}
 	query.setupListeners()
 
-	return new QueryResult(query.state)
+	return new QueryResultBox(query.state) as QueryResult<Result>
 }
+
+export type QueryListOptions<K extends QueryKey> = Omit<
+	QueryOptions<K, number[]>,
+	'onDatabaseChange'
+>
 
 export const createListQuery = <
 	const StoreName extends Exclude<AppStoreNames, 'playlistsTracks'>,
@@ -32,7 +39,7 @@ export const createListQuery = <
 >(
 	storeName: StoreName,
 	options: QueryListOptions<K>,
-): QueryResult<number[], undefined> =>
+): QueryResult<number[]> =>
 	createQuery({
 		...options,
 		fetcher: async (key) => {

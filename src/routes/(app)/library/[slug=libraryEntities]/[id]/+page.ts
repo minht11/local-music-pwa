@@ -5,7 +5,7 @@ import { keysListDatabaseChangeHandler } from '$lib/db/query/helpers.ts'
 import {
 	createPageQuery,
 	type PageQueryResult,
-} from '$lib/db/query/page-query.ts'
+} from '$lib/db/query/page-query.svelte.ts'
 import type { LibraryEntityStoreName } from '$lib/library/general.ts'
 import { error, redirect } from '@sveltejs/kit'
 import type { PageLoad } from './$types.d.ts'

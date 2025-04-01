@@ -1,5 +1,5 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
-import { type DatabaseChangeRecord, notifyAboutDatabaseChanges } from '$lib/db/channel'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/channel'
 import { type AppDB, getDatabase } from '$lib/db/database'
 import type { IDBPTransaction, IndexNames } from 'idb'
 
@@ -39,7 +39,7 @@ const removeTrackRelatedData = async <
 		return
 	}
 
-	const change: DatabaseChangeRecord = {
+	const change: DatabaseChangeDetails = {
 		storeName: entityStoreName,
 		key: entity.id,
 		operation: 'delete',
@@ -60,7 +60,7 @@ const removeTrackFromPlaylistsInDatabase = async (trackId: number) => {
 	await store.delete(range)
 
 	const changes = tracks.map(
-		(t): DatabaseChangeRecord => ({
+		(t): DatabaseChangeDetails => ({
 			operation: 'delete',
 			storeName: 'playlistsTracks',
 			key: [t.playlistId, t.trackId],
@@ -90,7 +90,7 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 
 	await db.delete('tracks', trackId)
 
-	notifyAboutDatabaseChanges([
+	dispatchDatabaseChangedEvent([
 		{
 			storeName: 'tracks',
 			operation: 'delete',

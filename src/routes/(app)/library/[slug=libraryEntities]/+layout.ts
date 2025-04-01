@@ -1,5 +1,5 @@
 import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
-import { createPageListQuery, type PageQueryResult } from '$lib/db/query/page-query.ts'
+import { createPageListQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
 import {
 	getEntityIds,
 	type LibraryEntityStoreName,
@@ -70,7 +70,6 @@ type LoadResult = LoadDataResult<LibraryEntityStoreName> & {
 
 export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 	const { slug } = event.params
-	console.log('slug22', slug)
 	const data = await loadData(slug)
 
 	const isWideLayout = () => (innerWidth.current ?? 0) > 1154

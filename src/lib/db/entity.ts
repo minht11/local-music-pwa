@@ -1,23 +1,20 @@
 import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists.ts'
 import { WeakLRUCache } from 'weak-lru-cache'
-import { type DatabaseChangeRecord, listenForDatabaseChanges } from './channel.ts'
+import { type DatabaseChangeDetails, onDatabaseChange } from './channel.ts'
 import { type DbKey, getDatabase } from './database.ts'
 import type { Album, Artist, Playlist, Track } from './database-types.ts'
+import type { QueryMutate } from './query/base-query.svelte.ts'
 import { createQuery, type QueryResult } from './query/query.ts'
-
-type QueryMutate<Result, InitialResult extends Result | undefined> = (
-	value: Result | ((prev: Result | InitialResult) => void),
-) => void
 
 export type DatabaseChangeHandler<Result> = (
 	id: number,
-	changes: DatabaseChangeRecord,
-	mutate: QueryMutate<Result | undefined, undefined>,
+	changes: DatabaseChangeDetails,
+	mutate: QueryMutate<Result | undefined>,
 ) => void
 
 interface QueryConfig<Result> {
 	fetch: (id: number) => Promise<Result | undefined>
-	onDatabaseChange?: DatabaseChangeHandler<Result | undefined>
+	onDatabaseChange: DatabaseChangeHandler<Result | undefined>
 }
 
 export type EntityStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
@@ -104,7 +101,9 @@ const albumConfig: QueryConfig<AlbumData> = {
 
 		return entity
 	},
-	//  TODO. ADD onDatabaseChange
+	onDatabaseChange: (id, change, mutate) => {
+		//  TODO. ADD onDatabaseChange
+	},
 }
 
 export type ArtistData = Artist
@@ -115,7 +114,9 @@ const artistConfig: QueryConfig<ArtistData> = {
 		const db = await getDatabase()
 		return db.get('artists', id)
 	},
-	//  TODO. ADD onDatabaseChange
+	onDatabaseChange: (id, change, mutate) => {
+		//  TODO. ADD onDatabaseChange
+	},
 }
 
 export type PlaylistData = Playlist
@@ -134,7 +135,9 @@ const playlistsConfig: QueryConfig<PlaylistData> = {
 		const db = await getDatabase()
 		return db.get('playlists', id)
 	},
-	//  TODO. ADD onDatabaseChange
+	onDatabaseChange: (id, change, mutate) => {
+		//  TODO. ADD onDatabaseChange
+	},
 }
 
 const LIBRARY_ENTITIES_DATA_MAP: {
@@ -185,7 +188,7 @@ if (!import.meta.env.SSR) {
 		}
 	}
 
-	listenForDatabaseChanges((changes) => {
+	onDatabaseChange((changes) => {
 		for (const key of entityCache.keys()) {
 			const [storeName, stringId] = key.split(':') as [EntityStoreName, string]
 			const id = Number(stringId)
@@ -313,11 +316,10 @@ const defineEntityQuery =
 	<AllowEmpty extends boolean = false>(
 		idGetter: number | (() => number),
 		options: EntityQueryOptions<AllowEmpty> = {},
-	): QueryResult<EntityQueryData<StoreName, AllowEmpty>, undefined> => {
+	): QueryResult<EntityQueryData<StoreName, AllowEmpty>> => {
 		const config = LIBRARY_ENTITIES_DATA_MAP[storeName]
 
 		return createQuery({
-			eager: true,
 			key: idGetter,
 			fetcher: (id) => getEntityDataInternal(storeName, id, config, options.allowEmpty),
 			onDatabaseChange: (_, { refetch }) => {
@@ -332,5 +334,7 @@ type EntityQuery<StoreName extends EntityStoreName> = ReturnType<DefineEntityQue
 
 export const createTrackQuery: EntityQuery<'tracks'> = /* @__PURE__ */ defineEntityQuery('tracks')
 export const createAlbumQuery: EntityQuery<'albums'> = /* @__PURE__ */ defineEntityQuery('albums')
-export const createArtistQuery: EntityQuery<'artists'> = /* @__PURE__ */ defineEntityQuery('artists')
-export const createPlaylistQuery: EntityQuery<'playlists'> = /* @__PURE__ */ defineEntityQuery('playlists')
+export const createArtistQuery: EntityQuery<'artists'> =
+	/* @__PURE__ */ defineEntityQuery('artists')
+export const createPlaylistQuery: EntityQuery<'playlists'> =
+	/* @__PURE__ */ defineEntityQuery('playlists')
