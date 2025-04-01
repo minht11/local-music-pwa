@@ -96,7 +96,7 @@ export default defineConfig({
 			name: 'log-chunks-size',
 			apply: 'build',
 			enforce: 'post',
-			async closeBundle() {
+			writeBundle() {
 				const dirSize = async (directory: string) => {
 					const files = readdirSync(directory)
 					const stats = files.map((file) => statSync(path.join(directory, file)))
@@ -109,8 +109,10 @@ export default defineConfig({
 					return size
 				}
 
-				const size = await dirSize('./build/_app/immutable/chunks')
-				console.log('Size of chunks:', size / 1024, 'KB')
+				setTimeout(async () => {
+					const size = await dirSize('./build/_app/immutable/chunks')
+					console.log('Size of chunks:', size / 1024, 'KB')	
+				}, 1000)
 			},
 		},
 	],
