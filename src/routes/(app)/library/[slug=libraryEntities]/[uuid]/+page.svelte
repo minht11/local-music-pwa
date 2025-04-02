@@ -81,7 +81,7 @@
 				{/if}
 
 				<div>
-					{#if data.slug === 'albums'}
+					{#if data.slug === 'albums' && (item as AlbumData).year}
 						{(item as AlbumData).year} •
 					{/if}
 

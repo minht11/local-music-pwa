@@ -21,7 +21,7 @@ patchedDependencies:
     hash: 11fcdd2d0c1b26018b2646dc931948ce22d82ee106bff932bf0ee91c940a5986
     path: patches/@material__material-color-utilities.patch
   debug:
-    hash: b2decac186f0d6a04644cf296cc0e363920d107757692c4185bd81ab5037f3cb
+    hash: b12cae049d47a9e32e31249166810e3faa1ce93528ce1c37b6635ddd408d60c4
     path: patches/debug.patch
 
 importers:
@@ -1507,7 +1507,7 @@ snapshots:
   '@sveltejs/vite-plugin-svelte-inspector@4.0.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.25.6)(vite@6.2.4(@types/node@22.10.5)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)))(svelte@5.25.6)(vite@6.2.4(@types/node@22.10.5)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))':
     dependencies:
       '@sveltejs/vite-plugin-svelte': 5.0.3(svelte@5.25.6)(vite@6.2.4(@types/node@22.10.5)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))
-      debug: 4.4.0(patch_hash=b2decac186f0d6a04644cf296cc0e363920d107757692c4185bd81ab5037f3cb)
+      debug: 4.4.0(patch_hash=b12cae049d47a9e32e31249166810e3faa1ce93528ce1c37b6635ddd408d60c4)
       svelte: 5.25.6
       vite: 6.2.4(@types/node@22.10.5)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)
     transitivePeerDependencies:
@@ -1516,7 +1516,7 @@ snapshots:
   '@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.25.6)(vite@6.2.4(@types/node@22.10.5)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))':
     dependencies:
       '@sveltejs/vite-plugin-svelte-inspector': 4.0.1(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.25.6)(vite@6.2.4(@types/node@22.10.5)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)))(svelte@5.25.6)(vite@6.2.4(@types/node@22.10.5)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))
-      debug: 4.4.0(patch_hash=b2decac186f0d6a04644cf296cc0e363920d107757692c4185bd81ab5037f3cb)
+      debug: 4.4.0(patch_hash=b12cae049d47a9e32e31249166810e3faa1ce93528ce1c37b6635ddd408d60c4)
       deepmerge: 4.3.1
       kleur: 4.1.5
       magic-string: 0.30.17
@@ -1651,7 +1651,7 @@ snapshots:
 
   core-util-is@1.0.3: {}
 
-  debug@4.4.0(patch_hash=b2decac186f0d6a04644cf296cc0e363920d107757692c4185bd81ab5037f3cb):
+  debug@4.4.0(patch_hash=b12cae049d47a9e32e31249166810e3faa1ce93528ce1c37b6635ddd408d60c4):
     dependencies:
       ms: 2.1.3
 
@@ -1839,7 +1839,7 @@ snapshots:
     dependencies:
       '@tokenizer/token': 0.3.0
       content-type: 1.0.5
-      debug: 4.4.0(patch_hash=b2decac186f0d6a04644cf296cc0e363920d107757692c4185bd81ab5037f3cb)
+      debug: 4.4.0(patch_hash=b12cae049d47a9e32e31249166810e3faa1ce93528ce1c37b6635ddd408d60c4)
       file-type: 19.6.0
       link: 2.1.1
       media-typer: 1.1.0

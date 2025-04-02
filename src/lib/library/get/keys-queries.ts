@@ -57,7 +57,7 @@ export const keysListDatabaseChangeHandler = <
         if (change.operation === 'delete' && change.key !== undefined) {
             mutate((value) => {
                 if (!value) {
-                    return value
+                    return [] 
                 }
 
                 const index = value.indexOf(change.key)

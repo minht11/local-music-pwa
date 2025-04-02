@@ -60,7 +60,7 @@
 	]
 
 	const isWideLayout = $derived.by(data.isWideLayout)
-	const layoutMode = $derived(data.layoutMode(isWideLayout, page.params.id))
+	const layoutMode = $derived(data.layoutMode(isWideLayout, page.params.uuid))
 
 	useSetBottomBar(() => layoutBottom)
 </script>

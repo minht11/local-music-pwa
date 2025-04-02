@@ -13,7 +13,7 @@ type ConfigDatabaseChangeHandler<Result> = (
 
 interface QueryConfig<Result> {
 	fetch: (id: number) => Promise<Result | undefined>
-	onDatabaseChange: ConfigDatabaseChangeHandler<Result>
+	onDatabaseChange?: ConfigDatabaseChangeHandler<Result>
 }
 
 type CacheKey<Store extends LibraryItemStoreName> = `${Store}:${string}`
@@ -98,9 +98,6 @@ const albumConfig: QueryConfig<AlbumData> = {
 
 		return item
 	},
-	onDatabaseChange: (id, change, mutate) => {
-		//  TODO. ADD onDatabaseChange
-	},
 }
 
 export type ArtistData = Artist
@@ -110,9 +107,6 @@ const artistConfig: QueryConfig<ArtistData> = {
 	fetch: async (id) => {
 		const db = await getDatabase()
 		return db.get('artists', id)
-	},
-	onDatabaseChange: (id, change, mutate) => {
-		//  TODO. ADD onDatabaseChange
 	},
 }
 
@@ -132,9 +126,6 @@ const playlistsConfig: QueryConfig<PlaylistData> = {
 
 		const db = await getDatabase()
 		return db.get('playlists', id)
-	},
-	onDatabaseChange: (id, change, mutate) => {
-		//  TODO. ADD onDatabaseChange
 	},
 }
 
@@ -162,7 +153,7 @@ type LibraryItemValue = LibraryItemsValueMap[LibraryItemStoreName]
 
 // Fast in memory cache for `items`, so we do not need to
 // call indexed db for every access.
-// IMPORTANT. Only store whole library items in` dataCache`
+// IMPORTANT. Only store whole library items in here.
 const dataCache = new WeakLRUCache<
 	CacheKey<LibraryItemStoreName>,
 	LibraryItemValue | Promise<LibraryItemValue>
@@ -170,20 +161,29 @@ const dataCache = new WeakLRUCache<
 	cacheSize: 10_000,
 })
 
+if (import.meta.env.DEV) {
+	// @ts-expect-error used for debugging
+	globalThis.libraryItemCache = dataCache
+}
+
 if (!import.meta.env.SSR) {
-	type MutateCallback =
-		| LibraryItemValue
+	type MutateCallback<T> =
+		| T
 		| undefined
-		| ((prev: LibraryItemValue | undefined) => LibraryItemValue)
-	const mutateFn = (key: CacheKey<LibraryItemStoreName>, v: MutateCallback) => {
-		let value = dataCache.getValue(key) as LibraryItemValue
-		if (typeof v === 'function') {
-			const accessor = v as (prev: LibraryItemValue | undefined) => LibraryItemValue
-			value = accessor(value)
+		| ((prev: T | undefined) => T)
+
+	const mutateFn = <T extends LibraryItemValue>(key: CacheKey<LibraryItemStoreName>, value: MutateCallback<T>) => {
+		let resolvedValue: LibraryItemValue | undefined
+		if (typeof value === 'function') {
+			const prevValue = dataCache.getValue(key)
+			// @ts-expect-error This could return a promise. TODO. Think how to handle this
+			resolvedValue = value(prevValue)
+		} else {
+			resolvedValue = value
 		}
 
-		if (value) {
-			dataCache.setValue(key, value)
+		if (resolvedValue) {
+			dataCache.setValue(key, resolvedValue)
 		} else {
 			dataCache.delete(key)
 		}
@@ -205,6 +205,8 @@ if (!import.meta.env.SSR) {
 					continue
 				}
 
+				invariant(storeName !== 'tracks', 'Tracks should have onDatabaseChange handler')
+
 				if (change.storeName !== storeName || change.key !== id) {
 					continue
 				}
@@ -212,11 +214,7 @@ if (!import.meta.env.SSR) {
 				if (change.operation === 'delete') {
 					mutate(undefined)
 				} else if (change.operation === 'update') {
-					if (import.meta.env.DEV && storeName === 'tracks') {
-						console.warn('Update operation should not be used for tracks')
-					}
-
-					mutate(change.value as Exclude<LibraryItemValue, Track>)
+					mutate(change.value)
 				}
 			}
 		}
@@ -276,6 +274,12 @@ export const getLibraryItemValue = <
 	const promise = libraryItemsConfigMap[storeName]
 		.fetch(id)
 		.then((value) => {
+			if (value) {
+				dataCache.setValue(key, value)
+			} else {
+				dataCache.delete(key)
+			}
+
 			return unwrapLibraryItemValue(value as Value, id, storeName, allowEmpty)
 		})
 		.catch((error) => {

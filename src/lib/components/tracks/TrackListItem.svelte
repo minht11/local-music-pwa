@@ -33,14 +33,7 @@
 	const artworkSrc = createManagedArtwork(() => data.value?.image?.small)
 	const track = $derived(data.value)
 
-	const menuItemsWithItem = $derived(
-		menuItems &&
-			(() => {
-				invariant(track)
-
-				return menuItems?.(track)
-			}),
-	)
+	const menuItemsWithItem = $derived(track && menuItems?.bind(null, track))
 </script>
 
 <ListItem

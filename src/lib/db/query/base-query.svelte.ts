@@ -32,7 +32,7 @@ type QueryErrorResult<Result> = {
 export type QueryResult<Result> = QueryBaseResult &
 	(QueryLoadedResult<Result> | QueryLoadingResult<Result> | QueryErrorResult<Result>)
 
-export type QueryMutate<Result> = (value: Result | ((prev: Result | undefined) => void)) => void
+export type QueryMutate<Result> = (value: Result | ((prev: Result | undefined) => Result)) => void
 
 export type DbChangeActions<Result> = {
 	mutate: QueryMutate<Result>
