@@ -106,18 +106,13 @@ export const removePlaylist = async (id: number, name: string): Promise<void> =>
 	try {
 		await dbRemovePlaylist(id)
 
-		snackbar({
-			id: `playlist-removed-${id}`,
-			// TODO. i18n
-			message: `Playlist "${truncate(name, 20)}" removed`,
-			duration: 3000,
-		})
+		snackbar(m.libraryPlaylistRemoved())
 	} catch (error) {
 		snackbar.unexpectedError(error)
 	}
 }
 
-export const addTrackToPlaylistInDatabase = async (
+const dbAddTrackToPlaylist = async (
 	playlistId: number,
 	trackId: number,
 ): Promise<void> => {
@@ -139,7 +134,7 @@ export const addTrackToPlaylistInDatabase = async (
 	})
 }
 
-export const removeTrackFromPlaylistInDatabase = async (
+const dbRemoveTrackFromPlaylist = async (
 	playlistId: number,
 	trackId: number,
 ): Promise<void> => {
@@ -155,26 +150,28 @@ export const removeTrackFromPlaylistInDatabase = async (
 	})
 }
 
-export const toggleTrackInPlaylistInDatabase = async (
+export const removeTrackFromPlaylist = async (
+	playlistId: number,
+	trackId: number,
+): Promise<void> => {
+	try {
+		await dbRemoveTrackFromPlaylist(playlistId, trackId)
+
+		snackbar(m.libraryTrackRemovedFromPlaylist())
+	} catch (error) {
+		snackbar.unexpectedError(error)
+	}
+}
+
+export const dbToggleTrackInPlaylist = async (
 	shouldBeRemoved: boolean,
 	playlistId: number,
 	trackId: number,
 ): Promise<void> => {
 	if (shouldBeRemoved) {
-		await removeTrackFromPlaylistInDatabase(playlistId, trackId)
+		await dbRemoveTrackFromPlaylist(playlistId, trackId)
 	} else {
-		await addTrackToPlaylistInDatabase(playlistId, trackId)
-	}
-}
-
-export const dbToggleFavoriteTrack = async (
-	shouldBeRemoved: boolean,
-	trackId: number,
-): Promise<void> => {
-	if (shouldBeRemoved) {
-		await removeTrackFromPlaylistInDatabase(FAVORITE_PLAYLIST_ID, trackId)
-	} else {
-		await addTrackToPlaylistInDatabase(FAVORITE_PLAYLIST_ID, trackId)
+		await dbAddTrackToPlaylist(playlistId, trackId)
 	}
 }
 
@@ -183,12 +180,15 @@ export const toggleFavoriteTrack = async (
 	trackId: number,
 ): Promise<void> => {
 	try {
-		await dbToggleFavoriteTrack(shouldBeRemoved, trackId)
-
+		if (shouldBeRemoved) {
+			await dbRemoveTrackFromPlaylist(FAVORITE_PLAYLIST_ID, trackId)
+		} else {
+			await dbAddTrackToPlaylist(FAVORITE_PLAYLIST_ID, trackId)
+		}
+	
 		snackbar({
 			id: 'track-favorite-toggled',
-			// TODO. i18n
-			message: shouldBeRemoved ? 'Track removed from favorites' : 'Track added to favorites',
+			message: shouldBeRemoved ? m.libraryTrackRemovedFromFavorites() : m.libraryTrackAddedToFavorites(),
 			duration: 2000,
 		})
 	} catch (error) {

@@ -41,6 +41,15 @@
 	"trackAddToFavorites": "Add to favorites",
 	"trackRemoveFromFavorites": "Remove from favorites",
 
+	"libraryTrackAddedToFavorites": "Track added to favorites",
+	"libraryTrackRemovedFromFavorites": "Track removed from favorites",
+	"libraryTrackRemovedFromPlaylist": "Track removed from playlist",
+	"libraryTrackRemovedFromLibrary": "Track removed from library",
+
+	"libraryPlaylistCreated": "Playlist \"{playlistName}\" created",
+	"libraryPlaylistUpdated": "Playlist updated",
+	"libraryPlaylistRemoved": "Playlist removed",
+
 	"playerPlayNextTrack": "Play next track",
 	"playerPlayPreviousTrack": "Play previous track",
 	"playerPlay": "Play",
@@ -59,9 +68,6 @@
 	"replaceDirectoryQ": "Replace directory?",
 	"replaceDirectoryExplanation": "The directory {newDir} you're adding is a parent of {existingDirs} which already exists in your Library.\n No changes will occur for existing tracks in your library.",
 	"directoryIsIncludedInParent": "\"{newDir}\" is subdirectory of \"{existingDir}\" which is already in your Library. You do not need to add it again.",
-
-	"libraryPlaylistCreated": "Playlist \"{playlistName}\" created",
-	"libraryPlaylistUpdated": "Playlist updated",
 
 	"settingsCurrentTracksInLibrary": "Currently there are {tracksCount} tracks inside your library",
 	"settingsAllDataLocal": "All data is stored on your device",

@@ -48,7 +48,6 @@
 
 			// TODO.
 			menuEl?.querySelector('button')?.focus()
-			// TODO.
 		}
 		if (e.key === 'Tab') {
 			e.preventDefault()

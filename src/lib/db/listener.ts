@@ -42,7 +42,6 @@ type Listener = (changes: readonly DatabaseChangeDetails[]) => void
 // It is faster to manually store listeners in a Set, than registering 2 EventTargets.
 const listeners = new Set<Listener>()
 
-// TODO. https://github.com/sveltejs/kit/issues/12394
 // We only want listeners to be registered in the main thread.
 if (globalThis.window) {
 	const notifyListeners = (changes: readonly DatabaseChangeDetails[]) => {

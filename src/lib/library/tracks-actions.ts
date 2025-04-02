@@ -10,7 +10,7 @@ type TrackOperationsTransaction = IDBPTransaction<
 	'readwrite'
 >
 
-const removeTrackRelatedData = async <
+const dbRemoveTrackRelatedData = async <
 	Store extends Exclude<LibraryItemStoreName, 'playlists'>,
 	ItemIndexName extends IndexNames<AppDB, Store>,
 	ItemValue extends AppDB[Store]['indexes'][ItemIndexName],
@@ -46,7 +46,7 @@ const removeTrackRelatedData = async <
 	return change
 }
 
-const removeTrackFromPlaylistsInDatabase = async (trackId: number) => {
+const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 	const db = await getDatabase()
 	const tx = db.transaction(['playlists', 'playlistsTracks'], 'readwrite')
 
@@ -78,11 +78,11 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 	}
 
 	const [albumChange, playlistChanges, _, ...artistsChanges] = await Promise.all([
-		removeTrackRelatedData(tx, 'album', 'albums', 'name', track.album),
-		removeTrackFromPlaylistsInDatabase(trackId),
+		dbRemoveTrackRelatedData(tx, 'album', 'albums', 'name', track.album),
+		dbRemoveTrackFromAllPlaylists(trackId),
 		tx.done,
 		...track.artists.map((artist) =>
-			removeTrackRelatedData(tx, 'artists', 'artists', 'name', artist),
+			dbRemoveTrackRelatedData(tx, 'artists', 'artists', 'name', artist),
 		),
 	])
 
@@ -100,18 +100,12 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 	])
 }
 
-export const removeTrack = async (id: number): Promise<void> =>
-	dbRemoveTrack(id).then(
-		() => {
-			snackbar({
-				id: 'track-removed',
-				message: 'Track removed',
-			})
-		},
-		() => {
-			snackbar({
-				id: 'track-removed-error',
-				message: 'Failed to remove track',
-			})
-		},
-	)
+export const removeTrack = async (id: number): Promise<void> => {
+	try {
+		await dbRemoveTrack(id)
+
+		snackbar(m.libraryTrackRemovedFromLibrary())
+	} catch (error) {
+		snackbar.unexpectedError(error)
+	}
+}

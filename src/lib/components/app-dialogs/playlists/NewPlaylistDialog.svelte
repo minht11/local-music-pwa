@@ -1,7 +1,7 @@
 <script lang="ts">
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import TextField from '$lib/components/TextField.svelte'
-	import { createPlaylist } from '$lib/library/playlists-actions'
+	import { createPlaylist } from '$lib/library/playlists-actions.ts'
 
 	const main = useMainStore()
 
@@ -9,7 +9,6 @@
 		const formData = new FormData(event.target as HTMLFormElement)
 		const name = formData.get('name') as string
 
-		// TODO. Add error handling
 		await createPlaylist(name)
 
 		main.createNewPlaylistDialogOpen = false

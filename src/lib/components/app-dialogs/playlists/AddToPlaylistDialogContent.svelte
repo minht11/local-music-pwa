@@ -8,7 +8,7 @@
 	import { createQuery } from '$lib/db/query/query.ts'
 	import { getLibraryItemIds } from '$lib/library/get/keys.ts'
 	import { createLibraryItemKeysQuery } from '$lib/library/get/keys-queries.ts'
-	import { toggleTrackInPlaylistInDatabase } from '$lib/library/playlists-actions'
+	import { dbToggleTrackInPlaylist } from '$lib/library/playlists-actions'
 	import { SvelteSet } from 'svelte/reactivity'
 
 	interface Props {
@@ -16,19 +16,11 @@
 		onclose: () => void
 	}
 
-	const { trackId, onclose }: Props = $props()
+	const { trackId }: Props = $props()
 
 	const query = createLibraryItemKeysQuery('playlists', {
 		key: ['playlists'],
 		fetcher: () => getLibraryItemIds('playlists', { sort: 'created' }),
-		onError: () => {
-			snackbar({
-				id: 'playlists-loading',
-				// TODO: i18n
-				message: 'Failed to load playlists',
-			})
-			onclose()
-		},
 	})
 
 	const trackPlaylists = createQuery({
@@ -68,14 +60,20 @@
 	const isTrackInPlaylist = (playlistId: number) => !!trackPlaylists.value?.has(playlistId)
 
 	const addToPlaylist = async (playlistId: number) => {
-		await toggleTrackInPlaylistInDatabase(isTrackInPlaylist(playlistId), playlistId, trackId)
+		try {
+			await dbToggleTrackInPlaylist(isTrackInPlaylist(playlistId), playlistId, trackId)
+		} catch (error) {
+			snackbar.unexpectedError(error)
+		}
 	}
 </script>
 
 <Separator class="mt-6" />
 
 <ScrollContainer class="max-h-100 grow overflow-auto px-2 py-4">
-	{#if query.status === 'loaded'}
+	{#if query.status === 'error'}
+		<div>Failed to load playlists</div>
+	{:else if query.status === 'loaded'}
 		<PlaylistListContainer
 			items={query.value}
 			onItemClick={(item) => {

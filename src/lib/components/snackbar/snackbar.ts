@@ -30,6 +30,6 @@ snackbar.unexpectedError = (error: unknown) => {
 	snackbar({
 		id: 'unexpected-error',
 		message: m.errorUnexpected(),
-		duration: false,
+		duration: 10_000,
 	})
 }

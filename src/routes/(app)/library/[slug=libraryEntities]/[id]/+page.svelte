@@ -9,7 +9,7 @@
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import type { TrackData } from '$lib/library/get/value.ts'
-	import { removeTrackFromPlaylistInDatabase } from '$lib/library/playlists-actions.js'
+	import { removeTrackFromPlaylist } from '$lib/library/playlists-actions.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { MediaQuery } from 'svelte/reactivity'
 
@@ -48,8 +48,7 @@
 		{
 			label: 'Remove from playlist',
 			action: () => {
-				// TODO. Error handling
-				removeTrackFromPlaylistInDatabase(item.id, track.id)
+				void removeTrackFromPlaylist(item.id, track.id)
 			},
 		},
 	]
@@ -86,6 +85,7 @@
 				<Button
 					kind="toned"
 					class="mr-auto"
+					disabled={tracks.length === 0}
 					onclick={() => {
 						player.playTrack(0, tracks, {
 							shuffle: true,
