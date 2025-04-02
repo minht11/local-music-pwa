@@ -1,4 +1,4 @@
-import { onDatabaseChange } from '$lib/db/listener.ts'
+import { onDatabaseChange } from '$lib/db/events.ts'
 import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { persist } from '$lib/helpers/persist.svelte.ts'

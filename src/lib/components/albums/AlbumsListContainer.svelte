@@ -1,7 +1,10 @@
 <script lang="ts" module>
 	import { goto } from '$app/navigation'
-	import type { Album } from '$lib/db/database-types'
+	import { page } from '$app/state'
 	import { safeInteger } from '$lib/helpers/utils/integers.ts'
+	import type { Album } from '$lib/library/types.ts'
+	import type { RouteId } from '$lib/view-transitions'
+	import VirtualContainer from '../VirtualContainer.svelte'
 	import AlbumGridItem from './AlbumGridItem.svelte'
 
 	export interface AlbumItemClick {
@@ -12,9 +15,6 @@
 </script>
 
 <script lang="ts">
-	import VirtualContainer from '../VirtualContainer.svelte'
-	import { page } from '$app/state'
-
 	interface Props {
 		items: number[]
 	}
@@ -61,10 +61,11 @@
 					height: {item.size - gap}px;
 					transform: translateY({item.start}px);
 				"
-			onclick={() => {
-				const shouldReplace = page.route.id === '/library/[slug=libraryEntities]/[id]'
+			onclick={(album) => {
+				const detailsViewId: RouteId = '/(app)/library/[slug=libraryEntities]/[uuid]'
+				const shouldReplace = page.route.id === detailsViewId
 
-				goto(`/library/albums/${albumId}`, { replaceState: shouldReplace })
+				goto(`/library/albums/${album.uuid}`, { replaceState: shouldReplace })
 			}}
 		/>
 	{/snippet}

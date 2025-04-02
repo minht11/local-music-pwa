@@ -41,6 +41,7 @@
 	"trackAddToFavorites": "Add to favorites",
 	"trackRemoveFromFavorites": "Remove from favorites",
 
+	"libraryTrackRemoveFromPlaylist": "Remove from playlist",
 	"libraryTrackAddedToFavorites": "Track added to favorites",
 	"libraryTrackRemovedFromFavorites": "Track removed from favorites",
 	"libraryTrackRemovedFromPlaylist": "Track removed from playlist",

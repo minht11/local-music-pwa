@@ -1,4 +1,4 @@
-import type { DatabaseChangeDetailsList } from '$lib/db/listener.ts'
+import type { DatabaseChangeDetailsList } from '$lib/db/events.ts'
 import type { DbChangeActions } from '$lib/db/query/base-query.svelte.ts'
 import { createPageQuery, type PageQueryOptions, type PageQueryResult, type QueryKey } from '$lib/db/query/page-query.svelte.ts'
 import { createQuery, type QueryOptions, type QueryResult } from '$lib/db/query/query.ts'

@@ -1,6 +1,6 @@
 import { type AppDB, getDatabase } from '$lib/db/database'
-import type { Album, Artist, Track, UnknownTrack } from '$lib/db/database-types'
-import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/listener.ts'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
+import type { Album, Artist, Track, UnknownTrack } from '$lib/library/types.ts'
 import type { IDBPTransaction } from 'idb'
 
 type ImportTrackTx = IDBPTransaction<
@@ -24,6 +24,7 @@ const importAlbum = async (tx: ImportTrackTx, track: Track) => {
 				image: existingAlbum.image ?? track.image?.full,
 			}
 		: {
+				uuid: crypto.randomUUID(),
 				name: track.album,
 				artists: track.artists,
 				year: track.year,
@@ -55,6 +56,7 @@ const importArtist = async (tx: ImportTrackTx, track: Track) => {
 
 		const newArtist: Omit<Artist, 'id'> = {
 			name: artist,
+			uuid: crypto.randomUUID(),
 		}
 
 		const artistId = await store.put(newArtist as Artist)

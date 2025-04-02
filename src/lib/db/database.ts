@@ -1,6 +1,6 @@
+import type { Album, Artist, Directory, Playlist, Track } from '$lib/library/types.ts'
 import type { DBSchema, IDBPDatabase, IDBPObjectStore, IndexNames, StoreNames } from 'idb'
 import { openDB } from 'idb'
-import type { Album, Artist, Directory, Playlist, Track } from './database-types.ts'
 
 export interface AppDB extends DBSchema {
 	tracks: {
@@ -27,7 +27,7 @@ export interface AppDB extends DBSchema {
 	albums: {
 		key: number
 		value: Album
-		indexes: Pick<Album, 'id' | 'name' | 'artists' | 'year'>
+		indexes: Pick<Album, 'id' | 'uuid' | 'name' | 'artists' | 'year'>
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -35,7 +35,7 @@ export interface AppDB extends DBSchema {
 	artists: {
 		key: number
 		value: Artist
-		indexes: Pick<Artist, 'id' | 'name'>
+		indexes: Pick<Artist, 'id' | 'uuid' | 'name'>
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -43,7 +43,7 @@ export interface AppDB extends DBSchema {
 	playlists: {
 		key: number
 		value: Playlist
-		indexes: Pick<Playlist, 'id' | 'name' | 'created'>
+		indexes: Pick<Playlist, 'id' | 'uuid' | 'name' | 'created'>
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -77,18 +77,11 @@ export type AppStoreNames = StoreNames<AppDB>
 const createIndexes = <DBTypes extends DBSchema | unknown, Name extends StoreNames<DBTypes>>(
 	store: IDBPObjectStore<DBTypes, ArrayLike<StoreNames<DBTypes>>, Name, 'versionchange'>,
 	indexes: readonly IndexNames<DBTypes, Name>[],
+	options: IDBIndexParameters
 ) => {
 	for (const name of indexes) {
-		store.createIndex(name, name, { unique: false })
+		store.createIndex(name, name, options)
 	}
-}
-
-const createUniqueNameIndex = <
-	Name extends Extract<AppStoreNames, 'albums' | 'tracks' | 'artists' | 'playlists'>,
->(
-	store: IDBPObjectStore<AppDB, ArrayLike<AppStoreNames>, Name, 'versionchange'>,
-) => {
-	store.createIndex('name', 'name', { unique: true })
 }
 
 const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames<DBTypes>>(
@@ -109,14 +102,9 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> =>
 			if (!objectStoreNames.contains('tracks')) {
 				const store = createStore(e, 'tracks')
 
-				createIndexes(store, [
-					'name',
-					'album',
-					'year',
-					'duration',
-					'lastScanned',
-					'directory',
-				])
+				createIndexes(store, ['name', 'album', 'year', 'duration', 'lastScanned', 'directory'], {
+					unique: false,
+				})
 
 				store.createIndex('path', ['directory', 'fileName'], {
 					// We keep flat folder structure in the database
@@ -134,8 +122,8 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> =>
 			if (!objectStoreNames.contains('albums')) {
 				const store = createStore(e, 'albums')
 
-				createUniqueNameIndex(store)
-				createIndexes(store, ['year'])
+				createIndexes(store, ['name', 'uuid'], { unique: true })
+				createIndexes(store, ['year'], { unique: false })
 
 				store.createIndex('artists', 'artists', {
 					unique: false,
@@ -145,13 +133,13 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> =>
 
 			if (!objectStoreNames.contains('artists')) {
 				const store = createStore(e, 'artists')
-				createUniqueNameIndex(store)
+				createIndexes(store, ['name', 'uuid'], { unique: true })
 			}
 
 			if (!objectStoreNames.contains('playlists')) {
 				const store = createStore(e, 'playlists')
-				createUniqueNameIndex(store)
-				store.createIndex('created', 'created', { unique: false })
+				createIndexes(store, ['name', 'uuid'], { unique: true })
+				createIndexes(store, ['created'], { unique: false })
 			}
 
 			if (!objectStoreNames.contains('playlistsTracks')) {
@@ -159,8 +147,7 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> =>
 					keyPath: ['playlistId', 'trackId'],
 				})
 
-				store.createIndex('playlistId', 'playlistId', { unique: false })
-				store.createIndex('trackId', 'trackId', { unique: false })
+				createIndexes(store, ['playlistId', 'trackId'], { unique: false })
 			}
 
 			if (!objectStoreNames.contains('directories')) {

@@ -91,13 +91,13 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 
 	defineViewTransitionMatcher((to, from) => {
 		const libraryRoute: RouteId = '/(app)/library/[slug=libraryEntities]'
-		const detailsRoute: RouteId = '/(app)/library/[slug=libraryEntities]/[id]'
+		const detailsRoute: RouteId = '/(app)/library/[slug=libraryEntities]/[uuid]'
 
 		if (to === libraryRoute && from === libraryRoute) {
 			return { view: 'library' }
 		}
 
-		const mode = event.untrack(() => layoutMode(isWideLayout(), event.params.id))
+		const mode = event.untrack(() => layoutMode(isWideLayout(), event.params.uuid))
 		if (mode !== 'both') {
 			return null
 		}

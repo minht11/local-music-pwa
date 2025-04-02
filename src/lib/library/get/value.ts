@@ -1,9 +1,9 @@
 import { type DbKey, getDatabase } from '$lib/db/database.ts'
-import type { Album, Artist, Playlist, Track } from '$lib/db/database-types.ts'
-import { type DatabaseChangeDetails, onDatabaseChange } from '$lib/db/listener.ts'
+import { type DatabaseChangeDetails, onDatabaseChange } from '$lib/db/events.ts'
 import type { QueryMutate } from '$lib/db/query/base-query.svelte.ts'
+import type { Album, Artist, Playlist, Track } from '$lib/library/types.ts'
 import { WeakLRUCache } from 'weak-lru-cache'
-import { FAVORITE_PLAYLIST_ID, type LibraryItemStoreName } from '../types.ts'
+import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryItemStoreName } from '../types.ts'
 
 type ConfigDatabaseChangeHandler<Result> = (
 	id: number,
@@ -124,6 +124,7 @@ const playlistsConfig: QueryConfig<PlaylistData> = {
 			return {
 				type: 'playlist',
 				id: FAVORITE_PLAYLIST_ID,
+				uuid: FAVORITE_PLAYLIST_UUID,
 				name: 'Favorites',
 				created: 0,
 			}

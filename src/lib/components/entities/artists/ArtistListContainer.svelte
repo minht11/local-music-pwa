@@ -3,6 +3,7 @@
 	import { page } from '$app/state'
 	import { safeInteger } from '$lib/helpers/utils/integers.ts'
 	import type { ArtistData } from '$lib/library/get/value.ts'
+	import type { RouteId } from '$lib/view-transitions'
 	import VirtualContainer from '../../VirtualContainer.svelte'
 	import ArtistGridItem from './ArtistGridItem.svelte'
 
@@ -60,10 +61,11 @@
 					height: {item.size - gap}px;
 					transform: translateY({item.start}px);
 				"
-			onclick={() => {
-				const shouldReplace = page.route.id === '/library/[slug=libraryEntities]/[id]'
+			onclick={(artist) => {
+				const detailsViewId: RouteId = '/(app)/library/[slug=libraryEntities]/[uuid]'
+				const shouldReplace = page.route.id === detailsViewId
 
-				goto(`/library/artists/${artistId}`, { replaceState: shouldReplace })
+				goto(`/library/artists/${artist.uuid}`, { replaceState: shouldReplace })
 			}}
 		/>
 	{/snippet}

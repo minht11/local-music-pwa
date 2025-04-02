@@ -1,8 +1,8 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
 import { getDatabase } from '$lib/db/database'
-import type { OmitId, Playlist } from '$lib/db/database-types'
-import { dispatchDatabaseChangedEvent } from '$lib/db/listener.ts'
+import { dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { truncate } from '$lib/helpers/utils/truncate.ts'
+import type { Playlist } from '$lib/library/types.ts'
 import { FAVORITE_PLAYLIST_ID } from './types.ts'
 
 export { FAVORITE_PLAYLIST_ID } from './types.ts'
@@ -10,8 +10,9 @@ export { FAVORITE_PLAYLIST_ID } from './types.ts'
 export const dbCreatePlaylist = async (name: string): Promise<number> => {
 	const db = await getDatabase()
 
-	const newPlaylist: OmitId<Playlist> = {
+	const newPlaylist: Omit<Playlist, 'id'> = {
 		name,
+		uuid: crypto.randomUUID(),
 		created: Date.now(),
 	}
 

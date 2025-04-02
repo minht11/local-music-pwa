@@ -12,8 +12,9 @@
 	import { initPageQueriesDynamic } from '$lib/db/query/page-query.svelte.ts'
 	import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
 	import { useSetBottomBar } from '$lib/layout-bottom-bar.svelte.ts'
-	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.js'
+	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
+	import type { RouteId } from '$lib/view-transitions.ts'
 	import Search from './Search.svelte'
 
 	const { data, children } = $props()
@@ -163,9 +164,10 @@
 									items: (playlist) => getPlaylistMenuItems(main, playlist),
 								}}
 								onItemClick={({ playlist }) => {
-									const shouldReplace = page.route.id === '/library/[slug=libraryEntities]/[id]'
+									const detailsViewId: RouteId = '/(app)/library/[slug=libraryEntities]/[uuid]'
+									const shouldReplace = page.route.id === detailsViewId
 
-									void goto(`/library/playlists/${playlist.id}`, { replaceState: shouldReplace })
+									void goto(`/library/playlists/${playlist.uuid}`, { replaceState: shouldReplace })
 								}}
 							/>
 						{/if}

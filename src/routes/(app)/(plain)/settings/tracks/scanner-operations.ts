@@ -1,9 +1,9 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
 import { getDatabase } from '$lib/db/database'
-import type { Directory } from '$lib/db/database-types'
-import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/listener.ts'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { lockDatabase } from '$lib/db/lock-database.ts'
 import { dbRemoveTrack } from '$lib/library/tracks-actions.ts'
+import type { Directory } from '$lib/library/types.ts'
 import { scanTracks } from './scan-tracks.ts'
 
 export interface DirectoryStatus {

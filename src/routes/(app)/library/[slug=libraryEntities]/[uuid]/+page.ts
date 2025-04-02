@@ -6,7 +6,7 @@ import {
 } from '$lib/db/query/page-query.svelte.ts'
 import { keysListDatabaseChangeHandler } from '$lib/library/get/keys-queries.ts'
 import { getLibraryItemValue, LibraryItemNotFoundError } from '$lib/library/get/value.ts'
-import type { LibraryItemStoreName } from '$lib/library/types.ts'
+import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryItemStoreName } from '$lib/library/types.ts'
 import { error, redirect } from '@sveltejs/kit'
 import type { PageLoad } from './$types.d.ts'
 
@@ -35,8 +35,7 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 			for (const change of changes) {
 				if (change.storeName === storeName && change.key === id) {
 					if (change.operation === 'delete') {
-						goto(`/library/${storeName}`)
-
+						actions.refetch()
 						break
 					}
 
@@ -114,8 +113,20 @@ export const load: PageLoad = async (event): Promise<LoadResult> => {
 		redirect(301, '/library/tracks')
 	}
 
-	const id = Number(event.params.id)
-	if (!Number.isFinite(id)) {
+	const uuid = event.params.uuid
+	if (!uuid) {
+		error(404)
+	}
+
+	let id: number | undefined
+	if (uuid === FAVORITE_PLAYLIST_UUID) {
+		id = FAVORITE_PLAYLIST_ID
+	} else {
+		const db = await getDatabase()
+		id = await db.getKeyFromIndex(slug, 'uuid', uuid)
+	}
+
+	if (!id) {
 		error(404)
 	}
 

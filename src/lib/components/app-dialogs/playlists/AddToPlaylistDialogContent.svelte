@@ -72,7 +72,7 @@
 
 <ScrollContainer class="max-h-100 grow overflow-auto px-2 py-4">
 	{#if query.status === 'error'}
-		<div>Failed to load playlists</div>
+		<div class="py-10">{m.errorUnexpected()}</div>
 	{:else if query.status === 'loaded'}
 		<PlaylistListContainer
 			items={query.value}

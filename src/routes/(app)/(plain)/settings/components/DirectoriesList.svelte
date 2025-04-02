@@ -6,7 +6,7 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
-	import type { Directory } from '$lib/db/database-types.ts'
+	import type { Directory } from '$lib/library/types.ts'
 	import type { DirectoryWithCount } from '../+page.ts'
 	import {
 		checkNewDirectoryStatus,

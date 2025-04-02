@@ -5,11 +5,11 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import type { Album, Playlist } from '$lib/db/database-types.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
-	import type { TrackData } from '$lib/library/get/value.ts'
+	import type { AlbumData, TrackData } from '$lib/library/get/value.ts'
 	import { removeTrackFromPlaylist } from '$lib/library/playlists-actions.ts'
+	import type { Album, Playlist } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { MediaQuery } from 'svelte/reactivity'
 
@@ -44,9 +44,9 @@
 		return []
 	}
 
-	const trackMenuItems = (track: TrackData) => [
+	const playlistTrackMenuItems = (track: TrackData) => [
 		{
-			label: 'Remove from playlist',
+			label: m.libraryTrackRemovedFromPlaylist(),
 			action: () => {
 				void removeTrackFromPlaylist(item.id, track.id)
 			},
@@ -75,10 +75,18 @@
 
 					<h1 class="text-headline-md">{item.name}</h1>
 				</div>
-				<!-- <h2 class="text-body-lg">{album.artists.join(', ')}</h2>
+
+				{#if data.slug === 'albums'}
+					<div class="text-body-lg">{(item as AlbumData).artists.join(', ')}</div>
+				{/if}
+
 				<div>
-					{album.year} • {tracks.length} tracks
-				</div> -->
+					{#if data.slug === 'albums'}
+						{(item as AlbumData).year} •
+					{/if}
+
+					{tracks.length} tracks
+				</div>
 			</div>
 
 			<div class="mt-auto flex items-center gap-2 py-4 pr-2 pl-4">
@@ -117,6 +125,6 @@
 
 	<TracksListContainer
 		items={tracks}
-		menuItems={data.slug === 'playlists' ? trackMenuItems : undefined}
+		menuItems={data.slug === 'playlists' ? playlistTrackMenuItems : undefined}
 	/>
 </div>

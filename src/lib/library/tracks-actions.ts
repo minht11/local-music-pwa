@@ -1,6 +1,6 @@
 import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
-import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/listener.ts'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import type { IDBPTransaction, IndexNames } from 'idb'
 import type { LibraryItemStoreName } from './types.ts'
 
