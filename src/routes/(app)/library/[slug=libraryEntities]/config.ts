@@ -1,5 +1,5 @@
 import type { DbValue } from "$lib/db/database"
-import type { LibraryItemSortKey } from "$lib/library/get/keys.ts"
+import type { LibraryItemSortKey } from "$lib/library/get/ids.ts"
 import type { LibraryItemStoreName } from "$lib/library/types"
 
 export type LibrarySearchFn<Value> = (

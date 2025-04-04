@@ -8,7 +8,7 @@
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import type { AlbumData, TrackData } from '$lib/library/get/value.ts'
-	import { removeTrackFromPlaylist } from '$lib/library/playlists-actions.ts'
+	import { FAVORITE_PLAYLIST_ID, removeTrackFromPlaylist } from '$lib/library/playlists-actions.ts'
 	import type { Album, Playlist } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import { MediaQuery } from 'svelte/reactivity'
@@ -23,6 +23,18 @@
 	const item = $derived(itemQuery.value)
 	const tracks = $derived(tracksQuery.value)
 
+	const getFallbackArtwork = () => {
+		if (data.slug === 'playlists') {
+			return 'playlist'
+		}
+
+		if (data.slug === 'albums') {
+			return 'album'
+		}
+
+		return 'person'
+	}
+
 	const artworkSrc = createManagedArtwork(() => {
 		if (data.slug !== 'playlists') {
 			return (item as Album).image
@@ -35,14 +47,6 @@
 	const menu = useMenu()
 
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
-
-	const getMenuItems = () => {
-		if (data.slug === 'playlists') {
-			return getPlaylistMenuItems(main, item as Playlist)
-		}
-
-		return []
-	}
 
 	const playlistTrackMenuItems = (track: TrackData) => [
 		{
@@ -63,7 +67,11 @@
 		class="relative flex w-full flex-col items-center justify-center gap-6 overflow-clip py-4 @2xl:h-56 @2xl:flex-row"
 	>
 		{#if data.slug !== 'playlists'}
-			<Artwork src={artworkSrc()} class="h-49 shrink-0 rounded-2xl @2xl:h-full" />
+			<Artwork
+				src={artworkSrc()}
+				fallbackIcon={getFallbackArtwork()}
+				class="h-49 shrink-0 rounded-2xl @2xl:h-full"
+			/>
 		{/if}
 
 		<div
@@ -104,21 +112,21 @@
 					<Icon type="shuffle" />
 				</Button>
 
-				<IconButton
-					icon="moreVertical"
-					tooltip="More"
-					onclick={(e) => {
-						e.stopPropagation()
-
-						menu.showFromEvent(e, getMenuItems(), {
-							anchor: true,
-							preferredAlignment: {
-								horizontal: 'right',
-								vertical: 'top',
-							},
-						})
-					}}
-				/>
+				{#if data.slug === 'playlists' && item.id !== FAVORITE_PLAYLIST_ID}
+					<IconButton
+						icon="moreVertical"
+						tooltip="More"
+						onclick={(e) => {
+							menu.showFromEvent(e, getPlaylistMenuItems(main, item as Playlist), {
+								anchor: true,
+								preferredAlignment: {
+									horizontal: 'right',
+									vertical: 'top',
+								},
+							})
+						}}
+					/>
+				{/if}
 			</div>
 		</div>
 	</section>

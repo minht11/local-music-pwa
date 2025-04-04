@@ -1,5 +1,5 @@
 import { persist } from '$lib/helpers/persist.svelte.ts'
-import type { LibraryItemSortKey, SortOrder } from '$lib/library/get/keys.ts'
+import type { LibraryItemSortKey, SortOrder } from '$lib/library/get/ids.ts'
 import type { LibraryItemStoreName } from '$lib/library/types.ts'
 
 export class LibraryStore<Slug extends LibraryItemStoreName> {

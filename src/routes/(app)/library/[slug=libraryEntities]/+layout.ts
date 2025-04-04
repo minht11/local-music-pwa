@@ -1,8 +1,8 @@
 import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
 import {
 	getLibraryItemIds,
-} from '$lib/library/get/keys.ts'
-import { createLibraryItemKeysPageQuery, type PageQueryResult } from '$lib/library/get/keys-queries.ts'
+} from '$lib/library/get/ids.ts'
+import { createLibraryItemKeysPageQuery, type PageQueryResult } from '$lib/library/get/ids-queries.ts'
 import { createTracksCountPageQuery } from '$lib/library/tracks-queries.ts'
 import { FAVORITE_PLAYLIST_ID, type LibraryItemStoreName } from '$lib/library/types.ts'
 import { defineViewTransitionMatcher, type RouteId } from '$lib/view-transitions.ts'

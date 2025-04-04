@@ -90,7 +90,7 @@ const COLOR_TOKENS_GENERATION_MAP: ColorTokensInputMap = {
 }
 
 /*@__NO_SIDE_EFFECTS__*/
-export const getDefaultThemeArgb = (): number => argbFromHex('#4c9e29')
+export const getDefaultThemeArgb = (): number => argbFromHex('#ffb599')
 
 export type ThemePaletteMap = Record<ColorToken, string>
 

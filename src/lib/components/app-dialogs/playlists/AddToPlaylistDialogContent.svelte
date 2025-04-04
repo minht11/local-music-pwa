@@ -6,8 +6,8 @@
 	import { snackbar } from '$lib/components/snackbar/snackbar'
 	import { getDatabase } from '$lib/db/database'
 	import { createQuery } from '$lib/db/query/query.ts'
-	import { getLibraryItemIds } from '$lib/library/get/keys.ts'
-	import { createLibraryItemKeysQuery } from '$lib/library/get/keys-queries.ts'
+	import { getLibraryItemIds } from '$lib/library/get/ids'
+	import { createLibraryItemKeysQuery } from '$lib/library/get/ids-queries'
 	import { dbToggleTrackInPlaylist } from '$lib/library/playlists-actions'
 	import { SvelteSet } from 'svelte/reactivity'
 

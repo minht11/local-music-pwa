@@ -4,7 +4,7 @@ import {
 	createPageQuery,
 	type PageQueryResult,
 } from '$lib/db/query/page-query.svelte.ts'
-import { keysListDatabaseChangeHandler } from '$lib/library/get/keys-queries.ts'
+import { keysListDatabaseChangeHandler } from '$lib/library/get/ids-queries.ts'
 import { getLibraryItemValue, LibraryItemNotFoundError } from '$lib/library/get/value.ts'
 import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryItemStoreName } from '$lib/library/types.ts'
 import { error, redirect } from '@sveltejs/kit'
