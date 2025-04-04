@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
-	import AlbumsListContainer from '$lib/components/albums/AlbumsListContainer.svelte'
+	import AlbumsListContainer from '$lib/components/AlbumsListContainer.svelte'
+	import ArtistListContainer from '$lib/components/ArtistListContainer.svelte'
 	import Button from '$lib/components/Button.svelte'
-	import ArtistListContainer from '$lib/components/entities/artists/ArtistListContainer.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'

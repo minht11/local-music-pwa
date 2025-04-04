@@ -1,4 +1,4 @@
-import { getContext, type Snippet, setContext } from 'svelte'
+import { getContext, setContext } from 'svelte'
 
 export interface BottomBarState {
 	snippet: Snippet | null

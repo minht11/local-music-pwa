@@ -116,56 +116,59 @@ const dbReplaceDirectories = async (
 		handle: parentDirHandle,
 	}
 
-	const replaceHandlePromise = tx.objectStore('directories').put(newDir).then((): DatabaseChangeDetails => ({
-		key: directoryId,
-		storeName: 'directories',
-		operation: 'add',
-		value: newDir,
-	}))
-	
-	const promises = dirIds.map(
-		async (existingDirId): Promise<DatabaseChangeDetails[]> => {
-			// Update all tracks to point to the new directory.
-			const updatedTracksPromise = tx
-				.objectStore('tracks')
-				.index('directory')
-				.openCursor(existingDirId)
-				.then(async (c) => {
-					let cursor = c
+	const replaceHandlePromise = tx
+		.objectStore('directories')
+		.put(newDir)
+		.then(
+			(): DatabaseChangeDetails => ({
+				key: directoryId,
+				storeName: 'directories',
+				operation: 'add',
+				value: newDir,
+			}),
+		)
 
-					const trackChangeRecords: DatabaseChangeDetails[] = []
-					while (cursor) {
-						const track = cursor.value
-						track.directory = directoryId
-						await cursor.update(track)
-						cursor = await cursor.continue()
+	const promises = dirIds.map(async (existingDirId): Promise<DatabaseChangeDetails[]> => {
+		// Update all tracks to point to the new directory.
+		const updatedTracksPromise = tx
+			.objectStore('tracks')
+			.index('directory')
+			.openCursor(existingDirId)
+			.then(async (c) => {
+				let cursor = c
 
-						trackChangeRecords.push({
-							key: track.id,
-							storeName: 'tracks',
-							operation: 'update',
-							value: track,
-						})
-					}
+				const trackChangeRecords: DatabaseChangeDetails[] = []
+				while (cursor) {
+					const track = cursor.value
+					track.directory = directoryId
+					await cursor.update(track)
+					cursor = await cursor.continue()
 
-					return trackChangeRecords
-				})
+					trackChangeRecords.push({
+						key: track.id,
+						storeName: 'tracks',
+						operation: 'update',
+						value: track,
+					})
+				}
 
-			const removedDirectoryPromise = tx
-				.objectStore('directories')
-				.delete(existingDirId)
-				.then(
-					(): DatabaseChangeDetails => ({
-						key: existingDirId,
-						storeName: 'directories',
-						operation: 'delete',
-					}),
-				)
+				return trackChangeRecords
+			})
 
-			const result = await Promise.all([removedDirectoryPromise, updatedTracksPromise])
-			return result.flat()
-		},
-	)
+		const removedDirectoryPromise = tx
+			.objectStore('directories')
+			.delete(existingDirId)
+			.then(
+				(): DatabaseChangeDetails => ({
+					key: existingDirId,
+					storeName: 'directories',
+					operation: 'delete',
+				}),
+			)
+
+		const result = await Promise.all([removedDirectoryPromise, updatedTracksPromise])
+		return result.flat()
+	})
 
 	const [_, ...changes] = await Promise.all([tx.done, replaceHandlePromise, ...promises])
 	console.log('REPLACE_DIRS', changes, changes.flat())

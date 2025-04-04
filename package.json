@@ -20,19 +20,19 @@
 		"@biomejs/biome": "2.0.0-beta.1",
 		"@inlang/paraglide-js": "2.0.8",
 		"@sveltejs/adapter-static": "^3.0.8",
-		"@sveltejs/kit": "^2.20.2",
+		"@sveltejs/kit": "^2.20.4",
 		"@sveltejs/vite-plugin-svelte": "5.0.3",
-		"@tailwindcss/vite": "^4.1.0",
+		"@tailwindcss/vite": "^4.1.2",
 		"prettier": "^3.5.3",
 		"prettier-plugin-svelte": "^3.3.3",
 		"prettier-plugin-tailwindcss": "^0.6.11",
 		"svelte": "^5.25.6",
 		"svelte-check": "^4.1.5",
-		"tailwindcss": "^4.1.0",
+		"tailwindcss": "^4.1.2",
 		"terser": "^5.39.0",
 		"typescript": "^5.8.2",
 		"unplugin-auto-import": "^19.1.2",
-		"vite": "^6.2.4"
+		"vite": "^6.2.5"
 	},
 	"dependencies": {
 		"@floating-ui/dom": "^1.6.13",
@@ -42,7 +42,7 @@
 		"@types/dom-view-transitions": "^1.0.6",
 		"@types/wicg-file-system-access": "^2023.10.6",
 		"idb": "^8.0.2",
-		"music-metadata": "^11.0.3",
+		"music-metadata": "^11.0.5",
 		"tiny-invariant": "^1.3.3",
 		"valibot": "1.0.0",
 		"weak-lru-cache": "^1.2.2"
