@@ -20,7 +20,7 @@
 
 	const query = createLibraryItemKeysQuery('playlists', {
 		key: ['playlists'],
-		fetcher: () => getLibraryItemIds('playlists', { sort: 'created' }),
+		fetcher: () => getLibraryItemIds('playlists', { sort: 'created', order: 'desc' }),
 	})
 
 	const trackPlaylists = createQuery({

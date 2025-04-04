@@ -100,7 +100,7 @@ const playlistConfig: LibraryRouteConfig<'playlists'> = {
 	slug: 'playlists',
 	singularTitle: m.playlist,
 	pluralTitle: m.playlists,
-	sortOptions: () => [nameSortOption],
+	sortOptions: () => [nameSortOption, { name: 'Created', key: 'created' }],
 }
 
 export type LibraryRouteConfigsMap = {

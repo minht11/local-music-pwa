@@ -94,7 +94,6 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 	})
 
 export const getDatabase = (): Promise<IDBPDatabase<AppDB>> =>
-	// TODO. Reset database version
 	openDB<AppDB>('app-storage', 1, {
 		upgrade(e) {
 			const { objectStoreNames } = e
@@ -138,8 +137,8 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> =>
 
 			if (!objectStoreNames.contains('playlists')) {
 				const store = createStore(e, 'playlists')
-				createIndexes(store, ['name', 'uuid'], { unique: true })
-				createIndexes(store, ['created'], { unique: false })
+				createIndexes(store, ['uuid'], { unique: true })
+				createIndexes(store, ['name', 'created'], { unique: false })
 			}
 
 			if (!objectStoreNames.contains('playlistsTracks')) {
