@@ -7,13 +7,13 @@ import { FAVORITE_PLAYLIST_ID } from './types.ts'
 
 export { FAVORITE_PLAYLIST_ID } from './types.ts'
 
-export const dbCreatePlaylist = async (name: string): Promise<number> => {
+export const dbCreatePlaylist = async (name: string, created = Date.now()): Promise<number> => {
 	const db = await getDatabase()
 
 	const newPlaylist: Omit<Playlist, 'id'> = {
 		name,
 		uuid: crypto.randomUUID(),
-		created: Date.now(),
+		created,
 	}
 
 	const id = await db.add('playlists', newPlaylist as Playlist)

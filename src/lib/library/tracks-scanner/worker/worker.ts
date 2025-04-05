@@ -238,7 +238,7 @@ self.addEventListener('message', async (event: MessageEvent<TracksScanOptions>) 
 		return
 	}
 
-	if (options.action === 'legacy-files-migrate-from-prev-app-version') {
+	if (options.action === 'legacy-files-migrate-from-v1') {
 		await scanNewDirectory(options.files, LEGACY_NO_NATIVE_DIRECTORY)
 
 		return

@@ -23,7 +23,7 @@ export type TracksScanOptions =
 	// Used in the browsers which do not support `showDirectoryPicker`
 	// or with tracks from previous application version
 	| {
-			action: 'legacy-files-migrate-from-prev-app-version'
+			action: 'legacy-files-migrate-from-v1'
 			files: FileEntity[]
 	  }
 	| {
