@@ -20,7 +20,6 @@
 	].filter(Boolean)
 
 	$effect(() => {
-		console.log('data.tracksCount.value', data.tracksCount.value)
 		if (data.tracksCount.value > 0) {
 			void goto('/library/tracks')
 		}

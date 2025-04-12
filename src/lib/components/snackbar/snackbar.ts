@@ -1,5 +1,5 @@
 import type { SnackbarData } from './Snackbar.svelte'
-import { snackbarItems } from './store.svelte'
+import { snackbarItems } from './store.svelte.ts'
 
 export type SnackbarOptions = SnackbarData
 

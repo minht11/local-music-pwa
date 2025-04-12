@@ -58,7 +58,7 @@
 		'interactable',
 		KIND_CLASS_MAP[kind],
 		kind !== 'blank' &&
-			'base-button interactable flex h-10 items-center justify-center gap-2 rounded-3xl px-6 text-label-lg',
+			'base-button interactable flex h-10 items-center justify-center gap-2 rounded-3xl px-6 text-label-lg transition-[outline-width] duration-150',
 		restProps.class,
 		disabled && '!cursor-default',
 	]}
@@ -101,11 +101,5 @@
 
 	:is(.tonal-button, .filled-button)[disabled] {
 		background-color: --alpha(var(--color-onSurface) / 12%);
-	}
-
-	.base-button:focus-visible,
-	.base-button:hover:focus-visible {
-		outline: --spacing(0.5) solid var(--color-onSurface) !important;
-		outline-offset: --spacing(-0.5);
 	}
 </style>

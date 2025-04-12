@@ -34,11 +34,6 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {
 				if (change.storeName === storeName && change.key === id) {
-					if (change.operation === 'delete') {
-						actions.refetch()
-						break
-					}
-
 					// It is fine to refetch because value almost always will be in cache
 					actions.refetch()
 				}
@@ -77,7 +72,7 @@ const createTracksPageQuery = <Slug extends DetailsSlug>(
 		},
 		onDatabaseChange: (changes, actions) => {
 			if (storeName !== 'playlists') {
-				return keysListDatabaseChangeHandler(storeName, changes, actions)
+				return keysListDatabaseChangeHandler('tracks', changes, actions)
 			}
 
 			for (const change of changes) {

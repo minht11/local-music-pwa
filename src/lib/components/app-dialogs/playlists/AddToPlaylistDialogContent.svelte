@@ -12,48 +12,37 @@
 	import { SvelteSet } from 'svelte/reactivity'
 
 	interface Props {
-		trackId: number
+		trackIds: number[] | number
 		onclose: () => void
 	}
 
-	const { trackId }: Props = $props()
+	const { trackIds }: Props = $props()
+
+	// TODO. Needs reworking.
+
+	const getData = async () => {
+		getLibraryItemIds('playlists', { sort: 'createdAt', order: 'desc' })
+
+		const db = await getDatabase()
+		const tx = db.transaction('playlistsTracks')
+		const promises = trackIds.map((trackId) => tx.objectStore('playlistsTracks').getAll(trackId))
+	}
 
 	const query = createLibraryItemKeysQuery('playlists', {
 		key: ['playlists'],
-		fetcher: () => getLibraryItemIds('playlists', { sort: 'created', order: 'desc' }),
+		fetcher: () => getLibraryItemIds('playlists', { sort: 'createdAt', order: 'desc' }),
 	})
 
 	const trackPlaylists = createQuery({
-		key: () => ['playlists-track', trackId],
+		key: () => ['playlists-track', ...trackIds],
 		fetcher: async () => {
-			invariant(trackId)
-
 			const db = await getDatabase()
-			const items = await db.getAllFromIndex('playlistsTracks', 'trackId', trackId)
+			const items = await db.getAllFromIndex('playlistsTracks', 'trackId', trackIds)
 
 			return new SvelteSet(items.map((item) => item.playlistId))
 		},
 		onDatabaseChange: (changes, actions) => {
-			for (const change of changes) {
-				if (change.storeName !== 'playlistsTracks') {
-					continue
-				}
-
-				const [playlistId, modifiedTrackId] = change.key
-				if (modifiedTrackId !== trackId) {
-					continue
-				}
-
-				actions.mutate((prev = new SvelteSet<number>()) => {
-					if (change.operation === 'delete') {
-						prev.delete(playlistId)
-					} else {
-						prev.add(playlistId)
-					}
-
-					return prev
-				})
-			}
+			// TODO. Change this so saving happens on save.
 		},
 	})
 
@@ -72,7 +61,7 @@
 
 <ScrollContainer class="max-h-100 grow overflow-auto px-2 py-4">
 	{#if query.status === 'error'}
-		<div class="py-10">{m.errorUnexpected()}</div>
+		<div class="py-10 text-center">{m.errorUnexpected()}</div>
 	{:else if query.status === 'loaded'}
 		<PlaylistListContainer
 			items={query.value}

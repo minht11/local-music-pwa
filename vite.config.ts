@@ -20,6 +20,10 @@ export default defineConfig({
 			],
 		},
 	},
+	// Tell Vitest to use the `browser` entry points in `package.json` files, even though it's running in Node
+	resolve: process.env.VITEST
+		? { conditions: ['browser'] }
+		: undefined,
 	worker: {
 		format: 'es',
 	},
@@ -111,7 +115,7 @@ export default defineConfig({
 
 				setTimeout(async () => {
 					const size = await dirSize('./build/_app/immutable/chunks')
-					console.log('Size of chunks:', size / 1024, 'KB')	
+					console.log('Size of chunks:', size / 1024, 'KB')
 				}, 1000)
 			},
 		},

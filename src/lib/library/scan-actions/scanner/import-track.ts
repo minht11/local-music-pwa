@@ -9,7 +9,7 @@ type ImportTrackTx = IDBPTransaction<
 	'readwrite'
 >
 
-const importAlbum = async (tx: ImportTrackTx, track: Track) => {
+const dbImportAlbum = async (tx: ImportTrackTx, track: Track) => {
 	if (!track.album) {
 		return
 	}
@@ -20,6 +20,9 @@ const importAlbum = async (tx: ImportTrackTx, track: Track) => {
 	const updatedAlbum: Omit<Album, 'id'> = existingAlbum
 		? {
 				...existingAlbum,
+				artists: [
+					...new Set([...existingAlbum.artists, ...track.artists]),
+				],
 				year: existingAlbum.year ?? track.year,
 				image: existingAlbum.image ?? track.image?.full,
 			}
@@ -37,44 +40,40 @@ const importAlbum = async (tx: ImportTrackTx, track: Track) => {
 	const change: DatabaseChangeDetails = {
 		storeName: 'albums',
 		key: albumId,
-		value: { ...updatedAlbum, id: albumId },
 		operation: existingAlbum ? 'update' : 'add',
 	}
 
 	return change
 }
 
-const importArtist = async (tx: ImportTrackTx, track: Track) => {
+const dbImportArtist = async (tx: ImportTrackTx, artistName: string) => {
 	const store = tx.objectStore('artists')
-	const changes: DatabaseChangeDetails[] = []
 
-	for (const artist of track.artists) {
-		const existingArtist = await store.index('name').get(artist)
-		if (existingArtist) {
-			continue
-		}
-
-		const newArtist: Omit<Artist, 'id'> = {
-			name: artist,
-			uuid: crypto.randomUUID(),
-		}
-
-		const artistId = await store.put(newArtist as Artist)
-
-		const change: DatabaseChangeDetails = {
-			storeName: 'artists',
-			key: artistId,
-			value: { ...newArtist, id: artistId },
-			operation: 'add',
-		}
-
-		changes.push(change)
+	const existingArtistId = await store.index('name').getKey(artistName)
+	if (existingArtistId) {
+		return
 	}
 
-	return changes
+	const newArtist: Omit<Artist, 'id'> = {
+		name: artistName,
+		uuid: crypto.randomUUID(),
+	}
+
+	const artistId = await store.put(newArtist as Artist)
+
+	const change: DatabaseChangeDetails = {
+		storeName: 'artists',
+		key: artistId,
+		operation: 'add',
+	}
+
+	return change
 }
 
-export const importTrackToDb = async (
+const dbImportArtists = (tx: ImportTrackTx, artistNames: string[]) =>
+	Promise.all(artistNames.map(async (artist) => dbImportArtist(tx, artist)))
+
+export const dbImportTrack = async (
 	metadata: UnknownTrack,
 	existingTrackId: number | undefined,
 ): Promise<number> => {
@@ -82,15 +81,14 @@ export const importTrackToDb = async (
 	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
 
 	const trackId = await tx.objectStore('tracks').put(metadata as Track, existingTrackId)
-
 	const track: Track = {
 		...metadata,
 		id: trackId,
 	}
 
 	const [albumChange, artistsChanges] = await Promise.all([
-		importAlbum(tx, track),
-		importArtist(tx, track),
+		dbImportAlbum(tx, track),
+		dbImportArtists(tx, track.artists),
 		tx.done,
 	])
 
@@ -98,7 +96,6 @@ export const importTrackToDb = async (
 		{
 			storeName: 'tracks',
 			key: trackId,
-			value: track,
 			operation: existingTrackId === trackId ? 'update' : 'add',
 		},
 		albumChange,

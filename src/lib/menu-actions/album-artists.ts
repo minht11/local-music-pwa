@@ -2,7 +2,7 @@ import type { MenuItem } from '$lib/components/ListItem.svelte'
 import type { Playlist } from '$lib/library/types.ts'
 import type { MainStore } from '$lib/stores/main/store.svelte.ts'
 
-export const getPlaylistMenuItems = (main: MainStore, playlist: Playlist): MenuItem[] => [
+export const getAlbumMenuItems = (main: MainStore, playlist: Playlist): MenuItem[] => [
 	{
 		label: 'Edit playlist',
 		action: () => {
@@ -13,12 +13,12 @@ export const getPlaylistMenuItems = (main: MainStore, playlist: Playlist): MenuI
 		},
 	},
 	{
-		label: 'Remove playlist',
+		label: 'Remove from library',
 		action: () => {
 			main.removeLibraryItemOpen = {
 				id: playlist.id,
 				name: playlist.name,
-				storeName: 'playlists',
+				storeName: 'albums',
 			}
 		},
 	},

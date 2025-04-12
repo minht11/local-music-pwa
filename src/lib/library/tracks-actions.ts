@@ -13,33 +13,41 @@ type TrackOperationsTransaction = IDBPTransaction<
 const dbRemoveTrackRelatedData = async <
 	Store extends Exclude<LibraryItemStoreName, 'playlists'>,
 	ItemIndexName extends IndexNames<AppDB, Store>,
-	ItemValue extends AppDB[Store]['indexes'][ItemIndexName],
 	IndexName extends IndexNames<AppDB, 'tracks'>,
+	ItemValue extends AppDB[Store]['indexes'][ItemIndexName],
 >(
 	tx: TrackOperationsTransaction,
 	trackIndex: IndexName,
-	itemStoreName: Store,
-	itemIndex: ItemIndexName,
-	itemValue?: ItemValue,
+	relatedItemStoreName: Store,
+	relatedItemName?: ItemValue,
 ) => {
-	if (!itemValue) {
+	if (!relatedItemName) {
 		return
 	}
 
-	const tracksWithItemCount = await tx.objectStore('tracks').index(trackIndex).count()
-	if (tracksWithItemCount > 1) {
+	const relatedItemNameKey = IDBKeyRange.only(relatedItemName)
+
+	const tracksWithItemCount = await tx
+		.objectStore('tracks')
+		.index(trackIndex)
+		.count(relatedItemNameKey)
+
+	// We don't delete related item if it is still used by other tracks
+	if (tracksWithItemCount > 0) {
 		return
 	}
 
-	const store = tx.objectStore(itemStoreName)
-	const item = await store.index(itemIndex).get(IDBKeyRange.only(itemValue))
-	if (!item) {
+	const relatedItemStore = tx.objectStore(relatedItemStoreName)
+	const relatedItem = await relatedItemStore.index('name').get(relatedItemNameKey)
+	if (!relatedItem) {
 		return
 	}
+
+	relatedItemStore.delete(relatedItem.id)
 
 	const change: DatabaseChangeDetails = {
-		storeName: itemStoreName,
-		key: item.id,
+		storeName: relatedItemStoreName,
+		key: relatedItem.id,
 		operation: 'delete',
 	}
 
@@ -68,6 +76,7 @@ const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 	return changes
 }
 
+
 export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 	const db = await getDatabase()
 	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
@@ -77,16 +86,16 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 		return
 	}
 
-	const [albumChange, playlistChanges, _, ...artistsChanges] = await Promise.all([
-		dbRemoveTrackRelatedData(tx, 'album', 'albums', 'name', track.album),
-		dbRemoveTrackFromAllPlaylists(trackId),
-		tx.done,
-		...track.artists.map((artist) =>
-			dbRemoveTrackRelatedData(tx, 'artists', 'artists', 'name', artist),
-		),
-	])
+	await tx.objectStore('tracks').delete(trackId)
 
-	await db.delete('tracks', trackId)
+	const [albumChange, playlistChanges, ...artistsChanges] = await Promise.all([
+		dbRemoveTrackRelatedData(tx, 'album', 'albums', track.album),
+		dbRemoveTrackFromAllPlaylists(trackId),
+		...track.artists.map((artist) =>
+			dbRemoveTrackRelatedData(tx, 'artists', 'artists', artist),
+		),
+		tx.done.then(() => undefined),
+	])
 
 	dispatchDatabaseChangedEvent([
 		{
@@ -108,4 +117,14 @@ export const removeTrack = async (id: number): Promise<void> => {
 	} catch (error) {
 		snackbar.unexpectedError(error)
 	}
+}
+
+export const dbRemoveMultipleTracks = async (trackIds: number[]): Promise<void> => {
+	for (const trackId of trackIds) {
+		await dbRemoveTrack(trackId)
+	}
+}
+
+export const dbRemoveTrackRelatedItem = async <Store extends Pick<LibraryItemStoreName, 'albums' | 'artists'>>(storeName: Store) => {
+	const db = await getDatabase()
 }

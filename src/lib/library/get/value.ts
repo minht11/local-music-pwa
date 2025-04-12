@@ -35,6 +35,7 @@ const trackConfig: QueryConfig<TrackData> = {
 		const [item, favorite] = await Promise.all([
 			tx.objectStore('tracks').get(id),
 			tx.objectStore('playlistsTracks').get([FAVORITE_PLAYLIST_ID, id]),
+			tx.done,
 		])
 
 		if (!item) {
@@ -75,16 +76,7 @@ const trackConfig: QueryConfig<TrackData> = {
 		if (change.operation === 'delete') {
 			mutate(undefined)
 		} else if (change.operation === 'update') {
-			mutate((prev) => {
-				if (!prev) {
-					return prev
-				}
-
-				return {
-					...change.value,
-					favorite: prev.favorite,
-				}
-			})
+			// TODO. REFETCH
 		}
 	},
 }
@@ -120,7 +112,7 @@ const playlistsConfig: QueryConfig<PlaylistData> = {
 				id: FAVORITE_PLAYLIST_ID,
 				uuid: FAVORITE_PLAYLIST_UUID,
 				name: 'Favorites',
-				created: 0,
+				createdAt: 0,
 			}
 		}
 
@@ -212,9 +204,9 @@ if (!import.meta.env.SSR) {
 				}
 
 				if (change.operation === 'delete') {
-					mutate(undefined)
+					dataCache.delete(key)
 				} else if (change.operation === 'update') {
-					mutate(change.value)
+					dataCache.delete(key)
 				}
 			}
 		}

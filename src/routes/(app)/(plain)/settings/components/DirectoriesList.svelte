@@ -6,15 +6,15 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
-	import type { Directory } from '$lib/library/types.ts'
-	import type { DirectoryWithCount } from '../+page.ts'
 	import {
 		checkNewDirectoryStatus,
 		importNewDirectory,
 		removeDirectory,
 		replaceDirectories,
 		rescanDirectory,
-	} from '../tracks/scanner-operations.ts'
+	} from '$lib/library/scan-actions/directories.ts'
+	import type { Directory } from '$lib/library/types.ts'
+	import type { DirectoryWithCount } from '../+page.ts'
 
 	interface Props {
 		disabled: boolean

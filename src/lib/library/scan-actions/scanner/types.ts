@@ -24,7 +24,7 @@ export type TracksScanOptions =
 	// or with tracks from previous application version
 	| {
 			action: 'legacy-files-migrate-from-v1'
-			files: FileEntity[]
+			files: { uuid: string; file: FileEntity }[]
 	  }
 	| {
 			action: 'legacy-files-add'

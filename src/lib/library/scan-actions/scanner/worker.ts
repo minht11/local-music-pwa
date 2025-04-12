@@ -4,7 +4,7 @@ import { getDatabase } from '$lib/db/database'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
 import { dbRemoveTrack } from '$lib/library/tracks-actions.ts'
 import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/library/types.ts'
-import { importTrackToDb } from './import-track-to-db.ts'
+import { dbImportTrack } from './import-track.ts'
 import { parseTrack } from './parse/parse-track.ts'
 import type { TracksScanMessage, TracksScanOptions } from './types.ts'
 
@@ -15,7 +15,8 @@ interface ImportTrackOptions {
 	file: FileEntity
 	directoryId: number
 	/** In cases when track already was imported */
-	trackId?: number
+	trackId: number | undefined
+	uuid: string | undefined
 }
 
 const importTrack = async (options: ImportTrackOptions): Promise<number | null> => {
@@ -25,13 +26,14 @@ const importTrack = async (options: ImportTrackOptions): Promise<number | null> 
 			return null
 		}
 
-		const id = await importTrackToDb(
+		const id = await dbImportTrack(
 			{
 				...metadata,
 				file: options.file,
 				directory: options.directoryId,
 				fileName: options.file.name,
-				lastScanned: Date.now(),
+				scannedAt: Date.now(),
+				uuid: options.uuid ?? crypto.randomUUID(),
 			},
 			options.trackId,
 		)
@@ -138,7 +140,7 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 				handle.name,
 			])
 			const existingTrack = await findTrackFn(
-				// If `LEGACY_NO_NATIVE_DIRECTORY` is used this will be a `File`
+				// If `LEGACY_NO_NATIVE_DIRECTORY` is used this will be a `File` or `FileSystemFileHandle`
 				// in all other cases it will be a `FileSystemFileHandle`
 				handle as FileSystemFileHandle,
 				possibleExistingTracks,
@@ -146,22 +148,21 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 
 			const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
 
-			let existingTrackId = undefined
 			if (existingTrack) {
 				// File was not modified since last scan
-				if (unwrappedFile.lastModified <= existingTrack.lastScanned) {
+				if (unwrappedFile.lastModified <= existingTrack.scannedAt) {
 					scannedTracksIds.add(existingTrack.id)
 					continue
 				}
-
-				existingTrackId = existingTrack.id
 			}
 
+			const existingTrackId = existingTrack?.id
 			const trackId = await importTrack({
 				unwrappedFile,
 				file: handle,
 				directoryId,
 				trackId: existingTrackId,
+				uuid: existingTrack?.uuid,
 			})
 
 			if (trackId !== null) {
@@ -191,12 +192,14 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 	tracker.sendMsg(true)
 }
 
-const scanNewDirectory = async (files: FileEntity[], directoryId: number) => {
-	const tracker = new StatusTracker(files.length)
+const scanNewDirectory = async (items:  { uuid: string; file: FileEntity }[], directoryId: number) => {
+	const tracker = new StatusTracker(items.length)
 
 	console.time('SCAN_NEW_DIR')
-	for (const handle of files) {
+	for (const item of items) {
 		tracker.current += 1
+
+		const handle = item.file
 
 		try {
 			const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
@@ -205,6 +208,7 @@ const scanNewDirectory = async (files: FileEntity[], directoryId: number) => {
 				file: handle,
 				directoryId,
 				trackId: undefined,
+				uuid: item.uuid,
 			})
 
 			if (trackId !== null) {
@@ -226,7 +230,12 @@ self.addEventListener('message', async (event: MessageEvent<TracksScanOptions>) 
 
 	if (options.action === 'directory-add') {
 		const handles = await getFileHandlesRecursively(options.dirHandle, SUPPORTED_EXTENSIONS)
-		await scanNewDirectory(handles, options.dirId)
+		const items = handles.map((handle) => ({
+			uuid: crypto.randomUUID(),
+			file: handle,
+		}))
+
+		await scanNewDirectory(items, options.dirId)
 
 		return
 	}

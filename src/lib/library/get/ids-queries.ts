@@ -1,6 +1,11 @@
 import type { DatabaseChangeDetailsList } from '$lib/db/events.ts'
 import type { DbChangeActions } from '$lib/db/query/base-query.svelte.ts'
-import { createPageQuery, type PageQueryOptions, type PageQueryResult, type QueryKey } from '$lib/db/query/page-query.svelte.ts'
+import {
+	createPageQuery,
+	type PageQueryOptions,
+	type PageQueryResult,
+	type QueryKey,
+} from '$lib/db/query/page-query.svelte.ts'
 import { createQuery, type QueryOptions, type QueryResult } from '$lib/db/query/query.ts'
 import { unwrap } from '$lib/helpers/utils/unwrap.ts'
 import type { LibraryItemStoreName } from '../types.ts'
@@ -10,67 +15,66 @@ export type { PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
 export type { QueryResult } from '$lib/db/query/query.ts'
 
 const preloadLibraryListItems = async <Store extends LibraryItemStoreName>(
-    storeName: Store,
-    keys: number[],
+	storeName: Store,
+	keys: number[],
 ) => {
-    if (
-        storeName === 'tracks' ||
-        storeName === 'albums' ||
-        storeName === 'artists' ||
-        storeName === 'playlists'
-    ) {
-        const preload = Array.from({ length: Math.min(keys.length, 12) }, (_, index) =>
-            // biome-ignore lint/style/noNonNullAssertion: index is bound checked
-        preloadLibraryItemValue(storeName as 'tracks', keys[index]!),
-        )
-        await Promise.all(preload)
-    } else if (import.meta.env.DEV) {
-        console.warn(`Cannot prefetch ${storeName} items`)
-    }
+	if (
+		storeName === 'tracks' ||
+		storeName === 'albums' ||
+		storeName === 'artists' ||
+		storeName === 'playlists'
+	) {
+		const preload = Array.from({ length: Math.min(keys.length, 12) }, (_, index) => {
+			const id = keys[index]
+			if (id) {
+				preloadLibraryItemValue(storeName, id)
+			}
+		})
+		await Promise.all(preload)
+	} else if (import.meta.env.DEV) {
+		throw new Error(`Preloading ${storeName} is not supported`)
+	}
 }
 
-
-export const keysListDatabaseChangeHandler = <
-    Store extends LibraryItemStoreName,
->(
-    storeName: Store,
-    changes: DatabaseChangeDetailsList,
-    { mutate, refetch }: DbChangeActions<number[]>,
+export const keysListDatabaseChangeHandler = <Store extends LibraryItemStoreName>(
+	storeName: Store,
+	changes: DatabaseChangeDetailsList,
+	{ mutate, refetch }: DbChangeActions<number[]>,
 ): void => {
-    let needRefetch = false
-    for (const change of changes) {
-        if (change.storeName !== storeName) {
-            continue
-        }
+	let needRefetch = false
+	for (const change of changes) {
+		if (change.storeName !== storeName) {
+			continue
+		}
 
-        if (
-            // We have no way of knowing where should the new item be inserted.
-            // So we just refetch the whole list.
-            change.operation === 'add' ||
-            // If playlist name changes, order might change as well.
-            (storeName === 'playlists' && change.operation === 'update')
-        ) {
-            needRefetch = true
-            break
-        }
+		if (
+			// We have no way of knowing where should the new item be inserted.
+			// So we just refetch the whole list.
+			change.operation === 'add' ||
+			// If playlist name changes, order might change as well.
+			(storeName === 'playlists' && change.operation === 'update')
+		) {
+			needRefetch = true
+			break
+		}
 
-        if (change.operation === 'delete' && change.key !== undefined) {
-            mutate((value) => {
-                if (!value) {
-                    return [] 
-                }
+		if (change.operation === 'delete' && change.key !== undefined) {
+			mutate((value) => {
+				if (!value) {
+					return []
+				}
 
-                const index = value.indexOf(change.key)
-                value.splice(index, 1)
+				const index = value.indexOf(change.key)
+				value.splice(index, 1)
 
-                return value
-            })
-        }
-    }
+				return value
+			})
+		}
+	}
 
-    if (needRefetch) {
-        refetch()
-    }
+	if (needRefetch) {
+		refetch()
+	}
 }
 
 export type LibraryItemKeysQueryOptions<K extends QueryKey> = Omit<

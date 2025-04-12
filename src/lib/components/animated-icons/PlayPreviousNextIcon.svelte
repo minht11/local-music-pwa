@@ -11,13 +11,6 @@
 	const flipIcon = $derived(type === 'previous')
 
 	let isAnimating = $state(false)
-	const animate = async () => {
-		isAnimating = true
-
-		wait(200).then(() => {
-			isAnimating = false
-		})
-	}
 
 	const action = (target: HTMLDivElement) => {
 		let button = target.parentElement
@@ -32,12 +25,14 @@
 
 		invariant(button, 'No button found')
 
-		const cleanup = on(button, 'click', () => {
+		const cleanup = on(button, 'click', async () => {
 			if ((button as HTMLButtonElement).disabled) {
 				return
 			}
 
-			void animate()
+			isAnimating = true
+			await wait(200)
+			isAnimating = false
 		})
 
 		return {

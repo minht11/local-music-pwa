@@ -5,13 +5,11 @@ type DatabaseOperationsConfig<StoreName extends AppStoreNames> =
 			storeName: StoreName
 			operation: 'add'
 			key: AppDB[StoreName]['key']
-			value: AppDB[StoreName]['value']
 	  }
 	| {
 			storeName: StoreName
 			operation: 'update'
 			key: AppDB[StoreName]['key']
-			value: AppDB[StoreName]['value']
 	  }
 	| {
 			storeName: StoreName

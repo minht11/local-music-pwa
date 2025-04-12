@@ -1,5 +1,5 @@
 import { snackbar } from '$lib/components/snackbar/snackbar.ts'
-import type { TracksScanOptions } from '$lib/library/tracks-scanner/scanner.ts'
+import type { TracksScanOptions } from './scanner/start.ts'
 
 export const scanTracks = async (options: TracksScanOptions): Promise<void> => {
 	const snackbarId = 'scan-tracks'
@@ -10,11 +10,9 @@ export const scanTracks = async (options: TracksScanOptions): Promise<void> => {
 		duration: false,
 	})
 
-	const { startTrackScanning } = await import(
-		'$lib/library/tracks-scanner/scanner.ts'
-	)
+	const { startTrackScannerWorker } = await import('./scanner/start.ts')
 
-	const result = await startTrackScanning(options, (data) => {
+	const result = await startTrackScannerWorker(options, (data) => {
 		snackbar({
 			id: snackbarId,
 			message: m.settingsScanInProgress({

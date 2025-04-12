@@ -50,10 +50,6 @@ const dbImportNewDirectory = async (dirHandle: FileSystemDirectoryHandle): Promi
 		key: id,
 		storeName: 'directories',
 		operation: 'add',
-		value: {
-			handle: dirHandle,
-			id,
-		},
 	})
 
 	await scanTracks({
@@ -124,7 +120,6 @@ const dbReplaceDirectories = async (
 				key: directoryId,
 				storeName: 'directories',
 				operation: 'add',
-				value: newDir,
 			}),
 		)
 
@@ -148,7 +143,6 @@ const dbReplaceDirectories = async (
 						key: track.id,
 						storeName: 'tracks',
 						operation: 'update',
-						value: track,
 					})
 				}
 
@@ -171,7 +165,6 @@ const dbReplaceDirectories = async (
 	})
 
 	const [_, ...changes] = await Promise.all([tx.done, replaceHandlePromise, ...promises])
-	console.log('REPLACE_DIRS', changes, changes.flat())
 
 	dispatchDatabaseChangedEvent(changes.flat())
 

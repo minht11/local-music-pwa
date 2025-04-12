@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { navigating, page } from '$app/state'
-	import PlaylistDialogs from '$lib/components/app-dialogs/PlaylistDialogs.svelte'
+	import { APP_DIALOGS_COMPONENTS } from '$lib/components/app-dialogs/dialogs.ts'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
@@ -77,7 +77,9 @@
 	<MenuRenderer />
 </div>
 
-<PlaylistDialogs />
+{#each APP_DIALOGS_COMPONENTS as Dialog}
+	<Dialog />
+{/each}
 
 <style>
 	@keyframes fade-in {

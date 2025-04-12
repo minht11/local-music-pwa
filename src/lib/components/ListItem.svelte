@@ -42,7 +42,7 @@
 	{tabindex}
 	class={[
 		className,
-		'flex cursor-pointer items-center overflow-hidden rounded-lg pr-2 pl-4 hover:bg-onSurface/10',
+		'flex cursor-pointer items-center overflow-hidden rounded-lg pr-2 pl-4 -outline-offset-2 hover:bg-onSurface/10',
 	]}
 	role="row"
 	aria-label={ariaLabel}

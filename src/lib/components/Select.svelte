@@ -60,7 +60,7 @@
 <button
 	bind:this={target}
 	class={[
-		'relative flex h-10 cursor-pointer appearance-none items-center gap-2 overflow-hidden rounded-sm border border-outlineVariant pr-2 pl-4',
+		'relative flex h-10 cursor-pointer appearance-none items-center gap-2 overflow-hidden rounded-sm border border-outlineVariant pr-2 pl-4 transition-[outline-width] duration-150',
 		className,
 	]}
 	use:ripple
@@ -97,7 +97,7 @@
 				role="option"
 				aria-selected={item[key] === selected}
 				class={[
-					'interactable flex h-10 w-full cursor-pointer items-center overflow-hidden px-4',
+					'interactable flex h-10 w-full cursor-pointer items-center overflow-hidden px-4 -outline-offset-2',
 					item[key] === selected && 'text-primary',
 				]}
 				onclick={() => {

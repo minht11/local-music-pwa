@@ -1,4 +1,4 @@
-import { openDB } from 'idb'
+import { deleteDB, openDB } from 'idb'
 
 export const V1_LEGACY_DB_NAME = 'APP_DATA-1'
 
@@ -47,9 +47,7 @@ export const getV1LegacyDatabaseValue = async <K extends V1LegacyDatabaseKey>(ke
     return data as V1LegacyDatabaseDataMap[K] | undefined
 }
 
-export const removeV1LegacyDatabase = (): void => {
-    indexedDB.deleteDatabase(V1_LEGACY_DB_NAME)
-}
+export const removeV1LegacyDatabase = (): Promise<void> => deleteDB(V1_LEGACY_DB_NAME)
 
 export const checkForV1LegacyDatabaseData = async (): Promise<boolean> => {
     const dbList = await indexedDB.databases()
@@ -65,7 +63,7 @@ export const checkForV1LegacyDatabaseData = async (): Promise<boolean> => {
 
     if (Object.keys(tracks).length === 0) {
         try {
-            removeV1LegacyDatabase()
+            void removeV1LegacyDatabase()
         } catch {
             // Ignore errors
         }

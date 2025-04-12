@@ -50,7 +50,7 @@
 				predefinedKey: 'addToPlaylist',
 				label: 'Add to playlist',
 				action: () => {
-					main.addTrackToPlaylistDialogOpen = track.id
+					main.addTrackToPlaylistDialogOpen = [track.id]
 				},
 			},
 			{

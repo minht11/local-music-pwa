@@ -37,8 +37,9 @@ export interface ParsedTrackData {
 }
 
 export interface UnknownTrack extends ParsedTrackData {
+    uuid: string
     file: FileEntity
-    lastScanned: number
+    scannedAt: number
     fileName: string
     directory: number
 }
@@ -58,7 +59,7 @@ export interface Artist extends BaseMusicItem {
 
 export interface Playlist extends BaseMusicItem {
     uuid: string
-    created: number
+    createdAt: number
 }
 
 export interface Directory {

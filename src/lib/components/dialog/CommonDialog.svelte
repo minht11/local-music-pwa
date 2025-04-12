@@ -9,7 +9,7 @@
 
 	export interface CommonDialogProps<S> extends DialogProps<S> {
 		buttons?: DialogButton[] | ((data: S) => DialogButton[])
-		onsubmit?: (e: SubmitEvent) => void
+		onsubmit?: (e: SubmitEvent, data: S) => void
 	}
 </script>
 
@@ -23,12 +23,6 @@
 		...props
 	}: CommonDialogProps<S> = $props()
 
-	const submitHandler = (e: SubmitEvent) => {
-		e.preventDefault()
-
-		onsubmit?.(e)
-	}
-
 	const getItems = (data: S) => {
 		if (typeof buttons === 'function') {
 			return buttons(data)
@@ -40,7 +34,15 @@
 
 <Dialog bind:open class={className} {...props}>
 	{#snippet children({ data, close })}
-		<form method="dialog" class="contents" onsubmit={submitHandler}>
+		<form
+			method="dialog"
+			class="contents"
+			onsubmit={(e) => {
+				e.preventDefault()
+
+				onsubmit?.(e, data)
+			}}
+		>
 			{#if externalChildren}
 				<div data-dialog-content class="mt-4 grow px-6 text-onSurfaceVariant">
 					{@render externalChildren({ data, close })}

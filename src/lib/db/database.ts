@@ -9,6 +9,7 @@ export interface AppDB extends DBSchema {
 		indexes: Pick<
 			Track,
 			| 'id'
+			| 'uuid'
 			| 'name'
 			| 'album'
 			| 'year'
@@ -16,7 +17,7 @@ export interface AppDB extends DBSchema {
 			| 'artists'
 			| 'directory'
 			| 'fileName'
-			| 'lastScanned'
+			| 'scannedAt'
 		> & {
 			path: [directoryId: number, fileName: string]
 		}
@@ -43,7 +44,7 @@ export interface AppDB extends DBSchema {
 	playlists: {
 		key: number
 		value: Playlist
-		indexes: Pick<Playlist, 'id' | 'uuid' | 'name' | 'created'>
+		indexes: Pick<Playlist, 'id' | 'uuid' | 'name' | 'createdAt'>
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -53,15 +54,30 @@ export interface AppDB extends DBSchema {
 		value: {
 			playlistId: number
 			trackId: number
+			addedAt: number
 		}
 		indexes: {
 			playlistId: number
 			trackId: number
+			addedAt: number
 		}
 		meta: {
 			notAllowedOperations: 'update'
 		}
 	}
+	// tracksRelations: {
+	// 	key: number,
+	// 	value: {
+	// 		trackId: number
+	// 		albumId: number
+	// 		artistIds: number[]
+	// 	},
+	// 	indexes: {
+	// 		trackId: number
+	// 		albumId: number
+	// 		artistIds: number[]
+	// 	}
+	// },
 	directories: {
 		key: number
 		value: Directory
@@ -93,15 +109,22 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 		autoIncrement: true,
 	})
 
-export const getDatabase = (): Promise<IDBPDatabase<AppDB>> =>
-	openDB<AppDB>('app-storage', 1, {
+let dbPromise: Promise<IDBPDatabase<AppDB>> | null = null
+
+export const getDatabase = (): Promise<IDBPDatabase<AppDB>> => {
+	if (dbPromise) {
+		return dbPromise
+	}
+
+	dbPromise = openDB<AppDB>('app-storage', 1, {
 		upgrade(e) {
 			const { objectStoreNames } = e
 
 			if (!objectStoreNames.contains('tracks')) {
 				const store = createStore(e, 'tracks')
 
-				createIndexes(store, ['name', 'album', 'year', 'duration', 'lastScanned', 'directory'], {
+				createIndexes(store, ['uuid'], { unique: true })
+				createIndexes(store, ['name', 'album', 'year', 'duration', 'scannedAt', 'directory'], {
 					unique: false,
 				})
 
@@ -138,7 +161,7 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> =>
 			if (!objectStoreNames.contains('playlists')) {
 				const store = createStore(e, 'playlists')
 				createIndexes(store, ['uuid'], { unique: true })
-				createIndexes(store, ['name', 'created'], { unique: false })
+				createIndexes(store, ['name', 'createdAt'], { unique: false })
 			}
 
 			if (!objectStoreNames.contains('playlistsTracks')) {
@@ -146,7 +169,7 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> =>
 					keyPath: ['playlistId', 'trackId'],
 				})
 
-				createIndexes(store, ['playlistId', 'trackId'], { unique: false })
+				createIndexes(store, ['playlistId', 'trackId', 'addedAt'], { unique: false })
 			}
 
 			if (!objectStoreNames.contains('directories')) {
@@ -154,6 +177,17 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> =>
 			}
 		},
 	})
+
+	dbPromise.then((db) => {
+		db.onclose = () => {
+			dbPromise = null
+		}
+	}).catch(() => {
+		dbPromise = null
+	})
+
+	return dbPromise
+}
 
 export type DbKey<Name extends AppStoreNames> = AppDB[Name]['key']
 export type DbValue<Name extends AppStoreNames> = AppDB[Name]['value']

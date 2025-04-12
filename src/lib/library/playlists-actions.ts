@@ -1,19 +1,19 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
 import { getDatabase } from '$lib/db/database'
-import { dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { truncate } from '$lib/helpers/utils/truncate.ts'
 import type { Playlist } from '$lib/library/types.ts'
 import { FAVORITE_PLAYLIST_ID } from './types.ts'
 
 export { FAVORITE_PLAYLIST_ID } from './types.ts'
 
-export const dbCreatePlaylist = async (name: string, created = Date.now()): Promise<number> => {
+export const dbCreatePlaylist = async (name: string, createdAt = Date.now()): Promise<number> => {
 	const db = await getDatabase()
 
 	const newPlaylist: Omit<Playlist, 'id'> = {
 		name,
 		uuid: crypto.randomUUID(),
-		created,
+		createdAt,
 	}
 
 	const id = await db.add('playlists', newPlaylist as Playlist)
@@ -22,10 +22,6 @@ export const dbCreatePlaylist = async (name: string, created = Date.now()): Prom
 		operation: 'add',
 		storeName: 'playlists',
 		key: id,
-		value: {
-			...newPlaylist,
-			id,
-		},
 	})
 
 	return id
@@ -35,9 +31,11 @@ export const createPlaylist = async (name: string): Promise<void> => {
 	try {
 		await dbCreatePlaylist(name)
 
-		snackbar(m.libraryPlaylistCreated({
-			playlistName: truncate(name, 20),
-		}))
+		snackbar(
+			m.libraryPlaylistCreated({
+				playlistName: truncate(name, 20),
+			}),
+		)
 	} catch (error) {
 		snackbar.unexpectedError(error)
 	}
@@ -113,32 +111,51 @@ export const removePlaylist = async (id: number, name: string): Promise<void> =>
 	}
 }
 
-const dbAddTrackToPlaylist = async (
-	playlistId: number,
-	trackId: number,
-): Promise<void> => {
+const dbAddTrackToPlaylist = async (playlistId: number, trackId: number): Promise<void> => {
 	const db = await getDatabase()
 
 	const key = await db.add('playlistsTracks', {
 		playlistId,
 		trackId,
+		addedAt: Date.now(),
 	})
 
 	dispatchDatabaseChangedEvent({
 		operation: 'add',
 		storeName: 'playlistsTracks',
-		value: {
-			playlistId,
-			trackId,
-		},
 		key,
 	})
 }
 
-const dbRemoveTrackFromPlaylist = async (
+export const dbAddMultipleTracksToPlaylist = async (
 	playlistId: number,
-	trackId: number,
+	trackIds: number[],
 ): Promise<void> => {
+	const db = await getDatabase()
+	const tx = db.transaction('playlistsTracks', 'readwrite')
+	const store = tx.objectStore('playlistsTracks')
+	const promises = trackIds.map(async (trackId) => {
+		const key = await store.add({
+			playlistId,
+			trackId,
+			addedAt: Date.now(),
+		})
+
+		const change: DatabaseChangeDetails = {
+			operation: 'add',
+			storeName: 'playlistsTracks',
+			key,
+		}
+
+		return change
+	})
+
+	const changes = await Promise.all(promises)
+
+	dispatchDatabaseChangedEvent(changes)
+}
+
+const dbRemoveTrackFromPlaylist = async (playlistId: number, trackId: number): Promise<void> => {
 	const db = await getDatabase()
 
 	const key: [number, number] = [playlistId, trackId]
@@ -186,10 +203,12 @@ export const toggleFavoriteTrack = async (
 		} else {
 			await dbAddTrackToPlaylist(FAVORITE_PLAYLIST_ID, trackId)
 		}
-	
+
 		snackbar({
 			id: 'track-favorite-toggled',
-			message: shouldBeRemoved ? m.libraryTrackRemovedFromFavorites() : m.libraryTrackAddedToFavorites(),
+			message: shouldBeRemoved
+				? m.libraryTrackRemovedFromFavorites()
+				: m.libraryTrackAddedToFavorites(),
 			duration: 2000,
 		})
 	} catch (error) {

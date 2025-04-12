@@ -82,7 +82,7 @@
 				role="menuitem"
 				tabindex="0"
 				class={[
-					'interactable relative flex h-10 grow items-center gap-4 px-4 text-body-md',
+					'interactable relative flex h-10 grow items-center gap-4 px-4 text-body-md -outline-offset-2',
 					item.selected && 'bg-surfaceVariant text-primary',
 				]}
 				use:ripple
