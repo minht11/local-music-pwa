@@ -84,7 +84,7 @@ export default defineConfig({
 			imports: [
 				{
 					'$paraglide/messages': [['*', 'm']],
-					'$lib/stores/player/store': ['usePlayer'],
+					'$lib/stores/player/use-store.ts': ['usePlayer'],
 					'$lib/stores/main/use-store.ts': ['useMainStore'],
 					'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
 					'tiny-invariant': [['default', 'invariant']],
