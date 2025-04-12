@@ -1,5 +1,5 @@
 import type { TracksScanMessage, TracksScanOptions, TracksScanResult } from './types.ts'
-import TracksWorker from './worker/worker.ts?worker'
+import TracksWorker from './worker.ts?worker'
 
 export type { TracksScanOptions, TracksScanResult } from './types.ts'
 

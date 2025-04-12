@@ -3,7 +3,6 @@ import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.
 import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { createTracksCountPageQuery } from '$lib/library/tracks-queries.ts'
 import { type Directory, LEGACY_NO_NATIVE_DIRECTORY } from '$lib/library/types.ts'
-import type { PageLoad } from './$types.ts'
 
 export type DirectoryWithCount = { count: number } & (
 	| {
@@ -65,7 +64,7 @@ interface LoadResult {
 	title: string
 }
 
-export const load: PageLoad = async (): Promise<LoadResult> => {
+export const load = async (): Promise<LoadResult> => {
 	const [count, directories] = await Promise.all([
 		createTracksCountPageQuery(),
 		createDirectoriesPageQuery(),
