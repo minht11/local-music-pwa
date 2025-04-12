@@ -13,6 +13,7 @@
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
 	import DirectoriesList from './components/DirectoriesList.svelte'
+	import InstallAppBanner from './components/InstallAppBanner.svelte'
 	import MissingFsApiBanner from './components/MissingFsApiBanner.svelte'
 
 	const { data } = $props()
@@ -103,6 +104,8 @@
 		{/if}
 	</div>
 </section>
+
+<InstallAppBanner class="settings-max-width mt-6" />
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
 	<div class="px-4 pt-4 text-title-sm">{m.settingsAppearance()}</div>
@@ -212,7 +215,7 @@
 <style lang="postcss">
 	@reference '../../../../app.css';
 
-	.settings-max-width {
+	:global(.settings-max-width) {
 		max-width: --spacing(225);
 	}
 </style>

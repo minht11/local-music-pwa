@@ -8,9 +8,10 @@
 	import { MainStore } from '$lib/stores/main/store.svelte.ts'
 	import { MAIN_STORE_CONTEXT } from '$lib/stores/main/use-store.ts'
 	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
-	import { PLAYER_STORE_CONTEXT } from '$lib/stores/player/store.ts'
+	import { PLAYER_STORE_CONTEXT } from '$lib/stores/player/use-store.ts'
 	import { setupAppViewTransitions } from '$lib/view-transitions.ts'
 	import { setContext } from 'svelte'
+	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'
 
 	// These context keys are in different files from their implementation
@@ -24,6 +25,7 @@
 	setupTheme()
 	setupGlobalMenu()
 	setupAppViewTransitions(() => mainStore.isReducedMotion)
+	setupAppInstallPromptListeners()
 	const bottomBar = setupBottomBar()
 
 	const { children } = $props()

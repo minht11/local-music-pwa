@@ -87,6 +87,10 @@
 	"settingsMotionReduced": "Reduced",
 	"settingsMotionNormal": "Normal",
 	"settingsAbout": "About",
+	"settingsInstallAppExplanation": "Add Snae Player to your {device} for more immersive experience",
+	"settingsInstallAppDesktop": "desktop",
+	"settingsInstallAppHomeScreen": "home screen",
+	"settingsInstallAppHomeAction": "Install",
 
 	"settingsGrantDirectoryAccess": "You need to allow the app access to the directory, via browser permission so it can scan its contents",
 	"settingsDirectoryRemoved": "Directory removed",

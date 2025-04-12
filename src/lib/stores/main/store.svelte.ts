@@ -61,6 +61,8 @@ export class MainStore {
 
 	addTrackToPlaylistDialogOpen: number[] | null = $state(null)
 
+	appInstallPromptEvent: BeforeInstallPromptEvent | null = $state(null)
+
 	constructor() {
 		persist('main', this, [
 			'theme',
