@@ -16,7 +16,7 @@ export default defineConfig({
 		warmup: {
 			clientFiles: [
 				'src/lib/components/**/*.svelte',
-				'src/lib/library/tracks-scanner/worker/worker.ts',
+				'src/lib/library/scan-actions/scanner/worker.ts',
 			],
 		},
 	},

@@ -65,19 +65,6 @@ export interface AppDB extends DBSchema {
 			notAllowedOperations: 'update'
 		}
 	}
-	// tracksRelations: {
-	// 	key: number,
-	// 	value: {
-	// 		trackId: number
-	// 		albumId: number
-	// 		artistIds: number[]
-	// 	},
-	// 	indexes: {
-	// 		trackId: number
-	// 		albumId: number
-	// 		artistIds: number[]
-	// 	}
-	// },
 	directories: {
 		key: number
 		value: Directory

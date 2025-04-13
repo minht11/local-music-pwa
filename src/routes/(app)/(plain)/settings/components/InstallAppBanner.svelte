@@ -14,7 +14,7 @@
 	const install = async (e: BeforeInstallPromptEvent) => {
 		await e.prompt()
 
-		main.appInstallPromptEvent = null
+		// TODO. Send analytics event
 	}
 
 	const installEvent = $derived(main.appInstallPromptEvent)

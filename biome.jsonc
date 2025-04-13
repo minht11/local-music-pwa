@@ -21,7 +21,8 @@
 			"!**/*.html",
 			"!**/*.svg",
 			"!**/*.css",
-			"!src/lib/components/WrapTranslation.svelte"
+			"!src/lib/components/WrapTranslation.svelte",
+			"!coverage/**"
 		]
 	},
 	"formatter": {

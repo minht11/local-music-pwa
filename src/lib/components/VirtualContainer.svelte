@@ -28,7 +28,6 @@
 		size: itemSize,
 		key,
 		children,
-		// @ts-expect-error TODO. https://github.com/sveltejs/language-tools/issues/2268
 		offsetWidth = $bindable(0),
 	}: Props = $props()
 
