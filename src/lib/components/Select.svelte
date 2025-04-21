@@ -90,25 +90,23 @@
 		isOpen = e.newState === 'open'
 	}}
 >
-	{#if isOpen}
-		{#each items as item (item[key])}
-			<button
-				use:ripple
-				role="option"
-				aria-selected={item[key] === selected}
-				class={[
-					'interactable flex h-10 w-full cursor-pointer items-center overflow-hidden px-4 -outline-offset-2',
-					item[key] === selected && 'text-primary',
-				]}
-				onclick={() => {
-					selected = item[key]
-					popup?.hidePopover()
-				}}
-			>
-				{item[labelKey]}
-			</button>
-		{/each}
-	{/if}
+	{#each items as item (item[key])}
+		<button
+			use:ripple
+			role="option"
+			aria-selected={item[key] === selected}
+			class={[
+				'interactable flex h-10 w-full cursor-pointer items-center overflow-hidden px-4 -outline-offset-2',
+				item[key] === selected && 'text-primary',
+			]}
+			onclick={() => {
+				selected = item[key]
+				popup?.hidePopover()
+			}}
+		>
+			{item[labelKey]}
+		</button>
+	{/each}
 </div>
 
 <style>

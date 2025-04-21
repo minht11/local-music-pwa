@@ -6,7 +6,7 @@ import { getArtworkRelatedData } from './format-artwork.ts'
 const FILE_SIZE_LIMIT_500MB = 5e8
 
 export const parseTrack = async (file: File): Promise<ParsedTrackData | null> => {
-	// Ignore files bigger than 500mb because of
+	// Ignore files bigger than limit because of
 	// potential performance issues.
 	if (file.size > FILE_SIZE_LIMIT_500MB) {
 		return null

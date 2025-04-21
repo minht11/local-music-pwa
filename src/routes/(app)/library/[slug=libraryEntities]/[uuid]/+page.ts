@@ -34,8 +34,9 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {
 				if (change.storeName === storeName && change.key === id) {
-					// It is fine to refetch because value almost always will be in cache
+					// We always refetch because in most cases we would just hit Library Value Cache
 					actions.refetch()
+					break
 				}
 			}
 		},

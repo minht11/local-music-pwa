@@ -1,38 +1,26 @@
-# create-svelte
+# Snae player
+Lightweight on device music player right in your browser.
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+![alt text](https://raw.githubusercontent.com/minht11/local-music-pwa/main/images/preview.webp)
 
-## Creating a project
+Play your local audio files without a native app, using just your browser. Complete with Dark/Light theme support, artwork based UI coloring, animations and more.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Limitations
+[File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API) is relatively new api which gives websites access to the files you choose. This app makes use of it when supported, for now that is only in Chromium based browsers. In other browsers legacy Files api is used which forces app to copy files inside IndexedDB, effectively duplicating used storage space, in oder to work correctly.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## Works with
+With limitations in mind app works with every modern browser.
 
-# create a new project in my-app
-npm create svelte@latest my-app
+## Privacy
+Minimal, privacy preserving analytics, provided by [GoatCounter](https://goatcounter.com/), are used to count page views.
+
+## Building locally
+Clone the repo, and:
 ```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+pnpm install
+pnpm run build
 ```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
+You can run the development server with:
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+pnpm run dev
+```

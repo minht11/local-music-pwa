@@ -58,4 +58,16 @@ declare global {
 	interface WindowEventMap {
 		beforeinstallprompt: BeforeInstallPromptEvent
 	}
+
+	interface GoatCounter {
+		count: (data: {
+			path: string
+			title?: string
+			event: boolean
+		}) => void
+	}
+
+	declare const goatcounter: GoatCounter | undefined
+
+	declare const __BUILD_VERSION__: string
 }
