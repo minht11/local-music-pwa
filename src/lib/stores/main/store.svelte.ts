@@ -1,6 +1,6 @@
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
-import type { LibraryItemStoreName } from '$lib/library/types'
+import type { LibraryStoreName } from '$lib/library/types'
 import { prefersReducedMotion } from 'svelte/motion'
 import { MediaQuery } from 'svelte/reactivity'
 
@@ -18,7 +18,7 @@ export interface ModifyPlaylistOptions {
 export interface RemoveLibraryItemOptions {
 	id: number
 	name: string
-	storeName: LibraryItemStoreName
+	storeName: LibraryStoreName
 }
 
 export class MainStore {

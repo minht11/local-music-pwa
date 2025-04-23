@@ -2,7 +2,7 @@ import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import type { IDBPTransaction, IndexNames } from 'idb'
-import type { LibraryItemStoreName } from './types.ts'
+import type { LibraryStoreName } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<
 	AppDB,
@@ -11,7 +11,7 @@ type TrackOperationsTransaction = IDBPTransaction<
 >
 
 const dbRemoveTrackRelatedData = async <
-	Store extends Exclude<LibraryItemStoreName, 'playlists'>,
+	Store extends Exclude<LibraryStoreName, 'playlists'>,
 	ItemIndexName extends IndexNames<AppDB, Store>,
 	IndexName extends IndexNames<AppDB, 'tracks'>,
 	ItemValue extends AppDB[Store]['indexes'][ItemIndexName],
@@ -125,6 +125,6 @@ export const dbRemoveMultipleTracks = async (trackIds: number[]): Promise<void> 
 	}
 }
 
-export const dbRemoveTrackRelatedItem = async <Store extends Pick<LibraryItemStoreName, 'albums' | 'artists'>>(storeName: Store) => {
+export const dbRemoveTrackRelatedItem = async <Store extends Pick<LibraryStoreName, 'albums' | 'artists'>>(storeName: Store) => {
 	const db = await getDatabase()
 }

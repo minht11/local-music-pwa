@@ -7,13 +7,13 @@ import {
 	type QueryKey,
 } from '$lib/db/query/page-query.svelte.ts'
 import { createQuery, type QueryOptions, type QueryResult } from '$lib/db/query/query.ts'
-import type { LibraryItemStoreName } from '../types.ts'
-import { preloadLibraryItemValue } from './value.ts'
+import type { LibraryStoreName } from '../types.ts'
+import { preloadLibraryValue } from './value.ts'
 
 export type { PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
 export type { QueryResult } from '$lib/db/query/query.ts'
 
-const preloadLibraryListItems = async <Store extends LibraryItemStoreName>(
+const preloadLibraryListValues = async <Store extends LibraryStoreName>(
 	storeName: Store,
 	keys: number[],
 ) => {
@@ -26,7 +26,7 @@ const preloadLibraryListItems = async <Store extends LibraryItemStoreName>(
 		const preload = Array.from({ length: Math.min(keys.length, 12) }, (_, index) => {
 			const id = keys[index]
 			if (id) {
-				return preloadLibraryItemValue(storeName, id)
+				return preloadLibraryValue(storeName, id)
 			}
 
 			return null
@@ -37,7 +37,7 @@ const preloadLibraryListItems = async <Store extends LibraryItemStoreName>(
 	}
 }
 
-export const keysListDatabaseChangeHandler = <Store extends LibraryItemStoreName>(
+export const keysListDatabaseChangeHandler = <Store extends LibraryStoreName>(
 	storeName: Store,
 	changes: DatabaseChangeDetailsList,
 	{ mutate, refetch }: DbChangeActions<number[]>,
@@ -84,7 +84,7 @@ export type LibraryItemKeysQueryOptions<K extends QueryKey> = Omit<
 >
 
 export const createLibraryItemKeysQuery = <
-	const Store extends LibraryItemStoreName,
+	const Store extends LibraryStoreName,
 	const K extends QueryKey,
 >(
 	storeName: Store,
@@ -94,7 +94,7 @@ export const createLibraryItemKeysQuery = <
 		...options,
 		fetcher: async (key) => {
 			const result = await options.fetcher(key)
-			await preloadLibraryListItems(storeName, result)
+			await preloadLibraryListValues(storeName, result)
 
 			return result
 		},
@@ -107,7 +107,7 @@ export type LibraryItemKeysPageQueryOptions<K extends QueryKey> = Omit<
 >
 
 export const createLibraryItemKeysPageQuery = <
-	Store extends LibraryItemStoreName,
+	Store extends LibraryStoreName,
 	const K extends QueryKey,
 >(
 	storeName: Store,
@@ -117,7 +117,7 @@ export const createLibraryItemKeysPageQuery = <
 		...options,
 		fetcher: async (key) => {
 			const result = await options.fetcher(key)
-			await preloadLibraryListItems(storeName, result)
+			await preloadLibraryListValues(storeName, result)
 
 			return result
 		},

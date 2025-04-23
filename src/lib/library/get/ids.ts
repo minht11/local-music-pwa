@@ -1,28 +1,28 @@
 import { type AppDB, getDatabase } from '$lib/db/database'
 import type { IDBPIndex, IndexNames } from 'idb'
-import type { LibraryItemStoreName } from '../types.ts'
+import type { LibraryStoreName } from '../types.ts'
 
 export type SortOrder = 'asc' | 'desc'
-export type LibraryItemSortKey<Store extends LibraryItemStoreName> = Exclude<
+export type LibraryItemSortKey<Store extends LibraryStoreName> = Exclude<
     IndexNames<AppDB, Store>,
     symbol
 >
 
-export interface SortOptions<Store extends LibraryItemStoreName> {
+export interface SortOptions<Store extends LibraryStoreName> {
     sort: LibraryItemSortKey<Store>
     order?: SortOrder
     searchTerm?: string
     searchFn?: (value: AppDB[Store]['value'], term: string) => boolean
 }
 
-type GetLibraryItemIdsIndex<Store extends LibraryItemStoreName> = IDBPIndex<
+type GetLibraryItemIdsIndex<Store extends LibraryStoreName> = IDBPIndex<
     AppDB,
     [Store],
     Store,
     keyof AppDB[Store]['indexes'] & string
 >
 
-const getLibraryItemIdsWithSearchSlow = async <Store extends LibraryItemStoreName>(
+const getLibraryItemIdsWithSearchSlow = async <Store extends LibraryStoreName>(
     storeIndex: GetLibraryItemIdsIndex<Store>,
     searchTerm: string,
     searchFn: (value: AppDB[Store]['value'], term: string) => boolean,
@@ -38,7 +38,7 @@ const getLibraryItemIdsWithSearchSlow = async <Store extends LibraryItemStoreNam
     return data
 }
 
-export const getLibraryItemIds = async <Store extends LibraryItemStoreName>(
+export const getLibraryItemIds = async <Store extends LibraryStoreName>(
     store: Store,
     options: SortOptions<Store>,
 ): Promise<number[]> => {

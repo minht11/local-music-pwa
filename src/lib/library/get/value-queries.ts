@@ -1,36 +1,36 @@
 import { createQuery, type QueryResult } from '$lib/db/query/query.ts'
 import { unwrap } from '$lib/helpers/utils/unwrap.ts'
-import type { LibraryItemStoreName } from '../types.ts'
+import type { LibraryStoreName } from '../types.ts'
 import {
-	type GetLibraryItemValueResult,
-	getLibraryItemValue,
-	shouldRefetchLibraryItemValue,
+	type GetLibraryValueResult,
+	getLibraryValue,
+	shouldRefetchLibraryValue,
 } from './value.ts'
 
 export type { AlbumData, ArtistData, PlaylistData, TrackData } from './value.ts'
 
-export interface LibraryItemQueryOptions<AllowEmpty extends boolean = false> {
+export interface LibraryValueQueryOptions<AllowEmpty extends boolean = false> {
 	allowEmpty?: AllowEmpty
 }
 
 const defineQuery =
-	<Store extends LibraryItemStoreName>(storeName: Store) =>
+	<Store extends LibraryStoreName>(storeName: Store) =>
 	<AllowEmpty extends boolean = false>(
 		idGetter: number | (() => number),
-		options: LibraryItemQueryOptions<AllowEmpty> = {},
-	): QueryResult<GetLibraryItemValueResult<Store, AllowEmpty>> => {
+		options: LibraryValueQueryOptions<AllowEmpty> = {},
+	): QueryResult<GetLibraryValueResult<Store, AllowEmpty>> => {
 		return createQuery({
 			key: idGetter,
-			fetcher: (id) => getLibraryItemValue(storeName, id, options.allowEmpty),
+			fetcher: (id) => getLibraryValue(storeName, id, options.allowEmpty),
 			onDatabaseChange: (changes, { refetch }) => {
-				if (shouldRefetchLibraryItemValue(storeName, unwrap(idGetter), changes)) {
+				if (shouldRefetchLibraryValue(storeName, unwrap(idGetter), changes)) {
 					void refetch()
 				}
 			},
 		})
 	}
 
-type LibraryItemQuery<Store extends LibraryItemStoreName> = ReturnType<typeof defineQuery<Store>>
+type LibraryItemQuery<Store extends LibraryStoreName> = ReturnType<typeof defineQuery<Store>>
 
 export const createTrackQuery: LibraryItemQuery<'tracks'> = /* @__PURE__ */ defineQuery('tracks')
 export const createAlbumQuery: LibraryItemQuery<'albums'> = /* @__PURE__ */ defineQuery('albums')

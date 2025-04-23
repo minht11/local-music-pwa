@@ -5,12 +5,12 @@ import { WeakLRUCache } from 'weak-lru-cache'
 import {
 	FAVORITE_PLAYLIST_ID,
 	FAVORITE_PLAYLIST_UUID,
-	type LibraryItemStoreName,
+	type LibraryStoreName,
 } from '../types.ts'
 
-type CacheKey<Store extends LibraryItemStoreName> = `${Store}:${string}`
+type CacheKey<Store extends LibraryStoreName> = `${Store}:${string}`
 
-const getCacheKey = <Store extends LibraryItemStoreName>(
+const getCacheKey = <Store extends LibraryStoreName>(
 	storeName: Store,
 	key: DbKey<Store>,
 ): CacheKey<Store> => `${storeName}:${key}`
@@ -21,7 +21,7 @@ interface QueryConfig<Result> {
 }
 
 const defaultRefreshOnDatabaseChanges = (
-	storeName: LibraryItemStoreName,
+	storeName: LibraryStoreName,
 	itemId: number | undefined,
 	changes: readonly DatabaseChangeDetails[],
 ) => {
@@ -41,6 +41,7 @@ const defaultRefreshOnDatabaseChanges = (
 }
 
 export interface TrackData extends Track {
+	type: 'track'
 	favorite: boolean
 }
 
@@ -61,6 +62,7 @@ const trackConfig: QueryConfig<TrackData> = {
 
 		return {
 			...item,
+			type: 'track',
 			favorite: !!favorite,
 		} as TrackData
 	},
@@ -97,87 +99,130 @@ const tracksDataDatabaseChangeHandler = (change: DatabaseChangeDetails) => {
 		(change.storeName === 'tracks' && change.operation === 'delete') ||
 		change.operation === 'update'
 	) {
-		// We clear our existing cache and just let refetch happen when getLibraryItemValue is called again
+		// We clear our existing cache and just let refetch happen when getLibraryValue is called again
 		const cacheKey = getCacheKey('tracks', change.key)
 		valueCache.delete(cacheKey)
 	}
 }
 
-export type AlbumData = Album
+const dbGetValue = async <Store extends LibraryStoreName, const T extends string>(
+	storeName: Store,
+	type: T,
+	id: number,
+) => {
+	const db = await getDatabase()
+	const value = await db.get(storeName, id)
+	if (!value) {
+		return undefined
+	}
 
-const albumConfig: QueryConfig<AlbumData> = {
-	fetch: async (id) => {
-		const db = await getDatabase()
-		return db.get('albums', id)
-	},
-	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'albums'),
+	return {
+		...value,
+		type,
+	}
 }
 
-export type ArtistData = Artist
+export interface AlbumData extends Album {
+	type: 'album'
+}
+
+const albumConfig: QueryConfig<AlbumData> = {
+	fetch: (id) => dbGetValue('albums', 'album', id),
+	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'albums'),
+}
+export interface ArtistData extends Artist {
+	type: 'artist'
+}
 
 const artistConfig: QueryConfig<ArtistData> = {
-	fetch: async (id) => {
-		const db = await getDatabase()
-		return db.get('artists', id)
-	},
+	fetch: (id) => dbGetValue('artists', 'artist', id),
 	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'artists'),
 }
 
-export type PlaylistData = Playlist
+export interface PlaylistData extends Playlist {
+	type: 'playlist'
+}
 
 const playlistsConfig: QueryConfig<PlaylistData> = {
-	fetch: async (id) => {
+	fetch: (id) => {
 		if (id === FAVORITE_PLAYLIST_ID) {
-			return {
+			const favoritePlaylist: PlaylistData = {
 				type: 'playlist',
 				id: FAVORITE_PLAYLIST_ID,
 				uuid: FAVORITE_PLAYLIST_UUID,
 				name: 'Favorites',
 				createdAt: 0,
 			}
+
+			return Promise.resolve(favoritePlaylist)
 		}
 
-		const db = await getDatabase()
-		return db.get('playlists', id)
+		return dbGetValue('playlists', 'playlist', id)
 	},
 	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'playlists'),
 }
 
-interface LibraryItemsConfigMap {
-	tracks: QueryConfig<TrackData>
-	albums: QueryConfig<AlbumData>
-	artists: QueryConfig<ArtistData>
-	playlists: QueryConfig<PlaylistData>
+interface LibraryValueMap {
+	tracks: TrackData
+	albums: AlbumData
+	artists: ArtistData
+	playlists: PlaylistData
 }
 
-const libraryItemsConfigMap: LibraryItemsConfigMap = {
+type LibraryValue<Store extends LibraryStoreName = LibraryStoreName> =
+	LibraryValueMap[Store]
+
+type LibraryConfigMap = {
+	[Store in LibraryStoreName]: QueryConfig<LibraryValue<Store>>
+}
+
+const libraryConfigMap = {
 	tracks: trackConfig,
 	albums: albumConfig,
 	artists: artistConfig,
 	playlists: playlistsConfig,
-} as const
+} satisfies LibraryConfigMap
 
-type LibraryItemsValueMap = {
-	[Store in LibraryItemStoreName]: LibraryItemsConfigMap[Store] extends QueryConfig<infer T>
-		? T
-		: never
+type LibraryCachedValue<Store extends LibraryStoreName = LibraryStoreName> =
+	| LibraryValue<Store>
+	| Promise<LibraryValue<Store> | undefined>
+
+class LibraryValueCache {
+	#cache = new WeakLRUCache<
+		CacheKey<LibraryStoreName>,
+		LibraryCachedValue<LibraryStoreName>
+	>({
+		cacheSize: 10_000,
+	})
+
+	get<Store extends LibraryStoreName>(key: CacheKey<Store>) {
+		return this.#cache.getValue(key) as LibraryCachedValue<Store> | undefined
+	}
+
+	set<Store extends LibraryStoreName>(
+		key: CacheKey<Store>,
+		value: LibraryCachedValue<Store> | undefined,
+	) {
+		if (value) {
+			this.#cache.setValue(key, value)
+		} else {
+			this.delete(key)
+		}
+	}
+
+	delete<Store extends LibraryStoreName>(key: CacheKey<Store>) {
+		this.#cache.delete(key)
+	}
 }
-
-type LibraryItemValue = LibraryItemsValueMap[LibraryItemStoreName]
 
 // Fast in memory cache for `items`, so we do not need to
 // call indexed db for every access.
 // IMPORTANT. Only store whole library items in here.
-const valueCache = new WeakLRUCache<
-	CacheKey<LibraryItemStoreName>,
-	LibraryItemValue | Promise<LibraryItemValue>
->({
-	cacheSize: 10_000,
-})
+const valueCache = new LibraryValueCache()
 
 if (import.meta.env.DEV) {
 	// @ts-expect-error used for debugging
-	globalThis.libraryItemCache = valueCache
+	globalThis.libraryValueCache = valueCache
 }
 
 if (!import.meta.env.SSR) {
@@ -197,105 +242,103 @@ if (!import.meta.env.SSR) {
 	})
 }
 
-export class LibraryItemNotFoundError extends Error {
-	constructor(storeName: LibraryItemStoreName, id: number) {
-		super(`${storeName} with id ${id} not found`)
-		this.name = 'LibraryItemNotFound'
+export class LibraryValueNotFoundError extends Error {
+	constructor(cacheKey: CacheKey<LibraryStoreName>) {
+		super(`Value not found. Cache key: ${cacheKey}`)
+		this.name = 'LibraryValueNotFoundError'
 	}
 }
 
-const unwrapLibraryItemValue = <T, AllowEmpty extends boolean = false>(
+const emptyValue = <T, AllowEmpty extends boolean = false>(
 	value: T,
-	id: number,
-	storeName: LibraryItemStoreName,
-	allowEmpty?: AllowEmpty,
+	allowEmpty: AllowEmpty | undefined,
+	cacheKey: CacheKey<LibraryStoreName>,
 ) => {
 	if (!(value || allowEmpty)) {
-		throw new LibraryItemNotFoundError(storeName, id)
+		throw new LibraryValueNotFoundError(cacheKey)
 	}
 
 	return value
 }
 
-export type GetLibraryItemValueResult<
-	Store extends LibraryItemStoreName,
-	AllowEmpty extends boolean = false,
-> = AllowEmpty extends true ? LibraryItemsValueMap[Store] | undefined : LibraryItemsValueMap[Store]
-
 /** @private */
-export const getCachedOrFetchValue = <Store extends LibraryItemStoreName>(
+export const getCachedOrFetchValue = <
+	Store extends LibraryStoreName,
+	Value extends LibraryValue<Store>,
+>(
 	key: CacheKey<Store>,
-	fetchValue: () => Promise<LibraryItemsValueMap[Store] | undefined>,
-): Promise<GetLibraryItemValueResult<Store, true>> | GetLibraryItemValueResult<Store, true> => {
-	const cachedValue = valueCache.getValue(key)
+	fetchValue: () => Promise<LibraryValueMap[Store] | undefined>,
+): LibraryValue<Store> | Promise<LibraryValue<Store> | undefined> => {
+	const cachedValue = valueCache.get(key)
+	if (cachedValue) {
+		return cachedValue
+	}
 
+	const promise = fetchValue()
+		.then((value) => {
+			valueCache.set(key, value)
 
-	// @ts-expect-error aa
-	return cachedValue
-	// if (cachedValue) {
-	// 	return cachedValue
-	// }
+			return value
+		})
+		.catch((error) => {
+			valueCache.delete(key)
+			throw error
+		})
 
-	// const promise = fetchValue()
-	// 	.then((value) => {
-	// 		if (value) {
-	// 			valueCache.setValue(key, value)
-	// 		} else {
-	// 			valueCache.delete(key)
-	// 		}
+	valueCache.set(key, promise)
 
-	// 		return value
-	// 	})
-	// 	.catch((error) => {
-	// 		valueCache.delete(key)
-	// 		throw error
-	// 	})
-
-	// valueCache.setValue(key, promise)
-
-	// return promise
+	return promise
 }
 
-export const getLibraryItemValue = <
-	Store extends LibraryItemStoreName,
+export type GetLibraryValueResult<
+	Store extends LibraryStoreName,
+	AllowEmpty extends boolean = false,
+> = AllowEmpty extends true ? LibraryValue<Store> | undefined : LibraryValue<Store>
+
+/** @public */
+export const getLibraryValue = <
+	Store extends LibraryStoreName,
 	AllowEmpty extends boolean = false,
 >(
 	storeName: Store,
 	id: number,
 	allowEmpty?: AllowEmpty,
-):
-	| Promise<GetLibraryItemValueResult<Store, AllowEmpty>>
-	| GetLibraryItemValueResult<Store, AllowEmpty> => {
-	type Value = LibraryItemsValueMap[Store]
-
+): Promise<GetLibraryValueResult<Store, AllowEmpty>> | GetLibraryValueResult<Store, AllowEmpty> => {
 	const key = getCacheKey(storeName, id)
-	const result = getCachedOrFetchValue(key, () => libraryItemsConfigMap[storeName].fetch(id))
+	const result = getCachedOrFetchValue(key, () => {
+		const config: LibraryConfigMap[Store] = libraryConfigMap[storeName]
 
-	return result
+		return config.fetch(id)
+	})
+
+	if (result instanceof Promise) {
+		const promiseResult = result.then((value) => emptyValue(value, allowEmpty, key)) as Promise<GetLibraryValueResult<Store, AllowEmpty>>
+	
+		return promiseResult
+	}
+
+	return emptyValue(result, allowEmpty, key)
 }
 
-export const preloadLibraryItemValue = async (
-	storeName: LibraryItemStoreName,
+/** @public */
+export const preloadLibraryValue = async (
+	storeName: LibraryStoreName,
 	id: number,
 ): Promise<void> => {
 	try {
-		console.log('Preloading', storeName, id)
-		// getLibraryItemValue will fetch data and store it inside cache
-		await getLibraryItemValue(storeName, id)
+		// this will fetch data and store it inside cache
+		await getLibraryValue(storeName, id)
 	} catch {
 		// Ignore
 	}
 }
 
-export const shouldRefetchLibraryItemValue = (
-	storeName: LibraryItemStoreName,
+export const shouldRefetchLibraryValue = (
+	storeName: LibraryStoreName,
 	id: number | undefined,
 	changes: readonly DatabaseChangeDetails[],
 ): boolean => {
-	const config = libraryItemsConfigMap[storeName]
-	if (!config) {
-		return false
-	}
+	const config = libraryConfigMap[storeName]
 
 	return config.shouldRefetch(id, changes)
 }

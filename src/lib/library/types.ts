@@ -1,6 +1,6 @@
 import type { FileEntity } from '$lib/helpers/file-system.ts'
 
-export type LibraryItemStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
+export type LibraryStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
 
 /**
  * Used in browsers where `showDirectoryPicker` is not supported.
@@ -14,7 +14,7 @@ export const LEGACY_NO_NATIVE_DIRECTORY = -1
 export const FAVORITE_PLAYLIST_ID = -1
 export const FAVORITE_PLAYLIST_UUID = 'favorite-sba6-42b4-a66f-162627d150a8'
 
-export interface BaseMusicItem {
+interface BaseMusicItem {
     id: number
     name: string
 }

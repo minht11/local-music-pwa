@@ -5,12 +5,12 @@ import {
 	type PageQueryResult,
 } from '$lib/db/query/page-query.svelte.ts'
 import { keysListDatabaseChangeHandler } from '$lib/library/get/ids-queries.ts'
-import { getLibraryItemValue, LibraryItemNotFoundError } from '$lib/library/get/value.ts'
-import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryItemStoreName } from '$lib/library/types.ts'
+import { getLibraryValue, LibraryValueNotFoundError } from '$lib/library/get/value.ts'
+import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryStoreName } from '$lib/library/types.ts'
 import { error, redirect } from '@sveltejs/kit'
 import type { PageLoad } from './$types.d.ts'
 
-type DetailsSlug = Exclude<LibraryItemStoreName, 'tracks'>
+type DetailsSlug = Exclude<LibraryStoreName, 'tracks'>
 
 const configMap = {
 	albums: {
@@ -30,7 +30,7 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 ): Promise<PageQueryResult<DbValue<T>>> => {
 	const query = createPageQuery({
 		key: () => [storeName, id],
-		fetcher: () => getLibraryItemValue(storeName, id),
+		fetcher: () => getLibraryValue(storeName, id),
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {
 				if (change.storeName === storeName && change.key === id) {
@@ -41,7 +41,7 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 			}
 		},
 		onError: (error) => {
-			if (error instanceof LibraryItemNotFoundError) {
+			if (error instanceof LibraryValueNotFoundError) {
 				void goto(`/library/${storeName}`, { replaceState: true })
 			}
 		},

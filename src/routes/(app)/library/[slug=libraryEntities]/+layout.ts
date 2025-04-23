@@ -5,7 +5,7 @@ import {
 } from '$lib/library/get/ids.ts'
 import { createLibraryItemKeysPageQuery, type PageQueryResult } from '$lib/library/get/ids-queries.ts'
 import { createTracksCountPageQuery } from '$lib/library/tracks-queries.ts'
-import { FAVORITE_PLAYLIST_ID, type LibraryItemStoreName } from '$lib/library/types.ts'
+import { FAVORITE_PLAYLIST_ID, type LibraryStoreName } from '$lib/library/types.ts'
 import { defineViewTransitionMatcher, type RouteId } from '$lib/view-transitions.ts'
 import { redirect } from '@sveltejs/kit'
 import { innerWidth } from 'svelte/reactivity/window'
@@ -20,7 +20,7 @@ import { LibraryStore } from './store.svelte.ts'
 const defaultSearchFn: LibrarySearchFn<{ name: string }> = (value, searchTerm) =>
 	value.name.toLowerCase().includes(searchTerm)
 
-type LoadDataResult<Slug extends LibraryItemStoreName> = {
+type LoadDataResult<Slug extends LibraryStoreName> = {
 	[ExactSlug in Slug]: LibraryRouteConfig<ExactSlug> & {
 		store: LibraryStore<ExactSlug>
 		itemsIdsQuery: PageQueryResult<number[]>
@@ -28,7 +28,7 @@ type LoadDataResult<Slug extends LibraryItemStoreName> = {
 	}
 }[Slug]
 
-const loadData = async <Slug extends LibraryItemStoreName>(slug: Slug): Promise<LoadDataResult<Slug>> => {
+const loadData = async <Slug extends LibraryStoreName>(slug: Slug): Promise<LoadDataResult<Slug>> => {
 	const config = configsMap[slug]
 	const searchFn = config.search ?? defaultSearchFn
 	const store = new LibraryStore(slug)
@@ -64,7 +64,7 @@ const loadData = async <Slug extends LibraryItemStoreName>(slug: Slug): Promise<
 	}
 }
 
-type LoadResult = LoadDataResult<LibraryItemStoreName> & {
+type LoadResult = LoadDataResult<LibraryStoreName> & {
 	isWideLayout: () => boolean
 	layoutMode: (isWide: boolean, itemId: string | undefined) => LayoutMode
 }
