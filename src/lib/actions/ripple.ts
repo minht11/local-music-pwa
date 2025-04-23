@@ -11,6 +11,7 @@ const rippleSpan = import.meta.env.SSR
 	: document.createElement('span')
 const activeRipples = new Map<HTMLSpanElement, boolean>()
 
+/** @public */
 export const getActiveRipplesCount = (): number => activeRipples.size
 
 const markForOrExitRipple = (ripple: HTMLSpanElement) => {

@@ -1,10 +1,17 @@
 import type { TracksScanMessage, TracksScanOptions, TracksScanResult } from './types.ts'
 import TracksWorker from './worker.ts?worker'
 
-export type { TracksScanOptions, TracksScanResult } from './types.ts'
+export type {
+	/** @public */
+	TracksScanOptions,
+	/** @public */
+	TracksScanResult
+} from './types.ts'
 
+/** @public */
 export type TrackParsedFn = (totalParsedCount: number) => void
 
+/** @public */
 export const startTrackScannerWorker = async (
 	options: TracksScanOptions,
 	progress: (data: TracksScanResult) => void,

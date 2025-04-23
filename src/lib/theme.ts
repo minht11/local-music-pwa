@@ -89,9 +89,13 @@ const COLOR_TOKENS_GENERATION_MAP: ColorTokensInputMap = {
 	inversePrimary: ['a1', 80, 40],
 }
 
-/*@__NO_SIDE_EFFECTS__*/
+/**
+ * @public
+ * @__NO_SIDE_EFFECTS__
+*/
 export const getDefaultThemeArgb = (): number => argbFromHex('#ffb599')
 
+/** @public */
 export type ThemePaletteMap = Record<ColorToken, string>
 
 const createTonalPalette = (hue: number, chroma: number) => ({
@@ -102,6 +106,7 @@ interface TonalPalette {
 	tone(argb: number): number
 }
 
+/** @public */
 export const getThemePaletteRgb = (argb: number, isDark: boolean): ThemePaletteMap => {
 	const cam16 = Cam16.fromInt(argb)
 	const hue = cam16.hue
@@ -131,12 +136,14 @@ export const getThemePaletteRgb = (argb: number, isDark: boolean): ThemePaletteM
 	return Object.fromEntries(transformedEntries) as ThemePaletteMap
 }
 
+/** @public */
 export const clearThemeCssVariables = (): void => {
 	for (const key of Object.keys(COLOR_TOKENS_GENERATION_MAP)) {
 		document.documentElement.style.removeProperty(`--color-${key}`)
 	}
 }
 
+/** @public */
 export const setThemeCssVariables = (argb: number, isDark: boolean): void => {
 	const palette = getThemePaletteRgb(argb, isDark)
 

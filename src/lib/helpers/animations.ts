@@ -1,3 +1,4 @@
+/** @public */
 export const animateEmpty = (
 	element: Element,
 	options: number | KeyframeAnimationOptions,

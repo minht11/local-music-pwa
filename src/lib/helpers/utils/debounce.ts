@@ -1,3 +1,4 @@
+/** @public */
 export const debounce = <Fn extends (...args: Parameters<Fn>) => ReturnType<Fn>>(
 	fn: Fn,
 	delay: number,

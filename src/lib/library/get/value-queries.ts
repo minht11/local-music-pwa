@@ -1,6 +1,11 @@
 import { createQuery, type QueryResult } from '$lib/db/query/query.ts'
+import { unwrap } from '$lib/helpers/utils/unwrap.ts'
 import type { LibraryItemStoreName } from '../types.ts'
-import { type GetLibraryItemValueResult, getLibraryItemValue } from './value.ts'
+import {
+	type GetLibraryItemValueResult,
+	getLibraryItemValue,
+	shouldRefetchLibraryItemValue,
+} from './value.ts'
 
 export type { AlbumData, ArtistData, PlaylistData, TrackData } from './value.ts'
 
@@ -17,9 +22,10 @@ const defineQuery =
 		return createQuery({
 			key: idGetter,
 			fetcher: (id) => getLibraryItemValue(storeName, id, options.allowEmpty),
-			onDatabaseChange: (_, { refetch }) => {
-				// It is fine to refetch because value almost always will be in cache
-				void refetch()
+			onDatabaseChange: (changes, { refetch }) => {
+				if (shouldRefetchLibraryItemValue(storeName, unwrap(idGetter), changes)) {
+					void refetch()
+				}
 			},
 		})
 	}

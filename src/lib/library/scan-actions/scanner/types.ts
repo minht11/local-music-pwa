@@ -14,6 +14,7 @@ export interface TracksScanMessage {
 	count: TracksScanResult
 }
 
+/** @public */
 export type TracksScanOptions =
 	| {
 			action: 'directory-add' | 'directory-rescan'

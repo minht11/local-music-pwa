@@ -16,5 +16,7 @@ export const createQuery = <const K extends QueryKey, Result>(options: QueryOpti
 	const query = new QueryImpl<K, Result>(options)
 	query.setupListeners()
 
+	void query.load()
+
 	return new QueryResultBox(query.state) as QueryResult<Result>
 }

@@ -7,7 +7,6 @@ import {
 	type QueryKey,
 } from '$lib/db/query/page-query.svelte.ts'
 import { createQuery, type QueryOptions, type QueryResult } from '$lib/db/query/query.ts'
-import { unwrap } from '$lib/helpers/utils/unwrap.ts'
 import type { LibraryItemStoreName } from '../types.ts'
 import { preloadLibraryItemValue } from './value.ts'
 
@@ -27,8 +26,10 @@ const preloadLibraryListItems = async <Store extends LibraryItemStoreName>(
 		const preload = Array.from({ length: Math.min(keys.length, 12) }, (_, index) => {
 			const id = keys[index]
 			if (id) {
-				preloadLibraryItemValue(storeName, id)
+				return preloadLibraryItemValue(storeName, id)
 			}
+
+			return null
 		})
 		await Promise.all(preload)
 	} else if (import.meta.env.DEV) {
@@ -109,16 +110,16 @@ export const createLibraryItemKeysPageQuery = <
 	Store extends LibraryItemStoreName,
 	const K extends QueryKey,
 >(
-	storeName: Store | (() => Store),
+	storeName: Store,
 	options: LibraryItemKeysPageQueryOptions<K>,
 ): Promise<PageQueryResult<number[]>> =>
 	createPageQuery({
 		...options,
 		fetcher: async (key) => {
 			const result = await options.fetcher(key)
-			await preloadLibraryListItems(unwrap(storeName), result)
+			await preloadLibraryListItems(storeName, result)
 
 			return result
 		},
-		onDatabaseChange: keysListDatabaseChangeHandler.bind(null, unwrap(storeName)),
+		onDatabaseChange: keysListDatabaseChangeHandler.bind(null, storeName),
 	})

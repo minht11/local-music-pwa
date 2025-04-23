@@ -77,7 +77,13 @@
 			},
 			"correctness": {
 				"noUndeclaredVariables": "error",
-				"useImportExtensions": "error"
+				"useImportExtensions": "error",
+				"noPrivateImports": {
+					"level": "error",
+					"options": {
+						"defaultVisibility": "package"
+					}
+				}
 			},
 			"nursery": {
 				"noFloatingPromises": "error",
@@ -130,7 +136,10 @@
 					"$bindable",
 					"usePlayer"
 				]
-			},
+			}
+		},
+		{
+			"includes": ["**/*.svelte", "!**/*.svelte.ts"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -138,7 +147,13 @@
 						"useImportType": "off"
 					},
 					"correctness": {
-						"noUndeclaredVariables": "off"
+						"noUndeclaredVariables": "off",
+						"noPrivateImports": {
+							"level": "error",
+							"options": {
+								"defaultVisibility": "public"
+							}
+						}
 					}
 				}
 			}
@@ -149,6 +164,21 @@
 				"rules": {
 					"style": {
 						"useFilenamingConvention": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/*.test.ts"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noPrivateImports": {
+							"level": "error",
+							"options": {
+								"defaultVisibility": "public"
+							}
+						}
 					}
 				}
 			}

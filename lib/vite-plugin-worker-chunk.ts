@@ -1,6 +1,7 @@
 import type { Plugin } from 'vite'
 
 // https://github.com/vitejs/vite/issues/16719#issuecomment-2308170706
+/** @public */
 export const workerChunkPlugin = (): Plugin => {
 	return {
 		name: workerChunkPlugin.name,

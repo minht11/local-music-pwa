@@ -1,6 +1,7 @@
 <script lang="ts" module>
 	import type { IconType } from './icon-paths.ts'
 
+	/** @public */
 	export type { IconType }
 
 	export interface IconProps {

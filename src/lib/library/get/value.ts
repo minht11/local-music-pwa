@@ -1,20 +1,12 @@
 import { type DbKey, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, onDatabaseChange } from '$lib/db/events.ts'
-import type { QueryMutate } from '$lib/db/query/base-query.svelte.ts'
 import type { Album, Artist, Playlist, Track } from '$lib/library/types.ts'
 import { WeakLRUCache } from 'weak-lru-cache'
-import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryItemStoreName } from '../types.ts'
-
-type ConfigDatabaseChangeHandler<Result> = (
-	id: number,
-	changes: DatabaseChangeDetails,
-	mutate: QueryMutate<Result | undefined>,
-) => void
-
-interface QueryConfig<Result> {
-	fetch: (id: number) => Promise<Result | undefined>
-	onDatabaseChange?: ConfigDatabaseChangeHandler<Result>
-}
+import {
+	FAVORITE_PLAYLIST_ID,
+	FAVORITE_PLAYLIST_UUID,
+	type LibraryItemStoreName,
+} from '../types.ts'
 
 type CacheKey<Store extends LibraryItemStoreName> = `${Store}:${string}`
 
@@ -22,6 +14,31 @@ const getCacheKey = <Store extends LibraryItemStoreName>(
 	storeName: Store,
 	key: DbKey<Store>,
 ): CacheKey<Store> => `${storeName}:${key}`
+
+interface QueryConfig<Result> {
+	fetch: (id: number) => Promise<Result | undefined>
+	shouldRefetch: (itemId: number | undefined, changes: readonly DatabaseChangeDetails[]) => boolean
+}
+
+const defaultRefreshOnDatabaseChanges = (
+	storeName: LibraryItemStoreName,
+	itemId: number | undefined,
+	changes: readonly DatabaseChangeDetails[],
+) => {
+	for (const change of changes) {
+		if (change.storeName === storeName) {
+			if (itemId === null) {
+				return true
+			}
+
+			if (change.key === itemId) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
 
 export interface TrackData extends Track {
 	favorite: boolean
@@ -47,38 +64,43 @@ const trackConfig: QueryConfig<TrackData> = {
 			favorite: !!favorite,
 		} as TrackData
 	},
-	onDatabaseChange: (id, change, mutate) => {
-		if (change.storeName === 'playlistsTracks') {
-			const [playlistId, trackId] = change.key
+	shouldRefetch: (itemId, changes) => {
+		for (const change of changes) {
+			if (change.storeName === 'playlistsTracks') {
+				const [playlistId, trackId] = change.key
 
-			if (playlistId === FAVORITE_PLAYLIST_ID && trackId === id) {
-				const favorite = change.operation === 'add'
-
-				mutate((prev) => {
-					if (!prev) {
-						return prev
-					}
-
-					return {
-						...prev,
-						favorite,
-					}
-				})
+				if (playlistId === FAVORITE_PLAYLIST_ID && itemId === trackId) {
+					return true
+				}
 			}
 
-			return
+			if (change.storeName === 'tracks' && change.key === itemId) {
+				return true
+			}
 		}
 
-		if (change.storeName !== 'tracks' || change.key !== id) {
-			return
-		}
-
-		if (change.operation === 'delete') {
-			mutate(undefined)
-		} else if (change.operation === 'update') {
-			// TODO. REFETCH
-		}
+		return false
 	},
+}
+
+const tracksDataDatabaseChangeHandler = (change: DatabaseChangeDetails) => {
+	if (change.storeName === 'playlistsTracks') {
+		const [playlistId, trackId] = change.key
+
+		if (playlistId === FAVORITE_PLAYLIST_ID) {
+			const cacheKey = getCacheKey('tracks', trackId)
+			valueCache.delete(cacheKey)
+		}
+	}
+
+	if (
+		(change.storeName === 'tracks' && change.operation === 'delete') ||
+		change.operation === 'update'
+	) {
+		// We clear our existing cache and just let refetch happen when getLibraryItemValue is called again
+		const cacheKey = getCacheKey('tracks', change.key)
+		valueCache.delete(cacheKey)
+	}
 }
 
 export type AlbumData = Album
@@ -86,20 +108,19 @@ export type AlbumData = Album
 const albumConfig: QueryConfig<AlbumData> = {
 	fetch: async (id) => {
 		const db = await getDatabase()
-		const item = db.get('albums', id)
-
-		return item
+		return db.get('albums', id)
 	},
+	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'albums'),
 }
 
 export type ArtistData = Artist
 
-// TODO. Reuse query config
 const artistConfig: QueryConfig<ArtistData> = {
 	fetch: async (id) => {
 		const db = await getDatabase()
 		return db.get('artists', id)
 	},
+	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'artists'),
 }
 
 export type PlaylistData = Playlist
@@ -119,6 +140,7 @@ const playlistsConfig: QueryConfig<PlaylistData> = {
 		const db = await getDatabase()
 		return db.get('playlists', id)
 	},
+	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'playlists'),
 }
 
 interface LibraryItemsConfigMap {
@@ -146,7 +168,7 @@ type LibraryItemValue = LibraryItemsValueMap[LibraryItemStoreName]
 // Fast in memory cache for `items`, so we do not need to
 // call indexed db for every access.
 // IMPORTANT. Only store whole library items in here.
-const dataCache = new WeakLRUCache<
+const valueCache = new WeakLRUCache<
 	CacheKey<LibraryItemStoreName>,
 	LibraryItemValue | Promise<LibraryItemValue>
 >({
@@ -155,60 +177,22 @@ const dataCache = new WeakLRUCache<
 
 if (import.meta.env.DEV) {
 	// @ts-expect-error used for debugging
-	globalThis.libraryItemCache = dataCache
+	globalThis.libraryItemCache = valueCache
 }
 
 if (!import.meta.env.SSR) {
-	type MutateCallback<T> =
-		| T
-		| undefined
-		| ((prev: T | undefined) => T)
-
-	const mutateFn = <T extends LibraryItemValue>(key: CacheKey<LibraryItemStoreName>, value: MutateCallback<T>) => {
-		let resolvedValue: LibraryItemValue | undefined
-		if (typeof value === 'function') {
-			const prevValue = dataCache.getValue(key)
-			// @ts-expect-error This could return a promise. TODO. Think how to handle this
-			resolvedValue = value(prevValue)
-		} else {
-			resolvedValue = value
-		}
-
-		if (resolvedValue) {
-			dataCache.setValue(key, resolvedValue)
-		} else {
-			dataCache.delete(key)
-		}
-	}
-
 	onDatabaseChange((changes) => {
-		for (const key of dataCache.keys()) {
-			const [storeName, stringId] = key.split(':') as [LibraryItemStoreName, string]
-			const id = Number(stringId)
+		for (const change of changes) {
+			const { storeName } = change
 
-			const onDatabaseChange = libraryItemsConfigMap[storeName].onDatabaseChange
-			const mutate = mutateFn.bind(null, key)
-
-			for (const change of changes) {
-				if (onDatabaseChange) {
-					// TODO. Fix type
-					// @ts-expect-error
-					onDatabaseChange(id, change, mutate)
-					continue
-				}
-
-				invariant(storeName !== 'tracks', 'Tracks should have onDatabaseChange handler')
-
-				if (change.storeName !== storeName || change.key !== id) {
-					continue
-				}
-
-				if (change.operation === 'delete') {
-					dataCache.delete(key)
-				} else if (change.operation === 'update') {
-					dataCache.delete(key)
+			if (storeName === 'albums' || storeName === 'artists' || storeName === 'playlists') {
+				if (change.operation === 'delete' || change.operation === 'update') {
+					const cacheKey = getCacheKey(storeName, change.key)
+					valueCache.delete(cacheKey)
 				}
 			}
+
+			tracksDataDatabaseChangeHandler(change)
 		}
 	})
 }
@@ -238,6 +222,40 @@ export type GetLibraryItemValueResult<
 	AllowEmpty extends boolean = false,
 > = AllowEmpty extends true ? LibraryItemsValueMap[Store] | undefined : LibraryItemsValueMap[Store]
 
+/** @private */
+export const getCachedOrFetchValue = <Store extends LibraryItemStoreName>(
+	key: CacheKey<Store>,
+	fetchValue: () => Promise<LibraryItemsValueMap[Store] | undefined>,
+): Promise<GetLibraryItemValueResult<Store, true>> | GetLibraryItemValueResult<Store, true> => {
+	const cachedValue = valueCache.getValue(key)
+
+
+	// @ts-expect-error aa
+	return cachedValue
+	// if (cachedValue) {
+	// 	return cachedValue
+	// }
+
+	// const promise = fetchValue()
+	// 	.then((value) => {
+	// 		if (value) {
+	// 			valueCache.setValue(key, value)
+	// 		} else {
+	// 			valueCache.delete(key)
+	// 		}
+
+	// 		return value
+	// 	})
+	// 	.catch((error) => {
+	// 		valueCache.delete(key)
+	// 		throw error
+	// 	})
+
+	// valueCache.setValue(key, promise)
+
+	// return promise
+}
+
 export const getLibraryItemValue = <
 	Store extends LibraryItemStoreName,
 	AllowEmpty extends boolean = false,
@@ -251,37 +269,9 @@ export const getLibraryItemValue = <
 	type Value = LibraryItemsValueMap[Store]
 
 	const key = getCacheKey(storeName, id)
-	const cachedValue = dataCache.getValue(key) as Value
+	const result = getCachedOrFetchValue(key, () => libraryItemsConfigMap[storeName].fetch(id))
 
-	if (cachedValue) {
-		if (cachedValue instanceof Promise) {
-			return cachedValue.then((value: Value) =>
-				unwrapLibraryItemValue(value, id, storeName, allowEmpty),
-			)
-		}
-
-		return unwrapLibraryItemValue(cachedValue, id, storeName, allowEmpty)
-	}
-
-	const promise = libraryItemsConfigMap[storeName]
-		.fetch(id)
-		.then((value) => {
-			if (value) {
-				dataCache.setValue(key, value)
-			} else {
-				dataCache.delete(key)
-			}
-
-			return unwrapLibraryItemValue(value as Value, id, storeName, allowEmpty)
-		})
-		.catch((error) => {
-			dataCache.delete(key)
-			throw error
-		})
-
-	dataCache.setValue(key, promise)
-
-	return promise
+	return result
 }
 
 export const preloadLibraryItemValue = async (
@@ -289,9 +279,23 @@ export const preloadLibraryItemValue = async (
 	id: number,
 ): Promise<void> => {
 	try {
+		console.log('Preloading', storeName, id)
 		// getLibraryItemValue will fetch data and store it inside cache
 		await getLibraryItemValue(storeName, id)
 	} catch {
 		// Ignore
 	}
+}
+
+export const shouldRefetchLibraryItemValue = (
+	storeName: LibraryItemStoreName,
+	id: number | undefined,
+	changes: readonly DatabaseChangeDetails[],
+): boolean => {
+	const config = libraryItemsConfigMap[storeName]
+	if (!config) {
+		return false
+	}
+
+	return config.shouldRefetch(id, changes)
 }
