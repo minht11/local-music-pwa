@@ -194,7 +194,7 @@ body {
 
 	&:is(:focus-visible),
 	&:hover:focus-visible {
-		outline-width:  --spacing(0.5);
+		outline-width: --spacing(0.5);
 	}
 
 	&:focus-visible::after {

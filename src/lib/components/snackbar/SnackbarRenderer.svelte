@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { flip } from 'svelte/animate'
 	import Snackbar from './Snackbar.svelte'
-	import { snackbarItems } from './store.svelte'
+	import { snackbarItems } from './store.svelte.ts'
 
 	const dismissHandler = (id: string) => {
 		const index = snackbarItems.findIndex((item) => item.id === id)

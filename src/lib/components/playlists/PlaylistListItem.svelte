@@ -2,8 +2,8 @@
 	import { createPlaylistQuery } from '$lib/library/get/value-queries.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions'
 	import type { Playlist } from '$lib/library/types.ts'
-	import Icon from '../icon/Icon.svelte'
 	import type { IconType } from '../icon/Icon.svelte'
+	import Icon from '../icon/Icon.svelte'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'
 
 	export type MenuItemsSelector = (playlist: Playlist) => MenuItem[]

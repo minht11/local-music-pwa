@@ -1,4 +1,4 @@
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: needed for inference
 type Impossible<K extends keyof any> = {
 	[P in K]: never
 }

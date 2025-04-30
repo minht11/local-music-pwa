@@ -1,11 +1,9 @@
 <script lang="ts" module>
 	import { timeline } from '$lib/helpers/animations.ts'
 	import { assign } from '$lib/helpers/utils/assign.ts'
-	import { setContext } from 'svelte'
-	import { getContext } from 'svelte'
+	import { getContext, setContext } from 'svelte'
 	import Menu from './Menu.svelte'
-	import { getMeasurementsFromAnchor } from './positioning.ts'
-	import { positionMenu } from './positioning.ts'
+	import { getMeasurementsFromAnchor, positionMenu } from './positioning.ts'
 	import type { MenuItem, MenuOptions, MenuPosition } from './types.ts'
 
 	const key = Symbol('menu')

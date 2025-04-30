@@ -12,7 +12,7 @@ export type {
 export type TrackParsedFn = (totalParsedCount: number) => void
 
 /** @public */
-export const startTrackScannerWorker = async (
+export const startTrackScannerWorker = (
 	options: TracksScanOptions,
 	progress: (data: TracksScanResult) => void,
 ): Promise<TracksScanResult> => {

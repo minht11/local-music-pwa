@@ -13,8 +13,7 @@ export const throttle = <Fn extends (...args: Parameters<Fn>) => ReturnType<Fn>>
 		if (wait) {
 			// prevValue always defined by the
 			// time wait is true
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			return prevValue!
+			return prevValue as ReturnType<Fn>
 		}
 
 		const val = fn(...args)
