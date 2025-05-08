@@ -241,7 +241,7 @@ export const createEntitiesStore = () => {
         addNewTracks(newTracks)
         toast({
           ...baseToastOptions,
-          message: `Successfully imported or uptated ${newTracks.length} tracks to the library.`,
+          message: `Successfully imported or updated ${newTracks.length} tracks to the library.`,
           duration: 8000,
           controls: undefined,
         })
