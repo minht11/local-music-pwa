@@ -326,3 +326,8 @@ body {
 		pointer-events: none;
 	}
 }
+
+/* Hide Netlify preview bar */
+div[data-netlify-deploy-id] {
+	display: none;
+}

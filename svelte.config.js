@@ -27,8 +27,6 @@ const config = {
 				'form-action': ['none'],
 				'manifest-src': ['self'],
 				'base-uri': ['none'],
-				// Used for deploy previews
-				'frame-src': ['https://app.netlify.com/']
 			},
 		},
 	},
