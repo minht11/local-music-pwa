@@ -1,0 +1,25 @@
+[build]
+publish = "build/"
+command = "pnpm run build"
+
+[build.environment]
+NODE_VERSION = "22.14.0"
+
+[[redirects]]
+from = "/*"
+to = "/200.html"
+status = 200
+
+[[redirects]]
+from = "/"
+to = "/index.html"
+status = 200
+force = true
+
+[[headers]]
+for = "/*"
+[headers.values]
+Referrer-Policy = "origin"
+X-Content-Type-Options = "nosniff"
+X-Frame-Options = "DENY"
+X-XSS-Protection = "1; mode=block"
