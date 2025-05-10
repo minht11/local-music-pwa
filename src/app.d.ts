@@ -67,7 +67,8 @@ declare global {
 		}) => void
 	}
 
-	declare const goatcounter: GoatCounter | undefined
-
-	declare const __BUILD_VERSION__: string
+	interface Window {
+		/** Analytics. If ad blocker blocks it this will be undefined */
+		goatcounter?: GoatCounter
+	}
 }

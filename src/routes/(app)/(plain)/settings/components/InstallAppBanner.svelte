@@ -14,7 +14,7 @@
 	const install = async (e: BeforeInstallPromptEvent) => {
 		await e.prompt()
 
-		goatcounter?.count({
+		window.goatcounter?.count({
 			path: 'click-settings-install-app',
 			title: 'Clicked settings install app',
 			event: true,
