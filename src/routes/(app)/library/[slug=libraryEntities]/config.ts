@@ -27,7 +27,7 @@ const artistsIncludesTerm = (item: { artists: string[] | undefined }, term: stri
 	item.artists?.some((artist) => includesTerm(artist, term)) ?? false
 
 const nameSortOption = {
-	name: 'Name',
+	name: m.name(),
 	key: 'name',
 } as const
 
@@ -53,19 +53,19 @@ const trackConfig: LibraryRouteConfig<'tracks'> = {
 	sortOptions: () => [
 		nameSortOption,
 		{
-			name: 'Artist',
+			name: m.artist(),
 			key: 'artists',
 		},
 		{
-			name: 'Album',
+			name: m.album(),
 			key: 'album',
 		},
 		{
-			name: 'Duration',
+			name: m.duration(),
 			key: 'duration',
 		},
 		{
-			name: 'Year',
+			name: m.year(),
 			key: 'year',
 		},
 	],

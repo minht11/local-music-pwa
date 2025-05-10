@@ -28,7 +28,10 @@
 	$effect(() => {
 		untrack(() => {
 			passHandler(onopen)
-			menuEl?.querySelector('button')?.focus()
+			setTimeout(() => {
+				console.log('menu open', menuEl?.querySelector('button'))
+				menuEl?.querySelector('button')?.focus()
+			}, 100)
 		})
 	})
 
@@ -45,10 +48,20 @@
 
 		if (e.key === 'ArrowDown') {
 			e.preventDefault()
+			const next = menuEl?.querySelector('button:focus')
+				?.nextElementSibling as HTMLButtonElement | null
 
-			// TODO.
-			menuEl?.querySelector('button')?.focus()
+			next?.focus()
 		}
+
+		if (e.key === 'ArrowUp') {
+			e.preventDefault()
+			const prev = menuEl?.querySelector('button:focus')
+				?.previousElementSibling as HTMLButtonElement | null
+
+			prev?.focus()
+		}
+
 		if (e.key === 'Tab') {
 			e.preventDefault()
 			close()
@@ -80,7 +93,6 @@
 		{#each items as item}
 			<button
 				role="menuitem"
-				tabindex="0"
 				class={[
 					'interactable relative flex h-10 grow items-center gap-4 px-4 text-body-md -outline-offset-2',
 					item.selected && 'bg-surfaceVariant text-primary',

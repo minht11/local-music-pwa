@@ -39,22 +39,22 @@
 	const navItems: NavItem[] = [
 		{
 			slug: 'tracks',
-			title: 'Tracks',
+			title: m.tracks(),
 			icon: 'musicNote',
 		},
 		{
 			slug: 'albums',
-			title: 'Albums',
+			title: m.albums(),
 			icon: 'album',
 		},
 		{
 			slug: 'artists',
-			title: 'Artists',
+			title: m.artists(),
 			icon: 'person',
 		},
 		{
 			slug: 'playlists',
-			title: 'Playlists',
+			title: m.playlists(),
 			icon: 'playlist',
 		},
 	]

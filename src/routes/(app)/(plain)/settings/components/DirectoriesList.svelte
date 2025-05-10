@@ -137,7 +137,7 @@
 			onclick={addNewDirectoryHandler}
 		>
 			<Icon type="plus" />
-			Add directory
+			{m.settingsAddDirectory()}
 		</button>
 	</li>
 </ul>

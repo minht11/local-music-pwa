@@ -7,16 +7,16 @@
 >
 	<Icon type="alertCircle" class="shrink-0" />
 	<span>
-		Your browser currently does not support&nbsp
+		{m.settingsMissingFs1()}&nbsp
 		<a
 			class="link inline-block"
 			target="_blank"
 			rel="noopener noreferrer"
 			href="https://wicg.github.io/file-system-access/"
 		>
-			required FS features
-		</a>, so in order for this app to work,
-		<strong>each music file must be copied and saved inside browser storage</strong>, that might
-		consume a lot of your device's storage.
+			{m.settingsMissingFs2()}
+		</a>{m.settingsMissingFs3()}
+		<strong>{m.settingsMissingFs4()}</strong>
+		{m.settingsMissingFs5()}
 	</span>
 </div>

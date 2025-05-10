@@ -1,5 +1,5 @@
 <section class="m-auto flex flex-col items-center select-text">
-	<div class="mb-4 text-headline-md">Snae Player</div>
+	<div class="mb-4 text-headline-md">{m.appName()}</div>
 
 	<div
 		class="flex justify-between gap-4 rounded-lg border border-primary/10 bg-surfaceContainerLowest px-4 py-2"

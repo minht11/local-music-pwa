@@ -17,7 +17,7 @@
 
 <header class="w-full items-center bg-surfaceContainerHigh">
 	<div class="content-width flex h-16 w-full items-center justify-between">
-		<div class="text-title-md">Snae player</div>
+		<div class="text-title-md">{m.appName()}</div>
 
 		<Button as="a" href="/library/tracks" kind="toned">Open app</Button>
 	</div>

@@ -105,7 +105,7 @@
 			...position,
 		})
 
-		const ani = timeline([
+		timeline([
 			[
 				menuEl,
 				{
@@ -129,10 +129,6 @@
 				},
 			],
 		])
-
-		ani.then(() => {
-			menuEl?.focus()
-		})
 	}
 
 	const closeMenu = (menuEl: Element) => {

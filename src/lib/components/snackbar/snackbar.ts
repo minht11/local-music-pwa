@@ -1,3 +1,4 @@
+import { untrack } from 'svelte'
 import type { SnackbarData } from './Snackbar.svelte'
 import { snackbarItems } from './store.svelte.ts'
 
@@ -8,7 +9,7 @@ export interface SnackbarFn {
 	unexpectedError(error: unknown): void
 }
 
-export const snackbar: SnackbarFn = (newSnackbar: SnackbarOptions | string): void => {
+const showSnackbar = (newSnackbar: SnackbarOptions | string): void => {
 	let newSnackbarNormalized: SnackbarData
 	if (typeof newSnackbar === 'string') {
 		newSnackbarNormalized = { id: newSnackbar, message: newSnackbar }
@@ -23,6 +24,10 @@ export const snackbar: SnackbarFn = (newSnackbar: SnackbarOptions | string): voi
 	} else {
 		snackbarItems.push(newSnackbarNormalized)
 	}
+}
+
+export const snackbar: SnackbarFn = (newSnackbar: SnackbarOptions | string): void => {
+	untrack(() => showSnackbar(newSnackbar))
 }
 
 snackbar.unexpectedError = (error: unknown) => {

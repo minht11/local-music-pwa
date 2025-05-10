@@ -45,7 +45,7 @@
 		>
 			<BackButton />
 
-			<div class="text-title-lg">Player</div>
+			<div class="text-title-lg">{m.player()}</div>
 
 			<div class="w-10"></div>
 		</div>
@@ -151,8 +151,8 @@
 						class="color-onSecondaryContainer my-auto size-35 opacity-54"
 					/>
 
-					<div class="mb-4 text-body-lg">Your queue is empty</div>
-					<Button kind="outlined" as="a" href="/">Play something here</Button>
+					<div class="mb-4 text-body-lg">{m.playerQueueEmpty()}</div>
+					<Button kind="outlined" as="a" href="/">{m.playerQueuePlaySomething()}</Button>
 				</div>
 			{:else}
 				<TracksListContainer

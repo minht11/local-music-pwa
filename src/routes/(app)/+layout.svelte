@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { navigating, page } from '$app/state'
+	import { navigating, page, updated } from '$app/state'
 	import { APP_DIALOGS_COMPONENTS } from '$lib/components/app-dialogs/dialogs.ts'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
+	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import { setupBottomBar } from '$lib/layout-bottom-bar.svelte'
 	import { MainStore } from '$lib/stores/main/store.svelte.ts'
 	import { MAIN_STORE_CONTEXT } from '$lib/stores/main/use-store.ts'
@@ -37,6 +38,22 @@
 			'--bottom-overlay-height',
 			`${overlayContentHeight}px`,
 		)
+	})
+
+	$effect(() => {
+		if (updated.current) {
+			snackbar({
+				id: 'app-update',
+				message: m.appUpdateAvailable(),
+				duration: false,
+				controls: {
+					label: m.reload(),
+					action: () => {
+						window.location.reload()
+					},
+				},
+			})
+		}
 	})
 </script>
 

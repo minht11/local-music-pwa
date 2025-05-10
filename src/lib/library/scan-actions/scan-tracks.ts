@@ -19,7 +19,6 @@ export const scanTracks = async (options: TracksScanOptions): Promise<void> => {
 				current: data.current,
 				total: data.total,
 			}),
-			controls: 'spinner',
 			duration: false,
 		})
 	})

@@ -1,8 +1,3 @@
-export interface SnackbarOptions {
-	id: string
-	message: (() => string) | string
-	duration?: number | false
-	controls?: 'spinner' | false
-}
+import type { SnackbarData } from './Snackbar.svelte'
 
-export const snackbarItems: SnackbarOptions[] = $state([])
+export const snackbarItems: SnackbarData[] = $state([])

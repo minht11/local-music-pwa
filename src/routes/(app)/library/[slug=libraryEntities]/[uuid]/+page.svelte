@@ -93,7 +93,7 @@
 						{(item as AlbumData).year} •
 					{/if}
 
-					{tracks.length} tracks
+					{m.libraryTracksCount({ count: tracks.length })}
 				</div>
 			</div>
 
@@ -108,14 +108,14 @@
 						})
 					}}
 				>
-					Shuffle
+					{m.shuffle()}
 					<Icon type="shuffle" />
 				</Button>
 
 				{#if data.slug === 'playlists' && item.id !== FAVORITE_PLAYLIST_ID}
 					<IconButton
 						icon="moreVertical"
-						tooltip="More"
+						tooltip={m.more()}
 						onclick={(e) => {
 							menu.showFromEvent(e, getPlaylistMenuItems(main, item as Playlist), {
 								anchor: true,

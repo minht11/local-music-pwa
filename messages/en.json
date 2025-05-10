@@ -20,6 +20,16 @@
 	"goBack": "Go back",
 	"moreOptions": "More options",
 	"noItemsToDisplay": "No items to display",
+	"dismiss": "Dismiss",
+	"reload": "Reload",
+	"duration": "Duration",
+	"year": "Year",
+	"name": "Name",
+	"more": "More",
+	"shuffle": "Shuffle",
+
+	"appName": "Snae Player",
+	"appUpdateAvailable": "App update is available",
 
 	"libraryNoResults": "No results found",
 	"libraryNoResultsExplanation": "Try searching for something else",
@@ -37,6 +47,7 @@
 	"libraryEmpty": "Your library is empty",
 	"libraryStartByAdding": "Start by adding some music",
 	"libraryImportTracks": "Import tracks",
+	"libraryTracksCount": "{count} tracks",
 
 	"trackAddToFavorites": "Add to favorites",
 	"trackRemoveFromFavorites": "Remove from favorites",
@@ -51,6 +62,7 @@
 	"libraryPlaylistUpdated": "Playlist updated",
 	"libraryPlaylistRemoved": "Playlist removed",
 
+	"player": "Player",
 	"playerPlayNextTrack": "Play next track",
 	"playerPlayPreviousTrack": "Play previous track",
 	"playerPlay": "Play",
@@ -65,6 +77,8 @@
 	"playerAddToQueue": "Add to queue",
 	"playerRemoveFromQueue": "Remove from queue",
 	"playerOpenQueue": "Open queue",
+	"playerQueueEmpty": "Your queue is empty",
+	"playerQueuePlaySomething": "Play something here",
 
 	"replaceDirectoryQ": "Replace directory?",
 	"replaceDirectoryExplanation": "The directory {newDir} you're adding is a parent of {existingDirs} which already exists in your Library.\n No changes will occur for existing tracks in your library.",
@@ -92,12 +106,18 @@
 	"settingsInstallAppHomeScreen": "home screen",
 	"settingsInstallAppHomeAction": "Install",
 
+	"settingsAddDirectory": "Add directory",
 	"settingsGrantDirectoryAccess": "You need to allow the app access to the directory, via browser permission so it can scan its contents",
 	"settingsDirectoryRemoved": "Directory removed",
 	"settingsPreparingForScan": "Preparing for the scan",
 	"settingsScanInProgress": "Scanning tracks. {current} of {total}",
 	"settingsScanNoNewTracks": "No new tracks were found",
 	"settingsScanNewOrUpdatedTracks": "Found {newTracks} new or updated tracks",
+	"settingsMissingFs1": "Your browser currently does not support",
+	"settingsMissingFs2": "required FS features",
+	"settingsMissingFs3": ", so in order for this app to work,",
+	"settingsMissingFs4": "each music file must be copied and saved inside browser storage",
+	"settingsMissingFs5": ", that might consume a lot of your device's storage.",
 
 	"about": "About",
 	"aboutSourceCode": "Source code",
