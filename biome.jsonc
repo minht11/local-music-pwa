@@ -32,6 +32,9 @@
 	},
 	"linter": {
 		"enabled": true,
+		"domains": {
+			"project": "recommended"
+		},
 		"rules": {
 			"style": {
 				"noNegationElse": "error",
