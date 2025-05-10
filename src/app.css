@@ -98,7 +98,7 @@ body {
 	@apply text-body-md;
 }
 
-.app-container {
+#app {
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;

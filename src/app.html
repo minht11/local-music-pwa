@@ -19,7 +19,21 @@
 	</head>
 
 	<body>
-		<div class="app-container">%snae.svg-icons-paths% %sveltekit.body%</div>
+		<noscript> Please enable Javascript in order to use this app. </noscript>
+		<div id="unsupported-browser" hidden class="m-auto p-5">
+			<div>
+				This browser does not support required technologies for this app to function correctly.
+			</div>
+			<div>Please upgrade your browser to the latest version of:</div>
+			<a class="link text-primary" href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>
+			<a class="link text-primary" href="https://www.microsoft.com/en-us/windows/microsoft-edge">
+				Edge
+			</a>
+			<a class="link text-primary" href="https://www.google.com/chrome/">Chrome</a>
+			<a class="link text-primary" href="https://www.apple.com/safari/">Safari</a>
+		</div>
+
+		<div id="app">%snae.svg-icons-paths% %sveltekit.body%</div>
 
 		<script
 			src="https://gc.zgo.at/count.js"
@@ -27,5 +41,7 @@
 			crossorigin="anonymous"
 			async
 		></script>
+
+		<script src="/supported-browser-check.js"></script>
 	</body>
 </html>

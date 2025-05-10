@@ -28,10 +28,7 @@
 	$effect(() => {
 		untrack(() => {
 			passHandler(onopen)
-			setTimeout(() => {
-				console.log('menu open', menuEl?.querySelector('button'))
-				menuEl?.querySelector('button')?.focus()
-			}, 100)
+			menuEl?.querySelector('button')?.focus()
 		})
 	})
 
