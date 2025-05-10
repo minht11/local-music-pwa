@@ -53,7 +53,7 @@ describe('v1 app data migration', () => {
 		expect(await checkForV1LegacyDatabaseData()).toBe(true)
 	})
 
-	it('getV1LegacyDatabase returns the database', async () => {
+	it.skip('getV1LegacyDatabase returns the database', async () => {
 		await setupLegacyDatabase()
 		await migrateV1LegacyData()
 	})

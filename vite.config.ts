@@ -32,29 +32,18 @@ export default defineConfig({
 			polyfill: false,
 		},
 		rollupOptions: {
-			treeshake: {
-				preset: 'smallest',
-			},
-			// Reduce bundle size a bit by tweaking rollup options
 			output: {
-				// Some chunks will still be smaller than this
-				// because of how svelte kit works.
-				experimentalMinChunkSize: 20 * 1024, // 20kb
-				externalLiveBindings: false,
-				freeze: false,
-				compact: true,
-				generatedCode: {
-					preset: 'es2015',
-					symbols: false,
-				},
-				manualChunks: (id) => {
-					// Merge all css into a single file
-					if (id.includes('type=style&lang.css') || id.endsWith('.css')) {
-						return 'app.css'
-					}
+				// externalLiveBindings: true,
+				// TODO. Do not work in Rolldown yet.
+				// experimentalMinChunkSize: 20 * 1024, // 20kb
+				// manualChunks: (id) => {
+				// 	// Merge all css into a single file
+				// 	if (id.includes('type=style&lang.css') || id.endsWith('.css')) {
+				// 		return 'app.css'
+				// 	}
 
-					return null
-				},
+				// 	return null
+				// },
 			},
 		},
 		target: 'esnext',
@@ -72,9 +61,13 @@ export default defineConfig({
 			},
 		},
 	},
+	experimental: {
+		enableNativePlugin: 'resolver',	
+	},
 	plugins: [
 		workerChunkPlugin(),
 		themeColorsPlugin({
+			// @ts-expect-error missing node types
 			output: `${import.meta.dirname}/.generated/theme-colors.css`,
 		}),
 		tailwindcss(),

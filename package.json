@@ -57,7 +57,9 @@
 	},
 	"packageManager": "pnpm@10.10.0",
 	"pnpm": {
-		"overrides": {
+		"overrides": 
+		{
+			"vite": "npm:rolldown-vite@6.3.8",
 			"@ianvs/prettier-plugin-sort-imports": "-",
 			"@trivago/prettier-plugin-sort-imports": "-",
 			"prettier-plugin-organize-imports": "-",
