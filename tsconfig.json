@@ -1,31 +1,14 @@
 {
 	"extends": "./.generated/svelte-kit/tsconfig.json",
 	"compilerOptions": {
-		"allowJs": true,
-		"moduleDetection": "force",
-		"allowImportingTsExtensions": true,
-		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true,
-		"skipLibCheck": true,
-		"sourceMap": true,
-		"strict": true,
-		"noFallthroughCasesInSwitch": true,
-		"noImplicitOverride": true,
-		"noImplicitReturns": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": false,
-		"noUncheckedIndexedAccess": true,
-		"allowUnreachableCode": false,
-		"allowUnusedLabels": false,
-		"declaration": true,
-		"isolatedDeclarations": false,
-		"libReplacement": false,
-		"erasableSyntaxOnly": true,
 		"types": [
 			"@types/dom-navigation",
 			"@types/wicg-file-system-access",
 			"@types/dom-view-transitions",
 			"./.generated/types/auto-imports.d.ts"
 		]
-	}
+	},
+	"references": [{
+		"path": "./tsconfig.node.json",
+	}]
 }

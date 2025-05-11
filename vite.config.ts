@@ -67,7 +67,6 @@ export default defineConfig({
 	plugins: [
 		workerChunkPlugin(),
 		themeColorsPlugin({
-			// @ts-expect-error missing node types
 			output: `${import.meta.dirname}/.generated/theme-colors.css`,
 		}),
 		tailwindcss(),

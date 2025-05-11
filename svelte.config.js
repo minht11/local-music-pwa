@@ -29,6 +29,14 @@ const config = {
 				'base-uri': ['none'],
 			},
 		},
+		typescript: {
+			config: (tsConfig) => {
+				tsConfig.extends = '../../tsconfig.base.json'
+				tsConfig.include.push('../paraglide/**/*')
+
+				return tsConfig
+			}
+		}
 	},
 }
 
