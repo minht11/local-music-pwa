@@ -117,7 +117,7 @@
 	</div>
 </div>
 
-<style lang="postcss">
+<style>
 	@reference '../../app.css';
 
 	input:is(:active, :focus-visible) ~ div > .thumb {

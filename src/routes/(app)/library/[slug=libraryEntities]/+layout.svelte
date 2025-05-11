@@ -191,7 +191,7 @@
 	{/snippet}
 </ListDetailsLayout>
 
-<style lang="postcss">
+<style>
 	@reference '../../../../app.css';
 
 	:root {

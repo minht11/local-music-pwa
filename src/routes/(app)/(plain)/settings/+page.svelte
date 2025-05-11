@@ -212,7 +212,7 @@
 	</div>
 </section>
 
-<style lang="postcss">
+<style>
 	@reference '../../../../app.css';
 
 	:global(.settings-max-width) {
