@@ -16,7 +16,7 @@
 <Artwork
 	src={player.artworkSrc}
 	alt={player.activeTrack?.name}
-	fallbackIcon={player.activeTrack ? undefined : null}
+	fallbackIcon={player.activeTrack ? undefined : false}
 	noFallbackBg
 	{...props}
 />

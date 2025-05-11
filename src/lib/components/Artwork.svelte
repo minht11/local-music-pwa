@@ -6,7 +6,8 @@
 		src: string | undefined
 		class?: ClassValue
 		alt?: string
-		fallbackIcon?: IconType
+		//
+		fallbackIcon?: IconType | false
 		noFallbackBg?: boolean
 		children?: Snippet
 	}
@@ -44,7 +45,7 @@
 				error = false
 			}}
 		/>
-	{:else if fallbackIcon !== null}
+	{:else if fallbackIcon !== false}
 		<Icon type={fallbackIcon} class="m-auto size-2/3" />
 	{/if}
 

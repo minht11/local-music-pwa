@@ -127,5 +127,6 @@ export const dbRemoveMultipleTracks = async (trackIds: number[]): Promise<void> 
 
 export const dbRemoveTrackRelatedItem = async <Store extends Extract<LibraryStoreName, 'albums' | 'artists'>>(_storeName: Store) => {
 	// TODO. Implement this function
-	const _db = await getDatabase()
+	await getDatabase()
+	throw new Error('Not implemented')
 }
