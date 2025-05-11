@@ -136,6 +136,10 @@ body {
 		outline: --spacing(0.5) solid var(--color-onSurface);
 		outline-offset: --spacing(0.5);
 	}
+
+	strong {
+		font-weight: 600;
+	}
 }
 
 @keyframes tooltip-fade-in {
