@@ -68,7 +68,7 @@
 	{/if}
 </svelte:element>
 
-<style>
+<style lang="postcss">
 	@reference '../../app.css';
 
 	.filled-button {

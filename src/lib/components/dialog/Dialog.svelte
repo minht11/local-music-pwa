@@ -202,7 +202,7 @@
 	</dialog>
 {/if}
 
-<style>
+<style lang="postcss">
 	@reference '../../../app.css';
 
 	dialog {

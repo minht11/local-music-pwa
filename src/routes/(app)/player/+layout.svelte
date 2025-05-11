@@ -185,7 +185,7 @@
 	noPlayerOverlayPadding
 />
 
-<style>
+<style lang="postcss">
 	@reference '../../../app.css';
 
 	:global(html[data-view-player]) :global {
