@@ -20,6 +20,8 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm install
+      - name: Build generated files
+        run: pnpm run build
       - run: pnpm run biome-check
       # - run: pnpm run format-prettier
       - run: pnpm run check
