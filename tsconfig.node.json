@@ -1,0 +1,16 @@
+{
+	
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"types": [
+			"@types/node",
+		]
+	},
+	"files": [
+		"vite.config.ts",
+		"svelte.config.js",
+	],
+	"include": [
+		"lib/**/*",
+	]
+}
