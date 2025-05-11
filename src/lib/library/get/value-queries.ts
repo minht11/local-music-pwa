@@ -1,5 +1,4 @@
 import { createQuery, type QueryResult } from '$lib/db/query/query.ts'
-import { unwrap } from '$lib/helpers/utils/unwrap.ts'
 import type { LibraryStoreName } from '../types.ts'
 import {
 	type GetLibraryValueResult,
@@ -16,14 +15,14 @@ export interface LibraryValueQueryOptions<AllowEmpty extends boolean = false> {
 const defineQuery =
 	<Store extends LibraryStoreName>(storeName: Store) =>
 	<AllowEmpty extends boolean = false>(
-		idGetter: number | (() => number),
+		idGetter: () => number,
 		options: LibraryValueQueryOptions<AllowEmpty> = {},
 	): QueryResult<GetLibraryValueResult<Store, AllowEmpty>> => {
 		return createQuery({
 			key: idGetter,
 			fetcher: (id) => getLibraryValue(storeName, id, options.allowEmpty),
 			onDatabaseChange: (changes, { refetch }) => {
-				if (shouldRefetchLibraryValue(storeName, unwrap(idGetter), changes)) {
+				if (shouldRefetchLibraryValue(storeName, idGetter(), changes)) {
 					void refetch()
 				}
 			},

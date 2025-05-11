@@ -37,7 +37,7 @@
 	type Value = LibraryGridItemValue<Type>
 
 	const query = (
-		type === 'albums' ? createAlbumQuery(itemId) : createArtistQuery(itemId)
+		type === 'albums' ? createAlbumQuery(() => itemId) : createArtistQuery(() => itemId)
 	) as QueryResult<Value>
 
 	const artworkSrc = createManagedArtwork(() => {

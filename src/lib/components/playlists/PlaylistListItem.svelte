@@ -38,7 +38,7 @@
 		menuItems,
 	}: Props = $props()
 
-	const data = createPlaylistQuery(playlistId)
+	const data = createPlaylistQuery(() => playlistId)
 	const playlist = $derived(data.value)
 
 	const menuItemsWithItem = $derived.by(() => {
