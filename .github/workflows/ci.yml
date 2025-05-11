@@ -12,13 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - name: Install modules
-        run: pnpm install
-      - name: Biome check
-        run: pnpm run biome-check
-      - name: Prettier check
-        run: pnpm run format-prettier
-      - name: Svelte check
-        run: pnpm run check
-      - name: test
-        run: pnpm test
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+          cache: 'pnpm'
+
+      - run: pnpm install
+      - run: pnpm run biome-check
+      - run: pnpm run format-prettier
+      - run: pnpm run check
+      - run: pnpm test
