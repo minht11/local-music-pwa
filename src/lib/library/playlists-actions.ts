@@ -60,7 +60,6 @@ const dbUpdatePlaylistName = async (id: number, name: string): Promise<void> => 
 		operation: 'update',
 		storeName: 'playlists',
 		key: id,
-		value: updatedPlaylist,
 	})
 }
 
@@ -101,7 +100,7 @@ const dbRemovePlaylist = async (id: number): Promise<void> => {
 	})
 }
 
-export const removePlaylist = async (id: number, name: string): Promise<void> => {
+export const removePlaylist = async (id: number): Promise<void> => {
 	try {
 		await dbRemovePlaylist(id)
 

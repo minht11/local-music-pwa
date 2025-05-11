@@ -55,7 +55,7 @@ const dbImportNewDirectory = async (dirHandle: FileSystemDirectoryHandle): Promi
 	await scanTracks({
 		action: 'directory-add',
 		dirId: id,
-		dirHandle: dirHandle,
+		dirHandle,
 	})
 }
 

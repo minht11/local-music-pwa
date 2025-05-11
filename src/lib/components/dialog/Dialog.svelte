@@ -176,7 +176,7 @@
 			close()
 		}}
 		class={[
-			'm-auto flex flex-col rounded-3xl bg-surfaceContainerHigh text-onSurface select-none focus:outline-none',
+			'm-auto flex flex-col rounded-3xl bg-surfaceContainerHigh text-onSurface contain-content select-none focus:outline-none',
 			className,
 		]}
 	>

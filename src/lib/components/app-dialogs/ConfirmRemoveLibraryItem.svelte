@@ -29,7 +29,7 @@
 		const { storeName } = data
 
 		if (storeName === 'playlists') {
-			void removePlaylist(data.id, data.name)
+			void removePlaylist(data.id)
 		}
 
 		if (storeName === 'tracks') {

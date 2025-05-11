@@ -23,10 +23,12 @@ class Artwork {
 const cache = new WeakMap<Blob, Artwork>()
 const cleanupQueue = new Set<Blob>()
 
-export const createManagedArtwork = (getImage: () => Blob | undefined | null): (() => string) => {
+export const createManagedArtwork = (
+	getImage: () => Blob | undefined | null,
+): (() => string | undefined) => {
 	const key = Symbol()
 
-	const state = $derived.by(() => {
+	const artwork = $derived.by(() => {
 		const image = getImage()
 
 		if (!image) {
@@ -45,29 +47,30 @@ export const createManagedArtwork = (getImage: () => Blob | undefined | null): (
 		return artwork
 	})
 
-	const url = $derived(state?.url ?? '')
-
 	$effect(() => {
-		if (!state) {
+		// Need to use variable here so cleanup uses
+		// previous value instead of the current one
+		const savedArtwork = artwork
+		if (!savedArtwork) {
 			return
 		}
 
 		return () => {
-			if (state.refs.size === 1) {
-				cleanupQueue.add(state.image)
+			if (savedArtwork.refs.size === 1) {
+				cleanupQueue.add(savedArtwork.image)
 			}
 
 			if (import.meta.env.DEV) {
-				if (!state.refs.has(key)) {
-					console.warn('Trying to release artwork that is not in use', state)
+				if (!savedArtwork.refs.has(key)) {
+					console.warn('Trying to release artwork that is not in use', savedArtwork)
 				}
 			}
 
-			state.refs.delete(key)
+			savedArtwork.refs.delete(key)
 		}
 	})
 
-	return () => url
+	return () => artwork?.url
 }
 
 if (!import.meta.env.SSR) {

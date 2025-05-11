@@ -50,7 +50,7 @@
 	const isTrackInPlaylist = (playlistId: number) => !!trackPlaylists.value?.has(playlistId)
 
 	// TODO
-	const addToPlaylist = async (playlistId: number) => {
+	const addToPlaylist = async (_playlistId: number) => {
 		// try {
 		// 	await dbToggleTrackInPlaylist(isTrackInPlaylist(playlistId), playlistId, trackId)
 		// } catch (error) {

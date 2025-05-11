@@ -15,7 +15,7 @@ type V1LegacyTrackFileWrapper =
 /**
  * This types does not contain all of the fields that exist,
  * but only those needed for migration.
- **/
+ */
 interface V1LegacyTrack {
 	id: string
 	fileWrapper: V1LegacyTrackFileWrapper
@@ -24,7 +24,7 @@ interface V1LegacyTrack {
 /**
  * This types does not contain all of the fields that exist,
  * but only those needed for migration.
- **/
+ */
 interface V1LegacyPlaylist {
 	dateCreated: number
 	id: string

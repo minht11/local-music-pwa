@@ -1,4 +1,4 @@
-// biome-ignore lint/nursery/noRestrictedImports: Main worker module for extracting colors from images
+// biome-ignore lint/style/noRestrictedImports: Main worker module for extracting colors from images
 import { argbFromRgb, QuantizerCelebi, Score } from '@material/material-color-utilities'
 
 export const extractColorFromImage = (image: ImageData): number | undefined => {

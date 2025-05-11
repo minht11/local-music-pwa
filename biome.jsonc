@@ -76,7 +76,15 @@
 				"noArguments": "error",
 				"useExportType": "error",
 				"noUselessElse": "error",
-				"useShorthandFunctionType": "error"
+				"useShorthandFunctionType": "error",
+				"noRestrictedImports": {
+					"level": "error",
+					"options": {
+						"paths": {
+							"@material/material-color-utilities": "Should not be used directly except in specific theme entrypoints to avoid breaking making big chunks"
+						}
+					}
+				}
 			},
 			"correctness": {
 				"noUndeclaredVariables": "error",
@@ -90,15 +98,14 @@
 			},
 			"nursery": {
 				"noFloatingPromises": "error",
-				"noDynamicNamespaceImportAccess": "error",
-				"noRestrictedImports": {
+				"useConsistentObjectDefinition": {
 					"level": "error",
 					"options": {
-						"paths": {
-							"@material/material-color-utilities": "Should not be used directly except in specific theme entrypoints to avoid breaking making big chunks"
-						}
+						"syntax": "shorthand"
 					}
-				}
+				},
+				"useSingleJsDocAsterisk": "error",
+				"noImportCycles": "error"
 			},
 			"complexity": {
 				"useSimplifiedLogicExpression": "error",
@@ -108,6 +115,9 @@
 				"noMisrefactoredShorthandAssign": "error",
 				"useAwait": "error",
 				"useErrorMessage": "error"
+			},
+			"performance": {
+				"noDynamicNamespaceImportAccess": "error"
 			}
 		}
 	},
@@ -151,6 +161,8 @@
 					},
 					"correctness": {
 						"noUndeclaredVariables": "off",
+						"noUnusedVariables": "off",
+						"noUnusedImports": "off",
 						"noPrivateImports": {
 							"level": "error",
 							"options": {

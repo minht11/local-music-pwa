@@ -125,6 +125,7 @@ export const dbRemoveMultipleTracks = async (trackIds: number[]): Promise<void> 
 	}
 }
 
-export const dbRemoveTrackRelatedItem = async <Store extends Pick<LibraryStoreName, 'albums' | 'artists'>>(storeName: Store) => {
-	const db = await getDatabase()
+export const dbRemoveTrackRelatedItem = async <Store extends Extract<LibraryStoreName, 'albums' | 'artists'>>(_storeName: Store) => {
+	// TODO. Implement this function
+	const _db = await getDatabase()
 }

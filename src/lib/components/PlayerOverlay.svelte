@@ -19,7 +19,7 @@
 
 <div
 	class={[
-		'view-transition-pl-container pointer-events-auto mx-auto max-w-225 justify-between overflow-hidden rounded-2xl border border-primary/10 bg-secondaryContainer text-onSecondaryContainer sm:h-auto sm:rounded-3xl',
+		'view-transition-pl-container pointer-events-auto mx-auto max-w-225 justify-between overflow-hidden rounded-2xl border border-primary/10 bg-secondaryContainer text-onSecondaryContainer contain-content sm:h-auto sm:rounded-3xl',
 		className,
 	]}
 >

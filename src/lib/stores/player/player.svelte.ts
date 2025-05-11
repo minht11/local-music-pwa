@@ -72,7 +72,7 @@ export class PlayerStore {
 	}
 
 	#artwork = createManagedArtwork(() => this.activeTrack?.image?.full)
-	artworkSrc: string = $derived.by(this.#artwork)
+	artworkSrc: string | undefined = $derived.by(this.#artwork)
 
 	constructor() {
 		persist('player', this, ['volume', 'shuffle', 'repeat', 'muted'])
@@ -201,11 +201,13 @@ export class PlayerStore {
 				title: track.name,
 				artist: track.artists.join(', '),
 				album: track.album,
-				artwork: [
-					// TODO. This does not work with empty artwork, because it is svg in dom,
-					// but maybe that's fine
-					{ src: this.artworkSrc, sizes: '512x512', type: 'image/jpeg' },
-				],
+				artwork: this.artworkSrc
+					? [
+							// TODO. This does not work with empty artwork, because it is svg in dom,
+							// but maybe that's fine
+							{ src: this.artworkSrc, sizes: '512x512', type: 'image/jpeg' },
+						]
+					: undefined,
 			})
 		})
 

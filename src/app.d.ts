@@ -1,5 +1,5 @@
 import type { Snippet as SnippetInternal } from 'svelte'
-import type { ClassValue as ClassValueInternal, HTMLAttributes } from 'svelte/elements'
+import type { ClassValue as ClassValueInternal } from 'svelte/elements'
 
 declare global {
 	namespace App {

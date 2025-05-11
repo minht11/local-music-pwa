@@ -161,7 +161,7 @@ export class QueryImpl<K extends QueryKey, Result> {
 				onDatabaseChange((changes) => {
 					this.options.onDatabaseChange?.(changes, {
 						mutate: (v) => {
-							let value: Result | undefined = undefined
+							let value: Result | undefined
 							if (typeof v === 'function') {
 								const accessor = v as (prev: Result | undefined) => Result
 								value = accessor(this.state.value)

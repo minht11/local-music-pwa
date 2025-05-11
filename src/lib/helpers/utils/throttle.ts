@@ -7,7 +7,7 @@ export const throttle = <Fn extends (...args: Parameters<Fn>) => ReturnType<Fn>>
 } => {
 	let wait = false
 	let timeout: undefined | number
-	let prevValue: ReturnType<Fn> | undefined = undefined
+	let prevValue: ReturnType<Fn> | undefined
 
 	const throttleFn = (...args: Parameters<Fn>) => {
 		if (wait) {

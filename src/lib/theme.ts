@@ -4,7 +4,7 @@ import {
 	type CorePalette,
 	HctSolver,
 	hexFromArgb,
-	// biome-ignore lint/nursery/noRestrictedImports: Main module for theme utilities
+	// biome-ignore lint/style/noRestrictedImports: Main module for theme utilities
 } from '@material/material-color-utilities'
 
 export { argbFromHex }

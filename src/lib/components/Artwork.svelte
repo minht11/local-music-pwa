@@ -3,10 +3,10 @@
 	import Icon from './icon/Icon.svelte'
 
 	interface Props {
-		src: string
+		src: string | undefined
 		class?: ClassValue
 		alt?: string
-		fallbackIcon?: IconType | null
+		fallbackIcon?: IconType
 		noFallbackBg?: boolean
 		children?: Snippet
 	}

@@ -152,7 +152,9 @@
 					/>
 
 					<div class="mb-4 text-body-lg">{m.playerQueueEmpty()}</div>
-					<Button kind="outlined" as="a" href="/">{m.playerQueuePlaySomething()}</Button>
+					<Button kind="outlined" as="a" href="/library/tracks">
+						{m.playerQueuePlaySomething()}
+					</Button>
 				</div>
 			{:else}
 				<TracksListContainer
