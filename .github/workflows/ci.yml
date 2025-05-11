@@ -21,6 +21,6 @@ jobs:
 
       - run: pnpm install
       - run: pnpm run biome-check
-      - run: pnpm run format-prettier
+      # - run: pnpm run format-prettier
       - run: pnpm run check
       - run: pnpm test
