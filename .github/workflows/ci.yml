@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        run: pnpm install
+      - name: Biome check
+        run: pnpm run biome-check
+      - name: Prettier check
+        run: pnpm run format-prettier
+      - name: Svelte check
+        run: pnpm run check
+      - name: test
+        run: pnpm test

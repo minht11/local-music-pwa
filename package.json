@@ -13,6 +13,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"biome-check": "biome check ./src",
 		"biome-fix": "biome check ./src --write",
+		"format-prettier": "prettier --check ./src",
 		"format-prettier-fix": "prettier --write ./src",
 		"compile-i18n": "paraglide-js compile --project ./project.inlang",
 		"test": "vitest",
