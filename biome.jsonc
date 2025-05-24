@@ -108,16 +108,11 @@
 				"noImportCycles": "error"
 			},
 			"complexity": {
-				"useSimplifiedLogicExpression": "error",
-				"useDateNow": "error"
+				"useSimplifiedLogicExpression": "error"
 			},
 			"suspicious": {
-				"noMisrefactoredShorthandAssign": "error",
 				"useAwait": "error",
 				"useErrorMessage": "error"
-			},
-			"performance": {
-				"noDynamicNamespaceImportAccess": "error"
 			}
 		}
 	},

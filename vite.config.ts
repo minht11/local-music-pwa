@@ -36,14 +36,15 @@ export default defineConfig({
 				// externalLiveBindings: true,
 				// TODO. Do not work in Rolldown yet.
 				// experimentalMinChunkSize: 20 * 1024, // 20kb
-				// manualChunks: (id) => {
-				// 	// Merge all css into a single file
-				// 	if (id.includes('type=style&lang.css') || id.endsWith('.css')) {
-				// 		return 'app.css'
-				// 	}
-
-				// 	return null
-				// },
+				// advancedChunks: {
+				// 	groups: [
+				// 		{
+				// 			// Merge all css into a single file
+				// 			name: 'styles',
+				// 			test: /\.css$/,
+				// 		}
+				// 	]
+				// }
 			},
 		},
 		target: 'esnext',
