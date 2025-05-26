@@ -61,7 +61,6 @@
 				"noCommaOperator": "error",
 				"useNodejsImportProtocol": "error",
 				"useAsConstAssertion": "error",
-				"useNumericLiterals": "error",
 				"useEnumInitializers": "error",
 				"useSelfClosingElements": "error",
 				"useSingleVarDeclarator": "error",
@@ -108,7 +107,8 @@
 				"noImportCycles": "error"
 			},
 			"complexity": {
-				"useSimplifiedLogicExpression": "error"
+				"useSimplifiedLogicExpression": "error",
+				"useNumericLiterals": "error"
 			},
 			"suspicious": {
 				"useAwait": "error",

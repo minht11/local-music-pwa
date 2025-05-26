@@ -1,7 +1,7 @@
 import { SvelteSet } from "svelte/reactivity"
 
 let counter = 0
-let pendingTasks = new SvelteSet<number>()
+const pendingTasks = new SvelteSet<number>()
 /**
  * Returns reactive boolean value stating if database operation is pending.
  */
