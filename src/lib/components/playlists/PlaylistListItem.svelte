@@ -60,11 +60,7 @@
 	{style}
 	menuItems={menuItemsWithItem}
 	tabindex={-1}
-	class={[
-		'h-14 text-left',
-		active ? 'bg-onSurfaceVariant/10 text-onSurfaceVariant' : '',
-		className,
-	]}
+	class={['h-14 text-left', active && 'bg-onSurfaceVariant/10 text-onSurfaceVariant', className]}
 	ariaLabel={`Play ${playlist?.name}`}
 	{ariaRowIndex}
 	onclick={() => onclick?.(playlist!)}

@@ -21,19 +21,18 @@ export default defineConfig({
 		},
 	},
 	// Tell Vitest to use the `browser` entry points in `package.json` files, even though it's running in Node
-	resolve: process.env.VITEST
-		? { conditions: ['browser'] }
-		: undefined,
-	worker: {
-		format: 'es',
-	},
+	resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
 	build: {
 		modulePreload: {
 			polyfill: false,
 		},
 		rollupOptions: {
 			output: {
-				// externalLiveBindings: true,
+				minify: {
+					mangle: true,
+					removeWhitespace: true,
+					compress: true,
+				},
 				// TODO. Do not work in Rolldown yet.
 				// experimentalMinChunkSize: 20 * 1024, // 20kb
 				// advancedChunks: {
@@ -53,6 +52,11 @@ export default defineConfig({
 			output: {
 				comments: false,
 			},
+			// mangle: {
+			// 	properties: {
+			// 		regex: /^_/,
+			// 	},
+			// },
 			module: true,
 			compress: {
 				passes: 3,
@@ -63,7 +67,7 @@ export default defineConfig({
 		},
 	},
 	experimental: {
-		enableNativePlugin: 'resolver',	
+		enableNativePlugin: 'resolver',
 	},
 	plugins: [
 		workerChunkPlugin(),
@@ -109,7 +113,16 @@ export default defineConfig({
 				setTimeout(async () => {
 					const size = await dirSize('./build/_app/immutable/chunks')
 					console.log('Size of chunks:', size / 1024, 'KB')
-				}, 1000)
+				}, 2000)
+			},
+		},
+		{
+			name: 'ssr-config',
+			config(config) {
+				// Since this is mostly SPA, server logs are mostly noise.
+				config.logLevel = config?.build?.ssr ? 'warn' : 'info'
+
+				return config
 			},
 		},
 	],
