@@ -1,6 +1,6 @@
 import { onNavigate } from '$app/navigation'
 import type { LayoutLoadEvent } from '../routes/(app)/$types'
-import { getActiveRipplesCount } from './actions/ripple.ts'
+import { getActiveRipplesCount } from './attachments/ripple.ts'
 import { wait } from './helpers/utils/wait.ts'
 
 export type AppViewTransitionType = 'regular' | 'player' | 'library'

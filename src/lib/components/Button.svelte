@@ -1,6 +1,6 @@
 <script module lang="ts">
-	import { ripple } from '../actions/ripple.ts'
-	import { tooltip } from '../actions/tooltip.ts'
+	import { ripple } from '../attachments/ripple.ts'
+	import { tooltip } from '../attachments/tooltip.ts'
 
 	export type AllowedButtonElement = 'button' | 'a'
 	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank'
@@ -44,11 +44,10 @@
 	} as const
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <svelte:element
-	this={!disabled ? as : 'button'}
-	use:ripple={{ stopPropagation: true }}
-	use:tooltip={tooltipMessage}
+	this={(!disabled ? as : 'button') as AllowedButtonElement}
+	{@attach ripple({ stopPropagation: true })}
+	{@attach tooltip(tooltipMessage)}
 	{...restProps}
 	{type}
 	aria-label={ariaLabel}

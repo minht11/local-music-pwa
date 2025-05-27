@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import { ripple } from '$lib/actions/ripple'
+	import { ripple } from '$lib/attachments/ripple.ts'
 	import IconButton from './IconButton.svelte'
 	import type { MenuItem } from './menu/types.ts'
 
@@ -37,7 +37,7 @@
 </script>
 
 <div
-	use:ripple
+	{@attach ripple()}
 	{style}
 	{tabindex}
 	class={[

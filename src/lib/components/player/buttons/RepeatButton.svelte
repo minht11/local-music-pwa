@@ -49,9 +49,7 @@
 			}
 		})
 
-		return {
-			destroy: cleanup,
-		}
+		return cleanup
 	}
 
 	const tooltipMap: Record<PlayerRepeat, string> = {
@@ -62,7 +60,7 @@
 </script>
 
 <IconButton tooltip={tooltipMap[player.repeat]} class={className} onclick={player.toggleRepeat}>
-	<svg use:action class="size-6 fill-current" viewBox="0 0 24 24">
+	<svg {@attach action} class="size-6 fill-current" viewBox="0 0 24 24">
 		<path
 			data-arrows
 			class="origin-center"

@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import { ripple } from '$lib/actions/ripple'
+	import { ripple } from '$lib/attachments/ripple.ts'
 	import { assign } from '$lib/helpers/utils/assign'
 	import { autoUpdate, computePosition, flip, shift } from '@floating-ui/dom'
 	import Icon from './icon/Icon.svelte'
@@ -59,11 +59,11 @@
 
 <button
 	bind:this={target}
+	{@attach ripple()}
 	class={[
 		'relative flex h-10 cursor-pointer appearance-none items-center gap-2 overflow-hidden rounded-sm border border-outlineVariant pr-2 pl-4 transition-[outline-width] duration-150',
 		className,
 	]}
-	use:ripple
 	role="combobox"
 	aria-controls="popupId"
 	aria-owns="popupId"
@@ -92,7 +92,7 @@
 >
 	{#each items as item (item[key])}
 		<button
-			use:ripple
+			{@attach ripple()}
 			role="option"
 			aria-selected={item[key] === selected}
 			class={[

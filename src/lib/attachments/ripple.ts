@@ -1,5 +1,5 @@
 import { assign } from '$lib/helpers/utils/assign.ts'
-import type { Action } from 'svelte/action'
+import type { Attachment } from 'svelte/attachments'
 import { on } from 'svelte/events'
 import { animateEmpty } from '../helpers/animations.ts'
 
@@ -114,18 +114,15 @@ export interface RippleOptions {
 	stopPropagation?: boolean
 }
 
-export const ripple: Action<HTMLElement, RippleOptions | undefined> = (node, options) => {
-	const cleanup = on(node, 'pointerdown', (e) => {
-		if (options?.stopPropagation) {
-			e.stopPropagation()
-		}
+export const ripple = (options: RippleOptions = {}): Attachment<HTMLElement> => {
+	return (node) => {
+		const cleanup = on(node, 'pointerdown', (e) => {
+			if (options?.stopPropagation) {
+				e.stopPropagation()
+			}
 
-		onPointerDownHandler(e)
-	})
-
-	return {
-		destroy() {
-			cleanup()
-		},
+			onPointerDownHandler(e)
+		})
+		return cleanup
 	}
 }

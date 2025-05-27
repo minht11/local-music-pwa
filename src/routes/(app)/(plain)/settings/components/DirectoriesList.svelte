@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { ripple } from '$lib/actions/ripple.ts'
-	import { tooltip } from '$lib/actions/tooltip'
+	import { ripple } from '$lib/attachments/ripple.ts'
+	import { tooltip } from '$lib/attachments/tooltip.ts'
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
@@ -89,7 +89,9 @@
 		>
 			{#if dir.legacy}
 				<div
-					use:tooltip={'In previous version of the app, directories were not saved, this contains previously scanned tracks'}
+					{@attach tooltip(
+						'In previous version of the app, directories were not saved, this contains previously scanned tracks',
+					)}
 				>
 					<Icon type="information" class="size-4 text-onTertiaryContainer/54" />
 				</div>
@@ -128,7 +130,7 @@
 	{/each}
 	<li class="contents">
 		<button
-			use:ripple
+			{@attach ripple()}
 			class={[
 				disabled ? 'bg-surfaceContainer/10 text-onSurface/54' : 'interactable',
 				'flex h-16 items-center gap-2 rounded-sm px-4 ring-1 ring-outlineVariant ring-inset',

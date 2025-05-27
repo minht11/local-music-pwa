@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ripple } from '$lib/actions/ripple'
+	import { ripple } from '$lib/attachments/ripple.ts'
 	import { untrack } from 'svelte'
 
 	import Icon from '../icon/Icon.svelte'
@@ -89,12 +89,12 @@
 	<div role="menu" class="flex flex-col py-2">
 		{#each items as item}
 			<button
+				{@attach ripple()}
 				role="menuitem"
 				class={[
 					'interactable relative flex h-10 grow items-center gap-4 px-4 text-body-md -outline-offset-2',
 					item.selected && 'bg-surfaceVariant text-primary',
 				]}
-				use:ripple
 				onclick={() => {
 					item.action()
 					close()

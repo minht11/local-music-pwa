@@ -35,9 +35,7 @@
 			isAnimating = false
 		})
 
-		return {
-			destroy: cleanup,
-		}
+		return cleanup
 	}
 </script>
 
@@ -45,7 +43,7 @@
 <div
 	class={[flipIcon && 'flip-x', 'grid']}
 	data-icon-animating={isAnimating ? '' : undefined}
-	use:action
+	{@attach action}
 >
 	<!-- Cannot add clip on svg itself because of Safari bug  -->
 	<div class="icon-clip [grid-area:1/1]">

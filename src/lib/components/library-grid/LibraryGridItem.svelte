@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
-	import { ripple } from '$lib/actions/ripple.ts'
+	import { ripple } from '$lib/attachments/ripple.ts'
 	import type { QueryResult } from '$lib/db/query/query.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte.ts'
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
@@ -59,7 +59,7 @@
 </script>
 
 <div
-	use:ripple
+	{@attach ripple()}
 	{...props}
 	role="listitem"
 	class={[className, 'interactable flex flex-col rounded-lg bg-surfaceContainerHigh']}
