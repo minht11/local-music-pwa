@@ -27,6 +27,9 @@ export default defineConfig({
 			polyfill: false,
 		},
 		rollupOptions: {
+			experimental: {
+				strictExecutionOrder: false,
+			},
 			output: {
 				minify: {
 					mangle: true,
@@ -35,15 +38,16 @@ export default defineConfig({
 				},
 				// TODO. Do not work in Rolldown yet.
 				// experimentalMinChunkSize: 20 * 1024, // 20kb
-				// advancedChunks: {
-				// 	groups: [
-				// 		{
-				// 			// Merge all css into a single file
-				// 			name: 'styles',
-				// 			test: /\.css$/,
-				// 		}
-				// 	]
-				// }
+				advancedChunks: {
+					minModuleSize: 20 * 1024, // 20kb
+					groups: [
+						{
+							// Merge all css into a single file
+							name: 'styles',
+							test: /\.css$/,
+						}
+					]
+				}
 			},
 		},
 		target: 'esnext',
@@ -52,11 +56,6 @@ export default defineConfig({
 			output: {
 				comments: false,
 			},
-			// mangle: {
-			// 	properties: {
-			// 		regex: /^_/,
-			// 	},
-			// },
 			module: true,
 			compress: {
 				passes: 3,
@@ -127,3 +126,5 @@ export default defineConfig({
 		},
 	],
 }) as unknown
+
+353.7197265625
