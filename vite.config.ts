@@ -36,18 +36,18 @@ export default defineConfig({
 					removeWhitespace: true,
 					compress: true,
 				},
-				// TODO. Do not work in Rolldown yet.
-				// experimentalMinChunkSize: 20 * 1024, // 20kb
 				advancedChunks: {
-					minModuleSize: 20 * 1024, // 20kb
+					// TODO. In Rolldown this produces bigger chunk sizes.
+					// minModuleSize: 20 * 1024, // 20kb
 					groups: [
 						{
 							// Merge all css into a single file
 							name: 'styles',
 							test: /\.css$/,
-						}
-					]
-				}
+							minModuleSize: 0,
+						},
+					],
+				},
 			},
 		},
 		target: 'esnext',
@@ -126,5 +126,3 @@ export default defineConfig({
 		},
 	],
 }) as unknown
-
-353.7197265625
