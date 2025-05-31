@@ -1,5 +1,11 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"defaultBranch": "main",
+		"useIgnoreFile": true
+	},
 	"assist": {
 		"actions": {
 			"source": {
@@ -10,25 +16,17 @@
 	"files": {
 		"includes": [
 			"**",
-			"!**/node_modules/**",
-			"!**/dist/**",
-			"!**/build/**",
-			"!**/.generated/**",
-			"!**/*.DS_Store",
-			"!**/*.env.*",
-			"!**/pnpm-lock.yaml",
-			"!src/paraglide/**",
-			"!**/*.html",
-			"!**/*.svg",
+			"!**/.generated",
+			// Biome does not support Tailwind syntax yet.
 			"!**/*.css",
-			"!src/lib/components/WrapTranslation.svelte",
-			"!coverage/**"
+			// Biome parser incorrectly errors on TS syntax.
+			"!src/lib/components/WrapTranslation.svelte"
 		]
 	},
 	"formatter": {
 		"enabled": true,
 		"lineWidth": 100,
-		"includes": ["!**/*.svelte", "**/*.svelte.ts"]
+		"includes": ["**", "!**/*.svelte", "**/*.svelte.ts"]
 	},
 	"linter": {
 		"enabled": true,
@@ -123,7 +121,7 @@
 			"jsxQuoteStyle": "single",
 			"indentWidth": 4
 		},
-		"globals": ["$state", "$effect", "$derived", "m", "invariant", "usePlayer", "useMainStore"]
+		"globals": ["m", "invariant", "usePlayer", "useMainStore"]
 	},
 	"json": {
 		"formatter": {
@@ -131,21 +129,6 @@
 		}
 	},
 	"overrides": [
-		{
-			"includes": ["**/*.svelte"],
-			"javascript": {
-				"globals": [
-					"Snippet",
-					"$state",
-					"$effect",
-					"$derived",
-					"m",
-					"$props",
-					"$bindable",
-					"usePlayer"
-				]
-			}
-		},
 		{
 			"includes": ["**/*.svelte", "!**/*.svelte.ts"],
 			"linter": {

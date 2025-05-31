@@ -5,7 +5,7 @@ export type {
 	/** @public */
 	TracksScanOptions,
 	/** @public */
-	TracksScanResult
+	TracksScanResult,
 } from './types.ts'
 
 /** @public */

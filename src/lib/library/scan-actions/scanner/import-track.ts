@@ -20,9 +20,7 @@ const dbImportAlbum = async (tx: ImportTrackTx, track: Track) => {
 	const updatedAlbum: Omit<Album, 'id'> = existingAlbum
 		? {
 				...existingAlbum,
-				artists: [
-					...new Set([...existingAlbum.artists, ...track.artists]),
-				],
+				artists: [...new Set([...existingAlbum.artists, ...track.artists])],
 				year: existingAlbum.year ?? track.year,
 				image: existingAlbum.image ?? track.image?.full,
 			}

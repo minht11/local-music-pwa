@@ -1,4 +1,4 @@
-import { createTracksCountPageQuery } from "$lib/library/tracks-queries"
+import { createTracksCountPageQuery } from '$lib/library/tracks-queries.ts'
 
 interface LoadResult {
 	noPlayerOverlay: boolean
@@ -7,7 +7,7 @@ interface LoadResult {
 
 export const load = async (): Promise<LoadResult> => {
 	const tracksCount = await createTracksCountPageQuery()
-	
+
 	return {
 		tracksCount,
 		noPlayerOverlay: true,

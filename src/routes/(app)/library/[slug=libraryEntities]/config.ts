@@ -1,11 +1,8 @@
-import type { DbValue } from "$lib/db/database"
-import type { LibraryItemSortKey } from "$lib/library/get/ids.ts"
-import type { LibraryStoreName } from "$lib/library/types"
+import type { DbValue } from '$lib/db/database'
+import type { LibraryItemSortKey } from '$lib/library/get/ids.ts'
+import type { LibraryStoreName } from '$lib/library/types'
 
-export type LibrarySearchFn<Value> = (
-	value: Value,
-	searchTerm: string,
-) => boolean
+export type LibrarySearchFn<Value> = (value: Value, searchTerm: string) => boolean
 
 export type SortOption<Store extends LibraryStoreName> = {
 	name: string

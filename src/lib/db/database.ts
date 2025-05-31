@@ -80,7 +80,7 @@ export type AppStoreNames = StoreNames<AppDB>
 const createIndexes = <DBTypes extends DBSchema | unknown, Name extends StoreNames<DBTypes>>(
 	store: IDBPObjectStore<DBTypes, ArrayLike<StoreNames<DBTypes>>, Name, 'versionchange'>,
 	indexes: readonly IndexNames<DBTypes, Name>[],
-	options: IDBIndexParameters
+	options: IDBIndexParameters,
 ) => {
 	for (const name of indexes) {
 		store.createIndex(name, name, options)
@@ -111,9 +111,13 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> => {
 				const store = createStore(e, 'tracks')
 
 				createIndexes(store, ['uuid'], { unique: true })
-				createIndexes(store, ['name', 'album', 'year', 'duration', 'scannedAt', 'directory'], {
-					unique: false,
-				})
+				createIndexes(
+					store,
+					['name', 'album', 'year', 'duration', 'scannedAt', 'directory'],
+					{
+						unique: false,
+					},
+				)
 
 				store.createIndex('path', ['directory', 'fileName'], {
 					// We keep flat folder structure in the database
@@ -165,13 +169,15 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> => {
 		},
 	})
 
-	dbPromise.then((db) => {
-		db.onclose = () => {
+	dbPromise
+		.then((db) => {
+			db.onclose = () => {
+				dbPromise = null
+			}
+		})
+		.catch(() => {
 			dbPromise = null
-		}
-	}).catch(() => {
-		dbPromise = null
-	})
+		})
 
 	return dbPromise
 }

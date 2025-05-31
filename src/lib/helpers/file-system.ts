@@ -33,7 +33,9 @@ export const getFilesFromLegacyInputEvent = (e: Event, extensions: string[]): Fi
 		return []
 	}
 
-	return Array.from(files).filter((file) => extensions.some((ext) => file.name.endsWith(`.${ext}`)))
+	return Array.from(files).filter((file) =>
+		extensions.some((ext) => file.name.endsWith(`.${ext}`)),
+	)
 }
 
 export const getFilesFromDirectory = async (extensions: string[]): Promise<FileEntity[] | null> => {

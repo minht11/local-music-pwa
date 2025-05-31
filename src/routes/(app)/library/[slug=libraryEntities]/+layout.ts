@@ -1,20 +1,17 @@
 import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
 import { checkForV1LegacyDatabaseData } from '$lib/db/v1-legacy/database.ts'
+import { getLibraryItemIds } from '$lib/library/get/ids.ts'
 import {
-	getLibraryItemIds,
-} from '$lib/library/get/ids.ts'
-import { createLibraryItemKeysPageQuery, type PageQueryResult } from '$lib/library/get/ids-queries.ts'
+	createLibraryItemKeysPageQuery,
+	type PageQueryResult,
+} from '$lib/library/get/ids-queries.ts'
 import { createTracksCountPageQuery } from '$lib/library/tracks-queries.ts'
 import { FAVORITE_PLAYLIST_ID, type LibraryStoreName } from '$lib/library/types.ts'
 import { defineViewTransitionMatcher, type RouteId } from '$lib/view-transitions.ts'
 import { redirect } from '@sveltejs/kit'
 import { innerWidth } from 'svelte/reactivity/window'
 import type { LayoutLoad } from './$types.ts'
-import {
-	configsMap,
-	type LibraryRouteConfig,
-	type LibrarySearchFn,
-} from './config.ts'
+import { configsMap, type LibraryRouteConfig, type LibrarySearchFn } from './config.ts'
 import { LibraryStore } from './store.svelte.ts'
 
 const defaultSearchFn: LibrarySearchFn<{ name: string }> = (value, searchTerm) =>
@@ -59,7 +56,7 @@ const loadData = <Slug extends LibraryStoreName>(slug: Slug): Promise<LoadDataRe
 			await itemsIdsQueryPromise,
 			createTracksCountPageQuery(),
 		])
-	
+
 		return {
 			...config,
 			store,
@@ -79,7 +76,7 @@ type LoadResult = LoadDataResult<LibraryStoreName> & {
 export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 	const { slug } = event.params
 	const data = await loadData(slug)
-	
+
 	if (data.tracksCountQuery.value === 0) {
 		const hasV1Data = await checkForV1LegacyDatabaseData()
 

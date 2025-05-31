@@ -8,9 +8,7 @@ import {
 
 export type { QueryKey, QueryResult } from './base-query.svelte.ts'
 
-export type {
-	QueryOptions,
-}
+export type { QueryOptions }
 
 export const createQuery = <const K extends QueryKey, Result>(options: QueryOptions<K, Result>) => {
 	const query = new QueryImpl<K, Result>(options)

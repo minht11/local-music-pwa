@@ -2,11 +2,7 @@ import { type DbKey, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, onDatabaseChange } from '$lib/db/events.ts'
 import type { Album, Artist, Playlist, Track } from '$lib/library/types.ts'
 import { WeakLRUCache } from 'weak-lru-cache'
-import {
-	FAVORITE_PLAYLIST_ID,
-	FAVORITE_PLAYLIST_UUID,
-	type LibraryStoreName,
-} from '../types.ts'
+import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryStoreName } from '../types.ts'
 
 type CacheKey<Store extends LibraryStoreName> = `${Store}:${string}`
 
@@ -17,7 +13,10 @@ const getCacheKey = <Store extends LibraryStoreName>(
 
 interface QueryConfig<Result> {
 	fetch: (id: number) => Promise<Result | undefined>
-	shouldRefetch: (itemId: number | undefined, changes: readonly DatabaseChangeDetails[]) => boolean
+	shouldRefetch: (
+		itemId: number | undefined,
+		changes: readonly DatabaseChangeDetails[],
+	) => boolean
 }
 
 const defaultRefreshOnDatabaseChanges = (
@@ -169,8 +168,7 @@ interface LibraryValueMap {
 	playlists: PlaylistData
 }
 
-type LibraryValue<Store extends LibraryStoreName = LibraryStoreName> =
-	LibraryValueMap[Store]
+type LibraryValue<Store extends LibraryStoreName = LibraryStoreName> = LibraryValueMap[Store]
 
 type LibraryConfigMap = {
 	[Store in LibraryStoreName]: QueryConfig<LibraryValue<Store>>
@@ -188,10 +186,7 @@ type LibraryCachedValue<Store extends LibraryStoreName = LibraryStoreName> =
 	| Promise<LibraryValue<Store> | undefined>
 
 class LibraryValueCache {
-	#cache = new WeakLRUCache<
-		CacheKey<LibraryStoreName>,
-		LibraryCachedValue<LibraryStoreName>
-	>({
+	#cache = new WeakLRUCache<CacheKey<LibraryStoreName>, LibraryCachedValue<LibraryStoreName>>({
 		cacheSize: 10_000,
 	})
 
@@ -262,9 +257,7 @@ const emptyValue = <T, AllowEmpty extends boolean = false>(
 }
 
 /** @private */
-export const getCachedOrFetchValue = <
-	Store extends LibraryStoreName,
->(
+export const getCachedOrFetchValue = <Store extends LibraryStoreName>(
 	key: CacheKey<Store>,
 	fetchValue: () => Promise<LibraryValueMap[Store] | undefined>,
 ): LibraryValue<Store> | Promise<LibraryValue<Store> | undefined> => {
@@ -295,10 +288,7 @@ export type GetLibraryValueResult<
 > = AllowEmpty extends true ? LibraryValue<Store> | undefined : LibraryValue<Store>
 
 /** @public */
-export const getLibraryValue = <
-	Store extends LibraryStoreName,
-	AllowEmpty extends boolean = false,
->(
+export const getLibraryValue = <Store extends LibraryStoreName, AllowEmpty extends boolean = false>(
 	storeName: Store,
 	id: number,
 	allowEmpty?: AllowEmpty,
@@ -311,8 +301,10 @@ export const getLibraryValue = <
 	})
 
 	if (result instanceof Promise) {
-		const promiseResult = result.then((value) => emptyValue(value, allowEmpty, key)) as Promise<GetLibraryValueResult<Store, AllowEmpty>>
-	
+		const promiseResult = result.then((value) => emptyValue(value, allowEmpty, key)) as Promise<
+			GetLibraryValueResult<Store, AllowEmpty>
+		>
+
 		return promiseResult
 	}
 

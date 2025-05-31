@@ -192,7 +192,10 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 	tracker.sendMsg(true)
 }
 
-const scanNewDirectory = async (items:  { uuid: string; file: FileEntity }[], directoryId: number) => {
+const scanNewDirectory = async (
+	items: { uuid: string; file: FileEntity }[],
+	directoryId: number,
+) => {
 	const tracker = new StatusTracker(items.length)
 
 	console.time('SCAN_NEW_DIR')

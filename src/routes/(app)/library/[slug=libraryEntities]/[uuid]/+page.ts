@@ -1,12 +1,13 @@
 import { goto } from '$app/navigation'
 import { type DbValue, getDatabase } from '$lib/db/database.ts'
-import {
-	createPageQuery,
-	type PageQueryResult,
-} from '$lib/db/query/page-query.svelte.ts'
+import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
 import { keysListDatabaseChangeHandler } from '$lib/library/get/ids-queries.ts'
 import { getLibraryValue, LibraryValueNotFoundError } from '$lib/library/get/value.ts'
-import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryStoreName } from '$lib/library/types.ts'
+import {
+	FAVORITE_PLAYLIST_ID,
+	FAVORITE_PLAYLIST_UUID,
+	type LibraryStoreName,
+} from '$lib/library/types.ts'
 import { error, redirect } from '@sveltejs/kit'
 import type { PageLoad } from './$types.d.ts'
 

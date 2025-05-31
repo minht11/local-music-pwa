@@ -1,10 +1,6 @@
 import { createQuery, type QueryResult } from '$lib/db/query/query.ts'
 import type { LibraryStoreName } from '../types.ts'
-import {
-	type GetLibraryValueResult,
-	getLibraryValue,
-	shouldRefetchLibraryValue,
-} from './value.ts'
+import { type GetLibraryValueResult, getLibraryValue, shouldRefetchLibraryValue } from './value.ts'
 
 export type { AlbumData, ArtistData, PlaylistData, TrackData } from './value.ts'
 

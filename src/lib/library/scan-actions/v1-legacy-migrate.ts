@@ -62,17 +62,22 @@ const dbMigrateV1LegacyData = async () => {
 	const db = await getDatabase()
 	const tracks = await db.getAllFromIndex('tracks', 'directory', LEGACY_NO_NATIVE_DIRECTORY)
 
-	const mapTrackLegacyIdsToNewIds = (legacyIds: string[]) => legacyIds.map((legacyTrackId) => {
-		const uuid = legacy.legacyIdToUuidMap.get(legacyTrackId)
-		const newId = tracks.find((track) => track.uuid === uuid)?.id
+	const mapTrackLegacyIdsToNewIds = (legacyIds: string[]) =>
+		legacyIds
+			.map((legacyTrackId) => {
+				const uuid = legacy.legacyIdToUuidMap.get(legacyTrackId)
+				const newId = tracks.find((track) => track.uuid === uuid)?.id
 
-		return newId
-	}).filter((id) => id !== undefined) 
-
+				return newId
+			})
+			.filter((id) => id !== undefined)
 
 	for (const legacyPlaylist of Object.values(legacyPlaylists)) {
 		try {
-			const playlistId = await dbCreatePlaylist(legacyPlaylist.name, legacyPlaylist.dateCreated)
+			const playlistId = await dbCreatePlaylist(
+				legacyPlaylist.name,
+				legacyPlaylist.dateCreated,
+			)
 
 			await dbAddMultipleTracksToPlaylist(
 				playlistId,

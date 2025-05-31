@@ -76,7 +76,6 @@ const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 	return changes
 }
 
-
 export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 	const db = await getDatabase()
 	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
@@ -125,7 +124,11 @@ export const dbRemoveMultipleTracks = async (trackIds: number[]): Promise<void> 
 	}
 }
 
-export const dbRemoveTrackRelatedItem = async <Store extends Extract<LibraryStoreName, 'albums' | 'artists'>>(_storeName: Store) => {
+export const dbRemoveTrackRelatedItem = async <
+	Store extends Extract<LibraryStoreName, 'albums' | 'artists'>,
+>(
+	_storeName: Store,
+) => {
 	// TODO. Implement this function
 	await getDatabase()
 	throw new Error('Not implemented')
