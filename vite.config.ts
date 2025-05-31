@@ -3,6 +3,7 @@ import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
+import devtoolsJson from 'vite-plugin-devtools-json'
 import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
 import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
 import { workerChunkPlugin } from './lib/vite-plugin-worker-chunk.ts'
@@ -71,7 +72,7 @@ export default defineConfig({
 	plugins: [
 		workerChunkPlugin(),
 		themeColorsPlugin({
-			defaultColorSeed: '#ffb599',
+			defaultColorSeed: '#cc9724',
 			output: `${import.meta.dirname}/.generated/theme-colors.css`,
 		}),
 		tailwindcss(),
@@ -92,7 +93,7 @@ export default defineConfig({
 			project: './project.inlang',
 			outdir: './.generated/paraglide',
 			strategy: ['baseLocale'],
-			isServer: 'import.meta.env.SSR'
+			isServer: 'import.meta.env.SSR',
 		}),
 		logChunkSizePlugin(),
 		{
@@ -104,5 +105,6 @@ export default defineConfig({
 				return config
 			},
 		},
+		devtoolsJson(),
 	],
 }) as unknown

@@ -39,11 +39,13 @@
 		"typescript": "^5.8.3",
 		"unplugin-auto-import": "^19.3.0",
 		"vite": "npm:rolldown-vite@6.3.14",
+		"vite-plugin-devtools-json": "^0.1.0",
 		"vitest": "^3.1.4"
 	},
 	"dependencies": {
 		"@floating-ui/dom": "^1.7.0",
 		"@material/material-color-utilities": "^0.3.0",
+		"@resvg/resvg-js": "^2.6.2",
 		"@tanstack/svelte-virtual": "^3.13.9",
 		"@types/dom-navigation": "^1.0.5",
 		"@types/dom-view-transitions": "^1.0.6",

@@ -10,13 +10,13 @@
 	"description": "Lightweight on device music player right in your browser.",
 	"icons": [
 		{
-			"src": "/icons/icon_responsive.svg",
+			"src": "/icons/responsive.svg",
 			"type": "image/svg+xml",
 			"sizes": "any",
 			"purpose": "any"
 		},
 		{
-			"src": "/icons/icon_maskable.svg",
+			"src": "/icons/maskable.svg",
 			"type": "image/svg+xml",
 			"sizes": "any",
 			"purpose": "maskable"
