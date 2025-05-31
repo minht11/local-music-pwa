@@ -48,28 +48,28 @@
 		const items: PredefinedMenuItem[] = [
 			{
 				predefinedKey: 'addToPlaylist',
-				label: 'Add to playlist',
+				label: m.libraryAddToPlaylist(),
 				action: () => {
 					main.addTrackToPlaylistDialogOpen = [track.id]
 				},
 			},
 			{
 				predefinedKey: 'addToFavorites',
-				label: track.favorite ? 'Remove from favorites' : 'Add to favorites',
+				label: track.favorite ? m.trackRemoveFromFavorites() : m.trackAddToFavorites(),
 				action: () => {
 					void toggleFavoriteTrack(track.favorite, track.id)
 				},
 			},
 			{
 				predefinedKey: 'addToQueue',
-				label: 'Add to queue',
+				label: m.playerAddToQueue(),
 				action: () => {
 					player.addToQueue(track.id)
 				},
 			},
 			{
 				predefinedKey: 'removeFromLibrary',
-				label: 'Remove from library',
+				label: m.libraryRemoveFromLibrary(),
 				action: () => {
 					void removeTrack(track.id)
 				},

@@ -91,6 +91,7 @@ export default defineConfig({
 			project: './project.inlang',
 			outdir: './.generated/paraglide',
 			strategy: ['baseLocale'],
+			isServer: 'import.meta.env.SSR'
 		}),
 		{
 			name: 'log-chunks-size',
@@ -102,16 +103,18 @@ export default defineConfig({
 					const stats = files.map((file) => statSync(path.join(directory, file)))
 
 					let size = 0
+					let count = 0
 					for await (const stat of stats) {
 						size += stat.size
+						count += 1
 					}
 
-					return size
+					return { size, count }
 				}
 
 				setTimeout(async () => {
-					const size = await dirSize('./build/_app/immutable/chunks')
-					console.log('Size of chunks:', size / 1024, 'KB')
+					const { size, count } = await dirSize('./build/_app/immutable/chunks')
+					console.log('Size of chunks:', size / 1024, 'KB. Files count:', count)
 				}, 2000)
 			},
 		},

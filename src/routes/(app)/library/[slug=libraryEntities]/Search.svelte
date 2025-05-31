@@ -24,13 +24,13 @@
 	const generalMenuHandler = (e: MouseEvent) => {
 		const menuItems = [
 			{
-				label: 'Settings',
+				label: m.settings(),
 				action: () => {
 					goto('/settings')
 				},
 			},
 			{
-				label: 'About',
+				label: m.about(),
 				action: () => {
 					goto('/about')
 				},
@@ -79,12 +79,12 @@
 
 	<Separator vertical class="my-auto h-6" />
 
-	<IconButton icon="sort" tooltip="Open sort menu" onclick={sortMenuHandler} />
+	<IconButton icon="sort" tooltip={m.libraryOpenSortMenu()} onclick={sortMenuHandler} />
 
 	<IconButton
 		class={[store.order === 'desc' && 'rotate-180', 'transition-transform']}
 		icon="sortAscending"
-		tooltip="Toggle sort order"
+		tooltip={m.libraryToggleSortOrder()}
 		onclick={() => {
 			store.order = store.order === 'asc' ? 'desc' : 'asc'
 		}}
@@ -93,8 +93,8 @@
 	<Separator vertical class="my-auto h-6" />
 
 	<IconButton
-		ariaLabel="Application menu"
-		tooltip="Open application menu"
+		ariaLabel={m.libraryToggleSortOrder()}
+		tooltip={m.libraryOpenApplicationMenu()}
 		icon="moreVertical"
 		onclick={generalMenuHandler}
 	/>

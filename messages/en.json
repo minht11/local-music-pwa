@@ -27,6 +27,7 @@
 	"name": "Name",
 	"more": "More",
 	"shuffle": "Shuffle",
+	"settings": "Settings",
 
 	"appName": "Snae Player",
 	"appUpdateAvailable": "App update is available",
@@ -48,6 +49,10 @@
 	"libraryStartByAdding": "Start by adding some music",
 	"libraryImportTracks": "Import tracks",
 	"libraryTracksCount": "{count} tracks",
+	"libraryOpenSortMenu": "Open sort menu",
+	"libraryToggleSortOrder": "Toggle sort order",
+	"libraryApplicationMenu": "Application menu",
+	"libraryOpenApplicationMenu": "Open application menu",
 
 	"trackAddToFavorites": "Add to favorites",
 	"trackRemoveFromFavorites": "Remove from favorites",
@@ -57,6 +62,8 @@
 	"libraryTrackRemovedFromFavorites": "Track removed from favorites",
 	"libraryTrackRemovedFromPlaylist": "Track removed from playlist",
 	"libraryTrackRemovedFromLibrary": "Track removed from library",
+	"libraryRemoveFromLibrary": "Remove from library",
+	"libraryAddToPlaylist": "Add to playlist",
 
 	"libraryPlaylistCreated": "Playlist \"{playlistName}\" created",
 	"libraryPlaylistUpdated": "Playlist updated",

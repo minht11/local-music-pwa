@@ -88,7 +88,7 @@
 				class="hidden @sm:flex"
 				tabindex={-1}
 				icon={track.favorite ? 'favorite' : 'favoriteOutline'}
-				tooltip={track.favorite ? 'Remove from favorites' : 'Add to favorites'}
+				tooltip={track.favorite ? m.trackRemoveFromFavorites() : m.trackAddToFavorites()}
 				onclick={(e) => {
 					e.stopPropagation()
 					void toggleFavoriteTrack(track.favorite, track.id)

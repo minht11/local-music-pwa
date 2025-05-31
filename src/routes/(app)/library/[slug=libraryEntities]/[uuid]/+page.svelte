@@ -50,7 +50,7 @@
 
 	const playlistTrackMenuItems = (track: TrackData) => [
 		{
-			label: m.libraryTrackRemovedFromPlaylist(),
+			label: m.libraryTrackRemoveFromPlaylist(),
 			action: () => {
 				void removeTrackFromPlaylist(item.id, track.id)
 			},
