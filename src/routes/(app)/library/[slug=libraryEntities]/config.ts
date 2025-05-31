@@ -103,7 +103,7 @@ const playlistConfig: LibraryRouteConfig<'playlists'> = {
 	sortOptions: () => [nameSortOption, { name: 'Created', key: 'createdAt' }],
 }
 
-export type LibraryRouteConfigsMap = {
+type LibraryRouteConfigsMap = {
 	[Slug in LibraryStoreName]: LibraryRouteConfig<Slug>
 }
 

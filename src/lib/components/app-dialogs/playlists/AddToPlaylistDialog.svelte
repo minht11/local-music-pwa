@@ -2,9 +2,8 @@
 	import Dialog from '$lib/components/dialog/Dialog.svelte'
 	import DialogFooter from '$lib/components/dialog/DialogFooter.svelte'
 	import Separator from '$lib/components/Separator.svelte'
-
-	// import { getLibraryItemIds } from '$lib/library/get/ids'
-	// import AddToPlaylistDialogContent from './AddToPlaylistDialogContent.svelte'
+	import { getDatabase } from '$lib/db/database.ts'
+	import AddToPlaylistDialogContent from './AddToPlaylistDialogContent.svelte'
 
 	const main = useMainStore()
 
@@ -21,6 +20,21 @@
 
 	// const playlistsPromise = getLibraryItemIds('playlists', { sort: 'createdAt', order: 'desc' })
 	// TODO.
+
+	const getPlaylists = async () => {
+		const db = await getDatabase()
+		const playlists = await db.getAllFromIndex('playlists', 'createdAt')
+		// Descending order
+		playlists.reverse()
+
+		return playlists
+	}
+
+	console.log('getPlaylists', getPlaylists)
+	const playlistsPromise = getPlaylists()
+	playlistsPromise.catch(() => {
+		main.addTrackToPlaylistDialogOpen = null
+	})
 </script>
 
 <Dialog
@@ -30,10 +44,10 @@
 			main.addTrackToPlaylistDialogOpen = null
 		},
 	}}
-	title={'Add to playlist'}
+	title={m.libraryAddToPlaylist()}
 >
 	{#snippet children({ data: trackIds, close })}
-		<!-- <AddToPlaylistDialogContent {trackIds} onclose={close} /> -->
+		<AddToPlaylistDialogContent {trackIds} onclose={close} />
 
 		<Separator />
 		<DialogFooter

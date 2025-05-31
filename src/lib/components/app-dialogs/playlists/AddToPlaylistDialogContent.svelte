@@ -2,37 +2,38 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
+	import Separator from '$lib/components/Separator.svelte'
 	// import { snackbar } from '$lib/components/snackbar/snackbar'
 	import TextField from '$lib/components/TextField.svelte'
 	import { getDatabase } from '$lib/db/database'
 	import { createQuery } from '$lib/db/query/query.ts'
 	import { getLibraryItemIds } from '$lib/library/get/ids'
 	import { createLibraryItemKeysQuery } from '$lib/library/get/ids-queries'
-	import type { PlaylistData } from '$lib/library/get/value'
 	// import { dbToggleTrackInPlaylist } from '$lib/library/playlists-actions'
 	import { SvelteSet } from 'svelte/reactivity'
 
 	interface Props {
-		playlists: PlaylistData[]
 		trackIds: number[]
 		onclose: () => void
 	}
 
 	const { trackIds }: Props = $props()
 
-	// const getData = async () => {
-	// 	const db = await getDatabase()
-	// 	const tx = db.transaction('playlistsTracks')
-	// 	const promises = trackIds.map((trackId) => tx.objectStore('playlistsTracks').getAll(trackId))
-	// }
+	let searchTerm = $state('')
 
-	const query = createLibraryItemKeysQuery('playlists', {
-		key: ['playlists'],
-		fetcher: () => getLibraryItemIds('playlists', { sort: 'createdAt', order: 'desc' }),
+	const playlistsIdsQuery = createLibraryItemKeysQuery('playlists', {
+		key: () => [searchTerm],
+		fetcher: () =>
+			getLibraryItemIds('playlists', {
+				sort: 'createdAt',
+				order: 'desc',
+				searchTerm,
+				searchFn: (p, term) => p.name.includes(term),
+			}),
 	})
 
 	const trackPlaylists = createQuery({
-		key: () => ['playlists-track', ...trackIds],
+		key: () => trackIds,
 		fetcher: async () => {
 			const firstTrackId = trackIds.at(0)
 			// In case there are multiple track ids, we treat as if there are no items added in the playlist
@@ -62,15 +63,16 @@
 <!-- <Separator class="my-6" /> -->
 
 <div class="p-4">
-	<TextField name="search" placeholder="Search" />
+	<TextField bind:value={searchTerm} name="search" placeholder={m.librarySearch()} />
 </div>
 
+<Separator />
 <ScrollContainer class="max-h-100 grow overflow-auto px-2 py-4">
-	{#if query.status === 'error'}
+	{#if playlistsIdsQuery.status === 'error'}
 		<div class="py-10 text-center">{m.errorUnexpected()}</div>
-	{:else if query.status === 'loaded'}
+	{:else if playlistsIdsQuery.status === 'loaded'}
 		<PlaylistListContainer
-			items={query.value}
+			items={playlistsIdsQuery.value}
 			onItemClick={(item) => {
 				void addToPlaylist(item.playlist.id)
 			}}

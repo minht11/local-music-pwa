@@ -1,20 +1,3 @@
-const updateStyles = async (argbOrHex: number | string | null, isDark: boolean) => {
-	const module = await import('$lib/theme.ts')
-
-	const argb =
-		typeof argbOrHex === 'number'
-			? argbOrHex
-			: typeof argbOrHex === 'string'
-				? module.argbFromHex(argbOrHex)
-				: null
-
-	if (argb) {
-		module.setThemeCssVariables(argb, isDark)
-	} else {
-		module.clearThemeCssVariables()
-	}
-}
-
 const updateWindowTileBarColor = () => {
 	const element = document.querySelector('meta[name="theme-color"]')
 	if (!element) {
@@ -50,7 +33,10 @@ export const setupTheme = (): void => {
 			}
 		}
 
-		void updateStyles(argbOrHex, isDark).then(updateWindowTileBarColor)
+		void import('$lib/theme.ts').then(({ updateThemeCssVariables }) => {
+			updateThemeCssVariables(argbOrHex, isDark)
+			updateWindowTileBarColor()
+		})
 	})
 
 	$effect.pre(() => {

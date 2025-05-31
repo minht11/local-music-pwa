@@ -125,7 +125,7 @@ body {
 @layer base {
 	* {
 		scrollbar-width: thin;
-		scrollbar-color: --alpha(var(--color-secondary) / 30%);
+		scrollbar-color: --alpha(var(--color-secondary) / 30%) transparent;
 	}
 
 	:where(:focus) {

@@ -31,6 +31,6 @@
 	setContext(contextKey, () => scrollTarget)
 </script>
 
-<div bind:this={scrollTarget} class={className}>
+<div bind:this={scrollTarget} class={['overscroll-contain', className]}>
 	{@render children()}
 </div>

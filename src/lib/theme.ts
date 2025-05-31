@@ -7,8 +7,6 @@ import {
 	// biome-ignore lint/style/noRestrictedImports: Main module for theme utilities
 } from '@material/material-color-utilities'
 
-export { argbFromHex }
-
 type ColorToken =
 	| 'primary'
 	| 'onPrimary'
@@ -89,14 +87,10 @@ const COLOR_TOKENS_GENERATION_MAP: ColorTokensInputMap = {
 	inversePrimary: ['a1', 80, 40],
 }
 
-/**
- * @public
- * @__NO_SIDE_EFFECTS__
-*/
-export const getDefaultThemeArgb = (): number => argbFromHex('#ffb599')
-
-/** @public */
-export type ThemePaletteMap = Record<ColorToken, string>
+const COLOR_TOKENS_GENERATION_ENTRIES = Object.entries(COLOR_TOKENS_GENERATION_MAP) as [
+	ColorToken,
+	ColorTokenInput,
+][]
 
 const createTonalPalette = (hue: number, chroma: number) => ({
 	tone: (tone: number) => HctSolver.solveToInt(hue, chroma, tone),
@@ -106,8 +100,10 @@ interface TonalPalette {
 	tone(argb: number): number
 }
 
+type ThemeEntry = [key: string, hexValue: string]
+
 /** @public */
-export const getThemePaletteRgb = (argb: number, isDark: boolean): ThemePaletteMap => {
+export const getThemePaletteRgbEntries = (argb: number, isDark: boolean): ThemeEntry[] => {
 	const cam16 = Cam16.fromInt(argb)
 	const hue = cam16.hue
 	const chroma = cam16.chroma
@@ -123,31 +119,47 @@ export const getThemePaletteRgb = (argb: number, isDark: boolean): ThemePaletteM
 		error: createTonalPalette(25, 84),
 	}
 
-	const entries = Object.entries(COLOR_TOKENS_GENERATION_MAP)
-	const transformedEntries = entries.map(([key, value]) => {
+	const transformedEntries = COLOR_TOKENS_GENERATION_ENTRIES.map(([key, value]): ThemeEntry => {
 		const [toneName, light, dark] = value
 
 		const tone = isDark ? dark : light
 		const argbValue = palette[toneName].tone(tone)
 
-		return [key, hexFromArgb(argbValue)] as [string, string]
+		return [key, hexFromArgb(argbValue)]
 	})
 
-	return Object.fromEntries(transformedEntries) as ThemePaletteMap
+	return transformedEntries
 }
 
-/** @public */
-export const clearThemeCssVariables = (): void => {
-	for (const key of Object.keys(COLOR_TOKENS_GENERATION_MAP)) {
+const clearThemeCssVariables = (): void => {
+	for (const [key] of COLOR_TOKENS_GENERATION_ENTRIES) {
 		document.documentElement.style.removeProperty(`--color-${key}`)
 	}
 }
 
-/** @public */
-export const setThemeCssVariables = (argb: number, isDark: boolean): void => {
-	const palette = getThemePaletteRgb(argb, isDark)
+const setThemeCssVariables = (argb: number, isDark: boolean): void => {
+	const palette = getThemePaletteRgbEntries(argb, isDark)
 
-	for (const [key, hex] of Object.entries(palette)) {
+	for (const [key, hex] of palette) {
 		document.documentElement.style.setProperty(`--color-${key}`, hex)
+	}
+}
+
+/** @public */
+export const updateThemeCssVariables = (
+	argbOrHex: number | string | null,
+	isDark: boolean,
+): void => {
+	const argb =
+		typeof argbOrHex === 'number'
+			? argbOrHex
+			: typeof argbOrHex === 'string'
+				? argbFromHex(argbOrHex)
+				: null
+
+	if (argb) {
+		setThemeCssVariables(argb, isDark)
+	} else {
+		clearThemeCssVariables()
 	}
 }

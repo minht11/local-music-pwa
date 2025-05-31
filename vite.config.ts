@@ -1,10 +1,9 @@
-import { readdirSync, statSync } from 'node:fs'
-import path from 'node:path'
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
+import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
 import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
 import { workerChunkPlugin } from './lib/vite-plugin-worker-chunk.ts'
 
@@ -14,6 +13,7 @@ export default defineConfig({
 			allow: ['./.generated'],
 		},
 		warmup: {
+			// Avoids page reloading in Dev mode. When vite supports bundled-dev mode this can be removed.
 			clientFiles: [
 				'src/lib/components/**/*.svelte',
 				'src/lib/library/scan-actions/scanner/worker.ts',
@@ -71,6 +71,7 @@ export default defineConfig({
 	plugins: [
 		workerChunkPlugin(),
 		themeColorsPlugin({
+			defaultColorSeed: '#ffb599',
 			output: `${import.meta.dirname}/.generated/theme-colors.css`,
 		}),
 		tailwindcss(),
@@ -93,31 +94,7 @@ export default defineConfig({
 			strategy: ['baseLocale'],
 			isServer: 'import.meta.env.SSR'
 		}),
-		{
-			name: 'log-chunks-size',
-			apply: 'build',
-			enforce: 'post',
-			writeBundle() {
-				const dirSize = async (directory: string) => {
-					const files = readdirSync(directory)
-					const stats = files.map((file) => statSync(path.join(directory, file)))
-
-					let size = 0
-					let count = 0
-					for await (const stat of stats) {
-						size += stat.size
-						count += 1
-					}
-
-					return { size, count }
-				}
-
-				setTimeout(async () => {
-					const { size, count } = await dirSize('./build/_app/immutable/chunks')
-					console.log('Size of chunks:', size / 1024, 'KB. Files count:', count)
-				}, 2000)
-			},
-		},
+		logChunkSizePlugin(),
 		{
 			name: 'ssr-config',
 			config(config) {
