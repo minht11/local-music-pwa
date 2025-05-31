@@ -1,4 +1,5 @@
 import { ICON_PATHS } from '$lib/components/icon/icon-paths'
+import minifyHtml from '@minify-html/node'
 import type { Handle } from '@sveltejs/kit'
 
 const getSvgSymbol = (name: string, path: string) =>
@@ -13,7 +14,7 @@ export const handle: Handle = ({ event, resolve }) => {
 
 			// Instead of keeping the icons paths in the client js bundle, we can inline them in the html
 			// making loading tiny bit faster
-			return html.replace(
+			const transformedHtml = html.replace(
 				'%snae.svg-icons-paths%',
 				`
 					<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display: none;">
@@ -22,6 +23,8 @@ export const handle: Handle = ({ event, resolve }) => {
 						</defs>
 					</svg>`,
 			)
+
+			return minifyHtml.minify(Buffer.from(transformedHtml), {}).toString('utf-8')
 		},
 	})
 }
