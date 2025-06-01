@@ -1,4 +1,4 @@
-import { THEME_PALLETTE_DARK } from '../../server/theme-colors.ts'
+import { THEME_PALLETTE_DARK } from '../../../server/theme-colors.ts'
 
 export const prerender = true
 

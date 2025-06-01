@@ -1,4 +1,4 @@
-import { THEME_PALLETTE_LIGHT } from '../../server/theme-colors.ts'
+import { THEME_PALLETTE_LIGHT } from '../../../server/theme-colors.ts'
 
 const foregroundColor = THEME_PALLETTE_LIGHT.onPrimary
 
