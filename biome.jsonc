@@ -110,7 +110,13 @@
 			},
 			"suspicious": {
 				"useAwait": "error",
-				"useErrorMessage": "error"
+				"useErrorMessage": "error",
+				"noConsole": {
+					"level": "error",
+					"options": {
+						"allow": ["assert", "error", "info", "warn", "time", "timeEnd", "debug"]
+					}
+				}
 			}
 		}
 	},

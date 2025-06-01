@@ -70,6 +70,7 @@
 	class="@container sticky top-2 z-1 mt-2 mb-4 ml-auto flex w-full max-w-125 items-center gap-2 rounded-lg border border-primary/10 bg-surfaceContainerHighest px-2"
 >
 	<input
+		value={store.searchTerm}
 		type="text"
 		name="search"
 		placeholder={`${m.librarySearch()} ${name.toLowerCase()}`}

@@ -30,7 +30,6 @@
 		return playlists
 	}
 
-	console.log('getPlaylists', getPlaylists)
 	const playlistsPromise = getPlaylists()
 	playlistsPromise.catch(() => {
 		main.addTrackToPlaylistDialogOpen = null

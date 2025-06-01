@@ -15,6 +15,7 @@
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import type { RouteId } from '$lib/view-transitions.ts'
+	import type { Snapshot } from '@sveltejs/kit'
 	import Search from './Search.svelte'
 
 	const { data, children } = $props()
@@ -63,6 +64,13 @@
 	const layoutMode = $derived(data.layoutMode(isWideLayout, page.params.uuid))
 
 	useSetBottomBar(() => layoutBottom)
+
+	export const snapshot: Snapshot<string> = {
+		capture: () => data.store.searchTerm,
+		restore: (value) => {
+			data.store.searchTerm = value
+		},
+	}
 </script>
 
 {#snippet navItemsSnippet(className: string)}
