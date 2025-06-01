@@ -57,7 +57,7 @@
 		'interactable',
 		KIND_CLASS_MAP[kind],
 		kind !== 'blank' &&
-			'base-button interactable flex h-10 items-center justify-center gap-2 rounded-3xl px-6 text-label-lg transition-[outline-width] duration-150',
+			'base-button flex h-10 items-center justify-center gap-2 rounded-3xl px-6 text-label-lg transition-[outline-width] duration-150',
 		restProps.class,
 		disabled && '!cursor-default',
 	]}

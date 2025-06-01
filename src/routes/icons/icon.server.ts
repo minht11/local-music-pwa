@@ -1,4 +1,6 @@
-const foregroundColor = '#ffffff'
+import { THEME_PALLETTE_LIGHT } from '../../server/theme-colors.ts'
+
+const foregroundColor = THEME_PALLETTE_LIGHT.onPrimary
 
 export const getAppIcon = (clipBounds = false): string => `
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 24 24">
@@ -15,7 +17,7 @@ export const getAppIcon = (clipBounds = false): string => `
     
     <g ${clipBounds ? 'clip-path="url(#bounds)"' : ''}>
         <g id="foreground">
-            <rect width="100%" height="100%" fill="#7c5800" />
+            <rect width="100%" height="100%" fill="${THEME_PALLETTE_LIGHT.primary}" />
 
             <rect width="2" height="10" fill="${foregroundColor}" x="13" y="6" rx="1" ry="1" />
             <rect width="6" height="4" fill="${foregroundColor}" x="9" y="13" rx="1" ry="1" />

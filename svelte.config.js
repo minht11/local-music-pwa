@@ -35,8 +35,8 @@ const config = {
 				tsConfig.include.push('../paraglide/**/*')
 
 				return tsConfig
-			}
-		}
+			},
+		},
 	},
 }
 

@@ -1,11 +1,11 @@
-const updateWindowTileBarColor = () => {
-	const element = document.querySelector('meta[name="theme-color"]')
-	if (!element) {
-		return
-	}
+const updateWindowTileBarColor = (isDark: boolean) => {
+	const element = document.querySelector(
+		`meta[name="theme-color"]media[prefers-color-scheme="${isDark ? 'dark' : 'light'}"]`,
+	)
 
-	const surfaceColor = window.getComputedStyle(document.body).getPropertyValue('--color-surface')
-	element.setAttribute('content', surfaceColor)
+	// Background color uses --surface color
+	const surfaceColor = window.getComputedStyle(document.documentElement).backgroundColor
+	element?.setAttribute('content', surfaceColor)
 }
 
 export const setupTheme = (): void => {
@@ -27,15 +27,13 @@ export const setupTheme = (): void => {
 			// On initial load, if no custom color is set we can skip
 			// loading module which relatively heavy
 			if (!argbOrHex) {
-				updateWindowTileBarColor()
-
 				return
 			}
 		}
 
 		void import('$lib/theme.ts').then(({ updateThemeCssVariables }) => {
 			updateThemeCssVariables(argbOrHex, isDark)
-			updateWindowTileBarColor()
+			updateWindowTileBarColor(isDark)
 		})
 	})
 

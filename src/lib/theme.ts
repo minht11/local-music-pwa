@@ -7,7 +7,8 @@ import {
 	// biome-ignore lint/style/noRestrictedImports: Main module for theme utilities
 } from '@material/material-color-utilities'
 
-type ColorToken =
+/** @public */
+export type PaletteToken =
 	| 'primary'
 	| 'onPrimary'
 	| 'primaryContainer'
@@ -45,11 +46,11 @@ type ColorToken =
 	| 'inversePrimary'
 
 type Tone = keyof CorePalette
-type ColorTokenInput = readonly [tone: Tone, light: number, dark: number]
+type PaletteTokenInput = readonly [tone: Tone, light: number, dark: number]
 
-type ColorTokensInputMap = Record<ColorToken, ColorTokenInput>
+type PaletteTokensInputMap = Record<PaletteToken, PaletteTokenInput>
 
-const COLOR_TOKENS_GENERATION_MAP: ColorTokensInputMap = {
+const COLOR_TOKENS_GENERATION_MAP: PaletteTokensInputMap = {
 	primary: ['a1', 40, 80],
 	onPrimary: ['a1', 100, 20],
 	primaryContainer: ['a1', 90, 30],
@@ -88,8 +89,8 @@ const COLOR_TOKENS_GENERATION_MAP: ColorTokensInputMap = {
 }
 
 const COLOR_TOKENS_GENERATION_ENTRIES = Object.entries(COLOR_TOKENS_GENERATION_MAP) as [
-	ColorToken,
-	ColorTokenInput,
+	PaletteToken,
+	PaletteTokenInput,
 ][]
 
 const createTonalPalette = (hue: number, chroma: number) => ({
@@ -100,7 +101,7 @@ interface TonalPalette {
 	tone(argb: number): number
 }
 
-type ThemeEntry = [key: string, hexValue: string]
+type ThemeEntry = [key: PaletteToken, hexValue: string]
 
 /** @public */
 export const getThemePaletteRgbEntries = (argb: number, isDark: boolean): ThemeEntry[] => {

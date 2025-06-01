@@ -72,9 +72,6 @@ importers:
       '@inlang/paraglide-js':
         specifier: 2.0.13
         version: 2.0.13
-      '@minify-html/node':
-        specifier: ^0.16.4
-        version: 0.16.4
       '@sveltejs/adapter-static':
         specifier: ^3.0.8
         version: 3.0.8(@sveltejs/kit@2.21.1(@sveltejs/vite-plugin-svelte@5.0.3(rolldown-vite@6.3.14(@types/node@22.15.29)(esbuild@0.25.4)(jiti@2.4.2)(terser@5.40.0))(svelte@5.33.10))(rolldown-vite@6.3.14(@types/node@22.15.29)(esbuild@0.25.4)(jiti@2.4.2)(terser@5.40.0))(svelte@5.33.10))
@@ -434,36 +431,6 @@ packages:
 
   '@material/material-color-utilities@0.3.0':
     resolution: {integrity: sha512-ztmtTd6xwnuh2/xu+Vb01btgV8SQWYCaK56CkRK8gEkWe5TuDyBcYJ0wgkMRn+2VcE9KUmhvkz+N9GHrqw/C0g==}
-
-  '@minify-html/node-darwin-arm64@0.16.4':
-    resolution: {integrity: sha512-9H8hcywDb8zo2jEJfaIAibgsKjMqE+XF7SyqTtJ5H8lVXHxffOkawH4TQtphf9V/x7zXeb/nByAvHe1orJ/RHA==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@minify-html/node-darwin-x64@0.16.4':
-    resolution: {integrity: sha512-P0Krf5nwXbccMrC7ragKAIVOENHFoVRQi+v/8k5pmfjrNlxgXGVILacG0FbUZXsH2Z2XaIo39HxuMf70L6wQlA==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@minify-html/node-linux-arm64@0.16.4':
-    resolution: {integrity: sha512-GDRExKf7AmyAdBTdhMkMyzFhJu5VeyJTu0OnNH2ekp69JrhQTrrrt9UYqnjen+7qLIaZB/R8urDRAYNk0HZi5w==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@minify-html/node-linux-x64@0.16.4':
-    resolution: {integrity: sha512-MS/gF1gxJoeHqEGcb1xoUIRv6gVin4cGJszgHPYSikzkK8Yg0p6rVOZdDAE4AAnp/NW0DYNq7fwYgw3igmppFw==}
-    cpu: [x64]
-    os: [linux]
-
-  '@minify-html/node-win32-x64@0.16.4':
-    resolution: {integrity: sha512-SCY7hzIqG1RclU0QzU2MlGtPOujPu6dvaPYqDvhAHpkvRXtX0hnyOrrfqf7GcBdDbASxV8LDlBWpY46JO2cjAA==}
-    cpu: [x64]
-    os: [win32]
-
-  '@minify-html/node@0.16.4':
-    resolution: {integrity: sha512-ykQgl6xcQQDE1shUExeObPSNwAf00DVUt/GrxdjiqFNCVGu7DXK9nuH29sNTyKKYnJJLZAi6OEib2bDfxW3udg==}
-    engines: {node: '>= 8.6.0'}
-    hasBin: true
 
   '@napi-rs/wasm-runtime@0.2.10':
     resolution: {integrity: sha512-bCsCyeZEwVErsGmyPNSzwfwFn4OdxBj0mmv6hOFucB/k81Ojdu68RbZdxYsRQUPc9l6SU5F/cG+bXgWs3oUgsQ==}
@@ -1942,29 +1909,6 @@ snapshots:
   '@lix-js/server-protocol-schema@0.1.1': {}
 
   '@material/material-color-utilities@0.3.0(patch_hash=11fcdd2d0c1b26018b2646dc931948ce22d82ee106bff932bf0ee91c940a5986)': {}
-
-  '@minify-html/node-darwin-arm64@0.16.4':
-    optional: true
-
-  '@minify-html/node-darwin-x64@0.16.4':
-    optional: true
-
-  '@minify-html/node-linux-arm64@0.16.4':
-    optional: true
-
-  '@minify-html/node-linux-x64@0.16.4':
-    optional: true
-
-  '@minify-html/node-win32-x64@0.16.4':
-    optional: true
-
-  '@minify-html/node@0.16.4':
-    optionalDependencies:
-      '@minify-html/node-darwin-arm64': 0.16.4
-      '@minify-html/node-darwin-x64': 0.16.4
-      '@minify-html/node-linux-arm64': 0.16.4
-      '@minify-html/node-linux-x64': 0.16.4
-      '@minify-html/node-win32-x64': 0.16.4
 
   '@napi-rs/wasm-runtime@0.2.10':
     dependencies:
