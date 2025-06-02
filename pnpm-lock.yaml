@@ -19,7 +19,7 @@ overrides:
 
 patchedDependencies:
   '@material/material-color-utilities':
-    hash: 11fcdd2d0c1b26018b2646dc931948ce22d82ee106bff932bf0ee91c940a5986
+    hash: d908b4656c84ea0edcaab27d59d7e83333ce172f88841fcc9006b2ca33590b3d
     path: patches/@material__material-color-utilities.patch
   debug:
     hash: b12cae049d47a9e32e31249166810e3faa1ce93528ce1c37b6635ddd408d60c4
@@ -34,7 +34,7 @@ importers:
         version: 1.7.1
       '@material/material-color-utilities':
         specifier: ^0.3.0
-        version: 0.3.0(patch_hash=11fcdd2d0c1b26018b2646dc931948ce22d82ee106bff932bf0ee91c940a5986)
+        version: 0.3.0(patch_hash=d908b4656c84ea0edcaab27d59d7e83333ce172f88841fcc9006b2ca33590b3d)
       '@resvg/resvg-js':
         specifier: ^2.6.2
         version: 2.6.2
@@ -1917,7 +1917,7 @@ snapshots:
 
   '@lix-js/server-protocol-schema@0.1.1': {}
 
-  '@material/material-color-utilities@0.3.0(patch_hash=11fcdd2d0c1b26018b2646dc931948ce22d82ee106bff932bf0ee91c940a5986)': {}
+  '@material/material-color-utilities@0.3.0(patch_hash=d908b4656c84ea0edcaab27d59d7e83333ce172f88841fcc9006b2ca33590b3d)': {}
 
   '@napi-rs/wasm-runtime@0.2.10':
     dependencies:

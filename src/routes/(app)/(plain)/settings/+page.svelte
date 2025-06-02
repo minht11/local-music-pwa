@@ -63,7 +63,7 @@
 
 	// We debounce state updates, because some DB operations can be very fast.
 	// This prevents UI from flickering
-	const isDatabasePendingGetter = new Debounced(() => isDatabaseOperationPending(), 150)
+	const isDatabasePendingGetter = new Debounced(() => isDatabaseOperationPending(), 200)
 	const isDatabasePending = $derived(isDatabasePendingGetter.current)
 </script>
 
@@ -98,7 +98,7 @@
 			<div
 				class="mt-4 flex w-full items-center justify-center gap-4 rounded-md bg-tertiaryContainer/20 py-4"
 			>
-				Scan in progress
+				Database operation in progress...
 				<Spinner class="size-8" />
 			</div>
 		{/if}
