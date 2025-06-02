@@ -1,4 +1,6 @@
 <script lang="ts">
+	import '../app.css'
+
 	import { page } from '$app/state'
 	import Button from '$lib/components/Button.svelte'
 
