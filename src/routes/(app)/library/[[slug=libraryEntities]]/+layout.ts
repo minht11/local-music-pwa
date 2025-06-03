@@ -76,7 +76,7 @@ type LoadResult = LoadDataResult<LibraryStoreName> & {
 export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 	const { slug } = event.params
 	if (!slug) {
-	  redirect(301, '/library/tracks')
+		redirect(301, '/library/tracks')
 	}
 
 	const data = await loadData(slug)
