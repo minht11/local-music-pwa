@@ -1,0 +1,55 @@
+<script lang="ts" module>
+	import ScrollContainer from './ScrollContainer.svelte'
+
+	// prettier-ignore
+	export type LayoutMode = 'both' | 'list' | 'details';
+</script>
+
+<script lang="ts">
+	interface Props {
+		mode: LayoutMode
+		list: Snippet<[LayoutMode]>
+		details: Snippet<[LayoutMode]>
+		class?: ClassValue
+		noPlayerOverlayPadding?: boolean
+		noListStableGutter?: boolean
+	}
+
+	const {
+		mode,
+		list,
+		details,
+		class: className,
+		noListStableGutter,
+		noPlayerOverlayPadding,
+	}: Props = $props()
+</script>
+
+<div class={['!flex !flex-col', className]}>
+	<div class="flex h-full grow">
+		{#if mode === 'both'}
+			<ScrollContainer
+				class={[
+					'sticky top-0 flex max-h-[100vh] shrink-0 flex-col overflow-y-auto overscroll-contain',
+					!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
+					!noListStableGutter && 'scrollbar-gutter-stable',
+				]}
+			>
+				{@render list(mode)}
+			</ScrollContainer>
+		{/if}
+
+		<div
+			class={[
+				'flex w-full grow flex-col',
+				!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
+			]}
+		>
+			{#if mode === 'both' || mode === 'details'}
+				{@render details(mode)}
+			{:else if mode === 'list'}
+				{@render list(mode)}
+			{/if}
+		</div>
+	</div>
+</div>

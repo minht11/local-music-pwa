@@ -1,0 +1,42 @@
+diff --git a/hct/hct.d.ts b/hct/hct.d.ts
+index fb4bd0eba86c2ed56c0032bd47ff05e73bbddd6c..45dc196ae164e22dfcd47bc2a19659a7be164d82 100644
+--- a/hct/hct.d.ts
++++ b/hct/hct.d.ts
+@@ -15,6 +15,9 @@
+  * limitations under the License.
+  */
+ import { ViewingConditions } from './viewing_conditions.js';
++
++export { HctSolver } from './hct_solver.js';
++
+ /**
+  * HCT, hue, chroma, and tone. A color system that provides a perceptually
+  * accurate color measurement system that can also accurately render what colors
+diff --git a/hct/hct.js b/hct/hct.js
+index f07a83af0c1feb25ebfc6b10f6a23b23cf3a47b9..be2925a24e1402eaa0fbc523356fed1a620828f9 100644
+--- a/hct/hct.js
++++ b/hct/hct.js
+@@ -33,6 +33,11 @@ import * as utils from '../utils/color_utils.js';
+ import { Cam16 } from './cam16.js';
+ import { HctSolver } from './hct_solver.js';
+ import { ViewingConditions } from './viewing_conditions.js';
++
++export {
++    HctSolver,
++}
++
+ /**
+  * HCT, hue, chroma, and tone. A color system that provides a perceptually
+  * accurate color measurement system that can also accurately render what colors
+diff --git a/package.json b/package.json
+index 715d7b7636c07775a9aeb5f6801ffa4e106f0382..7c1697dcbaa9b05186d3c050370194767f853344 100644
+--- a/package.json
++++ b/package.json
+@@ -4,6 +4,7 @@
+   "publishConfig": {
+     "access": "public"
+   },
++	"sideEffects": false,
+   "description": "Algorithms and utilities that power the Material Design 3 (M3) color system, including choosing theme colors from images and creating tones of colors; all in a new color space.",
+   "keywords": [
+     "material",
