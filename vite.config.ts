@@ -3,7 +3,6 @@ import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
-import devtoolsJson from 'vite-plugin-devtools-json'
 import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
 import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
 import { workerChunkPlugin } from './lib/vite-plugin-worker-chunk.ts'
@@ -105,6 +104,5 @@ export default defineConfig({
 				return config
 			},
 		},
-		devtoolsJson(),
 	],
 }) as unknown

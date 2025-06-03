@@ -1,6 +1,6 @@
 const updateWindowTileBarColor = (isDark: boolean) => {
 	const element = document.querySelector(
-		`meta[name="theme-color"]media[prefers-color-scheme="${isDark ? 'dark' : 'light'}"]`,
+		`meta[name="theme-color"][media="(prefers-color-scheme: ${isDark ? 'dark' : 'light'})"]`,
 	)
 
 	// Background color uses --surface color
