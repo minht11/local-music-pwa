@@ -172,7 +172,7 @@
 									items: (playlist) => getPlaylistMenuItems(main, playlist),
 								}}
 								onItemClick={({ playlist }) => {
-									const detailsViewId: RouteId = '/(app)/library/[slug=libraryEntities]/[uuid]'
+									const detailsViewId: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]'
 									const shouldReplace = page.route.id === detailsViewId
 
 									void goto(`/library/playlists/${playlist.uuid}`, { replaceState: shouldReplace })

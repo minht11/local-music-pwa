@@ -1,5 +1,5 @@
 import { onNavigate } from '$app/navigation'
-import type { LayoutLoadEvent } from '../routes/(app)/$types'
+import type { LayoutLoadEvent } from '../routes/$types'
 import { getActiveRipplesCount } from './attachments/ripple.ts'
 import { wait } from './helpers/utils/wait.ts'
 
@@ -10,7 +10,7 @@ export type AppViewTransitionTypeMatcherResult = {
 	backNavigation?: boolean
 } | null
 
-export type RouteId = LayoutLoadEvent['route']['id']
+export type RouteId = Exclude<LayoutLoadEvent['route']['id'], null>
 
 /** Used to determine which data attributes to add in order to apply correct view transition */
 export type AppViewTransitionTypeMatcher = (

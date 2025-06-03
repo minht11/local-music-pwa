@@ -50,7 +50,7 @@
 
 	const clickHandler = () => {
 		if (query.value) {
-			const detailsViewId: RouteId = '/(app)/library/[slug=libraryEntities]/[uuid]'
+			const detailsViewId: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]'
 			const shouldReplace = page.route.id === detailsViewId
 
 			goto(`/library/${type}/${query.value.uuid}`, { replaceState: shouldReplace })

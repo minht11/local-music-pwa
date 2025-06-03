@@ -75,6 +75,10 @@ type LoadResult = LoadDataResult<LibraryStoreName> & {
 
 export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 	const { slug } = event.params
+	if (!slug) {
+	  redirect(301, '/library/tracks')
+	}
+
 	const data = await loadData(slug)
 
 	if (data.tracksCountQuery.value === 0) {
@@ -104,8 +108,8 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 	}
 
 	defineViewTransitionMatcher((to, from) => {
-		const libraryRoute: RouteId = '/(app)/library/[slug=libraryEntities]'
-		const detailsRoute: RouteId = '/(app)/library/[slug=libraryEntities]/[uuid]'
+		const libraryRoute: RouteId = '/(app)/library/[[slug=libraryEntities]]'
+		const detailsRoute: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]'
 
 		if (to === libraryRoute && from === libraryRoute) {
 			return { view: 'library' }
