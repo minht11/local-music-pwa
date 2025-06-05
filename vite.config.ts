@@ -30,6 +30,8 @@ export default defineConfig({
 			experimental: {
 				strictExecutionOrder: false,
 			},
+			// TODO. Investigate this option.
+			// preserveEntrySignatures: false,
 			output: {
 				minify: {
 					mangle: true,
