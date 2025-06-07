@@ -148,11 +148,11 @@
 		}
 	}
 
-	:global(html[data-view-regular]) :global {
+	:global(html:active-view-transition-type(regular)) {
 		--view-regular-out: 1.1;
 		--view-regular-in: 0.9;
 
-		&[data-view-back-navigation] {
+		&:active-view-transition-type(backwards) {
 			--view-regular-out: 0.9;
 			--view-regular-in: 1.1;
 		}

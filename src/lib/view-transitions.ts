@@ -7,12 +7,11 @@ export type AppViewTransitionType = 'regular' | 'player' | 'library'
 
 export type AppViewTransitionTypeMatcherResult = {
 	view: AppViewTransitionType
-	backNavigation?: boolean
+	backwards?: boolean
 } | null
 
 export type RouteId = Exclude<LayoutLoadEvent['route']['id'], null>
 
-/** Used to determine which data attributes to add in order to apply correct view transition */
 export type AppViewTransitionTypeMatcher = (
 	to: RouteId,
 	from: RouteId,
@@ -26,46 +25,17 @@ export const defineViewTransitionMatcher = (callback: AppViewTransitionTypeMatch
 }
 
 export const setupAppViewTransitions = (disabled: () => boolean): void => {
-	/**
-	 * @param to - to view name
-	 * @param from - from view name
-	 * @param backNavigationFallback - when not explicitly specified this param will determine if view should be animated as going back to.
-	 */
-	const handleViewTransition = (
-		to: string | null | undefined,
-		from: string | null | undefined,
-		backNavigationFallback: boolean,
-	) => {
-		let viewType: AppViewTransitionType = 'regular'
-		let backNavigation = backNavigationFallback
-
-		if (to && from) {
-			for (const matcher of matchers) {
-				const matched = matcher?.(to as RouteId, from as RouteId)
-
-				if (matched) {
-					viewType = matched.view
-					backNavigation = matched.backNavigation ?? backNavigationFallback
-
-					break
-				}
-			}
-		}
-
-		const views: AppViewTransitionType[] = ['regular', 'player', 'library']
-		for (const view of views) {
-			document.documentElement.toggleAttribute(`data-view-${view}`, view === viewType)
-		}
-
-		document.documentElement.toggleAttribute('data-view-back-navigation', backNavigation)
-	}
-
 	onNavigate(async (nav) => {
 		if (disabled()) {
 			return
 		}
 
-		if (!document.startViewTransition) {
+		if (
+			// biome-ignore lint/complexity/useSimplifiedLogicExpression: suggested fix is not simpler
+			!document.startViewTransition ||
+			// Chrome introduced support for View Transition types bit later
+			!globalThis.ViewTransitionTypeSet
+		) {
 			return
 		}
 
@@ -76,12 +46,31 @@ export const setupAppViewTransitions = (disabled: () => boolean): void => {
 			await wait(175)
 		}
 
-		const backNavigation = nav.delta ? nav.delta < 0 : false
-		handleViewTransition(nav.to?.route.id, nav.from?.route.id, backNavigation)
+		const to = nav.to?.route.id
+		const from = nav.from?.route.id
 
-		document.startViewTransition(() => {
-			resolve()
-			return nav.complete
+		let customMatch: AppViewTransitionTypeMatcherResult | undefined
+		if (to && from) {
+			for (const matcher of matchers) {
+				const match = matcher?.(to as RouteId, from as RouteId)
+
+				if (match) {
+					customMatch = match
+					break
+				}
+			}
+		}
+
+		const goingBackwards = nav.delta ? nav.delta < 0 : false
+		const isBackwards = customMatch?.backwards ?? goingBackwards
+		const view = customMatch?.view ?? 'regular'
+
+		document.startViewTransition({
+			update: () => {
+				resolve()
+				return nav.complete
+			},
+			types: [view, isBackwards ? 'backwards' : 'forwards'],
 		})
 
 		return promise

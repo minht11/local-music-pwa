@@ -51,10 +51,10 @@ export const load: LayoutLoad = (): LoadResult => {
 			(prevRouteWasPlayer && nextRouteIsQueue) || (prevRouteWasQueue && nextRouteIsPlayer)
 
 		let view: AppViewTransitionType | null = null
-		let backNavigation = false
+		let backwards = false
 		if (prevRouteWasPlayer && !viewBetweenPlayerAndQueue) {
 			view = 'player'
-			backNavigation = true
+			backwards = true
 		}
 
 		if (nextRouteIsPlayer && !viewBetweenPlayerAndQueue) {
@@ -62,7 +62,7 @@ export const load: LayoutLoad = (): LoadResult => {
 		}
 
 		if (view) {
-			return { view, backNavigation }
+			return { view, backwards }
 		}
 
 		return null

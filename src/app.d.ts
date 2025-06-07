@@ -67,4 +67,16 @@ declare global {
 		/** Analytics. If ad blocker blocks it this will be undefined */
 		goatcounter?: GoatCounter
 	}
+
+	// TODO. Once Typescript 5.9 is out this can be removed
+	interface StartViewTransitionOptions {
+		types?: string[] | null
+		update?: ViewTransitionUpdateCallback | null
+	}
+
+	interface Document {
+		startViewTransition(
+			callbackOptions?: ViewTransitionUpdateCallback | StartViewTransitionOptions,
+		): ViewTransition
+	}
 }
