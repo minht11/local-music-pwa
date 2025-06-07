@@ -259,7 +259,7 @@ const emptyValue = <T, AllowEmpty extends boolean = false>(
 /** @private */
 export const getCachedOrFetchValue = <Store extends LibraryStoreName>(
 	key: CacheKey<Store>,
-	fetchValue: () => Promise<LibraryValueMap[Store] | undefined>,
+	fetchValue: () => Promise<GetLibraryValueResult<Store> | undefined>,
 ): LibraryValue<Store> | Promise<LibraryValue<Store> | undefined> => {
 	const cachedValue = valueCache.get(key)
 	if (cachedValue) {

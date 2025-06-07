@@ -4,11 +4,12 @@
 		"types": [
 			"@types/dom-navigation",
 			"@types/wicg-file-system-access",
-			"@types/dom-view-transitions",
 			"./.generated/types/auto-imports.d.ts"
 		]
 	},
-	"references": [{
-		"path": "./tsconfig.node.json",
-	}]
+	"references": [
+		{
+			"path": "./tsconfig.node.json"
+		}
+	]
 }
