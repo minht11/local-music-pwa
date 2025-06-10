@@ -51,7 +51,7 @@ export class PlayerStore {
 	}
 
 	#activeTrackIndex = $state(-1)
-	#itemsIdsOriginalOrder = $state<number[]>([])
+	#itemsIdsOriginalOrder = $state<number[]>([...Array.from({ length: 50 })])
 	#itemsIdsShuffled = $state<number[]>([])
 
 	itemsIds: number[] = $derived(

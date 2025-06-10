@@ -24,6 +24,22 @@ export const defineViewTransitionMatcher = (callback: AppViewTransitionTypeMatch
 	matchers.length = 2
 }
 
+type ViewTransitionReadyListener = (
+	match: Exclude<AppViewTransitionTypeMatcherResult, null>,
+) => void
+
+const readyListeners = new Set<(match: Exclude<AppViewTransitionTypeMatcherResult, null>) => void>()
+
+export const onViewTransitionReady = (listener: ViewTransitionReadyListener) => {
+	$effect(() => {
+		readyListeners.add(listener)
+
+		return () => {
+			readyListeners.delete(listener)
+		}
+	})
+}
+
 export const setupAppViewTransitions = (disabled: () => boolean): void => {
 	onNavigate(async (nav) => {
 		if (disabled()) {
@@ -65,12 +81,21 @@ export const setupAppViewTransitions = (disabled: () => boolean): void => {
 		const isBackwards = customMatch?.backwards ?? goingBackwards
 		const view = customMatch?.view ?? 'regular'
 
-		document.startViewTransition({
+		const transition = document.startViewTransition({
 			update: () => {
 				resolve()
 				return nav.complete
 			},
 			types: [view, isBackwards ? 'backwards' : 'forwards'],
+		})
+
+		transition.ready.then(() => {
+			for (const listener of readyListeners) {
+				listener({
+					view,
+					backwards: isBackwards,
+				})
+			}
 		})
 
 		return promise

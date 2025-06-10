@@ -10,7 +10,7 @@
 	import { MAIN_STORE_CONTEXT } from '$lib/stores/main/use-store.ts'
 	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
 	import { PLAYER_STORE_CONTEXT } from '$lib/stores/player/use-store.ts'
-	import { setupAppViewTransitions } from '$lib/view-transitions.ts'
+	import { setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
 	import { setContext } from 'svelte'
 	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'

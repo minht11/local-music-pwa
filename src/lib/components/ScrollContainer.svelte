@@ -21,16 +21,17 @@
 <script lang="ts">
 	interface Props {
 		class?: ClassValue
+		offsetWidth?: number
 		children: Snippet
 	}
 
-	const { class: className, children }: Props = $props()
+	let { class: className, offsetWidth = $bindable(), children }: Props = $props()
 
 	let scrollTarget = $state<ScrollTargetElement>(null)
 
 	setContext(contextKey, () => scrollTarget)
 </script>
 
-<div bind:this={scrollTarget} class={['overscroll-contain', className]}>
+<div bind:this={scrollTarget} bind:offsetWidth class={['overscroll-contain', className]}>
 	{@render children()}
 </div>

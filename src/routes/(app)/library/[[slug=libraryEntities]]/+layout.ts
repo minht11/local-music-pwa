@@ -7,7 +7,7 @@ import {
 } from '$lib/library/get/ids-queries.ts'
 import { createTracksCountPageQuery } from '$lib/library/tracks-queries.ts'
 import { FAVORITE_PLAYLIST_ID, type LibraryStoreName } from '$lib/library/types.ts'
-import { defineViewTransitionMatcher, type RouteId } from '$lib/view-transitions.ts'
+import { defineViewTransitionMatcher, type RouteId } from '$lib/view-transitions.svelte.ts'
 import { redirect } from '@sveltejs/kit'
 import { innerWidth } from 'svelte/reactivity/window'
 import type { LayoutLoad } from './$types.ts'

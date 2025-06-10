@@ -77,6 +77,8 @@ html {
 	scroll-padding-top: var(--app-header-height);
 	scroll-padding-bottom: var(--bottom-overlay-height);
 	--app-header-height: --spacing(16);
+	--player-mini-max-width: --spacing(225);
+	--player-full-max-width: --spacing(300);
 }
 
 html.dark {
@@ -296,6 +298,16 @@ body {
 	line-height: --spacing(4);
 	letter-spacing: 0.4px;
 	font-weight: 400;
+}
+
+@utility view-name-* {
+	view-transition-name: --value([*]);
+}
+
+@custom-variant active-view-player {
+  html:active-view-transition-type(player) & {
+	@slot
+  }
 }
 
 @layer components {
