@@ -30,8 +30,6 @@ export default defineConfig({
 			experimental: {
 				strictExecutionOrder: false,
 			},
-			// TODO. Investigate this option.
-			// preserveEntrySignatures: false,
 			output: {
 				minify: {
 					mangle: true,
@@ -40,7 +38,7 @@ export default defineConfig({
 				},
 				advancedChunks: {
 					// TODO. In Rolldown this produces bigger chunk sizes.
-					// minModuleSize: 20 * 1024, // 20kb
+					minModuleSize: 20 * 1024, // 20kb
 					groups: [
 						{
 							// Merge all css into a single file
