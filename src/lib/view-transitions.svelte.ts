@@ -24,6 +24,31 @@ export const defineViewTransitionMatcher = (callback: AppViewTransitionTypeMatch
 	matchers.length = 2
 }
 
+type ViewTransitionReadyListener = (
+	state: 'before-nav' | 'after-nav',
+	match: Exclude<AppViewTransitionTypeMatcherResult, null>,
+) => void
+
+const listeners = new Set<ViewTransitionReadyListener>()
+
+const notifyListeners: ViewTransitionReadyListener = (state, match) => {
+	for (const listener of listeners) {
+		listener(state, match)
+	}
+}
+
+export const onViewTransitionPrepare = (listener: ViewTransitionReadyListener) => {
+	$effect.pre(() => {
+		listeners.add(listener)
+
+		return () => {
+			setTimeout(() => {
+				listeners.delete(listener)
+			}, 0)
+		}
+	})
+}
+
 export const setupAppViewTransitions = (disabled: () => boolean): void => {
 	onNavigate(async (nav) => {
 		if (disabled()) {
@@ -67,8 +92,17 @@ export const setupAppViewTransitions = (disabled: () => boolean): void => {
 
 		document.startViewTransition({
 			update: () => {
+				notifyListeners('before-nav', {
+					view,
+					backwards: isBackwards,
+				})
 				resolve()
-				return nav.complete
+				return nav.complete.then(() => {
+					notifyListeners('after-nav', {
+						view,
+						backwards: isBackwards,
+					})
+				})
 			},
 			types: [view, isBackwards ? 'backwards' : 'forwards'],
 		})

@@ -10,7 +10,7 @@
 	import { MAIN_STORE_CONTEXT } from '$lib/stores/main/use-store.ts'
 	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
 	import { PLAYER_STORE_CONTEXT } from '$lib/stores/player/use-store.ts'
-	import { setupAppViewTransitions } from '$lib/view-transitions.ts'
+	import { onViewTransitionPrepare, setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
 	import { setContext } from 'svelte'
 	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'
@@ -53,6 +53,31 @@
 					},
 				},
 			})
+		}
+	})
+
+	onViewTransitionPrepare((_state, match) => {
+		if (match.view === 'player') {
+			const setProperties = (targetSelector: string, prefix: string) => {
+				const target = document.querySelector(targetSelector)
+				const rect = target?.getBoundingClientRect()
+
+				if (!rect) {
+					return
+				}
+
+				const setProperty = (name: keyof DOMRect) => {
+					document.documentElement.style.setProperty(`--${prefix}-${name}`, `${rect[name]}px`)
+				}
+
+				setProperty('left')
+				setProperty('bottom')
+				setProperty('width')
+				setProperty('height')
+			}
+
+			setProperties('#mini-player', 'mp')
+			setProperties('#full-player', 'fp')
 		}
 	})
 </script>
@@ -169,11 +194,11 @@
 				view-regular-in 300ms var(--ease-incoming80outgoing40);
 		}
 
-		&::view-transition-old(pl-container) {
+		&::view-transition-old(pl-card) {
 			display: none;
 		}
 
-		&::view-transition-new(pl-container) {
+		&::view-transition-new(pl-card) {
 			animation: none;
 		}
 	}

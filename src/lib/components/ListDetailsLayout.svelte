@@ -7,6 +7,7 @@
 
 <script lang="ts">
 	interface Props {
+		id?: string
 		mode: LayoutMode
 		list: Snippet<[LayoutMode]>
 		details: Snippet<[LayoutMode]>
@@ -16,6 +17,7 @@
 	}
 
 	const {
+		id,
 		mode,
 		list,
 		details,
@@ -23,14 +25,18 @@
 		noListStableGutter,
 		noPlayerOverlayPadding,
 	}: Props = $props()
+
+	let listOffsetWidth = $state(0)
+	let isBothMode = $derived(mode === 'both')
 </script>
 
-<div class={['!flex !flex-col', className]}>
+<div {id} class={['!flex !flex-col', className]}>
 	<div class="flex h-full grow">
-		{#if mode === 'both'}
+		{#if isBothMode}
 			<ScrollContainer
+				bind:offsetWidth={listOffsetWidth}
 				class={[
-					'sticky top-0 flex max-h-[100vh] shrink-0 flex-col overflow-y-auto overscroll-contain',
+					'fixed top-0 flex max-h-[100svh] min-h-full shrink-0 flex-col overflow-y-auto overscroll-contain',
 					!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
 					!noListStableGutter && 'scrollbar-gutter-stable',
 				]}
@@ -44,8 +50,9 @@
 				'flex w-full grow flex-col',
 				!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
 			]}
+			style={isBothMode ? `padding-left: ${listOffsetWidth}px;` : undefined}
 		>
-			{#if mode === 'both' || mode === 'details'}
+			{#if isBothMode || mode === 'details'}
 				{@render details(mode)}
 			{:else if mode === 'list'}
 				{@render list(mode)}

@@ -14,7 +14,7 @@
 	import { useSetBottomBar } from '$lib/layout-bottom-bar.svelte.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
-	import type { RouteId } from '$lib/view-transitions.ts'
+	import type { RouteId } from '$lib/view-transitions.svelte.ts'
 	import type { Snapshot } from '@sveltejs/kit'
 	import Search from './Search.svelte'
 

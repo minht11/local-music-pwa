@@ -18,16 +18,19 @@
 </script>
 
 <div
+	id="mini-player"
 	class={[
-		'view-transition-pl-container pointer-events-auto mx-auto max-w-225 justify-between overflow-hidden rounded-2xl border border-primary/10 bg-secondaryContainer text-onSecondaryContainer contain-content sm:h-auto sm:rounded-3xl',
+		'pointer-events-auto mx-auto max-w-225 justify-between overflow-hidden rounded-2xl border border-primary/10 bg-secondaryContainer text-onSecondaryContainer contain-content view-name-[pl-card] sm:h-auto sm:rounded-3xl active-view-player:border-transparent',
 		className,
 	]}
 >
 	<div
-		class="player-content flex h-full w-full flex-col items-center justify-between gap-4 sm:px-4 sm:pt-2 sm:pb-4"
+		class="flex h-full w-full flex-col items-center justify-between gap-4 sm:px-4 sm:pt-2 sm:pb-4"
 	>
+		<!-- TODO -->
+		<!-- active-view-player:view-name-[pl-overlay-content] -->
 		<Timeline class="max-sm:hidden" />
-		<div class="flex h-min w-full grow grid-cols-[1fr_max-content_1fr] items-center sm:grid">
+		<div class="hello flex h-min w-full grow grid-cols-[1fr_max-content_1fr] items-center sm:grid">
 			<div class="flex grow items-center">
 				<Button
 					as="a"
@@ -37,7 +40,7 @@
 					class="max-sm:rounded-r-4 group flex grow items-center rounded-lg pr-2 max-sm:p-2 sm:h-11 sm:max-w-45"
 				>
 					<div
-						class="player-artwork relative -z-1 size-11 shrink-0 overflow-hidden rounded-lg bg-onSecondary"
+						class="relative -z-1 size-11 shrink-0 overflow-hidden rounded-lg bg-onSecondary active-view-player:view-name-[pl-artwork]"
 					>
 						{#if track}
 							<PlayerArtwork class="size-full" />
@@ -46,7 +49,7 @@
 						<Icon
 							type="chevronUp"
 							class={[
-								'pl-overlay-chevron-up-icon absolute inset-0 m-auto shrink-0',
+								'absolute inset-0 m-auto shrink-0 active-view-player:view-name-[pl-chevron-up]',
 								track &&
 									'scale-0 rounded-full bg-tertiary text-onTertiary transition-[transform,opacity] duration-200 [.group:hover_&]:scale-100',
 							]}
@@ -84,26 +87,8 @@
 <style lang="postcss">
 	@reference '../../app.css';
 
-	.view-transition-pl-container {
-		view-transition-name: pl-container;
-	}
-
 	.controls {
 		grid-template-columns: 1fr max-content 1fr;
-	}
-
-	:global(html[data-view-player]) {
-		.player-content {
-			view-transition-name: pl-content;
-		}
-
-		.player-artwork {
-			view-transition-name: pl-artwork;
-		}
-
-		:global(.pl-overlay-chevron-up-icon) {
-			view-transition-name: pl-chevron-up;
-		}
 	}
 
 	::view-transition-old(pl-chevron-up) {

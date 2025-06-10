@@ -6,7 +6,7 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte.ts'
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
 	import { createAlbumQuery, createArtistQuery } from '$lib/library/get/value-queries'
-	import type { RouteId } from '$lib/view-transitions'
+	import type { RouteId } from '$lib/view-transitions.svelte.ts'
 	import Artwork from '../Artwork.svelte'
 
 	export type LibraryGridItemType = 'albums' | 'artists'

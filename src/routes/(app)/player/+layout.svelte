@@ -51,7 +51,7 @@
 		</div>
 
 		<PlayerArtwork
-			class="pl-view-artwork m-auto my-auto h-full max-h-75 rounded-2xl bg-onSecondary [grid-area:artwork]"
+			class="m-auto my-auto h-full max-h-75 rounded-2xl bg-onSecondary [grid-area:artwork] active-view-player:view-name-[pl-artwork]"
 		/>
 
 		<div class="mt-2 flex w-full flex-col gap-2 [grid-area:controls]">
@@ -171,12 +171,16 @@
 	</div>
 {/snippet}
 
-<div class="pl-view-container invisible fixed inset-0 mx-auto w-full max-w-320"></div>
+<!-- <div
+	class="invisible fixed inset-0 mx-auto w-full max-w-320 active-view-player:view-name-[pl-card]"
+></div> -->
 
+<!-- <div class="h-[100svh]"> -->
 <ListDetailsLayout
+	id="full-player"
 	mode={layoutMode}
 	class={[
-		'pl-view-content mx-auto w-full max-w-320 grow',
+		'mx-auto w-full max-w-300 grow active-view-player:view-name-[pl-card]',
 		layoutMode === 'both' && 'bg-secondaryContainer',
 	]}
 	list={playerSnippet}
@@ -185,22 +189,10 @@
 	noPlayerOverlayPadding
 />
 
+<!-- </div> -->
+
 <style lang="postcss">
 	@reference '../../../app.css';
-
-	:global(html[data-view-player]) :global {
-		.pl-view-container {
-			view-transition-name: pl-container;
-		}
-
-		.pl-view-content {
-			view-transition-name: pl-content;
-		}
-
-		.pl-view-artwork {
-			view-transition-name: pl-artwork;
-		}
-	}
 
 	.player-content {
 		display: grid;
@@ -219,55 +211,112 @@
 			'. artwork controls .';
 	}
 
-	::view-transition-old(pl-content) {
-		animation: fade-out 75ms linear forwards;
-	}
-
-	::view-transition-new(pl-content) {
-		animation: fade-in 325ms 75ms linear both;
-	}
-
-	::view-transition-group(pl-artwork),
-	::view-transition-group(pl-content) {
-		animation-duration: 400ms;
-		animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
-	}
-
-	:global(html[data-view-player][data-view-back-navigation]) {
-		--vt-pl-container-from-radius: 0;
-		--vt-pl-container-to-radius: var(--vt-pl-container-radius);
-	}
-
-	:global(html) {
-		--vt-pl-container-radius: var(--radius-2xl);
-		--vt-pl-container-from-radius: var(--vt-pl-container-radius);
-		--vt-pl-container-to-radius: 0;
-	}
-
-	@media (width >= --theme(--breakpoint-xs)) {
-		:global(html) {
-			--vt-pl-container-radius: var(--radius-3xl);
-		}
-	}
-
 	@keyframes -global-view-player-container-rounded {
 		from {
-			border-radius: var(--vt-pl-container-from-radius);
+			border-radius: var(--vt-pl-card-from-radius);
 		}
 		to {
-			border-radius: var(--vt-pl-container-to-radius);
+			border-radius: var(--vt-pl-card-to-radius);
 		}
 	}
 
-	:global(html[data-view-player]) :global {
-		&::view-transition-group(pl-container) {
+	@keyframes -global-view-player-card-morph-enter {
+		from {
+			width: var(--mp-width);
+			height: var(--mp-height);
+			translate: var(--mp-left) calc(var(--mp-bottom) - var(--mp-height));
+		}
+		to {
+			width: var(--fp-width);
+			height: 100svh;
+			translate: var(--fp-left) 0;
+		}
+	}
+
+	@keyframes -global-view-player-card-morph-exit {
+		from {
+			width: var(--fp-width);
+			height: 100svh;
+			translate: var(--fp-left) 0;
+		}
+		to {
+			width: var(--mp-width);
+			height: var(--mp-height);
+			translate: var(--mp-left) calc(var(--mp-bottom) - var(--mp-height));
+		}
+	}
+
+	:global(html:active-view-transition-type(player)) {
+		--vt-pl-card-radius: var(--radius-2xl);
+		@media (width >= --theme(--breakpoint-xs)) {
+			--vt-pl-card-radius: var(--radius-3xl);
+		}
+
+		&::view-transition-group(pl-card) {
+			overflow: clip;
 			background: var(--color-secondaryContainer);
+			top: 0;
+			left: 0;
+			transform: none;
 			animation:
 				view-player-container-rounded 400ms cubic-bezier(0.2, 0, 0, 1),
-				-ua-view-transition-group-anim-pl-container 400ms cubic-bezier(0.2, 0, 0, 1);
+				var(--vt-pl-card-morph-ani) 400ms cubic-bezier(0.2, 0, 0, 1);
 		}
-		&::view-transition-image-pair(pl-container) {
-			display: none;
+
+		&::view-transition-old(pl-card),
+		&::view-transition-new(pl-card) {
+			/* animation: none; */
+			/* Use normal blending,
+  so the new view sits on top and obscures the old view */
+			/* mix-blend-mode: normal; */
+			/* Make the height the same as the group,
+  meaning the view size might not match its aspect-ratio. */
+			/* height: 100vh; */
+			height: 100%;
+			/* max-height: 100svh; */
+			overflow: clip;
+			/* object-position: top; */
+		}
+
+		&::view-transition-old(pl-card) {
+			animation: fade-out 75ms linear forwards;
+		}
+
+		&::view-transition-new(pl-card) {
+			animation: fade-in 325ms 75ms linear both;
+		}
+
+		&:active-view-transition-type(forwards) {
+			--vt-pl-card-from-radius: var(--vt-pl-card-radius);
+			--vt-pl-card-to-radius: 0;
+			--vt-pl-card-morph-ani: view-player-card-morph-enter;
+
+			&::view-transition-old(pl-card) {
+				object-fit: contain;
+			}
+
+			&::view-transition-new(pl-card) {
+				object-fit: cover;
+			}
+		}
+
+		&:active-view-transition-type(backwards) {
+			--vt-pl-card-from-radius: 0;
+			--vt-pl-card-to-radius: var(--vt-pl-card-radius);
+			--vt-pl-card-morph-ani: view-player-card-morph-exit;
+
+			&::view-transition-old(pl-card) {
+				object-fit: cover;
+			}
+
+			&::view-transition-new(pl-card) {
+				object-fit: contain;
+			}
+		}
+
+		&::view-transition-group(pl-artwork) {
+			animation-duration: 400ms;
+			animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
 		}
 	}
 </style>

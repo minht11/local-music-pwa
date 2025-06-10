@@ -298,6 +298,16 @@ body {
 	font-weight: 400;
 }
 
+@utility view-name-* {
+	view-transition-name: --value([*]);
+}
+
+@custom-variant active-view-player {
+  html:active-view-transition-type(player) & {
+	@slot
+  }
+}
+
 @layer components {
 	.link {
 		text-decoration: underline;
