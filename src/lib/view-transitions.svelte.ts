@@ -25,17 +25,26 @@ export const defineViewTransitionMatcher = (callback: AppViewTransitionTypeMatch
 }
 
 type ViewTransitionReadyListener = (
+	state: 'before-nav' | 'after-nav',
 	match: Exclude<AppViewTransitionTypeMatcherResult, null>,
 ) => void
 
-const readyListeners = new Set<(match: Exclude<AppViewTransitionTypeMatcherResult, null>) => void>()
+const listeners = new Set<ViewTransitionReadyListener>()
 
-export const onViewTransitionReady = (listener: ViewTransitionReadyListener) => {
-	$effect(() => {
-		readyListeners.add(listener)
+const notifyListeners: ViewTransitionReadyListener = (state, match) => {
+	for (const listener of listeners) {
+		listener(state, match)
+	}
+}
+
+export const onViewTransitionPrepare = (listener: ViewTransitionReadyListener) => {
+	$effect.pre(() => {
+		listeners.add(listener)
 
 		return () => {
-			readyListeners.delete(listener)
+			setTimeout(() => {
+				listeners.delete(listener)
+			}, 0)
 		}
 	})
 }
@@ -81,21 +90,21 @@ export const setupAppViewTransitions = (disabled: () => boolean): void => {
 		const isBackwards = customMatch?.backwards ?? goingBackwards
 		const view = customMatch?.view ?? 'regular'
 
-		const transition = document.startViewTransition({
+		document.startViewTransition({
 			update: () => {
-				resolve()
-				return nav.complete
-			},
-			types: [view, isBackwards ? 'backwards' : 'forwards'],
-		})
-
-		transition.ready.then(() => {
-			for (const listener of readyListeners) {
-				listener({
+				notifyListeners('before-nav', {
 					view,
 					backwards: isBackwards,
 				})
-			}
+				resolve()
+				return nav.complete.then(() => {
+					notifyListeners('after-nav', {
+						view,
+						backwards: isBackwards,
+					})
+				})
+			},
+			types: [view, isBackwards ? 'backwards' : 'forwards'],
 		})
 
 		return promise

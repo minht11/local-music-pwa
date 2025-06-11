@@ -7,6 +7,7 @@
 
 <script lang="ts">
 	interface Props {
+		id?: string
 		mode: LayoutMode
 		list: Snippet<[LayoutMode]>
 		details: Snippet<[LayoutMode]>
@@ -16,6 +17,7 @@
 	}
 
 	const {
+		id,
 		mode,
 		list,
 		details,
@@ -28,7 +30,7 @@
 	let isBothMode = $derived(mode === 'both')
 </script>
 
-<div class={['!flex !flex-col', className]}>
+<div {id} class={['!flex !flex-col', className]}>
 	<div class="flex h-full grow">
 		{#if isBothMode}
 			<ScrollContainer

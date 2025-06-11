@@ -18,8 +18,9 @@
 </script>
 
 <div
+	id="mini-player"
 	class={[
-		'pointer-events-auto mx-auto max-w-[var(--player-mini-max-width)] justify-between overflow-hidden rounded-2xl border border-primary/10 bg-secondaryContainer text-onSecondaryContainer contain-content view-name-[pl-container] sm:h-auto sm:rounded-3xl active-view-player:border-transparent',
+		'pointer-events-auto mx-auto max-w-225 justify-between overflow-hidden rounded-2xl border border-primary/10 bg-secondaryContainer text-onSecondaryContainer contain-content view-name-[pl-card] sm:h-auto sm:rounded-3xl active-view-player:border-transparent',
 		className,
 	]}
 >

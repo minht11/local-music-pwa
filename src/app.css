@@ -77,8 +77,6 @@ html {
 	scroll-padding-top: var(--app-header-height);
 	scroll-padding-bottom: var(--bottom-overlay-height);
 	--app-header-height: --spacing(16);
-	--player-mini-max-width: --spacing(225);
-	--player-full-max-width: --spacing(300);
 }
 
 html.dark {
