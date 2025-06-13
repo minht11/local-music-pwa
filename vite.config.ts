@@ -37,14 +37,13 @@ export default defineConfig({
 					compress: true,
 				},
 				advancedChunks: {
-					// TODO. In Rolldown this produces bigger chunk sizes.
-					minModuleSize: 20 * 1024, // 20kb
 					groups: [
 						{
 							// Merge all css into a single file
 							name: 'styles',
 							test: /\.css$/,
 							minModuleSize: 0,
+							priority: 100,
 						},
 					],
 				},
