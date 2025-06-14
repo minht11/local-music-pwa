@@ -2,7 +2,7 @@ import { onDatabaseChange } from '$lib/db/events.ts'
 import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { persist } from '$lib/helpers/persist.svelte.ts'
-import { shuffleArray } from '$lib/helpers/utils/array.ts'
+import { toShuffledArray } from '$lib/helpers/utils/array.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { throttle } from '$lib/helpers/utils/throttle.ts'
 import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
@@ -52,10 +52,10 @@ export class PlayerStore {
 
 	#activeTrackIndex = $state(-1)
 	#itemsIdsOriginalOrder = $state<number[]>([])
-	#itemsIdsShuffled = $state<number[]>([])
+	#itemsIdsShuffled = $state<number[] | null>(null)
 
-	itemsIds: number[] = $derived(
-		this.shuffle ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
+	itemsIds: readonly number[] = $derived(
+		this.#itemsIdsShuffled ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
 	)
 
 	activeTrackQuery: QueryResult<TrackData | undefined> = createTrackQuery(
@@ -178,8 +178,12 @@ export class PlayerStore {
 						this.#activeTrackIndex = -1
 					}
 
-					if (this.shuffle) {
+					if (this.#itemsIdsShuffled) {
 						this.#itemsIdsShuffled.splice(index, 1)
+						const originalIndex = this.#itemsIdsOriginalOrder.indexOf(change.key)
+						if (originalIndex !== -1) {
+							this.#itemsIdsOriginalOrder.splice(originalIndex, 1)
+						}
 					} else {
 						this.#itemsIdsOriginalOrder.splice(index, 1)
 					}
@@ -257,21 +261,22 @@ export class PlayerStore {
 	): void => {
 		if (queue) {
 			this.#itemsIdsOriginalOrder = [...queue]
+			// Unless explicitly set, shuffle is reset when new queue is passed
+			this.shuffle = options.shuffle ?? false
+
+			if (this.shuffle) {
+				this.#itemsIdsShuffled = toShuffledArray(this.#itemsIdsOriginalOrder)
+			} else if (this.#itemsIdsShuffled) {
+				this.#itemsIdsShuffled = null
+			}
 		}
 
 		if (this.itemsIds.length === 0) {
+			this.#activeTrackIndex = -1
 			return
 		}
 
-		if (options.shuffle) {
-			const items = [...this.#itemsIdsOriginalOrder]
-			shuffleArray(items)
-
-			this.#itemsIdsShuffled = items
-			this.shuffle = false
-		}
-
-		this.#activeTrackIndex = trackIndex
+		this.#activeTrackIndex = options.shuffle ? 0 : trackIndex
 		this.currentTime = 0
 		this.togglePlay(true)
 	}
@@ -298,26 +303,34 @@ export class PlayerStore {
 	toggleShuffle = (): void => {
 		this.shuffle = !this.shuffle
 
+		// Save existing active track id, so after toggling shuffle we can find its new index
+		const activeTrackId = this.activeTrack?.id ?? -1
 		if (this.shuffle) {
-			this.#itemsIdsShuffled = [...this.#itemsIdsOriginalOrder]
-			shuffleArray(this.#itemsIdsShuffled)
-			// TODO. Need to adjust active track index
+			this.#itemsIdsShuffled = toShuffledArray(this.#itemsIdsOriginalOrder)
+			const newIndex = this.#itemsIdsShuffled.indexOf(activeTrackId)
+			if (newIndex !== -1) {
+				const swappedItemId = this.#itemsIdsShuffled[0] as number
+				this.#itemsIdsShuffled[0] = activeTrackId
+				this.#itemsIdsShuffled[newIndex] = swappedItemId
+
+				this.#activeTrackIndex = 0
+			} else {
+				this.#activeTrackIndex = -1
+			}
 		} else {
-			this.#itemsIdsShuffled = []
+			this.#itemsIdsShuffled = null
+			this.#activeTrackIndex = this.#itemsIdsOriginalOrder.indexOf(activeTrackId)
 		}
 	}
 
 	addToQueue = (trackId: number): void => {
-		if (this.shuffle) {
-			this.#itemsIdsShuffled.push(trackId)
-		}
-
+		this.#itemsIdsShuffled?.push(trackId)
 		this.#itemsIdsOriginalOrder.push(trackId)
 	}
 
 	clearQueue = (): void => {
 		this.#itemsIdsOriginalOrder = []
-		this.#itemsIdsShuffled = []
+		this.#itemsIdsShuffled = null
 		this.#activeTrackIndex = -1
 	}
 

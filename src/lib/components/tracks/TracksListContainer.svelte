@@ -13,7 +13,7 @@
 		| 'addToFavorites'
 	export interface TrackItemClick {
 		track: TrackData
-		items: number[]
+		items: readonly number[]
 		index: number
 	}
 </script>
@@ -27,7 +27,7 @@
 	}
 
 	interface Props {
-		items: number[]
+		items: readonly number[]
 		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItems, boolean>>
 		menuItems?: (track: TrackData) => MenuItem[]
 		onItemClick?: (data: TrackItemClick) => void

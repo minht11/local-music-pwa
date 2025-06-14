@@ -1,9 +1,13 @@
-export const shuffleArray = <T>(array: T[]): void => {
-	for (let i = array.length - 1; i > 0; i -= 1) {
+/** @public */
+export const toShuffledArray = <T>(input: T[]): T[] => {
+	const output = [...input]
+	for (let i = output.length - 1; i > 0; i -= 1) {
 		const j = Math.floor(Math.random() * (i + 1))
-		const temp = array[i] as T
+		const temp = output[i] as T
 
-		array[i] = array[j] as T
-		array[j] = temp
+		output[i] = output[j] as T
+		output[j] = temp
 	}
+
+	return output
 }
