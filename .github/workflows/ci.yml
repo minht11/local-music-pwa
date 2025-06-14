@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+          cache: 'pnpm'
+
+      - run: pnpm install
+      - name: Build generated files
+        run: pnpm run build
+      - run: pnpm run biome-check
+      # - run: pnpm run format-prettier
+      - run: pnpm run check
+      - run: pnpm test
