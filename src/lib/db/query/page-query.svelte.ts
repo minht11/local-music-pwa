@@ -47,7 +47,7 @@ export const createPageQuery = async <const K extends QueryKey, Result>(
 		throw state.error
 	}
 
-	const result: PageQueryResult<Result> = new PageQueryResultBox<Result>(
+	const result = new PageQueryResultBox<Result>(
 		state,
 		query.setupListeners,
 	) as PageQueryResult<Result>

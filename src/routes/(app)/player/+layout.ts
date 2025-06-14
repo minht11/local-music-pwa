@@ -1,5 +1,8 @@
 import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
-import { type AppViewTransitionType, defineViewTransitionMatcher } from '$lib/view-transitions.svelte.ts'
+import {
+	type AppViewTransitionType,
+	defineViewTransitionMatcher,
+} from '$lib/view-transitions.svelte.ts'
 import { innerHeight, innerWidth } from 'svelte/reactivity/window'
 import type { LayoutLoad } from './$types.ts'
 
