@@ -171,11 +171,6 @@
 	</div>
 {/snippet}
 
-<!-- <div
-	class="invisible fixed inset-0 mx-auto w-full max-w-320 active-view-player:view-name-[pl-card]"
-></div> -->
-
-<!-- <div class="h-[100svh]"> -->
 <ListDetailsLayout
 	id="full-player"
 	mode={layoutMode}
@@ -188,8 +183,6 @@
 	noListStableGutter
 	noPlayerOverlayPadding
 />
-
-<!-- </div> -->
 
 <style lang="postcss">
 	@reference '../../../app.css';
@@ -258,6 +251,7 @@
 			top: 0;
 			left: 0;
 			transform: none;
+			height: 100%;
 			animation:
 				view-player-container-rounded 400ms cubic-bezier(0.2, 0, 0, 1),
 				var(--vt-pl-card-morph-ani) 400ms cubic-bezier(0.2, 0, 0, 1);
@@ -265,17 +259,7 @@
 
 		&::view-transition-old(pl-card),
 		&::view-transition-new(pl-card) {
-			/* animation: none; */
-			/* Use normal blending,
-  so the new view sits on top and obscures the old view */
-			/* mix-blend-mode: normal; */
-			/* Make the height the same as the group,
-  meaning the view size might not match its aspect-ratio. */
-			/* height: 100vh; */
-			height: 100%;
-			/* max-height: 100svh; */
 			overflow: clip;
-			/* object-position: top; */
 		}
 
 		&::view-transition-old(pl-card) {
@@ -297,6 +281,7 @@
 
 			&::view-transition-new(pl-card) {
 				object-fit: cover;
+				object-position: 0 calc(-1 * var(--fp-scroll-top));
 			}
 		}
 
@@ -307,6 +292,7 @@
 
 			&::view-transition-old(pl-card) {
 				object-fit: cover;
+				object-position: 0 calc(-1 * var(--fp-scroll-top));
 			}
 
 			&::view-transition-new(pl-card) {

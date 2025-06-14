@@ -66,6 +66,10 @@
 					return
 				}
 
+				if (prefix === 'fp') {
+					document.documentElement.style.setProperty('--fp-scroll-top', `${window.scrollY}px`)
+				}
+
 				const setProperty = (name: keyof DOMRect) => {
 					document.documentElement.style.setProperty(`--${prefix}-${name}`, `${rect[name]}px`)
 				}
