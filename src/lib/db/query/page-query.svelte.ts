@@ -17,7 +17,7 @@ export type PageQueryOptions<K extends QueryKey, Result> = QueryBaseOptions<K, R
 
 const pageQueryHydrateSymbol: unique symbol = Symbol()
 
-export class PageQueryResultBox<Result> extends QueryResultBox<Result> {
+class PageQueryResultBox<Result> extends QueryResultBox<Result> {
 	#setupListeners: () => void
 
 	constructor(state: QueryStateInternal<Result>, setupListeners: () => void) {
@@ -33,6 +33,7 @@ export class PageQueryResultBox<Result> extends QueryResultBox<Result> {
 /**
  * Create a page query which should load data inside load function
  * and then listen for database changes once page is loaded.
+ * @public
  */
 export const createPageQuery = async <const K extends QueryKey, Result>(
 	options: PageQueryOptions<K, Result>,
@@ -46,7 +47,7 @@ export const createPageQuery = async <const K extends QueryKey, Result>(
 		throw state.error
 	}
 
-	const result = new PageQueryResultBox<Result>(
+	const result: PageQueryResult<Result> = new PageQueryResultBox<Result>(
 		state,
 		query.setupListeners,
 	) as PageQueryResult<Result>
@@ -57,6 +58,7 @@ export const createPageQuery = async <const K extends QueryKey, Result>(
 /**
  * Initialize pages queries once page is loaded.
  * Should be called inside page component.
+ * @public
  */
 export const initPageQueries = (data: Record<string, unknown>): void => {
 	for (const query of Object.values(data)) {
@@ -71,6 +73,7 @@ export const initPageQueries = (data: Record<string, unknown>): void => {
  * Similar to `initPageQueries` with the main difference being
  * that it will reinitialize queries on every change of `source`.
  * Should be called inside page component.
+ * @public
  */
 export const initPageQueriesDynamic = (
 	source: () => unknown,

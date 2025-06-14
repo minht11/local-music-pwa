@@ -47,7 +47,8 @@ export type DatabaseChangeHandler<Result> = (
 export type QueryKeyPrimitiveValue = number | string | boolean
 export type QueryKey = QueryKeyPrimitiveValue | QueryKeyPrimitiveValue[]
 
-const normalizeKey = <const K extends QueryKey>(key: K) => JSON.stringify(key)
+const normalizeKey = <const K extends QueryKey>(key: K): QueryKeyPrimitiveValue =>
+	Array.isArray(key) ? key.join(',') : key
 
 export interface QueryBaseOptions<K extends QueryKey, Result> {
 	key: K | (() => K)
@@ -65,7 +66,7 @@ export class QueryImpl<K extends QueryKey, Result> {
 		value: undefined,
 	})
 
-	resolvedKey: string | undefined = undefined
+	resolvedKey: QueryKeyPrimitiveValue | undefined = undefined
 
 	options: QueryBaseOptions<K, Result>
 
@@ -79,7 +80,7 @@ export class QueryImpl<K extends QueryKey, Result> {
 		return typeof key === 'function' ? key() : key
 	}
 
-	#setErrorState = (e: unknown, normalizedKey: string) => {
+	#setErrorState = (e: unknown, normalizedKey: QueryKeyPrimitiveValue) => {
 		this.resolvedKey = normalizedKey
 		assign(this.state, {
 			status: 'error',
@@ -89,7 +90,7 @@ export class QueryImpl<K extends QueryKey, Result> {
 		this.options.onError?.(e)
 	}
 
-	#setLoadedState = (value: Result, normalizedKey: string) => {
+	#setLoadedState = (value: Result, normalizedKey: QueryKeyPrimitiveValue) => {
 		this.resolvedKey = normalizedKey
 		assign(this.state, {
 			status: 'loaded',
@@ -98,9 +99,7 @@ export class QueryImpl<K extends QueryKey, Result> {
 		})
 	}
 
-	#loadWithKey = (key: K, normalizedKey: string) => {
-		const state = this.state
-
+	#loadWithKey = (key: K, normalizedKey: QueryKeyPrimitiveValue) => {
 		const { promise, resolve } = Promise.withResolvers<void>()
 
 		try {
@@ -110,7 +109,7 @@ export class QueryImpl<K extends QueryKey, Result> {
 				result
 					.then((value) => {
 						// We only need to set loading state if it is async
-						assign(state, {
+						assign(this.state, {
 							status: 'loading',
 							error: undefined,
 						})
