@@ -87,7 +87,6 @@
 			fade(dialogHeader),
 			dialogBody && fade(dialogBody),
 			dialogFooter && fade(dialogFooter),
-			// TODO at 0
 			dialogFooter &&
 				([
 					dialogFooter,
@@ -122,7 +121,6 @@
 					duration: 400,
 				},
 			] satisfies AnimationSequence,
-			// TODO at 0
 			dialogFooter &&
 				([
 					dialogFooter,
@@ -134,7 +132,6 @@
 			fade(dialogHeader),
 		].filter((x) => x !== null)
 
-		// TODO. Duration 300ms
 		return timeline(frames, {
 			defaultOptions: {
 				easing: 'cubic-bezier(0.2, 0, 0, 1)',
@@ -158,7 +155,6 @@
 </script>
 
 {#if isOpen}
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<dialog
 		{@attach onOpenAction}
 		out:outAni
