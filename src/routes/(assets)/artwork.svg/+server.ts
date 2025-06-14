@@ -1,4 +1,4 @@
-import { ICON_PATHS } from '$lib/components/icon/icon-paths'
+import { ICON_PATHS } from '$lib/components/icon/icon-paths.server.ts'
 import { THEME_PALLETTE_DARK } from '../../../server/theme-colors.ts'
 
 const artwork = `

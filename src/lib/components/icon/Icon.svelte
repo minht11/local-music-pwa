@@ -1,7 +1,7 @@
 <script lang="ts" module>
-	import type { IconType } from './icon-paths.ts'
+	import type { IconType } from './icon-paths.server.ts'
 
-	export type { IconType } from './icon-paths.ts'
+	export type { IconType } from './icon-paths.server.ts'
 
 	export interface IconProps {
 		type: IconType
