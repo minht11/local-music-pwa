@@ -2,7 +2,7 @@ class Artwork {
 	static index = 0
 
 	// Used for debugging purposes
-	index: number
+	index = -1
 
 	image: Blob
 
@@ -15,13 +15,40 @@ class Artwork {
 		this.url = URL.createObjectURL(image)
 		this.refs.add(key)
 
-		this.index = Artwork.index
-		Artwork.index += 1
+		if (import.meta.env.DEV) {
+			this.index = Artwork.index
+			Artwork.index += 1
+		}
 	}
 }
 
 const cache = new WeakMap<Blob, Artwork>()
 const cleanupQueue = new Set<Blob>()
+let isCleanupScheduled = false
+const scheduleCleanup = (artwork: Artwork) => {
+	cleanupQueue.add(artwork.image)
+
+	if (isCleanupScheduled) {
+		return
+	}
+
+	isCleanupScheduled = true
+	const thirtySeconds = 30 * 1000
+	setTimeout(() => {
+		for (const blob of cleanupQueue) {
+			const cached = cache.get(blob)
+			if (!cached) {
+				continue
+			}
+			if (cached.refs.size === 0) {
+				cache.delete(blob)
+				URL.revokeObjectURL(cached.url)
+			}
+		}
+		cleanupQueue.clear()
+		isCleanupScheduled = false
+	}, thirtySeconds)
+}
 
 export const createManagedArtwork = (
 	getImage: () => Blob | undefined | null,
@@ -57,7 +84,7 @@ export const createManagedArtwork = (
 
 		return () => {
 			if (savedArtwork.refs.size === 1) {
-				cleanupQueue.add(savedArtwork.image)
+				scheduleCleanup(savedArtwork)
 			}
 
 			if (import.meta.env.DEV) {
@@ -71,21 +98,4 @@ export const createManagedArtwork = (
 	})
 
 	return () => artwork?.url
-}
-
-if (!import.meta.env.SSR) {
-	const thirtySeconds = 30 * 1000
-	window.setInterval(() => {
-		for (const blob of cleanupQueue) {
-			const cached = cache.get(blob)
-			if (!cached) {
-				continue
-			}
-			if (cached.refs.size === 0) {
-				cache.delete(blob)
-				URL.revokeObjectURL(cached.url)
-			}
-		}
-		cleanupQueue.clear()
-	}, thirtySeconds)
 }
