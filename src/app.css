@@ -303,9 +303,9 @@ body {
 }
 
 @custom-variant active-view-player {
-  html:active-view-transition-type(player) & {
-	@slot
-  }
+	html:active-view-transition-type(player) & {
+		@slot;
+	}
 }
 
 @layer components {
