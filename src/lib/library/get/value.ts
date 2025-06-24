@@ -47,11 +47,14 @@ export interface TrackData extends Track {
 const trackConfig: QueryConfig<TrackData> = {
 	fetch: async (id) => {
 		const db = await getDatabase()
-		const tx = db.transaction(['tracks', 'playlistsTracks'], 'readonly')
+		const tx = db.transaction(['tracks', 'playlistEntries'], 'readonly')
 
 		const [item, favorite] = await Promise.all([
 			tx.objectStore('tracks').get(id),
-			tx.objectStore('playlistsTracks').get([FAVORITE_PLAYLIST_ID, id]),
+			tx
+				.objectStore('playlistEntries')
+				.index('playlistTrack')
+				.get([FAVORITE_PLAYLIST_ID, id]),
 			tx.done,
 		])
 
@@ -67,10 +70,13 @@ const trackConfig: QueryConfig<TrackData> = {
 	},
 	shouldRefetch: (itemId, changes) => {
 		for (const change of changes) {
-			if (change.storeName === 'playlistsTracks') {
-				const [playlistId, trackId] = change.key
+			if (change.storeName === 'playlistEntries') {
+				const playlistEntry = change.value
 
-				if (playlistId === FAVORITE_PLAYLIST_ID && itemId === trackId) {
+				if (
+					playlistEntry.playlistId === FAVORITE_PLAYLIST_ID &&
+					itemId === playlistEntry.trackId
+				) {
 					return true
 				}
 			}
@@ -85,11 +91,11 @@ const trackConfig: QueryConfig<TrackData> = {
 }
 
 const tracksDataDatabaseChangeHandler = (change: DatabaseChangeDetails) => {
-	if (change.storeName === 'playlistsTracks') {
-		const [playlistId, trackId] = change.key
+	if (change.storeName === 'playlistEntries') {
+		const playlistEntry = change.value
 
-		if (playlistId === FAVORITE_PLAYLIST_ID) {
-			const cacheKey = getCacheKey('tracks', trackId)
+		if (playlistEntry.playlistId === FAVORITE_PLAYLIST_ID) {
+			const cacheKey = getCacheKey('tracks', playlistEntry.trackId)
 			valueCache.delete(cacheKey)
 		}
 	}

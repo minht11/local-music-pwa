@@ -48,14 +48,41 @@
 
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
 
-	const playlistTrackMenuItems = (track: TrackData) => [
-		{
-			label: m.libraryTrackRemoveFromPlaylist(),
-			action: () => {
-				void removeTrackFromPlaylist(item.id, track.id)
+	const playlistTrackMenuItems = (track: TrackData, index: number) => {
+		return [
+			{
+				label: m.libraryTrackRemoveFromPlaylist(),
+				action: () => {
+					void removeTrackFromPlaylist(item.id, track.id)
+				},
 			},
-		},
-	]
+		]
+	}
+
+	const menuItems = $derived.by(() => {
+		if (data.slug === 'playlists' && item.id !== FAVORITE_PLAYLIST_ID) {
+			return getPlaylistMenuItems(main, item as Playlist)
+		}
+
+		if (data.slug === 'albums' || data.slug === 'artists') {
+			return [
+				{
+					label: 'Add to Playlist',
+					action: () => {
+						main.addTrackToPlaylistDialogOpen = tracks.tracksIds
+					},
+				},
+				{
+					label: m.libraryRemoveFromLibrary(),
+					action: () => {
+						// TODO.
+					},
+				},
+			]
+		}
+
+		return null
+	})
 </script>
 
 {#if !isWideLayout.current}
@@ -93,7 +120,7 @@
 						{(item as AlbumData).year} •
 					{/if}
 
-					{m.libraryTracksCount({ count: tracks.length })}
+					{m.libraryTracksCount({ count: tracks.tracksIds.length })}
 				</div>
 			</div>
 
@@ -101,9 +128,9 @@
 				<Button
 					kind="toned"
 					class="mr-auto"
-					disabled={tracks.length === 0}
+					disabled={tracks.tracksIds.length === 0}
 					onclick={() => {
-						player.playTrack(0, tracks, {
+						player.playTrack(0, tracks.tracksIds, {
 							shuffle: true,
 						})
 					}}
@@ -112,12 +139,12 @@
 					<Icon type="shuffle" />
 				</Button>
 
-				{#if data.slug === 'playlists' && item.id !== FAVORITE_PLAYLIST_ID}
+				{#if menuItems}
 					<IconButton
 						icon="moreVertical"
 						tooltip={m.more()}
 						onclick={(e) => {
-							menu.showFromEvent(e, getPlaylistMenuItems(main, item as Playlist), {
+							menu.showFromEvent(e, menuItems, {
 								anchor: true,
 								preferredAlignment: {
 									horizontal: 'right',
@@ -132,7 +159,7 @@
 	</section>
 
 	<TracksListContainer
-		items={tracks}
+		items={tracks.tracksIds}
 		menuItems={data.slug === 'playlists' ? playlistTrackMenuItems : undefined}
 	/>
 </div>

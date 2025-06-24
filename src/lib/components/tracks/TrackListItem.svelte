@@ -62,7 +62,6 @@
 				<div class="h-1 w-1/8 rounded-xs bg-onSurface/10"></div>
 			</div>
 		{:else if data.error}
-			<!-- TODO. Alow removing failed tracks -->
 			<div class="text-error">
 				Error loading track with id {trackId}
 			</div>

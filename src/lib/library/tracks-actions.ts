@@ -6,7 +6,7 @@ import type { LibraryStoreName } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<
 	AppDB,
-	('directories' | 'tracks' | 'albums' | 'artists' | 'playlistsTracks')[],
+	('directories' | 'tracks' | 'albums' | 'artists' | 'playlistEntries')[],
 	'readwrite'
 >
 
@@ -56,20 +56,21 @@ const dbRemoveTrackRelatedData = async <
 
 const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 	const db = await getDatabase()
-	const tx = db.transaction(['playlists', 'playlistsTracks'], 'readwrite')
+	const tx = db.transaction(['playlists', 'playlistEntries'], 'readwrite')
 
-	const store = tx.objectStore('playlistsTracks')
+	const store = tx.objectStore('playlistEntries')
 
 	const range = IDBKeyRange.bound([0, trackId], [Number.POSITIVE_INFINITY, trackId])
-	const tracks = await store.getAll(range)
+	const entries = await store.getAll(range)
 
 	await store.delete(range)
 
-	const changes = tracks.map(
-		(t): DatabaseChangeDetails => ({
+	const changes = entries.map(
+		(entry): DatabaseChangeDetails => ({
 			operation: 'delete',
-			storeName: 'playlistsTracks',
-			key: [t.playlistId, t.trackId],
+			storeName: 'playlistEntries',
+			key: entry.id,
+			value: entry,
 		}),
 	)
 
@@ -78,7 +79,7 @@ const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 
 export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 	const db = await getDatabase()
-	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
+	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistEntries'], 'readwrite')
 
 	const track = await tx.objectStore('tracks').get(trackId)
 	if (!track) {

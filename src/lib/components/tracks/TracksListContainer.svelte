@@ -11,6 +11,7 @@
 		| 'addToPlaylist'
 		| 'removeFromLibrary'
 		| 'addToFavorites'
+
 	export interface TrackItemClick {
 		track: TrackData
 		items: readonly number[]
@@ -29,7 +30,7 @@
 	interface Props {
 		items: readonly number[]
 		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItems, boolean>>
-		menuItems?: (track: TrackData) => MenuItem[]
+		menuItems?: (track: TrackData, index: number) => MenuItem[]
 		onItemClick?: (data: TrackItemClick) => void
 	}
 
@@ -44,8 +45,8 @@
 		predefinedKey: PredefinedTrackMenuItems
 	}
 
-	const getMenuItems = (track: TrackData) => {
-		const items: PredefinedMenuItem[] = [
+	const getMenuItems = (track: TrackData, index: number) => {
+		const predefinedMenuItemsList: PredefinedMenuItem[] = [
 			{
 				predefinedKey: 'addToPlaylist',
 				label: m.libraryAddToPlaylist(),
@@ -76,14 +77,14 @@
 			},
 		]
 
-		const predefinedItems = items.filter((item) => {
+		const predefinedItems = predefinedMenuItemsList.filter((item) => {
 			// By default, all predefined menu items are enabled.
 			const isExplicitlyDisabled = predefinedMenuItems[item.predefinedKey] === false
 
 			return !isExplicitlyDisabled
 		})
 
-		return [...predefinedItems, ...(menuItems ? menuItems(track) : [])]
+		return [...predefinedItems, ...(menuItems ? menuItems(track, index) : [])]
 	}
 </script>
 
@@ -97,7 +98,7 @@
 			style="transform: translateY({item.start}px)"
 			class="virtual-item top-0 left-0 w-full"
 			ariaRowIndex={item.index}
-			menuItems={(track) => getMenuItems(track)}
+			menuItems={(track) => getMenuItems(track, item.index)}
 			onclick={(track) => {
 				onItemClick({
 					track,

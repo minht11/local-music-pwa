@@ -3,7 +3,11 @@ import { getDatabase } from '$lib/db/database.ts'
 import { lockDatabase } from '$lib/db/lock-database.ts'
 import { getV1LegacyDatabaseValue, removeV1LegacyDatabase } from '$lib/db/v1-legacy/database.ts'
 import type { FileEntity } from '$lib/helpers/file-system.ts'
-import { dbAddMultipleTracksToPlaylist, dbCreatePlaylist } from '../playlists-actions.ts'
+import {
+	dbAddTracksToPlaylistsWithTx,
+	dbCreatePlaylist,
+	getPlaylistEntriesDatabaseStore,
+} from '../playlists-actions.ts'
 import { FAVORITE_PLAYLIST_ID, LEGACY_NO_NATIVE_DIRECTORY } from '../types.ts'
 import { scanTracks } from './scan-tracks.ts'
 
@@ -79,10 +83,10 @@ const dbMigrateV1LegacyData = async () => {
 				legacyPlaylist.dateCreated,
 			)
 
-			await dbAddMultipleTracksToPlaylist(
-				playlistId,
-				mapTrackLegacyIdsToNewIds(legacyPlaylist.trackIds),
-			)
+			await dbAddTracksToPlaylistsWithTx(await getPlaylistEntriesDatabaseStore(), {
+				playlistIds: [playlistId],
+				trackIds: mapTrackLegacyIdsToNewIds(legacyPlaylist.trackIds),
+			})
 		} catch (error) {
 			console.error('Error while adding legacy playlist', error)
 		}
@@ -91,10 +95,10 @@ const dbMigrateV1LegacyData = async () => {
 	try {
 		const favorites = await getV1LegacyDatabaseValue('favorites')
 		if (favorites) {
-			await dbAddMultipleTracksToPlaylist(
-				FAVORITE_PLAYLIST_ID,
-				mapTrackLegacyIdsToNewIds(favorites),
-			)
+			await dbAddTracksToPlaylistsWithTx(await getPlaylistEntriesDatabaseStore(), {
+				playlistIds: [FAVORITE_PLAYLIST_ID],
+				trackIds: mapTrackLegacyIdsToNewIds(favorites),
+			})
 		}
 	} catch (error) {
 		console.error('Error while adding legacy favorites', error)

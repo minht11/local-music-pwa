@@ -1,4 +1,11 @@
-import type { Album, Artist, Directory, Playlist, Track } from '$lib/library/types.ts'
+import type {
+	Album,
+	Artist,
+	Directory,
+	Playlist,
+	PlaylistEntry,
+	Track,
+} from '$lib/library/types.ts'
 import type { DBSchema, IDBPDatabase, IDBPObjectStore, IndexNames, StoreNames } from 'idb'
 import { openDB } from 'idb'
 
@@ -28,7 +35,7 @@ export interface AppDB extends DBSchema {
 	albums: {
 		key: number
 		value: Album
-		indexes: Pick<Album, 'id' | 'uuid' | 'name' | 'artists' | 'year'>
+		indexes: Pick<Album, 'uuid' | 'name' | 'artists' | 'year'>
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -36,7 +43,7 @@ export interface AppDB extends DBSchema {
 	artists: {
 		key: number
 		value: Artist
-		indexes: Pick<Artist, 'id' | 'uuid' | 'name'>
+		indexes: Pick<Artist, 'uuid' | 'name'>
 		meta: {
 			notAllowedOperations: undefined
 		}
@@ -44,22 +51,16 @@ export interface AppDB extends DBSchema {
 	playlists: {
 		key: number
 		value: Playlist
-		indexes: Pick<Playlist, 'id' | 'uuid' | 'name' | 'createdAt'>
+		indexes: Pick<Playlist, 'uuid' | 'name' | 'createdAt'>
 		meta: {
 			notAllowedOperations: undefined
 		}
 	}
-	playlistsTracks: {
-		key: [playlistId: number, trackId: number]
-		value: {
-			playlistId: number
-			trackId: number
-			addedAt: number
-		}
-		indexes: {
-			playlistId: number
-			trackId: number
-			addedAt: number
+	playlistEntries: {
+		key: number
+		value: PlaylistEntry
+		indexes: Pick<PlaylistEntry, 'playlistId' | 'trackId' | 'addedAt'> & {
+			playlistTrack: [playlistId: number, trackId: number]
 		}
 		meta: {
 			notAllowedOperations: 'update'
@@ -103,7 +104,7 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> => {
 		return dbPromise
 	}
 
-	dbPromise = openDB<AppDB>('app-storage', 1, {
+	dbPromise = openDB<AppDB>('snae-app-data', 1, {
 		upgrade(e) {
 			const { objectStoreNames } = e
 
@@ -155,12 +156,19 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> => {
 				createIndexes(store, ['name', 'createdAt'], { unique: false })
 			}
 
-			if (!objectStoreNames.contains('playlistsTracks')) {
-				const store = e.createObjectStore('playlistsTracks', {
-					keyPath: ['playlistId', 'trackId'],
+			if (!objectStoreNames.contains('playlistEntries')) {
+				const store = e.createObjectStore('playlistEntries', {
+					keyPath: 'id',
+					autoIncrement: true,
 				})
 
-				createIndexes(store, ['playlistId', 'trackId', 'addedAt'], { unique: false })
+				createIndexes(store, ['playlistId', 'trackId', 'addedAt'], {
+					unique: false,
+				})
+
+				store.createIndex('playlistTrack', ['playlistId', 'trackId'], {
+					unique: false,
+				})
 			}
 
 			if (!objectStoreNames.contains('directories')) {

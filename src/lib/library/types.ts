@@ -62,6 +62,13 @@ export interface Playlist extends BaseMusicItem {
 	createdAt: number
 }
 
+export interface PlaylistEntry {
+	id: number
+	playlistId: number
+	trackId: number
+	addedAt: number
+}
+
 export interface Directory {
 	id: number
 	handle: FileSystemDirectoryHandle

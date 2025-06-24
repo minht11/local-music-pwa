@@ -51,46 +51,80 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 	return query
 }
 
-const createTracksPageQuery = <Slug extends DetailsSlug>(
+export interface TracksQueryRegularResult {
+	tracksIds: number[]
+	playlistIdMap: null
+}
+
+const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 	storeName: Slug,
 	itemName: () => string,
 	id: number,
-): Promise<PageQueryResult<number[]>> => {
+): Promise<PageQueryResult<TracksQueryRegularResult>> => {
 	const query = createPageQuery({
 		key: () => [storeName, itemName()],
-		fetcher: async ([, name]) => {
+		fetcher: async ([, name]): Promise<TracksQueryRegularResult> => {
 			const db = await getDatabase()
 
-			let keys: number[]
-			if (storeName === 'playlists') {
-				const keysResult = await db.getAllKeysFromIndex('playlistsTracks', 'playlistId', id)
-				keys = keysResult.map(([, trackId]) => trackId)
-			} else {
-				const index = configMap[storeName as Exclude<Slug, 'playlists'>].index
-				keys = await db.getAllKeysFromIndex('tracks', index, name)
-			}
+			const index = configMap[storeName].index
+			const keys = await db.getAllKeysFromIndex('tracks', index, name)
 
-			return keys
+			return { tracksIds: keys, playlistIdMap: null }
 		},
 		onDatabaseChange: (changes, actions) => {
-			if (storeName !== 'playlists') {
-				return keysListDatabaseChangeHandler('tracks', changes, actions)
-			}
+			return keysListDatabaseChangeHandler('tracks', changes, actions)
+		},
+	})
 
-			for (const change of changes) {
-				if (change.storeName === 'playlistsTracks') {
-					const [playlistId, trackId] = change.key
+	return query
+}
 
-					if (playlistId === id) {
-						if (change.operation === 'delete') {
-							actions.mutate((keys = []) => keys.filter((key) => key !== trackId))
-						} else if (change.operation === 'add') {
-							// We can't know the order
-							actions.refetch()
-						}
-					}
-				}
+export interface PlaylistTrackItem {
+	trackId: number
+	uuid: string
+}
+
+export interface PlaylistTracksQueryResult {
+	tracksIds: number[]
+	playlistIdMap: Record<number, number>
+}
+
+const createPlaylistTracksPageQuery = (
+	playlistId: number,
+): Promise<PageQueryResult<PlaylistTracksQueryResult>> => {
+	const query = createPageQuery({
+		key: () => [playlistId],
+		fetcher: async (): Promise<PlaylistTracksQueryResult> => {
+			const db = await getDatabase()
+
+			const values = await db.getAllFromIndex('playlistEntries', 'playlistId', playlistId)
+
+			const tracksIds: number[] = Array.from({ length: values.length })
+			const playlistIdMap: Record<number, number> = {}
+			for (let i = 0; i < values.length; i++) {
+				// biome-ignore lint/style/noNonNullAssertion: value is always defined
+				const value = values[i]!
+				tracksIds[i] = value.trackId
+				playlistIdMap[value.trackId] = value.id
 			}
+			return { tracksIds, playlistIdMap }
+		},
+		onDatabaseChange: (changes, actions) => {
+			// TODO.
+			// for (const change of changes) {
+			// 	if (change.storeName === 'playlistEntries') {
+			// 		const [changePlaylistId, trackId] = change.key
+			// 		if (changePlaylistId === playlistId) {
+			// 			if (change.operation === 'delete') {
+			// 				// TODO
+			// 				// actions.mutate((keys = []) => keys.filter((key) => key !== trackId))
+			// 			} else if (change.operation === 'add') {
+			// 				// We can't know the order
+			// 				actions.refetch()
+			// 			}
+			// 		}
+			// 	}
+			// }
 		},
 	})
 
@@ -101,7 +135,7 @@ interface LoadResult {
 	slug: DetailsSlug
 	libraryType: DetailsSlug
 	itemQuery: PageQueryResult<DbValue<DetailsSlug>>
-	tracksQuery: PageQueryResult<number[]>
+	tracksQuery: PageQueryResult<TracksQueryRegularResult | PlaylistTracksQueryResult>
 }
 
 export const load: PageLoad = async (event): Promise<LoadResult> => {
@@ -128,7 +162,9 @@ export const load: PageLoad = async (event): Promise<LoadResult> => {
 	}
 
 	const itemQuery = await createDetailsPageQuery(slug, id)
-	const tracksQuery = await createTracksPageQuery(slug, () => itemQuery.value.name, id)
+	const tracksQuery = await (slug === 'playlists'
+		? createPlaylistTracksPageQuery(id)
+		: createTracksPageQuery(slug, () => itemQuery.value.name, id))
 
 	return {
 		slug,

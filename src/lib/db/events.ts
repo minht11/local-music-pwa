@@ -1,21 +1,43 @@
 import type { AppDB, AppStoreNames } from './database.ts'
 
 type DatabaseOperationsConfig<StoreName extends AppStoreNames> =
-	| {
-			storeName: StoreName
-			operation: 'add'
-			key: AppDB[StoreName]['key']
-	  }
-	| {
-			storeName: StoreName
-			operation: 'update'
-			key: AppDB[StoreName]['key']
-	  }
-	| {
-			storeName: StoreName
-			key: AppDB[StoreName]['key']
-			operation: 'delete'
-	  }
+	| (
+			| {
+					storeName: Exclude<StoreName, 'playlistEntries'>
+					operation: 'add'
+					key: AppDB[StoreName]['key']
+			  }
+			| {
+					storeName: Exclude<StoreName, 'playlistEntries'>
+					operation: 'update'
+					key: AppDB[StoreName]['key']
+			  }
+			| {
+					storeName: Exclude<StoreName, 'playlistEntries'>
+					operation: 'delete'
+					key: AppDB[StoreName]['key']
+			  }
+	  )
+	| (
+			| {
+					storeName: Extract<StoreName, 'playlistEntries'>
+					operation: 'add'
+					key: AppDB[StoreName]['key']
+					value: AppDB[StoreName]['value']
+			  }
+			| {
+					storeName: Extract<StoreName, 'playlistEntries'>
+					operation: 'update'
+					key: AppDB[StoreName]['key']
+					value: AppDB[StoreName]['value']
+			  }
+			| {
+					storeName: Extract<StoreName, 'playlistEntries'>
+					operation: 'delete'
+					key: AppDB[StoreName]['key']
+					value: AppDB[StoreName]['value']
+			  }
+	  )
 
 // For some schemas we want to enforce that only certain operations are allowed.
 type DatabaseChangeDetailsNonNarrowed<StoreName extends AppStoreNames> = Exclude<

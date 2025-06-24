@@ -6,7 +6,7 @@
 		align?: 'left'
 		kind?: ButtonKind
 		type?: 'submit' | 'button' | 'reset' | 'close'
-		action?: (data: S) => void
+		action?: (data: S) => void | Promise<void>
 	}
 
 	export interface DialogButtonProps<S = void> {
@@ -27,8 +27,8 @@
 				kind={button.kind ?? 'flat'}
 				class={['min-w-15', button.align === 'left' && 'mr-auto']}
 				type={button.type !== 'close' ? button.type : 'button'}
-				onclick={() => {
-					button.action?.(state as S)
+				onclick={async () => {
+					await button.action?.(state as S)
 					if (!button.type || button.type === 'close') {
 						onclose()
 					}

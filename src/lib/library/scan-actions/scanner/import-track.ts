@@ -5,7 +5,7 @@ import type { IDBPTransaction } from 'idb'
 
 type ImportTrackTx = IDBPTransaction<
 	AppDB,
-	('tracks' | 'albums' | 'artists' | 'playlistsTracks')[],
+	('tracks' | 'albums' | 'artists' | 'playlistEntries')[],
 	'readwrite'
 >
 
@@ -76,7 +76,7 @@ export const dbImportTrack = async (
 	existingTrackId: number | undefined,
 ): Promise<number> => {
 	const db = await getDatabase()
-	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistsTracks'], 'readwrite')
+	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistEntries'], 'readwrite')
 
 	const trackId = await tx.objectStore('tracks').put(metadata as Track, existingTrackId)
 	const track: Track = {
