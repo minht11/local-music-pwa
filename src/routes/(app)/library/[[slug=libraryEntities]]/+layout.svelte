@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snapshot } from '@sveltejs/kit'
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
 	import AlbumsListContainer from '$lib/components/AlbumsListContainer.svelte'
@@ -15,7 +16,6 @@
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import type { RouteId } from '$lib/view-transitions.svelte.ts'
-	import type { Snapshot } from '@sveltejs/kit'
 	import Search from './Search.svelte'
 
 	const { data, children } = $props()

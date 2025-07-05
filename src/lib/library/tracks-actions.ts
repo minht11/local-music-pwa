@@ -1,7 +1,7 @@
+import type { IDBPTransaction, IndexNames } from 'idb'
 import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
-import type { IDBPTransaction, IndexNames } from 'idb'
 import type { LibraryStoreName } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<

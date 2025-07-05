@@ -1,6 +1,6 @@
-import { assign } from '$lib/helpers/utils/assign.ts'
 import type { Attachment } from 'svelte/attachments'
 import { on } from 'svelte/events'
+import { assign } from '$lib/helpers/utils/assign.ts'
 import { animateEmpty } from '../helpers/animations.ts'
 
 const FADE_DURATION = 180

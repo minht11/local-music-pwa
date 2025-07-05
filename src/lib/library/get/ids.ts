@@ -1,5 +1,5 @@
-import { type AppDB, getDatabase } from '$lib/db/database'
 import type { IDBPIndex, IndexNames } from 'idb'
+import { type AppDB, getDatabase } from '$lib/db/database'
 import type { LibraryStoreName } from '../types.ts'
 
 export type SortOrder = 'asc' | 'desc'

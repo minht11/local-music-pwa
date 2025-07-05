@@ -9,7 +9,22 @@
 	"assist": {
 		"actions": {
 			"source": {
-				"organizeImports": "on"
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"groups": [
+							":URL:",
+							":NODE:",
+							":PACKAGE:",
+							":PACKAGE_WITH_PROTOCOL:",
+							"$app/**",
+							"$server/**",
+							"$lib/**",
+							":ALIAS:",
+							":PATH:"
+						]
+					}
+				}
 			}
 		}
 	},
@@ -113,15 +128,7 @@
 				"noConsole": {
 					"level": "error",
 					"options": {
-						"allow": [
-							"assert",
-							"error",
-							"info",
-							"warn",
-							"time",
-							"timeEnd",
-							"debug"
-						]
+						"allow": ["assert", "error", "info", "warn", "time", "timeEnd", "debug"]
 					}
 				}
 			}

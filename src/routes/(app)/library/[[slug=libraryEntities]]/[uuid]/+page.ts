@@ -1,3 +1,4 @@
+import { error, redirect } from '@sveltejs/kit'
 import { goto } from '$app/navigation'
 import { type DbValue, getDatabase } from '$lib/db/database.ts'
 import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
@@ -8,7 +9,6 @@ import {
 	FAVORITE_PLAYLIST_UUID,
 	type LibraryStoreName,
 } from '$lib/library/types.ts'
-import { error, redirect } from '@sveltejs/kit'
 import type { PageLoad } from './$types.d.ts'
 
 type DetailsSlug = Exclude<LibraryStoreName, 'tracks'>

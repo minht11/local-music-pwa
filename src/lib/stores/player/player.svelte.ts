@@ -1,3 +1,4 @@
+import { untrack } from 'svelte'
 import { onDatabaseChange } from '$lib/db/events.ts'
 import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
@@ -6,7 +7,6 @@ import { toShuffledArray } from '$lib/helpers/utils/array.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { throttle } from '$lib/helpers/utils/throttle.ts'
 import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
-import { untrack } from 'svelte'
 import { cleanupTrackAudio, loadTrackAudio } from './audio.ts'
 
 export interface PlayTrackOptions {

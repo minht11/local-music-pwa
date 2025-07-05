@@ -1,8 +1,8 @@
+import { prefersReducedMotion } from 'svelte/motion'
+import { MediaQuery } from 'svelte/reactivity'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
 import type { LibraryStoreName } from '$lib/library/types'
-import { prefersReducedMotion } from 'svelte/motion'
-import { MediaQuery } from 'svelte/reactivity'
 
 export type AppTheme = 'light' | 'dark'
 export type AppThemeOption = AppTheme | 'auto'

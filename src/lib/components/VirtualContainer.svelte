@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { doesElementHasFocus, findFocusedElement } from '$lib/helpers/focus'
 	import {
 		createVirtualizer,
 		createWindowVirtualizer,
@@ -9,6 +8,7 @@
 	} from '@tanstack/svelte-virtual'
 	import { untrack } from 'svelte'
 	import type { Readable } from 'svelte/store'
+	import { doesElementHasFocus, findFocusedElement } from '$lib/helpers/focus'
 	import { useScrollTarget } from './ScrollContainer.svelte'
 
 	interface Props {

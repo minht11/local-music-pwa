@@ -1,4 +1,7 @@
 <script lang="ts">
+	import type { IDBPObjectStore } from 'idb'
+	import { untrack } from 'svelte'
+	import { SvelteMap } from 'svelte/reactivity'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
@@ -14,9 +17,6 @@
 		dbAddTracksToPlaylistsWithTx,
 		getPlaylistEntriesDatabaseStore,
 	} from '$lib/library/playlists-actions'
-	import type { IDBPObjectStore } from 'idb'
-	import { untrack } from 'svelte'
-	import { SvelteMap } from 'svelte/reactivity'
 
 	interface Props {
 		trackIds: number[]

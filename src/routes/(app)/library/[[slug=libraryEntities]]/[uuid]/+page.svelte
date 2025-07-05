@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { MediaQuery } from 'svelte/reactivity'
 	import Artwork from '$lib/components/Artwork.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import Header from '$lib/components/Header.svelte'
@@ -11,7 +12,6 @@
 	import { FAVORITE_PLAYLIST_ID, removeTrackFromPlaylist } from '$lib/library/playlists-actions.ts'
 	import type { Album, Playlist } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
-	import { MediaQuery } from 'svelte/reactivity'
 
 	const { data } = $props()
 	const main = useMainStore()

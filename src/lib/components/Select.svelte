@@ -1,7 +1,7 @@
 <script lang="ts" module>
+	import { autoUpdate, computePosition, flip, shift } from '@floating-ui/dom'
 	import { ripple } from '$lib/attachments/ripple.ts'
 	import { assign } from '$lib/helpers/utils/assign'
-	import { autoUpdate, computePosition, flip, shift } from '@floating-ui/dom'
 	import Icon from './icon/Icon.svelte'
 
 	export interface SelectProps<T, Key extends keyof T, LabelKey extends keyof T> {

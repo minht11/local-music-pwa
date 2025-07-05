@@ -1,5 +1,5 @@
-import type { ParsedTrackData } from '$lib/library/types.ts'
 import { parseBlob } from 'music-metadata'
+import type { ParsedTrackData } from '$lib/library/types.ts'
 import { getArtworkRelatedData } from './format-artwork.ts'
 
 // This limit is a bit arbitrary.

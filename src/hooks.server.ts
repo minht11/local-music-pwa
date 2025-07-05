@@ -1,5 +1,5 @@
-import { ICON_PATHS } from '$lib/components/icon/icon-paths.server.ts'
 import type { Handle } from '@sveltejs/kit'
+import { ICON_PATHS } from '$lib/components/icon/icon-paths.server.ts'
 import { THEME_PALLETTE_DARK, THEME_PALLETTE_LIGHT } from './server/theme-colors.ts'
 
 const getThemeColorMeta = (color: string | undefined, theme: 'dark' | 'light') =>

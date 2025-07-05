@@ -3,7 +3,6 @@
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 	import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
 	import { toggleFavoriteTrack } from '$lib/library/playlists-actions'
-
 	import Artwork from '../Artwork.svelte'
 	import IconButton from '../IconButton.svelte'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'

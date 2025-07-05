@@ -1,10 +1,10 @@
 import 'fake-indexeddb/auto'
+import { afterEach, describe, expect, it } from 'vitest'
 import {
 	checkForV1LegacyDatabaseData,
 	getV1LegacyDatabase,
 	removeV1LegacyDatabase,
 } from '$lib/db/v1-legacy/database'
-import { afterEach, describe, expect, it } from 'vitest'
 import { migrateV1LegacyData } from '../scan-actions/v1-legacy-migrate.ts'
 
 const polyfillEnv = () => {

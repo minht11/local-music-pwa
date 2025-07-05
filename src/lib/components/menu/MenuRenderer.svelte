@@ -1,7 +1,7 @@
 <script lang="ts" module>
+	import { getContext, setContext } from 'svelte'
 	import { timeline } from '$lib/helpers/animations.ts'
 	import { assign } from '$lib/helpers/utils/assign.ts'
-	import { getContext, setContext } from 'svelte'
 	import Menu from './Menu.svelte'
 	import { getMeasurementsFromAnchor, positionMenu } from './positioning.ts'
 	import type { MenuItem, MenuOptions, MenuPosition } from './types.ts'

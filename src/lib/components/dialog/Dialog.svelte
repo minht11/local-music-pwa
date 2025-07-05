@@ -1,6 +1,6 @@
 <script module lang="ts">
-	import { type AnimationSequence, timeline } from '$lib/helpers/animations.ts'
 	import type { AnimationConfig } from 'svelte/animate'
+	import { type AnimationSequence, timeline } from '$lib/helpers/animations.ts'
 	import Icon, { type IconType } from '../icon/Icon.svelte'
 
 	export interface DialogOpenAccessor<S> {

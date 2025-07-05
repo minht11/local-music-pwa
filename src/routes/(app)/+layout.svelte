@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { setContext } from 'svelte'
 	import { navigating, page, updated } from '$app/state'
 	import { APP_DIALOGS_COMPONENTS } from '$lib/components/app-dialogs/dialogs.ts'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
@@ -11,7 +12,6 @@
 	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
 	import { PLAYER_STORE_CONTEXT } from '$lib/stores/player/use-store.ts'
 	import { onViewTransitionPrepare, setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
-	import { setContext } from 'svelte'
 	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'
 

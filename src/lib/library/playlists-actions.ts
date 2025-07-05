@@ -1,9 +1,9 @@
+import type { IDBPObjectStore } from 'idb'
 import { snackbar } from '$lib/components/snackbar/snackbar'
 import { type AppDB, getDatabase } from '$lib/db/database'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { truncate } from '$lib/helpers/utils/truncate.ts'
 import type { Playlist, PlaylistEntry } from '$lib/library/types.ts'
-import type { IDBPObjectStore } from 'idb'
 import { FAVORITE_PLAYLIST_ID } from './types.ts'
 
 export { FAVORITE_PLAYLIST_ID } from './types.ts'

@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
-import { getDatabase } from '$lib/db/database.ts'
 import { describe, expect, it } from 'vitest'
+import { getDatabase } from '$lib/db/database.ts'
 import { dbCreatePlaylist } from '../playlists-actions.ts'
 
 describe('playlists', () => {

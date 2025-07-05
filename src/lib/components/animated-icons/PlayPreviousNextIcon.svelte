@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { wait } from '$lib/helpers/utils/wait.ts'
 	import { on } from 'svelte/events'
+	import { wait } from '$lib/helpers/utils/wait.ts'
 
 	interface Props {
 		type: 'next' | 'previous'

@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { ripple } from '$lib/attachments/ripple.ts'
 	import { untrack } from 'svelte'
-
+	import { ripple } from '$lib/attachments/ripple.ts'
 	import Icon from '../icon/Icon.svelte'
 	import type { MenuItem } from './types.ts'
 
