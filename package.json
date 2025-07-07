@@ -32,13 +32,13 @@
 		"prettier": "^3.6.2",
 		"prettier-plugin-svelte": "^3.4.0",
 		"prettier-plugin-tailwindcss": "^0.6.13",
-		"svelte": "5.35.2",
+		"svelte": "5.35.4",
 		"svelte-check": "^4.2.2",
 		"tailwindcss": "^4.1.11",
 		"terser": "^5.43.1",
 		"typescript": "^5.8.3",
 		"unplugin-auto-import": "^19.3.0",
-		"vite": "npm:rolldown-vite@7.0.4",
+		"vite": "npm:rolldown-vite@7.0.5",
 		"vitest": "^3.2.4"
 	},
 	"dependencies": {
@@ -60,7 +60,7 @@
 	"packageManager": "pnpm@10.12.1",
 	"pnpm": {
 		"overrides": {
-			"vite": "npm:rolldown-vite@7.0.4",
+			"vite": "npm:rolldown-vite@7.0.5",
 			"@ianvs/prettier-plugin-sort-imports": "-",
 			"@trivago/prettier-plugin-sort-imports": "-",
 			"prettier-plugin-organize-imports": "-",
