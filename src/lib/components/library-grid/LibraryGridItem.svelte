@@ -39,10 +39,11 @@
 	const query = (
 		type === 'albums' ? createAlbumQuery(() => itemId) : createArtistQuery(() => itemId)
 	) as QueryResult<Value>
+	const { value: item } = $derived(query)
 
 	const artworkSrc = createManagedArtwork(() => {
 		if (type === 'albums') {
-			return query.status === 'loaded' ? (query.value as AlbumData).image : undefined
+			return item ? (item as AlbumData).image : undefined
 		}
 
 		return undefined
@@ -80,8 +81,8 @@
 			<div class="h-1 w-1/8 rounded-xs bg-onSurface/20"></div>
 		{:else if query.error}
 			{m.errorUnexpected()}
-		{:else if query.value}
-			{@render children(query.value)}
+		{:else if item}
+			{@render children(item)}
 		{/if}
 	</div>
 </div>

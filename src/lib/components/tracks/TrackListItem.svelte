@@ -27,10 +27,10 @@
 		menuItems,
 	}: Props = $props()
 
-	const data = createTrackQuery(() => trackId)
+	const query = createTrackQuery(() => trackId)
+	const { value: track, loading } = $derived(query)
 
-	const artworkSrc = createManagedArtwork(() => data.value?.image?.small)
-	const track = $derived(data.value)
+	const artworkSrc = createManagedArtwork(() => track?.image?.small)
 
 	const menuItemsWithItem = $derived(track && menuItems?.bind(null, track))
 </script>
@@ -52,15 +52,15 @@
 		<Artwork
 			src={artworkSrc()}
 			alt={track?.name}
-			class={['!hidden h-10 w-10 rounded-sm @xs:!flex', data.loading && 'opacity-50']}
+			class={['!hidden h-10 w-10 rounded-sm @xs:!flex', loading && 'opacity-50']}
 		/>
 
-		{#if data.loading}
+		{#if loading}
 			<div>
 				<div class="mb-2 h-2 rounded-xs bg-onSurface/10"></div>
 				<div class="h-1 w-1/8 rounded-xs bg-onSurface/10"></div>
 			</div>
-		{:else if data.error}
+		{:else if query.error}
 			<div class="text-error">
 				Error loading track with id {trackId}
 			</div>
