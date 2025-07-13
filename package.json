@@ -23,22 +23,22 @@
 		"@biomejs/biome": "2.0.6",
 		"@inlang/paraglide-js": "2.2.0",
 		"@sveltejs/adapter-static": "^3.0.8",
-		"@sveltejs/kit": "^2.22.2",
-		"@sveltejs/vite-plugin-svelte": "6.0.0-next.3",
+		"@sveltejs/kit": "^2.22.5",
+		"@sveltejs/vite-plugin-svelte": "6.0.0",
 		"@tailwindcss/vite": "^4.1.11",
-		"@types/node": "^24.0.10",
+		"@types/node": "^24.0.13",
 		"@vitest/coverage-v8": "^3.2.4",
 		"fake-indexeddb": "^6.0.1",
 		"prettier": "^3.6.2",
 		"prettier-plugin-svelte": "^3.4.0",
-		"prettier-plugin-tailwindcss": "^0.6.13",
-		"svelte": "5.35.4",
+		"prettier-plugin-tailwindcss": "^0.6.14",
+		"svelte": "5.35.6",
 		"svelte-check": "^4.2.2",
 		"tailwindcss": "^4.1.11",
 		"terser": "^5.43.1",
 		"typescript": "^5.8.3",
 		"unplugin-auto-import": "^19.3.0",
-		"vite": "npm:rolldown-vite@7.0.5",
+		"vite": "npm:rolldown-vite@7.0.8",
 		"vitest": "^3.2.4"
 	},
 	"dependencies": {
@@ -57,10 +57,10 @@
 	"engines": {
 		"node": "22.14.0"
 	},
-	"packageManager": "pnpm@10.12.1",
+	"packageManager": "pnpm@10.13.1",
 	"pnpm": {
 		"overrides": {
-			"vite": "npm:rolldown-vite@7.0.5",
+			"vite": "npm:rolldown-vite@7.0.8",
 			"@ianvs/prettier-plugin-sort-imports": "-",
 			"@trivago/prettier-plugin-sort-imports": "-",
 			"prettier-plugin-organize-imports": "-",
