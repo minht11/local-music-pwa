@@ -8,7 +8,7 @@
 	},
 	"files": [
 		"vite.config.ts",
-		"svelte.config.js",
+		"svelte.config.ts",
 		"src/lib/theme.ts"
 	],
 	"include": [

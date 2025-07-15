@@ -55,7 +55,7 @@
 		"weak-lru-cache": "^1.2.2"
 	},
 	"engines": {
-		"node": "22.14.0"
+		"node": "24.3.0"
 	},
 	"packageManager": "pnpm@10.13.1",
 	"pnpm": {
