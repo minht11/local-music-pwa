@@ -50,9 +50,34 @@ const scheduleCleanup = (artwork: Artwork) => {
 	}, thirtySeconds)
 }
 
-export const createManagedArtwork = (
-	getImage: () => Blob | undefined | null,
-): (() => string | undefined) => {
+// TODO. build fails with `$effect()` can only be used as an expression statement
+// error. After few rolldown updates check if this is still needed
+const useManagedTrackCleanup = (key: symbol, artwork: () => Artwork | null) => {
+	$effect(() => {
+		// Need to use variable here so cleanup uses
+		// previous value instead of the current one
+		const savedArtwork = artwork()
+		if (!savedArtwork) {
+			return
+		}
+
+		return () => {
+			if (savedArtwork.refs.size === 1) {
+				scheduleCleanup(savedArtwork)
+			}
+
+			if (import.meta.env.DEV) {
+				if (!savedArtwork.refs.has(key)) {
+					console.warn('Trying to release artwork that is not in use', savedArtwork)
+				}
+			}
+
+			savedArtwork.refs.delete(key)
+		}
+	})
+}
+
+export const createManagedArtwork = (getImage: () => Blob | undefined | null) => {
 	const key = Symbol()
 
 	const artwork = $derived.by(() => {
@@ -74,28 +99,7 @@ export const createManagedArtwork = (
 		return artwork
 	})
 
-	$effect(() => {
-		// Need to use variable here so cleanup uses
-		// previous value instead of the current one
-		const savedArtwork = artwork
-		if (!savedArtwork) {
-			return
-		}
-
-		return () => {
-			if (savedArtwork.refs.size === 1) {
-				scheduleCleanup(savedArtwork)
-			}
-
-			if (import.meta.env.DEV) {
-				if (!savedArtwork.refs.has(key)) {
-					console.warn('Trying to release artwork that is not in use', savedArtwork)
-				}
-			}
-
-			savedArtwork.refs.delete(key)
-		}
-	})
+	useManagedTrackCleanup(key, () => artwork)
 
 	return () => artwork?.url
 }
