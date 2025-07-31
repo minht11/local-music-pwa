@@ -31,6 +31,7 @@ export default defineConfig({
 				strictExecutionOrder: false,
 			},
 			output: {
+				legalComments: 'none',
 				minify: {
 					mangle: true,
 					removeWhitespace: true,
@@ -52,15 +53,9 @@ export default defineConfig({
 		target: 'esnext',
 		minify: 'terser',
 		terserOptions: {
-			output: {
-				comments: false,
-			},
 			module: true,
 			compress: {
 				passes: 3,
-				unsafe_math: true,
-				unsafe_methods: true,
-				unsafe_arrows: true,
 			},
 		},
 	},
