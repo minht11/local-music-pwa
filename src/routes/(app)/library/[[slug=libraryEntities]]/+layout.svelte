@@ -2,6 +2,7 @@
 	import type { Snapshot } from '@sveltejs/kit'
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
+	import type { RouteId } from '$app/types'
 	import AlbumsListContainer from '$lib/components/AlbumsListContainer.svelte'
 	import ArtistListContainer from '$lib/components/ArtistListContainer.svelte'
 	import Button from '$lib/components/Button.svelte'
@@ -15,7 +16,6 @@
 	import { useSetBottomBar } from '$lib/layout-bottom-bar.svelte.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
-	import type { RouteId } from '$lib/view-transitions.svelte.ts'
 	import Search from './Search.svelte'
 
 	const { data, children } = $props()

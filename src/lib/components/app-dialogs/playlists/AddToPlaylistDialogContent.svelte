@@ -140,20 +140,21 @@
 		}
 
 		dispatchDatabaseChangedEvent(allChanges)
+
+		return allChanges.length > 0
 	}
 
 	const save = async () => {
 		try {
-			await dbSave()
-			// TODO: Show snackbar with success message
-			// snackbar.show({ message: m.libraryTrackAddedToPlaylists() })
+			const changed = await dbSave()
+			if (changed) {
+				snackbar({ id: 'playlists-updated', message: m.libraryPlaylistsUpdated() })
+			}
 		} catch (error) {
 			snackbar.unexpectedError(error)
 		}
 	}
 </script>
-
-{trackIds}
 
 <div class="p-4">
 	<TextField bind:value={searchTerm} name="search" placeholder={m.librarySearch()} />

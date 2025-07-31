@@ -1,12 +1,12 @@
 <script lang="ts" module>
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
+	import type { RouteId } from '$app/types'
 	import { ripple } from '$lib/attachments/ripple.ts'
 	import type { QueryResult } from '$lib/db/query/query.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte.ts'
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
 	import { createAlbumQuery, createArtistQuery } from '$lib/library/get/value-queries'
-	import type { RouteId } from '$lib/view-transitions.svelte.ts'
 	import Artwork from '../Artwork.svelte'
 
 	export type LibraryGridItemType = 'albums' | 'artists'

@@ -1,5 +1,5 @@
 import { onNavigate } from '$app/navigation'
-import type { LayoutLoadEvent } from '../routes/$types'
+import type { RouteId } from '$app/types'
 import { getActiveRipplesCount } from './attachments/ripple.ts'
 import { wait } from './helpers/utils/wait.ts'
 
@@ -9,8 +9,6 @@ export type AppViewTransitionTypeMatcherResult = {
 	view: AppViewTransitionType
 	backwards?: boolean
 } | null
-
-export type RouteId = Exclude<LayoutLoadEvent['route']['id'], null>
 
 export type AppViewTransitionTypeMatcher = (
 	to: RouteId,

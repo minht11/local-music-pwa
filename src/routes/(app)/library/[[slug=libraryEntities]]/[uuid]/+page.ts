@@ -59,7 +59,6 @@ export interface TracksQueryRegularResult {
 const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 	storeName: Slug,
 	itemName: () => string,
-	id: number,
 ): Promise<PageQueryResult<TracksQueryRegularResult>> => {
 	const query = createPageQuery({
 		key: () => [storeName, itemName()],
@@ -164,7 +163,7 @@ export const load: PageLoad = async (event): Promise<LoadResult> => {
 	const itemQuery = await createDetailsPageQuery(slug, id)
 	const tracksQuery = await (slug === 'playlists'
 		? createPlaylistTracksPageQuery(id)
-		: createTracksPageQuery(slug, () => itemQuery.value.name, id))
+		: createTracksPageQuery(slug, () => itemQuery.value.name))
 
 	return {
 		slug,

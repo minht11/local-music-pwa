@@ -64,6 +64,7 @@
 	"libraryTrackRemovedFromLibrary": "Track removed from library",
 	"libraryRemoveFromLibrary": "Remove from library",
 	"libraryAddToPlaylist": "Add to playlist",
+	"libraryPlaylistsUpdated": "Playlists updated",
 
 	"libraryPlaylistCreated": "Playlist \"{playlistName}\" created",
 	"libraryPlaylistUpdated": "Playlist updated",

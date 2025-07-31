@@ -1,4 +1,5 @@
 import type { Handle } from '@sveltejs/kit'
+import { dev } from '$app/environment'
 import { ICON_PATHS } from '$lib/components/icon/icon-paths.server.ts'
 import { THEME_PALLETTE_DARK, THEME_PALLETTE_LIGHT } from './server/theme-colors.ts'
 
@@ -36,6 +37,11 @@ const replaceSvgIconPaths = (html: string) => {
 }
 
 export const handle: Handle = ({ event, resolve }) => {
+	// https://svelte.dev/docs/cli/devtools-json
+	if (dev && event.url.pathname === '/.well-known/appspecific/com.chrome.devtools.json') {
+		return new Response(undefined, { status: 404 })
+	}
+
 	return resolve(event, {
 		transformPageChunk: ({ html }) => {
 			html = replaceSvgIconPaths(html)

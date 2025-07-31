@@ -67,7 +67,7 @@
 		if (data.slug === 'albums' || data.slug === 'artists') {
 			return [
 				{
-					label: 'Add to Playlist',
+					label: m.libraryAddToPlaylist(),
 					action: () => {
 						main.addTrackToPlaylistDialogOpen = tracks.tracksIds
 					},
