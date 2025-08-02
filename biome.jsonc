@@ -36,7 +36,8 @@
 			"!**/*.css",
 			// Biome parser incorrectly errors on TS syntax.
 			"!src/lib/components/WrapTranslation.svelte",
-			"!build/**"
+			"!build/**",
+			"!coverage/**"
 		]
 	},
 	"formatter": {
