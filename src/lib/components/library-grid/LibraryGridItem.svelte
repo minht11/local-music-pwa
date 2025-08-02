@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import { goto } from '$app/navigation'
+	import { resolve } from '$app/paths'
 	import { page } from '$app/state'
 	import type { RouteId } from '$app/types'
 	import { ripple } from '$lib/attachments/ripple.ts'
@@ -49,27 +49,35 @@
 		return undefined
 	})
 
-	const clickHandler = () => {
-		if (query.value) {
-			const detailsViewId: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]'
-			const shouldReplace = page.route.id === detailsViewId
+	const linkProps = $derived.by(() => {
+		const item = query.value
 
-			goto(`/library/${type}/${query.value.uuid}`, { replaceState: shouldReplace })
+		if (!item) {
+			return {}
 		}
-	}
+
+		const detailsViewId: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]'
+		const shouldReplace = page.route.id === detailsViewId
+
+		const resolvedHref = resolve('/(app)/library/[[slug=libraryEntities]]/[uuid]', {
+			slug: type,
+			uuid: item.uuid,
+		})
+
+		return {
+			href: resolvedHref,
+			shouldReplace,
+		}
+	})
 </script>
 
-<div
+<a
 	{@attach ripple()}
 	{...props}
 	role="listitem"
 	class={[className, 'interactable flex flex-col rounded-lg bg-surfaceContainerHigh']}
-	onclick={clickHandler}
-	onkeydown={(e) => {
-		if (e.key === 'Enter') {
-			clickHandler()
-		}
-	}}
+	href={linkProps.href}
+	data-sveltekit-replacestate={linkProps.shouldReplace}
 >
 	<Artwork src={artworkSrc()} fallbackIcon="person" class="w-full rounded-[inherit]" />
 
@@ -85,4 +93,4 @@
 			{@render children(item)}
 		{/if}
 	</div>
-</div>
+</a>
