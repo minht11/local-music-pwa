@@ -241,7 +241,7 @@
 
 	:global(html:active-view-transition-type(player)) {
 		--vt-pl-card-radius: var(--radius-2xl);
-		@media (width >= --theme(--breakpoint-xs)) {
+		@media (width >= --theme(--breakpoint-sm)) {
 			--vt-pl-card-radius: var(--radius-3xl);
 		}
 

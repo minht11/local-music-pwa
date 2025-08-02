@@ -47,16 +47,18 @@
 		})
 	}
 
-	const sortMenuHandler = (e: MouseEvent) => {
-		const menuItems = sortOptions().map((option) => ({
+	const sortMenuItems = $derived.by(() =>
+		sortOptions().map((option) => ({
 			label: option.name,
 			selected: store.sortByKey === option.key,
 			action: () => {
 				store.sortByKey = option.key
 			},
-		}))
+		})),
+	)
 
-		menu.showFromEvent(e, menuItems, {
+	const sortMenuHandler = (e: MouseEvent) => {
+		menu.showFromEvent(e, sortMenuItems, {
 			anchor: true,
 			preferredAlignment: {
 				vertical: 'top',
@@ -67,7 +69,7 @@
 </script>
 
 <div
-	class="@container sticky top-2 z-1 mt-2 mb-4 ml-auto flex w-full max-w-125 items-center gap-2 rounded-lg border border-primary/10 bg-surfaceContainerHighest px-2"
+	class="@container sticky top-2 z-1 mt-2 mb-4 ml-auto flex w-full max-w-125 items-center gap-1 rounded-lg border border-primary/10 bg-surfaceContainerHighest px-2 @sm:gap-2"
 >
 	<input
 		value={store.searchTerm}
@@ -78,9 +80,11 @@
 		oninput={(e) => searchHandler(e as unknown as InputEvent)}
 	/>
 
-	<Separator vertical class="my-auto h-6" />
+	<Separator vertical class="my-auto hidden h-6 @sm:flex" />
 
-	<IconButton icon="sort" tooltip={m.libraryOpenSortMenu()} onclick={sortMenuHandler} />
+	{#if sortMenuItems.length > 1}
+		<IconButton icon="sort" tooltip={m.libraryOpenSortMenu()} onclick={sortMenuHandler} />
+	{/if}
 
 	<IconButton
 		class={[store.order === 'desc' && 'rotate-180', 'transition-transform']}
@@ -91,7 +95,7 @@
 		}}
 	/>
 
-	<Separator vertical class="my-auto h-6" />
+	<Separator vertical class="my-auto hidden h-6 @sm:flex" />
 
 	<IconButton
 		ariaLabel={m.libraryToggleSortOrder()}
