@@ -9,6 +9,10 @@ export const logChunkSizePlugin = (): Plugin => {
 		apply: 'build',
 		enforce: 'post',
 		writeBundle() {
+			if (this.environment.name === 'ssr') {
+				return
+			}
+
 			const dirSize = async (directory: string): Promise<{ size: number; count: number }> => {
 				let size = 0
 				let count = 0
