@@ -9,22 +9,33 @@ export const logChunkSizePlugin = (): Plugin => {
 		apply: 'build',
 		enforce: 'post',
 		writeBundle() {
-			const dirSize = async (directory: string) => {
-				const files = readdirSync(directory)
-				const stats = files.map((file) => statSync(path.join(directory, file)))
-
+			const dirSize = async (directory: string): Promise<{ size: number; count: number }> => {
 				let size = 0
 				let count = 0
-				for await (const stat of stats) {
-					size += stat.size
-					count += 1
+
+				const processDirectory = async (dir: string) => {
+					const files = readdirSync(dir)
+
+					for (const file of files) {
+						const filePath = path.join(dir, file)
+						const stat = statSync(filePath)
+
+						if (stat.isDirectory()) {
+							await processDirectory(filePath)
+						} else {
+							size += stat.size
+							count += 1
+						}
+					}
 				}
 
+				await processDirectory(directory)
 				return { size, count }
 			}
 
 			setTimeout(async () => {
-				const { size, count } = await dirSize('./build/_app/immutable/chunks')
+				const { size, count } = await dirSize('./build/_app/immutable')
+				// biome-ignore lint/suspicious/noConsole: log
 				console.log('Size of chunks:', size / 1024, 'KB. Files count:', count)
 			}, 2000)
 		},
