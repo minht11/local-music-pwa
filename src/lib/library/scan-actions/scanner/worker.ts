@@ -115,7 +115,7 @@ const findTrackByMixedFileEntity = async (handle: FileEntity, tracks: Track[]) =
 	return null
 }
 
-const SUPPORTED_EXTENSIONS = ['aac', 'mp3', 'ogg', 'wav', 'flac', 'm4a', 'opus']
+const SUPPORTED_EXTENSIONS = ['aac', 'mp3', 'ogg', 'wav', 'flac', 'm4a', 'opus', 'webm']
 
 const scanExistingDirectory = async (handles: FileEntity[], directoryId: number) => {
 	const db = await getDatabase()
@@ -246,6 +246,8 @@ self.addEventListener('message', async (event: MessageEvent<TracksScanOptions>) 
 	if (options.action === 'directory-rescan') {
 		const handles = await getFileHandlesRecursively(options.dirHandle, SUPPORTED_EXTENSIONS)
 		await scanExistingDirectory(handles, options.dirId)
+
+		// TODO. Scan for orphan albums/artists
 
 		return
 	}
