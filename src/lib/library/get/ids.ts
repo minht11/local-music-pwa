@@ -1,10 +1,10 @@
-import type { IDBPIndex, IndexNames } from 'idb'
-import { type AppDB, getDatabase } from '$lib/db/database'
+import type { IDBPIndex } from 'idb'
+import { type AppDB, type AppIndexNames, getDatabase } from '$lib/db/database'
 import type { LibraryStoreName } from '../types.ts'
 
 export type SortOrder = 'asc' | 'desc'
 export type LibraryItemSortKey<Store extends LibraryStoreName> = Exclude<
-	IndexNames<AppDB, Store>,
+	AppIndexNames<Store>,
 	symbol
 >
 

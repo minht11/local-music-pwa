@@ -15,7 +15,6 @@ export interface AppDB extends DBSchema {
 		value: Track
 		indexes: Pick<
 			Track,
-			| 'id'
 			| 'uuid'
 			| 'name'
 			| 'album'
@@ -77,11 +76,12 @@ export interface AppDB extends DBSchema {
 }
 
 export type AppStoreNames = StoreNames<AppDB>
+export type AppIndexNames<Store extends AppStoreNames> = IndexNames<AppDB, Store>
 
-const createIndexes = <DBTypes extends DBSchema | unknown, Name extends StoreNames<DBTypes>>(
-	store: IDBPObjectStore<DBTypes, ArrayLike<StoreNames<DBTypes>>, Name, 'versionchange'>,
-	indexes: readonly IndexNames<DBTypes, Name>[],
-	options: IDBIndexParameters,
+const createIndexes = <Name extends AppStoreNames>(
+	store: IDBPObjectStore<AppDB, ArrayLike<AppStoreNames>, Name, 'versionchange'>,
+	indexes: readonly AppIndexNames<Name>[],
+	options: IDBIndexParameters = {},
 ) => {
 	for (const name of indexes) {
 		store.createIndex(name, name, options)
@@ -97,14 +97,8 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 		autoIncrement: true,
 	})
 
-let dbPromise: Promise<IDBPDatabase<AppDB>> | null = null
-
-export const getDatabase = (): Promise<IDBPDatabase<AppDB>> => {
-	if (dbPromise) {
-		return dbPromise
-	}
-
-	dbPromise = openDB<AppDB>('snae-app-data', 1, {
+const openAppDatabase = () =>
+	openDB<AppDB>('snae-app-data', 1, {
 		upgrade(e) {
 			const { objectStoreNames } = e
 
@@ -137,7 +131,7 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> => {
 				const store = createStore(e, 'albums')
 
 				createIndexes(store, ['name', 'uuid'], { unique: true })
-				createIndexes(store, ['year'], { unique: false })
+				createIndexes(store, ['year'])
 
 				store.createIndex('artists', 'artists', {
 					unique: false,
@@ -153,7 +147,7 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> => {
 			if (!objectStoreNames.contains('playlists')) {
 				const store = createStore(e, 'playlists')
 				createIndexes(store, ['uuid'], { unique: true })
-				createIndexes(store, ['name', 'createdAt'], { unique: false })
+				createIndexes(store, ['name', 'createdAt'])
 			}
 
 			if (!objectStoreNames.contains('playlistEntries')) {
@@ -162,13 +156,10 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> => {
 					autoIncrement: true,
 				})
 
-				createIndexes(store, ['playlistId', 'trackId', 'addedAt'], {
-					unique: false,
-				})
+				// TODO. Do we need index for  playlistId and trackId?
+				createIndexes(store, ['playlistId', 'trackId', 'addedAt'])
 
-				store.createIndex('playlistTrack', ['playlistId', 'trackId'], {
-					unique: false,
-				})
+				store.createIndex('playlistTrack', ['playlistId', 'trackId'])
 			}
 
 			if (!objectStoreNames.contains('directories')) {
@@ -177,11 +168,24 @@ export const getDatabase = (): Promise<IDBPDatabase<AppDB>> => {
 		},
 	})
 
+type AppIDBDatabase = IDBPDatabase<AppDB>
+let dbPromise: Promise<AppIDBDatabase> | AppIDBDatabase | null = null
+
+export const getDatabase = (): Promise<AppIDBDatabase> | AppIDBDatabase => {
+	if (dbPromise) {
+		return dbPromise
+	}
+
+	dbPromise = openAppDatabase()
+
 	dbPromise
 		.then((db) => {
 			db.onclose = () => {
 				dbPromise = null
 			}
+
+			// Micro optimization to avoid unwrapping the promise
+			dbPromise = db
 		})
 		.catch(() => {
 			dbPromise = null

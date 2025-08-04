@@ -18,21 +18,16 @@
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"declaration": true,
-		"isolatedDeclarations": false,
 		"libReplacement": false,
 		"erasableSyntaxOnly": true,
 		"composite": true,
 		"emitDeclarationOnly": true,
-        "verbatimModuleSyntax": true,
+		"verbatimModuleSyntax": true,
 		"isolatedModules": true,
-		"lib": [
-			"esnext",
-			"DOM",
-			"DOM.Iterable"
-		],
+		"lib": ["esnext", "DOM", "DOM.Iterable"],
 		"moduleResolution": "bundler",
-		"module": "esnext",
+		"module": "esnext"
 	},
-    "include": [],
-    "exclude": []
+	"include": [],
+	"exclude": []
 }

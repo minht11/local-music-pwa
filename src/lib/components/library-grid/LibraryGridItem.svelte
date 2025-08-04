@@ -1,4 +1,5 @@
 <script lang="ts" module>
+	import { goto } from '$app/navigation'
 	import { resolve } from '$app/paths'
 	import { page } from '$app/state'
 	import type { RouteId } from '$app/types'
@@ -7,6 +8,7 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte.ts'
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
 	import { createAlbumQuery, createArtistQuery } from '$lib/library/get/value-queries'
+	import { removeAlbum, removeArtist } from '$lib/library/tracks-actions'
 	import Artwork from '../Artwork.svelte'
 
 	export type LibraryGridItemType = 'albums' | 'artists'
@@ -34,6 +36,8 @@
 		...props
 	}: LibraryItemGridItemProps<Type> = $props()
 
+	const menu = useMenu()
+
 	type Value = LibraryGridItemValue<Type>
 
 	const query = (
@@ -51,9 +55,8 @@
 
 	const linkProps = $derived.by(() => {
 		const item = query.value
-
 		if (!item) {
-			return {}
+			return null
 		}
 
 		const detailsViewId: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]'
@@ -69,6 +72,31 @@
 			shouldReplace,
 		}
 	})
+
+	const menuItems = () => {
+		if (!item || !linkProps) {
+			return []
+		}
+
+		return [
+			{
+				label: m.libraryViewDetails(),
+				action: () => {
+					goto(linkProps.href, { replaceState: linkProps.shouldReplace })
+				},
+			},
+			{
+				label: m.libraryRemoveFromLibrary(),
+				action: () => {
+					if (type === 'albums') {
+						void removeAlbum(item.id)
+					} else if (type === 'artists') {
+						void removeArtist(item.id)
+					}
+				},
+			},
+		]
+	}
 </script>
 
 <a
@@ -76,8 +104,15 @@
 	{...props}
 	role="listitem"
 	class={[className, 'interactable flex flex-col rounded-lg bg-surfaceContainerHigh']}
-	href={linkProps.href}
-	data-sveltekit-replacestate={linkProps.shouldReplace}
+	href={linkProps?.href}
+	data-sveltekit-replacestate={linkProps?.shouldReplace}
+	oncontextmenu={(e) => {
+		e.preventDefault()
+		menu.showFromEvent(e, menuItems(), {
+			anchor: false,
+			position: { top: e.y, left: e.x },
+		})
+	}}
 >
 	<Artwork src={artworkSrc()} fallbackIcon="person" class="w-full rounded-[inherit]" />
 
