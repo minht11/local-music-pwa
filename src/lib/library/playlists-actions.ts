@@ -2,6 +2,7 @@ import type { IDBPObjectStore } from 'idb'
 import { snackbar } from '$lib/components/snackbar/snackbar'
 import { type AppDB, getDatabase } from '$lib/db/database'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
+import { createUIAction } from '$lib/helpers/ui-action.ts'
 import { truncate } from '$lib/helpers/utils/truncate.ts'
 import type { Playlist, PlaylistEntry } from '$lib/library/types.ts'
 import { FAVORITE_PLAYLIST_ID } from './types.ts'
@@ -81,13 +82,17 @@ export const updatePlaylistName = async (id: number, name: string): Promise<bool
 	}
 }
 
-const dbRemovePlaylist = async (id: number): Promise<void> => {
+const dbRemovePlaylist = async (playlistId: number): Promise<void> => {
 	const db = await getDatabase()
 	const tx = db.transaction(['playlists', 'playlistEntries'], 'readwrite')
 	const tracksStore = tx.objectStore('playlistEntries')
 
+	const entriesIds = await tx.objectStore('playlistEntries').getAllKeys(playlistId)
+
 	await Promise.all([
-		tracksStore.delete(IDBKeyRange.bound([id, 0], [id, Number.POSITIVE_INFINITY])),
+		tracksStore.delete(
+			IDBKeyRange.bound([playlistId, 0], [playlistId, Number.POSITIVE_INFINITY]),
+		),
 		tx.objectStore('playlists').delete(id),
 		tx.done,
 	])
@@ -101,30 +106,29 @@ const dbRemovePlaylist = async (id: number): Promise<void> => {
 	})
 }
 
-export const removePlaylist = async (id: number): Promise<void> => {
-	try {
-		await dbRemovePlaylist(id)
-
-		snackbar(m.libraryPlaylistRemoved())
-	} catch (error) {
-		snackbar.unexpectedError(error)
-	}
-}
+export const removePlaylist = createUIAction(m.libraryPlaylistRemoved(), (id: number) =>
+	dbRemovePlaylist(id),
+)
 
 const dbAddTrackToPlaylist = async (playlistId: number, trackId: number): Promise<void> => {
 	const db = await getDatabase()
 
-	const key = await db.add('playlistEntries', {
-		uuid: crypto.randomUUID(),
+	const playlistEntry: Omit<PlaylistEntry, 'id'> = {
 		playlistId,
 		trackId,
 		addedAt: Date.now(),
-	})
+	}
+
+	const key = await db.add('playlistEntries', playlistEntry as PlaylistEntry)
 
 	dispatchDatabaseChangedEvent({
 		operation: 'add',
 		storeName: 'playlistEntries',
 		key,
+		value: {
+			...playlistEntry,
+			id: key,
+		},
 	})
 }
 
@@ -174,68 +178,28 @@ export const dbAddTracksToPlaylistsWithTx = (
 	return Promise.all(promises)
 }
 
-const dbRemoveTrackFromPlaylist = async (
-	uuid: string,
-	playlistId: number,
-	trackId: number,
-): Promise<void> => {
+const dbRemoveTrackFromPlaylist = async (playlistEntryId: number): Promise<void> => {
 	const db = await getDatabase()
 
-	const key: [number, number] = [playlistId, trackId, uuid]
-	await db.delete('playlistEntries', key)
+	const entry = await db.get('playlistEntries', playlistEntryId)
+	if (!entry) {
+		throw new Error(`Playlist entry with id ${playlistEntryId} not found`)
+	}
+
+	await db.delete('playlistEntries', entry.id)
 
 	dispatchDatabaseChangedEvent({
 		operation: 'delete',
 		storeName: 'playlistEntries',
-		key,
+		key: entry.id,
+		value: entry,
 	})
 }
 
-const dbRemoveTracksFromPlaylist = async (
-	keys: [playlistId: number, trackId: number][],
-): Promise<void> => {
-	const db = await getDatabase()
-
-	const tx = db.transaction('playlistEntries', 'readwrite')
-	const tasks = keys.map(async (key): Promise<DatabaseChangeDetails> => {
-		await tx.objectStore('playlistEntries').delete(key)
-
-		return {
-			operation: 'delete',
-			storeName: 'playlistEntries',
-			key,
-		}
-	})
-
-	const changes = await Promise.all(tasks)
-
-	dispatchDatabaseChangedEvent(changes)
-}
-
-export const removeTrackFromPlaylist = async (
-	playlistId: number,
-	trackId: number,
-): Promise<void> => {
-	try {
-		await dbRemoveTrackFromPlaylist(playlistId, trackId)
-
-		snackbar(m.libraryTrackRemovedFromPlaylist())
-	} catch (error) {
-		snackbar.unexpectedError(error)
-	}
-}
-
-export const dbToggleTrackInPlaylist = async (
-	shouldBeRemoved: boolean,
-	playlistId: number,
-	trackId: number,
-): Promise<void> => {
-	if (shouldBeRemoved) {
-		await dbRemoveTrackFromPlaylist(playlistId, trackId)
-	} else {
-		await dbAddTrackToPlaylist(playlistId, trackId)
-	}
-}
+export const removeTrackFromPlaylist = createUIAction(
+	m.libraryTrackRemovedFromPlaylist(),
+	(playlistEntryId: number) => dbRemoveTrackFromPlaylist(playlistEntryId),
+)
 
 export const toggleFavoriteTrack = async (
 	shouldBeRemoved: boolean,

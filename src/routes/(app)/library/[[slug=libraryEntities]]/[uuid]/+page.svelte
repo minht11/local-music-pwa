@@ -48,12 +48,17 @@
 
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
 
-	const playlistTrackMenuItems = (track: TrackData, index: number) => {
+	const playlistTrackMenuItems = (_: TrackData, index: number) => {
 		return [
 			{
 				label: m.libraryTrackRemoveFromPlaylist(),
 				action: () => {
-					void removeTrackFromPlaylist(item.id, track.id)
+					const entryId = tracks.playlistIdMap?.[index]
+					if (!entryId) {
+						throw new Error('Playlist entry id not found')
+					}
+
+					void removeTrackFromPlaylist(entryId)
 				},
 			},
 		]

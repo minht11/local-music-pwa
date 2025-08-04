@@ -1,7 +1,7 @@
-import type { IDBPTransaction, IndexNames } from 'idb'
-import { snackbar } from '$lib/components/snackbar/snackbar.ts'
-import { type AppDB, getDatabase } from '$lib/db/database.ts'
+import type { IDBPTransaction } from 'idb'
+import { type AppDB, type AppIndexNames, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
+import { createUIAction } from '$lib/helpers/ui-action.ts'
 import type { LibraryStoreName } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<
@@ -12,8 +12,8 @@ type TrackOperationsTransaction = IDBPTransaction<
 
 const dbRemoveTrackRelatedData = async <
 	Store extends Exclude<LibraryStoreName, 'playlists'>,
-	ItemIndexName extends IndexNames<AppDB, Store>,
-	IndexName extends IndexNames<AppDB, 'tracks'>,
+	ItemIndexName extends AppIndexNames<Store>,
+	IndexName extends AppIndexNames<'tracks'>,
 	ItemValue extends AppDB[Store]['indexes'][ItemIndexName],
 >(
 	tx: TrackOperationsTransaction,
@@ -59,9 +59,10 @@ const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 	const tx = db.transaction(['playlists', 'playlistEntries'], 'readwrite')
 
 	const store = tx.objectStore('playlistEntries')
+	const idx = store.index('trackId')
 
 	const range = IDBKeyRange.bound([0, trackId], [Number.POSITIVE_INFINITY, trackId])
-	const entries = await store.getAll(range)
+	const entries = await store.getAll(trackId)
 
 	await store.delete(range)
 
@@ -109,15 +110,9 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 	])
 }
 
-export const removeTrack = async (id: number): Promise<void> => {
-	try {
-		await dbRemoveTrack(id)
-
-		snackbar(m.libraryTrackRemovedFromLibrary())
-	} catch (error) {
-		snackbar.unexpectedError(error)
-	}
-}
+export const removeTrack = createUIAction(m.libraryTrackRemovedFromLibrary(), (id: number) =>
+	dbRemoveTrack(id),
+)
 
 export const dbRemoveMultipleTracks = async (trackIds: number[]): Promise<void> => {
 	for (const trackId of trackIds) {
@@ -125,12 +120,42 @@ export const dbRemoveMultipleTracks = async (trackIds: number[]): Promise<void> 
 	}
 }
 
-export const dbRemoveTrackRelatedItem = async <
-	Store extends Extract<LibraryStoreName, 'albums' | 'artists'>,
->(
-	_storeName: Store,
-) => {
-	// TODO. Implement this function
-	await getDatabase()
-	throw new Error('Not implemented')
+export const dbRemoveAlbum = async (albumId: number): Promise<void> => {
+	const db = await getDatabase()
+	const tx = await db.transaction(['albums', 'tracks'], 'readwrite')
+	const album = await tx.objectStore('albums').get(albumId)
+	if (!album) {
+		return
+	}
+
+	const tracksIds = await tx.objectStore('tracks').index('album').getAllKeys(album.name)
+
+	// If no tracks references it, it will be deleted automatically
+	await dbRemoveMultipleTracks(tracksIds)
 }
+
+export const removeAlbum = createUIAction(m.libraryAlbumRemovedFromLibrary(), (id: number) =>
+	dbRemoveAlbum(id),
+)
+
+export const dbRemoveArtist = async (artistId: number): Promise<void> => {
+	const db = await getDatabase()
+	const tx = await db.transaction(['artists', 'tracks'], 'readwrite')
+	const artist = await tx.objectStore('artists').get(artistId)
+	if (!artist) {
+		return
+	}
+
+	// Artists is an array, we want to remove all tracks that reference this artist, artist can have other names as well
+	const tracksIds = await tx
+		.objectStore('tracks')
+		.index('artists')
+		.getAllKeys(IDBKeyRange.only(artist.name))
+
+	// If no tracks references it, it will be deleted automatically
+	await dbRemoveMultipleTracks(tracksIds)
+}
+
+export const removeArtist = createUIAction(m.libraryArtistRemovedFromLibrary(), (id: number) =>
+	dbRemoveArtist(id),
+)
