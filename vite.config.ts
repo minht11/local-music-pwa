@@ -26,10 +26,7 @@ export default defineConfig({
 		modulePreload: {
 			polyfill: false,
 		},
-		rollupOptions: {
-			experimental: {
-				strictExecutionOrder: false,
-			},
+		rolldownOptions: {
 			output: {
 				legalComments: 'none',
 				minify: {
