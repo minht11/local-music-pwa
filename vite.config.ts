@@ -89,8 +89,18 @@ export default defineConfig({
 		{
 			name: 'ssr-config',
 			config(config) {
+				const isSsr = config?.build?.ssr
+
 				// Since this is mostly SPA, server logs are mostly noise.
-				config.logLevel = config?.build?.ssr ? 'warn' : 'info'
+				config.logLevel = isSsr ? 'warn' : 'info'
+		
+				if (!isSsr) {
+					config.build ??= {}
+					config.build.rolldownOptions ??= {}
+					config.build.rolldownOptions.optimization ??= {}
+					// Server build crashes with `inlineConst` enabled
+					config.build.rolldownOptions.optimization.inlineConst = true		
+				}
 
 				return config
 			},
