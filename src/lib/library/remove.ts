@@ -60,10 +60,13 @@ const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 
 	const store = tx.objectStore('playlistEntries')
 
-	const range = IDBKeyRange.bound([0, trackId], [Number.POSITIVE_INFINITY, trackId])
-	const entries = await store.getAll(trackId)
+	// Get all playlist entries for this track using the trackId index
+	const entries = await store.index('trackId').getAll(trackId)
 
-	await store.delete(range)
+	// Delete each entry
+	await Promise.all(entries.map(entry => store.delete(entry.id)))
+	
+	await tx.done
 
 	const changes = entries.map(
 		(entry): DatabaseChangeDetails => ({
@@ -121,13 +124,15 @@ export const dbRemoveMultipleTracks = async (trackIds: number[]): Promise<void> 
 
 export const dbRemoveAlbum = async (albumId: number): Promise<void> => {
 	const db = await getDatabase()
-	const tx = await db.transaction(['albums', 'tracks'], 'readwrite')
+	const tx = db.transaction(['albums', 'tracks'], 'readwrite')
 	const album = await tx.objectStore('albums').get(albumId)
 	if (!album) {
+		await tx.done
 		return
 	}
 
 	const tracksIds = await tx.objectStore('tracks').index('album').getAllKeys(album.name)
+	await tx.done
 
 	// If no tracks references it, it will be deleted automatically
 	await dbRemoveMultipleTracks(tracksIds)
@@ -139,9 +144,10 @@ export const removeAlbum = createUIAction(m.libraryAlbumRemovedFromLibrary(), (i
 
 export const dbRemoveArtist = async (artistId: number): Promise<void> => {
 	const db = await getDatabase()
-	const tx = await db.transaction(['artists', 'tracks'], 'readwrite')
+	const tx = db.transaction(['artists', 'tracks'], 'readwrite')
 	const artist = await tx.objectStore('artists').get(artistId)
 	if (!artist) {
+		await tx.done
 		return
 	}
 
@@ -150,6 +156,8 @@ export const dbRemoveArtist = async (artistId: number): Promise<void> => {
 		.objectStore('tracks')
 		.index('artists')
 		.getAllKeys(IDBKeyRange.only(artist.name))
+	
+	await tx.done
 
 	// If no tracks references it, it will be deleted automatically
 	await dbRemoveMultipleTracks(tracksIds)
