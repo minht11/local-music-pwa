@@ -2,7 +2,7 @@
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import { truncate } from '$lib/helpers/utils/truncate.ts'
 	import { removePlaylist } from '$lib/library/playlists-actions'
-	import { removeTrack } from '$lib/library/tracks-actions.ts'
+	import { removeTrack } from '$lib/library/remove.ts'
 
 	const main = useMainStore()
 </script>

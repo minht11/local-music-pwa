@@ -8,7 +8,7 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte.ts'
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
 	import { createAlbumQuery, createArtistQuery } from '$lib/library/get/value-queries'
-	import { removeAlbum, removeArtist } from '$lib/library/tracks-actions'
+	import { removeAlbum, removeArtist } from '$lib/library/remove.ts'
 	import Artwork from '../Artwork.svelte'
 
 	export type LibraryGridItemType = 'albums' | 'artists'

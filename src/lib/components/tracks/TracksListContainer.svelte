@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	import type { TrackData } from '$lib/library/get/value.ts'
 	import { toggleFavoriteTrack } from '$lib/library/playlists-actions'
-	import { removeTrack } from '$lib/library/tracks-actions'
+	import { removeTrack } from '$lib/library/remove.ts'
 	import type { MenuItem } from '../ListItem.svelte'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import TrackListItem from './TrackListItem.svelte'

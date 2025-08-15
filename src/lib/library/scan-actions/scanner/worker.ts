@@ -2,7 +2,7 @@
 
 import { getDatabase } from '$lib/db/database'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
-import { dbRemoveTrack } from '$lib/library/tracks-actions.ts'
+import { dbRemoveTrack } from '$lib/library/remove.ts'
 import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/library/types.ts'
 import { dbImportTrack } from './import-track.ts'
 import { parseTrack } from './parse/parse-track.ts'
@@ -246,8 +246,6 @@ self.addEventListener('message', async (event: MessageEvent<TracksScanOptions>) 
 	if (options.action === 'directory-rescan') {
 		const handles = await getFileHandlesRecursively(options.dirHandle, SUPPORTED_EXTENSIONS)
 		await scanExistingDirectory(handles, options.dirId)
-
-		// TODO. Scan for orphan albums/artists
 
 		return
 	}

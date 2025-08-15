@@ -59,7 +59,6 @@ const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 	const tx = db.transaction(['playlists', 'playlistEntries'], 'readwrite')
 
 	const store = tx.objectStore('playlistEntries')
-	const idx = store.index('trackId')
 
 	const range = IDBKeyRange.bound([0, trackId], [Number.POSITIVE_INFINITY, trackId])
 	const entries = await store.getAll(trackId)
