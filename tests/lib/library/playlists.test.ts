@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
 import { dbCreatePlaylist } from '$lib/library/playlists-actions.ts'
-import { clearDatabaseStores } from '../shared.ts'
+import { clearDatabaseStores } from '../../shared.ts'
 
 // crypto.randomUUID
 vi.stubGlobal('crypto', {

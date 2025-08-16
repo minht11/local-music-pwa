@@ -6,7 +6,7 @@ import {
 	removeV1LegacyDatabase,
 } from '$lib/db/v1-legacy/database'
 import { migrateV1LegacyData } from '$lib/library/scan-actions/v1-legacy-migrate.ts'
-import { clearDatabaseStores } from '../shared'
+import { clearDatabaseStores } from '../../shared'
 
 const polyfillEnv = () => {
 	// @ts-expect-error polyfill

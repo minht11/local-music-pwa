@@ -5,7 +5,7 @@ import { dbRemoveTrack, dbRemoveAlbum, dbRemoveArtist } from '$lib/library/remov
 import { dbImportTrack } from '$lib/library/scan-actions/scanner/import-track.ts'
 import { dbCreatePlaylist } from '$lib/library/playlists-actions.ts'
 import type { UnknownTrack } from '$lib/library/types.ts'
-import { clearDatabaseStores } from '../shared.ts'
+import { clearDatabaseStores } from '../../shared.ts'
 
 export function expectToBeDefined<T>(value: T | undefined): asserts value is T {
 	expect(value).toBeDefined()
