@@ -17,33 +17,33 @@
 			icon: 'palette',
 			title: 'Adaptive theming',
 			description:
-				'Beautiful interface that automatically adapts to your system theme and music artwork colors.',
+				'Beautiful interface that changes colors to match your music artwork and follows your system theme.',
 		},
 		{
 			icon: 'flash',
 			title: 'Lightning fast',
 			description:
-				'Instant startup, seamless playback, and responsive controls built for modern browsers.',
+				'Opens instantly, plays seamlessly, and responsive controls built for modern browsers.',
 		},
 		{
 			icon: 'cellphone',
-			title: 'Works everywhere',
+			title: 'Use anywhere',
 			description:
-				'Perfect experience across desktop, tablet, and mobile. No installation required.',
+				'Works great on your phone, tablet, or computer. Just open it in your browser - no downloads needed.',
 		},
 		{
 			icon: 'lock',
 			title: 'Privacy-first design',
 			description:
-				'Your music stays on your device. Minimal privacy-preserving analytics, zero personal tracking, zero compromises on your privacy.',
+				'Your music never leaves your device. No accounts, minimal privacy-preserving analytics. Just you and your music.',
 		},
 	]
 
 	const benefits = [
-		'Browse your music collection with smart filtering and search',
-		'Create and manage custom playlists',
+		'Browse and find songs with smart search and filters',
+		'Make custom playlists for every mood and moment',
 		'Control playback with keyboard shortcuts and media keys',
-		'Full offline support - no internet connection needed',
+		'Works completely offline - no internet needed',
 	]
 </script>
 
@@ -57,7 +57,7 @@
 	>
 		<Icon type="github" />
 	</IconButton>
-	<Button as="a" href="/library/tracks" kind="outlined">Open app</Button>
+	<Button as="a" href="/library/tracks" kind="outlined">Launch Player</Button>
 </Header>
 
 <section
@@ -72,16 +72,14 @@
 		<p
 			class="mx-auto mb-8 max-w-2xl text-title-md leading-relaxed text-onSurfaceVariant sm:text-title-lg"
 		>
-			Experience your local music collection with a beautiful, privacy-focused player that works
-			entirely in your browser.
+			Enjoy all your favorite songs with a fast, privacy-focused music player that works right in
+			your browser.
 		</p>
 		<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
 			<Button as="a" href="/library/tracks" kind="filled" class="w-full sm:w-60">
-				Launch Player
+				Start Listening
 			</Button>
-			<div class="text-body-md text-onSurfaceVariant">
-				No signup • No installation • Fully offline
-			</div>
+			<div class="text-body-md text-onSurfaceVariant">Free • No sign-up • Fully offline</div>
 		</div>
 	</div>
 
@@ -97,11 +95,11 @@
 <section class="content-width py-20">
 	<div class="mb-16 text-center">
 		<h2 class="mb-4 text-headline-md font-bold text-onSurface sm:text-headline-md">
-			Built for music lovers
+			Made for people who love music
 		</h2>
 		<p class="mx-auto max-w-xl text-title-md text-onSurfaceVariant">
-			Every feature designed to enhance your listening experience while keeping your data private
-			and secure.
+			Simple features that make listening to your music collection a joy, without compromising your
+			privacy.
 		</p>
 	</div>
 
@@ -135,7 +133,7 @@
 		<div class="mx-auto grid max-w-6xl items-center gap-16 lg:grid-cols-2">
 			<div>
 				<h2 class="mb-6 text-headline-md font-bold text-onSurface sm:text-headline-md">
-					Everything you need for the perfect listening experience
+					Everything you need to enjoy your music
 				</h2>
 				<ul class="space-y-4">
 					{#each benefits as benefit}
@@ -146,7 +144,6 @@
 					{/each}
 				</ul>
 			</div>
-
 			<img
 				class="flex w-full items-center justify-center rounded-2xl bg-surfaceContainerHigh object-contain object-bottom ring ring-outline/10"
 				src={secondaryImg}
@@ -160,11 +157,11 @@
 <section class="content-width py-20">
 	<div class="mx-auto max-w-xl text-center">
 		<h2 class="mb-6 text-headline-md font-bold text-onSurface sm:text-headline-md">
-			Ready to rediscover your music?
+			Ready to dive into your music?
 		</h2>
 		<p class="mb-8 text-title-md text-onSurfaceVariant">
-			Start enjoying your local music collection with complete privacy and control. No account
-			needed, no data shared.
+			Start exploring your music collection in a whole new way. It's free, private, and ready to use
+			right now.
 		</p>
 		<Button as="a" href="/library/tracks" kind="filled">
 			Open {m.appName()}
@@ -186,7 +183,7 @@
 					class="link flex items-center gap-2 text-onSurfaceVariant transition-colors duration-200 hover:text-onSurface"
 				>
 					<Icon type="github" class="h-5 w-5" />
-					{m.aboutSourceCode()}
+					{m.aboutSourceCode()} ❤️
 				</a>
 
 				<a
@@ -197,12 +194,6 @@
 					{m.aboutPrivacy()}
 				</a>
 			</div>
-		</div>
-
-		<div class="mt-6 border-t border-outline/10 pt-6 text-center">
-			<p class="text-body-sm text-onSurfaceVariant">
-				Built with privacy in mind • Works fully offline • Open source
-			</p>
 		</div>
 	</div>
 </footer>
