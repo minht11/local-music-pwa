@@ -309,6 +309,10 @@ body {
 	view-transition-name: --value([*]);
 }
 
+@utility scrollbar-gutter-stable {
+	scrollbar-gutter: stable;
+}
+
 @custom-variant active-view-player {
 	html:active-view-transition-type(player) & {
 		@slot;

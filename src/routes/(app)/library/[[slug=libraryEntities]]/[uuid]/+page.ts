@@ -34,6 +34,11 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {
 				if (change.storeName === storeName && change.key === id) {
+					if (change.operation === 'delete') {
+						void goto(`/library/${storeName}`, { replaceState: true })
+						return
+					}
+
 					// We always refetch because in most cases we would just hit Library Value Cache
 					actions.refetch()
 					break
