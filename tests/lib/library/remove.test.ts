@@ -1,27 +1,11 @@
 import 'fake-indexeddb/auto'
 import { describe, expect, it, beforeEach } from 'vitest'
-import { getDatabase, type AppStoreNames } from '$lib/db/database.ts'
+import { getDatabase } from '$lib/db/database.ts'
 import { dbRemoveTrack, dbRemoveAlbum, dbRemoveArtist } from '$lib/library/remove.ts'
 import { dbImportTrack } from '$lib/library/scan-actions/scanner/import-track.ts'
 import { dbCreatePlaylist } from '$lib/library/playlists-actions.ts'
 import type { UnknownTrack } from '$lib/library/types.ts'
-import { clearDatabaseStores } from '../../shared.ts'
-
-export function expectToBeDefined<T>(value: T | undefined): asserts value is T {
-	expect(value).toBeDefined()
-}
-
-const dbGetAllAndExpectLength = async <S extends AppStoreNames>(
-	storeName: S,
-	expectedCount: number,
-	message?: string
-) => {
-	const db = await getDatabase()
-	const items = await db.getAll(storeName)
-	expect(items, message).toHaveLength(expectedCount)
-
-	return items
-}
+import { clearDatabaseStores, dbGetAllAndExpectLength, expectToBeDefined } from '../../shared.ts'
 
 const dbImportTestTrack = async (overrides: Partial<UnknownTrack> = {}): Promise<number> => {
 	const trackData: UnknownTrack = {
