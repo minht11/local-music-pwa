@@ -137,6 +137,7 @@
 	"about": "About",
 	"aboutSourceCode": "Source code",
 	"aboutPrivacy": "Privacy",
+	"aboutHomepage": "Homepage",
 
 	"errorPageDoesNotExist": "Looks like this page doesn't exist.",
 	"errorUnexpected": "An unexpected error occurred.",
