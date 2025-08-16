@@ -93,14 +93,6 @@ export default defineConfig({
 
 				// Since this is mostly SPA, server logs are mostly noise.
 				config.logLevel = isSsr ? 'warn' : 'info'
-		
-				if (!isSsr) {
-					config.build ??= {}
-					config.build.rolldownOptions ??= {}
-					config.build.rolldownOptions.optimization ??= {}
-					// Server build crashes with `inlineConst` enabled
-					config.build.rolldownOptions.optimization.inlineConst = true		
-				}
 
 				return config
 			},
