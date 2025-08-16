@@ -3,6 +3,7 @@
 exports[`playlists > create new playlist 1`] = `
 {
   "createdAt": 1234567890,
+  "description": "",
   "id": 1,
   "name": "Test Playlist",
   "uuid": "test-uuid",

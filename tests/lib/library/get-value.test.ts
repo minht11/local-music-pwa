@@ -235,6 +235,7 @@ describe('getLibraryValue', () => {
 				type: 'playlist',
 				id: FAVORITE_PLAYLIST_ID,
 				uuid: FAVORITE_PLAYLIST_UUID,
+				description: '',
 				name: 'Favorites',
 				createdAt: 0,
 			})
