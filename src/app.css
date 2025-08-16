@@ -221,6 +221,13 @@ body {
 	transform: scaleY(-1);
 }
 
+@utility text-headline-lg {
+	font-size: --spacing(8);
+	line-height: --spacing(10);
+	letter-spacing: 0;
+	font-weight: 700;
+}
+
 @utility text-headline-md {
 	font-size: --spacing(7);
 	line-height: --spacing(9);

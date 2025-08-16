@@ -11,6 +11,7 @@
 		as?: As
 		kind?: ButtonKind
 		type?: 'button' | 'submit' | 'reset'
+		target?: string
 		disabled?: boolean
 		href?: ButtonHref<As>
 		class?: ClassValue

@@ -1,4 +1,5 @@
 <script lang="ts" module>
+	import { browser } from '$app/environment'
 	export interface HeaderProps {
 		children?: Snippet
 		title?: string
@@ -17,22 +18,24 @@
 	let scrollThresholdEl = $state<HTMLDivElement>()
 	let isScrolled = $state(false)
 
-	const io = new IntersectionObserver(
-		([entry]) => {
-			isScrolled = !entry?.isIntersecting
-		},
-		{ threshold: 0 },
-	)
+	if (browser) {
+		const io = new IntersectionObserver(
+			([entry]) => {
+				isScrolled = !entry?.isIntersecting
+			},
+			{ threshold: 0 },
+		)
 
-	$effect(() => {
-		if (scrollThresholdEl) {
-			io.observe(scrollThresholdEl)
-		}
+		$effect(() => {
+			if (scrollThresholdEl) {
+				io.observe(scrollThresholdEl)
+			}
 
-		return () => {
-			io.disconnect()
-		}
-	})
+			return () => {
+				io.disconnect()
+			}
+		})
+	}
 </script>
 
 <div bind:this={scrollThresholdEl} class="h-0 w-full" inert></div>

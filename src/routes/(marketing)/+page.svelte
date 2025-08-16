@@ -1,29 +1,30 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte'
-	import Icon from '$lib/components/icon/Icon.svelte'
+	import Header from '$lib/components/Header.svelte'
+	import Icon, { type IconType } from '$lib/components/icon/Icon.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 
-	const features = [
+	const features: Array<{ icon: IconType; title: string; description: string }> = [
 		{
-			icon: '🔒',
+			icon: 'lock',
 			title: 'Privacy-first design',
 			description:
-				'Your music stays on your device. Zero data collection, zero tracking, zero compromises on your privacy.',
+				'Your music stays on your device. Minimal analytics for page views only, zero personal tracking, zero compromises on your privacy.',
 		},
 		{
-			icon: '🎨',
+			icon: 'palette',
 			title: 'Adaptive theming',
 			description:
 				'Beautiful interface that automatically adapts to your system theme and music artwork colors.',
 		},
 		{
-			icon: '⚡',
+			icon: 'flash',
 			title: 'Lightning fast',
 			description:
 				'Instant startup, seamless playback, and responsive controls built for modern browsers.',
 		},
 		{
-			icon: '📱',
+			icon: 'cellphone',
 			title: 'Works everywhere',
 			description:
 				'Perfect experience across desktop, tablet, and mobile. No installation required.',
@@ -33,62 +34,57 @@
 	const benefits = [
 		'Browse your music collection with smart filtering and search',
 		'Create and manage custom playlists',
-		'Enjoy gapless playback and crossfade transitions',
 		'Control playback with keyboard shortcuts and media keys',
 		'Full offline support - no internet connection needed',
 	]
 </script>
 
-<header class="w-full items-center border-b border-outline/20 bg-surfaceContainerHigh">
-	<div class="content-width flex h-16 w-full items-center justify-between">
-		<div class="text-title-lg font-medium text-onSurface">{m.appName()}</div>
-		<div class="flex items-center gap-2">
-			<IconButton
-				as="a"
-				href="https://github.com/minht11/local-music-pwa"
-				target="_blank"
-				kind="flat"
-				ariaLabel="View source code on GitHub"
-			>
-				<Icon type="github" />
-			</IconButton>
-			<Button as="a" href="/library/tracks" kind="toned">Open app</Button>
-		</div>
-	</div>
-</header>
+<Header title={m.appName()} noBackButton mode="fixed">
+	<IconButton
+		as="a"
+		href="https://github.com/minht11/local-music-pwa"
+		target="_blank"
+		kind="flat"
+		tooltip="View source code on GitHub"
+	>
+		<Icon type="github" />
+	</IconButton>
+	<Button as="a" href="/library/tracks" kind="toned">Open app</Button>
+</Header>
 
 <!-- Hero Section -->
 <section
-	class="content-width-using-grid justify-items-center bg-gradient-to-br from-surfaceContainer to-surfaceContainerLow px-6 py-24 lg:py-32"
+	class="hero-section content-width-using-grid relative justify-items-center bg-gradient-to-br from-surfaceContainer to-surfaceContainerLow px-6 py-24 lg:py-32"
 >
-	<div class="max-w-4xl text-center">
-		<h1
-			class="sm:text-7xl lg:text-8xl mb-6 text-headline-md leading-tight font-bold text-onSurface"
-		>
+	<!-- Animated gradient overlay -->
+	<div class="animated-gradient absolute -inset-x-32 -inset-y-16 opacity-25"></div>
+
+	<div class="relative z-0 max-w-4xl text-center">
+		<h1 class="mb-6 text-headline-md leading-tight font-bold text-onSurface lg:text-headline-lg">
 			Your music, <span class="text-primary">your way</span>
 		</h1>
 		<p
-			class="sm:text-2xl mx-auto mb-8 max-w-2xl text-title-lg leading-relaxed text-onSurfaceVariant"
+			class="mx-auto mb-8 max-w-2xl text-title-md leading-relaxed text-onSurfaceVariant sm:text-title-lg"
 		>
 			Experience your local music collection with a beautiful, privacy-focused player that works
 			entirely in your browser.
 		</p>
 		<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
-			<Button as="a" href="/library/tracks" kind="filled" class="text-xl min-w-48 px-8 py-3">
-				Launch Player
-			</Button>
-			<div class="text-base text-onSurfaceVariant">No signup • No installation • No tracking</div>
+			<Button as="a" href="/library/tracks" kind="filled">Launch Player</Button>
+			<div class="text-body-md text-onSurfaceVariant">
+				No signup • No installation • Privacy preserving analytics
+			</div>
 		</div>
 	</div>
 
 	<!-- Placeholder for hero illustration/screenshot -->
 	<div
-		class="mt-16 flex h-64 w-full max-w-4xl items-center justify-center rounded-2xl border border-outline/20 bg-surfaceContainerHighest sm:h-80 lg:h-96"
+		class="relative z-0 mt-16 flex h-64 w-full max-w-4xl items-center justify-center rounded-2xl border border-outline/20 bg-surfaceContainerHighest sm:h-80 lg:h-96"
 	>
 		<div class="text-center text-onSurfaceVariant">
-			<div class="text-6xl mb-4">🎵</div>
-			<div class="text-lg font-medium">App Screenshot</div>
-			<div class="text-sm opacity-70">Coming soon</div>
+			<Icon type="musicNote" class="mb-4 text-headline-lg text-onSurfaceVariant" />
+			<div class="text-title-md font-medium">App Screenshot</div>
+			<div class="text-body-sm opacity-70">Coming soon</div>
 		</div>
 	</div>
 </section>
@@ -107,12 +103,22 @@
 
 	<div class="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2">
 		{#each features as feature}
-			<div class="card p-8 transition-shadow duration-300 hover:shadow-lg">
-				<div class="text-5xl mb-4">{feature.icon}</div>
-				<h3 class="mb-3 text-title-lg font-semibold text-onSurface">
+			<div
+				class="card group p-8 transition-shadow duration-300 hover:bg-inverseSurface hover:shadow-lg"
+			>
+				<div
+					class="mb-6 flex size-12 items-center justify-center rounded-full bg-tertiaryContainer"
+				>
+					<Icon type={feature.icon} class="text-primary" />
+				</div>
+				<h3
+					class="mb-3 text-title-lg font-semibold text-onSurface group-hover:text-inverseOnSurface"
+				>
 					{feature.title}
 				</h3>
-				<p class="text-body-lg leading-relaxed text-onSurfaceVariant">
+				<p
+					class="text-body-lg leading-relaxed text-onSurfaceVariant group-hover:text-inverseOnSurface"
+				>
 					{feature.description}
 				</p>
 			</div>
@@ -131,7 +137,7 @@
 				<ul class="space-y-4">
 					{#each benefits as benefit}
 						<li class="flex items-start gap-3">
-							<span class="text-2xl mt-1 text-primary">✓</span>
+							<Icon type="check" class="text-primary" />
 							<span class="text-body-lg text-onSurfaceVariant">{benefit}</span>
 						</li>
 					{/each}
@@ -143,9 +149,9 @@
 				class="flex h-80 items-center justify-center rounded-2xl border border-outline/20 bg-surfaceContainerHigh"
 			>
 				<div class="text-center text-onSurfaceVariant">
-					<div class="text-5xl mb-3">🎧</div>
-					<div class="text-lg font-medium">Feature Illustration</div>
-					<div class="text-sm opacity-70">Coming soon</div>
+					<Icon type="headphones" class="mb-3 text-headline-lg text-onSurfaceVariant" />
+					<div class="text-title-md font-medium">Feature Illustration</div>
+					<div class="text-body-sm opacity-70">Coming soon</div>
 				</div>
 			</div>
 		</div>
@@ -154,7 +160,7 @@
 
 <!-- CTA Section -->
 <section class="content-width py-20">
-	<div class="mx-auto max-w-3xl text-center">
+	<div class="mx-auto max-w-xl text-center">
 		<h2 class="mb-6 text-headline-md font-bold text-onSurface sm:text-headline-md">
 			Ready to rediscover your music?
 		</h2>
@@ -162,7 +168,7 @@
 			Start enjoying your local music collection with complete privacy and control. No account
 			needed, no data shared.
 		</p>
-		<Button as="a" href="/library/tracks" kind="filled" class="text-xl min-w-48 px-8 py-3">
+		<Button as="a" href="/library/tracks" kind="filled">
 			Open {m.appName()}
 		</Button>
 	</div>
@@ -198,7 +204,7 @@
 
 		<div class="mt-6 border-t border-outline/10 pt-6 text-center">
 			<p class="text-body-sm text-onSurfaceVariant">
-				Built with privacy in mind • No data collection • Works offline
+				Built with privacy in mind • Works fully offline
 			</p>
 		</div>
 	</div>
@@ -236,5 +242,46 @@
 			hsl(var(--md-sys-color-surface-container)),
 			hsl(var(--md-sys-color-surface-container-low))
 		);
+	}
+
+	/* Animated gradient overlay */
+	.hero-section {
+		position: relative;
+	}
+
+	.animated-gradient {
+		background: radial-gradient(
+			ellipse 1400px 700px at 0% 30%,
+			hsl(from var(--color-tertiary) h s l / 0.1),
+			hsl(from var(--color-tertiary) h s l / 0.09),
+			hsl(from var(--color-tertiary) h s l / 0.04),
+			transparent 60%
+		);
+		transform-origin: top;
+		animation: glow-pulse 8s ease-in-out infinite;
+	}
+
+	@keyframes glow-pulse {
+		0% {
+			transform: scale(0.95);
+			opacity: 0.7;
+		}
+		50% {
+			transform: scale(1.05);
+			opacity: 1;
+		}
+		100% {
+			transform: scale(2);
+			opacity: 0.7;
+		}
+	}
+
+	/* Reduce motion for users who prefer it */
+	@media (prefers-reduced-motion: reduce) {
+		.animated-gradient {
+			animation: none;
+			transform: scale(1);
+			opacity: 0.5;
+		}
 	}
 </style>
