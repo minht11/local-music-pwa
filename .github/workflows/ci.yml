@@ -16,7 +16,7 @@ jobs:
           run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.14.0
+          node-version: 24.5.0
           cache: 'pnpm'
 
       - run: pnpm install
