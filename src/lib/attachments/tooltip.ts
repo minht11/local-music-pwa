@@ -66,7 +66,9 @@ export const tooltip = (message: string | undefined): Attachment<HTMLElement> =>
 				element.style.top = `${y}px`
 			}
 
-			autoUpdateCleanup = autoUpdate(target, element, updatePosition)
+			autoUpdateCleanup = autoUpdate(target, element, () => {
+				void updatePosition()
+			})
 		}
 
 		const scheduleShowTooltip = () => {

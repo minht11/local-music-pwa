@@ -10,9 +10,9 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import type { AlbumData, TrackData } from '$lib/library/get/value.ts'
 	import { FAVORITE_PLAYLIST_ID, removeTrackFromPlaylist } from '$lib/library/playlists-actions.ts'
+	import { removeAlbum, removeArtist } from '$lib/library/remove.js'
 	import type { Album, Playlist } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
-	import { removeAlbum, removeArtist } from '$lib/library/remove.js'
 
 	const { data } = $props()
 	const main = useMainStore()

@@ -64,8 +64,8 @@ const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 	const entries = await store.index('trackId').getAll(trackId)
 
 	// Delete each entry
-	await Promise.all(entries.map(entry => store.delete(entry.id)))
-	
+	await Promise.all(entries.map((entry) => store.delete(entry.id)))
+
 	await tx.done
 
 	const changes = entries.map(
@@ -156,7 +156,7 @@ export const dbRemoveArtist = async (artistId: number): Promise<void> => {
 		.objectStore('tracks')
 		.index('artists')
 		.getAllKeys(IDBKeyRange.only(artist.name))
-	
+
 	await tx.done
 
 	// If no tracks references it, it will be deleted automatically

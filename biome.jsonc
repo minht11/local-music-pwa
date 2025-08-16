@@ -96,7 +96,8 @@
 							"@material/material-color-utilities": "Should not be used directly except in specific theme entrypoints to avoid breaking making big chunks"
 						}
 					}
-				}
+				},
+				"useConsistentObjectDefinitions": "error"
 			},
 			"correctness": {
 				"noUndeclaredVariables": "error",
@@ -106,18 +107,13 @@
 					"options": {
 						"defaultVisibility": "package"
 					}
-				}
+				},
+				"useSingleJsDocAsterisk": "error"
 			},
 			"nursery": {
 				"noFloatingPromises": "error",
-				"useConsistentObjectDefinition": {
-					"level": "error",
-					"options": {
-						"syntax": "shorthand"
-					}
-				},
-				"useSingleJsDocAsterisk": "error",
-				"noImportCycles": "error"
+				"noImportCycles": "error",
+				"noMisusedPromises": "error"
 			},
 			"complexity": {
 				"useSimplifiedLogicExpression": "error",

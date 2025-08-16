@@ -82,28 +82,26 @@ export const updatePlaylistName = async (id: number, name: string): Promise<bool
 	}
 }
 
-const dbRemovePlaylist = async (playlistId: number): Promise<void> => {
-	const db = await getDatabase()
-	const tx = db.transaction(['playlists', 'playlistEntries'], 'readwrite')
-	const tracksStore = tx.objectStore('playlistEntries')
-
-	const entriesIds = await tx.objectStore('playlistEntries').getAllKeys(playlistId)
-
-	await Promise.all([
-		tracksStore.delete(
-			IDBKeyRange.bound([playlistId, 0], [playlistId, Number.POSITIVE_INFINITY]),
-		),
-		tx.objectStore('playlists').delete(id),
-		tx.done,
-	])
-
+const dbRemovePlaylist = async (_playlistId: number): Promise<void> => {
+	// const db = await getDatabase()
+	// const tx = db.transaction(['playlists', 'playlistEntries'], 'readwrite')
+	// const tracksStore = tx.objectStore('playlistEntries')
+	// TODO.
+	// const entriesIds = await tx.objectStore('playlistEntries').getAllKeys(playlistId)
+	// await Promise.all([
+	// 	tracksStore.delete(
+	// 		IDBKeyRange.bound([playlistId, 0], [playlistId, Number.POSITIVE_INFINITY]),
+	// 	),
+	// 	tx.objectStore('playlists').delete(id),
+	// 	tx.done,
+	// ])
 	// We are not notifying about individual tracks removals
 	// because we are removing the whole playlist
-	dispatchDatabaseChangedEvent({
-		operation: 'delete',
-		storeName: 'playlists',
-		key: id,
-	})
+	// dispatchDatabaseChangedEvent({
+	// 	operation: 'delete',
+	// 	storeName: 'playlists',
+	// 	// key: id,
+	// })
 }
 
 export const removePlaylist = createUIAction(m.libraryPlaylistRemoved(), (id: number) =>

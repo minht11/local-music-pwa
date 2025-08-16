@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte'
 	import Header from '$lib/components/Header.svelte'
-	import Icon, { type IconType } from '$lib/components/icon/Icon.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
+	import Icon, { type IconType } from '$lib/components/icon/Icon.svelte'
 	import heroImg from './assets/hero.avif'
 	import secondaryImg from './assets/secondary.avif'
 
