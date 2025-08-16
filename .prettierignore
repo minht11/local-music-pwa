@@ -1,7 +1,7 @@
 .DS_Store
 node_modules
-/build
-/.svelte-kit
+/build/
+/.generated/
 /package
 .env
 .env.*
@@ -15,3 +15,6 @@ yarn.lock
 # Let Biome handle these files
 *.ts
 *.tsx
+*.js
+*.json
+*.jsonc

@@ -23,6 +23,6 @@ jobs:
       - name: Build generated files
         run: pnpm run build
       - run: pnpm run biome-check
-      # - run: pnpm run format-prettier
+      - run: pnpm run prettier-check
       - run: pnpm run check
       - run: pnpm test

@@ -155,7 +155,8 @@ const playlistsConfig: QueryConfig<PlaylistData> = {
 				type: 'playlist',
 				id: FAVORITE_PLAYLIST_ID,
 				uuid: FAVORITE_PLAYLIST_UUID,
-				name: 'Favorites',
+				name: m.favorites(),
+				description: '',
 				createdAt: 0,
 			}
 
