@@ -88,7 +88,7 @@
 
 <svelte:window
 	onkeydown={(e) => {
-		if (e.key === ' ') {
+		if (e.key === ' ' && !(e.target instanceof HTMLInputElement)) {
 			e.preventDefault()
 
 			player.togglePlay()
