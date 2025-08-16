@@ -13,9 +13,9 @@ export const logChunkSizePlugin = (): Plugin => {
 				return
 			}
 
-			const dirSize = async (directory: string): Promise<{ size: number; count: number }> => {
-				let size = 0
-				let count = 0
+			const dirSize = async (directory: string) => {
+				const jsInfo = { size: 0, count: 0 }
+				const totalInfo = { size: 0, count: 0 }
 
 				const processDirectory = async (dir: string) => {
 					const files = readdirSync(dir)
@@ -27,20 +27,37 @@ export const logChunkSizePlugin = (): Plugin => {
 						if (stat.isDirectory()) {
 							await processDirectory(filePath)
 						} else {
-							size += stat.size
-							count += 1
+							if (file.endsWith('.js')) {
+								jsInfo.size += stat.size
+								jsInfo.count += 1
+							}
+							totalInfo.size += stat.size
+							totalInfo.count += 1
 						}
 					}
 				}
 
 				await processDirectory(directory)
-				return { size, count }
+
+				return { jsInfo, totalInfo }
 			}
 
 			setTimeout(async () => {
-				const { size, count } = await dirSize('./build/_app/immutable')
+				const { jsInfo, totalInfo } = await dirSize('./build/_app/immutable')
 				// biome-ignore lint/suspicious/noConsole: log
-				console.log('Size of chunks:', size / 1024, 'KB. Files count:', count)
+				console.log(
+					'Size of JS chunks:',
+					jsInfo.size / 1024,
+					'KB. Files count:',
+					jsInfo.count,
+				)
+				// biome-ignore lint/suspicious/noConsole: log
+				console.log(
+					'Size of all files:',
+					totalInfo.size / 1024,
+					'KB. Files count:',
+					totalInfo.count,
+				)
 			}, 2000)
 		},
 	}
