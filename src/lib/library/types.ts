@@ -12,7 +12,7 @@ export const LEGACY_NO_NATIVE_DIRECTORY = -1
 
 /** Special type of playlist which user cannot modify */
 export const FAVORITE_PLAYLIST_ID = -1
-export const FAVORITE_PLAYLIST_UUID = 'favorite-sba6-42b4-a66f-162627d150a8'
+export const FAVORITE_PLAYLIST_UUID = 'favorites'
 
 interface BaseMusicItem {
 	id: number

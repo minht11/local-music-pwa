@@ -54,6 +54,8 @@
 	"libraryApplicationMenu": "Application menu",
 	"libraryOpenApplicationMenu": "Open application menu",
 
+	"trackViewAlbum": "View album",
+	"trackViewArtist": "View artist",
 	"trackAddToFavorites": "Add to favorites",
 	"trackRemoveFromFavorites": "Remove from favorites",
 
@@ -69,6 +71,8 @@
 	"libraryAddToPlaylist": "Add to playlist",
 	"libraryPlaylistsUpdated": "Playlists updated",
 
+	"libraryEditPlaylist": "Edit playlist",
+	"libraryRemovePlaylist": "Remove playlist",
 	"libraryPlaylistCreated": "Playlist \"{playlistName}\" created",
 	"libraryPlaylistUpdated": "Playlist updated",
 	"libraryPlaylistRemoved": "Playlist removed",

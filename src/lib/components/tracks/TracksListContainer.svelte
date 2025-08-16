@@ -1,8 +1,12 @@
 <script lang="ts" module>
+	import { goto } from '$app/navigation'
+	import { resolve } from '$app/paths'
+	import { getDatabase } from '$lib/db/database'
 	import type { TrackData } from '$lib/library/get/value.ts'
 	import { toggleFavoriteTrack } from '$lib/library/playlists-actions'
 	import { removeTrack } from '$lib/library/remove.ts'
 	import type { MenuItem } from '../ListItem.svelte'
+	import { snackbar } from '../snackbar/snackbar.ts'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import TrackListItem from './TrackListItem.svelte'
 
@@ -11,6 +15,8 @@
 		| 'addToPlaylist'
 		| 'removeFromLibrary'
 		| 'addToFavorites'
+		| 'viewAlbum'
+		| 'viewArtist'
 
 	export interface TrackItemClick {
 		track: TrackData
@@ -45,8 +51,30 @@
 		predefinedKey: PredefinedTrackMenuItems
 	}
 
+	const viewRelated = async (store: 'albums' | 'artists', name: string) => {
+		try {
+			const db = await getDatabase()
+			const album = await db.getFromIndex(store, 'name', name)
+			invariant(album)
+
+			const path = resolve('/(app)/library/[[slug=libraryEntities]]/[uuid]', {
+				slug: store,
+				uuid: album.uuid,
+			})
+
+			await goto(path)
+		} catch (error) {
+			snackbar.unexpectedError(error)
+		}
+	}
+
 	const getMenuItems = (track: TrackData, index: number) => {
-		const predefinedMenuItemsList: PredefinedMenuItem[] = [
+		const albumName = track.album
+		// In a future we should handle ability to view multiple artists
+		const artistName = track.artists[0]
+
+		type FalsyValue = false | undefined | null | ''
+		const predefinedMenuItemsList: (PredefinedMenuItem | FalsyValue)[] = [
 			{
 				predefinedKey: 'addToPlaylist',
 				label: m.libraryAddToPlaylist(),
@@ -68,6 +96,20 @@
 					player.addToQueue(track.id)
 				},
 			},
+			albumName && {
+				predefinedKey: 'viewAlbum',
+				label: m.trackViewAlbum(),
+				action: () => {
+					void viewRelated('albums', albumName)
+				},
+			},
+			artistName && {
+				predefinedKey: 'viewArtist',
+				label: m.trackViewArtist(),
+				action: () => {
+					void viewRelated('artists', artistName)
+				},
+			},
 			{
 				predefinedKey: 'removeFromLibrary',
 				label: m.libraryRemoveFromLibrary(),
@@ -78,11 +120,15 @@
 		]
 
 		const predefinedItems = predefinedMenuItemsList.filter((item) => {
+			if (!item) {
+				return false
+			}
+
 			// By default, all predefined menu items are enabled.
 			const isExplicitlyDisabled = predefinedMenuItems[item.predefinedKey] === false
 
 			return !isExplicitlyDisabled
-		})
+		}) as MenuItem[]
 
 		return [...predefinedItems, ...(menuItems ? menuItems(track, index) : [])]
 	}

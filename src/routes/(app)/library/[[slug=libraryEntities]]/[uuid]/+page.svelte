@@ -173,6 +173,10 @@
 
 	<TracksListContainer
 		items={tracks.tracksIds}
+		predefinedMenuItems={{
+			viewAlbum: slug !== 'albums',
+			viewArtist: slug !== 'artists',
+		}}
 		menuItems={slug === 'playlists' ? playlistTrackMenuItems : undefined}
 	/>
 </div>

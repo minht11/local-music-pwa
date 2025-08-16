@@ -2,7 +2,7 @@ import { error, redirect } from '@sveltejs/kit'
 import { goto } from '$app/navigation'
 import { type DbValue, getDatabase } from '$lib/db/database.ts'
 import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
-import { getLibraryValue, LibraryValueNotFoundError } from '$lib/library/get/value.ts'
+import { getLibraryValue } from '$lib/library/get/value.ts'
 import {
 	FAVORITE_PLAYLIST_ID,
 	FAVORITE_PLAYLIST_UUID,
@@ -43,11 +43,6 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 					actions.refetch()
 					break
 				}
-			}
-		},
-		onError: (error) => {
-			if (error instanceof LibraryValueNotFoundError) {
-				void goto(`/library/${storeName}`, { replaceState: true })
 			}
 		},
 	})
