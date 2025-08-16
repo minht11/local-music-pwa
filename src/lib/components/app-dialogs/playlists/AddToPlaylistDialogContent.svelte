@@ -7,7 +7,7 @@
 	import Separator from '$lib/components/Separator.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar'
 	import TextField from '$lib/components/TextField.svelte'
-	import { getDatabase } from '$lib/db/database'
+	import { getDatabase } from '$lib/db/database.ts'
 	import { createQuery } from '$lib/db/query/query.ts'
 	import { getLibraryItemIds } from '$lib/library/get/ids'
 	import { createLibraryItemKeysQuery } from '$lib/library/get/ids-queries'

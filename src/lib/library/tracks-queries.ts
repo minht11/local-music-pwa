@@ -1,4 +1,4 @@
-import { getDatabase } from '$lib/db/database'
+import { getDatabase } from '$lib/db/database.ts'
 import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
 
 export const createTracksCountPageQuery = (): Promise<PageQueryResult<number>> =>

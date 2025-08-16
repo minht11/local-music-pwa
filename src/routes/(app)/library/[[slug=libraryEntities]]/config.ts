@@ -1,4 +1,4 @@
-import type { DbValue } from '$lib/db/database'
+import type { DbValue } from '$lib/db/database.ts'
 import type { LibraryItemSortKey } from '$lib/library/get/ids.ts'
 import type { LibraryStoreName } from '$lib/library/types'
 

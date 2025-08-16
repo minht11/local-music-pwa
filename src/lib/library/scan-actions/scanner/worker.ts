@@ -1,7 +1,7 @@
 /// <reference lib='WebWorker' />
 
-import { getDatabase } from '$lib/db/database'
-import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system'
+import { getDatabase } from '$lib/db/database.ts'
+import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system.ts'
 import { dbRemoveTrack } from '$lib/library/remove.ts'
 import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/library/types.ts'
 import { dbImportTrack } from './import-track.ts'
@@ -115,8 +115,6 @@ const findTrackByMixedFileEntity = async (handle: FileEntity, tracks: Track[]) =
 	return null
 }
 
-const SUPPORTED_EXTENSIONS = ['aac', 'mp3', 'ogg', 'wav', 'flac', 'm4a', 'opus', 'webm']
-
 const scanExistingDirectory = async (handles: FileEntity[], directoryId: number) => {
 	const db = await getDatabase()
 
@@ -156,27 +154,30 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 				}
 			}
 
-			const existingTrackId = existingTrack?.id
 			const trackId = await importTrack({
 				unwrappedFile,
 				file: handle,
 				directoryId,
-				trackId: existingTrackId,
+				trackId: existingTrack?.id,
 				uuid: existingTrack?.uuid,
 			})
 
 			if (trackId !== null) {
 				scannedTracksIds.add(trackId)
 
-				if (existingTrackId !== undefined) {
-					tracker.newlyImported += 1
-				}
+				tracker.newlyImported += 1
 			}
 		} catch {
 			// we ignore errors and just move on to the next track.
 		}
 
 		tracker.sendMsg(false)
+	}
+
+	if (directoryId === LEGACY_NO_NATIVE_DIRECTORY) {
+		tracker.sendMsg(true)
+
+		return
 	}
 
 	// After importing is done, we remove tracks that were not scanned
@@ -232,7 +233,7 @@ self.addEventListener('message', async (event: MessageEvent<TracksScanOptions>) 
 	const options = event.data
 
 	if (options.action === 'directory-add') {
-		const handles = await getFileHandlesRecursively(options.dirHandle, SUPPORTED_EXTENSIONS)
+		const handles = await getFileHandlesRecursively(options.dirHandle)
 		const items = handles.map((handle) => ({
 			uuid: crypto.randomUUID(),
 			file: handle,
@@ -244,7 +245,7 @@ self.addEventListener('message', async (event: MessageEvent<TracksScanOptions>) 
 	}
 
 	if (options.action === 'directory-rescan') {
-		const handles = await getFileHandlesRecursively(options.dirHandle, SUPPORTED_EXTENSIONS)
+		const handles = await getFileHandlesRecursively(options.dirHandle)
 		await scanExistingDirectory(handles, options.dirId)
 
 		return

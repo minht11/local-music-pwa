@@ -1,5 +1,5 @@
 import { expect } from 'vitest'
-import { type AppStoreNames, getDatabase } from '$lib/db/database'
+import { type AppStoreNames, getDatabase } from '$lib/db/database.ts'
 
 /** @public */
 export const clearDatabaseStores = async () => {

@@ -1,5 +1,5 @@
 import { snackbar } from '$lib/components/snackbar/snackbar'
-import { getDatabase } from '$lib/db/database'
+import { getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { lockDatabase } from '$lib/db/lock-database.ts'
 import { dbRemoveTrack } from '$lib/library/remove.ts'
@@ -186,7 +186,8 @@ export const replaceDirectories = async (
 	}
 }
 
-const dbRemoveDirectory = async (directoryId: number): Promise<void> => {
+/** @private */
+export const dbRemoveDirectory = async (directoryId: number): Promise<void> => {
 	const db = await getDatabase()
 
 	const tx = db.transaction(['directories', 'tracks'])
@@ -211,6 +212,21 @@ export const removeDirectory = async (id: number): Promise<void> => {
 		await lockDatabase(() => dbRemoveDirectory(id))
 
 		snackbar(m.settingsDirectoryRemoved())
+	} catch (error) {
+		snackbar.unexpectedError(error)
+	}
+}
+
+/** @private */
+export const dbImportLegacyFiles = async (files: File[]): Promise<void> =>
+	scanTracks({
+		action: 'legacy-files-add',
+		files,
+	})
+
+export const importLegacyFiles = async (files: File[]): Promise<void> => {
+	try {
+		await lockDatabase(() => dbImportLegacyFiles(files))
 	} catch (error) {
 		snackbar.unexpectedError(error)
 	}

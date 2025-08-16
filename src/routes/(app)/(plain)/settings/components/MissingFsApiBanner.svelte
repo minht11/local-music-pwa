@@ -3,7 +3,7 @@
 </script>
 
 <div
-	class="flex flex-col gap-4 rounded-lg border border-outlineVariant p-4 text-onSurfaceVariant select-text"
+	class="mb-4 flex flex-col gap-4 rounded-lg border border-outlineVariant p-4 text-onSurfaceVariant select-text"
 >
 	<Icon type="alertCircle" class="shrink-0" />
 	<span>
@@ -12,7 +12,7 @@
 			class="link inline-block"
 			target="_blank"
 			rel="noopener noreferrer"
-			href="https://wicg.github.io/file-system-access/"
+			href="https://caniuse.com/?search=showDirectoryPicker"
 		>
 			{m.settingsMissingFs2()}
 		</a>{m.settingsMissingFs3()}

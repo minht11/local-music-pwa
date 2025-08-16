@@ -1,25 +1,26 @@
 import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
 import { wait } from '$lib/helpers/utils/wait.ts'
 
-export const isNativeFileSystemSupported: boolean = 'showDirectoryPicker' in globalThis
+export const isFileSystemAccessSupported: boolean = 'showDirectoryPicker' in globalThis
 
 export type FileEntity = File | FileSystemFileHandle
 
+const supportedExtensions = ['aac', 'mp3', 'ogg', 'wav', 'flac', 'm4a', 'opus', 'webm']
+
 export const getFileHandlesRecursively = async (
 	directory: FileSystemDirectoryHandle,
-	extensions: string[],
 ): Promise<FileSystemFileHandle[]> => {
 	const files: FileSystemFileHandle[] = []
 
 	for await (const handle of directory.values()) {
 		if (handle.kind === 'file') {
-			const isValidFile = extensions.some((ext) => handle.name.endsWith(`.${ext}`))
+			const isValidFile = supportedExtensions.some((ext) => handle.name.endsWith(`.${ext}`))
 
 			if (isValidFile) {
 				files.push(handle)
 			}
 		} else if (handle.kind === 'directory') {
-			const additionalFiles = await getFileHandlesRecursively(handle, extensions)
+			const additionalFiles = await getFileHandlesRecursively(handle)
 
 			files.push(...additionalFiles)
 		}
@@ -27,36 +28,25 @@ export const getFileHandlesRecursively = async (
 	return files
 }
 
-export const getFilesFromLegacyInputEvent = (e: Event, extensions: string[]): FileEntity[] => {
+const getFilesFromLegacyInputEvent = (e: Event): File[] => {
 	const { files } = e.target as HTMLInputElement
 	if (!files) {
 		return []
 	}
 
 	return Array.from(files).filter((file) =>
-		extensions.some((ext) => file.name.endsWith(`.${ext}`)),
+		supportedExtensions.some((ext) => file.name.endsWith(`.${ext}`)),
 	)
 }
 
-export const getFilesFromDirectory = async (extensions: string[]): Promise<FileEntity[] | null> => {
-	if (isNativeFileSystemSupported) {
-		try {
-			const directory = await showDirectoryPicker()
-			const files = await getFileHandlesRecursively(directory, extensions)
-
-			return files
-		} catch {
-			return null
-		}
-	}
-
+export const getFilesFromLegacyDirectory = async (): Promise<File[]> => {
 	const directoryElement = document.createElement('input')
 	directoryElement.type = 'file'
 
 	// Mobile devices do not support directory selection,
 	// so allow them to pick individual files instead.
 	if (isMobile()) {
-		directoryElement.accept = extensions.map((ext) => `.${ext}`).join(', ')
+		directoryElement.accept = supportedExtensions.map((ext) => `.${ext}`).join(', ')
 
 		directoryElement.multiple = true
 	} else {
@@ -64,10 +54,14 @@ export const getFilesFromDirectory = async (extensions: string[]): Promise<FileE
 		directoryElement.setAttribute('directory', '')
 	}
 
-	const { promise, resolve } = Promise.withResolvers<FileEntity[]>()
+	const { promise, resolve } = Promise.withResolvers<File[]>()
 
 	directoryElement.addEventListener('change', (e) => {
-		resolve(getFilesFromLegacyInputEvent(e, extensions))
+		resolve(getFilesFromLegacyInputEvent(e))
+	})
+
+	directoryElement.addEventListener('error', () => {
+		resolve([])
 	})
 
 	// In some cases event listener might not be registered yet

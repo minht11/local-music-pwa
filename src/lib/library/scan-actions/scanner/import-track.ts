@@ -1,5 +1,5 @@
 import type { IDBPTransaction } from 'idb'
-import { type AppDB, getDatabase } from '$lib/db/database'
+import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import type { Album, Artist, Track, UnknownTrack } from '$lib/library/types.ts'
 

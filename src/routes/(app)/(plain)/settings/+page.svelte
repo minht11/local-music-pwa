@@ -10,6 +10,7 @@
 	import { isDatabaseOperationPending } from '$lib/db/lock-database.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { Debounced } from '$lib/helpers/debounced.svelte.ts'
+	import { isFileSystemAccessSupported } from '$lib/helpers/file-system.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
 	import DirectoriesList from './components/DirectoriesList.svelte'
@@ -24,8 +25,6 @@
 
 	const count = $derived(data.countQuery.value)
 	const directories = $derived(data.directoriesQuery.value)
-
-	const isFileSystemAccessSupported = window.showDirectoryPicker !== undefined
 
 	const themeOptions: { name: string; value: AppThemeOption }[] = [
 		{
@@ -86,19 +85,16 @@
 	<div class="flex flex-col p-4">
 		{#if !isFileSystemAccessSupported}
 			<MissingFsApiBanner />
-
-			<Button kind="toned" class="mt-4 sm:ml-auto">Import tracks</Button>
 		{:else}
-			<div class="mb-4 text-title-sm">Directories</div>
-
-			<DirectoriesList disabled={isDatabasePending} {directories} />
+			<div class="mb-4 text-title-sm">{m.settingsDirectories()}</div>
 		{/if}
+		<DirectoriesList disabled={isDatabasePending} {directories} />
 
 		{#if isDatabasePending}
 			<div
 				class="mt-4 flex w-full items-center justify-center gap-4 rounded-md bg-tertiaryContainer/20 py-4"
 			>
-				Database operation in progress...
+				{m.settingsDbOperationInProgress()}
 				<Spinner class="size-8" />
 			</div>
 		{/if}

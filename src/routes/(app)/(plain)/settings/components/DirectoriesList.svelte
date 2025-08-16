@@ -7,7 +7,12 @@
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
 	import {
+		getFilesFromLegacyDirectory,
+		isFileSystemAccessSupported,
+	} from '$lib/helpers/file-system.ts'
+	import {
 		checkNewDirectoryStatus,
+		importLegacyFiles,
 		importNewDirectory,
 		removeDirectory,
 		replaceDirectories,
@@ -77,7 +82,36 @@
 			void importNewDirectory(directory)
 		}
 	}
+
+	const importLegacyFilesHandler = async () => {
+		const files = await getFilesFromLegacyDirectory().catch((e): File[] => {
+			snackbar.unexpectedError(e)
+
+			return []
+		})
+
+		if (files.length === 0) {
+			return
+		}
+
+		await importLegacyFiles(files)
+	}
 </script>
+
+{#snippet addButton(title: string, onclick: () => void)}
+	<button
+		{@attach ripple()}
+		class={[
+			disabled ? 'bg-surfaceContainer/10 text-onSurface/54' : 'interactable',
+			'flex h-16 items-center gap-2 rounded-sm px-4 ring-1 ring-outlineVariant ring-inset',
+		]}
+		{disabled}
+		{onclick}
+	>
+		<Icon type="plus" />
+		{title}
+	</button>
+{/snippet}
 
 <ul class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
 	{#each directories as dir}
@@ -87,7 +121,7 @@
 				dir.legacy ? 'bg-tertiaryContainer/40' : 'bg-tertiaryContainer/56',
 			]}
 		>
-			{#if dir.legacy}
+			{#if dir.legacy && isFileSystemAccessSupported}
 				<div
 					{@attach tooltip(
 						'In previous version of the app, directories were not saved, this contains previously scanned tracks',
@@ -99,10 +133,10 @@
 
 			<div class="flex flex-col overflow-hidden">
 				<div class="truncate">
-					{dir.legacy ? 'Tracks without directory' : dir.handle.name}
+					{dir.legacy ? m.settingsTracksWithoutDirectory() : dir.handle.name}
 				</div>
 				<div class="text-body-sm">
-					{dir.count} tracks
+					{m.settingsDirectoriesTracksCount({ count: dir.count })}
 				</div>
 			</div>
 
@@ -129,18 +163,11 @@
 		</li>
 	{/each}
 	<li class="contents">
-		<button
-			{@attach ripple()}
-			class={[
-				disabled ? 'bg-surfaceContainer/10 text-onSurface/54' : 'interactable',
-				'flex h-16 items-center gap-2 rounded-sm px-4 ring-1 ring-outlineVariant ring-inset',
-			]}
-			{disabled}
-			onclick={addNewDirectoryHandler}
-		>
-			<Icon type="plus" />
-			{m.settingsAddDirectory()}
-		</button>
+		{#if isFileSystemAccessSupported}
+			{@render addButton(m.settingsAddDirectory(), addNewDirectoryHandler)}
+		{:else}
+			{@render addButton(m.settingsImportTracks(), importLegacyFilesHandler)}
+		{/if}
 	</li>
 </ul>
 
