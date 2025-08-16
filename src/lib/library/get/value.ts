@@ -214,6 +214,10 @@ class LibraryValueCache {
 	delete<Store extends LibraryStoreName>(key: CacheKey<Store>) {
 		this.#cache.delete(key)
 	}
+
+	clear() {
+		this.#cache.clear()
+	}
 }
 
 // Fast in memory cache for `items`, so we do not need to
@@ -338,4 +342,9 @@ export const shouldRefetchLibraryValue = (
 	const config = libraryConfigMap[storeName]
 
 	return config.shouldRefetch(id, changes)
+}
+
+/** @private - Used for testing only */
+export const clearLibraryValueCache = () => {
+	valueCache.clear()
 }

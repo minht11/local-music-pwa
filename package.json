@@ -16,7 +16,7 @@
 		"format-prettier": "prettier --check ./src",
 		"format-prettier-fix": "prettier --write ./src",
 		"compile-i18n": "paraglide-js compile --project ./project.inlang",
-		"test": "vitest",
+		"test": "vitest run",
 		"coverage": "vitest run --coverage"
 	},
 	"devDependencies": {
