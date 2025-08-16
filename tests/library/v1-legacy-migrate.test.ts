@@ -5,7 +5,8 @@ import {
 	getV1LegacyDatabase,
 	removeV1LegacyDatabase,
 } from '$lib/db/v1-legacy/database'
-import { migrateV1LegacyData } from '../scan-actions/v1-legacy-migrate.ts'
+import { migrateV1LegacyData } from '$lib/library/scan-actions/v1-legacy-migrate.ts'
+import { clearDatabaseStores } from '../shared'
 
 const polyfillEnv = () => {
 	// @ts-expect-error polyfill
@@ -42,6 +43,7 @@ const setupLegacyDatabase = async () => {
 describe('v1 app data migration', () => {
 	afterEach(async () => {
 		await removeV1LegacyDatabase()
+		await clearDatabaseStores()
 	})
 
 	it('checkForV1LegacyDatabaseData returns false if no database exists', async () => {

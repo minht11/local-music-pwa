@@ -1,0 +1,10 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`playlists > create new playlist 1`] = `
+{
+  "createdAt": 1234567890,
+  "id": 1,
+  "name": "Test Playlist",
+  "uuid": "test-uuid",
+}
+`;
