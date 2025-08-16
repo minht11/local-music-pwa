@@ -46,13 +46,13 @@ describe('v1 app data migration', () => {
 		await clearDatabaseStores()
 	})
 
-	it('checkForV1LegacyDatabaseData returns false if no database exists', async () => {
-		expect(await checkForV1LegacyDatabaseData()).toBe(false)
+	it('checkForV1LegacyDatabaseData returns false if no database exists', () => {
+		expect(checkForV1LegacyDatabaseData()).resolves.toBe(false)
 	})
 
 	it('checkForV1LegacyDatabaseData returns true if database exists', async () => {
 		await setupLegacyDatabase()
-		expect(await checkForV1LegacyDatabaseData()).toBe(true)
+		expect(checkForV1LegacyDatabaseData()).resolves.toBe(true)
 	})
 
 	it.skip('getV1LegacyDatabase returns the database', async () => {
