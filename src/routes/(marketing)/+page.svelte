@@ -47,7 +47,7 @@
 	]
 </script>
 
-<Header title={m.appName()} noBackButton mode="fixed">
+<Header title={m.appName()} noBackButton mode="fixed-no-spacer">
 	<IconButton
 		as="a"
 		href="https://github.com/minht11/local-music-pwa"
@@ -61,11 +61,11 @@
 </Header>
 
 <section
-	class="content-width-using-grid relative justify-items-center bg-gradient-to-br from-surfaceContainer to-surfaceContainerLow px-6 pt-24 pb-0 lg:pt-32 lg:pb-24"
+	class="content-width-using-grid relative justify-items-center overflow-hidden bg-gradient-to-br from-surfaceContainer to-surfaceContainerLow px-6 pt-24 pb-0 lg:pt-32 lg:pb-24"
 >
 	<div inert class="animated-gradient absolute -inset-x-32 -inset-y-16"></div>
 
-	<div class="relative z-0 max-w-4xl text-center">
+	<div class="relative z-0 mt-[var(--app-header-height)] max-w-4xl text-center">
 		<h1 class="mb-6 text-headline-md leading-tight font-bold text-onSurface lg:text-headline-lg">
 			Your music, <span class="text-primary">your way</span>
 		</h1>

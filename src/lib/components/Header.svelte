@@ -4,7 +4,7 @@
 		children?: Snippet
 		title?: string
 		noBackButton?: boolean
-		mode?: 'fixed' | 'sticky'
+		mode?: 'fixed' | 'fixed-no-spacer' | 'sticky'
 	}
 </script>
 
@@ -13,7 +13,7 @@
 
 	const { children, title, noBackButton, mode = 'sticky' }: HeaderProps = $props()
 
-	const isFixed = $derived(mode === 'fixed')
+	const isFixed = $derived(mode === 'fixed' || mode === 'fixed-no-spacer')
 
 	let scrollThresholdEl = $state<HTMLDivElement>()
 	let isScrolled = $state(false)
@@ -40,7 +40,7 @@
 
 <div bind:this={scrollThresholdEl} class="h-0 w-full" inert></div>
 
-{#if isFixed}
+{#if mode === 'fixed'}
 	<div class="h-[var(--app-header-height)] shrink-0" aria-hidden="true"></div>
 {/if}
 
