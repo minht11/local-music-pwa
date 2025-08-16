@@ -53,7 +53,6 @@ const normalizeKey = <const K extends QueryKey>(key: K): QueryKeyPrimitiveValue 
 export interface QueryBaseOptions<K extends QueryKey, Result> {
 	key: K | (() => K)
 	fetcher: (key: K) => Promise<Result> | Result
-	onError?: (error: unknown) => void
 	onDatabaseChange?: DatabaseChangeHandler<Result>
 }
 
@@ -87,7 +86,6 @@ export class QueryImpl<K extends QueryKey, Result> {
 			value: undefined,
 			error: e,
 		})
-		this.options.onError?.(e)
 	}
 
 	#setLoadedState = (value: Result, normalizedKey: QueryKeyPrimitiveValue) => {

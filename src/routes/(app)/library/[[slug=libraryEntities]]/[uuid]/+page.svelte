@@ -9,7 +9,10 @@
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import type { AlbumData, TrackData } from '$lib/library/get/value.ts'
-	import { FAVORITE_PLAYLIST_ID, removeTrackFromPlaylist } from '$lib/library/playlists-actions.ts'
+	import {
+		FAVORITE_PLAYLIST_ID,
+		removeTrackEntryFromPlaylist,
+	} from '$lib/library/playlists-actions.ts'
 	import type { Album, Playlist } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 
@@ -55,11 +58,9 @@
 				label: m.libraryTrackRemoveFromPlaylist(),
 				action: () => {
 					const entryId = tracks.playlistIdMap?.[index]
-					if (!entryId) {
-						throw new Error('Playlist entry id not found')
-					}
+					invariant(entryId)
 
-					void removeTrackFromPlaylist(entryId)
+					void removeTrackEntryFromPlaylist(entryId)
 				},
 			},
 		]

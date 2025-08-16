@@ -156,7 +156,6 @@ const openAppDatabase = () =>
 					autoIncrement: true,
 				})
 
-				// TODO. Do we need index for  playlistId and trackId?
 				createIndexes(store, ['playlistId', 'trackId', 'addedAt'])
 
 				store.createIndex('playlistTrack', ['playlistId', 'trackId'])

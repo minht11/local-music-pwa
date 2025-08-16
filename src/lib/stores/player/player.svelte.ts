@@ -326,6 +326,9 @@ export class PlayerStore {
 	addToQueue = (trackId: number): void => {
 		this.#itemsIdsShuffled?.push(trackId)
 		this.#itemsIdsOriginalOrder.push(trackId)
+		if (this.activeTrackIndex === -1) {
+			this.#activeTrackIndex = 0
+		}
 	}
 
 	clearQueue = (): void => {

@@ -10,21 +10,16 @@
 
 	const remove = createUIAction(
 		m.libraryItemRemovedFromLibrary(),
-		async (store: LibraryStoreName, id: number) => {
-			if (store === 'playlists') {
-				await dbRemovePlaylist(id)
-			}
-
-			if (store === 'tracks') {
-				await dbRemoveTrack(id)
-			}
-
-			if (store === 'albums') {
-				await dbRemoveAlbum(id)
-			}
-
-			if (store === 'artists') {
-				await dbRemoveArtist(id)
+		(store: LibraryStoreName, id: number) => {
+			switch (store) {
+				case 'playlists':
+					return dbRemovePlaylist(id)
+				case 'tracks':
+					return dbRemoveTrack(id)
+				case 'albums':
+					return dbRemoveAlbum(id)
+				case 'artists':
+					return dbRemoveArtist(id)
 			}
 		},
 	)
