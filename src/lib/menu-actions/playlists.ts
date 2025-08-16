@@ -9,11 +9,12 @@ export const getPlaylistMenuItems = (main: MainStore, playlist: Playlist): MenuI
 			main.editPlaylistDialogOpen = {
 				id: playlist.id,
 				name: playlist.name,
+				description: playlist.description,
 			}
 		},
 	},
 	{
-		label: m.libraryEditPlaylist(),
+		label: m.libraryRemoveFromLibrary(),
 		action: () => {
 			main.removeLibraryItemOpen = {
 				id: playlist.id,

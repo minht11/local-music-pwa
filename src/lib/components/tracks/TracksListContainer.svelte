@@ -4,7 +4,6 @@
 	import { getDatabase } from '$lib/db/database'
 	import type { TrackData } from '$lib/library/get/value.ts'
 	import { toggleFavoriteTrack } from '$lib/library/playlists-actions'
-	import { removeTrack } from '$lib/library/remove.ts'
 	import type { MenuItem } from '../ListItem.svelte'
 	import { snackbar } from '../snackbar/snackbar.ts'
 	import VirtualContainer from '../VirtualContainer.svelte'
@@ -114,7 +113,11 @@
 				predefinedKey: 'removeFromLibrary',
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					void removeTrack(track.id)
+					main.removeLibraryItemOpen = {
+						name: track.name,
+						id: track.id,
+						storeName: 'tracks',
+					}
 				},
 			},
 		]

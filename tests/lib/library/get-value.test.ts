@@ -1,16 +1,16 @@
 import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
-import { 
-	getLibraryValue, 
-	preloadLibraryValue, 
-	shouldRefetchLibraryValue,
-	LibraryValueNotFoundError,
+import type { DatabaseChangeDetails } from '$lib/db/events.ts'
+import {
 	clearLibraryValueCache,
+	getLibraryValue,
+	LibraryValueNotFoundError,
+	preloadLibraryValue,
+	shouldRefetchLibraryValue,
 } from '$lib/library/get/value.ts'
 import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID } from '$lib/library/types.ts'
 import { clearDatabaseStores } from '../../shared.ts'
-import type { DatabaseChangeDetails } from '$lib/db/events.ts'
 
 // Mock crypto.randomUUID for consistent UUIDs
 vi.stubGlobal('crypto', {
@@ -32,7 +32,7 @@ describe('getLibraryValue', () => {
 	describe('tracks', () => {
 		it('should return track data with favorite status false', async () => {
 			const db = await getDatabase()
-			
+
 			// Insert a track
 			const trackData = {
 				id: 1,
@@ -50,7 +50,7 @@ describe('getLibraryValue', () => {
 				fileName: 'test-track.mp3',
 				directory: 1,
 			}
-			
+
 			await db.add('tracks', trackData)
 
 			const result = await getLibraryValue('tracks', 1)
@@ -64,7 +64,7 @@ describe('getLibraryValue', () => {
 
 		it('should return track data with favorite status true when track is in favorites', async () => {
 			const db = await getDatabase()
-			
+
 			// Insert a track
 			const trackData = {
 				id: 1,
@@ -82,7 +82,7 @@ describe('getLibraryValue', () => {
 				fileName: 'test-track.mp3',
 				directory: 1,
 			}
-			
+
 			await db.add('tracks', trackData)
 
 			// Add track to favorites
@@ -113,7 +113,7 @@ describe('getLibraryValue', () => {
 
 		it('should return cached value on subsequent calls', async () => {
 			const db = await getDatabase()
-			
+
 			const trackData = {
 				id: 1,
 				name: 'Test Track',
@@ -130,15 +130,15 @@ describe('getLibraryValue', () => {
 				fileName: 'test-track.mp3',
 				directory: 1,
 			}
-			
+
 			await db.add('tracks', trackData)
 
 			// First call - should fetch from database
 			const result1 = await getLibraryValue('tracks', 1)
-			
+
 			// Second call - should return cached value
 			const result2 = await getLibraryValue('tracks', 1)
-			
+
 			expect(result1).toEqual(result2)
 		})
 	})
@@ -146,7 +146,7 @@ describe('getLibraryValue', () => {
 	describe('albums', () => {
 		it('should return album data', async () => {
 			const db = await getDatabase()
-			
+
 			const albumData = {
 				id: 1,
 				name: 'Test Album',
@@ -155,7 +155,7 @@ describe('getLibraryValue', () => {
 				year: '2023',
 				image: new Blob(),
 			}
-			
+
 			await db.add('albums', albumData)
 
 			const result = await getLibraryValue('albums', 1)
@@ -179,13 +179,13 @@ describe('getLibraryValue', () => {
 	describe('artists', () => {
 		it('should return artist data', async () => {
 			const db = await getDatabase()
-			
+
 			const artistData = {
 				id: 1,
 				name: 'Test Artist',
 				uuid: 'artist-uuid-1',
 			}
-			
+
 			await db.add('artists', artistData)
 
 			const result = await getLibraryValue('artists', 1)
@@ -209,14 +209,14 @@ describe('getLibraryValue', () => {
 	describe('playlists', () => {
 		it('should return playlist data', async () => {
 			const db = await getDatabase()
-			
+
 			const playlistData = {
 				id: 1,
 				name: 'Test Playlist',
 				uuid: 'playlist-uuid-1',
 				createdAt: 1234567890,
 			}
-			
+
 			await db.add('playlists', playlistData)
 
 			const result = await getLibraryValue('playlists', 1)
@@ -240,7 +240,9 @@ describe('getLibraryValue', () => {
 		})
 
 		it('should throw LibraryValueNotFoundError for non-existent playlist', async () => {
-			await expect(getLibraryValue('playlists', 999)).rejects.toThrow(LibraryValueNotFoundError)
+			await expect(getLibraryValue('playlists', 999)).rejects.toThrow(
+				LibraryValueNotFoundError,
+			)
 		})
 
 		it('should return undefined for non-existent playlist when allowEmpty is true', async () => {
@@ -252,7 +254,7 @@ describe('getLibraryValue', () => {
 	describe('preloadLibraryValue', () => {
 		it('should preload track value into cache', async () => {
 			const db = await getDatabase()
-			
+
 			const trackData = {
 				id: 1,
 				name: 'Test Track',
@@ -269,15 +271,15 @@ describe('getLibraryValue', () => {
 				fileName: 'test-track.mp3',
 				directory: 1,
 			}
-			
+
 			await db.add('tracks', trackData)
 
 			// Preload the value
 			await preloadLibraryValue('tracks', 1)
-			
+
 			// This should now return synchronously from cache
 			const result = getLibraryValue('tracks', 1)
-			
+
 			// If it's synchronous, it should not be a Promise
 			expect(result).not.toBeInstanceOf(Promise)
 			expect(result).toEqual({
@@ -395,7 +397,7 @@ describe('getLibraryValue', () => {
 	describe('LibraryValueNotFoundError', () => {
 		it('should have correct message and name', () => {
 			const error = new LibraryValueNotFoundError('tracks:1')
-			
+
 			expect(error.message).toBe('Value not found. Cache key: tracks:1')
 			expect(error.name).toBe('LibraryValueNotFoundError')
 			expect(error).toBeInstanceOf(Error)
@@ -405,7 +407,7 @@ describe('getLibraryValue', () => {
 	describe('concurrent access', () => {
 		it('should handle concurrent requests for same value', async () => {
 			const db = await getDatabase()
-			
+
 			const trackData = {
 				id: 1,
 				name: 'Test Track',
@@ -422,7 +424,7 @@ describe('getLibraryValue', () => {
 				fileName: 'test-track.mp3',
 				directory: 1,
 			}
-			
+
 			await db.add('tracks', trackData)
 
 			// Make multiple concurrent requests
@@ -450,7 +452,9 @@ describe('getLibraryValue', () => {
 			await expect(getLibraryValue('tracks', 999)).rejects.toThrow(LibraryValueNotFoundError)
 			await expect(getLibraryValue('albums', 999)).rejects.toThrow(LibraryValueNotFoundError)
 			await expect(getLibraryValue('artists', 999)).rejects.toThrow(LibraryValueNotFoundError)
-			await expect(getLibraryValue('playlists', 999)).rejects.toThrow(LibraryValueNotFoundError)
+			await expect(getLibraryValue('playlists', 999)).rejects.toThrow(
+				LibraryValueNotFoundError,
+			)
 		})
 	})
 })

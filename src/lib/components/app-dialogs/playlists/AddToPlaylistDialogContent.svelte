@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { IDBPObjectStore } from 'idb'
 	import { untrack } from 'svelte'
 	import { SvelteMap } from 'svelte/reactivity'
 	import Icon from '$lib/components/icon/Icon.svelte'
@@ -8,15 +7,11 @@
 	import Separator from '$lib/components/Separator.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar'
 	import TextField from '$lib/components/TextField.svelte'
-	import { type AppDB, getDatabase } from '$lib/db/database'
-	import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events'
+	import { getDatabase } from '$lib/db/database'
 	import { createQuery } from '$lib/db/query/query.ts'
 	import { getLibraryItemIds } from '$lib/library/get/ids'
 	import { createLibraryItemKeysQuery } from '$lib/library/get/ids-queries'
-	import {
-		dbAddTracksToPlaylistsWithTx,
-		getPlaylistEntriesDatabaseStore,
-	} from '$lib/library/playlists-actions'
+	import { dbBatchModifyPlaylistsSelection } from '$lib/library/playlists-actions'
 
 	interface Props {
 		trackIds: number[]
@@ -88,60 +83,22 @@
 		}
 	}
 
-	const dbRemoveTracksFromPlaylists = async (
-		store: IDBPObjectStore<AppDB, ['playlistEntries'], 'playlistEntries', 'readwrite'>,
-		playlistIds: number[],
-	) => {
-		const trackIdIndex = store.index('trackId')
-		const changes: DatabaseChangeDetails[] = []
-
-		for (const trackId of trackIds) {
-			for await (const cursor of trackIdIndex.iterate(IDBKeyRange.only(trackId))) {
-				if (playlistIds.includes(cursor.value.playlistId)) {
-					await cursor.delete()
-					changes.push({
-						storeName: 'playlistEntries',
-						operation: 'delete',
-						key: cursor.primaryKey,
-						value: cursor.value,
-					})
-				}
-			}
-		}
-
-		return changes
-	}
-
-	const dbSave = async () => {
-		const playlistsToRemoveFrom: number[] = []
-		const playlistsToAddTo: number[] = []
+	const dbSave = () => {
+		const playlistsIdsRemoveFrom: number[] = []
+		const playlistsIdsAddTo: number[] = []
 		for (const [playlistId, status] of selection) {
 			if (status === 'remove') {
-				playlistsToRemoveFrom.push(playlistId)
+				playlistsIdsRemoveFrom.push(playlistId)
 			} else if (status === 'add') {
-				playlistsToAddTo.push(playlistId)
+				playlistsIdsAddTo.push(playlistId)
 			}
 		}
 
-		const store = await getPlaylistEntriesDatabaseStore()
-
-		const allChanges: DatabaseChangeDetails[] = []
-		if (playlistsToRemoveFrom.length > 0) {
-			const changes = await dbRemoveTracksFromPlaylists(store, playlistsToRemoveFrom)
-			allChanges.push(...changes)
-		}
-
-		if (playlistsToAddTo.length > 0) {
-			const changes = await dbAddTracksToPlaylistsWithTx(store, {
-				playlistIds: playlistsToAddTo,
-				trackIds,
-			})
-			allChanges.push(...changes)
-		}
-
-		dispatchDatabaseChangedEvent(allChanges)
-
-		return allChanges.length > 0
+		return dbBatchModifyPlaylistsSelection({
+			trackIds,
+			playlistsIdsAddTo,
+			playlistsIdsRemoveFrom,
+		})
 	}
 
 	const save = async () => {

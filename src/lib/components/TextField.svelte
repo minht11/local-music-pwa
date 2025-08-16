@@ -9,6 +9,7 @@
 		minLength?: number
 		maxLength?: number
 		required?: boolean
+		class?: ClassValue
 	}
 
 	let {
@@ -19,6 +20,7 @@
 		minLength,
 		maxLength,
 		required,
+		class: className,
 	}: TextFieldProps = $props()
 
 	const id = crypto.randomUUID()
@@ -51,7 +53,7 @@
 	})
 </script>
 
-<div class="text-field-container">
+<div class={[className, 'text-field-container']}>
 	<div
 		class="flex h-14 flex-col rounded-md border border-outline p-px text-onSurface focus-within:border-2 focus-within:border-primary focus-within:p-0 [&:has(input:user-invalid)]:border-error"
 	>

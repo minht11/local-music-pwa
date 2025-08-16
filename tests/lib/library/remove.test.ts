@@ -1,9 +1,9 @@
 import 'fake-indexeddb/auto'
-import { describe, expect, it, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
-import { dbRemoveTrack, dbRemoveAlbum, dbRemoveArtist } from '$lib/library/remove.ts'
-import { dbImportTrack } from '$lib/library/scan-actions/scanner/import-track.ts'
 import { dbCreatePlaylist } from '$lib/library/playlists-actions.ts'
+import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTrack } from '$lib/library/remove.ts'
+import { dbImportTrack } from '$lib/library/scan-actions/scanner/import-track.ts'
 import type { UnknownTrack } from '$lib/library/types.ts'
 import { clearDatabaseStores, dbGetAllAndExpectLength, expectToBeDefined } from '../../shared.ts'
 
@@ -93,7 +93,7 @@ describe('remove functions', () => {
 			const trackId = await dbImportTestTrack()
 
 			// Create a playlist and add the track to it
-			await dbCreatePlaylist('Test Playlist')
+			await dbCreatePlaylist('Test Playlist', '')
 			const playlists = await dbGetAllAndExpectLength('playlists', 1)
 			const playlistId = playlists[0]?.id
 			expectToBeDefined(playlistId)

@@ -10,12 +10,14 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import type { AlbumData, TrackData } from '$lib/library/get/value.ts'
 	import { FAVORITE_PLAYLIST_ID, removeTrackFromPlaylist } from '$lib/library/playlists-actions.ts'
-	import { removeAlbum, removeArtist } from '$lib/library/remove.js'
 	import type { Album, Playlist } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 
 	const { data } = $props()
+
+	const menu = useMenu()
 	const main = useMainStore()
+	const player = usePlayer()
 
 	initPageQueries(data)
 
@@ -44,9 +46,6 @@
 
 		return null
 	})
-
-	const player = usePlayer()
-	const menu = useMenu()
 
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
 
@@ -85,12 +84,10 @@
 			{
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					if (slug === 'albums') {
-						void removeAlbum(item.id)
-					}
-
-					if (slug === 'artists') {
-						void removeArtist(item.id)
+					main.removeLibraryItemOpen = {
+						id: item.id,
+						name: item.name,
+						storeName: slug,
 					}
 				},
 			},
@@ -123,6 +120,10 @@
 
 					<h1 class="text-headline-md">{item.name}</h1>
 				</div>
+
+				{#if slug === 'playlists'}
+					<div class="text-body-lg">{(item as Playlist).description}</div>
+				{/if}
 
 				{#if slug === 'albums'}
 					<div class="text-body-lg">{(item as AlbumData).artists.join(', ')}</div>

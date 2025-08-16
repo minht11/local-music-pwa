@@ -80,6 +80,7 @@ const dbMigrateV1LegacyData = async () => {
 		try {
 			const playlistId = await dbCreatePlaylist(
 				legacyPlaylist.name,
+				'',
 				legacyPlaylist.dateCreated,
 			)
 

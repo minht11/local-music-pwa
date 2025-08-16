@@ -1,7 +1,6 @@
 import type { IDBPTransaction } from 'idb'
 import { type AppDB, type AppIndexNames, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
-import { createUIAction } from '$lib/helpers/ui-action.ts'
 import type { LibraryStoreName } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<
@@ -112,10 +111,6 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 	])
 }
 
-export const removeTrack = createUIAction(m.libraryTrackRemovedFromLibrary(), (id: number) =>
-	dbRemoveTrack(id),
-)
-
 export const dbRemoveMultipleTracks = async (trackIds: number[]): Promise<void> => {
 	for (const trackId of trackIds) {
 		await dbRemoveTrack(trackId)
@@ -138,10 +133,6 @@ export const dbRemoveAlbum = async (albumId: number): Promise<void> => {
 	await dbRemoveMultipleTracks(tracksIds)
 }
 
-export const removeAlbum = createUIAction(m.libraryAlbumRemovedFromLibrary(), (id: number) =>
-	dbRemoveAlbum(id),
-)
-
 export const dbRemoveArtist = async (artistId: number): Promise<void> => {
 	const db = await getDatabase()
 	const tx = db.transaction(['artists', 'tracks'], 'readwrite')
@@ -162,7 +153,3 @@ export const dbRemoveArtist = async (artistId: number): Promise<void> => {
 	// If no tracks references it, it will be deleted automatically
 	await dbRemoveMultipleTracks(tracksIds)
 }
-
-export const removeArtist = createUIAction(m.libraryArtistRemovedFromLibrary(), (id: number) =>
-	dbRemoveArtist(id),
-)

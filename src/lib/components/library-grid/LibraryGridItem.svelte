@@ -8,7 +8,6 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte.ts'
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
 	import { createAlbumQuery, createArtistQuery } from '$lib/library/get/value-queries'
-	import { removeAlbum, removeArtist } from '$lib/library/remove.ts'
 	import Artwork from '../Artwork.svelte'
 
 	export type LibraryGridItemType = 'albums' | 'artists'
@@ -37,6 +36,7 @@
 	}: LibraryItemGridItemProps<Type> = $props()
 
 	const menu = useMenu()
+	const main = useMainStore()
 
 	type Value = LibraryGridItemValue<Type>
 
@@ -88,10 +88,10 @@
 			{
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					if (type === 'albums') {
-						void removeAlbum(item.id)
-					} else if (type === 'artists') {
-						void removeArtist(item.id)
+					main.removeLibraryItemOpen = {
+						id: item.id,
+						name: item.name,
+						storeName: type,
 					}
 				},
 			},

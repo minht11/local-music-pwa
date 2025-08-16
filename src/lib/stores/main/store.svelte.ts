@@ -2,6 +2,7 @@ import { prefersReducedMotion } from 'svelte/motion'
 import { MediaQuery } from 'svelte/reactivity'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
+import type { UpdatePlaylistOptions } from '$lib/library/playlists-actions'
 import type { LibraryStoreName } from '$lib/library/types'
 
 export type AppTheme = 'light' | 'dark'
@@ -9,11 +10,6 @@ export type AppThemeOption = AppTheme | 'auto'
 
 export type AppMotion = 'normal' | 'reduced'
 export type AppMotionOption = AppMotion | 'auto'
-
-export interface ModifyPlaylistOptions {
-	id: number
-	name: string
-}
 
 export interface RemoveLibraryItemOptions {
 	id: number
@@ -55,7 +51,7 @@ export class MainStore {
 
 	createNewPlaylistDialogOpen: boolean = $state(false)
 
-	editPlaylistDialogOpen: ModifyPlaylistOptions | null = $state(null)
+	editPlaylistDialogOpen: UpdatePlaylistOptions | null = $state(null)
 
 	removeLibraryItemOpen: RemoveLibraryItemOptions | null = $state(null)
 

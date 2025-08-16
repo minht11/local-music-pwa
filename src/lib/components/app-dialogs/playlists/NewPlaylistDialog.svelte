@@ -8,8 +8,9 @@
 	const onSubmitHandler = async (event: SubmitEvent) => {
 		const formData = new FormData(event.target as HTMLFormElement)
 		const name = formData.get('name') as string
+		const description = formData.get('description') as string
 
-		await createPlaylist(name)
+		await createPlaylist(name, description)
 
 		main.createNewPlaylistDialogOpen = false
 	}
@@ -31,4 +32,6 @@
 	onsubmit={onSubmitHandler}
 >
 	<TextField name="name" placeholder="New playlist name" required minLength={4} maxLength={40} />
+
+	<TextField name="description" placeholder="Description" maxLength={200} class="mt-6" />
 </CommonDialog>

@@ -1,10 +1,33 @@
 <script lang="ts">
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
+	import { createUIAction } from '$lib/helpers/ui-action'
 	import { truncate } from '$lib/helpers/utils/truncate.ts'
-	import { removePlaylist } from '$lib/library/playlists-actions'
-	import { removeTrack } from '$lib/library/remove.ts'
+	import { dbRemovePlaylist } from '$lib/library/playlists-actions.ts'
+	import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTrack } from '$lib/library/remove.ts'
+	import type { LibraryStoreName } from '$lib/library/types'
 
 	const main = useMainStore()
+
+	const remove = createUIAction(
+		m.libraryItemRemovedFromLibrary(),
+		async (store: LibraryStoreName, id: number) => {
+			if (store === 'playlists') {
+				await dbRemovePlaylist(id)
+			}
+
+			if (store === 'tracks') {
+				await dbRemoveTrack(id)
+			}
+
+			if (store === 'albums') {
+				await dbRemoveAlbum(id)
+			}
+
+			if (store === 'artists') {
+				await dbRemoveArtist(id)
+			}
+		},
+	)
 </script>
 
 <CommonDialog
@@ -14,7 +37,9 @@
 			main.removeLibraryItemOpen = null
 		},
 	}}
-	title={`Are you sure you want to remove "${truncate(main.removeLibraryItemOpen?.name ?? '', 10)}" playlist?`}
+	title={m.libraryConfirmRemoveTitle({
+		name: truncate(main.removeLibraryItemOpen?.name ?? '', 10),
+	})}
 	buttons={[
 		{
 			title: m.libraryCancel(),
@@ -26,22 +51,7 @@
 	]}
 	onsubmit={(_, data) => {
 		main.removeLibraryItemOpen = null
-		const { storeName } = data
 
-		if (storeName === 'playlists') {
-			void removePlaylist(data.id)
-		}
-
-		if (storeName === 'tracks') {
-			void removeTrack(data.id)
-		}
-
-		if (storeName === 'albums') {
-			throw new Error('Not implemented')
-		}
-
-		if (storeName === 'artists') {
-			throw new Error('Not implemented')
-		}
+		void remove(data.storeName, data.id)
 	}}
 />

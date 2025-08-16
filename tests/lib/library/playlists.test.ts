@@ -19,7 +19,7 @@ describe('playlists', () => {
 	})
 
 	it('create new playlist', async () => {
-		await dbCreatePlaylist('Test Playlist')
+		await dbCreatePlaylist('Test Playlist', '')
 
 		const db = await getDatabase()
 		const [firstPlaylist] = await db.getAll('playlists')

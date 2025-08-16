@@ -59,6 +59,7 @@ export interface Artist extends BaseMusicItem {
 
 export interface Playlist extends BaseMusicItem {
 	uuid: string
+	description: string
 	createdAt: number
 }
 
