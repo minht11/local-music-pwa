@@ -19,7 +19,7 @@ export const GET: RequestHandler = async ({ fetch }) => {
 		},
 	})
 	const pngData = resvg.render()
-	const pngBuffer = pngData.asPng()
+	const pngBuffer = pngData.asPng().buffer as ArrayBuffer
 
 	return new Response(pngBuffer, {
 		headers: {
