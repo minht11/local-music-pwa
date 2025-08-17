@@ -5,16 +5,17 @@ command = "pnpm run build"
 [build.environment]
 NODE_VERSION = "24.5.0"
 
+# V1 version of the app used different service worker file name
+[[redirects]]
+from = "/sw.js"
+to = "/service-worker.js"
+status = 200
+force = true
+
 [[redirects]]
 from = "/*"
 to = "/200.html"
 status = 200
-
-[[redirects]]
-from = "/"
-to = "/index.html"
-status = 200
-force = true
 
 [[headers]]
 for = "/*"
