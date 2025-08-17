@@ -1,4 +1,5 @@
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
+import { enhancedImages } from '@sveltejs/enhanced-img'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -65,6 +66,7 @@ export default defineConfig({
 			defaultColorSeed: '#cc9724',
 			output: `${import.meta.dirname}/.generated/theme-colors.css`,
 		}),
+		enhancedImages(),
 		tailwindcss(),
 		sveltekit(),
 		AutoImport({

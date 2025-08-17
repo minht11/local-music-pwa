@@ -3,8 +3,8 @@
 	import Header from '$lib/components/Header.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon, { type IconType } from '$lib/components/icon/Icon.svelte'
-	import heroImg from './assets/hero.avif'
-	import secondaryImg from './assets/secondary.avif'
+	import heroImg from './assets/hero.avif?enhanced'
+	import secondaryImg from './assets/secondary.avif?enhanced'
 
 	interface Feature {
 		icon: IconType
@@ -61,7 +61,7 @@
 </Header>
 
 <section
-	class="content-width-using-grid relative justify-items-center overflow-hidden bg-gradient-to-br from-surfaceContainer to-surfaceContainerLow px-6 pt-24 pb-0 lg:pt-32 lg:pb-24"
+	class="content-width-using-grid relative justify-items-center overflow-hidden px-6 pt-24 pb-0 lg:pt-32 lg:pb-24"
 >
 	<div inert class="animated-gradient absolute -inset-x-32 -inset-y-16"></div>
 
@@ -75,6 +75,7 @@
 			Enjoy all your favorite songs with a fast, privacy-focused music player that works right in
 			your browser.
 		</p>
+
 		<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
 			<Button as="a" href="/library/tracks" kind="filled" class="w-full sm:w-60">
 				Start Listening
@@ -83,8 +84,8 @@
 		</div>
 	</div>
 
-	<img
-		class="hero-image-slide-in relative mt-16 flex h-100 w-full max-w-4xl items-center justify-center rounded-2xl bg-surfaceContainerHighest object-cover object-left-bottom ring ring-outline/10 sm:h-120"
+	<enhanced:img
+		class="hero-image-slide-in relative mt-16 flex aspect-7/5 h-100 w-auto max-w-full items-center justify-center rounded-2xl bg-surfaceContainerHighest object-cover object-left-bottom ring ring-outline/10 sm:h-120"
 		src={heroImg}
 		alt="App Screenshot"
 		loading="eager"
@@ -137,14 +138,16 @@
 				</h2>
 				<ul class="space-y-4">
 					{#each benefits as benefit}
-						<li class="flex items-start gap-3">
-							<Icon type="check" class="text-primary" />
+						<li class="flex items-center gap-3">
+							<div class="rounded-full bg-surfaceContainerHighest p-1">
+								<Icon type="check" class="text-primary" />
+							</div>
 							<span class="text-body-lg text-onSurfaceVariant">{benefit}</span>
 						</li>
 					{/each}
 				</ul>
 			</div>
-			<img
+			<enhanced:img
 				class="flex w-full items-center justify-center rounded-2xl bg-surfaceContainerHigh object-contain object-bottom ring ring-outline/10"
 				src={secondaryImg}
 				alt="Feature Illustration"
@@ -169,10 +172,11 @@
 	</div>
 </section>
 
-<footer class="border-t border-outline/20 bg-surfaceContainerHigh">
-	<div class="content-width py-8">
+<footer class="content-width py-8">
+	<div class="w-full rounded-4xl bg-surfaceContainerHigh p-8 shadow-lg">
 		<div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
-			<div class="text-title-md font-medium text-onSurface">
+			<div class="flex items-center gap-2 text-title-md font-medium text-onSurface">
+				<img src="/icons/responsive.svg" width="24" height="24" alt="Logo" class="size-6" />
 				{m.appName()}
 			</div>
 
@@ -183,7 +187,7 @@
 					class="link flex items-center gap-2 text-onSurfaceVariant transition-colors duration-200 hover:text-onSurface"
 				>
 					<Icon type="github" class="h-5 w-5" />
-					{m.aboutSourceCode()} ❤️
+					{m.aboutSourceCode()}
 				</a>
 
 				<a
@@ -199,6 +203,10 @@
 </footer>
 
 <style>
+	:global(picture:has(enhanced\:img)) {
+		display: contents;
+	}
+
 	.content-width {
 		width: 100%;
 		max-width: 1200px;
@@ -214,22 +222,12 @@
 		justify-content: center;
 	}
 
-	/* Ensure smooth transitions and better hover effects */
 	.card {
 		transition: all 0.3s ease;
 	}
 
 	.card:hover {
 		transform: translateY(-2px);
-	}
-
-	/* Custom gradient background */
-	.bg-gradient-to-br {
-		background: linear-gradient(
-			to bottom right,
-			hsl(var(--md-sys-color-surface-container)),
-			hsl(var(--md-sys-color-surface-container-low))
-		);
 	}
 
 	.hero-image-slide-in {
@@ -250,13 +248,14 @@
 	.animated-gradient {
 		background: radial-gradient(
 			ellipse 1400px 800px at 0% 30%,
-			hsl(from var(--color-tertiary) h s l / 0.1),
-			hsl(from var(--color-tertiary) h s l / 0.1),
-			hsl(from var(--color-tertiary) h s l / 0.04),
+			--alpha(var(--color-tertiary) / 0.1),
+			--alpha(var(--color-tertiary) / 0.1),
+			--alpha(var(--color-tertiary) / 0.04),
 			transparent 60%
 		);
+		filter: blur(10px);
 		transform-origin: top;
-		animation: glow-pulse 8s ease-in-out infinite;
+		animation: glow-pulse 20s ease-in-out infinite;
 	}
 
 	@keyframes glow-pulse {

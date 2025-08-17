@@ -110,6 +110,10 @@ body {
 	flex-grow: 1;
 }
 
+source {
+	display: none;
+}
+
 @keyframes fade-in {
 	from {
 		opacity: 0;
