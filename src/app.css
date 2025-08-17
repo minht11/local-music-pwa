@@ -33,7 +33,7 @@
 @font-face {
 	font-family: 'Heebo';
 	font-style: normal;
-		font-display: swap;
+	font-display: swap;
 	src: url('/fonts/Heebo.cyrillic-ext.woff2') format('woff2');
 	unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
@@ -41,7 +41,7 @@
 @font-face {
 	font-family: 'Heebo';
 	font-style: normal;
-		font-display: swap;
+	font-display: swap;
 	src: url('/fonts/Heebo.greek.woff2') format('woff2');
 	unicode-range: U+0370-03FF;
 }
@@ -49,7 +49,7 @@
 @font-face {
 	font-family: 'Heebo';
 	font-style: normal;
-		font-display:fallback;
+	font-display: fallback;
 	src: url('/fonts/Heebo.greek-ext.woff2') format('woff2');
 	unicode-range: U+1F00-1FFF;
 }
