@@ -301,7 +301,7 @@ const dbRemoveTrackFromFavorites = async (trackId: number): Promise<void> => {
 export const toggleFavoriteTrack = async (
 	shouldBeRemoved: boolean,
 	trackId: number,
-): Promise<void> => {
+): Promise<boolean> => {
 	try {
 		if (shouldBeRemoved) {
 			await dbRemoveTrackFromFavorites(trackId)
@@ -309,14 +309,10 @@ export const toggleFavoriteTrack = async (
 			await dbAddTrackToFavorites(trackId)
 		}
 
-		snackbar({
-			id: 'track-favorite-toggled',
-			message: shouldBeRemoved
-				? m.libraryTrackRemovedFromFavorites()
-				: m.libraryTrackAddedToFavorites(),
-			duration: 2000,
-		})
+		return true
 	} catch (error) {
 		snackbar.unexpectedError(error)
+
+		return false
 	}
 }

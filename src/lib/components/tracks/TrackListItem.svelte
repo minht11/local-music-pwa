@@ -2,9 +2,8 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 	import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
-	import { toggleFavoriteTrack } from '$lib/library/playlists-actions'
 	import Artwork from '../Artwork.svelte'
-	import IconButton from '../IconButton.svelte'
+	import FavoriteButton from '../FavoriteButton.svelte'
 	import ListItem, { type MenuItem } from '../ListItem.svelte'
 
 	interface Props {
@@ -82,16 +81,7 @@
 				{formatDuration(track.duration)}
 			</div>
 
-			<IconButton
-				class="hidden @sm:flex"
-				tabindex={-1}
-				icon={track.favorite ? 'favorite' : 'favoriteOutline'}
-				tooltip={track.favorite ? m.trackRemoveFromFavorites() : m.trackAddToFavorites()}
-				onclick={(e) => {
-					e.stopPropagation()
-					void toggleFavoriteTrack(track.favorite, track.id)
-				}}
-			/>
+			<FavoriteButton class="hidden @sm:flex" trackId={track.id} favorite={track.favorite} />
 		{/if}
 	</div>
 </ListItem>

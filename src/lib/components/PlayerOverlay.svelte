@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button from './Button.svelte'
 	import Icon from './icon/Icon.svelte'
-	import FavoriteButton from './player/buttons/FavoriteButton.svelte'
+	import PlayerFavoriteButton from './player/buttons/PlayerFavoriteButton.svelte'
 	import PlayNextButton from './player/buttons/PlayNextButton.svelte'
 	import PlayToggleButton from './player/buttons/PlayToggleButton.svelte'
 	import MainControls from './player/MainControls.svelte'
@@ -64,7 +64,7 @@
 					{/if}
 				</Button>
 
-				<FavoriteButton />
+				<PlayerFavoriteButton />
 			</div>
 
 			<div class="ml-auto flex gap-2 pr-2 sm:hidden">

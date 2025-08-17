@@ -6,7 +6,7 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
-	import FavoriteButton from '$lib/components/player/buttons/FavoriteButton.svelte'
+	import PlayerFavoriteButton from '$lib/components/player/buttons/PlayerFavoriteButton.svelte'
 	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
 	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
@@ -101,7 +101,7 @@
 				{/if}
 
 				<div class="ml-auto flex gap-1">
-					<FavoriteButton />
+					<PlayerFavoriteButton />
 
 					{#if layoutMode === 'list'}
 						<IconButton tooltip={m.playerOpenQueue()} icon="trayFull" as="a" href="/player/queue" />
