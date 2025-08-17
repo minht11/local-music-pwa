@@ -8,12 +8,13 @@
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
+	import { formatArtists, formatNameOrUnknown } from '$lib/helpers/utils/text.ts'
 	import type { AlbumData, TrackData } from '$lib/library/get/value.ts'
 	import {
 		FAVORITE_PLAYLIST_ID,
 		removeTrackEntryFromPlaylist,
 	} from '$lib/library/playlists-actions.ts'
-	import type { Album, Playlist } from '$lib/library/types.ts'
+	import { type Album, type Playlist, UNKNOWN_ITEM } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 
 	const { data } = $props()
@@ -123,7 +124,7 @@
 				<div class="flex items-center gap-2">
 					<Icon type="playlist" class="size-10 text-onSurface/54" />
 
-					<h1 class="text-headline-md">{item.name}</h1>
+					<h1 class="text-headline-md">{formatNameOrUnknown(item.name)}</h1>
 				</div>
 
 				{#if slug === 'playlists'}
@@ -131,11 +132,13 @@
 				{/if}
 
 				{#if slug === 'albums'}
-					<div class="text-body-lg">{(item as AlbumData).artists.join(', ')}</div>
+					<div class="text-body-lg">
+						{formatArtists((item as AlbumData).artists)}
+					</div>
 				{/if}
 
 				<div>
-					{#if slug === 'albums' && (item as AlbumData).year}
+					{#if slug === 'albums' && (item as AlbumData).year !== UNKNOWN_ITEM}
 						{(item as AlbumData).year} •
 					{/if}
 

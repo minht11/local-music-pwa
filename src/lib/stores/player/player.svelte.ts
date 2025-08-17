@@ -5,6 +5,7 @@ import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { toShuffledArray } from '$lib/helpers/utils/array.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
+import { formatArtists } from '$lib/helpers/utils/text.ts'
 import { throttle } from '$lib/helpers/utils/throttle.ts'
 import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
 import { cleanupTrackAudio, loadTrackAudio } from './audio.ts'
@@ -203,7 +204,7 @@ export class PlayerStore {
 
 			ms.metadata = new MediaMetadata({
 				title: track.name,
-				artist: track.artists.join(', '),
+				artist: formatArtists(track.artists),
 				album: track.album,
 				artwork: [
 					{

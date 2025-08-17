@@ -16,6 +16,7 @@
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import { formatArtists } from '$lib/helpers/utils/text.ts'
 
 	const { data } = $props()
 
@@ -96,7 +97,7 @@
 
 					<div class="grid overflow-hidden">
 						<div class="truncate text-body-lg">{track.name}</div>
-						<div class="truncate text-body-md">{track.artists}</div>
+						<div class="truncate text-body-md">{formatArtists(track.artists)}</div>
 					</div>
 				{/if}
 

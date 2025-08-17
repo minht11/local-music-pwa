@@ -1,5 +1,5 @@
 import { parseBlob } from 'music-metadata'
-import type { ParsedTrackData } from '$lib/library/types.ts'
+import { type ParsedTrackData, UNKNOWN_ITEM } from '$lib/library/types.ts'
 import { getArtworkRelatedData } from './format-artwork.ts'
 
 // This limit is a bit arbitrary.
@@ -27,18 +27,18 @@ export const parseTrack = async (file: File): Promise<ParsedTrackData | null> =>
 	}
 
 	const artworkData = imageBlob && (await getArtworkRelatedData(imageBlob))
-	const artists = common.artists
-		?.flatMap((artist) => artist.split(/,|&/))
-		.map((artist) => artist.trim())
+	const artists =
+		common.artists?.flatMap((artist) => artist.split(/,|&/)).map((artist) => artist.trim()) ??
+		[]
 
 	const trackData: ParsedTrackData = {
 		name: common.title || file.name,
-		album: common.album,
-		artists: artists ?? [],
+		album: common.album ?? UNKNOWN_ITEM,
+		artists: artists.length > 0 ? artists : [UNKNOWN_ITEM],
 		genre: common.genre || [],
 		trackNo: common.track.no || 0,
 		trackOf: common.track.of || 0,
-		year: common.year?.toString(),
+		year: common.year?.toString() ?? UNKNOWN_ITEM,
 		duration: tags.format.duration || 0,
 		...artworkData,
 	}

@@ -14,6 +14,13 @@ export const LEGACY_NO_NATIVE_DIRECTORY = -1
 export const FAVORITE_PLAYLIST_ID = -1
 export const FAVORITE_PLAYLIST_UUID = 'favorites'
 
+/** Used to represent unknown Artist/Album and other values inside database */
+export const UNKNOWN_ITEM = '\0unknown'
+
+export type UnknownItem = typeof UNKNOWN_ITEM
+
+export type StringOrUnknownItem = (string & {}) | UnknownItem
+
 interface BaseMusicItem {
 	id: number
 	name: string
@@ -21,9 +28,9 @@ interface BaseMusicItem {
 
 export interface ParsedTrackData {
 	name: string
-	album?: string
-	artists: string[]
-	year?: string
+	album: StringOrUnknownItem
+	artists: StringOrUnknownItem[]
+	year: StringOrUnknownItem
 	duration: number
 	genre: string[]
 	trackNo?: number

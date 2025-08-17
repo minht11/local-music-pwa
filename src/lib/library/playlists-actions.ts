@@ -3,7 +3,7 @@ import { snackbar } from '$lib/components/snackbar/snackbar'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { createUIAction } from '$lib/helpers/ui-action.ts'
-import { truncate } from '$lib/helpers/utils/truncate.ts'
+import { truncate } from '$lib/helpers/utils/text.ts'
 import type { Playlist, PlaylistEntry } from '$lib/library/types.ts'
 import { FAVORITE_PLAYLIST_ID } from './types.ts'
 

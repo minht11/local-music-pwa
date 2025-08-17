@@ -4,7 +4,7 @@ import { getDatabase } from '$lib/db/database.ts'
 import { dbCreatePlaylist } from '$lib/library/playlists-actions.ts'
 import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTrack } from '$lib/library/remove.ts'
 import { dbImportTrack } from '$lib/library/scan-actions/scanner/import-track.ts'
-import type { UnknownTrack } from '$lib/library/types.ts'
+import type { PlaylistEntry, UnknownTrack } from '$lib/library/types.ts'
 import { clearDatabaseStores, dbGetAllAndExpectLength, expectToBeDefined } from '../../shared.ts'
 
 const dbImportTestTrack = async (overrides: Partial<UnknownTrack> = {}): Promise<number> => {
@@ -16,7 +16,7 @@ const dbImportTestTrack = async (overrides: Partial<UnknownTrack> = {}): Promise
 		year: '2023',
 		duration: 180,
 		genre: ['Rock'],
-		file: new File(['test'], 'test.mp3', { type: 'audio/mp3' }) as any,
+		file: new File(['test'], 'test.mp3', { type: 'audio/mp3' }),
 		scannedAt: Date.now(),
 		fileName: 'test.mp3',
 		directory: 1,
@@ -26,15 +26,14 @@ const dbImportTestTrack = async (overrides: Partial<UnknownTrack> = {}): Promise
 	return await dbImportTrack(trackData, undefined)
 }
 
-// Helper function to add track to playlist (since dbAddTrackToPlaylist is not exported)
 const addTrackToPlaylist = async (playlistId: number, trackId: number): Promise<void> => {
 	const db = await getDatabase()
-	const playlistEntry = {
+	const playlistEntry: Omit<PlaylistEntry, 'id'> = {
 		playlistId,
 		trackId,
 		addedAt: Date.now(),
 	}
-	await db.add('playlistEntries', playlistEntry as any)
+	await db.add('playlistEntries', playlistEntry as PlaylistEntry)
 }
 
 describe('remove functions', () => {
@@ -116,27 +115,6 @@ describe('remove functions', () => {
 		it('should handle removing non-existent track gracefully', async () => {
 			// Try to remove a track that doesn't exist
 			await expect(dbRemoveTrack(999)).resolves.toBeUndefined()
-		})
-
-		it('should handle track without album or artist', async () => {
-			// Create a track without album or artists
-			const trackId = await dbImportTestTrack({
-				album: undefined,
-				artists: [],
-			})
-
-			const db = await getDatabase()
-
-			// Verify track was created
-			const track = await db.get('tracks', trackId)
-			expect(track).toBeTruthy()
-
-			// Remove the track
-			await dbRemoveTrack(trackId)
-
-			// Verify track is removed
-			const removedTrack = await db.get('tracks', trackId)
-			expect(removedTrack).toBeUndefined()
 		})
 	})
 

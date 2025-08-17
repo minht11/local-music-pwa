@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatArtists } from '$lib/helpers/utils/text.ts'
 	import Button from './Button.svelte'
 	import Icon from './icon/Icon.svelte'
 	import PlayerFavoriteButton from './player/buttons/PlayerFavoriteButton.svelte'
@@ -59,7 +60,7 @@
 							<div class="truncate text-body-md">
 								{track.name}
 							</div>
-							<div class="truncate text-body-sm">{track.artists}</div>
+							<div class="truncate text-body-sm">{formatArtists(track.artists)}</div>
 						</div>
 					{/if}
 				</Button>

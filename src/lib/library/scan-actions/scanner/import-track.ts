@@ -1,7 +1,13 @@
 import type { IDBPTransaction } from 'idb'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
-import type { Album, Artist, Track, UnknownTrack } from '$lib/library/types.ts'
+import {
+	type Album,
+	type Artist,
+	type Track,
+	UNKNOWN_ITEM,
+	type UnknownTrack,
+} from '$lib/library/types.ts'
 
 type ImportTrackTx = IDBPTransaction<
 	AppDB,
@@ -10,29 +16,28 @@ type ImportTrackTx = IDBPTransaction<
 >
 
 const dbImportAlbum = async (tx: ImportTrackTx, track: Track) => {
-	if (!track.album) {
-		return
-	}
+	const albumName = track.album
 
 	const store = tx.objectStore('albums')
 
-	const existingAlbum = await store.index('name').get(track.album)
+	const existingAlbum = await store.index('name').get(albumName)
 	const updatedAlbum: Omit<Album, 'id'> = existingAlbum
 		? {
 				...existingAlbum,
-				artists: [...new Set([...existingAlbum.artists, ...track.artists])],
+				artists: [...new Set([...existingAlbum.artists, ...track.artists])].filter(
+					(artist) => artist !== UNKNOWN_ITEM,
+				),
 				year: existingAlbum.year ?? track.year,
 				image: existingAlbum.image ?? track.image?.full,
 			}
 		: {
 				uuid: crypto.randomUUID(),
-				name: track.album,
+				name: albumName,
 				artists: track.artists,
 				year: track.year,
 				image: track.image?.full,
 			}
 
-	// Id will be auto-generated
 	const albumId = await store.put(updatedAlbum as Album)
 
 	const change: DatabaseChangeDetails = {
