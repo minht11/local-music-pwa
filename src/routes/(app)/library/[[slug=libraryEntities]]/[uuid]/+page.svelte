@@ -52,7 +52,7 @@
 
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
 
-	const playlistTrackMenuItems = (_: TrackData, index: number) => {
+	const playlistTrackMenuItems = (track: TrackData) => {
 		if (item.id === FAVORITE_PLAYLIST_ID) {
 			return []
 		}
@@ -61,7 +61,7 @@
 			{
 				label: m.libraryTrackRemoveFromPlaylist(),
 				action: () => {
-					const entryId = tracks.playlistIdMap?.[index]
+					const entryId = tracks.playlistIdMap?.[track.id]
 					invariant(entryId)
 
 					void removeTrackEntryFromPlaylist(entryId)
