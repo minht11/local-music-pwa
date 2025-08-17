@@ -8,7 +8,7 @@ const getTooltipTemplate = () => {
 		tooltipTemplate = document.createElement('div')
 		tooltipTemplate.setAttribute('role', 'tooltip')
 		tooltipTemplate.className =
-			'tooltip-enter bg-inverseSurface text-nowrap flex items-center inset-0 m-0 text-body-sm min-h-6 text-inverseOnSurface px-2 rounded-sm'
+			'tooltip-enter bg-inverseSurface max-w-80 flex items-center inset-0 m-0 text-body-sm min-h-6 text-inverseOnSurface px-2 py-0.5 rounded-sm'
 		tooltipTemplate.popover = 'manual'
 	}
 

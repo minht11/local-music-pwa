@@ -6,10 +6,11 @@
 	class="mb-4 flex flex-col gap-4 rounded-lg border border-outlineVariant p-4 text-onSurfaceVariant select-text"
 >
 	<Icon type="alertCircle" class="shrink-0" />
+
 	<span>
-		{m.settingsMissingFs1()}&nbsp
+		{m.settingsMissingFs1()}
 		<a
-			class="link inline-block"
+			class="link inline"
 			target="_blank"
 			rel="noopener noreferrer"
 			href="https://caniuse.com/?search=showDirectoryPicker"

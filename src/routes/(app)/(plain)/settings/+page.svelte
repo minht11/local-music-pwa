@@ -6,7 +6,6 @@
 	import Separator from '$lib/components/Separator.svelte'
 	import Spinner from '$lib/components/Spinner.svelte'
 	import Switch from '$lib/components/Switch.svelte'
-	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
 	import { isDatabaseOperationPending } from '$lib/db/lock-database.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { Debounced } from '$lib/helpers/debounced.svelte.ts'
@@ -23,7 +22,6 @@
 
 	const mainStore = useMainStore()
 
-	const count = $derived(data.countQuery.value)
 	const directories = $derived(data.directoriesQuery.value)
 
 	const themeOptions: { name: string; value: AppThemeOption }[] = [
@@ -66,27 +64,17 @@
 	const isDatabasePending = $derived(isDatabasePendingGetter.current)
 </script>
 
-<section class="card container-lg settings-max-width mx-auto w-full">
-	<div class="px-4 pt-4">
-		<div class="text-body-lg">
-			<WrapTranslation messageFn={m.settingsCurrentTracksInLibrary}>
-				{#snippet tracksCount()}
-					<strong class="rounded-xl bg-tertiary px-2 text-onTertiary tabular-nums">
-						{count}
-					</strong>
-				{/snippet}
-			</WrapTranslation>
-		</div>
-		<div>{m.settingsAllDataLocal()}</div>
-	</div>
-
-	<Separator class="mt-4" />
-
+<section class="card settings-max-width mx-auto w-full overflow-clip">
 	<div class="flex flex-col p-4">
+		<div class="flex items-center gap-2 text-title-sm">
+			{m.settingsDirectories()}
+		</div>
+		<div class="mt-1 mb-4 text-body-sm text-onSurfaceVariant">
+			{m.settingsAllDataLocal()}
+		</div>
+
 		{#if !isFileSystemAccessSupported}
 			<MissingFsApiBanner />
-		{:else}
-			<div class="mb-4 text-title-sm">{m.settingsDirectories()}</div>
 		{/if}
 		<DirectoriesList disabled={isDatabasePending} {directories} />
 

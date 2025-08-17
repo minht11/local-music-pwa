@@ -121,19 +121,15 @@
 				dir.legacy ? 'bg-tertiaryContainer/40' : 'bg-tertiaryContainer/56',
 			]}
 		>
-			{#if dir.legacy && isFileSystemAccessSupported}
-				<div
-					{@attach tooltip(
-						'In previous version of the app, directories were not saved, this contains previously scanned tracks',
-					)}
-				>
+			{#if dir.legacy}
+				<div {@attach tooltip(m.settingsTracksInAppStorageTooltip())}>
 					<Icon type="information" class="size-4 text-onTertiaryContainer/54" />
 				</div>
 			{/if}
 
 			<div class="flex flex-col overflow-hidden">
 				<div class="truncate">
-					{dir.legacy ? m.settingsTracksWithoutDirectory() : dir.handle.name}
+					{dir.legacy ? m.settingsTracksInsideAppMemory() : dir.handle.name}
 				</div>
 				<div class="text-body-sm">
 					{m.settingsDirectoriesTracksCount({ count: dir.count })}
@@ -145,7 +141,7 @@
 					<IconButton
 						{disabled}
 						icon="cached"
-						tooltip="Rescan"
+						tooltip={m.settingsDirRescan()}
 						onclick={() => {
 							void rescanDirectory(dir.id, dir.handle)
 						}}
@@ -154,7 +150,7 @@
 				<IconButton
 					{disabled}
 					icon="trashOutline"
-					tooltip="Remove"
+					tooltip={m.settingsDirRemove()}
 					onclick={() => {
 						void removeDirectory(dir.id)
 					}}
