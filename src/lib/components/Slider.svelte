@@ -90,8 +90,18 @@
 		{min}
 		{max}
 		class="h-11 w-full grow appearance-none opacity-0 disabled:cursor-auto"
-		onpointerdown={() => onSeekStart?.()}
-		onpointerup={() => onSeekEnd?.()}
+		onpointerdown={() => {
+			onSeekStart?.()
+		}}
+		onpointerup={() => {
+			onSeekEnd?.()
+		}}
+		ontouchstart={() => {
+			onSeekStart?.()
+		}}
+		ontouchend={() => {
+			onSeekEnd?.()
+		}}
 	/>
 
 	<div
@@ -125,7 +135,10 @@
 	}
 
 	input::-webkit-slider-thumb {
+		-webkit-appearance: none;
 		height: --spacing(11);
+		width: --spacing(4);
 		cursor: pointer;
+		background-color: red;
 	}
 </style>

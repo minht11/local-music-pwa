@@ -50,6 +50,10 @@
 		{max}
 		bind:value={getSliderValue, setSliderValue}
 		onSeekStart={() => {
+			if (!seeking) {
+				seekingValue = value
+			}
+
 			seeking = true
 		}}
 		onSeekEnd={() => {
