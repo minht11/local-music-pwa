@@ -114,7 +114,11 @@
 		})
 	}}
 >
-	<Artwork src={artworkSrc()} fallbackIcon="person" class="w-full rounded-[inherit]" />
+	<Artwork
+		src={artworkSrc()}
+		fallbackIcon={type === 'albums' ? 'album' : 'person'}
+		class="w-full rounded-[inherit]"
+	/>
 
 	<div
 		class="flex h-18 w-full flex-col justify-center overflow-hidden px-2 text-center text-onSurfaceVariant"
