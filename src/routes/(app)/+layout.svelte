@@ -106,11 +106,12 @@
 
 {@render children()}
 
-<div class="pointer-events-none fixed inset-x-0 bottom-0 flex flex-col overflow-hidden">
+<div class="pointer-events-none fixed inset-x-0 bottom-0 flex flex-col gap-2 overflow-hidden">
 	<SnackbarRenderer />
+
 	<div bind:clientHeight={overlayContentHeight} class="flex flex-col">
 		{#if !page.data.noPlayerOverlay}
-			<div class="pointer-events-none px-4 pb-2">
+			<div class="px-4 pb-4 sm:pb-2">
 				<PlayerOverlay />
 			</div>
 		{/if}
@@ -198,10 +199,12 @@
 				view-regular-in 300ms var(--ease-incoming80outgoing40);
 		}
 
+		&::view-transition-old(lib-bottom),
 		&::view-transition-old(pl-card) {
 			display: none;
 		}
 
+		&::view-transition-old(lib-bottom),
 		&::view-transition-new(pl-card) {
 			animation: none;
 		}

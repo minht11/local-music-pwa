@@ -97,7 +97,7 @@
 {#snippet layoutBottom()}
 	{#if isHandHeldDevice}
 		<div
-			class="pointer-events-auto grid h-16 w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer sm:hidden"
+			class="pointer-events-auto -mt-2 grid h-16 w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer sm:hidden"
 		>
 			{@render navItemsSnippet('h-full')}
 		</div>
@@ -147,7 +147,7 @@
 					</div>
 				{:else}
 					<div class={['flex w-full grow flex-col']}>
-						{#if slug && itemsIds.length === 0}
+						{#if itemsIds.length === 0}
 							<div class="relative m-auto flex flex-col items-center text-center">
 								<Icon type="magnify" class="my-auto size-35 opacity-54" />
 

@@ -211,7 +211,7 @@
 		width: clamp(
 			var(--dialog-width, --spacing(70)),
 			var(--dialog-width, --spacing(100)),
-			100% - --spacing(4)
+			100% - --spacing(8)
 		) !important;
 		height: max-content !important;
 		overscroll-behavior: contain;

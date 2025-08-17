@@ -13,11 +13,9 @@
 </script>
 
 {#if snackbarItems.length !== 0}
-	<div
-		class="pointer-events-auto mx-auto flex w-full max-w-125 flex-col gap-2 bg-transparent px-2 pb-4"
-	>
+	<div class="mx-auto flex w-full max-w-125 flex-col gap-2 px-4">
 		{#each snackbarItems as item (item.id)}
-			<div class="top-auto" animate:flip={{ duration: 140 }}>
+			<div class="pointer-events-auto top-auto" animate:flip={{ duration: 140 }}>
 				<Snackbar {...item} ondismiss={dismissHandler} />
 			</div>
 		{/each}
