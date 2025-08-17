@@ -10,12 +10,6 @@ from = "/*"
 to = "/200.html"
 status = 200
 
-[[redirects]]
-from = "/"
-to = "/index.html"
-status = 200
-force = true
-
 # V1 version of the app used different service worker file name
 [[redirects]]
 from = "/sw.js"
