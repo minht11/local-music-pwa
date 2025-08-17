@@ -55,8 +55,10 @@
 					</div>
 
 					{#if track}
-						<div class="mr-1 ml-4 min-w-0">
-							<div class="truncate text-body-md">{track.name}</div>
+						<div class="mr-1 ml-4 grid min-w-0">
+							<div class="truncate text-body-md">
+								{track.name}
+							</div>
 							<div class="truncate text-body-sm">{track.artists}</div>
 						</div>
 					{/if}
