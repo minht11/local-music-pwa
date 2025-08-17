@@ -7,6 +7,20 @@ import { defineConfig } from 'vite'
 import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
 import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
 
+const getAutoImportPlugin = () =>
+	AutoImport({
+		dts: './.generated/types/auto-imports.d.ts',
+		imports: [
+			{
+				'$paraglide/messages': [['*', 'm']],
+				'$lib/stores/player/use-store.ts': ['usePlayer'],
+				'$lib/stores/main/use-store.ts': ['useMainStore'],
+				'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
+				'tiny-invariant': [['default', 'invariant']],
+			},
+		],
+	})
+
 export default defineConfig({
 	server: {
 		fs: {
@@ -58,6 +72,7 @@ export default defineConfig({
 	},
 	worker: {
 		format: 'es',
+		plugins: () => [getAutoImportPlugin()],
 	},
 	experimental: {
 		enableNativePlugin: 'resolver',
@@ -70,18 +85,7 @@ export default defineConfig({
 		enhancedImages(),
 		tailwindcss(),
 		sveltekit(),
-		AutoImport({
-			dts: './.generated/types/auto-imports.d.ts',
-			imports: [
-				{
-					'$paraglide/messages': [['*', 'm']],
-					'$lib/stores/player/use-store.ts': ['usePlayer'],
-					'$lib/stores/main/use-store.ts': ['useMainStore'],
-					'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
-					'tiny-invariant': [['default', 'invariant']],
-				},
-			],
-		}),
+		getAutoImportPlugin(),
 		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './.generated/paraglide',
