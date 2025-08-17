@@ -8,6 +8,7 @@
 	import Switch from '$lib/components/Switch.svelte'
 	import { isDatabaseOperationPending } from '$lib/db/lock-database.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
+	import { supportsChangingAudioVolume } from '$lib/helpers/audio.ts'
 	import { Debounced } from '$lib/helpers/debounced.svelte.ts'
 	import { isFileSystemAccessSupported } from '$lib/helpers/file-system.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
@@ -179,13 +180,15 @@
 
 	<Separator />
 
-	<div class="flex items-center justify-between p-4">
-		<div>
-			{m.settingsDisplayVolumeSlider()}
-		</div>
+	{#if supportsChangingAudioVolume()}
+		<div class="flex items-center justify-between p-4">
+			<div>
+				{m.settingsDisplayVolumeSlider()}
+			</div>
 
-		<Switch bind:checked={mainStore.volumeSliderEnabled} />
-	</div>
+			<Switch bind:checked={mainStore.volumeSliderEnabled} />
+		</div>
+	{/if}
 </section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">

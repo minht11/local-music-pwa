@@ -12,7 +12,7 @@
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueriesDynamic } from '$lib/db/query/page-query.svelte.ts'
-	import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
+	import { isMobile } from '$lib/helpers/utils/ua.ts'
 	import { useSetBottomBar } from '$lib/layout-bottom-bar.svelte.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'

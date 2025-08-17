@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte'
-	import { isMobile } from '$lib/helpers/utils/is-mobile'
+	import { isMobile } from '$lib/helpers/utils/ua.ts'
 
 	interface Props {
 		class: ClassValue

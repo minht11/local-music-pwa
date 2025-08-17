@@ -1,7 +1,8 @@
 import { prefersReducedMotion } from 'svelte/motion'
 import { MediaQuery } from 'svelte/reactivity'
+import { supportsChangingAudioVolume } from '$lib/helpers/audio.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
-import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
+import { isMobile } from '$lib/helpers/utils/ua.ts'
 import type { UpdatePlaylistOptions } from '$lib/library/playlists-actions'
 import type { LibraryStoreName } from '$lib/library/types'
 
@@ -47,7 +48,7 @@ export class MainStore {
 	 * The initial value is false for mobile devices and true for desktop.
 	 * User can change this setting.
 	 */
-	volumeSliderEnabled: boolean = $state(!isMobile())
+	volumeSliderEnabled: boolean = $state(supportsChangingAudioVolume() ? !isMobile() : false)
 
 	createNewPlaylistDialogOpen: boolean = $state(false)
 

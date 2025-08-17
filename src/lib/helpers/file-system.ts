@@ -1,4 +1,4 @@
-import { isMobile } from '$lib/helpers/utils/is-mobile.ts'
+import { isMobile } from '$lib/helpers/utils/ua.ts'
 import { wait } from '$lib/helpers/utils/wait.ts'
 
 export const isFileSystemAccessSupported: boolean = 'showDirectoryPicker' in globalThis
