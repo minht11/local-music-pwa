@@ -80,7 +80,8 @@
 		"onlyBuiltDependencies": [
 			"@biomejs/biome",
 			"@tailwindcss/oxide",
-			"esbuild"
+			"esbuild",
+			"sharp"
 		]
 	}
 }
