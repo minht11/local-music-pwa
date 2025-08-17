@@ -110,6 +110,8 @@ export const tooltip = (message: string | undefined): Attachment<HTMLElement> =>
 		// Makes so tooltip is hidden just before view transitions starts
 		on(target, 'pointerup', hideTooltip, { signal })
 		on(target, 'focusout', hideTooltip, { signal })
+		// Needed for Safari
+		on(target, 'touchend', hideTooltip, { signal })
 
 		const cleanup = () => {
 			controller.abort()
