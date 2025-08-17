@@ -1,8 +1,6 @@
 # Snae player
 Lightweight on device music player right in your browser.
 
-![alt text](https://raw.githubusercontent.com/minht11/local-music-pwa/main/images/preview.webp)
-
 Play your local audio files without a native app, using just your browser. Complete with Dark/Light theme support, artwork based UI coloring, animations and more.
 
 ## Limitations
