@@ -28,7 +28,6 @@ export const scanTracks = async (options: TracksScanOptions): Promise<void> => {
 			id: snackbarId,
 			message: m.settingsScanNoNewTracks(),
 			duration: 2000,
-			controls: false,
 		})
 	} else {
 		snackbar({
@@ -37,7 +36,6 @@ export const scanTracks = async (options: TracksScanOptions): Promise<void> => {
 				newTracks: result.newlyImported,
 			}),
 			duration: 8000,
-			controls: false,
 		})
 	}
 }

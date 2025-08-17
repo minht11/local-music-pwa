@@ -1,4 +1,4 @@
-import { type StringOrUnknownItem, UNKNOWN_ITEM } from '$lib/library/types'
+import { type StringOrUnknownItem, UNKNOWN_ITEM } from '$lib/library/types.ts'
 
 export const truncate = (text: string, length: number): string => {
 	if (text.length <= length) {

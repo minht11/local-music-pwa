@@ -14,8 +14,11 @@ export const LEGACY_NO_NATIVE_DIRECTORY = -1
 export const FAVORITE_PLAYLIST_ID = -1
 export const FAVORITE_PLAYLIST_UUID = 'favorites'
 
-/** Used to represent unknown Artist/Album and other values inside database */
-export const UNKNOWN_ITEM = '\0unknown'
+/**
+ * Used to represent unknown Artist/Album and other values inside database
+ * Using ~ so when sorting items are always at the end
+ */
+export const UNKNOWN_ITEM = '~\0unknown'
 
 export type UnknownItem = typeof UNKNOWN_ITEM
 
