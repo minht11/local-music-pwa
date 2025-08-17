@@ -6,7 +6,6 @@ import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
 import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
-import { workerChunkPlugin } from './lib/vite-plugin-worker-chunk.ts'
 
 export default defineConfig({
 	server: {
@@ -57,11 +56,13 @@ export default defineConfig({
 			},
 		},
 	},
+	worker: {
+		format: 'es',
+	},
 	experimental: {
 		enableNativePlugin: 'resolver',
 	},
 	plugins: [
-		workerChunkPlugin(),
 		themeColorsPlugin({
 			defaultColorSeed: '#cc9724',
 			output: `${import.meta.dirname}/.generated/theme-colors.css`,
