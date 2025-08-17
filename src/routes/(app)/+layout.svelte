@@ -178,6 +178,18 @@
 		}
 	}
 
+	@keyframes -global-view-bottom-bar-out {
+		to {
+			translate: 0 100%;
+		}
+	}
+
+	@keyframes -global-view-bottom-bar-in {
+		from {
+			translate: 0 100%;
+		}
+	}
+
 	:global(html:active-view-transition-type(regular)) {
 		--view-regular-out: 1.1;
 		--view-regular-in: 0.9;
@@ -199,14 +211,20 @@
 				view-regular-in 300ms var(--ease-incoming80outgoing40);
 		}
 
-		&::view-transition-old(lib-bottom),
 		&::view-transition-old(pl-card) {
 			display: none;
 		}
 
-		&::view-transition-old(lib-bottom),
 		&::view-transition-new(pl-card) {
 			animation: none;
+		}
+
+		&::view-transition-new(bottom-bar):only-child {
+			animation: view-bottom-bar-in 300ms var(--ease-standard) forwards;
+		}
+
+		&::view-transition-old(bottom-bar):only-child {
+			animation: view-bottom-bar-out 300ms var(--ease-standard) forwards;
 		}
 	}
 </style>

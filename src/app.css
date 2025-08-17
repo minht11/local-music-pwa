@@ -59,6 +59,7 @@
 	--breakpoint-xss: 20rem;
 
 	--ease-*: initial;
+	--ease-standard: cubic-bezier(0.2, 0, 0, 1);
 	--ease-outgoing40: cubic-bezier(0.4, 0, 1, 1);
 	--ease-incoming80: cubic-bezier(0, 0, 0.2, 1);
 	--ease-incoming80outgoing40: cubic-bezier(0.4, 0, 0.2, 1);
@@ -325,6 +326,12 @@ source {
 
 @custom-variant active-view-player {
 	html:active-view-transition-type(player) & {
+		@slot;
+	}
+}
+
+@custom-variant active-view-regular {
+	html:active-view-transition-type(regular) & {
 		@slot;
 	}
 }

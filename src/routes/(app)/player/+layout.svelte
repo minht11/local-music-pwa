@@ -253,8 +253,8 @@
 			transform: none;
 			height: 100%;
 			animation:
-				view-player-container-rounded 400ms cubic-bezier(0.2, 0, 0, 1),
-				var(--vt-pl-card-morph-ani) 400ms cubic-bezier(0.2, 0, 0, 1);
+				view-player-container-rounded 400ms var(--ease-standard),
+				var(--vt-pl-card-morph-ani) 400ms var(--ease-standard);
 		}
 
 		&::view-transition-old(pl-card),
@@ -302,7 +302,7 @@
 
 		&::view-transition-group(pl-artwork) {
 			animation-duration: 400ms;
-			animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+			animation-timing-function: var(--ease-standard);
 		}
 	}
 </style>
