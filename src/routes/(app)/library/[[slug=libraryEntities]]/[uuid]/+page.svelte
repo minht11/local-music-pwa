@@ -99,6 +99,10 @@
 			},
 		]
 	})
+
+	const description = $derived(slug === 'playlists' && (item as Playlist).description)
+
+	const artists = $derived(slug === 'albums' && formatArtists((item as AlbumData).artists))
 </script>
 
 {#if !isWideLayout.current}
@@ -107,7 +111,7 @@
 
 <div class="@container flex grow flex-col px-4 pb-4">
 	<section
-		class="relative flex w-full flex-col items-center justify-center gap-6 overflow-clip py-4 @2xl:h-56 @2xl:flex-row"
+		class="relative flex w-full flex-col items-center justify-center gap-6 overflow-clip py-4 @2xl:min-h-60 @2xl:flex-row"
 	>
 		{#if slug !== 'playlists'}
 			<Artwork
@@ -127,17 +131,17 @@
 					<h1 class="text-headline-md">{formatNameOrUnknown(item.name)}</h1>
 				</div>
 
-				{#if slug === 'playlists'}
-					<div class="text-body-lg">{(item as Playlist).description}</div>
+				{#if description}
+					<div class="text-body-lg">{description}</div>
 				{/if}
 
-				{#if slug === 'albums'}
+				{#if artists}
 					<div class="text-body-lg">
-						{formatArtists((item as AlbumData).artists)}
+						{artists}
 					</div>
 				{/if}
 
-				<div>
+				<div class="mt-1 text-onSurfaceVariant">
 					{#if slug === 'albums' && (item as AlbumData).year !== UNKNOWN_ITEM}
 						{(item as AlbumData).year} •
 					{/if}
@@ -148,7 +152,18 @@
 
 			<div class="mt-auto flex items-center gap-2 py-4 pr-2 pl-4">
 				<Button
-					kind="toned"
+					kind="filled"
+					class="my-1"
+					disabled={tracks.tracksIds.length === 0}
+					onclick={() => {
+						player.playTrack(0, tracks.tracksIds)
+					}}
+				>
+					{m.play()}
+				</Button>
+
+				<Button
+					kind="flat"
 					class="my-1 mr-auto"
 					disabled={tracks.tracksIds.length === 0}
 					onclick={() => {
