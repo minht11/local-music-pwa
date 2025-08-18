@@ -93,11 +93,13 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 	const isWideLayout = () => (innerWidth.current ?? 0) > 1154
 	// We pass params here so that inside page we can benefit from $derived caching
 	const layoutMode = (isWide: boolean, itemUuid: string | undefined): LayoutMode => {
+		const main = useMainStore()
+
 		if (slug === 'tracks') {
 			return 'list'
 		}
 
-		if (isWide) {
+		if (isWide && main.sideBySideViewEnabled) {
 			return 'both'
 		}
 
