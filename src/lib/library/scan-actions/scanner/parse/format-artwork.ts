@@ -1,5 +1,5 @@
 import { isSafari as isSafariCheck } from '$lib/helpers/utils/ua.ts'
-import { extractColorFromImage } from './color-from-image.ts'
+import { getPrimaryColor } from './image-primary-color.ts'
 
 const getSmallImageDimensions = (
 	originalWidth: number,
@@ -51,9 +51,10 @@ export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRel
 		ctx.imageSmoothingEnabled = false
 
 		ctx.drawImage(bitmapSmall, 0, 0, tw, th)
+
 		const data = ctx.getImageData(0, 0, tw, th).data
 
-		const primaryColor = extractColorFromImage(data)
+		const primaryColor = getPrimaryColor(data, tw, th)
 
 		return {
 			image: {
