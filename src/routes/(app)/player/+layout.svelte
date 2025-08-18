@@ -176,7 +176,7 @@
 	id="full-player"
 	mode={layoutMode}
 	class={[
-		'mx-auto w-full grow active-view-player:view-name-[pl-card]',
+		'mx-auto w-full max-w-300 grow active-view-player:view-name-[pl-card]',
 		layoutMode === 'both' && 'bg-secondaryContainer',
 	]}
 	list={playerSnippet}
