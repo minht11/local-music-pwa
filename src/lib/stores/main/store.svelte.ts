@@ -50,7 +50,7 @@ export class MainStore {
 	 */
 	volumeSliderEnabled: boolean = $state(supportsChangingAudioVolume() ? !isMobile() : false)
 
-	sideBySideViewEnabled: boolean = $state(true)
+	sideBySideLibraryLayoutEnabled: boolean = $state(true)
 
 	createNewPlaylistDialogOpen: boolean = $state(false)
 
@@ -69,7 +69,7 @@ export class MainStore {
 			'pickColorFromArtwork',
 			'customThemePaletteHex',
 			'volumeSliderEnabled',
-			'sideBySideViewEnabled',
+			'sideBySideLibraryLayoutEnabled',
 		])
 	}
 }

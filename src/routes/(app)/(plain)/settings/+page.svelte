@@ -194,10 +194,10 @@
 
 	<div class="flex items-center justify-between p-4">
 		<div>
-			{m.settingsEnableSideBySideView()}
+			{m.settingsEnableSideBySideLibraryLayout()}
 		</div>
 
-		<Switch bind:checked={mainStore.sideBySideViewEnabled} />
+		<Switch bind:checked={mainStore.sideBySideLibraryLayoutEnabled} />
 	</div>
 </section>
 

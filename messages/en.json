@@ -108,7 +108,7 @@
 	"settingsApplicationTheme": "Application theme",
 	"settingPickColorFromArtwork": "Automatically pick color from currently playing song artwork",
 	"settingsDisplayVolumeSlider": "Display volume slider inside player",
-	"settingsEnableSideBySideView": "Enable side-by-side view on artists/albums/playlists",
+	"settingsEnableSideBySideLibraryLayout": "Enable the side-by-side layout in the Library",
 	"settingsPrimaryColor": "Application primary color",
 	"settingsColorPick": "Pick color",
 	"settingsColorReset": "Reset",

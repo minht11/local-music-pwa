@@ -99,7 +99,7 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 			return 'list'
 		}
 
-		if (isWide && main.sideBySideViewEnabled) {
+		if (isWide && main.sideBySideLibraryLayoutEnabled) {
 			return 'both'
 		}
 
