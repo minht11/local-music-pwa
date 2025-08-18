@@ -141,4 +141,8 @@
 		cursor: pointer;
 		background-color: red;
 	}
+
+	input::-moz-range-thumb {
+		cursor: pointer;
+	}
 </style>
