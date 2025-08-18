@@ -1,13 +1,11 @@
 // biome-ignore lint/style/noRestrictedImports: Main worker module for extracting colors from images
 import { argbFromRgb, QuantizerCelebi, Score } from '@material/material-color-utilities'
 
-export const extractColorFromImage = (image: ImageData): number | undefined => {
+export const extractColorFromImage = (imageBytes: ImageDataArray): number | undefined => {
 	try {
 		const skipPixels = 2
 		const bytesPerPixel = 4
 		const increment = bytesPerPixel + bytesPerPixel * skipPixels
-
-		const imageBytes = image.data
 
 		const pixelsLen = Math.round(imageBytes.length / increment)
 		// Preallocate array because it is faster

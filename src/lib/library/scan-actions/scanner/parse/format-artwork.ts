@@ -1,4 +1,4 @@
-import { isSafari } from '$lib/helpers/utils/ua.ts'
+import { isSafari as isSafariCheck } from '$lib/helpers/utils/ua.ts'
 import { extractColorFromImage } from './color-from-image.ts'
 
 const getSmallImageDimensions = (
@@ -31,41 +31,38 @@ export type ArtworkRelatedData = {
 	primaryColor: number | undefined
 }
 
+const isSafari = isSafariCheck()
+
 export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRelatedData> => {
+	let bitmap: ImageBitmap | undefined
+	let bitmapSmall: ImageBitmap | undefined
 	try {
 		const bitmap = await createImageBitmap(imageBlob)
+		const [tw, th] = getSmallImageDimensions(bitmap.width, bitmap.height)
 
-		const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
-		const ctx = canvas.getContext('2d')
-
-		invariant(ctx, 'Canvas context is null')
-
-		ctx.drawImage(bitmap, 0, 0)
-
-		const minifiedImage = isSafari()
-			? imageBlob
-			: await canvas.convertToBlob({
-					type: 'image/webp',
-					quality: 0.8,
-				})
-
-		const [smallWidth, smallHeight] = getSmallImageDimensions(bitmap.width, bitmap.height)
-		canvas.width = smallWidth
-		canvas.height = smallHeight
-		ctx.drawImage(bitmap, 0, 0, smallWidth, smallHeight)
-
-		const small = await canvas.convertToBlob({
-			type: isSafari() ? 'image/png' : 'image/webp',
-			quality: 0.7,
+		const bitmapSmall = await createImageBitmap(imageBlob, {
+			resizeWidth: tw,
+			resizeHeight: th,
 		})
 
-		const primaryColor = extractColorFromImage(ctx.getImageData(0, 0, smallWidth, smallHeight))
+		const canvas = new OffscreenCanvas(tw, th)
+		const ctx = canvas.getContext('2d')
+		invariant(ctx)
+		ctx.imageSmoothingEnabled = false
+
+		ctx.drawImage(bitmapSmall, 0, 0, tw, th)
+		const data = ctx.getImageData(0, 0, tw, th).data
+
+		const primaryColor = extractColorFromImage(data)
 
 		return {
 			image: {
 				optimized: true,
-				full: minifiedImage,
-				small,
+				full: imageBlob,
+				small: await canvas.convertToBlob({
+					type: isSafari ? 'image/png' : 'image/webp',
+					quality: 0.7,
+				}),
 			},
 			primaryColor,
 		}
@@ -80,5 +77,8 @@ export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRel
 			},
 			primaryColor: undefined,
 		}
+	} finally {
+		bitmap?.close()
+		bitmapSmall?.close()
 	}
 }
