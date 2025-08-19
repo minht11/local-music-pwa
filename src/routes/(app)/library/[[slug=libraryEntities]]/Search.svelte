@@ -3,6 +3,7 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
+	import { navigateToExternal } from '$lib/helpers/utils/navigate.ts'
 	import type { PageData } from './$types.ts'
 
 	interface Props {
@@ -33,6 +34,12 @@
 				label: m.about(),
 				action: () => {
 					goto('/about')
+				},
+			},
+			{
+				label: m.foundAnIssue(),
+				action: () => {
+					navigateToExternal('https://github.com/minht11/local-music-pwa/issues/new')
 				},
 			},
 		]

@@ -52,18 +52,27 @@
 		return { dialogBody, dialogFooter }
 	}
 
-	const animateBackdrop = (dialog: HTMLDialogElement, isOut = false) =>
-		dialog.animate(
-			{
-				opacity: isOut ? [1, 0] : [0, 1],
-			},
-			{
-				pseudoElement: '::backdrop',
-				duration: 300,
-				easing: 'linear',
-				fill: isOut ? 'forwards' : undefined,
-			},
-		)
+	const animateBackdrop = (dialog: HTMLDialogElement, isOut = false) => {
+		try {
+			dialog.animate(
+				{
+					opacity: isOut ? [1, 0] : [0, 1],
+				},
+				{
+					pseudoElement: '::backdrop',
+					duration: 300,
+					easing: 'linear',
+					fill: isOut ? 'forwards' : undefined,
+				},
+			)
+		} catch (err) {
+			// Firefox does not support pseudo-element animations
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=1770591
+			if (import.meta.env.DEV) {
+				console.warn(err)
+			}
+		}
+	}
 
 	const animateIn = (dialog: HTMLDialogElement) => {
 		const { dialogBody, dialogFooter } = getParts()
@@ -97,6 +106,7 @@
 
 		timeline(frames, {
 			defaultOptions: {
+				// ease-standard
 				easing: 'cubic-bezier(0.2, 0, 0, 1)',
 			},
 		})
@@ -134,6 +144,7 @@
 
 		return timeline(frames, {
 			defaultOptions: {
+				// ease-standard
 				easing: 'cubic-bezier(0.2, 0, 0, 1)',
 			},
 		})
