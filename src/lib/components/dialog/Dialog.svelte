@@ -52,18 +52,29 @@
 		return { dialogBody, dialogFooter }
 	}
 
-	const animateBackdrop = (dialog: HTMLDialogElement, isOut = false) =>
-		dialog.animate(
-			{
-				opacity: isOut ? [1, 0] : [0, 1],
-			},
-			{
-				pseudoElement: '::backdrop',
-				duration: 300,
-				easing: 'linear',
-				fill: isOut ? 'forwards' : undefined,
-			},
-		)
+	const animateBackdrop = (dialog: HTMLDialogElement, isOut = false) => {
+		try {
+			dialog.animate(
+				{
+					opacity: isOut ? [1, 0] : [0, 1],
+				},
+				{
+					pseudoElement: '::backdrop',
+					duration: 300,
+					easing: 'linear',
+					fill: isOut ? 'forwards' : undefined,
+				},
+			)
+		} catch (err) {
+			// Firefox does not support pseudo-element animations
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=1770591
+			if (import.meta.env.DEV) {
+				console.warn(
+					'Dialog backdrop animation failed. This is likely due to the browser not supporting dialog element animations.',
+				)
+			}
+		}
+	}
 
 	const animateIn = (dialog: HTMLDialogElement) => {
 		const { dialogBody, dialogFooter } = getParts()
