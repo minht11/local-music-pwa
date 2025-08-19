@@ -69,9 +69,7 @@
 			// Firefox does not support pseudo-element animations
 			// https://bugzilla.mozilla.org/show_bug.cgi?id=1770591
 			if (import.meta.env.DEV) {
-				console.warn(
-					'Dialog backdrop animation failed. This is likely due to the browser not supporting dialog element animations.',
-				)
+				console.warn(err)
 			}
 		}
 	}
