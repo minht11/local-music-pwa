@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ❓ Questions & Support
+    url: https://github.com/minht11/local-music-pwa/discussions
+    about: Ask questions, get help, or discuss how to use the app
+  - name: 💬 General Discussions
+    url: https://github.com/minht11/local-music-pwa/discussions
+    about: Share ideas, feedback, or chat with the community
