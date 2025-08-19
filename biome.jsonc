@@ -193,6 +193,19 @@
 					}
 				}
 			}
+		},
+		{
+			"includes": ["messages/*.json", "src/lib/components/icon/icon-paths.server.ts"],
+			"assist": {
+				"actions": {
+					"source": {
+						"useSortedKeys": {
+							"level": "on",
+							"options": {}
+						}
+					}
+				}
+			}
 		}
 	]
 }

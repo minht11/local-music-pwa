@@ -23,9 +23,14 @@
 	const player = new PlayerStore()
 	setContext(PLAYER_STORE_CONTEXT, player)
 
+	let pageContainer = $state<HTMLElement | null>(null)
+
 	setupTheme()
 	setupGlobalMenu()
-	setupAppViewTransitions(() => mainStore.isReducedMotion)
+	setupAppViewTransitions(
+		() => pageContainer,
+		() => mainStore.isReducedMotion,
+	)
 	setupAppInstallPromptListeners()
 	const bottomBar = setupBottomBar()
 
@@ -104,7 +109,9 @@
 	</div>
 {/if}
 
-{@render children()}
+<div bind:this={pageContainer} class="flex grow flex-col">
+	{@render children()}
+</div>
 
 <div class="pointer-events-none fixed inset-x-0 bottom-0 flex flex-col gap-2 overflow-hidden">
 	<SnackbarRenderer />

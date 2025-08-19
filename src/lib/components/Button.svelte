@@ -94,12 +94,8 @@
 
 	.base-button[disabled] {
 		cursor: default;
-		background-color: --alpha(var(--color-onSurface) / 38%);
+		background-color: --alpha(var(--color-onSurface) / 12%);
 		border-color: --alpha(var(--color-onSurface) / 38%);
 		color: --alpha(var(--color-onSurface) / 38%);
-	}
-
-	:is(.tonal-button, .filled-button)[disabled] {
-		background-color: --alpha(var(--color-onSurface) / 12%);
 	}
 </style>
