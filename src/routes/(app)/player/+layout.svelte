@@ -92,7 +92,7 @@
 			<div class="flex h-18 w-full shrink-0 items-center rounded-2xl bg-secondaryContainer px-4">
 				{#if track}
 					<div class="mr-2 min-w-6 text-center text-body-lg tabular-nums">
-						{player.activeTrackIndex}
+						{player.activeTrackIndex + 1}
 					</div>
 
 					<div class="grid overflow-hidden">
