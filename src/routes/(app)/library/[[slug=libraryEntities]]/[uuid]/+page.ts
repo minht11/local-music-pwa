@@ -65,7 +65,22 @@ const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 			const db = await getDatabase()
 
 			const index = configMap[storeName].index
-			const keys = await db.getAllKeysFromIndex('tracks', index, name)
+			let keys: number[]
+			if (storeName === 'albums') {
+				// This will load all of the tracks metadata in memory,
+				// generally albums should not be that big so its fine
+				const tracks = await db.getAllFromIndex('tracks', index, name)
+				tracks.sort((a, b) => {
+					const aNo = a.trackNo ?? 0
+					const bNo = b.trackNo ?? 0
+
+					return aNo - bNo
+				})
+
+				keys = tracks.map((track) => track.id)
+			} else {
+				keys = await db.getAllKeysFromIndex('tracks', index, name)
+			}
 
 			return { tracksIds: keys, playlistIdMap: null }
 		},
