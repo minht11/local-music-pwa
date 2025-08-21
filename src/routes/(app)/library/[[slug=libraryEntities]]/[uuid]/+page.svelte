@@ -71,16 +71,27 @@
 		]
 	}
 
-	const menuItems = $derived.by(() => {
+	const getMenuItems = () => {
+		const addToQueueMenuItem =
+			tracks.tracksIds.length === 0
+				? null
+				: {
+						label: m.playerAddToQueue(),
+						action: () => {
+							player.addToQueue(tracks.tracksIds)
+						},
+					}
+
 		if (slug === 'playlists') {
 			if (item.id === FAVORITE_PLAYLIST_ID) {
-				return null
+				return [addToQueueMenuItem]
 			}
 
-			return getPlaylistMenuItems(main, item as Playlist)
+			return [addToQueueMenuItem, ...getPlaylistMenuItems(main, item as Playlist)]
 		}
 
 		return [
+			addToQueueMenuItem,
 			{
 				label: m.libraryAddToPlaylist(),
 				action: () => {
@@ -98,6 +109,12 @@
 				},
 			},
 		]
+	}
+
+	const menuItems = $derived.by(() => {
+		const items = getMenuItems().filter((item) => item !== null)
+
+		return items.length > 0 ? items : null
 	})
 
 	const description = $derived(slug === 'playlists' && (item as Playlist).description)
