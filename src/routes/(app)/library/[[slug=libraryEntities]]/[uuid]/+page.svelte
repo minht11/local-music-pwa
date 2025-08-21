@@ -153,8 +153,10 @@
 				{/if}
 
 				{#if artists}
-					<div class="text-body-lg">
-						{artists}
+					<div class="grid w-full overflow-hidden text-body-lg">
+						<div class="truncate">
+							{artists}
+						</div>
 					</div>
 				{/if}
 
