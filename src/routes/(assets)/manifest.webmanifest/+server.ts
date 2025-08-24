@@ -10,7 +10,7 @@ const manifest = {
 	theme_color: THEME_PALLETTE_DARK.surface,
 	background_color: THEME_PALLETTE_DARK.surface,
 	display: 'standalone',
-	orientation: 'portrait',
+	orientation: 'any',
 	description: 'Lightweight on device music player right in your browser.',
 	icons: [
 		{
