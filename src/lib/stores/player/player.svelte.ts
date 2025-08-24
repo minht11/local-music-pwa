@@ -1,4 +1,3 @@
-import { untrack } from 'svelte'
 import { onDatabaseChange } from '$lib/db/events.ts'
 import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'

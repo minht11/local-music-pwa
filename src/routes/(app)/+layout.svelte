@@ -6,7 +6,7 @@
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
-	import { setupBottomBar } from '$lib/layout-bottom-bar.svelte'
+	import { setupOverlaySnippets } from '$lib/layout-bottom-bar.svelte'
 	import { MainStore } from '$lib/stores/main/store.svelte.ts'
 	import { MAIN_STORE_CONTEXT } from '$lib/stores/main/use-store.ts'
 	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
@@ -32,7 +32,7 @@
 		() => mainStore.isReducedMotion,
 	)
 	setupAppInstallPromptListeners()
-	const bottomBar = setupBottomBar()
+	const overlaySnippets = setupOverlaySnippets()
 
 	const { children } = $props()
 
@@ -117,15 +117,21 @@
 	<SnackbarRenderer />
 
 	<div bind:clientHeight={overlayContentHeight} class="flex flex-col">
+		<div class="px-4 pb-4 sm:pb-2">
+			<div class="mx-auto w-full max-w-225">
+				{#each overlaySnippets.abovePlayer as snippet}
+					{@render snippet()}
+				{/each}
+			</div>
+		</div>
+
 		{#if !page.data.noPlayerOverlay}
 			<div class="px-4 pb-4 sm:pb-2">
 				<PlayerOverlay />
 			</div>
 		{/if}
 
-		{#if bottomBar.snippet}
-			{@render bottomBar.snippet()}
-		{/if}
+		{@render overlaySnippets.bottomBar?.()}
 	</div>
 </div>
 

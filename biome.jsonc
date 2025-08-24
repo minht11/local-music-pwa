@@ -139,7 +139,7 @@
 			"jsxQuoteStyle": "single",
 			"indentWidth": 4
 		},
-		"globals": ["m", "invariant", "usePlayer", "useMainStore"]
+		"globals": ["m", "invariant", "usePlayer", "useMainStore", "untrack"]
 	},
 	"json": {
 		"formatter": {

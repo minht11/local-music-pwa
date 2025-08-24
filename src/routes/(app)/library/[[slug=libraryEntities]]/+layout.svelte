@@ -13,7 +13,7 @@
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueriesDynamic } from '$lib/db/query/page-query.svelte.ts'
 	import { isMobile } from '$lib/helpers/utils/ua.ts'
-	import { useSetBottomBar } from '$lib/layout-bottom-bar.svelte.ts'
+	import { useSetOverlaySnippet } from '$lib/layout-bottom-bar.svelte.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import Search from './Search.svelte'
@@ -63,7 +63,7 @@
 	const isWideLayout = $derived.by(data.isWideLayout)
 	const layoutMode = $derived(data.layoutMode(isWideLayout, page.params.uuid))
 
-	useSetBottomBar(() => layoutBottom)
+	useSetOverlaySnippet('bottom-bar', () => layoutBottom)
 
 	export const snapshot: Snapshot<string> = {
 		capture: () => data.store.searchTerm,

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { untrack } from 'svelte'
 	import { SvelteMap } from 'svelte/reactivity'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'

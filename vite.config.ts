@@ -17,6 +17,7 @@ const getAutoImportPlugin = () =>
 				'$lib/stores/main/use-store.ts': ['useMainStore'],
 				'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
 				'tiny-invariant': [['default', 'invariant']],
+				svelte: ['untrack'],
 			},
 		],
 	})

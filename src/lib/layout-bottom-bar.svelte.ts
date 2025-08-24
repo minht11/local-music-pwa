@@ -1,33 +1,61 @@
 import { getContext, setContext } from 'svelte'
+import { SvelteMap } from 'svelte/reactivity'
 
 export interface BottomBarState {
-	snippet: Snippet | null
+	bottomBar: Snippet | null
+	abovePlayer: SvelteMap<string, Snippet>
 }
 
 const key = Symbol('root-layout')
 
-export const setupBottomBar = () => {
+export const setupOverlaySnippets = () => {
 	const state: BottomBarState = $state({
-		snippet: null,
+		bottomBar: null,
+		abovePlayer: new SvelteMap<string, Snippet>(),
 	})
 
 	setContext(key, state)
 
 	return {
-		get snippet(): BottomBarState['snippet'] {
-			return state.snippet
+		get bottomBar(): BottomBarState['bottomBar'] {
+			return state.bottomBar
+		},
+		get abovePlayer(): Snippet[] {
+			return [...state.abovePlayer.values()]
 		},
 	}
 }
 
-export const useSetBottomBar = (bottomBar: () => Snippet): void => {
+export const useSetOverlaySnippet = (
+	type: 'bottom-bar' | 'above-player',
+	getSnippet: () => Snippet | null,
+): void => {
 	const state = getContext<BottomBarState>(key)
+	const id = crypto.randomUUID()
 
 	$effect.pre(() => {
-		state.snippet = bottomBar()
+		if (type === 'bottom-bar') {
+			state.bottomBar = getSnippet()
 
-		return () => {
-			state.snippet = null
+			return () => {
+				state.bottomBar = null
+			}
 		}
+
+		if (type === 'above-player') {
+			const snippet = getSnippet()
+
+			if (snippet) {
+				state.abovePlayer.set(id, snippet)
+			} else {
+				state.abovePlayer.delete(id)
+			}
+
+			return () => {
+				state.abovePlayer.delete(id)
+			}
+		}
+
+		return
 	})
 }
