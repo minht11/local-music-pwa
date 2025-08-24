@@ -1,4 +1,3 @@
-import { untrack } from 'svelte'
 import type { SnackbarData } from './Snackbar.svelte'
 import { snackbarItems } from './store.svelte.ts'
 
