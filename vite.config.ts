@@ -58,11 +58,15 @@ export default defineConfig({
 							minModuleSize: 0,
 							priority: 100,
 						},
+						{
+							// Merge smaller chunks than together
+							name: 'small-chunks',
+							maxModuleSize: 1 * 1024,
+						},
 					],
 				},
 			},
 		},
-		target: 'esnext',
 		minify: 'terser',
 		terserOptions: {
 			module: true,
@@ -74,9 +78,6 @@ export default defineConfig({
 	worker: {
 		format: 'es',
 		plugins: () => [getAutoImportPlugin()],
-	},
-	experimental: {
-		enableNativePlugin: 'resolver',
 	},
 	plugins: [
 		themeColorsPlugin({
