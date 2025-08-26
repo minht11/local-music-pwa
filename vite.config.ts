@@ -1,9 +1,9 @@
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
-import { enhancedImages } from '@sveltejs/enhanced-img'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
+import { imagetools } from 'vite-imagetools'
 import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
 import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
 
@@ -84,7 +84,7 @@ export default defineConfig({
 			defaultColorSeed: '#cc9724',
 			output: `${import.meta.dirname}/.generated/theme-colors.css`,
 		}),
-		enhancedImages(),
+		imagetools(),
 		tailwindcss(),
 		sveltekit(),
 		getAutoImportPlugin(),

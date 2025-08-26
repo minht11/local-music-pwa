@@ -39,13 +39,13 @@
 		"typescript": "^5.9.2",
 		"unplugin-auto-import": "^20.0.0",
 		"vite": "npm:rolldown-vite@7.1.4",
+		"vite-imagetools": "^8.0.0",
 		"vitest": "^3.2.4"
 	},
 	"dependencies": {
 		"@floating-ui/dom": "^1.7.4",
 		"@material/material-color-utilities": "^0.3.0",
 		"@resvg/resvg-js": "^2.6.2",
-		"@sveltejs/enhanced-img": "^0.8.1",
 		"@tanstack/svelte-virtual": "^3.13.12",
 		"@types/dom-navigation": "^1.0.6",
 		"@types/wicg-file-system-access": "^2023.10.6",
