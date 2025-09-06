@@ -60,7 +60,7 @@ declare global {
 	}
 
 	interface GoatCounter {
-		count: (data: { path: string; title?: string; event: boolean }) => void
+		count: (data: { path: string; title?: string; event?: boolean }) => void
 	}
 
 	interface Window {

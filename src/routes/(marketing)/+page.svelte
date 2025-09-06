@@ -23,7 +23,7 @@
 			icon: 'flash',
 			title: 'Lightning fast',
 			description:
-				'Opens instantly, plays seamlessly, and responsive controls built for modern browsers.',
+				'Opens instantly, plays seamlessly, with responsive controls built for modern browsers.',
 		},
 		{
 			icon: 'cellphone',
