@@ -142,9 +142,10 @@
 	"successfullyRemovedTracks": "Successfully removed {count} tracks",
 	"track": "Track",
 	"trackAddToFavorites": "Add to favorites",
+
+	"trackPlay": "Play {name}",
 	"trackRemoveFromFavorites": "Remove from favorites",
 	"tracks": "Tracks",
-
 	"trackViewAlbum": "View album",
 	"trackViewArtist": "View artist",
 	"understood": "Understood",

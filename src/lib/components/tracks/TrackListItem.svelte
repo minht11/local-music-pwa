@@ -44,7 +44,7 @@
 		active ? 'bg-onSurfaceVariant/10 text-onSurfaceVariant' : 'color-onSurfaceVariant',
 		className,
 	]}
-	ariaLabel={`Play ${track?.name}`}
+	ariaLabel={m.trackPlay({ name: track?.name ?? '' })}
 	{ariaRowIndex}
 	onclick={() => onclick?.(track!)}
 >
