@@ -8,8 +8,12 @@ const config: Config = {
 		runes: true,
 	},
 	kit: {
+		paths: {
+			relative: false,
+		},
 		outDir: './.generated/svelte-kit',
 		adapter: adapter({
+			// When changing this, also update env variable
 			fallback: '200.html',
 		}),
 		alias: {
@@ -36,6 +40,9 @@ const config: Config = {
 
 				return tsConfig
 			},
+		},
+		serviceWorker: {
+			register: false,
 		},
 	},
 }
