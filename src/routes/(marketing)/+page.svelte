@@ -3,8 +3,8 @@
 	import Header from '$lib/components/Header.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon, { type IconType } from '$lib/components/icon/Icon.svelte'
-	import heroImg from './assets/hero.avif?enhanced'
-	import secondaryImg from './assets/secondary.avif?enhanced'
+	import heroImg from './assets/hero.avif?as=metadata'
+	import secondaryImg from './assets/secondary.avif?as=metadata'
 
 	interface Feature {
 		icon: IconType
@@ -23,7 +23,7 @@
 			icon: 'flash',
 			title: 'Lightning fast',
 			description:
-				'Opens instantly, plays seamlessly, and responsive controls built for modern browsers.',
+				'Opens instantly, plays seamlessly, with responsive controls built for modern browsers.',
 		},
 		{
 			icon: 'cellphone',
@@ -84,9 +84,11 @@
 		</div>
 	</div>
 
-	<enhanced:img
+	<img
 		class="hero-image-slide-in relative mt-16 flex aspect-7/5 h-100 w-auto max-w-full items-center justify-center rounded-2xl bg-surfaceContainerHighest object-cover object-left-bottom ring ring-outline/10 sm:h-120"
-		src={heroImg}
+		src={heroImg.src}
+		width={heroImg.width}
+		height={heroImg.height}
 		alt="App Screenshot"
 		loading="eager"
 		fetchpriority="high"
@@ -147,9 +149,11 @@
 					{/each}
 				</ul>
 			</div>
-			<enhanced:img
+			<img
 				class="flex w-full items-center justify-center rounded-2xl bg-surfaceContainerHigh object-contain object-bottom ring ring-outline/10"
-				src={secondaryImg}
+				src={secondaryImg.src}
+				width={secondaryImg.width}
+				height={secondaryImg.height}
 				alt="Feature Illustration"
 				loading="lazy"
 			/>
@@ -203,10 +207,6 @@
 </footer>
 
 <style>
-	:global(picture:has(enhanced\:img)) {
-		display: contents;
-	}
-
 	.content-width {
 		width: 100%;
 		max-width: 1200px;

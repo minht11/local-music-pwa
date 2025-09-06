@@ -1,3 +1,4 @@
 import type { SnackbarData } from './Snackbar.svelte'
 
-export const snackbarItems: SnackbarData[] = $state([])
+// biome-ignore lint/suspicious/noExplicitAny: this can be anything
+export const snackbarItems: SnackbarData<any>[] = $state([])

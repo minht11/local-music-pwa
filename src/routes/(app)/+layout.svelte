@@ -1,18 +1,24 @@
 <script lang="ts">
 	import { setContext } from 'svelte'
-	import { navigating, page, updated } from '$app/state'
+	import { browser } from '$app/environment'
+	import { navigating, page } from '$app/state'
 	import { APP_DIALOGS_COMPONENTS } from '$lib/components/app-dialogs/dialogs.ts'
+	import Button from '$lib/components/Button.svelte'
+	import Icon from '$lib/components/icon/Icon.svelte'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
-	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
-	import { setupBottomBar } from '$lib/layout-bottom-bar.svelte'
+	import { setupOverlaySnippets } from '$lib/layout-bottom-bar.svelte'
 	import { MainStore } from '$lib/stores/main/store.svelte.ts'
 	import { MAIN_STORE_CONTEXT } from '$lib/stores/main/use-store.ts'
 	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
 	import { PLAYER_STORE_CONTEXT } from '$lib/stores/player/use-store.ts'
 	import { onViewTransitionPrepare, setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
 	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
+	import {
+		type DirectoriesPermissionPromptSnackbarArg,
+		setupDirectoriesPermissionPrompt,
+	} from './layout/setup-directories-permission-prompt.svelte.ts'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'
 
 	// These context keys are in different files from their implementation
@@ -32,7 +38,7 @@
 		() => mainStore.isReducedMotion,
 	)
 	setupAppInstallPromptListeners()
-	const bottomBar = setupBottomBar()
+	const overlaySnippets = setupOverlaySnippets()
 
 	const { children } = $props()
 
@@ -43,22 +49,6 @@
 			'--bottom-overlay-height',
 			`${overlayContentHeight}px`,
 		)
-	})
-
-	$effect(() => {
-		if (updated.current) {
-			snackbar({
-				id: 'app-update',
-				message: m.appUpdateAvailable(),
-				duration: false,
-				controls: {
-					label: m.reload(),
-					action: () => {
-						window.location.reload()
-					},
-				},
-			})
-		}
 	})
 
 	onViewTransitionPrepare((_state, match) => {
@@ -89,7 +79,41 @@
 			setProperties('#full-player', 'fp')
 		}
 	})
+
+	if (browser) {
+		void setupDirectoriesPermissionPrompt(directoriesPermissionSnackbar)
+	}
 </script>
+
+{#snippet directoriesPermissionSnackbar({ dirs, dismiss }: DirectoriesPermissionPromptSnackbarArg)}
+	<div class="flex w-full flex-col gap-1 pt-2 pb-1">
+		<div>
+			<div>{m.libraryDirPromptBrowserPermission()}</div>
+			<div class="text-body-sm opacity-54">
+				{m.libraryDirPromptExplanation()}
+			</div>
+		</div>
+
+		<!-- Showing only subset at the time so snackbar does not take up the whole screen -->
+		{#each dirs().slice(0, 3) as dir}
+			<div class="flex items-center justify-between gap-2">
+				<Icon type="folder" class="size-4 text-tertiaryContainer" />
+
+				<div class="truncate">
+					{dir.name}
+				</div>
+
+				<Button kind="flat" class="ml-auto w-24 shrink-0 !text-inversePrimary" onclick={dir.action}>
+					{m.libraryDirPromptGrant()}
+				</Button>
+			</div>
+		{/each}
+
+		<Button kind="flat" class="!text-inversePrimary" onclick={dismiss}>
+			{m.dismiss()}
+		</Button>
+	</div>
+{/snippet}
 
 <svelte:window
 	onkeydown={(e) => {
@@ -117,15 +141,22 @@
 	<SnackbarRenderer />
 
 	<div bind:clientHeight={overlayContentHeight} class="flex flex-col">
+		<!-- TODO. Will be used for multi select -->
+		<!-- <div class="px-4 pb-4 sm:pb-2">
+			<div class="mx-auto w-full max-w-225">
+				{#each overlaySnippets.abovePlayer as snippet}
+					{@render snippet()}
+				{/each}
+			</div>
+		</div> -->
+
 		{#if !page.data.noPlayerOverlay}
 			<div class="px-4 pb-4 sm:pb-2">
 				<PlayerOverlay />
 			</div>
 		{/if}
 
-		{#if bottomBar.snippet}
-			{@render bottomBar.snippet()}
-		{/if}
+		{@render overlaySnippets.bottomBar?.()}
 	</div>
 </div>
 

@@ -1,9 +1,9 @@
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
-import { enhancedImages } from '@sveltejs/enhanced-img'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
+import { imagetools } from 'vite-imagetools'
 import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
 import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
 
@@ -17,6 +17,7 @@ const getAutoImportPlugin = () =>
 				'$lib/stores/main/use-store.ts': ['useMainStore'],
 				'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
 				'tiny-invariant': [['default', 'invariant']],
+				svelte: ['untrack'],
 			},
 		],
 	})
@@ -45,8 +46,8 @@ export default defineConfig({
 				legalComments: 'none',
 				minify: {
 					mangle: true,
-					removeWhitespace: true,
 					compress: true,
+					// TODO. add removeWhitespace: true, once rolldown supports it
 				},
 				advancedChunks: {
 					groups: [
@@ -57,11 +58,15 @@ export default defineConfig({
 							minModuleSize: 0,
 							priority: 100,
 						},
+						{
+							// Merge smaller chunks than together
+							name: 'small-chunks',
+							maxModuleSize: 1 * 1024,
+						},
 					],
 				},
 			},
 		},
-		target: 'esnext',
 		minify: 'terser',
 		terserOptions: {
 			module: true,
@@ -74,15 +79,12 @@ export default defineConfig({
 		format: 'es',
 		plugins: () => [getAutoImportPlugin()],
 	},
-	experimental: {
-		enableNativePlugin: 'resolver',
-	},
 	plugins: [
 		themeColorsPlugin({
 			defaultColorSeed: '#cc9724',
 			output: `${import.meta.dirname}/.generated/theme-colors.css`,
 		}),
-		enhancedImages(),
+		imagetools(),
 		tailwindcss(),
 		sveltekit(),
 		getAutoImportPlugin(),

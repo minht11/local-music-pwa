@@ -1,16 +1,16 @@
-import { untrack } from 'svelte'
 import type { SnackbarData } from './Snackbar.svelte'
 import { snackbarItems } from './store.svelte.ts'
 
-export type SnackbarOptions = SnackbarData
+export type SnackbarOptions<T = unknown> = SnackbarData<T>
 
-export interface SnackbarFn {
-	(newSnackbar: SnackbarOptions | string): void
+export interface SnackbarFn<T> {
+	(newSnackbar: SnackbarOptions<T> | string): void
 	unexpectedError(error: unknown): void
+	dismiss(id: string): void
 }
 
-const showSnackbar = (newSnackbar: SnackbarOptions | string): void => {
-	let newSnackbarNormalized: SnackbarData
+const showSnackbar = <const T>(newSnackbar: SnackbarOptions<T> | string): void => {
+	let newSnackbarNormalized: SnackbarData<T>
 	if (typeof newSnackbar === 'string') {
 		newSnackbarNormalized = { id: newSnackbar, message: newSnackbar }
 	} else {
@@ -26,8 +26,15 @@ const showSnackbar = (newSnackbar: SnackbarOptions | string): void => {
 	}
 }
 
-export const snackbar: SnackbarFn = (newSnackbar: SnackbarOptions | string): void => {
+export const snackbar = <const T>(newSnackbar: SnackbarOptions<T> | string): void => {
 	untrack(() => showSnackbar(newSnackbar))
+}
+
+snackbar.dismiss = (id: string): void => {
+	const index = snackbarItems.findIndex((snackbar) => snackbar.id === id)
+	if (index > -1) {
+		snackbarItems.splice(index, 1)
+	}
 }
 
 snackbar.unexpectedError = (error: unknown) => {

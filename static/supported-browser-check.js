@@ -8,7 +8,8 @@ var isSupportedBrowser =
 	CSS &&
 	CSS.supports('color: color-mix(in oklab, black, black)') &&
 	// Container queries
-	'container' in document.documentElement.style
+	'container' in document.documentElement.style &&
+	navigator.serviceWorker
 
 if (!isSupportedBrowser) {
 	document.getElementById('unsupported-browser').removeAttribute('hidden')

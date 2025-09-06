@@ -35,9 +35,7 @@
 			// Biome does not support Tailwind syntax yet.
 			"!**/*.css",
 			// Biome parser incorrectly errors on TS syntax.
-			"!src/lib/components/WrapTranslation.svelte",
-			"!build/",
-			"!coverage/"
+			"!src/lib/components/WrapTranslation.svelte"
 		]
 	},
 	"formatter": {
@@ -139,7 +137,7 @@
 			"jsxQuoteStyle": "single",
 			"indentWidth": 4
 		},
-		"globals": ["m", "invariant", "usePlayer", "useMainStore"]
+		"globals": ["m", "invariant", "usePlayer", "useMainStore", "untrack"]
 	},
 	"json": {
 		"formatter": {

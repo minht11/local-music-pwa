@@ -1,6 +1,6 @@
 import type { Handle } from '@sveltejs/kit'
-import { dev } from '$app/environment'
 import { ICON_PATHS } from '$lib/components/icon/icon-paths.server.ts'
+import { PUBLIC_FALLBACK_PAGE } from '$env/static/public'
 import { THEME_PALLETTE_DARK, THEME_PALLETTE_LIGHT } from './server/theme-colors.ts'
 
 const getThemeColorMeta = (color: string | undefined, theme: 'dark' | 'light') =>
@@ -36,18 +36,31 @@ const replaceSvgIconPaths = (html: string) => {
 	)
 }
 
-export const handle: Handle = ({ event, resolve }) => {
+const transformPageChunk = ({ html }: { html: string }) => {
+	html = replaceSvgIconPaths(html)
+	html = replaceThemeColorMeta(html)
+
+	return html
+}
+
+export const handle: Handle = async ({ event, resolve }) => {
+	// This will only run in dev/preview or build and not in production
+	// since this we are using static adapter
+
 	// https://svelte.dev/docs/cli/devtools-json
-	if (dev && event.url.pathname === '/.well-known/appspecific/com.chrome.devtools.json') {
+	if (event.url.pathname === '/.well-known/appspecific/com.chrome.devtools.json') {
 		return new Response(undefined, { status: 404 })
 	}
 
-	return resolve(event, {
-		transformPageChunk: ({ html }) => {
-			html = replaceSvgIconPaths(html)
-			html = replaceThemeColorMeta(html)
+	// Adding this so service-worker can properly cache the 200.html
+	if (event.url.pathname === PUBLIC_FALLBACK_PAGE) {
+		const response = await resolve(event, { transformPageChunk })
 
-			return html
-		},
-	})
+		return new Response(response.body, {
+			status: 200,
+			headers: response.headers,
+		})
+	}
+
+	return resolve(event, { transformPageChunk })
 }
