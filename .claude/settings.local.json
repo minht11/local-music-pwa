@@ -11,7 +11,12 @@
       "Bash(npx patch-package:*)",
       "Bash(npm run build:*)",
       "Bash(npm audit:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
