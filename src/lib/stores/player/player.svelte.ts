@@ -132,30 +132,44 @@ export class PlayerStore {
 
 		const reset = debounce(() => {
 			if (!this.activeTrack) {
-				this.reset()
+				this.resetAudio()
 			}
 		}, 100)
 
-		let prevTrackId: number | null = null
+		let prevTrack: { id: number; loaded: boolean } | null = null
 		$effect(() => {
 			const track = this.activeTrack
 
 			if (track) {
-				if (prevTrackId === track.id) {
+				if (prevTrack?.id === track.id && prevTrack.loaded) {
 					return
 				}
 
-				prevTrackId = track.id
+				prevTrack = { id: track.id, loaded: false }
 
 				reset.cancel()
-				void loadTrackAudio(this.#audio, track.file)
+				this.resetAudio()
+				void loadTrackAudio(this.#audio, track.file).then(async (loaded) => {
+					if (prevTrack?.id !== track.id) {
+						// Track was changed while loading
+						return
+					}
+
+					if (!loaded) {
+						this.playing = false
+					}
+
+					prevTrack.loaded = loaded
+
+					await audio.play()
+				})
 			} else {
 				untrack(() => {
 					this.playing = false
 				})
 				reset()
 
-				prevTrackId = null
+				prevTrack = null
 			}
 		})
 
@@ -343,7 +357,7 @@ export class PlayerStore {
 		this.#activeTrackIndex = -1
 	}
 
-	reset = (): void => {
+	resetAudio = (): void => {
 		if (!this.#audio.src) {
 			return
 		}

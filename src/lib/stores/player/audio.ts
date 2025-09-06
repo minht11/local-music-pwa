@@ -36,16 +36,15 @@ export const cleanupTrackAudio = (audio: HTMLAudioElement): void => {
 export const loadTrackAudio = async (
 	audio: HTMLAudioElement,
 	entity: FileEntity,
-): Promise<void> => {
+): Promise<boolean> => {
 	const file = await getTrackFile(entity)
+	cleanupTrackAudio(audio)
 
 	if (!file) {
-		return
+		return false
 	}
-
-	cleanupTrackAudio(audio)
 
 	audio.src = URL.createObjectURL(file)
 
-	await audio.play()
+	return true
 }
