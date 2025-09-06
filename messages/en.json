@@ -33,6 +33,9 @@
 	"libraryConfirmRemoveTitle": "Are you sure you want to remove \"{name}\"?",
 	"libraryCreate": "Create",
 	"libraryCreateNewPlaylist": "Create new playlist",
+	"libraryDirPromptBrowserPermission": "Browser permission required",
+	"libraryDirPromptExplanation": "To play music, the app needs permission to access these directories:",
+	"libraryDirPromptGrant": "Grant",
 
 	"libraryEditPlaylist": "Edit playlist",
 	"libraryEditPlaylistName": "Edit playlist name",

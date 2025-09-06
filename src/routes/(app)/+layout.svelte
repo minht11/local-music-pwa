@@ -13,6 +13,13 @@
 	import { onViewTransitionPrepare, setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
 	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'
+	import { browser } from '$app/environment'
+	import {
+		setupDirectoriesPermissionPrompt,
+		type DirectoriesPermissionPromptSnackbarArg,
+	} from './layout/setup-directories-permission-prompt.svelte.ts'
+	import Button from '$lib/components/Button.svelte'
+	import Icon from '$lib/components/icon/Icon.svelte'
 
 	// These context keys are in different files from their implementation
 	// to allow better trees shaking and inlining
@@ -72,7 +79,41 @@
 			setProperties('#full-player', 'fp')
 		}
 	})
+
+	if (browser) {
+		void setupDirectoriesPermissionPrompt(directoriesPermissionSnackbar)
+	}
 </script>
+
+{#snippet directoriesPermissionSnackbar({ dirs, dismiss }: DirectoriesPermissionPromptSnackbarArg)}
+	<div class="flex w-full flex-col gap-1 pt-2 pb-1">
+		<div>
+			<div>{m.libraryDirPromptBrowserPermission()}</div>
+			<div class="text-body-sm opacity-54">
+				{m.libraryDirPromptExplanation()}
+			</div>
+		</div>
+
+		<!-- Showing only subset at the time so snackbar does not take up the whole screen -->
+		{#each dirs().slice(0, 3) as dir}
+			<div class="flex items-center justify-between gap-2">
+				<Icon type="folder" class="size-4 text-tertiaryContainer" />
+
+				<div class="truncate">
+					{dir.name}
+				</div>
+
+				<Button kind="flat" class="ml-auto w-24 shrink-0 !text-inversePrimary" onclick={dir.action}>
+					{m.libraryDirPromptGrant()}
+				</Button>
+			</div>
+		{/each}
+
+		<Button kind="flat" class="!text-inversePrimary" onclick={dismiss}>
+			{m.dismiss()}
+		</Button>
+	</div>
+{/snippet}
 
 <svelte:window
 	onkeydown={(e) => {
@@ -100,13 +141,14 @@
 	<SnackbarRenderer />
 
 	<div bind:clientHeight={overlayContentHeight} class="flex flex-col">
-		<div class="px-4 pb-4 sm:pb-2">
+		<!-- TODO. Will be used for multi select -->
+		<!-- <div class="px-4 pb-4 sm:pb-2">
 			<div class="mx-auto w-full max-w-225">
 				{#each overlaySnippets.abovePlayer as snippet}
 					{@render snippet()}
 				{/each}
 			</div>
-		</div>
+		</div> -->
 
 		{#if !page.data.noPlayerOverlay}
 			<div class="px-4 pb-4 sm:pb-2">
