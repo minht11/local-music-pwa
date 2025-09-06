@@ -2,7 +2,7 @@ import {
 	argbFromHex,
 	Cam16,
 	type CorePalette,
-	HctSolver,
+	Hct,
 	hexFromArgb,
 	// biome-ignore lint/style/noRestrictedImports: Main module for theme utilities
 } from '@material/material-color-utilities'
@@ -94,7 +94,7 @@ const COLOR_TOKENS_GENERATION_ENTRIES = Object.entries(COLOR_TOKENS_GENERATION_M
 ][]
 
 const createTonalPalette = (hue: number, chroma: number) => ({
-	tone: (tone: number) => HctSolver.solveToInt(hue, chroma, tone),
+	tone: (tone: number) => Hct.from(hue, chroma, tone).toInt(),
 })
 
 interface TonalPalette {
@@ -142,7 +142,8 @@ const setThemeCssVariables = (argb: number, isDark: boolean): void => {
 	const palette = getThemePaletteRgbEntries(argb, isDark)
 
 	for (const [key, hex] of palette) {
-		document.documentElement.style.setProperty(`--color-${key}`, hex)
+		// Use !important to override the light-dark() fallback values
+		document.documentElement.style.setProperty(`--color-${key}`, hex, 'important')
 	}
 }
 

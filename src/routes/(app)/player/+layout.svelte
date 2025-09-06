@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state'
-	import BackButton from '$lib/components/BackButton.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import Header from '$lib/components/Header.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
-	import PlayerFavoriteButton from '$lib/components/player/buttons/PlayerFavoriteButton.svelte'
+	import LikeButton from '$lib/components/player/buttons/LikeButton.svelte'
 	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
 	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
@@ -17,6 +16,8 @@
 	import Slider from '$lib/components/Slider.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { formatArtists } from '$lib/helpers/utils/text.ts'
+	import { useMainStore } from '$lib/stores/main/use-store.ts'
+	import { usePlayer } from '$lib/stores/player/use-store.ts'
 
 	const { data } = $props()
 
@@ -27,6 +28,30 @@
 	const sizes = $derived.by(data.sizes)
 	const isCompactVertical = $derived(sizes.isCompactVertical)
 	const layoutMode = $derived(data.layoutMode(sizes.isCompact, page.url.pathname))
+
+	// Tab state for queue/playlists
+	let activeTab = $state<'queue' | 'playlists'>('queue')
+
+	// Use actual YTM playlists instead of API endpoint
+	const playlists = $derived(player.userPlaylists)
+
+	// Function to load playlist via YTM
+	const loadPlaylist = async (playlistId: string) => {
+		console.log('Loading playlist:', playlistId)
+		if (!player.isConnected) {
+			console.warn('Not connected to YTM Desktop')
+			return
+		}
+		
+		try {
+			// Send command to YTM to load playlist
+			await player.loadPlaylist(playlistId)
+			// Switch back to queue tab to see the loaded tracks
+			activeTab = 'queue'
+		} catch (error) {
+			console.error('Failed to load playlist:', error)
+		}
+	}
 </script>
 
 {#snippet playerSnippet()}
@@ -44,11 +69,16 @@
 				'flex w-full items-center justify-between gap-2 [grid-area:header]',
 			]}
 		>
-			<BackButton />
+			<div class="w-10"></div>
 
 			<div class="text-title-lg">{m.player()}</div>
 
-			<div class="w-10"></div>
+			<IconButton 
+				tooltip="Settings"
+				icon="moreVertical"
+				as="a" 
+				href="/settings"
+			/>
 		</div>
 
 		<PlayerArtwork
@@ -80,29 +110,39 @@
 
 				{#if mainStore.volumeSliderEnabled}
 					<div class="flex items-center gap-2">
-						<IconButton icon="volumeMid" tooltip="Decrease volume" />
+						<IconButton 
+							icon="volumeMid" 
+							tooltip="Decrease volume" 
+							onclick={() => {
+								const newVolume = Math.max(0, player.volume - 10)
+								player.setVolume(newVolume)
+							}}
+						/>
 
 						<Slider bind:value={player.volume} />
 
-						<IconButton icon="volumeHigh" tooltip="Increase volume" />
+						<IconButton 
+							icon="volumeHigh" 
+							tooltip="Increase volume"
+							onclick={() => {
+								const newVolume = Math.min(100, player.volume + 10)
+								player.setVolume(newVolume)
+							}}
+						/>
 					</div>
 				{/if}
 			</div>
 
 			<div class="flex h-18 w-full shrink-0 items-center rounded-2xl bg-secondaryContainer px-4">
 				{#if track}
-					<div class="mr-2 min-w-6 text-center text-body-lg tabular-nums">
-						{player.activeTrackIndex + 1}
-					</div>
-
-					<div class="grid overflow-hidden">
-						<div class="truncate text-body-lg">{track.name}</div>
+					<div class="grid overflow-hidden flex-1">
+						<div class="truncate text-body-lg">{track.title}</div>
 						<div class="truncate text-body-md">{formatArtists(track.artists)}</div>
 					</div>
 				{/if}
 
 				<div class="ml-auto flex gap-1">
-					<PlayerFavoriteButton />
+					<LikeButton />
 
 					{#if layoutMode === 'list'}
 						<IconButton tooltip={m.playerOpenQueue()} icon="trayFull" as="a" href="/player/queue" />
@@ -113,22 +153,10 @@
 	</div>
 {/snippet}
 
-{#snippet queueActions()}
-	<IconButton
-		tooltip={m.playerClearQueue()}
-		disabled={player.isQueueEmpty}
-		icon="trayRemove"
-		onclick={player.clearQueue}
-	/>
-{/snippet}
 
 {#snippet queueSnippet()}
 	{#if layoutMode === 'details'}
-		<Header title={m.queue()}>
-			{#if layoutMode === 'details'}
-				{@render queueActions()}
-			{/if}
-		</Header>
+		<Header title="Music"></Header>
 	{/if}
 
 	<div class="flex w-full grow flex-col">
@@ -137,36 +165,148 @@
 				<div class="w-10"></div>
 
 				<div class="mx-auto text-title-lg">
-					{m.queue()}
+					Music
 				</div>
 
-				{@render queueActions()}
+				<div class="w-10"></div>
 			</div>
 		{/if}
 
-		<div class="flex grow p-4">
-			{#if player.isQueueEmpty}
-				<div class="m-auto flex flex-col items-center text-center">
-					<Icon
-						type="playlistMusic"
-						class="color-onSecondaryContainer my-auto size-35 opacity-54"
-					/>
+		<!-- Tabs -->
+		<div class="flex gap-2 p-2 bg-secondaryContainer">
+			<button 
+				class="flex-1 py-3 px-4 text-center font-medium transition-all duration-200 rounded-xl {activeTab === 'queue' ? 'bg-primary text-onPrimary shadow-md' : 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface'}"
+				onclick={() => activeTab = 'queue'}
+			>
+				Queue ({player.queue.length})
+			</button>
+			<button 
+				class="flex-1 py-3 px-4 text-center font-medium transition-all duration-200 rounded-xl {activeTab === 'playlists' ? 'bg-primary text-onPrimary shadow-md' : 'text-onSurfaceVariant hover:bg-surfaceContainerHigh hover:text-onSurface'}"
+				onclick={() => activeTab = 'playlists'}
+			>
+				Playlists ({playlists.length})
+			</button>
+		</div>
 
-					<div class="mb-4 text-body-lg">{m.playerQueueEmpty()}</div>
-					<Button kind="outlined" as="a" href="/library/tracks">
-						{m.playerQueuePlaySomething()}
-					</Button>
+		<div class="flex grow p-4">
+			{#if activeTab === 'queue'}
+				{#if player.isQueueEmpty}
+					<div class="m-auto flex flex-col items-center text-center">
+						<!-- Connection Status Debug -->
+						<div class="mb-4 p-4 bg-surfaceContainer rounded w-full max-w-md">
+							<h3 class="font-bold mb-2">YTM Connection Status</h3>
+							<div class="text-left text-sm space-y-1">
+								<p>Connected: <span class="font-mono">{player.isConnected}</span></p>
+								<p>Error: <span class="font-mono">{player.connectionError || 'None'}</span></p>
+								<p>Current Track: <span class="font-mono">{player.activeTrack?.title || 'None'}</span></p>
+								<p>Queue Length: <span class="font-mono">{player.queue.length}</span></p>
+							</div>
+							<div class="mt-3 flex gap-2">
+								<Button 
+									kind="outlined" 
+									onclick={() => player.resetConnection()}
+								>
+									Reset Connection
+								</Button>
+								<Button 
+									kind="toned" 
+									onclick={() => player.forceReconnect()}
+								>
+									Force Reconnect
+								</Button>
+							</div>
+						</div>
+
+						<Icon
+							type="playlistMusic"
+							class="color-onSecondaryContainer my-auto size-35 opacity-54"
+						/>
+
+						<div class="mb-4 text-body-lg">
+							{#if !player.isConnected}
+								Connect to YouTube Music Desktop to start playing
+							{:else}
+								No music playing. Start playing music in YouTube Music Desktop.
+							{/if}
+						</div>
+						<Button kind="outlined" as="a" href="/settings">
+							Open Settings
+						</Button>
+					</div>
+				{:else}
+					<!-- YTM Queue Display -->
+					<div class="flex flex-col gap-2 w-full">
+						{#each player.queue as track, index}
+							<button 
+								class="flex items-center gap-3 p-2 rounded bg-surfaceContainer hover:bg-surfaceContainerHigh transition-colors cursor-pointer w-full text-left {index === player.activeTrackIndex ? 'ring-2 ring-primary' : ''}"
+								onclick={() => player.playTrackAtIndex(index)}
+							>
+								{#if track.thumbnail}
+									<img src={track.thumbnail} alt={track.title} class="w-12 h-12 rounded" />
+								{:else}
+									<div class="w-12 h-12 rounded bg-surfaceContainerHigh flex items-center justify-center text-onSurfaceVariant">🎵</div>
+								{/if}
+								<div class="flex-1">
+									<div class="font-medium">{track.title}</div>
+									<div class="text-sm text-onSurfaceVariant">{formatArtists(track.artists)}</div>
+								</div>
+								{#if index === player.activeTrackIndex}
+									<div class="text-primary text-sm flex items-center gap-1">
+										<span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+										Now Playing
+									</div>
+								{/if}
+							</button>
+						{/each}
+					</div>
+				{/if}
+			{:else if activeTab === 'playlists'}
+				<!-- Playlists Tab Content -->
+				<div class="flex flex-col gap-2 w-full">
+					{#if !player.isConnected}
+						<div class="m-auto flex flex-col items-center text-center">
+							<Icon
+								type="playlistMusic"
+								class="color-onSecondaryContainer my-auto size-35 opacity-54"
+							/>
+							<div class="mb-4 text-body-lg">Connect to YouTube Music Desktop to see your playlists</div>
+							<Button kind="outlined" as="a" href="/settings">
+								Open Settings
+							</Button>
+						</div>
+					{:else if playlists.length === 0}
+						<div class="m-auto flex flex-col items-center text-center">
+							<Icon
+								type="playlistMusic"
+								class="color-onSecondaryContainer my-auto size-35 opacity-54"
+							/>
+							<div class="mb-4 text-body-lg">No playlists found</div>
+							<Button kind="outlined" onclick={() => player.forceReconnect()}>
+								Refresh Connection
+							</Button>
+						</div>
+					{:else}
+						{#each playlists as playlist}
+							<button 
+								class="flex items-center gap-3 p-3 rounded bg-surfaceContainer hover:bg-surfaceContainerHigh transition-colors cursor-pointer w-full text-left"
+								onclick={() => loadPlaylist(playlist.id)}
+							>
+								{#if playlist.thumbnail}
+									<img src={playlist.thumbnail} alt={playlist.title} class="w-12 h-12 rounded" />
+								{:else}
+									<div class="w-12 h-12 rounded bg-surfaceContainerHigh flex items-center justify-center text-onSurfaceVariant">🎵</div>
+								{/if}
+								<div class="flex-1">
+									<div class="font-medium">{playlist.title}</div>
+									<div class="text-sm text-onSurfaceVariant">
+										{playlist.author}
+									</div>
+								</div>
+								<Icon type="playlistMusic" class="w-5 h-5 text-onSurfaceVariant" />
+							</button>
+						{/each}
+					{/if}
 				</div>
-			{:else}
-				<TracksListContainer
-					items={player.itemsIds}
-					predefinedMenuItems={{
-						addToQueue: false,
-					}}
-					onItemClick={({ index }) => {
-						player.playTrack(index)
-					}}
-				/>
 			{/if}
 		</div>
 	</div>

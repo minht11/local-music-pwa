@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
+	import { usePlayer } from '$lib/stores/player/use-store.ts'
 	import Slider from '../Slider.svelte'
+	import type { ClassValue } from 'clsx'
 
 	const { class: className }: { class?: ClassValue } = $props()
 

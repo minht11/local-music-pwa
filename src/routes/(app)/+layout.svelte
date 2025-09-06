@@ -9,7 +9,7 @@
 	import { setupBottomBar } from '$lib/layout-bottom-bar.svelte'
 	import { MainStore } from '$lib/stores/main/store.svelte.ts'
 	import { MAIN_STORE_CONTEXT } from '$lib/stores/main/use-store.ts'
-	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
+	import { YTMPlayerStore } from '$lib/stores/player/ytm-player.svelte.ts'
 	import { PLAYER_STORE_CONTEXT } from '$lib/stores/player/use-store.ts'
 	import { onViewTransitionPrepare, setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
 	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
@@ -20,7 +20,7 @@
 	const mainStore = new MainStore()
 	setContext(MAIN_STORE_CONTEXT, mainStore)
 
-	const player = new PlayerStore()
+	const player = new YTMPlayerStore()
 	setContext(PLAYER_STORE_CONTEXT, player)
 
 	let pageContainer = $state<HTMLElement | null>(null)

@@ -8,7 +8,8 @@ export const truncate = (text: string, length: number): string => {
 	return `${text.slice(0, length)}...`
 }
 
-export const formatArtists = (artists: readonly StringOrUnknownItem[]): string => {
+export const formatArtists = (artists?: readonly StringOrUnknownItem[]): string => {
+	if (!artists) return ''
 	return artists.filter((artist) => artist !== UNKNOWN_ITEM).join(', ')
 }
 

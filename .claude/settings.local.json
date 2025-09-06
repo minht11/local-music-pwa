@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(npm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(npx pnpm add:*)",
+      "Bash(npm run check:*)",
+      "Bash(timeout 30 npm run build)",
+      "Bash(npm run dev:*)",
+      "Bash(npx patch-package:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm audit:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,6 +1,8 @@
 <script lang="ts">
+	import type { ClassValue } from 'clsx'
 	import { goto } from '$app/navigation'
 	import IconButton from './IconButton.svelte'
+	import * as m from '$paraglide/messages.js'
 
 	interface Props {
 		class?: ClassValue
@@ -21,7 +23,7 @@
 		if (canGoBack()) {
 			window.history.back()
 		} else {
-			void goto('/library/tracks')
+			void goto('/')
 		}
 	}
 </script>

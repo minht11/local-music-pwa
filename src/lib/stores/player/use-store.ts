@@ -1,6 +1,6 @@
 import { getContext } from 'svelte'
-import type { PlayerStore } from './player.svelte.ts'
+import type { YTMPlayerStore } from './ytm-player.svelte.ts'
 
 export const PLAYER_STORE_CONTEXT: unique symbol = Symbol()
 
-export const usePlayer = (): PlayerStore => getContext<PlayerStore>(PLAYER_STORE_CONTEXT)
+export const usePlayer = (): YTMPlayerStore => getContext<YTMPlayerStore>(PLAYER_STORE_CONTEXT)
