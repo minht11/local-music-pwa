@@ -45,8 +45,6 @@ export const positionMenu = (menuEl: HTMLElement, pos: MenuPositioning): void =>
 	const left = Math.min(pos.left, window.innerWidth - pos.width)
 
 	assign(menuEl.style, {
-		width: `${pos.width}px`,
-		height: `${pos.height}px`,
 		top: `${top}px`,
 		left: `${left}px`,
 		transformOrigin: `${pos.originX || 0}px ${pos.originY || 0}px`,

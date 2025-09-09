@@ -83,7 +83,16 @@
 		const { options } = data
 
 		menuEl.showModal()
+
+		if (options?.width) {
+			menuEl.style.width = `${options.width}px`
+		}
+		if (options?.height) {
+			menuEl.style.height = `${options.height}px`
+		}
+
 		const baseRect = menuEl.getBoundingClientRect()
+
 		const rect = {
 			...baseRect,
 			width: options?.width ?? baseRect.width,

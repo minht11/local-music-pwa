@@ -61,7 +61,7 @@
 	bind:this={target}
 	{@attach ripple()}
 	class={[
-		'relative flex h-10 cursor-pointer appearance-none items-center gap-2 overflow-hidden rounded-sm border border-outlineVariant pr-2 pl-4 transition-[outline-width] duration-150',
+		'relative flex h-10 cursor-pointer appearance-none items-center gap-2 truncate overflow-hidden rounded-sm border border-outlineVariant pr-2 pl-4 transition-[outline-width] duration-150',
 		className,
 	]}
 	role="combobox"
@@ -70,11 +70,13 @@
 	aria-expanded={isOpen}
 	popovertarget={popupId}
 >
-	{#if selectedItem}
-		{selectedItem[labelKey]}
-	{:else}
-		Select item
-	{/if}
+	<div class="truncate">
+		{#if selectedItem}
+			{selectedItem[labelKey]}
+		{:else}
+			Select item
+		{/if}
+	</div>
 
 	<Icon type="menuDown" class="ml-auto size-5" />
 </button>

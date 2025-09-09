@@ -93,7 +93,6 @@
 	"playlists": "Playlists",
 	"queue": "Queue",
 	"reload": "Reload",
-	"removingSelectedTracks": "Removing selected {count} tracks",
 	"replace": "Replace",
 	"replaceDirectoryExplanation": "The directory {newDir} you're adding is a parent of {existingDirs} which already exists in your Library.\n No changes will occur to existing tracks in your library.",
 
@@ -122,6 +121,7 @@
 	"settingsInstallAppExplanation": "Add Snae Player to your {device} for more immersive experience",
 	"settingsInstallAppHomeAction": "Install",
 	"settingsInstallAppHomeScreen": "home screen",
+	"settingsLanguage": "Language",
 	"settingsMissingFs1": "Your browser does not support required ",
 	"settingsMissingFs2": "File System features,",
 	"settingsMissingFs3": " for full directory access so in order for this app to work,",
@@ -141,6 +141,7 @@
 	"settingsThemeLight": "Light",
 	"settingsTracksInAppStorageTooltip": "This contains tracks stored in app storage and/or data you migrated from Snae Player v1",
 	"settingsTracksInsideAppMemory": "Tracks inside app storage",
+
 	"shuffle": "Shuffle",
 	"successfullyRemovedTracks": "Successfully removed {count} tracks",
 	"track": "Track",
