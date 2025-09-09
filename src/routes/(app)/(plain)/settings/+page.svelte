@@ -16,6 +16,7 @@
 	import DirectoriesList from './components/DirectoriesList.svelte'
 	import InstallAppBanner from './components/InstallAppBanner.svelte'
 	import MissingFsApiBanner from './components/MissingFsApiBanner.svelte'
+	import { getLocale, setLocale, type Locale } from '$paraglide/runtime.js'
 
 	const { data } = $props()
 
@@ -53,6 +54,11 @@
 			name: m.settingsMotionNormal(),
 			value: 'normal',
 		},
+	]
+
+	const languageOptions: { name: string; value: Locale }[] = [
+		{ name: 'English (EN)', value: 'en' },
+		{ name: 'Deutsch (DE)', value: 'de' },
 	]
 
 	const updateMainColor = debounce((value: string | null) => {
@@ -189,6 +195,20 @@
 			<Switch bind:checked={mainStore.volumeSliderEnabled} />
 		</div>
 	{/if}
+</section>
+
+<section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
+	<div class="flex items-center justify-between p-4">
+		<div>{m.settingsLanguage()}</div>
+
+		<Select
+			bind:selected={() => getLocale(), setLocale}
+			items={languageOptions}
+			key="value"
+			labelKey="name"
+			class="w-35"
+		/>
+	</div>
 </section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
