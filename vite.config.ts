@@ -47,7 +47,9 @@ export default defineConfig({
 				minify: {
 					mangle: true,
 					compress: true,
-					// TODO. add removeWhitespace: true, once rolldown supports it
+					codegen: {
+						removeWhitespace: true,
+					}
 				},
 				advancedChunks: {
 					groups: [

@@ -28,15 +28,16 @@ const dbGetDirectoriesNeedingPermission = async () => {
 export const setupDirectoriesPermissionPrompt = async (
 	snippet: Snippet<[DirectoriesPermissionPromptSnackbarArg]>,
 ): Promise<void> => {
-	let dirsNeedingPermission = $state(await dbGetDirectoriesNeedingPermission())
-
-	if (dirsNeedingPermission.length === 0) {
+	const dirsNeedingPermissionItems = await dbGetDirectoriesNeedingPermission()
+	if (dirsNeedingPermissionItems.length === 0) {
 		return
 	}
 
 	const snackbarId = 'dirs-needing-permission'
 
 	const dismiss = () => snackbar.dismiss(snackbarId)
+
+	let dirsNeedingPermission = $state(dirsNeedingPermissionItems)
 
 	const dirsItems = $derived(
 		dirsNeedingPermission.map(
