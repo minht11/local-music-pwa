@@ -3,6 +3,7 @@ import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { toShuffledArray } from '$lib/helpers/utils/array.ts'
+import { clamp } from '$lib/helpers/utils/clamp.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { formatArtists } from '$lib/helpers/utils/text.ts'
 import { throttle } from '$lib/helpers/utils/throttle.ts'
@@ -41,7 +42,7 @@ export class PlayerStore {
 	}
 
 	set volume(value: number) {
-		this.#volume = value
+		this.#volume = clamp(value, 0, 100)
 	}
 
 	muted: boolean = $state(false)
