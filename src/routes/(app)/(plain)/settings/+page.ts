@@ -67,6 +67,6 @@ export const load = async (): Promise<LoadResult> => {
 
 	return {
 		directoriesQuery: directories,
-		title: 'Settings',
+		title: m.settings(),
 	}
 }

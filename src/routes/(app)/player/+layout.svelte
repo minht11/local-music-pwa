@@ -80,11 +80,11 @@
 
 				{#if mainStore.volumeSliderEnabled}
 					<div class="flex items-center gap-2">
-						<IconButton icon="volumeMid" tooltip="Decrease volume" />
+						<IconButton icon="volumeMid" tooltip={m.playerDecreaseVolume()} />
 
 						<Slider bind:value={player.volume} />
 
-						<IconButton icon="volumeHigh" tooltip="Increase volume" />
+						<IconButton icon="volumeHigh" tooltip={m.playerIncreaseVolume()} />
 					</div>
 				{/if}
 			</div>
