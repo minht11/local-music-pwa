@@ -3,7 +3,7 @@
 
 	"about": "Über",
 	"aboutHomepage": "Startseite",
-	"aboutJoinDiscord": "Tritt unserem Discord-Server bei",
+	"aboutJoinDiscord": "Discord",
 	"aboutPrivacy": "Privatsphäre",
 	"aboutSourceCode": "Quellcode",
 
@@ -93,7 +93,6 @@
 	"playlists": "Wiedergabelisten",
 	"queue": "Warteschlange",
 	"reload": "Aktualisieren",
-	"removingSelectedTracks": "{count} ausgewählte Titel werden entfernt",
 	"replace": "Ersetzen",
 	"replaceDirectoryExplanation": "{newDir} ist ein übergeordnetes Verzeichnis von {existingDirs} und bereits in Ihrer Bibliothek enthalten.\n Bestehende Titel in Ihrer Bibliothek bleiben unverändert.",
 

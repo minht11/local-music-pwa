@@ -58,6 +58,7 @@
 
 	const languageOptions: { name: string; value: Locale }[] = [
 		{ name: 'English (EN)', value: 'en' },
+		{ name: 'Lietuvių (LT)', value: 'lt' },
 		{ name: 'Deutsch (DE)', value: 'de' },
 	]
 
@@ -109,7 +110,7 @@
 			items={themeOptions}
 			key="value"
 			labelKey="name"
-			class="w-35"
+			class="w-40"
 		/>
 	</div>
 
@@ -180,7 +181,7 @@
 			items={motionOptions}
 			key="value"
 			labelKey="name"
-			class="w-35"
+			class="w-40"
 		/>
 	</div>
 
@@ -206,7 +207,7 @@
 			items={languageOptions}
 			key="value"
 			labelKey="name"
-			class="w-35"
+			class="w-40"
 		/>
 	</div>
 </section>

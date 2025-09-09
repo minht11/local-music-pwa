@@ -93,7 +93,6 @@
 	"playlists": "Playlists",
 	"queue": "Queue",
 	"reload": "Reload",
-	"removingSelectedTracks": "Removing selected {count} tracks",
 	"replace": "Replace",
 	"replaceDirectoryExplanation": "The directory {newDir} you're adding is a parent of {existingDirs} which already exists in your Library.\n No changes will occur to existing tracks in your library.",
 
