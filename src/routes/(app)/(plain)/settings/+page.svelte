@@ -13,10 +13,10 @@
 	import { isFileSystemAccessSupported } from '$lib/helpers/file-system.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
+	import { getLocale, type Locale, setLocale } from '$paraglide/runtime.js'
 	import DirectoriesList from './components/DirectoriesList.svelte'
 	import InstallAppBanner from './components/InstallAppBanner.svelte'
 	import MissingFsApiBanner from './components/MissingFsApiBanner.svelte'
-	import { getLocale, setLocale, type Locale } from '$paraglide/runtime.js'
 
 	const { data } = $props()
 
