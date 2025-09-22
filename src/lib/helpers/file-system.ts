@@ -1,5 +1,4 @@
 import { isMobile } from '$lib/helpers/utils/ua.ts'
-import { wait } from '$lib/helpers/utils/wait.ts'
 
 export const isFileSystemAccessSupported: boolean = 'showDirectoryPicker' in globalThis
 
@@ -39,7 +38,7 @@ const getFilesFromLegacyInputEvent = (e: Event): File[] => {
 	)
 }
 
-export const getFilesFromLegacyDirectory = async (): Promise<File[]> => {
+export const getFilesFromLegacyDirectory = (): Promise<File[]> => {
 	const directoryElement = document.createElement('input')
 	directoryElement.type = 'file'
 
@@ -54,19 +53,31 @@ export const getFilesFromLegacyDirectory = async (): Promise<File[]> => {
 		directoryElement.setAttribute('directory', '')
 	}
 
-	const { promise, resolve } = Promise.withResolvers<File[]>()
+	const { promise, resolve: resolvePromise } = Promise.withResolvers<File[]>()
+
+	const resolve = (files: File[]) => {
+		directoryElement.remove()
+		resolvePromise(files)
+	}
 
 	directoryElement.addEventListener('change', (e) => {
 		resolve(getFilesFromLegacyInputEvent(e))
+	})
+
+	directoryElement.addEventListener('cancel', () => {
+		resolve([])
 	})
 
 	directoryElement.addEventListener('error', () => {
 		resolve([])
 	})
 
-	// In some cases event listener might not be registered yet
-	// because of event loop racing.
-	await wait(100)
+	// See https://stackoverflow.com/questions/47664777/javascript-file-input-onchange-not-working-ios-safari-only
+	directoryElement.style.position = 'fixed'
+	directoryElement.style.top = '-100000px'
+	directoryElement.style.left = '-100000px'
+	document.body.appendChild(directoryElement)
+
 	directoryElement.click()
 
 	return promise
