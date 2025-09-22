@@ -8,9 +8,9 @@ import { imagetools } from 'vite-imagetools'
 import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
 import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
 
-const getAutoImportPlugin = () =>
+const getAutoImportPlugin = (dts: string | false = false) =>
 	AutoImport({
-		dts: './.generated/types/auto-imports.d.ts',
+		dts,
 		imports: [
 			{
 				'$paraglide/messages': [['*', 'm']],
@@ -97,13 +97,13 @@ export default defineConfig({
 		imagetools(),
 		tailwindcss(),
 		sveltekit(),
-		getAutoImportPlugin(),
 		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './.generated/paraglide',
 			strategy: ['baseLocale'],
 			isServer: 'import.meta.env.SSR',
 		}),
+		getAutoImportPlugin('./.generated/types/auto-imports.d.ts'),
 		logChunkSizePlugin(),
 		{
 			name: 'ssr-config',
