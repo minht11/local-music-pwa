@@ -60,7 +60,6 @@
 		kind !== 'blank' &&
 			'base-button flex h-10 items-center justify-center gap-2 rounded-3xl px-6 text-label-lg transition-[outline-width] duration-150',
 		restProps.class,
-		disabled && '!cursor-default',
 	]}
 >
 	{#if children}

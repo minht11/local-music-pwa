@@ -1,6 +1,7 @@
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
+import { Features } from 'lightningcss'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 import { imagetools } from 'vite-imagetools'
@@ -44,13 +45,6 @@ export default defineConfig({
 		rolldownOptions: {
 			output: {
 				legalComments: 'none',
-				minify: {
-					mangle: true,
-					compress: true,
-					codegen: {
-						removeWhitespace: true,
-					}
-				},
 				advancedChunks: {
 					groups: [
 						{
@@ -68,6 +62,11 @@ export default defineConfig({
 					],
 				},
 			},
+			optimization: {
+				inlineConst: {
+					mode: 'smart',
+				},
+			},
 		},
 		minify: 'terser',
 		terserOptions: {
@@ -75,6 +74,15 @@ export default defineConfig({
 			compress: {
 				passes: 3,
 			},
+		},
+	},
+	css: {
+		lightningcss: {
+			targets: {
+				chrome: 130,
+				safari: 18,
+			},
+			exclude: Features.LightDark | Features.Colors,
 		},
 	},
 	worker: {
