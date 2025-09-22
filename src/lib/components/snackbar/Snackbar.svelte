@@ -57,7 +57,7 @@
 
 <div
 	class={[
-		'flex items-center rounded-lg bg-inverseSurface py-1.5 pr-1.5 pl-4 text-inverseOnSurface',
+		'flex min-h-13 items-center rounded-lg bg-inverseSurface py-1.5 pr-1.5 pl-4 text-inverseOnSurface',
 		layout === 'column' ? 'flex-col items-start' : 'gap-2',
 	]}
 >
