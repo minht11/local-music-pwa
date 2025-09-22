@@ -54,6 +54,24 @@
 	unicode-range: U+1F00-1FFF;
 }
 
+@font-face {
+	font-family: 'App CJK Fallback';
+	src:
+		local('Noto Sans SC'), local('Noto Sans CJK SC'), local('Noto Sans TC'),
+		local('Noto Sans CJK TC'), local('Noto Sans HK'), local('Noto Sans CJK HK'),
+		local('PingFang SC'), local('PingFang TC'), local('Microsoft YaHei'),
+		local('Microsoft JhengHei');
+	font-style: normal;
+	font-weight: 400 900;
+	font-display: swap;
+	unicode-range:
+		U+3000-303F,
+		/* CJK punctuation */ U+3400-4DBF,
+		/* CJK Ext A */ U+4E00-9FFF,
+		/* CJK Unified Ideographs */ U+F900-FAFF,
+		/* CJK Compatibility Ideographs */ U+FF00-FFEF; /* Half/Fullwidth */
+}
+
 @theme {
 	--breakpoint-xs: 24rem;
 	--breakpoint-xss: 20rem;
@@ -64,7 +82,7 @@
 	--ease-incoming80: cubic-bezier(0, 0, 0.2, 1);
 	--ease-incoming80outgoing40: cubic-bezier(0.4, 0, 0.2, 1);
 
-	--font-sans: 'Heebo', system-ui, sans-serif;
+	--font-sans: 'Heebo', 'App CJK Fallback', system-ui, 'Noto Color Emoji', sans-serif;
 	--text-*: initial;
 }
 
