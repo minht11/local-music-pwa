@@ -18,12 +18,13 @@ jobs:
         with:
           node-version: 24.5.0
           cache: 'pnpm'
-      - run: ls
-      - run: ls .generated/types
-
       - run: pnpm install
       - name: Build generated files
         run: pnpm run build
+
+      - run: ls
+      - run: ls .generated/types
+
       - run: pnpm run biome-check
       - run: pnpm run prettier-check
       - run: pnpm run check
