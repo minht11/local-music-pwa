@@ -18,6 +18,8 @@ jobs:
         with:
           node-version: 24.5.0
           cache: 'pnpm'
+      - run: ls
+      - run: ls .generated/types
 
       - run: pnpm install
       - name: Build generated files
