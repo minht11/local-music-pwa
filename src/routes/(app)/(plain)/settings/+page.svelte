@@ -196,6 +196,16 @@
 			<Switch bind:checked={mainStore.volumeSliderEnabled} />
 		</div>
 	{/if}
+
+	<Separator />
+
+	<div class="flex items-center justify-between p-4">
+		<div>
+			{m.settingsEnableSideBySideLibraryLayout()}
+		</div>
+
+		<Switch bind:checked={mainStore.sideBySideLibraryLayoutEnabled} />
+	</div>
 </section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
