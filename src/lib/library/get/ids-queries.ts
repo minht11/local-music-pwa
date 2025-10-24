@@ -78,29 +78,6 @@ export const keysListDatabaseChangeHandler = <Store extends LibraryStoreName>(
 	}
 }
 
-export type LibraryItemKeysQueryOptions<K extends QueryKey> = Omit<
-	QueryOptions<K, number[]>,
-	'onDatabaseChange'
->
-
-export const createLibraryItemKeysQuery = <
-	const Store extends LibraryStoreName,
-	const K extends QueryKey,
->(
-	storeName: Store,
-	options: LibraryItemKeysQueryOptions<K>,
-): QueryResult<number[]> =>
-	createQuery({
-		...options,
-		fetcher: async (key) => {
-			const result = await options.fetcher(key)
-			await preloadLibraryListValues(storeName, result)
-
-			return result
-		},
-		onDatabaseChange: keysListDatabaseChangeHandler.bind(null, storeName),
-	})
-
 export type LibraryItemKeysPageQueryOptions<K extends QueryKey> = Omit<
 	PageQueryOptions<K, number[]>,
 	'onDatabaseChange'
