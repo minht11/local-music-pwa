@@ -18,3 +18,4 @@ yarn.lock
 *.js
 *.json
 *.jsonc
+*.css

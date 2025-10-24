@@ -65,11 +65,8 @@
 	font-weight: 400 900;
 	font-display: swap;
 	unicode-range:
-		U+3000-303F,
-		/* CJK punctuation */ U+3400-4DBF,
-		/* CJK Ext A */ U+4E00-9FFF,
-		/* CJK Unified Ideographs */ U+F900-FAFF,
-		/* CJK Compatibility Ideographs */ U+FF00-FFEF; /* Half/Fullwidth */
+		U+3000-303F, /* CJK punctuation */ U+3400-4DBF, /* CJK Ext A */ U+4E00-9FFF,
+		/* CJK Unified Ideographs */ U+F900-FAFF, /* CJK Compatibility Ideographs */ U+FF00-FFEF; /* Half/Fullwidth */
 }
 
 @theme {
@@ -237,6 +234,7 @@ source {
 
 	@starting-style {
 		&::after {
+			/* biome-ignore lint/complexity/noImportantStyles: we need to force it */
 			opacity: 0 !important;
 		}
 	}
@@ -368,6 +366,7 @@ source {
 	}
 
 	.virtual-item {
+		/* biome-ignore lint/complexity/noImportantStyles: we need to force it */
 		position: absolute !important;
 		contain: strict;
 		will-change: transform;

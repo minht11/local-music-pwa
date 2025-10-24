@@ -18,6 +18,9 @@
 	"[typescript]": {
 		"editor.defaultFormatter": "biomejs.biome"
 	},
+	"[css]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
 	"editor.formatOnSave": true,
 	"eslint.useESLintClass": true,
 	"npm.packageManager": "pnpm",
