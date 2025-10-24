@@ -1,7 +1,6 @@
 import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
-import { Features } from 'lightningcss'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 import { imagetools } from 'vite-imagetools'
@@ -39,9 +38,7 @@ export default defineConfig({
 	// Tell Vitest to use the `browser` entry points in `package.json` files, even though it's running in Node
 	resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
 	build: {
-		modulePreload: {
-			polyfill: false,
-		},
+		target: ['chrome130', 'safari18'],
 		rolldownOptions: {
 			output: {
 				legalComments: 'none',
@@ -74,15 +71,6 @@ export default defineConfig({
 			compress: {
 				passes: 3,
 			},
-		},
-	},
-	css: {
-		lightningcss: {
-			targets: {
-				chrome: 130,
-				safari: 18,
-			},
-			exclude: Features.LightDark | Features.Colors,
 		},
 	},
 	worker: {
