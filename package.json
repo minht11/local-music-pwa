@@ -20,27 +20,27 @@
 		"coverage": "vitest run --coverage"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.3.0",
+		"@biomejs/biome": "2.3.2",
 		"@inlang/paraglide-js": "2.4.0",
 		"@sveltejs/adapter-static": "^3.0.10",
-		"@sveltejs/kit": "^2.47.3",
+		"@sveltejs/kit": "^2.48.2",
 		"@sveltejs/vite-plugin-svelte": "6.2.1",
 		"@tailwindcss/vite": "^4.1.16",
-		"@types/node": "^24.9.1",
-		"@vitest/coverage-v8": "^4.0.3",
+		"@types/node": "^24.9.2",
+		"@vitest/coverage-v8": "^4.0.4",
 		"fake-indexeddb": "^6.2.4",
 		"prettier": "^3.6.2",
 		"prettier-plugin-svelte": "^3.4.0",
 		"prettier-plugin-tailwindcss": "^0.7.1",
-		"svelte": "5.41.4",
+		"svelte": "5.43.0",
 		"svelte-check": "^4.3.3",
 		"tailwindcss": "^4.1.16",
 		"terser": "^5.44.0",
 		"typescript": "^5.9.3",
 		"unplugin-auto-import": "^20.2.0",
-		"vite": "npm:rolldown-vite@7.1.19",
+		"vite": "npm:rolldown-vite@7.1.20",
 		"vite-imagetools": "^9.0.0",
-		"vitest": "^4.0.3"
+		"vitest": "^4.0.4"
 	},
 	"dependencies": {
 		"@floating-ui/dom": "^1.7.4",
@@ -58,10 +58,10 @@
 	"engines": {
 		"node": "24.5.0"
 	},
-	"packageManager": "pnpm@10.17.1",
+	"packageManager": "pnpm@10.19.0",
 	"pnpm": {
 		"overrides": {
-			"vite": "npm:rolldown-vite@7.1.19",
+			"vite": "npm:rolldown-vite@7.1.20",
 			"@ianvs/prettier-plugin-sort-imports": "-",
 			"@trivago/prettier-plugin-sort-imports": "-",
 			"prettier-plugin-organize-imports": "-",
