@@ -3,6 +3,6 @@
 	"compilerOptions": {
 		"types": ["@types/node"]
 	},
-	"files": ["vite.config.ts", "svelte.config.js", "src/lib/theme.js"],
+	"files": ["vite.config.ts", "svelte.config.js", "src/lib/theme.ts"],
 	"include": ["lib/**/*"]
 }
