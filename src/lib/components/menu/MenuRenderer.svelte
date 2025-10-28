@@ -1,12 +1,10 @@
 <script lang="ts" module>
-	import { getContext, setContext } from 'svelte'
+	import { createContext } from 'svelte'
 	import { timeline } from '$lib/helpers/animations.ts'
 	import { assign } from '$lib/helpers/utils/assign.ts'
 	import Menu from './Menu.svelte'
 	import { getMeasurementsFromAnchor, positionMenu } from './positioning.ts'
 	import type { MenuItem, MenuOptions, MenuPosition } from './types.ts'
-
-	const key = Symbol('menu')
 
 	export interface MenuInternalData {
 		items: MenuItem[]
@@ -18,20 +16,14 @@
 		value?: MenuInternalData
 	}
 
+	const [getMenuContext, setMenuContext] = createContext<MenuInternalState>()
+
 	export const setupGlobalMenu = (): void => {
 		const menuState = $state<MenuInternalState>({
 			value: undefined,
 		})
 
-		setContext(key, menuState)
-	}
-
-	const getMenuContext = () => {
-		const state = getContext<MenuInternalState>(key)
-
-		invariant(state, 'useMenu must be used within a MenuProvider')
-
-		return state
+		setMenuContext(menuState)
 	}
 
 	export interface MenuAPI {
