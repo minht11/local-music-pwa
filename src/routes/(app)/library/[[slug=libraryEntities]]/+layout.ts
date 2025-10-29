@@ -26,7 +26,9 @@ type LoadDataResult<Slug extends LibraryStoreName> = {
 	}
 }[Slug]
 
-const loadData = <Slug extends LibraryStoreName>(slug: Slug): Promise<LoadDataResult<Slug>> => {
+const loadData = async <Slug extends LibraryStoreName>(
+	slug: Slug,
+): Promise<LoadDataResult<Slug>> => {
 	const config = configsMap[slug]
 	const searchFn = config.search ?? defaultSearchFn
 	const store = new LibraryStore(slug)
@@ -49,24 +51,17 @@ const loadData = <Slug extends LibraryStoreName>(slug: Slug): Promise<LoadDataRe
 		},
 	})
 
-	// This extra function wrapper is needed because of
-	// https://github.com/sveltejs/kit/issues/13809
-	// TODO. Remove this when the issue is fixed
-	const getAsync = async () => {
-		const [itemsIdsQuery, tracksCountQuery] = await Promise.all([
-			await itemsIdsQueryPromise,
-			createTracksCountPageQuery(),
-		])
+	const [itemsIdsQuery, tracksCountQuery] = await Promise.all([
+		await itemsIdsQueryPromise,
+		createTracksCountPageQuery(),
+	])
 
-		return {
-			...config,
-			store,
-			itemsIdsQuery,
-			tracksCountQuery,
-		}
+	return {
+		...config,
+		store,
+		itemsIdsQuery,
+		tracksCountQuery,
 	}
-
-	return getAsync()
 }
 
 type LoadResult = LoadDataResult<LibraryStoreName> & {
