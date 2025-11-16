@@ -65,13 +65,6 @@ export default defineConfig({
 				},
 			},
 		},
-		minify: 'terser',
-		terserOptions: {
-			module: true,
-			compress: {
-				passes: 3,
-			},
-		},
 	},
 	worker: {
 		format: 'es',

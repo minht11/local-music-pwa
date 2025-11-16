@@ -35,10 +35,9 @@
 		"svelte": "5.43.0",
 		"svelte-check": "^4.3.3",
 		"tailwindcss": "^4.1.16",
-		"terser": "^5.44.0",
 		"typescript": "^5.9.3",
 		"unplugin-auto-import": "^20.2.0",
-		"vite": "npm:rolldown-vite@7.1.20",
+		"vite": "npm:rolldown-vite@7.2.5",
 		"vite-imagetools": "^9.0.0",
 		"vitest": "^4.0.4"
 	},
@@ -61,7 +60,7 @@
 	"packageManager": "pnpm@10.19.0",
 	"pnpm": {
 		"overrides": {
-			"vite": "npm:rolldown-vite@7.1.20",
+			"vite": "npm:rolldown-vite@7.2.5",
 			"@ianvs/prettier-plugin-sort-imports": "-",
 			"@trivago/prettier-plugin-sort-imports": "-",
 			"prettier-plugin-organize-imports": "-",
