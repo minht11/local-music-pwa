@@ -23,8 +23,10 @@
 	const main = useMainStore()
 	const player = usePlayer()
 
+	// svelte-ignore state_referenced_locally
 	initPageQueries(data)
 
+	// svelte-ignore state_referenced_locally
 	const { itemQuery, tracksQuery } = data
 
 	const item = $derived(itemQuery.value)

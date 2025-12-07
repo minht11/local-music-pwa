@@ -59,11 +59,6 @@ export default defineConfig({
 					],
 				},
 			},
-			optimization: {
-				inlineConst: {
-					mode: 'smart',
-				},
-			},
 		},
 	},
 	worker: {

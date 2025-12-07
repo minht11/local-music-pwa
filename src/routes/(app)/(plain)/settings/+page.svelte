@@ -20,6 +20,7 @@
 
 	const { data } = $props()
 
+	// svelte-ignore state_referenced_locally
 	initPageQueries(data)
 
 	const mainStore = useMainStore()

@@ -60,7 +60,7 @@
 		},
 	]
 
-	const isWideLayout = $derived.by(data.isWideLayout)
+	const isWideLayout = $derived(data.isWideLayout())
 	const layoutMode = $derived(data.layoutMode(isWideLayout, page.params.uuid))
 
 	useSetOverlaySnippet('bottom-bar', () => layoutBottom)
