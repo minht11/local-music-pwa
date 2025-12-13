@@ -1,7 +1,7 @@
 import { prefersReducedMotion } from 'svelte/motion'
 import { MediaQuery } from 'svelte/reactivity'
 import { supportsChangingAudioVolume } from '$lib/helpers/audio.ts'
-import { persist } from '$lib/helpers/persist.svelte.ts'
+import { getPersistedValue, persist } from '$lib/helpers/persist.svelte.ts'
 import { isMobile } from '$lib/helpers/utils/ua.ts'
 import type { UpdatePlaylistOptions } from '$lib/library/playlists-actions'
 import type { LibraryStoreName } from '$lib/library/types'
@@ -17,6 +17,9 @@ export interface RemoveLibraryItemOptions {
 	name: string
 	storeName: LibraryStoreName
 }
+
+export const getPersistedLibrarySplitLayoutEnabled = (): boolean =>
+	getPersistedValue('main', 'librarySplitLayoutEnabled', true)
 
 export class MainStore {
 	theme: AppThemeOption = $state('auto')
@@ -60,6 +63,8 @@ export class MainStore {
 
 	appInstallPromptEvent: BeforeInstallPromptEvent | null = $state(null)
 
+	librarySplitLayoutEnabled: boolean = $state(true)
+
 	constructor() {
 		persist('main', this, [
 			'theme',
@@ -67,6 +72,7 @@ export class MainStore {
 			'pickColorFromArtwork',
 			'customThemePaletteHex',
 			'volumeSliderEnabled',
+			'librarySplitLayoutEnabled',
 		])
 	}
 }

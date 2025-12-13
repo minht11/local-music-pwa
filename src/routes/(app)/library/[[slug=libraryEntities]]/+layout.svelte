@@ -6,6 +6,7 @@
 	import AlbumsListContainer from '$lib/components/AlbumsListContainer.svelte'
 	import ArtistListContainer from '$lib/components/ArtistListContainer.svelte'
 	import Button from '$lib/components/Button.svelte'
+	import IconButton from '$lib/components/IconButton.svelte'
 	import type { IconType } from '$lib/components/icon/Icon.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
@@ -61,7 +62,9 @@
 	]
 
 	const isWideLayout = $derived(data.isWideLayout())
-	const layoutMode = $derived(data.layoutMode(isWideLayout, page.params.uuid))
+	const layoutMode = $derived(
+		data.layoutMode(main.librarySplitLayoutEnabled, isWideLayout, page.params.uuid),
+	)
 
 	useSetOverlaySnippet('bottom-bar', () => layoutBottom)
 
@@ -104,18 +107,31 @@
 	{/if}
 {/snippet}
 
-{#if !(layoutMode === 'details' && !isWideLayout)}
+{#if layoutMode !== 'details'}
 	<div
 		class={[
-			'desktop-sidebar fixed z-1 mt-20 h-max w-max flex-col gap-2 [@media(max-height:500px)]:mt-2',
+			'desktop-sidebar fixed z-1 mt-20 h-max w-max flex-col items-center gap-2 [@media(max-height:500px)]:mt-2',
 			isHandHeldDevice ? 'hidden sm:flex' : 'flex',
 		]}
 	>
 		{@render navItemsSnippet('h-14 w-20')}
+
+		{#if slug === 'albums' || slug === 'artists'}
+			<IconButton
+				icon="sidePanel"
+				tooltip={main.librarySplitLayoutEnabled
+					? m.librarySplitViewDisable()
+					: m.librarySplitViewEnable()}
+				class={['mt-4', main.librarySplitLayoutEnabled && 'rotate-180']}
+				onclick={() => {
+					main.librarySplitLayoutEnabled = !main.librarySplitLayoutEnabled
+				}}
+			/>
+		{/if}
 	</div>
 {/if}
 
-<ListDetailsLayout mode={layoutMode} class="mx-auto w-full max-w-[var(--library-max-width)] grow">
+<ListDetailsLayout mode={layoutMode} class="mx-auto w-full max-w-(--library-max-width) grow">
 	{#snippet list(mode)}
 		<div class={[isHandHeldDevice ? 'sm:pl-20' : 'pl-20', 'flex grow flex-col']}>
 			<div class={[mode === 'both' && 'w-100', 'flex grow flex-col px-4']}>

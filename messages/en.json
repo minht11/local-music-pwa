@@ -58,6 +58,8 @@
 
 	"librarySearch": "Search",
 	"librarySelectSomethingToBeShown": "Select something from the list to be shown here",
+	"librarySplitViewDisable": "Disable split view layout",
+	"librarySplitViewEnable": "Enable split view layout",
 	"libraryStartByAdding": "Start by adding some music",
 	"libraryToggleSortOrder": "Toggle sort order",
 	"libraryTrackRemovedFromPlaylist": "Track removed from playlist",

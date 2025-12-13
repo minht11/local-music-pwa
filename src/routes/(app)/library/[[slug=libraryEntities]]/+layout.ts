@@ -10,6 +10,7 @@ import {
 } from '$lib/library/get/ids-queries.ts'
 import { createTracksCountPageQuery } from '$lib/library/tracks-queries.ts'
 import { FAVORITE_PLAYLIST_ID, type LibraryStoreName } from '$lib/library/types.ts'
+import { getPersistedLibrarySplitLayoutEnabled } from '$lib/stores/main/store.svelte.ts'
 import { defineViewTransitionMatcher } from '$lib/view-transitions.svelte.ts'
 import type { LayoutLoad } from './$types.ts'
 import { configsMap, type LibraryRouteConfig, type LibrarySearchFn } from './config.ts'
@@ -66,7 +67,11 @@ const loadData = async <Slug extends LibraryStoreName>(
 
 type LoadResult = LoadDataResult<LibraryStoreName> & {
 	isWideLayout: () => boolean
-	layoutMode: (isWide: boolean, itemId: string | undefined) => LayoutMode
+	layoutMode: (
+		splitViewAllowed: boolean,
+		isWide: boolean,
+		itemId: string | undefined,
+	) => LayoutMode
 }
 
 export const load: LayoutLoad = async (event): Promise<LoadResult> => {
@@ -87,12 +92,16 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 
 	const isWideLayout = () => (innerWidth.current ?? 0) > 1154
 	// We pass params here so that inside page we can benefit from $derived caching
-	const layoutMode = (isWide: boolean, itemUuid: string | undefined): LayoutMode => {
+	const layoutMode = (
+		splitViewAllowed: boolean,
+		isWide: boolean,
+		itemUuid: string | undefined,
+	): LayoutMode => {
 		if (slug === 'tracks') {
 			return 'list'
 		}
 
-		if (isWide) {
+		if (isWide && splitViewAllowed) {
 			return 'both'
 		}
 
@@ -111,7 +120,9 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 			return { view: 'library' }
 		}
 
-		const mode = event.untrack(() => layoutMode(isWideLayout(), event.params.uuid))
+		const mode = event.untrack(() =>
+			layoutMode(getPersistedLibrarySplitLayoutEnabled(), isWideLayout(), event.params.uuid),
+		)
 		if (mode !== 'both') {
 			return null
 		}
