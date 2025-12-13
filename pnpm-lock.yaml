@@ -38,9 +38,9 @@ importers:
       '@resvg/resvg-js':
         specifier: ^2.6.2
         version: 2.6.2
-      '@tanstack/svelte-virtual':
+      '@tanstack/virtual-core':
         specifier: ^3.13.13
-        version: 3.13.13(svelte@5.46.0)
+        version: 3.13.13
       '@types/dom-navigation':
         specifier: ^1.0.6
         version: 1.0.6
@@ -866,11 +866,6 @@ packages:
     resolution: {integrity: sha512-jVA+/UpKL1vRLg6Hkao5jldawNmRo7mQYrZtNHMIVpLfLhDml5nMRUo/8MwoX2vNXvnaXNNMedrMfMugAVX1nA==}
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
-
-  '@tanstack/svelte-virtual@3.13.13':
-    resolution: {integrity: sha512-VDOvbRw3R+XBQdFodEJ4E7AOmEyo3Bmr4zL4DLVnJ0fxICdbvY5F5t8zSwJ4f7lqjckXi0yKFzY8WBtjaNbsGQ==}
-    peerDependencies:
-      svelte: ^3.48.0 || ^4.0.0 || ^5.0.0
 
   '@tanstack/virtual-core@3.13.13':
     resolution: {integrity: sha512-uQFoSdKKf5S8k51W5t7b2qpfkyIbdHMzAn+AMQvHPxKUPeo1SsGaA4JRISQT87jm28b7z8OEqPcg1IOZagQHcA==}
@@ -2206,11 +2201,6 @@ snapshots:
       '@tailwindcss/oxide': 4.1.18
       tailwindcss: 4.1.18
       vite: 8.0.0-beta.2(@types/node@24.10.2)(esbuild@0.25.4)(jiti@2.6.1)(terser@5.44.0)
-
-  '@tanstack/svelte-virtual@3.13.13(svelte@5.46.0)':
-    dependencies:
-      '@tanstack/virtual-core': 3.13.13
-      svelte: 5.46.0
 
   '@tanstack/virtual-core@3.13.13': {}
 

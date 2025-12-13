@@ -1,13 +1,17 @@
 <script lang="ts">
 	import {
-		createVirtualizer,
-		createWindowVirtualizer,
-		type SvelteVirtualizer,
+		elementScroll,
+		observeElementOffset,
+		observeElementRect,
+		observeWindowOffset,
+		observeWindowRect,
 		type VirtualItem,
+		Virtualizer,
 		type VirtualizerOptions,
-	} from '@tanstack/svelte-virtual'
-	import type { Readable } from 'svelte/store'
-	import { doesElementHasFocus, findFocusedElement } from '$lib/helpers/focus'
+		windowScroll,
+	} from '@tanstack/virtual-core'
+	import { doesElementHasFocus, findFocusedElement } from '$lib/helpers/focus.ts'
+	import { createVirtualizerBase } from '$lib/helpers/virtualizer.svelte.ts'
 	import { useScrollTarget } from './ScrollContainer.svelte'
 
 	interface Props {
@@ -24,7 +28,7 @@
 		count,
 		lanes = 1,
 		gap = 0,
-		size: itemSize,
+		size: itemSize2,
 		key,
 		children,
 		offsetWidth = $bindable(0),
@@ -32,74 +36,77 @@
 
 	const scrollContainer = useScrollTarget()
 
-	let focusIndex = $state(-1)
-	let virtualizer:
-		| Readable<SvelteVirtualizer<Element, Element> | SvelteVirtualizer<Window, Element>>
-		| undefined
+	const target = $derived.by(() => {
+		const scrollContainerTarget = scrollContainer.scrollTarget
 
-	$effect(() => {
-		const scrollTarget = scrollContainer.scrollTarget
-
-		if ((!virtualizer && lanes === 0) || !scrollTarget) {
-			return
+		if (scrollContainerTarget instanceof Window) {
+			return {
+				isWindow: true,
+				element: scrollContainerTarget,
+			}
 		}
 
-		// Add it so effect watch for size changes
-		itemSize
+		return {
+			isWindow: false,
+			element: scrollContainerTarget,
+		}
+	})
 
-		const baseOptions = {
+	const itemSize = $derived(itemSize2)
+
+	const getVirtualizerOptions = <
+		IsWindow extends boolean,
+		E extends IsWindow extends true ? Window : Element,
+	>(): VirtualizerOptions<E, Element> => {
+		type VirtualizerWindowInstance = Virtualizer<Window, Element>
+		type VirtualizerElementInstance = Virtualizer<Element, Element>
+
+		return {
+			observeElementRect: (instance, cb) =>
+				target.isWindow
+					? observeWindowRect(instance as unknown as VirtualizerWindowInstance, cb)
+					: observeElementRect(instance as unknown as VirtualizerElementInstance, cb),
+			observeElementOffset: (instance, cb) =>
+				target.isWindow
+					? observeWindowOffset(instance as unknown as VirtualizerWindowInstance, cb)
+					: observeElementOffset(instance as unknown as VirtualizerElementInstance, cb),
+			scrollToFn: (offset, scrollOptions, instance) =>
+				target.isWindow
+					? windowScroll(offset, scrollOptions, instance as unknown as VirtualizerWindowInstance)
+					: elementScroll(offset, scrollOptions, instance as unknown as VirtualizerElementInstance),
+			initialOffset: () => (target.isWindow ? window.scrollY : 0),
 			count,
 			lanes,
+			estimateSize: () => itemSize,
+			overscan: 10,
+			getScrollElement: () => target.element as E,
+			rangeExtractor: (range) => {
+				const start = Math.max(range.startIndex - range.overscan, 0)
+				const initialEnd = range.endIndex + range.overscan
+
+				const arr = []
+
+				if (focusIndex !== -1 && focusIndex < start) {
+					arr.push(focusIndex)
+				}
+
+				const end = Math.min(initialEnd, range.count - 1)
+				for (let i = start; i <= end; i += 1) {
+					arr.push(i)
+				}
+
+				if (focusIndex !== -1 && focusIndex > initialEnd) {
+					arr.push(focusIndex)
+				}
+
+				return arr
+			},
 		}
+	}
 
-		if (!virtualizer || untrack(() => $virtualizer?.scrollElement !== scrollTarget)) {
-			type CommonOptions = Parameters<typeof createVirtualizer>[0]
+	const virtualizer = createVirtualizerBase(getVirtualizerOptions)
 
-			const commonOptions: CommonOptions = {
-				...baseOptions,
-				estimateSize: () => itemSize,
-				overscan: 10,
-				getScrollElement: () => scrollTarget as Element,
-				rangeExtractor: (range) => {
-					const start = Math.max(range.startIndex - range.overscan, 0)
-					const initialEnd = range.endIndex + range.overscan
-
-					const arr = []
-
-					if (focusIndex !== -1 && focusIndex < start) {
-						arr.push(focusIndex)
-					}
-
-					const end = Math.min(initialEnd, range.count - 1)
-					for (let i = start; i <= end; i += 1) {
-						arr.push(i)
-					}
-
-					if (focusIndex !== -1 && focusIndex > initialEnd) {
-						arr.push(focusIndex)
-					}
-
-					return arr
-				},
-			}
-
-			if (scrollTarget === window) {
-				virtualizer = createWindowVirtualizer(
-					commonOptions as unknown as VirtualizerOptions<Window, Element>,
-				)
-			} else {
-				virtualizer = createVirtualizer({
-					...commonOptions,
-					getScrollElement: () => scrollTarget as Element,
-				})
-			}
-		}
-
-		untrack(() => {
-			$virtualizer?.setOptions(baseOptions)
-			$virtualizer?.measure()
-		})
-	})
+	let focusIndex = $state(-1)
 
 	let container = $state<HTMLDivElement>()
 
@@ -143,7 +150,7 @@
 
 		const nextIndex = currentIndex + increment
 		if (nextIndex >= 0 && nextIndex < count) {
-			$virtualizer?.scrollToIndex(currentIndex, {
+			virtualizer.scrollToIndex(currentIndex, {
 				behavior: 'smooth',
 			})
 
@@ -180,14 +187,14 @@
 		bind:offsetWidth
 		role="grid"
 		aria-rowcount={count}
-		style:height={`${($virtualizer?.getTotalSize() ?? 0) - gap}px`}
+		style:height={`${virtualizer.getTotalSize() - gap}px`}
 		class="@container relative w-full rounded-lg -outline-offset-2 contain-strict"
 		tabindex="0"
 		onfocusin={focusinHandler}
 		onfocusout={focusoutHandler}
 		onkeydown={keydownHandler}
 	>
-		{#each $virtualizer?.getVirtualItems() ?? [] as virtualItem (key(virtualItem.index))}
+		{#each virtualizer.getVirtualItems() as virtualItem (key(virtualItem.index))}
 			{@render children(virtualItem)}
 		{/each}
 	</div>
