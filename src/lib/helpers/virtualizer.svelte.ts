@@ -34,7 +34,6 @@ export function createVirtualizerBase<
 	$effect(() => {
 		const cleanup = untrack(() => {
 			const cleanupInner = virtualizer._didMount()
-			virtualizer._willUpdate()
 
 			return cleanupInner
 		})

@@ -5,8 +5,8 @@
 		observeElementRect,
 		observeWindowOffset,
 		observeWindowRect,
+		type Range,
 		type VirtualItem,
-		Virtualizer,
 		type VirtualizerOptions,
 		windowScroll,
 	} from '@tanstack/virtual-core'
@@ -28,80 +28,84 @@
 		count,
 		lanes = 1,
 		gap = 0,
-		size: itemSize2,
+		size: itemSize,
 		key,
 		children,
 		offsetWidth = $bindable(0),
 	}: Props = $props()
 
-	const scrollContainer = useScrollTarget()
+	const scrollContainerTarget = useScrollTarget()
 
-	const target = $derived.by(() => {
-		const scrollContainerTarget = scrollContainer.scrollTarget
+	type VirtualizerTargetOptions<E extends Window | Element> = Pick<
+		VirtualizerOptions<E, Element>,
+		| 'getScrollElement'
+		| 'observeElementRect'
+		| 'observeElementOffset'
+		| 'scrollToFn'
+		| 'initialOffset'
+	>
 
-		if (scrollContainerTarget instanceof Window) {
-			return {
-				isWindow: true,
-				element: scrollContainerTarget,
+	const scrollTargetOptions = $derived.by(() => {
+		const target = scrollContainerTarget.scrollTarget
+
+		if (target instanceof Window) {
+			const options: VirtualizerTargetOptions<Window> = {
+				getScrollElement: () => target,
+				observeElementRect: observeWindowRect,
+				observeElementOffset: observeWindowOffset,
+				scrollToFn: windowScroll,
+				initialOffset: () => window.scrollY,
 			}
+
+			return options
 		}
 
-		return {
-			isWindow: false,
-			element: scrollContainerTarget,
+		const options: VirtualizerTargetOptions<Element> = {
+			getScrollElement: () => target,
+			observeElementRect,
+			observeElementOffset,
+			scrollToFn: elementScroll,
 		}
+
+		return options
 	})
 
-	const itemSize = $derived(itemSize2)
+	const rangeExtractor = (range: Range) =>
+		// We untrack because when focusIndex changes it forces virtualizer deps to change
+		// which is not needed here.
+		untrack(() => {
+			const start = Math.max(range.startIndex - range.overscan, 0)
+			const initialEnd = range.endIndex + range.overscan
 
-	const getVirtualizerOptions = <
-		IsWindow extends boolean,
-		E extends IsWindow extends true ? Window : Element,
-	>(): VirtualizerOptions<E, Element> => {
-		type VirtualizerWindowInstance = Virtualizer<Window, Element>
-		type VirtualizerElementInstance = Virtualizer<Element, Element>
+			const arr = []
+			if (focusIndex !== -1 && focusIndex < start) {
+				arr.push(focusIndex)
+			}
 
-		return {
-			observeElementRect: (instance, cb) =>
-				target.isWindow
-					? observeWindowRect(instance as unknown as VirtualizerWindowInstance, cb)
-					: observeElementRect(instance as unknown as VirtualizerElementInstance, cb),
-			observeElementOffset: (instance, cb) =>
-				target.isWindow
-					? observeWindowOffset(instance as unknown as VirtualizerWindowInstance, cb)
-					: observeElementOffset(instance as unknown as VirtualizerElementInstance, cb),
-			scrollToFn: (offset, scrollOptions, instance) =>
-				target.isWindow
-					? windowScroll(offset, scrollOptions, instance as unknown as VirtualizerWindowInstance)
-					: elementScroll(offset, scrollOptions, instance as unknown as VirtualizerElementInstance),
-			initialOffset: () => (target.isWindow ? window.scrollY : 0),
+			const end = Math.min(initialEnd, range.count - 1)
+			for (let i = start; i <= end; i += 1) {
+				arr.push(i)
+			}
+
+			if (focusIndex !== -1 && focusIndex > initialEnd) {
+				arr.push(focusIndex)
+			}
+
+			return arr
+		})
+
+	const getVirtualizerOptions = () => {
+		const options: VirtualizerOptions<Window | Element, Element> = {
+			// narrowing window/element specific types is difficult so we just cast here
+			...(scrollTargetOptions as VirtualizerTargetOptions<Window | Element>),
 			count,
 			lanes,
 			estimateSize: () => itemSize,
+			rangeExtractor,
 			overscan: 10,
-			getScrollElement: () => target.element as E,
-			rangeExtractor: (range) => {
-				const start = Math.max(range.startIndex - range.overscan, 0)
-				const initialEnd = range.endIndex + range.overscan
-
-				const arr = []
-
-				if (focusIndex !== -1 && focusIndex < start) {
-					arr.push(focusIndex)
-				}
-
-				const end = Math.min(initialEnd, range.count - 1)
-				for (let i = start; i <= end; i += 1) {
-					arr.push(i)
-				}
-
-				if (focusIndex !== -1 && focusIndex > initialEnd) {
-					arr.push(focusIndex)
-				}
-
-				return arr
-			},
 		}
+
+		return options
 	}
 
 	const virtualizer = createVirtualizerBase(getVirtualizerOptions)
