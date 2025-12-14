@@ -52,7 +52,8 @@
 	<title>{m.appName()} - Your music, your way</title>
 	<meta
 		name="description"
-		content="Enjoy all on device songs with a fast, privacy-focused music player that works right in your browser. No downloads needed."
+		content="Free online music player for your local music library. Play songs directly in your browser with no downloads, no sign-up, and complete privacy. Works offline on any device."
+	/>
 	/>
 
 	<link rel="canonical" href={page.url.href} />
