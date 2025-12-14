@@ -11,5 +11,13 @@ export class LibraryStore<Slug extends LibraryStoreName> {
 
 	constructor(slug: Slug) {
 		persist(`library:${slug}`, this, ['sortByKey', 'order'])
+
+		// Previous version used 'album' key for sorting track by album.
+		// Update value after loading persisted state.
+		if (slug === 'tracks') {
+			if (this.sortByKey === 'album') {
+				this.sortByKey = 'byAlbumSorted' as LibraryItemSortKey<Slug>
+			}
+		}
 	}
 }

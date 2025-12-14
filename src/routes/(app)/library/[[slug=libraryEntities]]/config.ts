@@ -55,7 +55,7 @@ const trackConfig: LibraryRouteConfig<'tracks'> = {
 		},
 		{
 			name: m.album(),
-			key: 'album',
+			key: 'byAlbumSorted',
 		},
 		{
 			name: m.duration(),
