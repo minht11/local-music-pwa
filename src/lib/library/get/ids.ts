@@ -61,3 +61,25 @@ export const getLibraryItemIds = async <Store extends LibraryStoreName>(
 
 	return data
 }
+
+export const dbGetAlbumTracksIdsByName = async (albumName: string): Promise<number[]> => {
+	const db = await getDatabase()
+	const tracksIds = await db.getAllKeysFromIndex(
+		'tracks',
+		'byAlbumSorted',
+		IDBKeyRange.bound([albumName], [albumName, '\uffff']),
+	)
+
+	return tracksIds
+}
+
+export const dbGetArtistTracksIdsByName = async (artistName: string): Promise<number[]> => {
+	const db = await getDatabase()
+	const tracksIds = await db.getAllKeysFromIndex(
+		'tracks',
+		'artists',
+		IDBKeyRange.only(artistName),
+	)
+
+	return tracksIds
+}

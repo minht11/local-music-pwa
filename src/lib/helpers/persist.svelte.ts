@@ -5,7 +5,11 @@ const getValue = (key: string) => {
 	return value
 }
 
-export const getPersistedValue = <T>(storeName: string, key: string, defaultValue: T): T => {
+export const getPersistedValue = <T, D = null>(
+	storeName: string,
+	key: string,
+	defaultValue: D = null as D,
+): T | D => {
 	const fullKey = `snaeplayer-${storeName}.${key}`
 	const value = getValue(fullKey)
 

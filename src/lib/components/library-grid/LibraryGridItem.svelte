@@ -6,9 +6,11 @@
 	import { ripple } from '$lib/attachments/ripple.ts'
 	import type { QueryResult } from '$lib/db/query/query.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte.ts'
+	import { dbGetAlbumTracksIdsByName, dbGetArtistTracksIdsByName } from '$lib/library/get/ids'
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
 	import { createAlbumQuery, createArtistQuery } from '$lib/library/get/value-queries'
 	import Artwork from '../Artwork.svelte'
+	import { snackbar } from '../snackbar/snackbar.ts'
 
 	export type LibraryGridItemType = 'albums' | 'artists'
 
@@ -37,6 +39,7 @@
 
 	const menu = useMenu()
 	const main = useMainStore()
+	const player = usePlayer()
 
 	type Value = LibraryGridItemValue<Type>
 
@@ -76,6 +79,14 @@
 		}
 	})
 
+	const dbGetAlbumOrArtistTrackIdsByName = async (name: string) => {
+		if (type === 'albums') {
+			return dbGetAlbumTracksIdsByName(name)
+		}
+
+		return dbGetArtistTracksIdsByName(name)
+	}
+
 	const menuItems = () => {
 		if (!item || !linkProps) {
 			return []
@@ -86,6 +97,30 @@
 				label: m.libraryViewDetails(),
 				action: () => {
 					goto(linkProps.href, { replaceState: linkProps.shouldReplace })
+				},
+			},
+			{
+				label: m.playerAddToQueue(),
+				action: async () => {
+					try {
+						const tracksIds = await dbGetAlbumOrArtistTrackIdsByName(item.name)
+
+						player.addToQueue(tracksIds)
+					} catch (error) {
+						snackbar.unexpectedError(error)
+					}
+				},
+			},
+			{
+				label: m.libraryAddToPlaylist(),
+				action: async () => {
+					try {
+						const tracksIds = await dbGetAlbumOrArtistTrackIdsByName(item.name)
+
+						main.addTrackToPlaylistDialogOpen = tracksIds
+					} catch (error) {
+						snackbar.unexpectedError(error)
+					}
 				},
 			},
 			{

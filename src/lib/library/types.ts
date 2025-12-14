@@ -36,10 +36,10 @@ export interface ParsedTrackData {
 	year: StringOrUnknownItem
 	duration: number
 	genre: string[]
-	trackNo?: number
-	trackOf?: number
-	discNo?: number
-	discOf?: number
+	trackNo: number
+	trackOf: number
+	discNo: number
+	discOf: number
 	image?: {
 		optimized: boolean
 		small: Blob

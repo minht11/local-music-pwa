@@ -26,6 +26,7 @@ export interface AppDB extends DBSchema {
 			| 'scannedAt'
 		> & {
 			path: [directoryId: number, fileName: string]
+			byAlbumSorted: [album: string, name: string, trackNo: number, discNo: number]
 		}
 		meta: {
 			notAllowedOperations: undefined
@@ -98,12 +99,12 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 	})
 
 const openAppDatabase = () =>
-	openDB<AppDB>('snae-app-data', 1, {
-		upgrade(e) {
-			const { objectStoreNames } = e
+	openDB<AppDB>('snae-app-data', 2, {
+		async upgrade(db, oldVersion, _newVersion, tx) {
+			const { objectStoreNames } = db
 
 			if (!objectStoreNames.contains('tracks')) {
-				const store = createStore(e, 'tracks')
+				const store = createStore(db, 'tracks')
 
 				createIndexes(store, ['uuid'], { unique: true })
 				createIndexes(
@@ -127,8 +128,35 @@ const openAppDatabase = () =>
 				})
 			}
 
+			const tracksStore = tx.objectStore('tracks')
+			if (!tracksStore.indexNames.contains('byAlbumSorted')) {
+				tx.objectStore('tracks').createIndex(
+					'byAlbumSorted',
+					['album', 'discNo', 'trackNo', 'name'],
+					{
+						unique: false,
+					},
+				)
+			}
+
+			if (oldVersion === 1) {
+				// Previous versions didn't have discNo and trackNo fields
+				for await (const cursor of tracksStore) {
+					const track = cursor.value
+					if (track.discNo === undefined || track.trackNo === undefined) {
+						await cursor.update({
+							...track,
+							discNo: track.discNo ?? 0,
+							discOf: track.discOf ?? 0,
+							trackNo: track.trackNo ?? 0,
+							trackOf: track.trackOf ?? 0,
+						})
+					}
+				}
+			}
+
 			if (!objectStoreNames.contains('albums')) {
-				const store = createStore(e, 'albums')
+				const store = createStore(db, 'albums')
 
 				createIndexes(store, ['name', 'uuid'], { unique: true })
 				createIndexes(store, ['year'])
@@ -140,18 +168,18 @@ const openAppDatabase = () =>
 			}
 
 			if (!objectStoreNames.contains('artists')) {
-				const store = createStore(e, 'artists')
+				const store = createStore(db, 'artists')
 				createIndexes(store, ['name', 'uuid'], { unique: true })
 			}
 
 			if (!objectStoreNames.contains('playlists')) {
-				const store = createStore(e, 'playlists')
+				const store = createStore(db, 'playlists')
 				createIndexes(store, ['uuid'], { unique: true })
 				createIndexes(store, ['name', 'createdAt'])
 			}
 
 			if (!objectStoreNames.contains('playlistEntries')) {
-				const store = e.createObjectStore('playlistEntries', {
+				const store = db.createObjectStore('playlistEntries', {
 					keyPath: 'id',
 					autoIncrement: true,
 				})
@@ -162,7 +190,7 @@ const openAppDatabase = () =>
 			}
 
 			if (!objectStoreNames.contains('directories')) {
-				createStore(e, 'directories')
+				createStore(db, 'directories')
 			}
 		},
 	})

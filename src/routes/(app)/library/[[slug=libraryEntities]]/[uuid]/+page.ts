@@ -2,6 +2,7 @@ import { error, redirect } from '@sveltejs/kit'
 import { goto } from '$app/navigation'
 import { type DbValue, getDatabase } from '$lib/db/database.ts'
 import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
+import { dbGetAlbumTracksIdsByName } from '$lib/library/get/ids.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
 import {
 	FAVORITE_PLAYLIST_ID,
@@ -11,18 +12,6 @@ import {
 import type { PageLoad } from './$types.d.ts'
 
 type DetailsSlug = Exclude<LibraryStoreName, 'tracks'>
-
-const configMap = {
-	albums: {
-		index: 'album',
-	},
-	artists: {
-		index: 'artists',
-	},
-	playlists: {
-		index: 'playlist',
-	},
-} as const
 
 const createDetailsPageQuery = <T extends DetailsSlug>(
 	storeName: T,
@@ -64,28 +53,11 @@ const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 		fetcher: async ([, name]): Promise<TracksQueryRegularResult> => {
 			const db = await getDatabase()
 
-			const index = configMap[storeName].index
 			let keys: number[]
 			if (storeName === 'albums') {
-				// This will load all of the tracks metadata in memory,
-				// generally albums should not be that big so its fine
-				const tracks = await db.getAllFromIndex('tracks', index, name)
-				tracks.sort((a, b) => {
-					const aNo = a.trackNo ?? 0
-					const bNo = b.trackNo ?? 0
-					const aDisc = a.discNo ?? 0
-					const bDisc = b.discNo ?? 0
-
-					if (aDisc !== bDisc) {
-						return aDisc - bDisc
-					}
-
-					return aNo - bNo
-				})
-
-				keys = tracks.map((track) => track.id)
+				keys = await dbGetAlbumTracksIdsByName(name)
 			} else {
-				keys = await db.getAllKeysFromIndex('tracks', index, name)
+				keys = await db.getAllKeysFromIndex('tracks', 'artists', IDBKeyRange.only(name))
 			}
 
 			return { tracksIds: keys, playlistIdMap: null }
