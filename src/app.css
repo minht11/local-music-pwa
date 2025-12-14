@@ -99,6 +99,7 @@ html {
 	scroll-padding-top: var(--app-header-height);
 	scroll-padding-bottom: var(--bottom-overlay-height);
 	--app-header-height: --spacing(16);
+	--app-max-content-width: --spacing(400);
 }
 
 html.dark {

@@ -131,7 +131,7 @@
 	</div>
 {/if}
 
-<ListDetailsLayout mode={layoutMode} class="mx-auto w-full max-w-(--library-max-width) grow">
+<ListDetailsLayout mode={layoutMode} class="mx-auto w-full max-w-(--app-max-content-width) grow">
 	{#snippet list(mode)}
 		<div class={[isHandHeldDevice ? 'sm:pl-20' : 'pl-20', 'flex grow flex-col']}>
 			<div class={[mode === 'both' && 'w-100', 'flex grow flex-col px-4']}>
@@ -218,10 +218,7 @@
 <style lang="postcss">
 	@reference '../../../../app.css';
 
-	:root {
-		--library-max-width: --spacing(400);
-	}
 	.desktop-sidebar {
-		left: max(0, (100% - var(--library-max-width)) / 2);
+		left: max(0, (100% - var(--app-max-content-width)) / 2);
 	}
 </style>
