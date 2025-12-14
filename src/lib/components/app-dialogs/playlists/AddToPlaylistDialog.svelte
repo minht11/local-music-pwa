@@ -6,6 +6,13 @@
 	import AddToPlaylistDialogContent from './AddToPlaylistDialogContent.svelte'
 
 	const main = useMainStore()
+
+	const dialogTitle = () => {
+		const count = main.addTrackToPlaylistDialogOpen?.length ?? 0
+		const countLabel = count > 1 ? ` (${count})` : ''
+
+		return `${m.libraryAddToPlaylist()}${countLabel}`
+	}
 </script>
 
 <Dialog
@@ -15,7 +22,7 @@
 			main.addTrackToPlaylistDialogOpen = null
 		},
 	}}
-	title={m.libraryAddToPlaylist()}
+	title={dialogTitle()}
 >
 	{#snippet children({ data: trackIds, close })}
 		<svelte:boundary

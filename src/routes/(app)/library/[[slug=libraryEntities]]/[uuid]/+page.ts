@@ -2,6 +2,7 @@ import { error, redirect } from '@sveltejs/kit'
 import { goto } from '$app/navigation'
 import { type DbValue, getDatabase } from '$lib/db/database.ts'
 import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
+import { dbGetAlbumTracksIdsByName } from '$lib/library/get/ids.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
 import {
 	FAVORITE_PLAYLIST_ID,
@@ -67,11 +68,7 @@ const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 			const index = configMap[storeName].index
 			let keys: number[]
 			if (storeName === 'albums') {
-				keys = await db.getAllKeysFromIndex(
-					'tracks',
-					'byAlbumSorted',
-					IDBKeyRange.bound([name], [name, '\uffff']),
-				)
+				keys = await dbGetAlbumTracksIdsByName(name)
 			} else {
 				keys = await db.getAllKeysFromIndex('tracks', index, name)
 			}
