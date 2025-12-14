@@ -54,7 +54,6 @@
 		name="description"
 		content="Free online music player for your local music library. Play songs directly in your browser with no downloads, no sign-up, and complete privacy. Works offline on any device."
 	/>
-	/>
 
 	<link rel="canonical" href={page.url.href} />
 </svelte:head>
