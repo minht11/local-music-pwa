@@ -14,9 +14,10 @@ const manifest = {
 	description: 'Lightweight on device music player right in your browser.',
 	icons: [
 		{
-			src: '/icons/only-for-pwa-builder-192.png',
+			src: '/icons/raster-192.png',
 			sizes: '192x192',
 			type: 'image/png',
+			purpose: 'any',
 		},
 		{
 			src: '/icons/responsive.svg',

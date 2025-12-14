@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state'
 	import Button from '$lib/components/Button.svelte'
 	import Header from '$lib/components/Header.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
@@ -46,6 +47,16 @@
 		'Works completely offline - no internet needed',
 	]
 </script>
+
+<svelte:head>
+	<title>{m.appName()} - Your music, your way</title>
+	<meta
+		name="description"
+		content="Enjoy all on device songs with a fast, privacy-focused music player that works right in your browser. No downloads needed."
+	/>
+
+	<link rel="canonical" href={page.url.href} />
+</svelte:head>
 
 <Header title={m.appName()} noBackButton mode="fixed-no-spacer">
 	<IconButton
