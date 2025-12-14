@@ -100,7 +100,7 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 
 const openAppDatabase = () =>
 	openDB<AppDB>('snae-app-data', 2, {
-		upgrade(db, _oldVersion, _newVersion, tx) {
+		async upgrade(db, oldVersion, _newVersion, tx) {
 			const { objectStoreNames } = db
 
 			if (!objectStoreNames.contains('tracks')) {
@@ -138,6 +138,22 @@ const openAppDatabase = () =>
 						unique: false,
 					},
 				)
+			}
+
+			if (oldVersion === 1) {
+				// Previous versions didn't have discNo and trackNo fields
+				for await (const cursor of tracksStore) {
+					const track = cursor.value
+					if (track.discNo === undefined || track.trackNo === undefined) {
+						await cursor.update({
+							...track,
+							discNo: track.discNo ?? 0,
+							discOf: track.discOf ?? 0,
+							trackNo: track.trackNo ?? 0,
+							trackOf: track.trackOf ?? 0,
+						})
+					}
+				}
 			}
 
 			if (!objectStoreNames.contains('albums')) {
