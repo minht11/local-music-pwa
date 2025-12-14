@@ -38,6 +38,8 @@ export const parseTrack = async (file: File): Promise<ParsedTrackData | null> =>
 		genre: common.genre || [],
 		trackNo: common.track.no || 0,
 		trackOf: common.track.of || 0,
+		discNo: common.disk.no || 0,
+		discOf: common.disk.of || 0,
 		year: common.year?.toString() ?? UNKNOWN_ITEM,
 		duration: tags.format.duration || 0,
 		...artworkData,

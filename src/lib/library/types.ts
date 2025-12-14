@@ -38,6 +38,8 @@ export interface ParsedTrackData {
 	genre: string[]
 	trackNo?: number
 	trackOf?: number
+	discNo?: number
+	discOf?: number
 	image?: {
 		optimized: boolean
 		small: Blob

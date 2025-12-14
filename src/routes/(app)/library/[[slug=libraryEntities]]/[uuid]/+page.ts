@@ -73,6 +73,12 @@ const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 				tracks.sort((a, b) => {
 					const aNo = a.trackNo ?? 0
 					const bNo = b.trackNo ?? 0
+					const aDisc = a.discNo ?? 0
+					const bDisc = b.discNo ?? 0
+
+					if (aDisc !== bDisc) {
+						return aDisc - bDisc
+					}
 
 					return aNo - bNo
 				})

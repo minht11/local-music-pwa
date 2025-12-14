@@ -52,7 +52,7 @@
 		<Artwork
 			src={artworkSrc()}
 			alt={track?.name}
-			class={['!hidden h-10 w-10 rounded-sm @xs:!flex', loading && 'opacity-50']}
+			class={['hidden! h-10 w-10 rounded-sm @xs:flex!', loading && 'opacity-50']}
 		/>
 
 		{#if loading}
