@@ -116,7 +116,7 @@
 	>
 		{@render navItemsSnippet('h-14 w-20')}
 
-		{#if slug === 'albums' || slug === 'artists'}
+		{#if (slug === 'albums' || slug === 'artists') && isWideLayout}
 			<IconButton
 				icon="sidePanel"
 				tooltip={main.librarySplitLayoutEnabled
