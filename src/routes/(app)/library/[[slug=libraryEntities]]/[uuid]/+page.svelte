@@ -23,8 +23,10 @@
 	const main = useMainStore()
 	const player = usePlayer()
 
+	// svelte-ignore state_referenced_locally
 	initPageQueries(data)
 
+	// svelte-ignore state_referenced_locally
 	const { itemQuery, tracksQuery } = data
 
 	const item = $derived(itemQuery.value)
@@ -122,7 +124,7 @@
 	const artists = $derived(slug === 'albums' && formatArtists((item as AlbumData).artists))
 </script>
 
-{#if !isWideLayout.current}
+{#if !isWideLayout.current || !main.librarySplitLayoutEnabled}
 	<Header title={data.singularTitle()} mode="fixed" />
 {/if}
 

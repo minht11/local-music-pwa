@@ -6,7 +6,6 @@ import {
 	type PageQueryResult,
 	type QueryKey,
 } from '$lib/db/query/page-query.svelte.ts'
-import { createQuery, type QueryOptions, type QueryResult } from '$lib/db/query/query.ts'
 import type { LibraryStoreName } from '../types.ts'
 import { preloadLibraryValue } from './value.ts'
 
@@ -77,29 +76,6 @@ export const keysListDatabaseChangeHandler = <Store extends LibraryStoreName>(
 		refetch()
 	}
 }
-
-export type LibraryItemKeysQueryOptions<K extends QueryKey> = Omit<
-	QueryOptions<K, number[]>,
-	'onDatabaseChange'
->
-
-export const createLibraryItemKeysQuery = <
-	const Store extends LibraryStoreName,
-	const K extends QueryKey,
->(
-	storeName: Store,
-	options: LibraryItemKeysQueryOptions<K>,
-): QueryResult<number[]> =>
-	createQuery({
-		...options,
-		fetcher: async (key) => {
-			const result = await options.fetcher(key)
-			await preloadLibraryListValues(storeName, result)
-
-			return result
-		},
-		onDatabaseChange: keysListDatabaseChangeHandler.bind(null, storeName),
-	})
 
 export type LibraryItemKeysPageQueryOptions<K extends QueryKey> = Omit<
 	PageQueryOptions<K, number[]>,

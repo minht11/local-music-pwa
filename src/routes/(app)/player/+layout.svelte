@@ -24,7 +24,7 @@
 	const player = usePlayer()
 	const track = $derived(player.activeTrack)
 
-	const sizes = $derived.by(data.sizes)
+	const sizes = $derived(data.sizes())
 	const isCompactVertical = $derived(sizes.isCompactVertical)
 	const layoutMode = $derived(data.layoutMode(sizes.isCompact, page.url.pathname))
 </script>

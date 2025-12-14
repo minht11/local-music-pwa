@@ -9,7 +9,6 @@
 	import { getDatabase } from '$lib/db/database.ts'
 	import { createQuery } from '$lib/db/query/query.ts'
 	import { getLibraryItemIds } from '$lib/library/get/ids'
-	import { createLibraryItemKeysQuery } from '$lib/library/get/ids-queries'
 	import { dbBatchModifyPlaylistsSelection } from '$lib/library/playlists-actions'
 
 	interface Props {
@@ -21,16 +20,14 @@
 
 	let searchTerm = $state('')
 
-	const playlistsIdsQuery = createLibraryItemKeysQuery('playlists', {
-		key: () => [searchTerm],
-		fetcher: () =>
-			getLibraryItemIds('playlists', {
-				sort: 'createdAt',
-				order: 'desc',
-				searchTerm,
-				searchFn: (p, term) => p.name.includes(term),
-			}),
-	})
+	const playlistsIds = $derived(
+		await getLibraryItemIds('playlists', {
+			sort: 'createdAt',
+			order: 'desc',
+			searchTerm,
+			searchFn: (p, term) => p.name.includes(term),
+		}),
+	)
 
 	const initialTrackPlaylists = createQuery({
 		// We only care about initial values
@@ -118,30 +115,26 @@
 
 <Separator />
 <ScrollContainer class="max-h-100 grow overflow-auto px-2 py-4">
-	{#if playlistsIdsQuery.status === 'error' || initialTrackPlaylists.status === 'error'}
-		<div class="py-10 text-center">{m.errorUnexpected()}</div>
-	{:else if playlistsIdsQuery.status === 'loaded'}
-		<PlaylistListContainer
-			items={playlistsIdsQuery.value}
-			onItemClick={(item) => {
-				toggleSelection(item.playlist.id)
-			}}
-		>
-			{#snippet icon(playlist)}
-				{@const isInPlaylist = isTrackInPlaylist(playlist.id)}
-				<div
-					class={[
-						'flex size-6 items-center justify-center rounded-full border-2',
-						isInPlaylist ? 'border-primary bg-primary text-onPrimary' : 'border-neutral',
-					]}
-				>
-					{#if isInPlaylist}
-						<Icon type="check" />
-					{/if}
-				</div>
-			{/snippet}
-		</PlaylistListContainer>
-	{/if}
+	<PlaylistListContainer
+		items={playlistsIds}
+		onItemClick={(item) => {
+			toggleSelection(item.playlist.id)
+		}}
+	>
+		{#snippet icon(playlist)}
+			{@const isInPlaylist = isTrackInPlaylist(playlist.id)}
+			<div
+				class={[
+					'flex size-6 items-center justify-center rounded-full border-2',
+					isInPlaylist ? 'border-primary bg-primary text-onPrimary' : 'border-neutral',
+				]}
+			>
+				{#if isInPlaylist}
+					<Icon type="check" />
+				{/if}
+			</div>
+		{/snippet}
+	</PlaylistListContainer>
 </ScrollContainer>
 
 {@render children({ save })}

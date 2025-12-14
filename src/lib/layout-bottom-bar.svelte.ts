@@ -1,4 +1,4 @@
-import { getContext, setContext } from 'svelte'
+import { createContext } from 'svelte'
 import { SvelteMap } from 'svelte/reactivity'
 
 export interface BottomBarState {
@@ -6,7 +6,7 @@ export interface BottomBarState {
 	abovePlayer: SvelteMap<string, Snippet>
 }
 
-const key = Symbol('root-layout')
+const [getContext, setContext] = createContext<BottomBarState>()
 
 export const setupOverlaySnippets = () => {
 	const state: BottomBarState = $state({
@@ -14,7 +14,7 @@ export const setupOverlaySnippets = () => {
 		abovePlayer: new SvelteMap<string, Snippet>(),
 	})
 
-	setContext(key, state)
+	setContext(state)
 
 	return {
 		get bottomBar(): BottomBarState['bottomBar'] {
@@ -30,7 +30,7 @@ export const useSetOverlaySnippet = (
 	type: 'bottom-bar' | 'above-player',
 	getSnippet: () => Snippet | null,
 ): void => {
-	const state = getContext<BottomBarState>(key)
+	const state = getContext()
 	const id = crypto.randomUUID()
 
 	$effect.pre(() => {

@@ -11,4 +11,4 @@
 	{@render children()}
 </div>
 
-<div class="mt-4 h-[var(--bottom-overlay-height)] shrink-0"></div>
+<div class="mt-4 h-(--bottom-overlay-height) shrink-0"></div>

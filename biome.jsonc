@@ -32,8 +32,6 @@
 		"includes": [
 			"**",
 			"!**/.generated",
-			// Biome does not support Tailwind syntax yet.
-			"!**/*.css",
 			// Biome parser incorrectly errors on TS syntax.
 			"!src/lib/components/WrapTranslation.svelte"
 		]
@@ -111,7 +109,8 @@
 			"nursery": {
 				"noFloatingPromises": "error",
 				"noImportCycles": "error",
-				"noMisusedPromises": "error"
+				"noMisusedPromises": "error",
+				"noDeprecatedImports": "on"
 			},
 			"complexity": {
 				"useSimplifiedLogicExpression": "error",
@@ -125,6 +124,12 @@
 					"level": "error",
 					"options": {
 						"allow": ["assert", "error", "info", "warn", "time", "timeEnd", "debug"]
+					}
+				},
+				"noUnknownAtRules": {
+					"level": "info",
+					"options": {
+						"ignore": ["slot"]
 					}
 				}
 			}
@@ -142,6 +147,14 @@
 	"json": {
 		"formatter": {
 			"indentWidth": 2
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		},
+		"formatter": {
+			"quoteStyle": "single"
 		}
 	},
 	"overrides": [

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state'
 	import Button from '$lib/components/Button.svelte'
 	import Header from '$lib/components/Header.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
@@ -47,6 +48,16 @@
 	]
 </script>
 
+<svelte:head>
+	<title>{m.appName()} - Your music, your way</title>
+	<meta
+		name="description"
+		content="Free online music player for your local music library. Play songs directly in your browser with no downloads, no sign-up, and complete privacy. Works offline on any device."
+	/>
+
+	<link rel="canonical" href={page.url.href} />
+</svelte:head>
+
 <Header title={m.appName()} noBackButton mode="fixed-no-spacer">
 	<IconButton
 		as="a"
@@ -65,7 +76,7 @@
 >
 	<div inert class="animated-gradient absolute -inset-x-32 -inset-y-16"></div>
 
-	<div class="relative z-0 mt-[var(--app-header-height)] max-w-4xl text-center">
+	<div class="relative z-0 mt-(--app-header-height) max-w-4xl text-center">
 		<h1 class="mb-6 text-headline-md leading-tight font-bold text-onSurface lg:text-headline-lg">
 			Your music, <span class="text-primary">your way</span>
 		</h1>

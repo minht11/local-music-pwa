@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { setContext } from 'svelte'
 	import { browser } from '$app/environment'
 	import { navigating, page } from '$app/state'
 	import { APP_DIALOGS_COMPONENTS } from '$lib/components/app-dialogs/dialogs.ts'
@@ -10,9 +9,9 @@
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 	import { setupOverlaySnippets } from '$lib/layout-bottom-bar.svelte'
 	import { MainStore } from '$lib/stores/main/store.svelte.ts'
-	import { MAIN_STORE_CONTEXT } from '$lib/stores/main/use-store.ts'
+	import { setMainStoreContext } from '$lib/stores/main/use-store.ts'
 	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
-	import { PLAYER_STORE_CONTEXT } from '$lib/stores/player/use-store.ts'
+	import { setPlayerStoreContext } from '$lib/stores/player/use-store.ts'
 	import { onViewTransitionPrepare, setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
 	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
 	import {
@@ -21,13 +20,10 @@
 	} from './layout/setup-directories-permission-prompt.svelte.ts'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'
 
-	// These context keys are in different files from their implementation
+	// These context are in different files from their implementation
 	// to allow better trees shaking and inlining
-	const mainStore = new MainStore()
-	setContext(MAIN_STORE_CONTEXT, mainStore)
-
-	const player = new PlayerStore()
-	setContext(PLAYER_STORE_CONTEXT, player)
+	const mainStore = setMainStoreContext(new MainStore())
+	const player = setPlayerStoreContext(new PlayerStore())
 
 	let pageContainer = $state<HTMLElement | null>(null)
 
@@ -103,13 +99,13 @@
 					{dir.name}
 				</div>
 
-				<Button kind="flat" class="ml-auto w-24 shrink-0 !text-inversePrimary" onclick={dir.action}>
+				<Button kind="flat" class="ml-auto w-24 shrink-0 text-inversePrimary!" onclick={dir.action}>
 					{m.libraryDirPromptGrant()}
 				</Button>
 			</div>
 		{/each}
 
-		<Button kind="flat" class="!text-inversePrimary" onclick={dismiss}>
+		<Button kind="flat" class="text-inversePrimary!" onclick={dismiss}>
 			{m.dismiss()}
 		</Button>
 	</div>

@@ -196,7 +196,7 @@
 			{/if}
 
 			{#if title}
-				<h1 class="text-headline-sm">{title}</h1>
+				<div class="text-headline-sm">{title}</div>
 			{/if}
 		</header>
 
