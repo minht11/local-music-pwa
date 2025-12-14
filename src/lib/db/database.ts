@@ -128,7 +128,6 @@ const openAppDatabase = () =>
 				})
 			}
 
-			// TODO. Add migration for discNo and trackNo indexes
 			const tracksStore = tx.objectStore('tracks')
 			if (!tracksStore.indexNames.contains('byAlbumSorted')) {
 				tx.objectStore('tracks').createIndex(
