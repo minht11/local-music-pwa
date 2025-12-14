@@ -40,10 +40,12 @@
 
 	type Value = LibraryGridItemValue<Type>
 
-	const query = // svelte-ignore state_referenced_locally only initialized once
-	(
-		type === 'albums' ? createAlbumQuery(() => itemId) : createArtistQuery(() => itemId)
-	) as QueryResult<Value>
+	const query =
+		// prettier-ignore
+		(
+			// svelte-ignore state_referenced_locally only initialized once
+			type === 'albums' ? createAlbumQuery(() => itemId) : createArtistQuery(() => itemId)
+		) as QueryResult<Value>
 	const { value: item } = $derived(query)
 
 	const artworkSrc = createManagedArtwork(() => {
