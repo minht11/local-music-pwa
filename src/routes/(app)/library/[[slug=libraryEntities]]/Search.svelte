@@ -18,6 +18,9 @@
 		const term = (e.target as HTMLInputElement).value
 
 		store.searchTerm = term
+		queueMicrotask(() => {
+			window.scrollTo({ top: 0, behavior: 'instant' })
+		})
 	}, 300)
 
 	const menu = useMenu()
