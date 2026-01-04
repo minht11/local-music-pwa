@@ -5,7 +5,7 @@
 	interface FavoriteButtonProps {
 		trackId: number
 		favorite: boolean
-		class?: string
+		class?: ClassValue
 	}
 
 	const { trackId, favorite, class: className }: FavoriteButtonProps = $props()

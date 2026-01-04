@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
 	import IconButton from '$lib/components/IconButton.svelte'
+	import MenuButton from '$lib/components/MenuButton.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import { navigateToExternal } from '$lib/helpers/utils/navigate.ts'
@@ -23,9 +24,7 @@
 		})
 	}, 300)
 
-	const menu = useMenu()
-
-	const generalMenuHandler = (e: MouseEvent) => {
+	const generalMenuItems = () => {
 		const menuItems = [
 			{
 				label: m.settings(),
@@ -47,14 +46,7 @@
 			},
 		]
 
-		menu.showFromEvent(e, menuItems, {
-			width: 200,
-			anchor: true,
-			preferredAlignment: {
-				vertical: 'top',
-				horizontal: 'right',
-			},
-		})
+		return menuItems
 	}
 
 	const sortMenuItems = $derived.by(() =>
@@ -66,16 +58,6 @@
 			},
 		})),
 	)
-
-	const sortMenuHandler = (e: MouseEvent) => {
-		menu.showFromEvent(e, sortMenuItems, {
-			anchor: true,
-			preferredAlignment: {
-				vertical: 'top',
-				horizontal: 'right',
-			},
-		})
-	}
 </script>
 
 <div
@@ -93,7 +75,7 @@
 	<Separator vertical class="my-auto hidden h-6 @sm:flex" />
 
 	{#if sortMenuItems.length > 1}
-		<IconButton icon="sort" tooltip={m.libraryOpenSortMenu()} onclick={sortMenuHandler} />
+		<MenuButton icon="sort" tooltip={m.libraryOpenSortMenu()} menuItems={() => sortMenuItems} />
 	{/if}
 
 	<IconButton
@@ -107,10 +89,10 @@
 
 	<Separator vertical class="my-auto hidden h-6 @sm:flex" />
 
-	<IconButton
+	<MenuButton
 		ariaLabel={m.libraryToggleSortOrder()}
 		tooltip={m.libraryOpenApplicationMenu()}
-		icon="moreVertical"
-		onclick={generalMenuHandler}
+		menuItems={generalMenuItems}
+		width={200}
 	/>
 </div>
