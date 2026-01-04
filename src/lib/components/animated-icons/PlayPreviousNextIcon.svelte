@@ -45,13 +45,13 @@
 	{@attach action}
 >
 	<!-- Cannot add clip on svg itself because of Safari bug  -->
-	<div class="icon-clip [grid-area:1/1]">
+	<div class="icon-clip stack-in-grid">
 		<svg class="size-6 fill-current" viewBox="0 0 24 24">
 			<path class="skip-top" d="M 6,18 14.5,12 6,6 M 8,9.86 11.03,12 8,14.14" />
 			<path class="skip-bottom invisible" d="M 6,18 14.5,12 6,6 M 8,9.86 11.03,12 8,14.14" />
 		</svg>
 	</div>
-	<svg class="size-6 fill-current [grid-area:1/1]" viewBox="0 0 24 24">
+	<svg class="size-6 fill-current stack-in-grid" viewBox="0 0 24 24">
 		<path d="M16,6L16,18L18,18L18,6L16,6Z" />
 	</svg>
 </div>
