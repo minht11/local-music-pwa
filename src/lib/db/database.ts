@@ -199,7 +199,7 @@ type AppIDBDatabase = IDBPDatabase<AppDB>
 let dbPromise: Promise<AppIDBDatabase> | AppIDBDatabase | null = null
 
 export const getDatabase = (): Promise<AppIDBDatabase> | AppIDBDatabase => {
-	if (dbPromise) {
+	if (dbPromise !== null) {
 		return dbPromise
 	}
 
