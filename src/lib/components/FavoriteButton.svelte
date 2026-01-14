@@ -5,11 +5,11 @@
 	interface FavoriteButtonProps {
 		trackId: number
 		favorite: boolean
+		tabindex?: number
 		class?: ClassValue
 	}
 
-	const { trackId, favorite, class: className }: FavoriteButtonProps = $props()
-
+	const { trackId, favorite, tabindex, class: className }: FavoriteButtonProps = $props()
 	const clickHandler = async (e: MouseEvent) => {
 		e.stopPropagation()
 
@@ -36,6 +36,7 @@
 </script>
 
 <IconButton
+	{tabindex}
 	class={className}
 	icon={favorite ? 'favorite' : 'favoriteOutline'}
 	tooltip={favorite ? m.trackRemoveFromFavorites() : m.trackAddToFavorites()}

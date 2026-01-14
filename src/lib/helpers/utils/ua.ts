@@ -13,3 +13,30 @@ export const isSafari = () => {
 
 	return ua.indexOf('safari') !== -1 && ua.indexOf('chrome') === -1
 }
+
+/** @public */
+export const isMac = (): boolean => {
+	if (navigator.userAgentData?.platform) {
+		return navigator.userAgentData.platform === 'macOS'
+	}
+
+	return navigator.platform.toUpperCase().indexOf('MAC') >= 0
+}
+
+/** @public */
+export const isWindows = (): boolean => {
+	if (navigator.userAgentData?.platform) {
+		return navigator.userAgentData.platform === 'Windows'
+	}
+
+	return navigator.platform.toUpperCase().indexOf('WIN') >= 0
+}
+
+/**
+ * Returns whether the primary modifier key is pressed.
+ * On Mac this is the Meta key (Cmd), on Windows/Linux it's the Ctrl key.
+ * @public
+ */
+export const isPrimaryModifierKey = (event: KeyboardEvent | MouseEvent): boolean => {
+	return isMac() ? event.metaKey : event.ctrlKey
+}

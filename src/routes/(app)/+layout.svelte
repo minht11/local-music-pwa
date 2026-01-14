@@ -137,14 +137,13 @@
 	<SnackbarRenderer />
 
 	<div bind:clientHeight={overlayContentHeight} class="flex flex-col">
-		<!-- TODO. Will be used for multi select -->
-		<!-- <div class="px-4 pb-4 sm:pb-2">
+		<div class="px-4 pb-4 sm:pb-2">
 			<div class="mx-auto w-full max-w-225">
 				{#each overlaySnippets.abovePlayer as snippet}
 					{@render snippet()}
 				{/each}
 			</div>
-		</div> -->
+		</div>
 
 		{#if !page.data.noPlayerOverlay}
 			<div class="px-4 pb-4 sm:pb-2">
