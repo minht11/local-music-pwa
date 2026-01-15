@@ -22,7 +22,7 @@
 		selectionEnabled: boolean
 		selectionHover: boolean
 		selected: boolean
-		menuItems?: (playlist: TrackData) => MenuItem[]
+		menuItems?: (track: TrackData) => MenuItem[]
 		onclick?: (track: TrackData, e: KeyboardEvent | MouseEvent) => void
 		onpointerenter?: (e: PointerEvent) => void
 		toggleSelection?: (isSelected: boolean) => void

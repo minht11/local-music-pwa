@@ -17,7 +17,7 @@
 		alignment?: MenuAlignment
 		width?: number
 		icon?: IconType
-		menuItems?: () => MenuItem[]
+		menuItems?: (() => MenuItem[]) | MenuItem[]
 	}
 
 	const {
@@ -47,7 +47,7 @@
 			return
 		}
 
-		menu.showFromEvent(e, menuItems(), {
+		menu.showFromEvent(e, typeof menuItems === 'function' ? menuItems() : menuItems, {
 			anchor: true,
 			width,
 			preferredAlignment: alignment,
