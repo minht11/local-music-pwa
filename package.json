@@ -42,7 +42,6 @@
 		"vitest": "^4.0.17"
 	},
 	"dependencies": {
-		"@floating-ui/dom": "^1.7.4",
 		"@material/material-color-utilities": "^0.3.0",
 		"@resvg/resvg-js": "^2.6.2",
 		"@tanstack/virtual-core": "^3.13.18",
@@ -60,6 +59,8 @@
 	"pnpm": {
 		"overrides": {
 			"vite": "8.0.0-beta.7",
+			"vite>terser": "-",
+			"vite>esbuild": "-",
 			"@ianvs/prettier-plugin-sort-imports": "-",
 			"@trivago/prettier-plugin-sort-imports": "-",
 			"prettier-plugin-organize-imports": "-",

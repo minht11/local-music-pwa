@@ -1,33 +1,33 @@
-import { autoPlacement, autoUpdate, computePosition, offset } from '@floating-ui/dom'
 import type { Attachment } from 'svelte/attachments'
 import { on } from 'svelte/events'
+import { browser } from '$app/environment'
 
 let tooltipTemplate: HTMLDivElement | null = null
-const getTooltipTemplate = () => {
+const cloneTooltipTemplate = () => {
 	if (tooltipTemplate === null) {
 		tooltipTemplate = document.createElement('div')
 		tooltipTemplate.setAttribute('role', 'tooltip')
 		tooltipTemplate.className =
-			'tooltip-enter bg-inverseSurface max-w-80 flex items-center inset-0 m-0 text-body-sm min-h-6 text-inverseOnSurface px-2 py-0.5 rounded-sm'
+			'tooltip bg-inverseSurface max-w-80 flex items-center m-0 text-body-sm min-h-6 text-inverseOnSurface px-2 py-0.5 rounded-sm'
 		tooltipTemplate.popover = 'manual'
 	}
 
 	return tooltipTemplate.cloneNode() as HTMLDivElement
 }
 
+const supportsCssAnchor = browser && CSS.supports('anchor-name', '--a')
+
 export const tooltip = (message: string | undefined): Attachment<HTMLElement> => {
 	return (target) => {
-		if (!message || import.meta.env.SSR) {
+		if (!message || import.meta.env.SSR || !supportsCssAnchor) {
 			return
 		}
 
-		const messageValue: string | undefined = message
+		const anchorName = `--tooltip-${crypto.randomUUID().slice(0, 4)}`
 
-		// Remove attribute to prevent default browser tooltip
 		target.setAttribute('title', message)
 
-		let element: HTMLElement | null = null
-		let autoUpdateCleanup: (() => void) | null = null
+		let tooltipElement: HTMLElement | null = null
 		let timeoutId: number | null = null
 		const controller = new AbortController()
 		const { signal } = controller
@@ -40,39 +40,26 @@ export const tooltip = (message: string | undefined): Attachment<HTMLElement> =>
 		}
 
 		const showTooltip = () => {
-			if (element || !messageValue) {
+			if (tooltipElement || !message) {
 				return
 			}
 
+			// Remove attribute to prevent default browser tooltip
 			target.removeAttribute('title')
+			// @ts-expect-error missing types
+			target.style.anchorName = anchorName
 
-			element = element ?? getTooltipTemplate()
-			element.textContent = messageValue
+			tooltipElement = tooltipElement ?? cloneTooltipTemplate()
+			tooltipElement.textContent = message
+			// @ts-expect-error missing types
+			tooltipElement.style.positionAnchor = anchorName
 
-			document.body.appendChild(element)
-			element.showPopover()
-
-			const updatePosition = async () => {
-				if (!element) {
-					return
-				}
-
-				const { x, y } = await computePosition(target, element, {
-					strategy: 'fixed',
-					middleware: [offset(8), autoPlacement()],
-				})
-
-				element.style.left = `${x}px`
-				element.style.top = `${y}px`
-			}
-
-			autoUpdateCleanup = autoUpdate(target, element, () => {
-				void updatePosition()
-			})
+			document.body.appendChild(tooltipElement)
+			tooltipElement.showPopover()
 		}
 
 		const scheduleShowTooltip = () => {
-			if (element) {
+			if (tooltipElement) {
 				return
 			}
 
@@ -81,16 +68,15 @@ export const tooltip = (message: string | undefined): Attachment<HTMLElement> =>
 
 		const hideTooltip = () => {
 			clearTooltipTimeout()
-			autoUpdateCleanup?.()
-
 			// Restore the title attribute
-			if (messageValue) {
-				target.setAttribute('title', messageValue)
+			if (message) {
+				target.setAttribute('title', message)
 			}
 
-			if (element) {
-				element.remove()
-				element = null
+			target.style.removeProperty('anchorName')
+			if (tooltipElement) {
+				tooltipElement.remove()
+				tooltipElement = null
 			}
 		}
 
