@@ -154,6 +154,7 @@
 			"tailwindDirectives": true
 		},
 		"formatter": {
+			"enabled": true,
 			"quoteStyle": "single"
 		}
 	},
