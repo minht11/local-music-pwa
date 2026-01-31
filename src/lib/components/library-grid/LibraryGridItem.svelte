@@ -10,7 +10,6 @@
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
 	import { createAlbumQuery, createArtistQuery } from '$lib/library/get/value-queries'
 	import Artwork from '../Artwork.svelte'
-	import { snackbar } from '../snackbar/snackbar.ts'
 
 	export type LibraryGridItemType = 'albums' | 'artists'
 

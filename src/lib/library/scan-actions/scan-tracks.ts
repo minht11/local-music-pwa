@@ -1,4 +1,3 @@
-import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 import type { TracksScanOptions } from './scanner/start.ts'
 
 export const scanTracks = async (options: TracksScanOptions): Promise<void> => {

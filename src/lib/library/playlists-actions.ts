@@ -1,5 +1,4 @@
 import type { IDBPObjectStore } from 'idb'
-import { snackbar } from '$lib/components/snackbar/snackbar'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { createUIAction } from '$lib/helpers/ui-action.ts'

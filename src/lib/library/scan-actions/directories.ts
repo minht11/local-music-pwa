@@ -1,4 +1,3 @@
-import { snackbar } from '$lib/components/snackbar/snackbar'
 import { getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { lockDatabase } from '$lib/db/lock-database.ts'

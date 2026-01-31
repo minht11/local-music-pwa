@@ -1,4 +1,3 @@
-import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 import { getDatabase } from '$lib/db/database.ts'
 import { lockDatabase } from '$lib/db/lock-database.ts'
 import { getV1LegacyDatabaseValue, removeV1LegacyDatabase } from '$lib/db/v1-legacy/database.ts'

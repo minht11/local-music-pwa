@@ -25,8 +25,10 @@ interface MenuSize {
 	height?: number
 }
 
+/** @public */
 export type MenuOptions = (MenuAnchorOptions | MenuPositionOptions) & MenuSize
 
+/** @public */
 export interface MenuItem {
 	label: string
 	icon?: IconType

@@ -4,7 +4,6 @@
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
 	import Separator from '$lib/components/Separator.svelte'
-	import { snackbar } from '$lib/components/snackbar/snackbar'
 	import TextField from '$lib/components/TextField.svelte'
 	import { getDatabase } from '$lib/db/database.ts'
 	import { createQuery } from '$lib/db/query/query.ts'

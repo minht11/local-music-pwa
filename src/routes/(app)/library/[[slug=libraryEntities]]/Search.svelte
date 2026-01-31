@@ -75,7 +75,7 @@
 	<Separator vertical class="my-auto hidden h-6 @sm:flex" />
 
 	{#if sortMenuItems.length > 1}
-		<MenuButton icon="sort" tooltip={m.libraryOpenSortMenu()} menuItems={() => sortMenuItems} />
+		<MenuButton icon="sort" tooltip={m.libraryOpenSortMenu()} menuItems={sortMenuItems} />
 	{/if}
 
 	<IconButton

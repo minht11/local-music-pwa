@@ -4,7 +4,6 @@
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
-	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
 	import {
 		getFilesFromLegacyDirectory,
