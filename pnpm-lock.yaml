@@ -21,7 +21,7 @@ overrides:
 
 patchedDependencies:
   '@material/material-color-utilities':
-    hash: d908b4656c84ea0edcaab27d59d7e83333ce172f88841fcc9006b2ca33590b3d
+    hash: ba9c0fd32469c32e8fbc40d212f789ab9438cca094fa57f398755793916bd133
     path: patches/@material__material-color-utilities.patch
   debug:
     hash: b12cae049d47a9e32e31249166810e3faa1ce93528ce1c37b6635ddd408d60c4
@@ -32,8 +32,8 @@ importers:
   .:
     dependencies:
       '@material/material-color-utilities':
-        specifier: ^0.3.0
-        version: 0.3.0(patch_hash=d908b4656c84ea0edcaab27d59d7e83333ce172f88841fcc9006b2ca33590b3d)
+        specifier: ^0.4.0
+        version: 0.4.0(patch_hash=ba9c0fd32469c32e8fbc40d212f789ab9438cca094fa57f398755793916bd133)
       '@resvg/resvg-js':
         specifier: ^2.6.2
         version: 2.6.2
@@ -379,8 +379,8 @@ packages:
   '@lix-js/server-protocol-schema@0.1.1':
     resolution: {integrity: sha512-jBeALB6prAbtr5q4vTuxnRZZv1M2rKe8iNqRQhFJ4Tv7150unEa0vKyz0hs8Gl3fUGsWaNJBh3J8++fpbrpRBQ==}
 
-  '@material/material-color-utilities@0.3.0':
-    resolution: {integrity: sha512-ztmtTd6xwnuh2/xu+Vb01btgV8SQWYCaK56CkRK8gEkWe5TuDyBcYJ0wgkMRn+2VcE9KUmhvkz+N9GHrqw/C0g==}
+  '@material/material-color-utilities@0.4.0':
+    resolution: {integrity: sha512-dlq6VExJReb8dhjj3a/yTigr3ncNwoFmL5Iy2ENtbDX03EmNeOEdZ+vsaGrj7RTuO+mB7L58II4LCsl4NpM8uw==}
 
   '@napi-rs/wasm-runtime@1.1.1':
     resolution: {integrity: sha512-p64ah1M1ld8xjWv3qbvFwHiFVWrq1yFvV4f7w+mzaqiR4IlSgkqhcRdHwsGgomwzBH51sRY4NEowLxnaBjcW/A==}
@@ -1739,7 +1739,7 @@ snapshots:
 
   '@lix-js/server-protocol-schema@0.1.1': {}
 
-  '@material/material-color-utilities@0.3.0(patch_hash=d908b4656c84ea0edcaab27d59d7e83333ce172f88841fcc9006b2ca33590b3d)': {}
+  '@material/material-color-utilities@0.4.0(patch_hash=ba9c0fd32469c32e8fbc40d212f789ab9438cca094fa57f398755793916bd133)': {}
 
   '@napi-rs/wasm-runtime@1.1.1':
     dependencies:

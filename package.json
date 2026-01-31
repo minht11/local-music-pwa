@@ -42,7 +42,7 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
-		"@material/material-color-utilities": "^0.3.0",
+		"@material/material-color-utilities": "^0.4.0",
 		"@resvg/resvg-js": "^2.6.2",
 		"@tanstack/virtual-core": "^3.13.18",
 		"@types/dom-navigation": "^1.0.6",
@@ -73,8 +73,8 @@
 			"prettier-plugin-sort-imports": "-"
 		},
 		"patchedDependencies": {
-			"@material/material-color-utilities": "patches/@material__material-color-utilities.patch",
-			"debug": "patches/debug.patch"
+			"debug": "patches/debug.patch",
+			"@material/material-color-utilities": "patches/@material__material-color-utilities.patch"
 		},
 		"onlyBuiltDependencies": [
 			"@biomejs/biome",
