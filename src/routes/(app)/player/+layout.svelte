@@ -169,8 +169,16 @@
 				<TracksListContainer
 					items={player.itemsIds}
 					predefinedMenuItems={{
-						addToQueue: false,
+						disableAddToQueue: true,
 					}}
+					menuItems={(_track, index) => [
+						{
+							label: m.playerRemoveFromQueue(),
+							action: () => {
+								player.removeFromQueue(index)
+							},
+						},
+					]}
 					onItemClick={({ index }) => {
 						player.playTrack(index)
 					}}

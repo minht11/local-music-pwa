@@ -59,7 +59,7 @@ export class MainStore {
 
 	removeLibraryItemOpen: RemoveLibraryItemOptions | null = $state(null)
 
-	addTrackToPlaylistDialogOpen: number[] | null = $state(null)
+	addTrackToPlaylistDialogOpen: readonly number[] | null = $state(null)
 
 	appInstallPromptEvent: BeforeInstallPromptEvent | null = $state(null)
 

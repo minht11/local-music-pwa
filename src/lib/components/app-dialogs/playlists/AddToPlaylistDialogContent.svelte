@@ -11,7 +11,7 @@
 	import { dbBatchModifyPlaylistsSelection } from '$lib/library/playlists-actions'
 
 	interface Props {
-		trackIds: number[]
+		trackIds: readonly number[]
 		children: Snippet<[{ save: () => Promise<void> }]>
 	}
 

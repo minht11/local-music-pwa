@@ -352,6 +352,31 @@ export class PlayerStore {
 		}
 	}
 
+	removeFromQueue = (index: number): void => {
+		if (index < 0 || index >= this.itemsIds.length) {
+			return
+		}
+
+		const trackId = this.itemsIds[index]
+		invariant(trackId !== undefined)
+
+		if (this.#itemsIdsShuffled) {
+			this.#itemsIdsShuffled.splice(index, 1)
+			const originalIndex = this.#itemsIdsOriginalOrder.indexOf(trackId)
+			if (originalIndex !== -1) {
+				this.#itemsIdsOriginalOrder.splice(originalIndex, 1)
+			}
+		} else {
+			this.#itemsIdsOriginalOrder.splice(index, 1)
+		}
+
+		if (index < this.#activeTrackIndex) {
+			this.#activeTrackIndex -= 1
+		} else if (index === this.#activeTrackIndex) {
+			this.#activeTrackIndex = -1
+		}
+	}
+
 	clearQueue = (): void => {
 		this.#itemsIdsOriginalOrder = []
 		this.#itemsIdsShuffled = null
