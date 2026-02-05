@@ -16,33 +16,33 @@ export const formatNameOrUnknown = (name: StringOrUnknownItem, fallback = m.unkn
 	return name === UNKNOWN_ITEM ? fallback : name
 }
 
-export const getItemLanguage = (lang: string | undefined): string | undefined => {
-	if (!lang) {
+export const getItemLanguage = (language: string | undefined): string | undefined => {
+	if (!language) {
 		return
 	}
 
-	lang = lang.toLowerCase()
+	const lang = language.toLowerCase()
 	switch (lang) {
-		case "jp":
-		case "jap":
-		case "japanese":
-			return "ja"
-		case "korean":
-			return "ko"
-		case "zho":
-		case "chinese":
-			return "zh"
-		case "cantonese":
-			return "yue"
-		case "fre":
-		case "french":
-			return "fr"
-		case "esp":
-		case "spanish":
-			return "es"
-		case "eng":
-		case "english":
-			return "en"
+		case 'jp':
+		case 'jap':
+		case 'japanese':
+			return 'ja'
+		case 'korean':
+			return 'ko'
+		case 'zho':
+		case 'chinese':
+			return 'zh'
+		case 'cantonese':
+			return 'yue'
+		case 'fre':
+		case 'french':
+			return 'fr'
+		case 'esp':
+		case 'spanish':
+			return 'es'
+		case 'eng':
+		case 'english':
+			return 'en'
 		default:
 			return lang
 	}
