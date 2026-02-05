@@ -59,6 +59,7 @@
 
 	const languageOptions: { name: string; value: Locale }[] = [
 		{ name: 'English (EN)', value: 'en' },
+		{ name: 'Français (FR)', value: 'fr' },
 		{ name: 'Lietuvių (LT)', value: 'lt' },
 		{ name: 'Deutsch (DE)', value: 'de' },
 	]
