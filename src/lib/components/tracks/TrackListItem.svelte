@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
-	import { formatArtists, formatNameOrUnknown } from '$lib/helpers/utils/text.ts'
+	import { formatArtists, formatNameOrUnknown, getItemLanguage } from '$lib/helpers/utils/text.ts'
 	import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
 	import Artwork from '../Artwork.svelte'
 	import FavoriteButton from '../FavoriteButton.svelte'
@@ -65,7 +65,7 @@
 				Error loading track with id {trackId}
 			</div>
 		{:else if track}
-			<div class="flex flex-col truncate">
+			<div class="flex flex-col truncate" lang={getItemLanguage(track?.language)}>
 				<div class={[active ? 'text-primary' : 'color-onSurface', 'truncate']}>
 					{track.name}
 				</div>

@@ -11,6 +11,7 @@
 <script lang="ts">
 	interface Props {
 		style?: string
+		lang?: string
 		class?: ClassValue
 		ariaLabel?: string
 		ariaRowIndex?: number
@@ -24,6 +25,7 @@
 		children,
 		class: className,
 		style,
+		lang,
 		ariaLabel,
 		ariaRowIndex,
 		tabindex = 0,
@@ -40,6 +42,7 @@
 	{@attach ripple()}
 	{style}
 	{tabindex}
+	{lang}
 	class={[
 		className,
 		'flex cursor-pointer items-center overflow-hidden rounded-lg pr-2 pl-4 -outline-offset-2 contain-content hover:bg-onSurface/10',
