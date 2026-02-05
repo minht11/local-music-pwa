@@ -28,5 +28,7 @@
 	"files.associations": {
 		"*.css": "tailwindcss"
 	},
-	"css.lint.unknownAtRules": "ignore"
+	"css.lint.unknownAtRules": "ignore",
+	"vite.https": true,
+	"vite.host": "http://localhost:4000/"
 }

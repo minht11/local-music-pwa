@@ -1,0 +1,13 @@
+{
+	"servers": {
+		"wallaby": {
+			"command": "powershell.exe",
+			"args": [
+				"node",
+				"$Env:USERPROFILE/.wallaby/mcp/"
+			],
+			"type": "stdio"
+		}
+	},
+	"inputs": []
+}
