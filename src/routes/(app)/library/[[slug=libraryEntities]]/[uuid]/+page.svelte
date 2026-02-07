@@ -32,6 +32,8 @@
 	const tracks = $derived(tracksQuery.value)
 	const slug = $derived(data.slug)
 
+	const isFavoritesView = $derived(slug === 'playlists' && item.id === FAVORITE_PLAYLIST_ID)
+
 	const getFallbackArtwork = () => {
 		if (slug === 'playlists') {
 			return 'playlist'
@@ -55,7 +57,7 @@
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
 
 	const playlistTrackMenuItems = (track: TrackData) => {
-		if (item.id === FAVORITE_PLAYLIST_ID) {
+		if (isFavoritesView) {
 			return []
 		}
 
@@ -84,7 +86,7 @@
 					}
 
 		if (slug === 'playlists') {
-			if (item.id === FAVORITE_PLAYLIST_ID) {
+			if (isFavoritesView) {
 				return [addToQueueMenuItem]
 			}
 
@@ -206,8 +208,10 @@
 	<TracksListContainer
 		items={tracks.tracksIds}
 		predefinedMenuItems={{
-			viewAlbum: slug !== 'albums',
-			viewArtist: slug !== 'artists',
+			disableViewAlbum: slug === 'albums',
+			disableViewArtist: slug === 'artists',
+			disableAddToFavorites: isFavoritesView,
+			enableMultiRemoveFromFavorites: isFavoritesView,
 		}}
 		menuItems={slug === 'playlists' ? playlistTrackMenuItems : undefined}
 	/>

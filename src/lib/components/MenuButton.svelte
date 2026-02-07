@@ -34,23 +34,21 @@
 	const menu = useMenu()
 </script>
 
-<IconButton
-	{ariaLabel}
-	{tabindex}
-	{icon}
-	{tooltip}
-	class={className}
-	onclick={(e) => {
-		e.stopPropagation()
+{#if menuItems}
+	<IconButton
+		{ariaLabel}
+		{tabindex}
+		{icon}
+		{tooltip}
+		class={className}
+		onclick={(e) => {
+			e.stopPropagation()
 
-		if (!menuItems) {
-			return
-		}
-
-		menu.showFromEvent(e, typeof menuItems === 'function' ? menuItems() : menuItems, {
-			anchor: true,
-			width,
-			preferredAlignment: alignment,
-		})
-	}}
-/>
+			menu.showFromEvent(e, typeof menuItems === 'function' ? menuItems() : menuItems, {
+				anchor: true,
+				width,
+				preferredAlignment: alignment,
+			})
+		}}
+	/>
+{/if}

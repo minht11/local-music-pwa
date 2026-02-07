@@ -1,28 +1,15 @@
 <script lang="ts" module>
-	import { goto } from '$app/navigation'
-	import { resolve } from '$app/paths'
-	import { getDatabase } from '$lib/db/database.ts'
 	import { isPrimaryModifierKey } from '$lib/helpers/utils/ua.ts'
 	import { useSetOverlaySnippet } from '$lib/layout-bottom-bar.svelte.ts'
 	import type { TrackData } from '$lib/library/get/value.ts'
-	import { toggleFavoriteTrack } from '$lib/library/playlists-actions'
 	import Button from '../Button.svelte'
 	import IconButton from '../IconButton.svelte'
 	import MenuButton from '../MenuButton.svelte'
 	import type { MenuItem } from '../menu/types.ts'
-	import { snackbar } from '../snackbar/snackbar.ts'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import { SelectionTracker } from './selection.svelte.ts'
 	import TrackListItem from './TrackListItem.svelte'
-
-	export type PredefinedTrackMenuItems =
-		| 'addToQueue'
-		| 'addToPlaylist'
-		| 'removeFromLibrary'
-		| 'addToFavorites'
-		| 'viewAlbum'
-		| 'viewArtist'
-
+	import { type PredefinedTrackMenuItemOption, useTrackMenuItems } from './use-track-menu-items.ts'
 	export interface TrackItemClick {
 		track: TrackData
 		items: readonly number[]
@@ -32,7 +19,6 @@
 
 <script lang="ts">
 	const player = usePlayer()
-	const main = useMainStore()
 
 	const defaultOnItemClick = (data: TrackItemClick) => {
 		player.playTrack(data.index, data.items)
@@ -40,7 +26,7 @@
 
 	interface Props {
 		items: readonly number[]
-		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItems, boolean>>
+		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItemOption, boolean>>
 		menuItems?: (track: TrackData, index: number) => MenuItem[]
 		onItemClick?: (data: TrackItemClick) => void
 	}
@@ -52,95 +38,10 @@
 		onItemClick = defaultOnItemClick,
 	}: Props = $props()
 
-	interface PredefinedMenuItem extends MenuItem {
-		predefinedKey: PredefinedTrackMenuItems
-	}
-
-	const viewRelated = async (store: 'albums' | 'artists', name: string) => {
-		try {
-			const db = await getDatabase()
-			const album = await db.getFromIndex(store, 'name', name)
-			invariant(album)
-
-			const path = resolve('/(app)/library/[[slug=libraryEntities]]/[uuid]', {
-				slug: store,
-				uuid: album.uuid,
-			})
-
-			await goto(path)
-		} catch (error) {
-			snackbar.unexpectedError(error)
-		}
-	}
-
-	const getMenuItems = (track: TrackData, index: number) => {
-		const albumName = track.album
-		// In a future we should handle ability to view multiple artists
-		const artistName = track.artists[0]
-
-		type FalsyValue = false | undefined | null | ''
-		const predefinedMenuItemsList: (PredefinedMenuItem | FalsyValue)[] = [
-			{
-				predefinedKey: 'addToPlaylist',
-				label: m.libraryAddToPlaylist(),
-				action: () => {
-					main.addTrackToPlaylistDialogOpen = [track.id]
-				},
-			},
-			{
-				predefinedKey: 'addToFavorites',
-				label: track.favorite ? m.trackRemoveFromFavorites() : m.trackAddToFavorites(),
-				action: () => {
-					void toggleFavoriteTrack(track.favorite, track.id)
-				},
-			},
-			{
-				predefinedKey: 'addToQueue',
-				label: m.playerAddToQueue(),
-				action: () => {
-					player.addToQueue(track.id)
-				},
-			},
-			albumName && {
-				predefinedKey: 'viewAlbum',
-				label: m.trackViewAlbum(),
-				action: () => {
-					void viewRelated('albums', albumName)
-				},
-			},
-			artistName && {
-				predefinedKey: 'viewArtist',
-				label: m.trackViewArtist(),
-				action: () => {
-					void viewRelated('artists', artistName)
-				},
-			},
-			{
-				predefinedKey: 'removeFromLibrary',
-				label: m.libraryRemoveFromLibrary(),
-				action: () => {
-					main.removeLibraryItemOpen = {
-						name: track.name,
-						id: track.id,
-						storeName: 'tracks',
-					}
-				},
-			},
-		]
-
-		const predefinedItems = predefinedMenuItemsList.filter((item) => {
-			if (!item) {
-				return false
-			}
-
-			// By default, all predefined menu items are enabled.
-			const isExplicitlyDisabled = predefinedMenuItems[item.predefinedKey] === false
-
-			return !isExplicitlyDisabled
-		}) as MenuItem[]
-
-		return [...predefinedItems, ...(menuItems ? menuItems(track, index) : [])]
-	}
+	const { getMenuItems, getMultiSelectMenuItems } = useTrackMenuItems(
+		() => menuItems,
+		() => predefinedMenuItems,
+	)
 
 	const selection = new SelectionTracker()
 
@@ -218,22 +119,7 @@
 		class="pointer-events-auto relative mx-auto flex w-full max-w-125 items-center gap-1 rounded-lg bg-inverseSurface p-2 py-1 text-inverseOnSurface"
 	>
 		<MenuButton
-			menuItems={() => [
-				{
-					label: 'Add to playlist',
-					action: () => {
-						main.addTrackToPlaylistDialogOpen = selection.selectedIds
-					},
-				},
-				{
-					label: 'Add to favorites',
-					action: () => {
-						selection.selectedIds.forEach((trackId) => {
-							void toggleFavoriteTrack(true, trackId)
-						})
-					},
-				},
-			]}
+			menuItems={() => getMultiSelectMenuItems(selection.selectedIds)}
 			alignment={{ horizontal: 'left', vertical: 'bottom' }}
 		/>
 
@@ -241,7 +127,8 @@
 
 		<Button
 			kind="flat"
-			class="ml-auto text-inversePrimary!"
+			class="ml-auto text-inversePrimary! disabled:text-inverseOnSurface/50!"
+			disabled={selection.size === items.length}
 			onclick={() => {
 				selection.selectMany(items)
 			}}
