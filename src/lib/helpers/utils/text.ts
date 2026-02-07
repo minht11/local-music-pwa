@@ -27,22 +27,36 @@ export const getItemLanguage = (language: string | undefined): string | undefine
 		case 'jap':
 		case 'japanese':
 			return 'ja'
+
 		case 'korean':
 			return 'ko'
+
+		case 'zh-cn':
+  			return 'zh-CN'
+
+		case 'zh-tw':
+  			return 'zh-TW'
+
 		case 'zho':
 		case 'chinese':
-			return 'zh'
+		case 'zh':
+  			return 'zh-CN'
+
 		case 'cantonese':
 			return 'yue'
+
 		case 'fre':
 		case 'french':
 			return 'fr'
+
 		case 'esp':
 		case 'spanish':
 			return 'es'
+
 		case 'eng':
 		case 'english':
 			return 'en'
+			
 		default:
 			return lang
 	}

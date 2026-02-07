@@ -62,6 +62,8 @@
 		{ name: 'Français (FR)', value: 'fr' },
 		{ name: 'Lietuvių (LT)', value: 'lt' },
 		{ name: 'Deutsch (DE)', value: 'de' },
+		{ name: '简体中文', value: 'zh-CN' },
+  		{ name: '繁體中文', value: 'zh-TW' }, 
 	]
 
 	const updateMainColor = debounce((value: string | null) => {
