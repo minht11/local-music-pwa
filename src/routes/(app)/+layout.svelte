@@ -149,7 +149,7 @@
 		{/if}
 	</div>
 
-	<div bind:clientHeight={bottomBarHeight} class="col-[1/6] empty:hidden">
+	<div bind:clientHeight={bottomBarHeight} class="col-[1/6]">
 		{@render overlaySnippets.bottomBar?.()}
 	</div>
 </div>
