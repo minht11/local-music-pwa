@@ -7,16 +7,16 @@
 export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height: number): number {
 	const SHIFT = 3 // quantize 8-bit -> 5-bit
 	const BINS = 32 * 32 * 32 // 5-bit bins
-	const hueBins = 180 // hue histogram bins (2° each)
-	const hueWindow = 18 // accept ±18° around peak hue
+	const hueBins = 360 // hue histogram bins (1° each) - increased for better resolution
+	const hueWindow = 24 // accept ±24° around peak hue
 	const alphaThreshold = 240 // ignore semi-transparent
-	const minSat = 0.06 // ignore near-gray
-	const minVal = 0.1 // ignore near-black
-	const whiteSkipV = 0.96 // ignore near-white if also low sat
-	const whiteSkipS = 0.12
-	const satGamma = 1.8 // stronger accent preference
-	const valGamma = 0.25 // small brightness weight
-	const centerBias = 0.25 // 0..1: extra weight to center
+	const minSat = 0.15 // ignore near-gray - increased to focus on vibrant colors
+	const minVal = 0.15 // ignore near-black - increased to avoid dark noise
+	const whiteSkipV = 0.94 // ignore near-white if also low sat
+	const whiteSkipS = 0.15
+	const satGamma = 2.2 // stronger accent preference for vibrant colors
+	const valGamma = 0.4 // moderate brightness weight
+	const centerBias = 0.15 // reduced center bias to avoid missing off-center accents
 
 	// Hue histogram
 	const hueHist = new Float64Array(hueBins)
@@ -116,8 +116,11 @@ export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height
 	}
 	const peakHue = (peak + 0.5) * (360 / hueBins)
 
-	// PASS 2: Build restricted 5-bit RGB histogram
+	// PASS 2: Build restricted RGB histogram and track actual pixel colors
 	const counts = new Float64Array(BINS)
+	const rSums = new Float64Array(BINS)
+	const gSums = new Float64Array(BINS)
+	const bSums = new Float64Array(BINS)
 	col = 0
 	row = 0
 
@@ -169,6 +172,9 @@ export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height
 
 		const idx = ((r >> SHIFT) << 10) | ((g >> SHIFT) << 5) | (b >> SHIFT)
 		;(counts[idx] as number) += w
+		;(rSums[idx] as number) += r * w
+		;(gSums[idx] as number) += g * w
+		;(bSums[idx] as number) += b * w
 
 		col++
 		if (col >= width) {
@@ -187,18 +193,14 @@ export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height
 			bestIdx = idx
 		}
 	}
-	if (bestIdx < 0) {
+	if (bestIdx < 0 || bestW === 0) {
 		return 0xff000000
 	}
 
-	// Decode bin center back to RGB
-	const r5 = (bestIdx >> 10) & 31
-	const g5 = (bestIdx >> 5) & 31
-	const b5 = bestIdx & 31
-	const from5 = (v5: number) => (v5 << SHIFT) + (1 << (SHIFT - 1))
-	const R = from5(r5)
-	const G = from5(g5)
-	const B = from5(b5)
+	// Calculate weighted average of actual pixel colors in the winning bin
+	const R = Math.round((rSums[bestIdx] as number) / bestW)
+	const G = Math.round((gSums[bestIdx] as number) / bestW)
+	const B = Math.round((bSums[bestIdx] as number) / bestW)
 
 	return (0xff << 24) | (R << 16) | (G << 8) | B
 }

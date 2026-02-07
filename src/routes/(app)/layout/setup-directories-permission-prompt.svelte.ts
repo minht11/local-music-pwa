@@ -1,4 +1,3 @@
-import { snackbar } from '$lib/components/snackbar/snackbar'
 import { getDatabase } from '$lib/db/database'
 
 export interface DirectoryNeedingPermission {

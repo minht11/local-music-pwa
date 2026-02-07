@@ -2,29 +2,46 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 	import { formatArtists, formatNameOrUnknown, getItemLanguage } from '$lib/helpers/utils/text.ts'
+	import { isMobile } from '$lib/helpers/utils/ua.ts'
 	import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
 	import Artwork from '../Artwork.svelte'
 	import FavoriteButton from '../FavoriteButton.svelte'
-	import ListItem, { type MenuItem } from '../ListItem.svelte'
+	import IconButton from '../IconButton.svelte'
+	import Icon from '../icon/Icon.svelte'
+	import ListItem from '../ListItem.svelte'
+	import MenuButton from '../MenuButton.svelte'
+	import type { MenuItem } from '../menu/types.ts'
 
 	interface Props {
 		trackId: number
 		style?: string
-		ariaRowIndex?: number
-		active?: boolean
+		ariaRowIndex: number
+		active: boolean
+		activePlaying: boolean
 		class?: ClassValue
-		menuItems?: (playlist: TrackData) => MenuItem[]
-		onclick?: (track: TrackData) => void
+		selectionEnabled: boolean
+		selectionHover: boolean
+		selected: boolean
+		menuItems?: (track: TrackData) => MenuItem[]
+		onclick?: (track: TrackData, e: KeyboardEvent | MouseEvent) => void
+		onpointerenter?: (e: PointerEvent) => void
+		toggleSelection?: (isSelected: boolean) => void
 	}
 
 	const {
 		trackId,
 		style,
 		active,
+		activePlaying,
 		class: className,
-		onclick,
+		selectionEnabled,
+		selectionHover,
+		selected,
 		ariaRowIndex,
 		menuItems,
+		onclick,
+		onpointerenter,
+		toggleSelection,
 	}: Props = $props()
 
 	const query = createTrackQuery(() => trackId)
@@ -32,40 +49,79 @@
 
 	const artworkSrc = createManagedArtwork(() => track?.image?.small)
 
+	const menu = useMenu()
 	const menuItemsWithItem = $derived(track && menuItems?.bind(null, track))
 </script>
 
 <ListItem
 	{style}
-	menuItems={menuItemsWithItem}
 	tabindex={-1}
 	class={[
-		'h-18 text-left',
+		'group h-18 text-left',
 		active ? 'bg-onSurfaceVariant/10 text-onSurfaceVariant' : 'color-onSurfaceVariant',
 		className,
+		selected && 'bg-primary/5',
+		selectionHover && 'bg-tertiary/10',
 	]}
 	ariaLabel={m.trackPlay({ name: track?.name ?? '' })}
 	{ariaRowIndex}
-	onclick={() => onclick?.(track!)}
+	onclick={(e) => onclick?.(track!, e)}
+	{onpointerenter}
+	oncontextmenu={(e) => {
+		if (!menuItemsWithItem) {
+			return
+		}
+
+		e.preventDefault()
+
+		// On mobile, enter selection mode instead of showing context menu
+		if (isMobile()) {
+			if (!selectionEnabled) {
+				// Enter selection mode and select this item
+				toggleSelection?.(true)
+			}
+			return
+		}
+
+		menu.showFromEvent(e, menuItemsWithItem(), {
+			anchor: false,
+			position: { top: e.y, left: e.x },
+		})
+	}}
 >
-	<div role="cell" class="track-item grow items-center gap-5">
+	<div role="gridcell">
 		<Artwork
 			src={artworkSrc()}
 			alt={track?.name}
-			class={['hidden! h-10 w-10 rounded-sm @xs:flex!', loading && 'opacity-50']}
-		/>
+			class={['mr-4 hidden! h-10 w-10 rounded-sm @xs:flex!', loading && 'opacity-50']}
+		>
+			{#if activePlaying}
+				{@const barClassName = 'playing-bar h-5 w-[3px] origin-bottom rounded-sm bg-[white]'}
+				<div class="absolute inset-0 flex items-center justify-center gap-1 bg-scrim/40">
+					<span class={barClassName}></span>
+					<span class={[barClassName, '[--ani-delay:0.2s]']}></span>
+					<span class={[barClassName, '[--ani-delay:0.4s]']}></span>
+				</div>
+			{/if}
+		</Artwork>
+	</div>
 
-		{#if loading}
-			<div>
-				<div class="mb-2 h-2 rounded-xs bg-onSurface/10"></div>
-				<div class="h-1 w-1/8 rounded-xs bg-onSurface/10"></div>
-			</div>
-		{:else if query.error}
-			<div class="text-error">
-				Error loading track with id {trackId}
-			</div>
-		{:else if track}
-			<div class="flex flex-col truncate" lang={getItemLanguage(track?.language)}>
+	{#if loading}
+		<div>
+			<div class="mb-2 h-2 rounded-xs bg-onSurface/10"></div>
+			<div class="h-1 w-1/8 rounded-xs bg-onSurface/10"></div>
+		</div>
+	{:else if query.error}
+		<div class="text-error">
+			Error loading track with id {trackId}
+		</div>
+	{:else if track}
+		<div
+			role="gridcell"
+			class="track-item grow items-center gap-5"
+			lang={getItemLanguage(track?.language)}
+		>
+			<div class="flex flex-col truncate">
 				<div class={[active ? 'text-primary' : 'color-onSurface', 'truncate']}>
 					{track.name}
 				</div>
@@ -74,36 +130,99 @@
 				</div>
 			</div>
 
-			<div class="hidden @4xl:block">
+			<div class="hidden @3xl:block">
 				{formatNameOrUnknown(track.album)}
 			</div>
+		</div>
 
-			<div class="hidden tabular-nums @sm:block">
-				{formatDuration(track.duration)}
+		<div role="gridcell" class="flex gap-1">
+			<FavoriteButton
+				class={['hidden @sm:flex', selectionEnabled && 'invisible']}
+				trackId={track.id}
+				favorite={track.favorite}
+				tabindex={-1}
+			/>
+
+			<MenuButton
+				class={[selectionEnabled && 'invisible']}
+				tabindex={-1}
+				menuItems={menuItemsWithItem}
+			/>
+
+			<div
+				class={[
+					'w-16 items-center justify-items-end',
+					!selectionEnabled ? 'hidden @sm:grid' : 'grid',
+				]}
+			>
+				{#if !selectionEnabled}
+					<div
+						class="text-right tabular-nums stack-in-grid group-focus-within:opacity-0 group-hover:opacity-0"
+					>
+						{formatDuration(track.duration)}
+					</div>
+				{/if}
+
+				<IconButton
+					tabindex={-1}
+					tooltip={'Select track'}
+					class={[
+						'stack-in-grid',
+						selectionEnabled
+							? ''
+							: 'opacity-0 group-focus-within:opacity-100 group-hover:opacity-100',
+					]}
+					onclick={(e) => {
+						// If selection is not enabled, enable it
+						// otherwise let parent handle toggling
+						if (!selectionEnabled) {
+							e.stopPropagation()
+							toggleSelection?.(true)
+						}
+					}}
+				>
+					<div
+						class={[
+							'flex size-5 items-center justify-center rounded-sm border-2',
+							selected && 'border-primary bg-primary text-onPrimary',
+						]}
+					>
+						{#if selected}
+							<Icon type="check" class="size-5" />
+						{/if}
+					</div>
+				</IconButton>
 			</div>
-
-			<FavoriteButton class="hidden @sm:flex" trackId={track.id} favorite={track.favorite} />
-		{/if}
-	</div>
+		</div>
+	{/if}
 </ListItem>
 
-<style>
+<style lang="postcss">
+	@reference '../../../app.css';
+
 	.track-item {
-		--grid-cols: auto 1fr;
+		--grid-cols: 1fr;
 		display: grid;
 		grid-template-columns: var(--grid-cols);
 	}
 
-	@container (min-width: 24rem) {
+	@container (min-width: theme('container-3xl')) {
 		.track-item {
-			--grid-cols: auto 1.5fr 74px 44px;
+			--grid-cols: 1.5fr minmax(200px, 1fr);
 		}
 	}
 
-	/* @container (theme('containers.4xl')) { */
-	@container (min-width: 56rem) {
-		.track-item {
-			--grid-cols: auto 1.5fr minmax(200px, 1fr) 74px 44px;
+	@keyframes playing-bar {
+		0%,
+		100% {
+			transform: scaleY(0.3);
 		}
+		50% {
+			transform: scaleY(1);
+		}
+	}
+
+	.playing-bar {
+		animation: playing-bar 0.8s ease-in-out infinite var(--ani-delay, 0s) backwards;
 	}
 </style>

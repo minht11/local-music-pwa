@@ -1,7 +1,6 @@
 import {
 	argbFromHex,
 	Cam16,
-	type CorePalette,
 	HctSolver,
 	hexFromArgb,
 	// biome-ignore lint/style/noRestrictedImports: Main module for theme utilities
@@ -45,7 +44,7 @@ export type PaletteToken =
 	| 'inverseOnSurface'
 	| 'inversePrimary'
 
-type Tone = keyof CorePalette
+type Tone = 'a1' | 'a2' | 'a3' | 'n1' | 'n2' | 'error'
 type PaletteTokenInput = readonly [tone: Tone, light: number, dark: number]
 
 type PaletteTokensInputMap = Record<PaletteToken, PaletteTokenInput>

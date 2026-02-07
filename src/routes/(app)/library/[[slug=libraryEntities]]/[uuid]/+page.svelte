@@ -3,8 +3,8 @@
 	import Artwork from '$lib/components/Artwork.svelte'
 	import Button from '$lib/components/Button.svelte'
 	import Header from '$lib/components/Header.svelte'
-	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
+	import MenuButton from '$lib/components/MenuButton.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
@@ -19,7 +19,6 @@
 
 	const { data } = $props()
 
-	const menu = useMenu()
 	const main = useMainStore()
 	const player = usePlayer()
 
@@ -32,6 +31,8 @@
 	const item = $derived(itemQuery.value)
 	const tracks = $derived(tracksQuery.value)
 	const slug = $derived(data.slug)
+
+	const isFavoritesView = $derived(slug === 'playlists' && item.id === FAVORITE_PLAYLIST_ID)
 
 	const getFallbackArtwork = () => {
 		if (slug === 'playlists') {
@@ -56,7 +57,7 @@
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
 
 	const playlistTrackMenuItems = (track: TrackData) => {
-		if (item.id === FAVORITE_PLAYLIST_ID) {
+		if (isFavoritesView) {
 			return []
 		}
 
@@ -85,7 +86,7 @@
 					}
 
 		if (slug === 'playlists') {
-			if (item.id === FAVORITE_PLAYLIST_ID) {
+			if (isFavoritesView) {
 				return [addToQueueMenuItem]
 			}
 
@@ -103,7 +104,8 @@
 			{
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					main.removeLibraryItemOpen = {
+					main.removeFromLibraryOpen = {
+						type: 'single',
 						id: item.id,
 						name: item.name,
 						storeName: slug,
@@ -198,19 +200,7 @@
 				</Button>
 
 				{#if menuItems}
-					<IconButton
-						icon="moreVertical"
-						tooltip={m.more()}
-						onclick={(e) => {
-							menu.showFromEvent(e, menuItems, {
-								anchor: true,
-								preferredAlignment: {
-									horizontal: 'right',
-									vertical: 'top',
-								},
-							})
-						}}
-					/>
+					<MenuButton tooltip={m.more()} menuItems={() => menuItems} />
 				{/if}
 			</div>
 		</div>
@@ -219,8 +209,10 @@
 	<TracksListContainer
 		items={tracks.tracksIds}
 		predefinedMenuItems={{
-			viewAlbum: slug !== 'albums',
-			viewArtist: slug !== 'artists',
+			disableViewAlbum: slug === 'albums',
+			disableViewArtist: slug === 'artists',
+			disableAddToFavorites: isFavoritesView,
+			enableMultiRemoveFromFavorites: isFavoritesView,
 		}}
 		menuItems={slug === 'playlists' ? playlistTrackMenuItems : undefined}
 	/>

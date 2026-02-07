@@ -142,7 +142,7 @@
 			"jsxQuoteStyle": "single",
 			"indentWidth": 4
 		},
-		"globals": ["m", "invariant", "usePlayer", "useMainStore", "untrack"]
+		"globals": ["m", "invariant", "usePlayer", "useMainStore", "untrack", "snackbar"]
 	},
 	"json": {
 		"formatter": {
@@ -154,6 +154,7 @@
 			"tailwindDirectives": true
 		},
 		"formatter": {
+			"enabled": true,
 			"quoteStyle": "single"
 		}
 	},

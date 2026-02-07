@@ -26,6 +26,7 @@ const showSnackbar = <const T>(newSnackbar: SnackbarOptions<T> | string): void =
 	}
 }
 
+/** @public */
 export const snackbar = <const T>(newSnackbar: SnackbarOptions<T> | string): void => {
 	untrack(() => showSnackbar(newSnackbar))
 }

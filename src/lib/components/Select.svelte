@@ -1,13 +1,12 @@
 <script lang="ts" module>
-	import { autoUpdate, computePosition, flip, shift } from '@floating-ui/dom'
 	import { ripple } from '$lib/attachments/ripple.ts'
-	import { assign } from '$lib/helpers/utils/assign'
 	import Icon from './icon/Icon.svelte'
 
 	export interface SelectProps<T, Key extends keyof T, LabelKey extends keyof T> {
 		items: readonly T[]
 		key: Key
 		labelKey: LabelKey
+		placeholder?: string
 		selected?: T[Key]
 		class?: ClassValue
 	}
@@ -18,50 +17,26 @@
 		items,
 		key,
 		labelKey,
+		placeholder,
 		selected = $bindable(),
 		class: className,
 	}: SelectProps<T, Key, LabelKey> = $props()
 
 	const selectedItem = $derived(items.find((item) => item[key] === selected))
 
+	const anchorId = $props.id()
+	const anchorName = `--select-anchor-${anchorId}`
+
 	const popupId = crypto.randomUUID()
-	let target = $state<HTMLButtonElement | null>(null)
 	let popup = $state<HTMLDivElement | null>(null)
 	let isOpen = $state(false)
-
-	$effect(() => {
-		if (!popup || !target) {
-			return
-		}
-
-		const updatePosition = async () => {
-			if (!popup || !target) {
-				return
-			}
-
-			const { x, y } = await computePosition(target, popup, {
-				placement: 'bottom-start',
-				middleware: [flip(), shift()],
-			})
-
-			assign(popup.style, {
-				left: `${x}px`,
-				top: `${y}px`,
-				width: `${target.offsetWidth}px`,
-			})
-		}
-
-		const cleanup = autoUpdate(target, popup, updatePosition)
-
-		return cleanup
-	})
 </script>
 
 <button
-	bind:this={target}
 	{@attach ripple()}
+	style={`anchor-name: ${anchorName};`}
 	class={[
-		'relative flex h-10 cursor-pointer appearance-none items-center gap-2 truncate overflow-hidden rounded-sm border border-outlineVariant pr-2 pl-4 transition-[outline-width] duration-150',
+		'select-anchor relative flex h-10 cursor-pointer appearance-none items-center gap-2 truncate overflow-hidden rounded-sm border border-outlineVariant pr-2 pl-4 transition-[outline-width] duration-150',
 		className,
 	]}
 	role="combobox"
@@ -74,7 +49,7 @@
 		{#if selectedItem}
 			{selectedItem[labelKey]}
 		{:else}
-			Select item
+			{placeholder}
 		{/if}
 	</div>
 
@@ -87,7 +62,8 @@
 	aria-orientation="vertical"
 	role="listbox"
 	popover="auto"
-	class="absolute m-0 hidden flex-col rounded-sm bg-surfaceContainerHighest px-0 py-2 shadow-xl open:flex"
+	style={`position-anchor: ${anchorName};`}
+	class="select-popup m-0 hidden flex-col rounded-sm bg-surfaceContainerHighest px-0 py-2 shadow-xl open:flex"
 	ontoggle={(e) => {
 		isOpen = e.newState === 'open'
 	}}
@@ -112,15 +88,17 @@
 </div>
 
 <style>
-	[popover]:popover-open {
-		opacity: 1;
-	}
-
-	[popover] {
-		opacity: 0;
+	.select-popup {
+		position-area: bottom center;
+		position-try-fallbacks: flip-block;
+		width: anchor-size(width);
 		transition-property: opacity, overlay, display;
 		transition-duration: 0.2s;
 		transition-behavior: allow-discrete;
+		opacity: 0;
+		&:popover-open {
+			opacity: 1;
+		}
 	}
 
 	@starting-style {

@@ -23,7 +23,7 @@
 		...props
 	}: CommonDialogProps<S> = $props()
 
-	const getItems = (data: S) => {
+	const getButtonItems = (data: S) => {
 		if (typeof buttons === 'function') {
 			return buttons(data)
 		} else {
@@ -49,7 +49,7 @@
 				</div>
 			{/if}
 
-			<DialogFooter buttons={getItems(data)} onclose={close} />
+			<DialogFooter buttons={getButtonItems(data)} onclose={close} />
 		</form>
 	{/snippet}
 </Dialog>

@@ -4,15 +4,15 @@
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
 	import Separator from '$lib/components/Separator.svelte'
-	import { snackbar } from '$lib/components/snackbar/snackbar'
 	import TextField from '$lib/components/TextField.svelte'
 	import { getDatabase } from '$lib/db/database.ts'
+	import { createInlineQuery } from '$lib/db/query/inline-query.svelte'
 	import { createQuery } from '$lib/db/query/query.ts'
 	import { getLibraryItemIds } from '$lib/library/get/ids'
 	import { dbBatchModifyPlaylistsSelection } from '$lib/library/playlists-actions'
 
 	interface Props {
-		trackIds: number[]
+		trackIds: readonly number[]
 		children: Snippet<[{ save: () => Promise<void> }]>
 	}
 
@@ -20,14 +20,27 @@
 
 	let searchTerm = $state('')
 
-	const playlistsIds = $derived(
-		await getLibraryItemIds('playlists', {
-			sort: 'createdAt',
-			order: 'desc',
-			searchTerm,
-			searchFn: (p, term) => p.name.includes(term),
-		}),
-	)
+	const getPlaylists = createInlineQuery({
+		key: () => [searchTerm],
+		fetcher: () =>
+			getLibraryItemIds('playlists', {
+				sort: 'createdAt',
+				order: 'desc',
+				searchTerm,
+				searchFn: (p, term) => p.name.includes(term),
+			}),
+		onDatabaseChange: (changes) => {
+			for (const change of changes) {
+				if (change.storeName === 'playlists') {
+					return true
+				}
+			}
+
+			return false
+		},
+	})
+
+	const playlistsIds = $derived(await getPlaylists())
 
 	const initialTrackPlaylists = createQuery({
 		// We only care about initial values

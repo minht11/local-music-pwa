@@ -178,7 +178,11 @@ source {
 	}
 }
 
-.tooltip-enter {
+.tooltip {
+	position: fixed;
+	position-area: bottom;
+	position-try-fallbacks: top, left, right;
+	margin: 8px;
 	animation: tooltip-fade-in 0.3s ease-out;
 }
 
@@ -339,6 +343,10 @@ source {
 
 @utility scrollbar-gutter-stable {
 	scrollbar-gutter: stable;
+}
+
+@utility stack-in-grid {
+	grid-area: 1 / 1;
 }
 
 @custom-variant active-view-player {

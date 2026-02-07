@@ -31,7 +31,13 @@
 	]}
 	onsubmit={onSubmitHandler}
 >
-	<TextField name="name" placeholder="New playlist name" required minLength={4} maxLength={40} />
+	<TextField
+		name="name"
+		placeholder={m.libraryPlaylistName()}
+		required
+		minLength={4}
+		maxLength={40}
+	/>
 
-	<TextField name="description" placeholder="Description" maxLength={200} class="mt-6" />
+	<TextField name="description" placeholder={m.description()} maxLength={200} class="mt-6" />
 </CommonDialog>

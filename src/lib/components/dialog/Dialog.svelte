@@ -10,7 +10,7 @@
 
 	export interface DialogProps<S> {
 		open?: boolean | DialogOpenAccessor<S>
-		title?: string
+		title?: string | ((data: S) => string)
 		icon?: IconType
 		class?: ClassValue
 		children?: Snippet<[{ data: S; close: () => void }]>
@@ -33,6 +33,14 @@
 		} else {
 			return open
 		}
+	})
+
+	const titleText = $derived.by(() => {
+		if (typeof title === 'function') {
+			return openData ? title(openData) : ''
+		}
+
+		return title
 	})
 
 	const close = () => {
@@ -195,8 +203,8 @@
 				<Icon type={icon} class="text-secondary" />
 			{/if}
 
-			{#if title}
-				<div class="text-headline-sm">{title}</div>
+			{#if titleText}
+				<div class="text-headline-sm">{titleText}</div>
 			{/if}
 		</header>
 

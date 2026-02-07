@@ -20,6 +20,7 @@ declare global {
 		// Optional because Safari and Firefox don't support it
 		userAgentData?: {
 			mobile: boolean
+			platform: 'macOS' | 'Windows' | (string & {})
 			brands: {
 				brand: string
 				version: string

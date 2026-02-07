@@ -1,5 +1,4 @@
 import type { IDBPObjectStore } from 'idb'
-import { snackbar } from '$lib/components/snackbar/snackbar'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { createUIAction } from '$lib/helpers/ui-action.ts'
@@ -136,8 +135,8 @@ export const getPlaylistEntriesDatabaseStore = async (): Promise<DbPlaylistEntri
 }
 
 export interface AddTracksToPlaylistOptions {
-	playlistIds: number[]
-	trackIds: number[]
+	playlistIds: readonly number[]
+	trackIds: readonly number[]
 }
 
 export const dbAddTracksToPlaylistsWithTx = (
@@ -172,8 +171,8 @@ export const dbAddTracksToPlaylistsWithTx = (
 }
 
 interface RemoveTracksFromPlaylistOptions {
-	playlistIds: number[]
-	trackIds: number[]
+	playlistIds: readonly number[]
+	trackIds: readonly number[]
 }
 
 export const dbRemoveTracksFromPlaylistsWithTx = async (
@@ -203,9 +202,9 @@ export const dbRemoveTracksFromPlaylistsWithTx = async (
 }
 
 interface BatchModifyPlaylistSelectionOptions {
-	trackIds: number[]
-	playlistsIdsAddTo: number[]
-	playlistsIdsRemoveFrom: number[]
+	trackIds: readonly number[]
+	playlistsIdsAddTo: readonly number[]
+	playlistsIdsRemoveFrom: readonly number[]
 }
 
 export const dbBatchModifyPlaylistsSelection = async (
@@ -259,6 +258,16 @@ export const removeTrackEntryFromPlaylist = createUIAction(
 
 const dbAddTrackToFavorites = async (trackId: number): Promise<void> => {
 	const db = await getDatabase()
+
+	// Check if already exists to prevent duplicates
+	const existing = await db.getFromIndex('playlistEntries', 'playlistTrack', [
+		FAVORITE_PLAYLIST_ID,
+		trackId,
+	])
+
+	if (existing) {
+		return
+	}
 
 	const playlistEntry: Omit<PlaylistEntry, 'id'> = {
 		playlistId: FAVORITE_PLAYLIST_ID,

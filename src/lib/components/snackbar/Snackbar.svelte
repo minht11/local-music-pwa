@@ -74,7 +74,7 @@
 			{#if controls}
 				<Button
 					kind="flat"
-					class="!text-inversePrimary"
+					class="text-inversePrimary!"
 					onclick={() => {
 						ondismiss(id)
 						controls.action()

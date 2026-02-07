@@ -26,7 +26,7 @@
 
 <div
 	class={[
-		'flex aspect-1/1 overflow-hidden ring-1 ring-surfaceContainerHigh contain-strict',
+		'flex aspect-square overflow-hidden ring-1 ring-surfaceContainerHigh contain-strict',
 		!noFallbackBg && 'bg-surfaceContainerHighest',
 		className,
 	]}

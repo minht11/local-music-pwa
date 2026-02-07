@@ -4,7 +4,9 @@
 	import type { Playlist } from '$lib/library/types.ts'
 	import type { IconType } from '../icon/Icon.svelte'
 	import Icon from '../icon/Icon.svelte'
-	import ListItem, { type MenuItem } from '../ListItem.svelte'
+	import ListItem from '../ListItem.svelte'
+	import MenuButton from '../MenuButton.svelte'
+	import type { MenuItem } from '../menu/types.ts'
 
 	export type MenuItemsSelector = (playlist: Playlist) => MenuItem[]
 	export type MenuItemsConfig =
@@ -19,7 +21,7 @@
 	interface Props {
 		playlistId: number
 		style?: string
-		ariaRowIndex?: number
+		ariaRowIndex: number
 		active?: boolean
 		class?: ClassValue
 		icon?: Snippet<[Playlist]> | IconType
@@ -58,7 +60,6 @@
 
 <ListItem
 	{style}
-	menuItems={menuItemsWithItem}
 	tabindex={-1}
 	class={['h-14 text-left', active && 'bg-onSurfaceVariant/10 text-onSurfaceVariant', className]}
 	ariaLabel={`Play ${playlist?.name}`}
@@ -88,6 +89,8 @@
 			</div>
 		{/if}
 	</div>
+
+	<MenuButton tabindex={-1} menuItems={menuItemsWithItem} />
 </ListItem>
 
 <style>

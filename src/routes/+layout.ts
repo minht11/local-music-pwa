@@ -1,6 +1,5 @@
 import '../app.css'
 import { browser } from '$app/environment'
-import { snackbar } from '$lib/components/snackbar/snackbar'
 import { registerServiceWorker } from '$lib/helpers/register-sw'
 import { baseLocale, isLocale, overwriteGetLocale, overwriteSetLocale } from '$paraglide/runtime'
 

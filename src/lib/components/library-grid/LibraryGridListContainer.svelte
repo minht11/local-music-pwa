@@ -8,7 +8,7 @@
 
 	interface Props<Type extends LibraryGridItemType> {
 		type: Type
-		items: number[]
+		items: readonly number[]
 		item: LibraryItemGridItemProps<Type>['children']
 	}
 </script>

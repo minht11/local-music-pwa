@@ -5,6 +5,8 @@ import { getArtworkRelatedData } from './format-artwork.ts'
 // This limit is a bit arbitrary.
 const FILE_SIZE_LIMIT_500MB = 5e8
 
+const artistSeparatorRegex = /,|&/
+
 /** @public */
 export const parseTrack = async (file: File): Promise<ParsedTrackData | null> => {
 	// Ignore files bigger than limit because of
@@ -28,8 +30,9 @@ export const parseTrack = async (file: File): Promise<ParsedTrackData | null> =>
 
 	const artworkData = imageBlob && (await getArtworkRelatedData(imageBlob))
 	const artists =
-		common.artists?.flatMap((artist) => artist.split(/,|&/)).map((artist) => artist.trim()) ??
-		[]
+		common.artists
+			?.flatMap((artist) => artist.split(artistSeparatorRegex))
+			.map((artist) => artist.trim()) ?? []
 
 	const trackData: ParsedTrackData = {
 		name: common.title || file.name,

@@ -3,12 +3,17 @@
 	import { createUIAction } from '$lib/helpers/ui-action'
 	import { truncate } from '$lib/helpers/utils/text.ts'
 	import { dbRemovePlaylist } from '$lib/library/playlists-actions.ts'
-	import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTrack } from '$lib/library/remove.ts'
+	import {
+		dbRemoveAlbum,
+		dbRemoveArtist,
+		dbRemoveMultipleTracks,
+		dbRemoveTrack,
+	} from '$lib/library/remove.ts'
 	import type { LibraryStoreName } from '$lib/library/types'
 
 	const main = useMainStore()
 
-	const remove = createUIAction(
+	const removeSingle = createUIAction(
 		m.libraryItemRemovedFromLibrary(),
 		(store: LibraryStoreName, id: number) => {
 			switch (store) {
@@ -23,18 +28,35 @@
 			}
 		},
 	)
+
+	const removeMultiple = createUIAction(
+		m.libraryItemsRemovedFromLibrary(),
+		(store: LibraryStoreName, ids: readonly number[]) => {
+			invariant(store === 'tracks', 'Only tracks can be removed in bulk')
+
+			return dbRemoveMultipleTracks(ids)
+		},
+	)
 </script>
 
 <CommonDialog
 	open={{
-		get: () => main.removeLibraryItemOpen,
+		get: () => main.removeFromLibraryOpen,
 		close: () => {
-			main.removeLibraryItemOpen = null
+			main.removeFromLibraryOpen = null
 		},
 	}}
-	title={m.libraryConfirmRemoveTitle({
-		name: truncate(main.removeLibraryItemOpen?.name ?? '', 10),
-	})}
+	title={(data) => {
+		if (data.type === 'multiple') {
+			return m.libraryConfirmRemoveMultipleTitle({
+				count: data.ids.length,
+			})
+		}
+
+		return m.libraryConfirmRemoveTitle({
+			name: truncate(data.name ?? '', 10),
+		})
+	}}
 	buttons={[
 		{
 			title: m.libraryCancel(),
@@ -45,8 +67,13 @@
 		},
 	]}
 	onsubmit={(_, data) => {
-		main.removeLibraryItemOpen = null
+		main.removeFromLibraryOpen = null
 
-		void remove(data.storeName, data.id)
+		if (data.type === 'multiple') {
+			void removeMultiple(data.storeName, data.ids)
+			return
+		}
+
+		void removeSingle(data.storeName, data.id)
 	}}
 />

@@ -47,7 +47,7 @@
 	<TextField
 		value={data?.name}
 		name="name"
-		placeholder="Playlist name"
+		placeholder={m.libraryPlaylistName()}
 		required
 		minLength={4}
 		maxLength={40}
@@ -56,7 +56,7 @@
 	<TextField
 		value={data?.description}
 		name="description"
-		placeholder="Description"
+		placeholder={m.description()}
 		maxLength={200}
 		class="mt-6"
 	/>

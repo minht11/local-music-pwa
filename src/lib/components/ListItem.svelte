@@ -1,23 +1,18 @@
 <script lang="ts" module>
 	import { ripple } from '$lib/attachments/ripple.ts'
-	import IconButton from './IconButton.svelte'
-	import type { MenuItem } from './menu/types.ts'
-
-	export type { MenuItem }
-
-	export type ListMenuFn = () => MenuItem[]
 </script>
 
 <script lang="ts">
 	interface Props {
 		style?: string
 		class?: ClassValue
-		ariaLabel?: string
-		ariaRowIndex?: number
-		tabindex?: number
+		ariaLabel: string
+		ariaRowIndex: number
+		tabindex: number
 		children: Snippet
-		menuItems?: ListMenuFn
-		onclick?: () => void
+		onclick?: (e: KeyboardEvent | MouseEvent) => void
+		onpointerenter?: (e: PointerEvent) => void
+		oncontextmenu?: (e: MouseEvent) => void
 	}
 
 	const {
@@ -27,13 +22,12 @@
 		ariaLabel,
 		ariaRowIndex,
 		tabindex = 0,
-		menuItems,
 		onclick,
+		oncontextmenu,
+		onpointerenter,
 	}: Props = $props()
 
-	const menu = useMenu()
-
-	const clickHandler = () => onclick?.()
+	const clickHandler = (e: KeyboardEvent | MouseEvent) => onclick?.(e)
 </script>
 
 <div
@@ -48,46 +42,13 @@
 	aria-label={ariaLabel}
 	aria-rowindex={ariaRowIndex}
 	onclick={clickHandler}
+	{onpointerenter}
 	onkeydown={(e) => {
 		if (e.key === 'Enter') {
-			clickHandler()
+			clickHandler(e)
 		}
 	}}
-	oncontextmenu={(e) => {
-		if (!menuItems) {
-			return
-		}
-
-		e.preventDefault()
-		menu.showFromEvent(e, menuItems(), {
-			anchor: false,
-			position: { top: e.y, left: e.x },
-		})
-	}}
+	{oncontextmenu}
 >
 	{@render children()}
-
-	{#if menuItems}
-		<IconButton
-			tabindex={-1}
-			icon="moreVertical"
-			class="text-onSurfaceVariant"
-			tooltip={m.moreOptions()}
-			onclick={(e) => {
-				e.stopPropagation()
-
-				if (!menuItems) {
-					return
-				}
-
-				menu.showFromEvent(e, menuItems(), {
-					anchor: true,
-					preferredAlignment: {
-						horizontal: 'right',
-						vertical: 'top',
-					},
-				})
-			}}
-		/>
-	{/if}
 </div>
