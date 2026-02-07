@@ -111,7 +111,7 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 	])
 }
 
-export const dbRemoveMultipleTracks = async (trackIds: number[]): Promise<void> => {
+export const dbRemoveMultipleTracks = async (trackIds: readonly number[]): Promise<void> => {
 	for (const trackId of trackIds) {
 		await dbRemoveTrack(trackId)
 	}

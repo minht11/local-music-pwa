@@ -12,11 +12,18 @@ export type AppThemeOption = AppTheme | 'auto'
 export type AppMotion = 'normal' | 'reduced'
 export type AppMotionOption = AppMotion | 'auto'
 
-export interface RemoveLibraryItemOptions {
-	id: number
-	name: string
-	storeName: LibraryStoreName
-}
+export type RemoveLibraryItemOptions =
+	| {
+			type: 'single'
+			id: number
+			name: string
+			storeName: LibraryStoreName
+	  }
+	| {
+			type: 'multiple'
+			ids: readonly number[]
+			storeName: 'tracks'
+	  }
 
 export const getPersistedLibrarySplitLayoutEnabled = (): boolean =>
 	getPersistedValue('main', 'librarySplitLayoutEnabled', true)
@@ -57,7 +64,7 @@ export class MainStore {
 
 	editPlaylistDialogOpen: UpdatePlaylistOptions | null = $state(null)
 
-	removeLibraryItemOpen: RemoveLibraryItemOptions | null = $state(null)
+	removeFromLibraryOpen: RemoveLibraryItemOptions | null = $state(null)
 
 	addTrackToPlaylistDialogOpen: readonly number[] | null = $state(null)
 

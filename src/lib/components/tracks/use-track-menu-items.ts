@@ -48,21 +48,12 @@ export const useTrackMenuItems = (
 
 	const filterPredefinedItems = (items: UnfilteredPredefinedMenuItem[]) => {
 		const options = predefinedItemsOptions()
-		console.log('options', options)
 		const predefinedItems = items.filter((item) => {
 			if (!item) {
 				return false
 			}
 
 			const valueFromOptions = options[item.predefinedKey]
-
-			console.log(
-				'item',
-				item.predefinedKey,
-				'valueFromOptions',
-				valueFromOptions,
-				item.predefinedKey.startsWith('disable'),
-			)
 
 			if (item.predefinedKey.startsWith('disable')) {
 				return valueFromOptions === undefined ? true : !valueFromOptions
@@ -119,7 +110,8 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableRemoveFromLibrary',
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					main.removeLibraryItemOpen = {
+					main.removeFromLibraryOpen = {
+						type: 'single',
 						name: track.name,
 						id: track.id,
 						storeName: 'tracks',
@@ -149,7 +141,6 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableAddToFavorites',
 				label: m.trackAddToFavorites(),
 				action: () => {
-					console.log('Adding to favorites:', trackIds)
 					trackIds.forEach((trackId) => {
 						void toggleFavoriteTrack(false, trackId)
 					})
@@ -168,7 +159,6 @@ export const useTrackMenuItems = (
 				predefinedKey: 'enableMultiRemoveFromFavorites',
 				label: m.trackRemoveFromFavorites(),
 				action: () => {
-					console.log('Removing from favorites:', trackIds)
 					trackIds.forEach((trackId) => {
 						void toggleFavoriteTrack(true, trackId)
 					})
@@ -178,8 +168,11 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableRemoveFromLibrary',
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					// TODO.
-					throw new Error('Not implemented yet')
+					main.removeFromLibraryOpen = {
+						type: 'multiple',
+						ids: trackIds,
+						storeName: 'tracks',
+					}
 				},
 			},
 		]

@@ -125,7 +125,8 @@
 			{
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					main.removeLibraryItemOpen = {
+					main.removeFromLibraryOpen = {
+						type: 'single',
 						id: item.id,
 						name: item.name,
 						storeName: type,

@@ -16,7 +16,8 @@ export const getPlaylistMenuItems = (main: MainStore, playlist: Playlist): MenuI
 	{
 		label: m.libraryRemoveFromLibrary(),
 		action: () => {
-			main.removeLibraryItemOpen = {
+			main.removeFromLibraryOpen = {
+				type: 'single',
 				id: playlist.id,
 				name: playlist.name,
 				storeName: 'playlists',

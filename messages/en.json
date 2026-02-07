@@ -30,6 +30,7 @@
 	"libraryAddToPlaylist": "Add to playlist",
 	"libraryApplicationMenu": "Application menu",
 	"libraryCancel": "Cancel",
+	"libraryConfirmRemoveMultipleTitle": "Are you sure you want to remove these {count} items?",
 	"libraryConfirmRemoveTitle": "Are you sure you want to remove \"{name}\"?",
 	"libraryCreate": "Create",
 	"libraryCreateNewPlaylist": "Create new playlist",
@@ -42,6 +43,7 @@
 	"libraryEmpty": "Your library is empty",
 	"libraryImportTracks": "Import tracks",
 	"libraryItemRemovedFromLibrary": "Item removed from library",
+	"libraryItemsRemovedFromLibrary": "Items removed from library",
 	"libraryNewPlaylist": "New playlist",
 
 	"libraryNoResults": "No results found",

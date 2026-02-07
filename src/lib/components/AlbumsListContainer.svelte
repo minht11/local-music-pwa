@@ -3,7 +3,7 @@
 	import LibraryGridListContainer from './library-grid/LibraryGridListContainer.svelte'
 
 	interface Props {
-		items: number[]
+		items: readonly number[]
 	}
 
 	const { items }: Props = $props()
