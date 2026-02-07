@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatArtists } from '$lib/helpers/utils/text.ts'
+	import { formatArtists, getItemLanguage } from '$lib/helpers/utils/text.ts'
 	import Button from './Button.svelte'
 	import Icon from './icon/Icon.svelte'
 	import PlayerFavoriteButton from './player/buttons/PlayerFavoriteButton.svelte'
@@ -56,7 +56,7 @@
 					</div>
 
 					{#if track}
-						<div class="mr-1 ml-4 grid min-w-0">
+						<div class="mr-1 ml-4 grid min-w-0" lang={getItemLanguage(track.language)}>
 							<div class="truncate text-body-md">
 								{track.name}
 							</div>

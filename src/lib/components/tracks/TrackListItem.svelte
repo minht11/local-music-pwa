@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
-	import { formatArtists, formatNameOrUnknown } from '$lib/helpers/utils/text.ts'
+	import { formatArtists, formatNameOrUnknown, getItemLanguage } from '$lib/helpers/utils/text.ts'
 	import { isMobile } from '$lib/helpers/utils/ua.ts'
 	import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
 	import Artwork from '../Artwork.svelte'
@@ -116,7 +116,11 @@
 			Error loading track with id {trackId}
 		</div>
 	{:else if track}
-		<div role="gridcell" class="track-item grow items-center gap-5">
+		<div
+			role="gridcell"
+			class="track-item grow items-center gap-5"
+			lang={getItemLanguage(track?.language)}
+		>
 			<div class="flex flex-col truncate">
 				<div class={[active ? 'text-primary' : 'color-onSurface', 'truncate']}>
 					{track.name}

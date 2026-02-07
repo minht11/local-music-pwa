@@ -16,7 +16,7 @@
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { formatArtists } from '$lib/helpers/utils/text.ts'
+	import { formatArtists, getItemLanguage } from '$lib/helpers/utils/text.ts'
 
 	const { data } = $props()
 
@@ -103,7 +103,7 @@
 						{player.activeTrackIndex + 1}
 					</div>
 
-					<div class="grid overflow-hidden">
+					<div class="grid overflow-hidden" lang={getItemLanguage(track.language)}>
 						<div class="truncate text-body-lg">{track.name}</div>
 						<div class="truncate text-body-md">{formatArtists(track.artists)}</div>
 					</div>
