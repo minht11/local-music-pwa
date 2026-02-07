@@ -259,6 +259,16 @@ export const removeTrackEntryFromPlaylist = createUIAction(
 const dbAddTrackToFavorites = async (trackId: number): Promise<void> => {
 	const db = await getDatabase()
 
+	// Check if already exists to prevent duplicates
+	const existing = await db.getFromIndex('playlistEntries', 'playlistTrack', [
+		FAVORITE_PLAYLIST_ID,
+		trackId,
+	])
+
+	if (existing) {
+		return
+	}
+
 	const playlistEntry: Omit<PlaylistEntry, 'id'> = {
 		playlistId: FAVORITE_PLAYLIST_ID,
 		trackId,
