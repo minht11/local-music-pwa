@@ -32,15 +32,15 @@ export const getItemLanguage = (language: string | undefined): string | undefine
 			return 'ko'
 
 		case 'zh-cn':
-  			return 'zh-CN'
+			return 'zh-CN'
 
 		case 'zh-tw':
-  			return 'zh-TW'
+			return 'zh-TW'
 
 		case 'zho':
 		case 'chinese':
 		case 'zh':
-  			return 'zh-CN'
+			return 'zh-CN'
 
 		case 'cantonese':
 			return 'yue'
@@ -56,7 +56,7 @@ export const getItemLanguage = (language: string | undefined): string | undefine
 		case 'eng':
 		case 'english':
 			return 'en'
-			
+
 		default:
 			return lang
 	}
