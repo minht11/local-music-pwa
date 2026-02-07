@@ -57,6 +57,7 @@
 
 	$effect(() => {
 		void items
+		void items.length
 
 		untrack(() => {
 			cancelSelection()
@@ -116,7 +117,7 @@
 
 {#snippet multiselectPane()}
 	<div
-		class="pointer-events-auto relative mx-auto flex w-full max-w-125 items-center gap-1 rounded-lg bg-inverseSurface p-2 py-1 text-inverseOnSurface"
+		class="pointer-events-auto col-2 flex w-full items-center gap-1 rounded-lg bg-inverseSurface p-2 py-1 text-inverseOnSurface"
 	>
 		<MenuButton
 			menuItems={() => getMultiSelectMenuItems(selection.selectedIds)}
@@ -133,11 +134,11 @@
 				selection.selectMany(items)
 			}}
 		>
-			Select All
+			{m.selectAll()}
 		</Button>
 
 		<IconButton
-			tooltip={'Add to playlist'}
+			tooltip={m.libraryAddToPlaylist()}
 			icon="close"
 			onclick={() => {
 				cancelSelection()

@@ -39,11 +39,12 @@
 	const { children } = $props()
 
 	let overlayContentHeight = $state(0)
+	let bottomBarHeight = $state(0)
 
 	$effect(() => {
 		document.documentElement.style.setProperty(
 			'--bottom-overlay-height',
-			`${overlayContentHeight}px`,
+			`${overlayContentHeight + bottomBarHeight}px`,
 		)
 	})
 
@@ -133,24 +134,22 @@
 	{@render children()}
 </div>
 
-<div class="pointer-events-none fixed inset-x-0 bottom-0 flex flex-col gap-2 overflow-hidden">
+<div
+	class="page-overlay-container pointer-events-none fixed inset-x-0 bottom-0 grid gap-y-2 overflow-hidden"
+>
 	<SnackbarRenderer />
 
-	<div bind:clientHeight={overlayContentHeight} class="flex flex-col">
-		<div class="px-4 pb-4 sm:pb-2">
-			<div class="mx-auto w-full max-w-225">
-				{#each overlaySnippets.abovePlayer as snippet}
-					{@render snippet()}
-				{/each}
-			</div>
-		</div>
+	<div bind:clientHeight={overlayContentHeight} class="col-[2/5] grid grid-cols-subgrid gap-y-2">
+		{#each overlaySnippets.abovePlayer as snippet}
+			{@render snippet()}
+		{/each}
 
 		{#if !page.data.noPlayerOverlay}
-			<div class="px-4 pb-4 sm:pb-2">
-				<PlayerOverlay />
-			</div>
+			<PlayerOverlay class={['col-[1/4]', bottomBarHeight < 0 && 'mb-2']} />
 		{/if}
+	</div>
 
+	<div bind:clientHeight={bottomBarHeight} class="col-[1/6] empty:hidden">
 		{@render overlaySnippets.bottomBar?.()}
 	</div>
 </div>
@@ -164,6 +163,8 @@
 {/each}
 
 <style>
+	@reference '../../app.css';
+
 	@keyframes fade-in {
 		from {
 			opacity: 0;
@@ -176,6 +177,13 @@
 
 	.page-loading-indicator-bar {
 		animation: page-loading-indicator 6s cubic-bezier(0.05, 0.7, 0.1, 1) forwards;
+	}
+
+	.page-overlay-container {
+		--p-overlay-side: --spacing(4);
+		grid-template-columns: var(--p-overlay-side) 1fr minmax(0, --spacing(125)) 1fr var(
+				--p-overlay-side
+			);
 	}
 
 	@keyframes page-loading-indicator {

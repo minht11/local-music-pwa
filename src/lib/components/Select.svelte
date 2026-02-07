@@ -6,6 +6,7 @@
 		items: readonly T[]
 		key: Key
 		labelKey: LabelKey
+		placeholder?: string
 		selected?: T[Key]
 		class?: ClassValue
 	}
@@ -16,6 +17,7 @@
 		items,
 		key,
 		labelKey,
+		placeholder,
 		selected = $bindable(),
 		class: className,
 	}: SelectProps<T, Key, LabelKey> = $props()
@@ -47,7 +49,7 @@
 		{#if selectedItem}
 			{selectedItem[labelKey]}
 		{:else}
-			Select item
+			{placeholder}
 		{/if}
 	</div>
 

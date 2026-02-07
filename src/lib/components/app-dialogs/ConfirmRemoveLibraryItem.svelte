@@ -70,7 +70,7 @@
 		main.removeFromLibraryOpen = null
 
 		if (data.type === 'multiple') {
-			removeMultiple(data.storeName, data.ids)
+			void removeMultiple(data.storeName, data.ids)
 			return
 		}
 

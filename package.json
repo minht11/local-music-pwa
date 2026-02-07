@@ -10,7 +10,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"check:i18n": "node scripts/check-translations.ts",
 		"biome-check": "biome check ./src",
 		"biome-fix": "biome check ./src --write",
 		"prettier-check": "prettier --check ./src",
