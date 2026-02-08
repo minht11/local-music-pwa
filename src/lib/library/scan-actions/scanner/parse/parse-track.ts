@@ -17,6 +17,7 @@ export const parseTrack = async (file: File): Promise<ParsedTrackData | null> =>
 
 	const tags = await parseBlob(file, {
 		duration: true,
+		mkvUseIndex: true,
 	})
 
 	const { common } = tags
