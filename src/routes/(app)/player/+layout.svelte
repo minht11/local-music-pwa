@@ -192,7 +192,7 @@
 	id="full-player"
 	mode={layoutMode}
 	class={[
-		'mx-auto w-full max-w-300 grow active-view-player:view-name-[pl-card]',
+		'grow active-view-player:view-name-[pl-card]',
 		layoutMode === 'both' && 'bg-secondaryContainer',
 	]}
 	list={playerSnippet}
@@ -237,17 +237,17 @@
 			translate: var(--mp-left) calc(var(--mp-bottom) - var(--mp-height));
 		}
 		to {
-			width: var(--fp-width);
+			width: 100vw;
 			height: 100svh;
-			translate: var(--fp-left) 0;
+			translate: 0 0;
 		}
 	}
 
 	@keyframes -global-view-player-card-morph-exit {
 		from {
-			width: var(--fp-width);
+			width: 100vw;
 			height: 100svh;
-			translate: var(--fp-left) 0;
+			translate: 0 0;
 		}
 		to {
 			width: var(--mp-width);
@@ -256,7 +256,7 @@
 		}
 	}
 
-	:global(html:active-view-transition-type(player)) {
+	/* :global(html:active-view-transition-type(player)) {
 		--vt-pl-card-radius: var(--radius-2xl);
 		@media (width >= --theme(--breakpoint-sm)) {
 			--vt-pl-card-radius: var(--radius-3xl);
@@ -321,5 +321,5 @@
 			animation-duration: 400ms;
 			animation-timing-function: var(--ease-standard);
 		}
-	}
+	} */
 </style>
