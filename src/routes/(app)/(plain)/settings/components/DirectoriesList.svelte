@@ -168,7 +168,7 @@
 
 {#snippet directoryName(name: string | undefined)}
 	<span class="inline-flex h-[--spacing(4.125)] w-fit items-center gap-1 text-tertiary">
-		<Icon type="folder" class="mt-[2px] size-3" />
+		<Icon type="folder" class="mt-0.5 size-3" />
 
 		<span class="inline h-full w-fit max-w-25 truncate">{name}</span>
 	</span>
