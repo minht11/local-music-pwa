@@ -162,7 +162,7 @@
 	<Dialog />
 {/each}
 
-<style>
+<style lang="postcss">
 	@reference '../../app.css';
 
 	@keyframes fade-in {
