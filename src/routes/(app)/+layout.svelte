@@ -25,14 +25,9 @@
 	const mainStore = setMainStoreContext(new MainStore())
 	const player = setPlayerStoreContext(new PlayerStore())
 
-	let pageContainer = $state<HTMLElement | null>(null)
-
 	setupTheme()
 	setupGlobalMenu()
-	setupAppViewTransitions(
-		() => pageContainer,
-		() => mainStore.isReducedMotion,
-	)
+	setupAppViewTransitions(() => mainStore.isReducedMotion)
 	setupAppInstallPromptListeners()
 	const overlaySnippets = setupOverlaySnippets()
 
@@ -50,30 +45,21 @@
 
 	onViewTransitionPrepare((_state, match) => {
 		if (match.view === 'player') {
-			const setProperties = (targetSelector: string, prefix: string) => {
-				const target = document.querySelector(targetSelector)
-				const rect = target?.getBoundingClientRect()
+			const target = document.querySelector('#mini-player')
+			const rect = target?.getBoundingClientRect()
 
-				if (!rect) {
-					return
-				}
-
-				if (prefix === 'fp') {
-					document.documentElement.style.setProperty('--fp-scroll-top', `${window.scrollY}px`)
-				}
-
-				const setProperty = (name: keyof DOMRect) => {
-					document.documentElement.style.setProperty(`--${prefix}-${name}`, `${rect[name]}px`)
-				}
-
-				setProperty('left')
-				setProperty('bottom')
-				setProperty('width')
-				setProperty('height')
+			if (!rect) {
+				return
 			}
 
-			setProperties('#mini-player', 'mp')
-			setProperties('#full-player', 'fp')
+			const setProperty = (name: keyof DOMRect) => {
+				document.documentElement.style.setProperty(`--mp-${name}`, `${rect[name]}px`)
+			}
+
+			setProperty('left')
+			setProperty('bottom')
+			setProperty('width')
+			setProperty('height')
 		}
 	})
 
@@ -130,9 +116,7 @@
 	</div>
 {/if}
 
-<div bind:this={pageContainer} class="flex grow flex-col">
-	{@render children()}
-</div>
+{@render children()}
 
 <div
 	class="page-overlay-container pointer-events-none fixed inset-x-0 bottom-0 grid gap-y-2 overflow-hidden"

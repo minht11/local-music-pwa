@@ -78,10 +78,7 @@ const resolveView = (nav: OnNavigate | AfterNavigate) => {
 	return { view, isBackwards }
 }
 
-export const setupAppViewTransitions = (
-	containerElement: () => HTMLElement | null,
-	disabled: () => boolean,
-): void => {
+export const setupAppViewTransitions = (disabled: () => boolean): void => {
 	onNavigate(async (nav) => {
 		if (disabled()) {
 			return
@@ -119,26 +116,4 @@ export const setupAppViewTransitions = (
 
 		return promise
 	})
-
-	// Firefox does not support View Transitions after it does this could be removed.
-	// https://bugzilla.mozilla.org/show_bug.cgi?id=1823896
-	if (viewTransitionsUnsupported) {
-		afterNavigate((nav) => {
-			if (disabled()) {
-				return
-			}
-
-			const { view } = resolveView(nav)
-			if (view === 'library') {
-				return
-			}
-
-			const element = containerElement()
-			if (!element) {
-				return
-			}
-
-			element.animate({ opacity: [0, 1] }, { duration: 175, easing: 'linear' })
-		})
-	}
 }

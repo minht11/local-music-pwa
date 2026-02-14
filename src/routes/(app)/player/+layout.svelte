@@ -14,6 +14,7 @@
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
+	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { formatArtists, getItemLanguage } from '$lib/helpers/utils/text.ts'
@@ -131,61 +132,67 @@
 {/snippet}
 
 {#snippet queueSnippet()}
-	{#if layoutMode === 'details'}
-		<Header title={m.queue()}>
-			{#if layoutMode === 'details'}
-				{@render queueActions()}
-			{/if}
-		</Header>
-	{/if}
-
-	<div class="flex w-full grow flex-col">
-		{#if layoutMode !== 'details'}
-			<div class="flex h-16 items-center border-b border-onSecondaryContainer/24 px-4">
-				<div class="w-10"></div>
-
-				<div class="mx-auto text-title-lg">
-					{m.queue()}
-				</div>
-
-				{@render queueActions()}
-			</div>
+	<!--
+		For view transition to work correctly we need to clip the captured element size
+		so we can't use root scroller here.
+	-->
+	<ScrollContainer class="flex h-dvh flex-col overflow-auto contain-strict">
+		{#if layoutMode === 'details'}
+			<Header title={m.queue()}>
+				{#if layoutMode === 'details'}
+					{@render queueActions()}
+				{/if}
+			</Header>
 		{/if}
 
-		<div class="flex grow p-4">
-			{#if player.isQueueEmpty}
-				<div class="m-auto flex flex-col items-center text-center">
-					<Icon
-						type="playlistMusic"
-						class="color-onSecondaryContainer my-auto size-35 opacity-54"
-					/>
+		<div class="flex w-full grow flex-col">
+			{#if layoutMode !== 'details'}
+				<div class="flex h-16 items-center border-b border-onSecondaryContainer/24 px-4">
+					<div class="w-10"></div>
 
-					<div class="mb-4 text-body-lg">{m.playerQueueEmpty()}</div>
-					<Button kind="outlined" as="a" href="/library/tracks">
-						{m.playerQueuePlaySomething()}
-					</Button>
+					<div class="mx-auto text-title-lg">
+						{m.queue()}
+					</div>
+
+					{@render queueActions()}
 				</div>
-			{:else}
-				<TracksListContainer
-					items={player.itemsIds}
-					predefinedMenuItems={{
-						disableAddToQueue: true,
-					}}
-					menuItems={(_track, index) => [
-						{
-							label: m.playerRemoveFromQueue(),
-							action: () => {
-								player.removeFromQueue(index)
-							},
-						},
-					]}
-					onItemClick={({ index }) => {
-						player.playTrack(index)
-					}}
-				/>
 			{/if}
+
+			<div class="flex grow p-4">
+				{#if player.isQueueEmpty}
+					<div class="m-auto flex flex-col items-center text-center">
+						<Icon
+							type="playlistMusic"
+							class="color-onSecondaryContainer my-auto size-35 opacity-54"
+						/>
+
+						<div class="mb-4 text-body-lg">{m.playerQueueEmpty()}</div>
+						<Button kind="outlined" as="a" href="/library/tracks">
+							{m.playerQueuePlaySomething()}
+						</Button>
+					</div>
+				{:else}
+					<TracksListContainer
+						items={player.itemsIds}
+						predefinedMenuItems={{
+							disableAddToQueue: true,
+						}}
+						menuItems={(_track, index) => [
+							{
+								label: m.playerRemoveFromQueue(),
+								action: () => {
+									player.removeFromQueue(index)
+								},
+							},
+						]}
+						onItemClick={({ index }) => {
+							player.playTrack(index)
+						}}
+					/>
+				{/if}
+			</div>
 		</div>
-	</div>
+	</ScrollContainer>
 {/snippet}
 
 <ListDetailsLayout
@@ -237,16 +244,16 @@
 			translate: var(--mp-left) calc(var(--mp-bottom) - var(--mp-height));
 		}
 		to {
-			width: 100vw;
-			height: 100svh;
+			width: 100dvw;
+			height: 100dvh;
 			translate: 0 0;
 		}
 	}
 
 	@keyframes -global-view-player-card-morph-exit {
 		from {
-			width: 100vw;
-			height: 100svh;
+			width: 100dvw;
+			height: 100dvh;
 			translate: 0 0;
 		}
 		to {
@@ -256,7 +263,7 @@
 		}
 	}
 
-	/* :global(html:active-view-transition-type(player)) {
+	:global(html:active-view-transition-type(player)) {
 		--vt-pl-card-radius: var(--radius-2xl);
 		@media (width >= --theme(--breakpoint-sm)) {
 			--vt-pl-card-radius: var(--radius-3xl);
@@ -270,8 +277,8 @@
 			transform: none;
 			height: 100%;
 			animation:
-				view-player-container-rounded 400ms var(--ease-standard),
-				var(--vt-pl-card-morph-ani) 400ms var(--ease-standard);
+				view-player-container-rounded 400ms var(--ease-standard) forwards,
+				var(--vt-pl-card-morph-ani) 400ms var(--ease-standard) forwards;
 		}
 
 		&::view-transition-old(pl-card),
@@ -298,7 +305,6 @@
 
 			&::view-transition-new(pl-card) {
 				object-fit: cover;
-				object-position: 0 calc(-1 * var(--fp-scroll-top));
 			}
 		}
 
@@ -309,7 +315,6 @@
 
 			&::view-transition-old(pl-card) {
 				object-fit: cover;
-				object-position: 0 calc(-1 * var(--fp-scroll-top));
 			}
 
 			&::view-transition-new(pl-card) {
@@ -321,5 +326,5 @@
 			animation-duration: 400ms;
 			animation-timing-function: var(--ease-standard);
 		}
-	} */
+	}
 </style>

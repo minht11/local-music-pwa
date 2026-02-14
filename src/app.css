@@ -108,7 +108,7 @@ html.dark {
 
 html,
 body {
-	min-height: 100svh;
+	min-height: 100dvh;
 }
 
 body {
