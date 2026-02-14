@@ -1,0 +1,27 @@
+engineStrict: true
+
+ignoredBuiltDependencies:
+  - '@biomejs/biome'
+  - '@tailwindcss/oxide'
+
+onlyBuiltDependencies:
+  - 'sharp'
+
+overrides:
+  'vite': '8.0.0-beta.14'
+  'vite>terser': '-'
+  'vite>esbuild': '-'
+  '@ianvs/prettier-plugin-sort-imports': '-'
+  '@trivago/prettier-plugin-sort-imports': '-'
+  'prettier-plugin-organize-imports': '-'
+  'prettier-plugin-css-order': '-'
+  'prettier-plugin-import-sort': '-'
+  'prettier-plugin-jsdoc': '-'
+  'prettier-plugin-multiline-arrays': '-'
+  'prettier-plugin-organize-attributes': '-'
+  'prettier-plugin-style-order': '-'
+  'prettier-plugin-sort-imports': '-'
+
+patchedDependencies:
+  'debug': 'patches/debug.patch'
+  '@material/material-color-utilities': 'patches/@material__material-color-utilities.patch'
