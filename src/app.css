@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 @import '../.generated/theme-colors.css';
 
+/* We don't use these classes */
+@source not inline('container');
+
 /* latin */
 @font-face {
 	font-family: 'Heebo';
