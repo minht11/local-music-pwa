@@ -23,6 +23,7 @@ export const startTrackScannerWorker = (
 	worker.addEventListener('error', reject)
 	worker.addEventListener('message', ({ data }: MessageEvent<TracksScanMessage>) => {
 		if (data.finished) {
+			worker.terminate()
 			resolve(data.count)
 		} else {
 			progress(data.count)

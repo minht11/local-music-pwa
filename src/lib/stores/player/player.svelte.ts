@@ -250,10 +250,10 @@ export class PlayerStore {
 		setActionHandler('previoustrack', this.playPrev)
 		setActionHandler('nexttrack', this.playNext)
 		setActionHandler('seekbackward', () => {
-			audio.currentTime = Math.min(audio.currentTime - 10, 0)
+			audio.currentTime = Math.max(audio.currentTime - 10, 0)
 		})
 		setActionHandler('seekforward', () => {
-			audio.currentTime = Math.max(audio.currentTime + 10, audio.duration)
+			audio.currentTime = Math.min(audio.currentTime + 10, audio.duration)
 		})
 	}
 

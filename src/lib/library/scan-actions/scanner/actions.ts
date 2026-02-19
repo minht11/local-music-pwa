@@ -89,16 +89,6 @@ const findTrackByMixedFileEntity = async (handle: FileEntity, tracks: Track[]) =
 			continue
 		}
 
-		// No reliable way to compare two Files,
-		// so we compare their names and size
-		if (
-			existingFile instanceof File &&
-			handle instanceof File &&
-			existingFile.size === handle.size
-		) {
-			return track
-		}
-
 		if (
 			existingFile instanceof FileSystemFileHandle &&
 			handle instanceof FileSystemFileHandle
@@ -107,6 +97,16 @@ const findTrackByMixedFileEntity = async (handle: FileEntity, tracks: Track[]) =
 			if (isSame) {
 				return track
 			}
+		}
+
+		// No reliable way to compare two Files,
+		// so we compare their names and size
+		if (
+			existingFile instanceof File &&
+			handle instanceof File &&
+			existingFile.size === handle.size
+		) {
+			return track
 		}
 	}
 
