@@ -26,7 +26,7 @@ const defaultRefreshOnDatabaseChanges = (
 ) => {
 	for (const change of changes) {
 		if (change.storeName === storeName) {
-			if (itemId === null) {
+			if (itemId === undefined) {
 				return true
 			}
 
@@ -255,7 +255,7 @@ export class LibraryValueNotFoundError extends Error {
 	}
 }
 
-const emptyValue = <T, AllowEmpty extends boolean = false>(
+const assertsValue = <T, AllowEmpty extends boolean = false>(
 	value: T,
 	allowEmpty: AllowEmpty | undefined,
 	cacheKey: CacheKey<LibraryStoreName>,
@@ -312,14 +312,14 @@ export const getLibraryValue = <Store extends LibraryStoreName, AllowEmpty exten
 	})
 
 	if (result instanceof Promise) {
-		const promiseResult = result.then((value) => emptyValue(value, allowEmpty, key)) as Promise<
-			GetLibraryValueResult<Store, AllowEmpty>
-		>
+		const promiseResult = result.then((value) =>
+			assertsValue(value, allowEmpty, key),
+		) as Promise<GetLibraryValueResult<Store, AllowEmpty>>
 
 		return promiseResult
 	}
 
-	return emptyValue(result, allowEmpty, key)
+	return assertsValue(result, allowEmpty, key)
 }
 
 /** @public */

@@ -4,6 +4,7 @@ import type {
 	Album,
 	Artist,
 	Directory,
+	PlayHistoryEntry,
 	Playlist,
 	PlaylistEntry,
 	Track,
@@ -74,6 +75,14 @@ export interface AppDB extends DBSchema {
 			notAllowedOperations: undefined
 		}
 	}
+	playHistory: {
+		key: number
+		value: PlayHistoryEntry
+		indexes: Pick<PlayHistoryEntry, 'trackId' | 'playedAt'>
+		meta: {
+			notAllowedOperations: undefined
+		}
+	}
 }
 
 export type AppStoreNames = StoreNames<AppDB>
@@ -99,7 +108,7 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 	})
 
 const openAppDatabase = () =>
-	openDB<AppDB>('snae-app-data', 2, {
+	openDB<AppDB>('snae-app-data', 3, {
 		async upgrade(db, oldVersion, _newVersion, tx) {
 			const { objectStoreNames } = db
 
@@ -191,6 +200,11 @@ const openAppDatabase = () =>
 
 			if (!objectStoreNames.contains('directories')) {
 				createStore(db, 'directories')
+			}
+
+			if (!objectStoreNames.contains('playHistory')) {
+				const store = createStore(db, 'playHistory')
+				createIndexes(store, ['trackId', 'playedAt'], { unique: true })
 			}
 		},
 	})

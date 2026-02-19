@@ -1,6 +1,6 @@
 import type { AfterNavigate, OnNavigate } from '@sveltejs/kit'
 import { browser } from '$app/environment'
-import { afterNavigate, onNavigate } from '$app/navigation'
+import { onNavigate } from '$app/navigation'
 import type { RouteId } from '$app/types'
 import { getActiveRipplesCount } from './attachments/ripple.ts'
 import { wait } from './helpers/utils/wait.ts'
@@ -80,11 +80,7 @@ const resolveView = (nav: OnNavigate | AfterNavigate) => {
 
 export const setupAppViewTransitions = (disabled: () => boolean): void => {
 	onNavigate(async (nav) => {
-		if (disabled()) {
-			return
-		}
-
-		if (viewTransitionsUnsupported) {
+		if (disabled() || viewTransitionsUnsupported) {
 			return
 		}
 
