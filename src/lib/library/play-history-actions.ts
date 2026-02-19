@@ -17,19 +17,26 @@ export const dbAddToPlayHistory = async (trackId: number): Promise<void> => {
 	const tx = db.transaction('playHistory', 'readwrite')
 	const store = tx.objectStore('playHistory')
 
-	const newEntry: Omit<PlayHistoryEntry, 'id'> = {
+	const existingEntryId = await store.index('trackId').getKey(trackId)
+
+	const newEntry: Omit<PlayHistoryEntry, 'id'> & { id?: number } = {
 		trackId,
 		playedAt: Date.now(),
 	}
 
+	if (existingEntryId !== undefined) {
+		newEntry.id = existingEntryId
+	}
+
 	await store.put(newEntry as PlayHistoryEntry)
 
-	let cursor = await store.index('playedAt').openKeyCursor()
+	let cursor = await store.index('playedAt').openCursor()
 	cursor = (await cursor?.advance(PLAY_HISTORY_LIMIT)) ?? null
-	if (cursor) {
-		for await (const c of cursor) {
-			await c.delete()
-		}
+
+	// Delete all entries that exceed the limit
+	while (cursor) {
+		await cursor.delete()
+		cursor = await cursor.continue()
 	}
 
 	notifyPlayHistoryChange()
