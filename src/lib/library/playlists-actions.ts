@@ -105,7 +105,7 @@ export const dbRemovePlaylist = async (playlistId: number): Promise<void> => {
 		.getAllKeys(IDBKeyRange.bound([playlistId], [playlistId + 1], false, true))
 
 	await Promise.all([
-		entriesIds.map((id) => entriesStore.delete(id)),
+		...entriesIds.map((id) => entriesStore.delete(id)),
 		tx.objectStore('playlists').delete(playlistId),
 		tx.done,
 	])

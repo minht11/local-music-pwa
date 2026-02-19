@@ -90,26 +90,6 @@ const trackConfig: QueryConfig<TrackData> = {
 	},
 }
 
-const tracksDataDatabaseChangeHandler = (change: DatabaseChangeDetails) => {
-	if (change.storeName === 'playlistEntries') {
-		const playlistEntry = change.value
-
-		if (playlistEntry.playlistId === FAVORITE_PLAYLIST_ID) {
-			const cacheKey = getCacheKey('tracks', playlistEntry.trackId)
-			valueCache.delete(cacheKey)
-		}
-	}
-
-	if (
-		(change.storeName === 'tracks' && change.operation === 'delete') ||
-		change.operation === 'update'
-	) {
-		// We clear our existing cache and just let refetch happen when getLibraryValue is called again
-		const cacheKey = getCacheKey('tracks', change.key)
-		valueCache.delete(cacheKey)
-	}
-}
-
 const dbGetValue = async <Store extends LibraryStoreName, const T extends string>(
 	storeName: Store,
 	type: T,
@@ -236,14 +216,24 @@ if (!import.meta.env.SSR) {
 		for (const change of changes) {
 			const { storeName } = change
 
-			if (storeName === 'albums' || storeName === 'artists' || storeName === 'playlists') {
+			if (
+				storeName === 'tracks' ||
+				storeName === 'albums' ||
+				storeName === 'artists' ||
+				storeName === 'playlists'
+			) {
 				if (change.operation === 'delete' || change.operation === 'update') {
 					const cacheKey = getCacheKey(storeName, change.key)
 					valueCache.delete(cacheKey)
 				}
-			}
+			} else if (storeName === 'playlistEntries') {
+				const playlistEntry = change.value
 
-			tracksDataDatabaseChangeHandler(change)
+				if (playlistEntry.playlistId === FAVORITE_PLAYLIST_ID) {
+					const cacheKey = getCacheKey('tracks', playlistEntry.trackId)
+					valueCache.delete(cacheKey)
+				}
+			}
 		}
 	})
 }

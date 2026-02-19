@@ -38,6 +38,8 @@ export const dbAddToPlayHistory = async (trackId: number): Promise<void> => {
 		cursor = await cursor.continue()
 	}
 
+	await tx.done
+
 	notifyPlayHistoryChange()
 }
 
