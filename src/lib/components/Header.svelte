@@ -2,18 +2,18 @@
 	import { browser } from '$app/environment'
 	export interface HeaderProps {
 		children?: Snippet
-		centerChildren?: Snippet
 		title?: string
 		noBackButton?: boolean
 		/** @default 'fixed' */
 		mode?: 'fixed' | 'sticky'
+		class?: (isElevated: boolean) => ClassValue
 	}
 </script>
 
 <script lang="ts">
 	import BackButton from './BackButton.svelte'
 
-	const { children, centerChildren, title, noBackButton, mode = 'fixed' }: HeaderProps = $props()
+	const { children, title, noBackButton, mode = 'fixed', class: className }: HeaderProps = $props()
 
 	const isFixed = $derived(mode === 'fixed')
 
@@ -51,9 +51,12 @@
 		'ease-in-out inset-x-0 top-0 z-10 flex h-(--app-header-height) shrink-0 transition-[background-color] duration-200',
 		isScrolled && 'bg-surfaceContainerHigh',
 		isFixed ? 'fixed' : 'sticky',
+		className?.(isScrolled),
 	]}
 >
-	<div class="mx-auto flex w-full max-w-(--app-max-content-width) items-center gap-2 pr-2 pl-6">
+	<div
+		class="mx-auto flex w-full max-w-(--app-max-content-width) items-center justify-end gap-2 pr-2 pl-6"
+	>
 		{#if !noBackButton}
 			<BackButton class={[!title && 'mr-auto']} />
 		{/if}
@@ -62,10 +65,6 @@
 			<div class="mr-auto text-title-lg">{title}</div>
 		{/if}
 
-		{@render centerChildren?.()}
-
-		<div class="flex items-center gap-2">
-			{@render children?.()}
-		</div>
+		{@render children?.()}
 	</div>
 </header>

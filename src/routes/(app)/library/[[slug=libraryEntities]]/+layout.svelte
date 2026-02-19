@@ -209,16 +209,8 @@
 			]}
 		>
 			{#key page.url.pathname}
-				{@render children?.()}
+				{@render children()}
 			{/key}
 		</div>
 	{/snippet}
 </ListDetailsLayout>
-
-<style lang="postcss">
-	@reference '../../../../app.css';
-
-	.desktop-sidebar {
-		left: max(0, (100% - var(--app-max-content-width)) / 2);
-	}
-</style>

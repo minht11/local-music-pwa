@@ -7,6 +7,7 @@ declare global {
 		// interface Locals {}
 		interface PageData {
 			noPlayerOverlay?: boolean
+			htmlOverflow?: 'auto' | 'default'
 		}
 		// interface Platform {}
 	}

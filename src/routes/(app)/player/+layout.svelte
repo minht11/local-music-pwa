@@ -31,7 +31,7 @@
 
 	const mainStore = useMainStore()
 	const player = usePlayer()
-	const track = $derived(player.activeTrack)
+	const activeTrack = $derived(player.activeTrack)
 
 	const isSelectedTabQueue = $derived(
 		page.route.id === '/(app)/player' || page.route.id === '/(app)/player/queue',
@@ -45,7 +45,7 @@
 {#snippet playerSnippet()}
 	<div
 		class={[
-			layoutMode === 'both' && 'w-100',
+			layoutMode === 'both' && 'w-100 2xl:w-[28dvw]',
 			layoutMode === 'list' && 'mx-auto w-full',
 			'player-content z-0 grow items-center gap-x-6 overflow-clip bg-secondaryContainerVariant px-2 pb-2',
 			isCompactVertical && !isCompactHorizontal && 'player-content-horizontal',
@@ -111,14 +111,14 @@
 			</div>
 
 			<div class="flex h-18 w-full shrink-0 items-center rounded-2xl bg-secondaryContainer px-4">
-				{#if track}
+				{#if activeTrack}
 					<div class="mr-2 min-w-6 text-center text-body-lg tabular-nums">
 						{player.activeTrackIndex + 1}
 					</div>
 
-					<div class="grid overflow-hidden" lang={getItemLanguage(track.language)}>
-						<div class="truncate text-body-lg">{track.name}</div>
-						<div class="truncate text-body-md">{formatArtists(track.artists)}</div>
+					<div class="grid overflow-hidden" lang={getItemLanguage(activeTrack.language)}>
+						<div class="truncate text-body-lg">{activeTrack.name}</div>
+						<div class="truncate text-body-md">{formatArtists(activeTrack.artists)}</div>
 					</div>
 				{/if}
 
@@ -132,24 +132,6 @@
 			</div>
 		</div>
 	</div>
-{/snippet}
-
-{#snippet tabsSnippet()}
-	<Tabs
-		class="mx-auto"
-		selectedIndex={isSelectedTabQueue ? 0 : 1}
-		items={[
-			{ id: 'queue', text: m.queue() },
-			{ id: 'history', text: m.playerHistory() },
-		]}
-		onchange={(item) => {
-			void goto(`/player/${item.id}`, { replaceState: true })
-		}}
-	>
-		{#snippet text(item)}
-			{item.text}
-		{/snippet}
-	</Tabs>
 {/snippet}
 
 {#snippet emptyList(title: string)}
@@ -168,8 +150,34 @@
 		For view transition to work correctly we need to clip the captured element size
 		so we can't use root scroller here.
 	-->
-	<ScrollContainer class="flex h-dvh flex-col overflow-auto contain-strict">
-		<Header mode="sticky" noBackButton={layoutMode !== 'details'} centerChildren={tabsSnippet}>
+	<ScrollContainer
+		class="flex h-dvh scroll-pt-(--app-header-height) flex-col overflow-auto contain-strict scrollbar-gutter-stable"
+	>
+		<Header
+			mode="sticky"
+			noBackButton={layoutMode !== 'details'}
+			class={(isElevated) => [
+				'border-b',
+				isElevated ? 'border-transparent' : 'border-onSecondaryContainer/24',
+			]}
+		>
+			<div class="absolute inset-0 m-auto size-max">
+				<Tabs
+					selectedIndex={isSelectedTabQueue ? 0 : 1}
+					items={[
+						{ id: 'queue', text: m.queue() },
+						{ id: 'history', text: m.playerHistory() },
+					]}
+					onchange={(item) => {
+						void goto(`/player/${item.id}`, { replaceState: true })
+					}}
+				>
+					{#snippet text(item)}
+						{item.text}
+					{/snippet}
+				</Tabs>
+			</div>
+
 			{#if isSelectedTabQueue}
 				<IconButton
 					tooltip={m.playerClearQueue()}
@@ -187,7 +195,7 @@
 			{/if}
 		</Header>
 
-		<div class="flex w-full grow flex-col">
+		<div class="mx-auto flex w-full max-w-(--app-max-content-width) grow flex-col">
 			<div class="flex grow p-4">
 				{#if isSelectedTabQueue}
 					{#if player.isQueueEmpty}

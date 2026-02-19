@@ -7,6 +7,7 @@ import { getLayoutProps } from './layout-props.ts'
 interface LoadResult {
 	historyTrackIds: PageQueryResult<number[]>
 	noPlayerOverlay: boolean
+	htmlOverflow: 'auto'
 }
 
 const createPlayHistoryQuery = () =>
@@ -61,5 +62,6 @@ export const load: LayoutLoad = async (): Promise<LoadResult> => {
 	return {
 		historyTrackIds,
 		noPlayerOverlay: true,
+		htmlOverflow: 'auto',
 	}
 }
