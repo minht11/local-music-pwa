@@ -108,9 +108,7 @@
 			},
 			"nursery": {
 				"noFloatingPromises": "error",
-				"noImportCycles": "error",
-				"noMisusedPromises": "error",
-				"noDeprecatedImports": "on"
+				"noMisusedPromises": "error"
 			},
 			"complexity": {
 				"useSimplifiedLogicExpression": "error",
@@ -131,7 +129,9 @@
 					"options": {
 						"ignore": ["slot"]
 					}
-				}
+				},
+				"noImportCycles": "error",
+				"noDeprecatedImports": "on"
 			}
 		}
 	},
