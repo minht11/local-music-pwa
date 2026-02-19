@@ -191,17 +191,12 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 	tracker.sendMsg(true)
 }
 
-const scanNewDirectory = async (
-	items: { uuid: string; file: FileEntity }[],
-	directoryId: number,
-) => {
-	const tracker = new StatusTracker(items.length)
+const scanNewDirectory = async (handles: FileEntity[], directoryId: number) => {
+	const tracker = new StatusTracker(handles.length)
 
 	console.time('SCAN_NEW_DIR')
-	for (const item of items) {
+	for (const handle of handles) {
 		tracker.current += 1
-
-		const handle = item.file
 
 		try {
 			const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
@@ -210,7 +205,7 @@ const scanNewDirectory = async (
 				file: handle,
 				directoryId,
 				trackId: undefined,
-				uuid: item.uuid,
+				uuid: crypto.randomUUID(),
 			})
 
 			if (trackId !== null) {
@@ -230,12 +225,7 @@ const scanNewDirectory = async (
 export const workerAction = async (options: TracksScanOptions) => {
 	if (options.action === 'directory-add') {
 		const handles = await getFileHandlesRecursively(options.dirHandle)
-		const items = handles.map((handle) => ({
-			uuid: crypto.randomUUID(),
-			file: handle,
-		}))
-
-		await scanNewDirectory(items, options.dirId)
+		await scanNewDirectory(handles, options.dirId)
 
 		return
 	}
