@@ -346,12 +346,6 @@ await scanTracks({
 	action: 'scan-new-directory',
 	files: fileEntities,
 })
-
-// Legacy migration
-await scanTracks({
-	action: 'legacy-files-migrate-from-v1',
-	files: legacyFiles,
-})
 ```
 
 ### Playlist Management

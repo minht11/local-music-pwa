@@ -12,7 +12,7 @@ export type DbStandardOperation<
 	? {
 			value: AppDB[StoreName]['value']
 		}
-	: {})
+	: unknown)
 
 export type DbStandardOperations<
 	StoreName extends AppStoreNames,

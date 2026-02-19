@@ -2,7 +2,6 @@ import { redirect } from '@sveltejs/kit'
 import { innerWidth } from 'svelte/reactivity/window'
 import type { RouteId } from '$app/types'
 import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
-import { checkForV1LegacyDatabaseData } from '$lib/db/v1-legacy/database.ts'
 import { getLibraryItemIds } from '$lib/library/get/ids.ts'
 import {
 	createLibraryItemKeysPageQuery,
@@ -81,14 +80,6 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 	}
 
 	const data = await loadData(slug)
-
-	if (data.tracksCountQuery.value === 0) {
-		const hasV1Data = await checkForV1LegacyDatabaseData()
-
-		if (hasV1Data) {
-			redirect(307, '/v1-migration')
-		}
-	}
 
 	const isWideLayout = () => (innerWidth.current ?? 0) > 1154
 	// We pass params here so that inside page we can benefit from $derived caching

@@ -247,12 +247,6 @@ export const workerAction = async (options: TracksScanOptions) => {
 		return
 	}
 
-	if (options.action === 'legacy-files-migrate-from-v1') {
-		await scanNewDirectory(options.files, LEGACY_NO_NATIVE_DIRECTORY)
-
-		return
-	}
-
 	if (options.action === 'legacy-files-add') {
 		await scanExistingDirectory(options.files, LEGACY_NO_NATIVE_DIRECTORY)
 
