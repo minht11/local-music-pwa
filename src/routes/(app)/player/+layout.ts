@@ -17,7 +17,7 @@ const createPlayHistoryQuery = () =>
 			const db = await getDatabase()
 			const entries = await db.getAllFromIndex('playHistory', 'playedAt')
 
-			return entries.map((entry) => entry.trackId)
+			return entries.map((entry) => entry.trackId).reverse()
 		},
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {

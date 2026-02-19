@@ -232,14 +232,14 @@
 								},
 							},
 						]}
-						onItemClick={({ track, index }) => {
-							const trackIndexInQueue = player.itemsIds.findIndex((id) => id === track.id)
+						onItemClick={({ track }) => {
+							const trackIndexInQueue = player.itemsIds.indexOf(track.id)
 							if (trackIndexInQueue !== -1) {
 								player.playTrack(trackIndexInQueue)
 								return
 							}
 
-							player.playTrack(index, [track.id])
+							player.playTrack(0, [track.id])
 						}}
 					/>
 				{/if}
