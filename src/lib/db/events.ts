@@ -1,6 +1,6 @@
 import type { AppDB, AppStoreNames } from './database.ts'
 
-export type DbStandardOperation<
+export type DbBaseChange<
 	StoreName extends AppStoreNames,
 	Operation extends 'add' | 'update' | 'delete' | (string & {}),
 	IncludeValue extends boolean = false,
@@ -14,13 +14,13 @@ export type DbStandardOperation<
 		}
 	: unknown)
 
-export type DbStandardOperations<
+export type DbStandardChange<
 	StoreName extends AppStoreNames,
 	IncludeValue extends boolean = false,
 > =
-	| DbStandardOperation<StoreName, 'add', IncludeValue>
-	| DbStandardOperation<StoreName, 'update', IncludeValue>
-	| DbStandardOperation<StoreName, 'delete', IncludeValue>
+	| DbBaseChange<StoreName, 'add', IncludeValue>
+	| DbBaseChange<StoreName, 'update', IncludeValue>
+	| DbBaseChange<StoreName, 'delete', IncludeValue>
 
 export type DatabaseChangeDetails = {
 	[StoreName in AppStoreNames]: AppDB[StoreName]['meta']['operations']

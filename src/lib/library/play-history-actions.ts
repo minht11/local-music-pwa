@@ -7,7 +7,6 @@ const PLAY_HISTORY_LIMIT = 100
 
 const notifyPlayHistoryChange = () => {
 	dispatchDatabaseChangedEvent({
-		operation: 'change',
 		storeName: 'playHistory',
 	})
 }

@@ -9,7 +9,7 @@ import type {
 	PlaylistEntry,
 	Track,
 } from '$lib/library/types.ts'
-import type { DbStandardOperation, DbStandardOperations } from './events.ts'
+import type { DbBaseChange, DbStandardChange } from './events.ts'
 
 export interface AppDB extends DBSchema {
 	tracks: {
@@ -31,7 +31,7 @@ export interface AppDB extends DBSchema {
 			byAlbumSorted: [album: string, name: string, trackNo: number, discNo: number]
 		}
 		meta: {
-			operations: DbStandardOperations<'tracks'>
+			operations: DbStandardChange<'tracks'>
 		}
 	}
 	albums: {
@@ -39,7 +39,7 @@ export interface AppDB extends DBSchema {
 		value: Album
 		indexes: Pick<Album, 'uuid' | 'name' | 'artists' | 'year'>
 		meta: {
-			operations: DbStandardOperations<'albums'>
+			operations: DbStandardChange<'albums'>
 		}
 	}
 	artists: {
@@ -47,7 +47,7 @@ export interface AppDB extends DBSchema {
 		value: Artist
 		indexes: Pick<Artist, 'uuid' | 'name'>
 		meta: {
-			operations: DbStandardOperations<'artists'>
+			operations: DbStandardChange<'artists'>
 		}
 	}
 	playlists: {
@@ -55,7 +55,7 @@ export interface AppDB extends DBSchema {
 		value: Playlist
 		indexes: Pick<Playlist, 'uuid' | 'name' | 'createdAt'>
 		meta: {
-			operations: DbStandardOperations<'playlists'>
+			operations: DbStandardChange<'playlists'>
 		}
 	}
 	playlistEntries: {
@@ -66,8 +66,8 @@ export interface AppDB extends DBSchema {
 		}
 		meta: {
 			operations:
-				| DbStandardOperation<'playlistEntries', 'add', true>
-				| DbStandardOperation<'playlistEntries', 'delete', true>
+				| DbBaseChange<'playlistEntries', 'add', true>
+				| DbBaseChange<'playlistEntries', 'delete', true>
 		}
 	}
 	directories: {
@@ -75,7 +75,7 @@ export interface AppDB extends DBSchema {
 		value: Directory
 		indexes: Pick<Directory, 'id'>
 		meta: {
-			operations: DbStandardOperations<'directories'>
+			operations: DbStandardChange<'directories'>
 		}
 	}
 	playHistory: {
@@ -85,7 +85,6 @@ export interface AppDB extends DBSchema {
 		meta: {
 			operations: {
 				storeName: 'playHistory'
-				operation: 'change'
 			}
 		}
 	}
