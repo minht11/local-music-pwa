@@ -81,6 +81,7 @@
 
 	"player": "播放器",
 	"playerAddToQueue": "新增到佇列",
+	"playerClearHistory": "清除歷史記錄",
 	"playerClearQueue": "清空佇列",
 	"playerDecreaseVolume": "降低音量",
 	"playerDisableRepeat": "停用重複播放",
@@ -90,6 +91,7 @@
 	"playerEnableShuffle": "啟用隨機播放",
 	"playerIncreaseVolume": "增加音量",
 	"playerOpenFullPlayer": "開啟完整播放器",
+	"playerOpenHistory": "開啟歷史記錄",
 	"playerOpenQueue": "開啟佇列",
 	"playerPause": "暫停",
 	"playerPlay": "播放",
@@ -97,6 +99,7 @@
 	"playerPlayPreviousTrack": "播放上一首曲目",
 	"playerQueueEmpty": "您的佇列是空的",
 	"playerQueuePlaySomething": "在此播放一些內容",
+	"playerRemoveFromHistory": "從歷史記錄中移除",
 	"playerRemoveFromQueue": "從佇列中移除",
 	"playlist": "播放列表",
 	"playlists": "播放列表",

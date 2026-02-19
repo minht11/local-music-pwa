@@ -1,79 +1,65 @@
-import { innerHeight, innerWidth } from 'svelte/reactivity/window'
-import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
-import {
-	type AppViewTransitionType,
-	defineViewTransitionMatcher,
-} from '$lib/view-transitions.svelte.ts'
+import { getDatabase } from '$lib/db/database.ts'
+import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
+import { defineViewTransitionMatcher } from '$lib/view-transitions.svelte.ts'
 import type { LayoutLoad } from './$types.ts'
-
-interface LayoutSizes {
-	isCompactVertical: boolean
-	isCompactHorizontal: boolean
-	isCompact: boolean
-}
+import { getLayoutProps } from './layout-props.ts'
 
 interface LoadResult {
+	historyTrackIds: PageQueryResult<number[]>
 	noPlayerOverlay: boolean
-	sizes: () => LayoutSizes
-	layoutMode: (isCompact: boolean, pathname: string) => LayoutMode
 }
 
-export const load: LayoutLoad = (): LoadResult => {
-	const sizes = (): LayoutSizes => {
-		const isCompactVertical = (innerHeight.current ?? 0) < 600
-		const isCompactHorizontal = (innerWidth.current ?? 0) < 768
-		const isCompact = isCompactVertical || isCompactHorizontal
+const createPlayHistoryQuery = () =>
+	createPageQuery({
+		key: [],
+		fetcher: async () => {
+			const db = await getDatabase()
+			const entries = await db.getAllFromIndex('playHistory', 'playedAt')
 
-		return {
-			isCompactVertical,
-			isCompactHorizontal,
-			isCompact,
-		}
-	}
+			return entries.map((entry) => entry.trackId)
+		},
+		onDatabaseChange: (changes, actions) => {
+			for (const change of changes) {
+				if (change.storeName === 'playHistory') {
+					void actions.refetch()
+					return
+				}
+			}
+		},
+	})
 
-	const layoutMode = (isCompact: boolean, pathname: string): LayoutMode => {
-		if (!isCompact) {
-			return 'both'
-		}
-
-		if (pathname.endsWith('/queue')) {
-			return 'details'
-		}
-
-		return 'list'
-	}
-
+export const load: LayoutLoad = async (): Promise<LoadResult> => {
 	defineViewTransitionMatcher((to, from) => {
-		const prevRouteWasPlayer = from.startsWith('/(app)/player')
-		const nextRouteIsPlayer = to.startsWith('/(app)/player')
+		const playerRouteId = '/(app)/player'
+		const prevRouteWasPlayer = from.startsWith(playerRouteId)
+		const nextRouteIsPlayer = to.startsWith(playerRouteId)
 
-		const prevRouteWasQueue = from.endsWith('/queue')
-		const nextRouteIsQueue = to.endsWith('/queue')
+		if (prevRouteWasPlayer && nextRouteIsPlayer) {
+			const { layoutMode } = getLayoutProps(to)
 
-		const viewBetweenPlayerAndQueue =
-			(prevRouteWasPlayer && nextRouteIsQueue) || (prevRouteWasQueue && nextRouteIsPlayer)
+			if (layoutMode === 'both' || (layoutMode === 'details' && from !== playerRouteId)) {
+				return { view: 'disabled' }
+			}
 
-		let view: AppViewTransitionType | null = null
-		let backwards = false
-		if (prevRouteWasPlayer && !viewBetweenPlayerAndQueue) {
-			view = 'player'
-			backwards = true
+			// Use default transition
+			return null
 		}
 
-		if (nextRouteIsPlayer && !viewBetweenPlayerAndQueue) {
-			view = 'player'
+		if (prevRouteWasPlayer) {
+			return { view: 'player', backwards: true }
 		}
 
-		if (view) {
-			return { view, backwards }
+		if (nextRouteIsPlayer) {
+			return { view: 'player' }
 		}
 
 		return null
 	})
 
+	const historyTrackIds = await createPlayHistoryQuery()
+
 	return {
+		historyTrackIds,
 		noPlayerOverlay: true,
-		sizes,
-		layoutMode,
 	}
 }

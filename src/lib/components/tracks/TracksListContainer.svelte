@@ -15,6 +15,13 @@
 		items: readonly number[]
 		index: number
 	}
+
+	interface Props {
+		items: readonly number[]
+		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItemOption, boolean>>
+		menuItems?: (track: TrackData, index: number) => MenuItem[]
+		onItemClick?: (data: TrackItemClick) => void
+	}
 </script>
 
 <script lang="ts">
@@ -22,13 +29,6 @@
 
 	const defaultOnItemClick = (data: TrackItemClick) => {
 		player.playTrack(data.index, data.items)
-	}
-
-	interface Props {
-		items: readonly number[]
-		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItemOption, boolean>>
-		menuItems?: (track: TrackData, index: number) => MenuItem[]
-		onItemClick?: (data: TrackItemClick) => void
 	}
 
 	const {

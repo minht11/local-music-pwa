@@ -5,7 +5,7 @@ import type { LibraryStoreName } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<
 	AppDB,
-	('directories' | 'tracks' | 'albums' | 'artists' | 'playlistEntries')[],
+	('directories' | 'tracks' | 'albums' | 'artists' | 'playlistEntries' | 'playHistory')[],
 	'readwrite'
 >
 
@@ -81,7 +81,10 @@ const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 
 export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 	const db = await getDatabase()
-	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistEntries'], 'readwrite')
+	const tx = db.transaction(
+		['tracks', 'albums', 'artists', 'playlistEntries', 'playHistory'],
+		'readwrite',
+	)
 
 	const track = await tx.objectStore('tracks').get(trackId)
 	if (!track) {
@@ -96,6 +99,7 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 		...track.artists.map((artist) =>
 			dbRemoveTrackRelatedData(tx, 'artists', 'artists', artist),
 		),
+		// TODO. Remove track from play history
 		tx.done.then(() => undefined),
 	])
 

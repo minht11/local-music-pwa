@@ -8,6 +8,7 @@ import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { formatArtists } from '$lib/helpers/utils/text.ts'
 import { throttle } from '$lib/helpers/utils/throttle.ts'
 import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
+import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { cleanupTrackAudio, loadTrackAudio } from './audio.ts'
 
 export interface PlayTrackOptions {
@@ -203,6 +204,19 @@ export class PlayerStore {
 						this.#itemsIdsOriginalOrder.splice(index, 1)
 					}
 				}
+			}
+		})
+
+		// Track play history
+		let lastTrackedTrackId: number | null = null
+		$effect(() => {
+			const track = this.activeTrack
+
+			if (track && track.id !== lastTrackedTrackId) {
+				lastTrackedTrackId = track.id
+				void dbAddToPlayHistory(track.id)
+			} else if (!track) {
+				lastTrackedTrackId = null
 			}
 		})
 

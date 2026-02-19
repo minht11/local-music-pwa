@@ -127,7 +127,7 @@
 </script>
 
 {#if !isWideLayout.current || !main.librarySplitLayoutEnabled}
-	<Header title={data.singularTitle()} mode="fixed" />
+	<Header title={data.singularTitle()} />
 {/if}
 
 <div class="@container flex grow flex-col px-4 pb-4">

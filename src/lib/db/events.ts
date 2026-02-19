@@ -1,53 +1,29 @@
 import type { AppDB, AppStoreNames } from './database.ts'
 
-type DatabaseOperationsConfig<StoreName extends AppStoreNames> =
-	| (
-			| {
-					storeName: Exclude<StoreName, 'playlistEntries'>
-					operation: 'add'
-					key: AppDB[StoreName]['key']
-			  }
-			| {
-					storeName: Exclude<StoreName, 'playlistEntries'>
-					operation: 'update'
-					key: AppDB[StoreName]['key']
-			  }
-			| {
-					storeName: Exclude<StoreName, 'playlistEntries'>
-					operation: 'delete'
-					key: AppDB[StoreName]['key']
-			  }
-	  )
-	| (
-			| {
-					storeName: Extract<StoreName, 'playlistEntries'>
-					operation: 'add'
-					key: AppDB[StoreName]['key']
-					value: AppDB[StoreName]['value']
-			  }
-			| {
-					storeName: Extract<StoreName, 'playlistEntries'>
-					operation: 'update'
-					key: AppDB[StoreName]['key']
-					value: AppDB[StoreName]['value']
-			  }
-			| {
-					storeName: Extract<StoreName, 'playlistEntries'>
-					operation: 'delete'
-					key: AppDB[StoreName]['key']
-					value: AppDB[StoreName]['value']
-			  }
-	  )
+export type DbStandardOperation<
+	StoreName extends AppStoreNames,
+	Operation extends 'add' | 'update' | 'delete' | (string & {}),
+	IncludeValue extends boolean = false,
+> = {
+	storeName: StoreName
+	operation: Operation
+	key: AppDB[StoreName]['key']
+} & (IncludeValue extends true
+	? {
+			value: AppDB[StoreName]['value']
+		}
+	: {})
 
-// For some schemas we want to enforce that only certain operations are allowed.
-type DatabaseChangeDetailsNonNarrowed<StoreName extends AppStoreNames> = Exclude<
-	DatabaseOperationsConfig<StoreName>,
-	{ operation: AppDB[StoreName]['meta']['notAllowedOperations'] }
->
+export type DbStandardOperations<
+	StoreName extends AppStoreNames,
+	IncludeValue extends boolean = false,
+> =
+	| DbStandardOperation<StoreName, 'add', IncludeValue>
+	| DbStandardOperation<StoreName, 'update', IncludeValue>
+	| DbStandardOperation<StoreName, 'delete', IncludeValue>
 
 export type DatabaseChangeDetails = {
-	// Needed for typescript narrowing to work properly
-	[StoreName in AppStoreNames]: DatabaseChangeDetailsNonNarrowed<StoreName>
+	[StoreName in AppStoreNames]: AppDB[StoreName]['meta']['operations']
 }[AppStoreNames]
 
 export type DatabaseChangeDetailsList = readonly DatabaseChangeDetails[]

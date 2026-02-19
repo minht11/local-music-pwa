@@ -9,7 +9,7 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"check": "svelte-kit sync && svelte-check",
+		"type-check": "svelte-kit sync && svelte-check",
 		"check:i18n": "node scripts/check-translations.ts",
 		"biome-check": "biome check ./src",
 		"biome-fix": "biome check ./src --write",

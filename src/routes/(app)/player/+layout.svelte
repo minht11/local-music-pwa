@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
 	import BackButton from '$lib/components/BackButton.svelte'
 	import Button from '$lib/components/Button.svelte'
@@ -16,18 +17,29 @@
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
 	import Slider from '$lib/components/Slider.svelte'
+	import Tabs from '$lib/components/Tabs.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import { initPageQueries } from '$lib/db/query/page-query.svelte.js'
 	import { formatArtists, getItemLanguage } from '$lib/helpers/utils/text.ts'
+	import { clearPlayHistory, dbRemoveFromPlayHistory } from '$lib/library/play-history-actions.js'
+	import { getLayoutProps } from './layout-props.ts'
 
 	const { data } = $props()
+
+	// svelte-ignore state_referenced_locally
+	initPageQueries(data)
 
 	const mainStore = useMainStore()
 	const player = usePlayer()
 	const track = $derived(player.activeTrack)
 
-	const sizes = $derived(data.sizes())
-	const isCompactVertical = $derived(sizes.isCompactVertical)
-	const layoutMode = $derived(data.layoutMode(sizes.isCompact, page.url.pathname))
+	const isSelectedTabQueue = $derived(
+		page.route.id === '/(app)/player' || page.route.id === '/(app)/player/queue',
+	)
+
+	const { isCompactHorizontal, isCompactVertical, layoutMode } = $derived(
+		getLayoutProps(page.route.id),
+	)
 </script>
 
 {#snippet playerSnippet()}
@@ -36,12 +48,12 @@
 			layoutMode === 'both' && 'w-100',
 			layoutMode === 'list' && 'mx-auto w-full',
 			'player-content z-0 grow items-center gap-x-6 overflow-clip bg-secondaryContainerVariant px-2 pb-2',
-			isCompactVertical && !sizes.isCompactHorizontal && 'player-content-horizontal',
+			isCompactVertical && !isCompactHorizontal && 'player-content-horizontal',
 		]}
 	>
 		<div
 			class={[
-				isCompactVertical && !sizes.isCompactHorizontal ? 'absolute top-0 left-0 h-14' : 'h-16',
+				isCompactVertical && !isCompactHorizontal ? 'absolute top-0 left-0 h-14' : 'h-16',
 				'flex w-full items-center justify-between gap-2 [grid-area:header]',
 			]}
 		>
@@ -122,13 +134,33 @@
 	</div>
 {/snippet}
 
-{#snippet queueActions()}
-	<IconButton
-		tooltip={m.playerClearQueue()}
-		disabled={player.isQueueEmpty}
-		icon="trayRemove"
-		onclick={player.clearQueue}
-	/>
+{#snippet tabsSnippet()}
+	<Tabs
+		class="mx-auto"
+		selectedIndex={isSelectedTabQueue ? 0 : 1}
+		items={[
+			{ id: 'queue', text: m.queue() },
+			{ id: 'history', text: m.playerHistory() },
+		]}
+		onchange={(item) => {
+			void goto(`/player/${item.id}`, { replaceState: true })
+		}}
+	>
+		{#snippet text(item)}
+			{item.text}
+		{/snippet}
+	</Tabs>
+{/snippet}
+
+{#snippet emptyList(title: string)}
+	<div class="m-auto flex flex-col items-center text-center">
+		<Icon type="playlistMusic" class="color-onSecondaryContainer my-auto size-35 opacity-54" />
+
+		<div class="mb-4 text-body-lg">{title}</div>
+		<Button kind="outlined" as="a" href="/library/tracks">
+			{m.playerQueuePlaySomething()}
+		</Button>
+	</div>
 {/snippet}
 
 {#snippet queueSnippet()}
@@ -137,56 +169,69 @@
 		so we can't use root scroller here.
 	-->
 	<ScrollContainer class="flex h-dvh flex-col overflow-auto contain-strict">
-		{#if layoutMode === 'details'}
-			<Header title={m.queue()}>
-				{#if layoutMode === 'details'}
-					{@render queueActions()}
-				{/if}
-			</Header>
-		{/if}
+		<Header mode="sticky" noBackButton={layoutMode !== 'details'} centerChildren={tabsSnippet}>
+			{#if isSelectedTabQueue}
+				<IconButton
+					tooltip={m.playerClearQueue()}
+					disabled={player.isQueueEmpty}
+					icon="trayRemove"
+					onclick={player.clearQueue}
+				/>
+			{:else}
+				<IconButton
+					tooltip={m.playerClearHistory()}
+					disabled={data.historyTrackIds.value.length === 0}
+					icon="trayRemove"
+					onclick={() => void clearPlayHistory()}
+				/>
+			{/if}
+		</Header>
 
 		<div class="flex w-full grow flex-col">
-			{#if layoutMode !== 'details'}
-				<div class="flex h-16 items-center border-b border-onSecondaryContainer/24 px-4">
-					<div class="w-10"></div>
-
-					<div class="mx-auto text-title-lg">
-						{m.queue()}
-					</div>
-
-					{@render queueActions()}
-				</div>
-			{/if}
-
 			<div class="flex grow p-4">
-				{#if player.isQueueEmpty}
-					<div class="m-auto flex flex-col items-center text-center">
-						<Icon
-							type="playlistMusic"
-							class="color-onSecondaryContainer my-auto size-35 opacity-54"
+				{#if isSelectedTabQueue}
+					{#if player.isQueueEmpty}
+						{@render emptyList(m.playerQueueEmpty())}
+					{:else}
+						<TracksListContainer
+							items={player.itemsIds}
+							predefinedMenuItems={{
+								disableAddToQueue: true,
+							}}
+							menuItems={(_track, index) => [
+								{
+									label: m.playerRemoveFromQueue(),
+									action: () => {
+										player.removeFromQueue(index)
+									},
+								},
+							]}
+							onItemClick={({ index }) => {
+								player.playTrack(index)
+							}}
 						/>
-
-						<div class="mb-4 text-body-lg">{m.playerQueueEmpty()}</div>
-						<Button kind="outlined" as="a" href="/library/tracks">
-							{m.playerQueuePlaySomething()}
-						</Button>
-					</div>
+					{/if}
+				{:else if data.historyTrackIds.value.length === 0}
+					{@render emptyList(m.playerHistoryEmpty())}
 				{:else}
 					<TracksListContainer
-						items={player.itemsIds}
-						predefinedMenuItems={{
-							disableAddToQueue: true,
-						}}
-						menuItems={(_track, index) => [
+						items={data.historyTrackIds.value}
+						menuItems={(item) => [
 							{
-								label: m.playerRemoveFromQueue(),
+								label: m.playerRemoveFromHistory(),
 								action: () => {
-									player.removeFromQueue(index)
+									void dbRemoveFromPlayHistory(item.id)
 								},
 							},
 						]}
-						onItemClick={({ index }) => {
-							player.playTrack(index)
+						onItemClick={({ track, index }) => {
+							const trackIndexInQueue = player.itemsIds.findIndex((id) => id === track.id)
+							if (trackIndexInQueue !== -1) {
+								player.playTrack(trackIndexInQueue)
+								return
+							}
+
+							player.playTrack(index, [track.id])
 						}}
 					/>
 				{/if}

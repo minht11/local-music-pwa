@@ -1,19 +1,15 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-
 	"about": "À propos",
 	"aboutHomepage": "Page d’accueil",
 	"aboutJoinDiscord": "Rejoindre notre Discord",
 	"aboutPrivacy": "Confidentialité",
 	"aboutSourceCode": "Code source",
-
 	"album": "Album",
 	"albums": "Albums",
-
 	"appName": "Snae Player",
 	"appNameShort": "Snae",
 	"appUpdateAvailable": "Une mise à jour est disponible",
-
 	"artist": "Artiste",
 	"artists": "Artistes",
 	"cancel": "Annuler",
@@ -21,7 +17,6 @@
 	"directoryIsIncludedInParent": "« {newDir} » est un sous-dossier de « {existingDir} » qui est déjà dans votre bibliothèque. Vous n’avez pas besoin de l’ajouter à nouveau.",
 	"dismiss": "Fermer",
 	"duration": "Durée",
-
 	"errorPageDoesNotExist": "Il semble que cette page n’existe pas.",
 	"errorUnexpected": "Une erreur inattendue s’est produite.",
 	"favorites": "Favoris",
@@ -39,7 +34,6 @@
 	"libraryDirPromptBrowserPermission": "Autorisation du navigateur requise",
 	"libraryDirPromptExplanation": "Pour lire la musique, l’application a besoin d’accéder à ces dossiers :",
 	"libraryDirPromptGrant": "Autoriser",
-
 	"libraryEditPlaylist": "Modifier la liste de lecture",
 	"libraryEditPlaylistName": "Modifier le nom de la liste de lecture",
 	"libraryEmpty": "Votre bibliothèque est vide",
@@ -47,7 +41,6 @@
 	"libraryItemRemovedFromLibrary": "Élément supprimé de la bibliothèque",
 	"libraryItemsRemovedFromLibrary": "Éléments supprimés de la bibliothèque",
 	"libraryNewPlaylist": "Nouvelle liste de lecture",
-
 	"libraryNoResults": "Aucun résultat trouvé",
 	"libraryNoResultsExplanation": "Essayez de rechercher autre chose",
 	"libraryOpenApplicationMenu": "Ouvrir le menu de l’application",
@@ -60,7 +53,6 @@
 	"libraryPlaylistUpdated": "Liste de lecture mise à jour",
 	"libraryRemoveFromLibrary": "Supprimer de la bibliothèque",
 	"librarySave": "Enregistrer",
-
 	"librarySearch": "Rechercher",
 	"librarySelectSomethingToBeShown": "Sélectionnez un élément de la liste pour l’afficher ici",
 	"librarySplitViewDisable": "Désactiver la vue partagée",
@@ -68,7 +60,6 @@
 	"libraryStartByAdding": "Commencez par ajouter de la musique",
 	"libraryToggleSortOrder": "Changer l’ordre de tri",
 	"libraryTrackRemovedFromPlaylist": "Piste retirée de la liste de lecture",
-
 	"libraryTrackRemoveFromPlaylist": "Retirer de la liste de lecture",
 	"libraryTracksCount": "{count} pistes",
 	"libraryViewDetails": "Voir les détails",
@@ -78,9 +69,9 @@
 	"noItemsToDisplay": "Aucun élément à afficher",
 	"pause": "Pause",
 	"play": "Lecture",
-
 	"player": "Lecteur",
 	"playerAddToQueue": "Ajouter à la file d’attente",
+	"playerClearHistory": "Effacer l'historique",
 	"playerClearQueue": "Vider la file d’attente",
 	"playerDecreaseVolume": "Diminuer le volume",
 	"playerDisableRepeat": "Désactiver la répétition",
@@ -88,8 +79,10 @@
 	"playerEnableRepeat": "Activer la répétition",
 	"playerEnableRepeatOne": "Répéter une seule piste",
 	"playerEnableShuffle": "Activer la lecture aléatoire",
+	"playerHistory": "Historique",
 	"playerIncreaseVolume": "Augmenter le volume",
 	"playerOpenFullPlayer": "Ouvrir le lecteur en plein écran",
+	"playerOpenHistory": "Ouvrir l'historique",
 	"playerOpenQueue": "Ouvrir la file d’attente",
 	"playerPause": "Pause",
 	"playerPlay": "Lecture",
@@ -97,6 +90,7 @@
 	"playerPlayPreviousTrack": "Piste précédente",
 	"playerQueueEmpty": "Votre file d’attente est vide",
 	"playerQueuePlaySomething": "Lancez une lecture ici",
+	"playerRemoveFromHistory": "Retirer de l'historique",
 	"playerRemoveFromQueue": "Retirer de la file d’attente",
 	"playlist": "Liste de lecture",
 	"playlists": "Listes de lecture",
@@ -104,15 +98,12 @@
 	"reload": "Recharger",
 	"replace": "Remplacer",
 	"replaceDirectoryExplanation": "Le dossier {newDir} que vous ajoutez contient {existingDirs} qui existe déjà dans votre bibliothèque.\n Aucune modification ne sera apportée aux pistes existantes de votre bibliothèque.",
-
 	"replaceDirectoryQ": "Remplacer le dossier ?",
 	"selectAll": "Tout sélectionner",
 	"settingPickColorFromArtwork": "Choisir automatiquement la couleur à partir de la pochette de la piste en cours",
 	"settings": "Paramètres",
 	"settingsAbout": "À propos",
-
 	"settingsAddDirectory": "Ajouter un dossier",
-
 	"settingsAllDataLocal": "Toutes les données sont conservées sur votre appareil",
 	"settingsAppearance": "Apparence",
 	"settingsApplicationTheme": "Thème de l’application",
@@ -151,12 +142,10 @@
 	"settingsThemeLight": "Clair",
 	"settingsTracksInAppStorageTooltip": "Contient les pistes stockées dans le stockage de l'application et/ou les données migrées depuis Snae Player v1",
 	"settingsTracksInsideAppMemory": "Pistes dans le stockage de l’application",
-
 	"shuffle": "Aléatoire",
 	"successfullyRemovedTracks": "{count} pistes supprimées avec succès",
 	"track": "Piste",
 	"trackAddToFavorites": "Ajouter aux favoris",
-
 	"trackPlay": "Lire {name}",
 	"trackRemoveFromFavorites": "Retirer des favoris",
 	"tracks": "Pistes",
@@ -166,7 +155,6 @@
 	"unknown": "Inconnu",
 	"validationMaxLength": "{max} caractères maximum autorisés",
 	"validationMinLength": "{min} caractères minimum requis",
-
 	"validationRequired": "Champ obligatoire",
 	"year": "Année"
 }

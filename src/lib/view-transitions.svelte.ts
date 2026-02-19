@@ -5,7 +5,7 @@ import type { RouteId } from '$app/types'
 import { getActiveRipplesCount } from './attachments/ripple.ts'
 import { wait } from './helpers/utils/wait.ts'
 
-export type AppViewTransitionType = 'regular' | 'player' | 'library'
+export type AppViewTransitionType = 'regular' | 'player' | 'library' | 'disabled'
 
 export type AppViewTransitionTypeMatcherResult = {
 	view: AppViewTransitionType
@@ -92,6 +92,10 @@ export const setupAppViewTransitions = (disabled: () => boolean): void => {
 		}
 
 		const { view, isBackwards } = resolveView(nav)
+
+		if (view === 'disabled') {
+			return
+		}
 
 		document.startViewTransition({
 			update: () => {

@@ -9,6 +9,7 @@ import type {
 	PlaylistEntry,
 	Track,
 } from '$lib/library/types.ts'
+import type { DbStandardOperation, DbStandardOperations } from './events.ts'
 
 export interface AppDB extends DBSchema {
 	tracks: {
@@ -30,7 +31,7 @@ export interface AppDB extends DBSchema {
 			byAlbumSorted: [album: string, name: string, trackNo: number, discNo: number]
 		}
 		meta: {
-			notAllowedOperations: undefined
+			operations: DbStandardOperations<'tracks'>
 		}
 	}
 	albums: {
@@ -38,7 +39,7 @@ export interface AppDB extends DBSchema {
 		value: Album
 		indexes: Pick<Album, 'uuid' | 'name' | 'artists' | 'year'>
 		meta: {
-			notAllowedOperations: undefined
+			operations: DbStandardOperations<'albums'>
 		}
 	}
 	artists: {
@@ -46,7 +47,7 @@ export interface AppDB extends DBSchema {
 		value: Artist
 		indexes: Pick<Artist, 'uuid' | 'name'>
 		meta: {
-			notAllowedOperations: undefined
+			operations: DbStandardOperations<'artists'>
 		}
 	}
 	playlists: {
@@ -54,7 +55,7 @@ export interface AppDB extends DBSchema {
 		value: Playlist
 		indexes: Pick<Playlist, 'uuid' | 'name' | 'createdAt'>
 		meta: {
-			notAllowedOperations: undefined
+			operations: DbStandardOperations<'playlists'>
 		}
 	}
 	playlistEntries: {
@@ -64,7 +65,9 @@ export interface AppDB extends DBSchema {
 			playlistTrack: [playlistId: number, trackId: number]
 		}
 		meta: {
-			notAllowedOperations: 'update'
+			operations:
+				| DbStandardOperation<'playlistEntries', 'add', true>
+				| DbStandardOperation<'playlistEntries', 'delete', true>
 		}
 	}
 	directories: {
@@ -72,7 +75,7 @@ export interface AppDB extends DBSchema {
 		value: Directory
 		indexes: Pick<Directory, 'id'>
 		meta: {
-			notAllowedOperations: undefined
+			operations: DbStandardOperations<'directories'>
 		}
 	}
 	playHistory: {
@@ -80,7 +83,10 @@ export interface AppDB extends DBSchema {
 		value: PlayHistoryEntry
 		indexes: Pick<PlayHistoryEntry, 'trackId' | 'playedAt'>
 		meta: {
-			notAllowedOperations: undefined
+			operations: {
+				storeName: 'playHistory'
+				operation: 'change'
+			}
 		}
 	}
 }
