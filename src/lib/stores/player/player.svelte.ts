@@ -352,13 +352,13 @@ export class PlayerStore {
 		}
 	}
 
-	addToQueue = (trackId: number | number[]): void => {
+	addToQueue = (trackId: number | readonly number[]): void => {
 		if (Array.isArray(trackId)) {
 			this.#itemsIdsShuffled?.push(...trackId)
 			this.#itemsIdsOriginalOrder.push(...trackId)
 		} else {
-			this.#itemsIdsShuffled?.push(trackId)
-			this.#itemsIdsOriginalOrder.push(trackId)
+			this.#itemsIdsShuffled?.push(trackId as number)
+			this.#itemsIdsOriginalOrder.push(trackId as number)
 		}
 
 		if (this.activeTrackIndex === -1) {

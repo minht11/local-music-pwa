@@ -150,9 +150,7 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableAddToQueue',
 				label: m.playerAddToQueue(),
 				action: () => {
-					trackIds.forEach((trackId) => {
-						player.addToQueue(trackId)
-					})
+					player.addToQueue(trackIds)
 				},
 			},
 			{
