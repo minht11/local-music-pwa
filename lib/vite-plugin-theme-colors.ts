@@ -32,8 +32,8 @@ export interface Options {
 export const themeColorsPlugin = (options: Options): Plugin => ({
 	name: themeColorsPlugin.name,
 	enforce: 'pre',
-	async buildStart() {
-		const variables = await generateThemeVariables(options.defaultColorSeed)
+	buildStart() {
+		const variables = generateThemeVariables(options.defaultColorSeed)
 
 		const content = `
 			@theme {

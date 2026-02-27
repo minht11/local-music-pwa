@@ -42,7 +42,7 @@ export default defineConfig({
 		target: ['chrome130', 'safari18'],
 		rolldownOptions: {
 			output: {
-				legalComments: 'none',
+				comments: false,
 				codeSplitting: {
 					groups: [
 						{
