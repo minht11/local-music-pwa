@@ -172,7 +172,7 @@ const openAppDatabase = () =>
 			if (!objectStoreNames.contains('albums')) {
 				const store = createStore(db, 'albums')
 
-				createIndexes(store, ['name', 'uuid'], { unique: true })
+				createIndexes(store, ['name', 'uuid'], { unique: false })
 				createIndexes(store, ['year'])
 
 				store.createIndex('artists', 'artists', {

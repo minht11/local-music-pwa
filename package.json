@@ -17,7 +17,8 @@
 		"prettier-fix": "prettier --write ./src",
 		"compile-i18n": "paraglide-js compile --project ./project.inlang",
 		"test": "vitest run",
-		"coverage": "vitest run --coverage"
+		"coverage": "vitest run --coverage",
+		"gen-color-theme": "node scripts/gen-color-theme.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.4",

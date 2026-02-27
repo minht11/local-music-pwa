@@ -5,7 +5,6 @@ import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
-import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
 
 const getAutoImportPlugin = (dts: string | false = false) =>
 	AutoImport({
@@ -67,10 +66,6 @@ export default defineConfig({
 		plugins: () => [getAutoImportPlugin()],
 	},
 	plugins: [
-		themeColorsPlugin({
-			defaultColorSeed: '#cc9724',
-			output: `${import.meta.dirname}/.generated/theme-colors.css`,
-		}),
 		imagetools(),
 		tailwindcss(),
 		sveltekit(),

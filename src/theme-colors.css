@@ -1,0 +1,41 @@
+/* This file is auto generated, do not edit manually. */
+@theme {
+	--color-*: initial;
+	--color-transparent: transparent;
+	--color-current: currentColor;
+	--color-primary: light-dark(#7c5800, #f7bd48);
+	--color-onPrimary: light-dark(#ffffff, #412d00);
+	--color-primaryContainer: light-dark(#ffdea7, #5e4200);
+	--color-onPrimaryContainer: light-dark(#271900, #ffdea7);
+	--color-secondary: light-dark(#6d5c3f, #dac4a0);
+	--color-onSecondary: light-dark(#ffffff, #3c2e15);
+	--color-secondaryContainer: light-dark(#f7dfbb, #54452a);
+	--color-secondaryContainerVariant: light-dark(#cbb694, #30240c);
+	--color-onSecondaryContainer: light-dark(#251a04, #f7dfbb);
+	--color-tertiary: light-dark(#4c6544, #b3cea6);
+	--color-onTertiary: light-dark(#ffffff, #1f361a);
+	--color-tertiaryContainer: light-dark(#ceebc1, #354d2e);
+	--color-onTertiaryContainer: light-dark(#0b2007, #ceebc1);
+	--color-error: light-dark(#ba1a1a, #ffb4ab);
+	--color-onError: light-dark(#ffffff, #690005);
+	--color-errorContainer: light-dark(#ffdad6, #93000a);
+	--color-onErrorContainer: light-dark(#410002, #ffdad6);
+	--color-surface: light-dark(#fff8f3, #201b13);
+	--color-onSurface: light-dark(#201b13, #ece1d4);
+	--color-surfaceVariant: light-dark(#eee1cf, #4e4639);
+	--color-onSurfaceVariant: light-dark(#4e4639, #d1c5b4);
+	--color-surfaceContainerHighest: light-dark(#ece1d4, #3a342b);
+	--color-surfaceContainerHigh: light-dark(#f1e7d9, #2f2921);
+	--color-surfaceContainer: light-dark(#f7ecdf, #241f17);
+	--color-surfaceContainerLow: light-dark(#fdf2e5, #201b13);
+	--color-surfaceContainerLowest: light-dark(#ffffff, #120e07);
+	--color-surfaceBright: light-dark(#fff8f3, #3e382f);
+	--color-surfaceDim: light-dark(#e3d8cc, #17130b);
+	--color-outline: light-dark(#807667, #9a8f80);
+	--color-outlineVariant: light-dark(#d1c5b4, #4e4639);
+	--color-shadow: light-dark(#000000, #000000);
+	--color-scrim: light-dark(#000000, #000000);
+	--color-inverseSurface: light-dark(#353027, #ece1d4);
+	--color-inverseOnSurface: light-dark(#faefe2, #201b13);
+	--color-inversePrimary: light-dark(#f7bd48, #7c5800);
+}

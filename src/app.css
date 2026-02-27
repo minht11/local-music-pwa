@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import '../.generated/theme-colors.css';
+@import './theme-colors.css';
 
 /* We don't use these classes */
 @source not inline('container');

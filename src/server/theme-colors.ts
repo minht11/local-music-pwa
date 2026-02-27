@@ -1,5 +1,5 @@
 import type { PaletteToken } from '$lib/theme.ts'
-import themeCss from '../../.generated/theme-colors.css?raw'
+import themeCss from '../theme-colors.css?raw'
 
 /** @public */
 export const THEME_PALLETTE_LIGHT = {} as Record<PaletteToken, string>
