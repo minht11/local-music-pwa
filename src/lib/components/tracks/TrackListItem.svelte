@@ -65,7 +65,11 @@
 	]}
 	ariaLabel={m.trackPlay({ name: track?.name ?? '' })}
 	{ariaRowIndex}
-	onclick={(e) => onclick?.(track!, e)}
+	onclick={(e) => {
+		if (track) {
+			onclick?.(track, e)
+		}
+	}}
 	{onpointerenter}
 	oncontextmenu={(e) => {
 		if (!menuItemsWithItem) {

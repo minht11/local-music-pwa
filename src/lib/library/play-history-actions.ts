@@ -28,7 +28,15 @@ export const dbAddToPlayHistory = async (trackId: number): Promise<void> => {
 	}
 
 	await store.put(newEntry as PlayHistoryEntry)
+	/**
+ * 
+ * Truncation deletes the newest plays, keeps the oldest
+play-history-actions.ts:33
 
+openCursor() defaults to ascending order — oldest playedAt first. advance(100) moves to position 101. The while loop then deletes position 101 onward, which are the newer entries. The 100 oldest plays survive:
+
+TODO
+ */
 	let cursor = await store.index('playedAt').openCursor()
 	cursor = (await cursor?.advance(PLAY_HISTORY_LIMIT)) ?? null
 

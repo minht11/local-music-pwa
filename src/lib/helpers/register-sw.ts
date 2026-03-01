@@ -1,13 +1,13 @@
 // https://whatwebcando.today/articles/handling-service-worker-updates/
 
 const waitForPageToLoad = () => {
+	const { promise, resolve } = Promise.withResolvers<void>()
+
 	if (document.readyState === 'loading') {
-		return new Promise((resolve) => {
-			window.addEventListener('load', resolve, { once: true })
-		})
+		window.addEventListener('load', () => resolve(), { once: true })
 	}
 
-	return
+	return promise
 }
 
 /** @public */

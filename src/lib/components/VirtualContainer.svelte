@@ -144,7 +144,13 @@
 		e.preventDefault()
 
 		if (container && doesElementHasFocus(container)) {
-			findRow(0)?.focus()
+			virtualizer.scrollToIndex(0, {
+				behavior: 'smooth',
+			})
+			// TODO. Should somehow await for scroll to finish.
+			queueMicrotask(() => {
+				findRow(0)?.focus()
+			})
 
 			return
 		}

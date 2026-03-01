@@ -49,7 +49,7 @@ export const tooltip = (message: string | undefined): Attachment<HTMLElement> =>
 			// @ts-expect-error missing types
 			target.style.anchorName = anchorName
 
-			tooltipElement = tooltipElement ?? cloneTooltipTemplate()
+			tooltipElement = cloneTooltipTemplate()
 			tooltipElement.textContent = message
 			// @ts-expect-error missing types
 			tooltipElement.style.positionAnchor = anchorName

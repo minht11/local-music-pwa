@@ -21,6 +21,8 @@ const matchers: (AppViewTransitionTypeMatcher | undefined)[] = []
 
 export const defineViewTransitionMatcher = (callback: AppViewTransitionTypeMatcher): void => {
 	matchers.unshift(callback)
+	// We only care about last and current matcher,
+	// matches from previous routes are not relevant.
 	matchers.length = 2
 }
 

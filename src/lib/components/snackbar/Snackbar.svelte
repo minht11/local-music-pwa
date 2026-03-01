@@ -63,7 +63,7 @@
 >
 	{#if message}
 		<div class="min-h-3 py-2">
-			{message}
+			{typeof message === 'function' ? message() : message}
 		</div>
 	{/if}
 

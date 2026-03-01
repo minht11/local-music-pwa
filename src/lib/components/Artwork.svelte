@@ -6,7 +6,6 @@
 		src: string | undefined
 		class?: ClassValue
 		alt?: string
-		//
 		fallbackIcon?: IconType | false
 		noFallbackBg?: boolean
 		children?: Snippet
@@ -22,6 +21,14 @@
 	}: Props = $props()
 
 	let error = $state(false)
+
+	$effect(() => {
+		void src
+
+		untrack(() => {
+			error = false
+		})
+	})
 </script>
 
 <div

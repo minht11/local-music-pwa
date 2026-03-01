@@ -34,7 +34,7 @@ const loadData = async <Slug extends LibraryStoreName>(
 	const store = new LibraryStore(slug)
 
 	const itemsIdsQueryPromise = createLibraryItemKeysPageQuery(slug, {
-		key: () => [slug, store.sortByKey, store.order, store.searchTerm],
+		key: () => [slug, store.sortByKey, store.order, store.searchTerm.toLowerCase().trim()],
 		fetcher: async ([name, sortKey, order, searchTerm]) => {
 			const result = await getLibraryItemIds(name, {
 				sort: sortKey,
@@ -52,7 +52,7 @@ const loadData = async <Slug extends LibraryStoreName>(
 	})
 
 	const [itemsIdsQuery, tracksCountQuery] = await Promise.all([
-		await itemsIdsQueryPromise,
+		itemsIdsQueryPromise,
 		createTracksCountPageQuery(),
 	])
 

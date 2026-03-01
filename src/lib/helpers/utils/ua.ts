@@ -1,17 +1,19 @@
+const isMobileRegex = /Android|iPhone|iPad|iPod/i
+
 /** @public */
 export const isMobile = (): boolean => {
 	if (navigator.userAgentData) {
 		return navigator.userAgentData.mobile
 	}
 
-	return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+	return isMobileRegex.test(navigator.userAgent)
 }
 
 /** @public */
 export const isSafari = () => {
 	const ua = navigator.userAgent.toLowerCase()
 
-	return ua.indexOf('safari') !== -1 && ua.indexOf('chrome') === -1
+	return ua.includes('safari')
 }
 
 /** @public */
@@ -20,7 +22,7 @@ export const isMac = (): boolean => {
 		return navigator.userAgentData.platform === 'macOS'
 	}
 
-	return navigator.platform.toUpperCase().indexOf('MAC') >= 0
+	return /Mac/.test(navigator.userAgent)
 }
 
 /** @public */
@@ -29,7 +31,7 @@ export const isWindows = (): boolean => {
 		return navigator.userAgentData.platform === 'Windows'
 	}
 
-	return navigator.platform.toUpperCase().indexOf('WIN') >= 0
+	return /Win/.test(navigator.userAgent)
 }
 
 /**

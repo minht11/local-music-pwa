@@ -51,11 +51,14 @@
 		}
 	}
 
-	let dialogHeader = $state<HTMLElement>()!
+	let dialogHeader = $state<HTMLElement>()
 
 	const getParts = () => {
-		const dialogBody = dialogHeader.querySelector<HTMLElement>('[data-dialog-content]')
-		const dialogFooter = dialogHeader.querySelector<HTMLElement>('[data-dialog-footer]')
+		const dialogBody = dialogHeader?.querySelector<HTMLElement>('[data-dialog-content]')
+		const dialogFooter = dialogHeader?.querySelector<HTMLElement>('[data-dialog-footer]')
+
+		invariant(dialogBody)
+		invariant(dialogFooter)
 
 		return { dialogBody, dialogFooter }
 	}
@@ -101,7 +104,7 @@
 					duration: 400,
 				},
 			] satisfies AnimationSequence,
-			fade(dialogHeader),
+			dialogHeader && fade(dialogHeader),
 			dialogBody && fade(dialogBody),
 			dialogFooter && fade(dialogFooter),
 			dialogFooter &&
@@ -147,8 +150,8 @@
 				] satisfies AnimationSequence),
 			fade(dialogFooter),
 			fade(dialogBody),
-			fade(dialogHeader),
-		].filter((x) => x !== null)
+			dialogHeader && fade(dialogHeader),
+		].filter((x) => x !== null && x !== undefined)
 
 		return timeline(frames, {
 			defaultOptions: {

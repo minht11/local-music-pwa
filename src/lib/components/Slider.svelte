@@ -20,7 +20,7 @@
 	}: Props = $props()
 
 	const progressPercentage = $derived.by(() => {
-		const percentage = ((value || 1) * 100) / max
+		const percentage = (value * 100) / max
 		const percentageSafe = Number.isFinite(percentage) ? percentage : 0
 
 		return percentageSafe

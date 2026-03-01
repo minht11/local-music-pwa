@@ -62,7 +62,7 @@
 			title: m.libraryCancel(),
 		},
 		{
-			title: 'Remove',
+			title: m.libraryRemove(),
 			type: 'submit',
 		},
 	]}
