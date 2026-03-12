@@ -5,7 +5,8 @@ export const prerender = true
 const manifest = {
 	short_name: m.appNameShort(),
 	name: m.appName(),
-	start_url: './library/tracks/',
+	// Start PWA on the shorts page instead of the full tracks list
+	start_url: './library/shorts/',
 	scope: '../',
 	theme_color: THEME_PALLETTE_DARK.surface,
 	background_color: THEME_PALLETTE_DARK.surface,
