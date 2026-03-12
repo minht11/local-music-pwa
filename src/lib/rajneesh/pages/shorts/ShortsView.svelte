@@ -6,7 +6,13 @@
 	import { trackShortLiked } from '$lib/rajneesh/analytics/posthog.ts'
 	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import { getCachedBlob } from '$lib/rajneesh/index.ts'
-	import { lastShortsIndex, setLastShortsIndex, savedPlaybackTime, setSavedPlaybackTime } from './shorts-state.ts'
+	import {
+		lastShortsIndex,
+		lastShortsTotalCount,
+		savedPlaybackTime,
+		setLastShortsIndex,
+		setSavedPlaybackTime,
+	} from './shorts-state.ts'
 	import { ensureShortByTrackId, getShortsItems, loadMoreShorts } from './shorts-data.ts'
 	import { getLikedTrackIds, setTrackLiked } from './shorts-liked-state.ts'
 	import {
@@ -462,7 +468,7 @@ function handleUserTap(event: MouseEvent) {
 
 	$effect(() => {
 		if (activeIndex >= 0) {
-			setLastShortsIndex(activeIndex)
+			setLastShortsIndex(activeIndex, shorts.length)
 			maybeLoadMore(activeIndex)
 		}
 	})
@@ -487,6 +493,17 @@ function handleUserTap(event: MouseEvent) {
 		})
 		return () => {
 			cancelled = true
+		}
+	})
+
+	// Ensure we regenerate enough shorts to reach the last seen index.
+	$effect(() => {
+		if (lastShortsTotalCount <= 0) return
+		if (shorts.length >= lastShortsTotalCount) return
+
+		while (shorts.length < lastShortsTotalCount) {
+			loadMoreShorts()
+			shorts = getShortsItems()
 		}
 	})
 

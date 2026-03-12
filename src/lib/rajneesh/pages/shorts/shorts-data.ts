@@ -16,6 +16,50 @@ const PAGE_SIZE = 20
 const MIN_START = 60 // 1 min
 const MAX_START = 40 * 60 // 40 min
 
+const SEED_STORAGE_KEY = 'shorts-seed'
+
+// Deterministic per-user PRNG so shorts order is stable across sessions.
+let seededRandom: (() => number) | null = null
+
+function createMulberry32(seed: number): () => number {
+	return function mulberry32() {
+		let t = (seed += 0x6d2b79f5)
+		t = Math.imul(t ^ (t >>> 15), t | 1)
+		t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+	}
+}
+
+function initSeededRandom(): void {
+	if (seededRandom) return
+
+	// On the server we don't have window/localStorage, just fall back to Math.random.
+	if (typeof window === 'undefined') {
+		seededRandom = Math.random
+		return
+	}
+
+	const existing = window.localStorage.getItem(SEED_STORAGE_KEY)
+	let seed: number
+
+	if (existing !== null) {
+		const parsed = Number(existing)
+		seed = Number.isFinite(parsed) ? parsed : Math.floor(Math.random() * 0xffffffff)
+	} else {
+		seed = Math.floor(Math.random() * 0xffffffff)
+		window.localStorage.setItem(SEED_STORAGE_KEY, String(seed))
+	}
+
+	seededRandom = createMulberry32(seed)
+}
+
+function getRandom(): number {
+	if (!seededRandom) {
+		initSeededRandom()
+	}
+	return seededRandom!()
+}
+
 const isEnglishTrack = (url: string): boolean =>
 	url.toLowerCase().includes('/english/')
 
@@ -66,12 +110,12 @@ function generateBatch(count: number): ShortItem[] {
 	let attempts = 0
 	while (batch.length < count && attempts < count * 3) {
 		attempts++
-		const idx = Math.floor(Math.random() * tracks.length)
+		const idx = Math.floor(getRandom() * tracks.length)
 		const track = tracks[idx]
 		const file = track.file as RemoteFile | undefined
 		if (!file || file.type !== 'remote' || !file.url) continue
 
-		const startSeconds = Math.floor(Math.random() * (MAX_START - MIN_START + 1)) + MIN_START
+		const startSeconds = Math.floor(getRandom() * (MAX_START - MIN_START + 1)) + MIN_START
 
 		// Find album info for this track
 		const catalog = getCatalog()
@@ -134,7 +178,7 @@ export function ensureShortByTrackId(trackId: string, startFrom?: number): numbe
 		const short: ShortItem = {
 			url: file.url,
 			trackId: normalizedTrackId,
-			startSeconds: requestedStart ?? (Math.floor(Math.random() * (MAX_START - MIN_START + 1)) + MIN_START),
+			startSeconds: requestedStart ?? (Math.floor(getRandom() * (MAX_START - MIN_START + 1)) + MIN_START),
 			albumName: track.album ?? 'Unknown',
 			albumUuid: album?.uuid ?? '',
 			trackIndex: track.trackNo,
