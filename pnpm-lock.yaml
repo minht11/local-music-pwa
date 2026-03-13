@@ -4,18 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@ianvs/prettier-plugin-sort-imports': '-'
-  '@trivago/prettier-plugin-sort-imports': '-'
-  prettier-plugin-organize-imports: '-'
-  prettier-plugin-css-order: '-'
-  prettier-plugin-import-sort: '-'
-  prettier-plugin-jsdoc: '-'
-  prettier-plugin-multiline-arrays: '-'
-  prettier-plugin-organize-attributes: '-'
-  prettier-plugin-style-order: '-'
-  prettier-plugin-sort-imports: '-'
-
 patchedDependencies:
   '@material/material-color-utilities':
     hash: ba9c0fd32469c32e8fbc40d212f789ab9438cca094fa57f398755793916bd133
