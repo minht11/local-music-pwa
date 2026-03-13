@@ -15,6 +15,7 @@ interface ImportTrackOptions {
 	/** In cases when track already was imported */
 	trackId: number | undefined
 	uuid: string | undefined
+	scannedAt: number
 }
 
 const importTrack = async (options: ImportTrackOptions): Promise<number | null> => {
@@ -30,7 +31,7 @@ const importTrack = async (options: ImportTrackOptions): Promise<number | null> 
 				file: options.file,
 				directory: options.directoryId,
 				fileName: options.file.name,
-				scannedAt: Date.now(),
+				scannedAt: options.scannedAt,
 				uuid: options.uuid ?? crypto.randomUUID(),
 			},
 			options.trackId,
@@ -52,11 +53,23 @@ class StatusTracker {
 
 	total = 0
 
+	#pendingTimeout: number | null = null
+
 	constructor(total: number) {
 		this.total = total
 	}
 
 	sendMsg = (finished: boolean) => {
+		if (!finished) {
+			if (this.#pendingTimeout) {
+				return
+			}
+
+			this.#pendingTimeout = self.setTimeout(() => {
+				this.#pendingTimeout = null
+			}, 600)
+		}
+
 		const message: TracksScanMessage = {
 			finished,
 			count: {
@@ -119,6 +132,8 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 	const tracker = new StatusTracker(handles.length)
 	const scannedTracksIds = new Set<number>()
 
+	const scannedAt = Date.now()
+
 	const findTrackFn =
 		directoryId === LEGACY_NO_NATIVE_DIRECTORY
 			? findTrackByMixedFileEntity
@@ -158,6 +173,7 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 				directoryId,
 				trackId: existingTrack?.id,
 				uuid: existingTrack?.uuid,
+				scannedAt,
 			})
 
 			if (trackId !== null) {
@@ -193,6 +209,7 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 
 const scanNewDirectory = async (handles: FileEntity[], directoryId: number) => {
 	const tracker = new StatusTracker(handles.length)
+	const scannedAt = Date.now()
 
 	console.time('SCAN_NEW_DIR')
 	for (const handle of handles) {
@@ -206,6 +223,7 @@ const scanNewDirectory = async (handles: FileEntity[], directoryId: number) => {
 				directoryId,
 				trackId: undefined,
 				uuid: crypto.randomUUID(),
+				scannedAt,
 			})
 
 			if (trackId !== null) {
