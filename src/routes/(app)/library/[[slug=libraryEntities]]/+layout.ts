@@ -105,7 +105,7 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 
 	defineViewTransitionMatcher((to, from) => {
 		const libraryRoute: RouteId = '/(app)/library/[[slug=libraryEntities]]'
-		const detailsRoute: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]'
+		const detailsRoute: RouteId = `${libraryRoute}/[uuid]`
 
 		if (to === libraryRoute && from === libraryRoute) {
 			return { view: 'library' }
