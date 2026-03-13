@@ -8,9 +8,6 @@ onlyBuiltDependencies:
   - 'sharp'
 
 overrides:
-  'vite': '8.0.0-beta.16'
-  'vite>terser': '-'
-  'vite>esbuild': '-'
   '@ianvs/prettier-plugin-sort-imports': '-'
   '@trivago/prettier-plugin-sort-imports': '-'
   'prettier-plugin-organize-imports': '-'

@@ -337,14 +337,14 @@ export class PlayerStore {
 		if (this.shuffle) {
 			this.#itemsIdsShuffled = toShuffledArray(this.#itemsIdsOriginalOrder)
 			const newIndex = this.#itemsIdsShuffled.indexOf(activeTrackId)
-			if (newIndex !== -1) {
+			if (newIndex === -1) {
+				this.#activeTrackIndex = -1
+			} else {
 				const swappedItemId = this.#itemsIdsShuffled[0] as number
 				this.#itemsIdsShuffled[0] = activeTrackId
 				this.#itemsIdsShuffled[newIndex] = swappedItemId
 
 				this.#activeTrackIndex = 0
-			} else {
-				this.#activeTrackIndex = -1
 			}
 		} else {
 			this.#itemsIdsShuffled = null

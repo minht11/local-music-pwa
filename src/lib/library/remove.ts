@@ -42,7 +42,7 @@ const dbRemoveTrackRelatedData = async <
 		return
 	}
 
-	relatedItemStore.delete(relatedItem.id)
+	await relatedItemStore.delete(relatedItem.id)
 
 	const change: DatabaseChangeDetails = {
 		storeName: relatedItemStoreName,
