@@ -89,6 +89,7 @@
 			<button
 				{@attach ripple()}
 				role="menuitem"
+				type="button"
 				class={[
 					'interactable relative flex min-h-10 grow items-center gap-4 px-4 py-2 text-left text-body-md -outline-offset-2 select-none',
 					item.selected && 'bg-surfaceVariant text-primary',

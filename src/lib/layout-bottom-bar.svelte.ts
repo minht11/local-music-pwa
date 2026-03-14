@@ -56,6 +56,6 @@ export const useSetOverlaySnippet = (
 			}
 		}
 
-		return
+		return undefined
 	})
 }

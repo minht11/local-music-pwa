@@ -242,7 +242,6 @@ source {
 
 	@starting-style {
 		&::after {
-			/* biome-ignore lint/complexity/noImportantStyles: we need to force it */
 			opacity: 0 !important;
 		}
 	}
@@ -378,7 +377,6 @@ source {
 	}
 
 	.virtual-item {
-		/* biome-ignore lint/complexity/noImportantStyles: we need to force it */
 		position: absolute !important;
 		contain: strict;
 		will-change: transform;

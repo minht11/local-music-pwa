@@ -33,7 +33,7 @@
 			"**",
 			"!**/.generated",
 			// Biome parser incorrectly errors on TS syntax.
-			"!src/lib/components/WrapTranslation.svelte"
+			"!src/lib/components/VirtualContainer.svelte"
 		]
 	},
 	"formatter": {
@@ -104,16 +104,27 @@
 						"defaultVisibility": "package"
 					}
 				},
-				"useSingleJsDocAsterisk": "error"
+				"useSingleJsDocAsterisk": "error",
+				"noUnknownFunction": {
+					"level": "on",
+					"options": {
+						"ignore": ["theme"]
+					}
+				}
 			},
 			"nursery": {
 				"noFloatingPromises": "error",
-				"noMisusedPromises": "error"
+				"noMisusedPromises": "error",
+				"noNestedPromises": "error",
+				"noIncrementDecrement": "error",
+				"noUnnecessaryConditions": "error",
+				"noUselessReturn": "error"
 			},
 			"complexity": {
 				"useSimplifiedLogicExpression": "error",
 				"useNumericLiterals": "error",
-				"noCommaOperator": "error"
+				"noCommaOperator": "error",
+				"noImportantStyles": "off"
 			},
 			"suspicious": {
 				"useAwait": "error",
@@ -132,6 +143,9 @@
 				},
 				"noImportCycles": "error",
 				"noDeprecatedImports": "on"
+			},
+			"a11y": {
+				"noSvgWithoutTitle": "off"
 			}
 		}
 	},
@@ -158,6 +172,12 @@
 			"quoteStyle": "single"
 		}
 	},
+	"html": {
+		"formatter": {
+			"enabled": false
+		},
+		"experimentalFullSupportEnabled": true
+	},
 	"overrides": [
 		{
 			"includes": ["**/*.svelte", "!**/*.svelte.ts"],
@@ -170,13 +190,10 @@
 					"correctness": {
 						"noUndeclaredVariables": "off",
 						"noUnusedVariables": "off",
-						"noUnusedImports": "off",
-						"noPrivateImports": {
-							"level": "error",
-							"options": {
-								"defaultVisibility": "public"
-							}
-						}
+						"noUnusedImports": "off"
+					},
+					"complexity": {
+						"noCommaOperator": "off"
 					}
 				}
 			}

@@ -100,6 +100,7 @@
 {#snippet addButton(title: string, onclick: () => void)}
 	<button
 		{@attach ripple()}
+		type="button"
 		class={[
 			disabled ? 'bg-surfaceContainer/10 text-onSurface/54' : 'interactable',
 			'flex h-16 items-center gap-2 rounded-sm px-4 ring-1 ring-outlineVariant ring-inset',

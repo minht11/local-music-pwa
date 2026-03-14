@@ -78,7 +78,7 @@
 		}
 	})
 
-	const dbGetAlbumOrArtistTrackIdsByName = async (name: string) => {
+	const dbGetAlbumOrArtistTrackIdsByName = (name: string) => {
 		if (type === 'albums') {
 			return dbGetAlbumTracksIdsByName(name)
 		}
@@ -87,7 +87,7 @@
 	}
 
 	const menuItems = () => {
-		if (!item || !linkProps) {
+		if (!(item && linkProps)) {
 			return []
 		}
 

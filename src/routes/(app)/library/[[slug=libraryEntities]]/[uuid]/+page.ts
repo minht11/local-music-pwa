@@ -99,7 +99,7 @@ const createPlaylistTracksPageQuery = (
 
 			const tracksIds: number[] = Array.from({ length: values.length })
 			const playlistIdMap: Record<number, number> = {}
-			for (let i = 0; i < values.length; i++) {
+			for (let i = 0; i < values.length; i += 1) {
 				// biome-ignore lint/style/noNonNullAssertion: value is always defined
 				const value = values[i]!
 				tracksIds[i] = value.trackId

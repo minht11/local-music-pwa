@@ -30,9 +30,9 @@
 	const isOpen = $derived.by(() => {
 		if (typeof open === 'object') {
 			return openData !== null
-		} else {
-			return open
 		}
+
+		return open
 	})
 
 	const titleText = $derived.by(() => {

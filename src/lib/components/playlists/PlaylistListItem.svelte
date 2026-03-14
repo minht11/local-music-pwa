@@ -44,7 +44,7 @@
 	const playlist = $derived(data.value)
 
 	const menuItemsWithItem = $derived.by(() => {
-		if (!playlist || !menuItems) {
+		if (!(playlist && menuItems)) {
 			return undefined
 		}
 

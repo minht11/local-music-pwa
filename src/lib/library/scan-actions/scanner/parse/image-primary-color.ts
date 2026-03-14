@@ -60,10 +60,10 @@ export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height
 	for (let i = 0; i < pixels.length; i += 4) {
 		const a = pixels[i + 3] as number
 		if (a < alphaThreshold) {
-			col++
+			col += 1
 			if (col >= width) {
 				col = 0
-				row++
+				row += 1
 			}
 			continue
 		}
@@ -75,10 +75,10 @@ export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height
 
 		// Skip unwanted pixels (white bg, gray, dark)
 		if ((v > whiteSkipV && s < whiteSkipS) || s < minSat || v < minVal) {
-			col++
+			col += 1
 			if (col >= width) {
 				col = 0
-				row++
+				row += 1
 			}
 			continue
 		}
@@ -93,23 +93,23 @@ export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height
 		const bin = Math.floor((h / 360) * hueBins) % hueBins
 		;(hueHist[bin] as number) += w
 
-		col++
+		col += 1
 		if (col >= width) {
 			col = 0
-			row++
+			row += 1
 		}
 	}
 
 	// Smooth histogram and pick peak hue
 	const smooth = new Float64Array(hueBins)
-	for (let i = 0; i < hueBins; i++) {
+	for (let i = 0; i < hueBins; i += 1) {
 		const im1 = (i - 1 + hueBins) % hueBins
 		const ip1 = (i + 1) % hueBins
 		smooth[i] =
 			0.5 * (hueHist[im1] as number) + (hueHist[i] as number) + 0.5 * (hueHist[ip1] as number)
 	}
 	let peak = 0
-	for (let i = 1; i < hueBins; i++) {
+	for (let i = 1; i < hueBins; i += 1) {
 		if ((smooth[i] as number) > (smooth[peak] as number)) {
 			peak = i
 		}
@@ -133,10 +133,10 @@ export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height
 	for (let i = 0; i < pixels.length; i += 4) {
 		const a = pixels[i + 3] as number
 		if (a < alphaThreshold) {
-			col++
+			col += 1
 			if (col >= width) {
 				col = 0
-				row++
+				row += 1
 			}
 			continue
 		}
@@ -147,19 +147,19 @@ export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height
 		const { h, s, v } = rgb2hsv(r, g, b)
 
 		if ((v > whiteSkipV && s < whiteSkipS) || s < minSat || v < minVal) {
-			col++
+			col += 1
 			if (col >= width) {
 				col = 0
-				row++
+				row += 1
 			}
 			continue
 		}
 
 		if (!inHueWindow(h)) {
-			col++
+			col += 1
 			if (col >= width) {
 				col = 0
-				row++
+				row += 1
 			}
 			continue
 		}
@@ -176,17 +176,17 @@ export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height
 		;(gSums[idx] as number) += g * w
 		;(bSums[idx] as number) += b * w
 
-		col++
+		col += 1
 		if (col >= width) {
 			col = 0
-			row++
+			row += 1
 		}
 	}
 
 	// Find winner bin
 	let bestIdx = -1
 	let bestW = -1
-	for (let idx = 0; idx < BINS; idx++) {
+	for (let idx = 0; idx < BINS; idx += 1) {
 		const w = counts[idx] as number
 		if (w > bestW) {
 			bestW = w

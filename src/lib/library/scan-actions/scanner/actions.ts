@@ -257,7 +257,5 @@ export const workerAction = async (options: TracksScanOptions) => {
 
 	if (options.action === 'legacy-files-add') {
 		await scanExistingDirectory(options.files, LEGACY_NO_NATIVE_DIRECTORY)
-
-		return
 	}
 }

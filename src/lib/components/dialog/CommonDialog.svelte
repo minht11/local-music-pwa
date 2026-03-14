@@ -26,9 +26,9 @@
 	const getButtonItems = (data: S) => {
 		if (typeof buttons === 'function') {
 			return buttons(data)
-		} else {
-			return buttons
 		}
+
+		return buttons
 	}
 </script>
 
