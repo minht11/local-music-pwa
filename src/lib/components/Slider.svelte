@@ -24,7 +24,7 @@
 	}: Props = $props()
 
 	const progressPercentage = $derived.by(() => {
-		const percentage = (value * 100) / max
+		const percentage = ((value - min) * 100) / (max - min)
 		const percentageSafe = Number.isFinite(percentage) ? percentage : 0
 
 		return percentageSafe
@@ -193,7 +193,7 @@
 	@reference '../../app.css';
 
 	.slider {
-		--slider-size: calc(100% - --spacing(4));
+		--slider-size: calc(100% - --spacing(1));
 	}
 
 	.horizontal-input:is(:active, :focus-visible) ~ div > .thumb {
