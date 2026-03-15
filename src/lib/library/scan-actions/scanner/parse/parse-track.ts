@@ -1,6 +1,5 @@
 import { parseBlob } from 'music-metadata'
 import { type ParsedTrackData, UNKNOWN_ITEM } from '$lib/library/types.ts'
-import { getArtworkRelatedData } from './format-artwork.ts'
 
 // This limit is a bit arbitrary.
 const FILE_SIZE_LIMIT_500MB = 5e8
@@ -8,7 +7,9 @@ const FILE_SIZE_LIMIT_500MB = 5e8
 const artistSeparatorRegex = /,|&/
 
 /** @public */
-export const parseTrack = async (file: File): Promise<ParsedTrackData | null> => {
+export const parseTrackMetadata = async (
+	file: File,
+): Promise<{ data: ParsedTrackData; imageBlob?: Blob } | null> => {
 	// Ignore files bigger than limit because of
 	// potential performance issues.
 	if (file.size > FILE_SIZE_LIMIT_500MB) {
@@ -30,7 +31,6 @@ export const parseTrack = async (file: File): Promise<ParsedTrackData | null> =>
 		imageBlob = new Blob([imageData], { type: picture.type })
 	}
 
-	const artworkData = imageBlob && (await getArtworkRelatedData(imageBlob))
 	const artists =
 		common.artists
 			?.flatMap((artist) => artist.split(artistSeparatorRegex))
@@ -48,8 +48,10 @@ export const parseTrack = async (file: File): Promise<ParsedTrackData | null> =>
 		year: common.year?.toString() ?? UNKNOWN_ITEM,
 		duration: tags.format.duration ?? 0,
 		language: common.language?.trim(),
-		...artworkData,
 	}
 
-	return trackData
+	return {
+		data: trackData,
+		imageBlob,
+	}
 }

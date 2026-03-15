@@ -58,8 +58,6 @@
 		const dialogBody = dialog.querySelector<HTMLElement>('[data-dialog-content]')
 		const dialogFooter = dialog.querySelector<HTMLElement>('[data-dialog-footer]')
 
-		invariant(dialogBody, 'Dialog body not found.')
-
 		return { dialogHeader, dialogBody, dialogFooter }
 	}
 

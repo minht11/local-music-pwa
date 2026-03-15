@@ -46,7 +46,7 @@ export function createVirtualizerBase<
 
 		virtualizer.setOptions({
 			...resolvedOptions,
-			onChange: (instance: Virtualizer<TScrollElement, TItemElement>, sync: boolean) => {
+			onChange: (instance, sync) => {
 				instance._willUpdate()
 				virtualItems = instance.getVirtualItems()
 				totalSize = instance.getTotalSize()

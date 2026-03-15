@@ -35,6 +35,7 @@
 <Dialog bind:open class={className} {...props}>
 	{#snippet children({ data, close })}
 		<form
+			data-dialog-body
 			method="dialog"
 			class="contents"
 			onsubmit={(e) => {

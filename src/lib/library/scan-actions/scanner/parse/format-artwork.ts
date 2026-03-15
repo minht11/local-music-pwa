@@ -33,6 +33,7 @@ export type ArtworkRelatedData = {
 
 const isSafari = isSafariCheck()
 
+/** @public */
 export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRelatedData> => {
 	let bitmap: ImageBitmap | undefined
 	try {
