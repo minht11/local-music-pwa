@@ -13,6 +13,7 @@
 		title?: string | ((data: S) => string)
 		icon?: IconType
 		class?: ClassValue
+		header?: Snippet<[{ data: S; close: () => void }]>
 		children?: Snippet<[{ data: S; close: () => void }]>
 	}
 </script>
@@ -23,6 +24,7 @@
 		title,
 		icon,
 		class: className,
+		header,
 		children,
 	}: DialogProps<S> = $props()
 
@@ -51,16 +53,14 @@
 		}
 	}
 
-	let dialogHeader = $state<HTMLElement>()
+	const getParts = (dialog: HTMLDialogElement) => {
+		const dialogHeader = dialog.querySelector<HTMLElement>('[data-dialog-header]')
+		const dialogBody = dialog.querySelector<HTMLElement>('[data-dialog-content]')
+		const dialogFooter = dialog.querySelector<HTMLElement>('[data-dialog-footer]')
 
-	const getParts = () => {
-		const dialogBody = dialogHeader?.querySelector<HTMLElement>('[data-dialog-content]')
-		const dialogFooter = dialogHeader?.querySelector<HTMLElement>('[data-dialog-footer]')
+		invariant(dialogBody, 'Dialog body not found.')
 
-		invariant(dialogBody)
-		invariant(dialogFooter)
-
-		return { dialogBody, dialogFooter }
+		return { dialogHeader, dialogBody, dialogFooter }
 	}
 
 	const animateBackdrop = (dialog: HTMLDialogElement, isOut = false) => {
@@ -86,7 +86,7 @@
 	}
 
 	const animateIn = (dialog: HTMLDialogElement) => {
-		const { dialogBody, dialogFooter } = getParts()
+		const { dialogHeader, dialogBody, dialogFooter } = getParts(dialog)
 
 		const fade = (el: HTMLElement | null): AnimationSequence | null =>
 			el ? [el, { opacity: [0, 1] }, { duration: 300, at: '<' }] : null
@@ -104,9 +104,9 @@
 					duration: 400,
 				},
 			] satisfies AnimationSequence,
-			dialogHeader && fade(dialogHeader),
-			dialogBody && fade(dialogBody),
-			dialogFooter && fade(dialogFooter),
+			fade(dialogHeader),
+			fade(dialogBody),
+			fade(dialogFooter),
 			dialogFooter &&
 				([
 					dialogFooter,
@@ -124,7 +124,7 @@
 	}
 
 	const animateOut = (dialog: HTMLDialogElement) => {
-		const { dialogBody, dialogFooter } = getParts()
+		const { dialogHeader, dialogBody, dialogFooter } = getParts(dialog)
 
 		const fade = (el: HTMLElement | null): AnimationSequence | null =>
 			el ? [el, { opacity: [1, 0] }, { duration: 300, at: '<' }] : null
@@ -150,7 +150,7 @@
 				] satisfies AnimationSequence),
 			fade(dialogFooter),
 			fade(dialogBody),
-			dialogHeader && fade(dialogHeader),
+			fade(dialogHeader),
 		].filter((x) => x !== null && x !== undefined)
 
 		return timeline(frames, {
@@ -198,18 +198,22 @@
 			className,
 		]}
 	>
-		<header
-			bind:this={dialogHeader}
-			class={['flex flex-col gap-4 px-6 pt-6', icon && 'items-center justify-center text-center']}
-		>
-			{#if icon}
-				<Icon type={icon} class="text-secondary" />
-			{/if}
+		{#if header}
+			{@render header({ data: openData!, close })}
+		{:else}
+			<header
+				data-dialog-header
+				class={['flex flex-col gap-4 px-6 pt-6', icon && 'items-center justify-center text-center']}
+			>
+				{#if icon}
+					<Icon type={icon} class="text-secondary" />
+				{/if}
 
-			{#if titleText}
-				<div class="text-headline-sm">{titleText}</div>
-			{/if}
-		</header>
+				{#if titleText}
+					<div class="text-headline-sm">{titleText}</div>
+				{/if}
+			</header>
+		{/if}
 
 		<div class="flex shrink flex-col overflow-hidden">
 			{@render children?.({
@@ -231,7 +235,7 @@
 		max-width: initial !important;
 		max-height: min(100% - --spacing(6) * 2, var(--dialog-height, 100%), --spacing(150)) !important;
 		width: clamp(
-			var(--dialog-width, --spacing(70)),
+			--spacing(70),
 			var(--dialog-width, --spacing(100)),
 			100% - --spacing(8)
 		) !important;

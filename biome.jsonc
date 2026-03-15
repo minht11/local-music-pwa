@@ -173,9 +173,6 @@
 		}
 	},
 	"html": {
-		"formatter": {
-			"enabled": false
-		},
 		"experimentalFullSupportEnabled": true
 	},
 	"overrides": [
