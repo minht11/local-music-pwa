@@ -196,10 +196,10 @@
 		--slider-size: calc(100% - --spacing(1));
 	}
 
-	.horizontal-input:is(:active, :focus-visible) ~ div > .thumb {
+	.horizontal-input:not(:disabled):is(:active, :focus-visible) ~ div > .thumb {
 		transform: scaleX(0.5);
 	}
-	.vertical-input:is(:active, :focus-visible) ~ div > .thumb {
+	.vertical-input:not(:disabled):is(:active, :focus-visible) ~ div > .thumb {
 		transform: scaleY(0.5);
 	}
 
@@ -207,6 +207,10 @@
 		-webkit-appearance: none;
 		cursor: pointer;
 		background-color: red;
+	}
+
+	input:disabled::-webkit-slider-thumb {
+		cursor: auto;
 	}
 
 	.horizontal-input::-webkit-slider-thumb {
@@ -221,5 +225,9 @@
 
 	input::-moz-range-thumb {
 		cursor: pointer;
+	}
+
+	input:disabled::-moz-range-thumb {
+		cursor: auto;
 	}
 </style>

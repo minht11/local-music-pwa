@@ -10,6 +10,7 @@ import { throttle } from '$lib/helpers/utils/throttle.ts'
 import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
 import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { cleanupTrackAudio, loadTrackAudio } from './audio.ts'
+import { EqualizerStore } from './equalizer.svelte.ts'
 
 export interface PlayTrackOptions {
 	shuffle?: boolean
@@ -18,9 +19,11 @@ export interface PlayTrackOptions {
 export type PlayerRepeat = 'none' | 'one' | 'all'
 
 export class PlayerStore {
-	#main = useMainStore()
+	readonly #main = useMainStore()
 
-	#audio = new Audio()
+	readonly #audio = new Audio()
+
+	readonly equalizer = new EqualizerStore(this.#audio)
 
 	shuffle: boolean = $state(false)
 
@@ -86,6 +89,10 @@ export class PlayerStore {
 			// we do not need to do anything
 			if (audio.paused === !this.playing) {
 				return
+			}
+
+			if (this.playing) {
+				void this.equalizer.resumeContext()
 			}
 
 			void audio[this.playing ? 'play' : 'pause']()
@@ -163,6 +170,7 @@ export class PlayerStore {
 
 					prevTrack.loaded = loaded
 
+					await this.equalizer.resumeContext()
 					await audio.play()
 				})
 			} else {

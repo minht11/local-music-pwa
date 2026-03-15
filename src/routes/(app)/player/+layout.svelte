@@ -13,6 +13,7 @@
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
+	import EqualizerDialog from '$lib/components/player/EqualizerDialog.svelte'
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
@@ -40,6 +41,8 @@
 	const { isCompactHorizontal, isCompactVertical, layoutMode } = $derived(
 		getLayoutProps(page.route.id),
 	)
+
+	let equalizerOpen = $state(false)
 </script>
 
 {#snippet playerSnippet()}
@@ -124,6 +127,12 @@
 
 				<div class="ml-auto flex gap-1">
 					<PlayerFavoriteButton />
+
+					<IconButton
+						icon="equalizer"
+						tooltip={m.equalizerOpenEqualizer()}
+						onclick={() => (equalizerOpen = true)}
+					/>
 
 					{#if layoutMode === 'list'}
 						<IconButton tooltip={m.playerOpenQueue()} icon="trayFull" as="a" href="/player/queue" />
@@ -260,6 +269,8 @@
 	noListStableGutter
 	noPlayerOverlayPadding
 />
+
+<EqualizerDialog bind:open={equalizerOpen} />
 
 <style lang="postcss">
 	@reference '../../../app.css';
