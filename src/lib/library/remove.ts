@@ -53,6 +53,21 @@ const dbRemoveTrackRelatedData = async <
 	return change
 }
 
+const dbRemoveTrackFromPlayHistoryWithTx = async (
+	tx: TrackOperationsTransaction,
+	trackId: number,
+): Promise<DatabaseChangeDetails | undefined> => {
+	const store = tx.objectStore('playHistory')
+	const historyIds = await store.index('trackId').getAllKeys(trackId)
+	if (historyIds.length === 0) {
+		return
+	}
+
+	await Promise.all(historyIds.map((id) => store.delete(id)))
+
+	return { storeName: 'playHistory' }
+}
+
 const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 	const db = await getDatabase()
 	const tx = db.transaction(['playlists', 'playlistEntries'], 'readwrite')
@@ -93,13 +108,13 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 
 	await tx.objectStore('tracks').delete(trackId)
 
-	const [albumChange, playlistChanges, ...artistsChanges] = await Promise.all([
+	const [albumChange, playlistChanges, historyChange, ...artistsChanges] = await Promise.all([
 		dbRemoveTrackRelatedData(tx, 'album', 'albums', track.album),
 		dbRemoveTrackFromAllPlaylists(trackId),
+		dbRemoveTrackFromPlayHistoryWithTx(tx, trackId),
 		...track.artists.map((artist) =>
 			dbRemoveTrackRelatedData(tx, 'artists', 'artists', artist),
 		),
-		// TODO. Remove track from play history
 		tx.done.then(() => undefined),
 	])
 
@@ -110,6 +125,7 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 			key: trackId,
 		},
 		albumChange,
+		historyChange,
 		...artistsChanges,
 		...playlistChanges,
 	])
