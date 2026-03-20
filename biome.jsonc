@@ -156,7 +156,15 @@
 			"jsxQuoteStyle": "single",
 			"indentWidth": 4
 		},
-		"globals": ["m", "invariant", "usePlayer", "useMainStore", "untrack", "snackbar"]
+		"globals": [
+			"m",
+			"invariant",
+			"usePlayer",
+			"useMainStore",
+			"useDialogsStore",
+			"untrack",
+			"snackbar"
+		]
 	},
 	"json": {
 		"formatter": {

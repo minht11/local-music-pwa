@@ -20,6 +20,7 @@
 	const { data } = $props()
 
 	const main = useMainStore()
+	const dialogs = useDialogsStore()
 	const player = usePlayer()
 
 	// svelte-ignore state_referenced_locally
@@ -90,7 +91,7 @@
 				return [addToQueueMenuItem]
 			}
 
-			return [addToQueueMenuItem, ...getPlaylistMenuItems(main, item as Playlist)]
+			return [addToQueueMenuItem, ...getPlaylistMenuItems(dialogs, item as Playlist)]
 		}
 
 		return [
@@ -98,13 +99,13 @@
 			{
 				label: m.libraryAddToPlaylist(),
 				action: () => {
-					main.addTrackToPlaylistDialogOpen = tracks.tracksIds
+					dialogs.addTrackToPlaylistDialogOpen = tracks.tracksIds
 				},
 			},
 			{
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					main.removeFromLibraryOpen = {
+					dialogs.removeFromLibraryOpen = {
 						type: 'single',
 						id: item.id,
 						name: item.name,

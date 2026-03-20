@@ -14,6 +14,7 @@ const getAutoImportPlugin = (dts: string | false = false) =>
 				'$paraglide/messages': [['*', 'm']],
 				'$lib/stores/player/use-store.ts': ['usePlayer'],
 				'$lib/stores/main/use-store.ts': ['useMainStore'],
+				'$lib/stores/dialogs/use-store.ts': ['useDialogsStore'],
 				'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
 				'$lib/components/snackbar/snackbar.ts': ['snackbar'],
 				'tiny-invariant': [['default', 'invariant']],
