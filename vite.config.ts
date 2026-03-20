@@ -42,7 +42,7 @@ export default defineConfig({
 		rolldownOptions: {
 			output: {
 				comments: false,
-				codeSplitting: {
+				advancedChunks: {
 					groups: [
 						{
 							// Merge all css into a single file
