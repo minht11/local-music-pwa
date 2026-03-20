@@ -11,13 +11,13 @@ import type { TracksScanMessage, TracksScanOptions } from './types.ts'
 declare const self: DedicatedWorkerGlobalScope
 
 interface TrackEnqueueOptions {
+	scannedAt: number
 	unwrappedFile: File
 	file: FileEntity
 	directoryId: number
 	/** In cases when track already was imported */
-	trackId: number | undefined
-	uuid: string
-	scannedAt: number
+	trackId?: number
+	uuid?: string
 }
 
 /**
@@ -61,7 +61,7 @@ class TrackProcessor {
 							directory: options.directoryId,
 							fileName: options.file.name,
 							scannedAt: options.scannedAt,
-							uuid: options.uuid,
+							uuid: options.uuid ?? crypto.randomUUID(),
 						},
 						options.trackId,
 					)
@@ -223,7 +223,7 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 				file: handle,
 				directoryId,
 				trackId: existingTrack?.id,
-				uuid: existingTrack?.uuid ?? crypto.randomUUID(),
+				uuid: existingTrack?.uuid,
 				scannedAt,
 			})
 		} catch {
@@ -267,8 +267,6 @@ const scanNewDirectory = async (handles: FileEntity[], directoryId: number) => {
 				file: handle,
 				directoryId,
 				scannedAt,
-				uuid: crypto.randomUUID(),
-				trackId: undefined,
 			})
 		} catch {
 			// we ignore errors and just move on to the next track
