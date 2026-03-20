@@ -169,7 +169,7 @@
 
 		// TODO. A hack until svelte supports non duration based animations
 		return {
-			duration: 300,
+			duration: 400,
 		}
 	}
 </script>
@@ -199,7 +199,7 @@
 		{#if header}
 			{@render header({ data: openData!, close })}
 		{:else}
-			<header
+			<div
 				data-dialog-header
 				class={['flex flex-col gap-4 px-6 pt-6', icon && 'items-center justify-center text-center']}
 			>
@@ -210,7 +210,7 @@
 				{#if titleText}
 					<div class="text-headline-sm">{titleText}</div>
 				{/if}
-			</header>
+			</div>
 		{/if}
 
 		<div class="flex shrink flex-col overflow-hidden">

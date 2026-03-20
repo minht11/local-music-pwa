@@ -179,14 +179,17 @@
 						selection.selectionEnabled = true
 					}
 
-					// Toggle range from last selected index to current
-					if (selection.lastSelectedIndex !== null) {
+					if (selection.lastSelectedIndex === null) {
+						// No previous selection, just select this one
+						selection.select(trackId, item.index)
+					} else {
+						// Toggle range from last selected index to current
 						const min = Math.min(selection.lastSelectedIndex, item.index)
 						const max = Math.max(selection.lastSelectedIndex, item.index)
 						const rangeIds: number[] = []
 
 						let allSelected = true
-						for (let i = min; i <= max; i++) {
+						for (let i = min; i <= max; i += 1) {
 							const itemAtIndex = items[i]
 							if (itemAtIndex !== undefined) {
 								rangeIds.push(itemAtIndex)
@@ -206,9 +209,6 @@
 
 						// Update last selected index to current position
 						selection.lastSelectedIndex = item.index
-					} else {
-						// No previous selection, just select this one
-						selection.select(trackId, item.index)
 					}
 					return
 				}

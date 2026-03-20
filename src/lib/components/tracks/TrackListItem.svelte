@@ -156,7 +156,7 @@
 			<div
 				class={[
 					'w-16 items-center justify-items-end',
-					!selectionEnabled ? 'hidden @sm:grid' : 'grid',
+					selectionEnabled ? 'grid' : 'hidden @sm:grid',
 				]}
 			>
 				{#if !selectionEnabled}
@@ -169,7 +169,7 @@
 
 				<IconButton
 					tabindex={-1}
-					tooltip={'Select track'}
+					tooltip={''}
 					class={[
 						'stack-in-grid',
 						selectionEnabled

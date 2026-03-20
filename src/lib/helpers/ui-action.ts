@@ -12,6 +12,7 @@ export const createUIAction = <P extends unknown[] = []>(
 				snackbar(successMessage)
 			}
 		} catch (error) {
+			console.error('Error executing UI action:', error)
 			snackbar.unexpectedError(error)
 		}
 	}

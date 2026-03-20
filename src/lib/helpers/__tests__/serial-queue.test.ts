@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/useAwait: <explanation> */
+/** biome-ignore-all lint/suspicious/useAwait: test code */
 import { describe, expect, it, vi } from 'vitest'
 import { SerialQueue } from '../serial-queue.ts'
 import { wait } from '../utils/wait.ts'
