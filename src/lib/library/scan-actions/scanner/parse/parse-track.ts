@@ -28,7 +28,7 @@ export const parseTrackMetadata = async (
 	const picture = common.picture?.[0]
 	if (picture) {
 		const imageData = new Uint8ClampedArray(picture.data)
-		imageBlob = new Blob([imageData], { type: picture.type })
+		imageBlob = new Blob([imageData], { type: picture.format })
 	}
 
 	const artists =
