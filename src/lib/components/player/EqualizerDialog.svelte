@@ -91,7 +91,7 @@
 	{/snippet}
 </Dialog>
 
-<style>
+<style lang="postcss">
 	@reference '../../../app.css';
 	.sliders-columns {
 		grid-template-columns: repeat(10, minmax(--spacing(12), 1fr));
