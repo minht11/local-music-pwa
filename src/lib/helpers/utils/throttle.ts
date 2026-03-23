@@ -3,7 +3,7 @@ export const throttle = <Fn extends (...args: Parameters<Fn>) => ReturnType<Fn>>
 	delay: number,
 ): {
 	(...args: Parameters<Fn>): ReturnType<Fn>
-	cancel(): void
+	cancel: () => void
 } => {
 	let wait = false
 	let timeout: undefined | number

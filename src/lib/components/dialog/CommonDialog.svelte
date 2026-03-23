@@ -2,11 +2,6 @@
 	import Dialog, { type DialogProps } from './Dialog.svelte'
 	import DialogFooter, { type DialogButton } from './DialogFooter.svelte'
 
-	export interface DialogOpenAccessor<S> {
-		get(): S | null
-		close(): void
-	}
-
 	export interface CommonDialogProps<S> extends DialogProps<S> {
 		buttons?: DialogButton[] | ((data: S) => DialogButton[])
 		onsubmit?: (e: SubmitEvent, data: S) => void

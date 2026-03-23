@@ -209,7 +209,8 @@ const openAppDatabase = () =>
 
 			if (!objectStoreNames.contains('playHistory')) {
 				const store = createStore(db, 'playHistory')
-				createIndexes(store, ['trackId', 'playedAt'], { unique: true })
+				createIndexes(store, ['trackId'], { unique: false })
+				createIndexes(store, ['playedAt'], { unique: true })
 			}
 		},
 	})

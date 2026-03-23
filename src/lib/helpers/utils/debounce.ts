@@ -4,7 +4,7 @@ export const debounce = <Fn extends (...args: Parameters<Fn>) => ReturnType<Fn>>
 	delay: number,
 ): {
 	(...args: Parameters<Fn>): void
-	cancel(): void
+	cancel: () => void
 } => {
 	let timeout: undefined | number
 

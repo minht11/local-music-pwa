@@ -4,8 +4,8 @@
 	import Icon, { type IconType } from '../icon/Icon.svelte'
 
 	export interface DialogOpenAccessor<S> {
-		get(): S | null
-		close(): void
+		get: () => S | null
+		close: () => void
 	}
 
 	export interface DialogProps<S> {

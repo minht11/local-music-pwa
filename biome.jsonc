@@ -118,7 +118,8 @@
 				"noNestedPromises": "error",
 				"noIncrementDecrement": "error",
 				"noUnnecessaryConditions": "error",
-				"noUselessReturn": "error"
+				"noUselessReturn": "error",
+				"useConsistentMethodSignatures": "error"
 			},
 			"complexity": {
 				"useSimplifiedLogicExpression": "error",
