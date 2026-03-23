@@ -40,8 +40,8 @@
 		className,
 	]}
 	role="combobox"
-	aria-controls="popupId"
-	aria-owns="popupId"
+	aria-controls={popupId}
+	aria-owns={popupId}
 	aria-expanded={isOpen}
 	popovertarget={popupId}
 	type="button"

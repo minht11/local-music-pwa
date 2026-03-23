@@ -10,7 +10,7 @@ import {
 	shouldRefetchLibraryValue,
 } from '$lib/library/get/value.ts'
 import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID } from '$lib/library/types.ts'
-import { clearDatabaseStores } from '../../shared.ts'
+import { clearDatabaseStores } from '../../../../../tests/shared.ts'
 
 // Mock crypto.randomUUID for consistent UUIDs
 vi.stubGlobal('crypto', {
