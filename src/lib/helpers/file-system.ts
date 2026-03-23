@@ -5,6 +5,14 @@ export const isFileSystemAccessSupported: boolean = 'showDirectoryPicker' in glo
 export type FileEntity = File | FileSystemFileHandle
 
 const supportedExtensions = ['aac', 'mp3', 'ogg', 'wav', 'flac', 'm4a', 'opus', 'webm']
+const supportedExtensionsWithDot = supportedExtensions.map((ext) => `.${ext}`)
+
+const isSupportedFile = (fileName: string): boolean => {
+	// On Windows .MP3 and .mp3 are both valid file extensions
+	const fileNameLower = fileName.toLowerCase()
+
+	return supportedExtensionsWithDot.some((ext) => fileNameLower.endsWith(ext))
+}
 
 export const getFileHandlesRecursively = async (
 	directory: FileSystemDirectoryHandle,
@@ -13,7 +21,7 @@ export const getFileHandlesRecursively = async (
 
 	for await (const handle of directory.values()) {
 		if (handle.kind === 'file') {
-			const isValidFile = supportedExtensions.some((ext) => handle.name.endsWith(`.${ext}`))
+			const isValidFile = isSupportedFile(handle.name)
 
 			if (isValidFile) {
 				files.push(handle)
@@ -33,9 +41,7 @@ const getFilesFromLegacyInputEvent = (e: Event): File[] => {
 		return []
 	}
 
-	return Array.from(files).filter((file) =>
-		supportedExtensions.some((ext) => file.name.endsWith(`.${ext}`)),
-	)
+	return Array.from(files).filter((file) => isSupportedFile(file.name))
 }
 
 export const getFilesFromLegacyDirectory = (): Promise<File[]> => {
@@ -45,7 +51,7 @@ export const getFilesFromLegacyDirectory = (): Promise<File[]> => {
 	// Mobile devices do not support directory selection,
 	// so allow them to pick individual files instead.
 	if (isMobile()) {
-		directoryElement.accept = supportedExtensions.map((ext) => `.${ext}`).join(', ')
+		directoryElement.accept = supportedExtensionsWithDot.join(', ')
 
 		directoryElement.multiple = true
 	} else {
