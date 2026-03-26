@@ -10,6 +10,7 @@
 		"build": "pnpm run build:pagefind && vite build",
 		"build:pagefind": "tsx scripts/build-pagefind-index.ts",
 		"preview": "vite preview",
+		"generate:transcript-tags": "tsx scripts/generate-transcript-tags.ts",
 		"check": "svelte-kit sync && svelte-check",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"biome-check": "biome check ./src",

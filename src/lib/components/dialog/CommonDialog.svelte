@@ -44,7 +44,7 @@
 			}}
 		>
 			{#if externalChildren}
-				<div data-dialog-content class="mt-4 grow px-6 text-onSurfaceVariant">
+				<div data-dialog-content class="mt-3 grow px-4 text-onSurfaceVariant sm:mt-4 sm:px-6">
 					{@render externalChildren({ data, close })}
 				</div>
 			{/if}

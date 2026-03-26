@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment'
 	import { navigating, page } from '$app/state'
+	import { onDestroy } from 'svelte'
 	import { APP_DIALOGS_COMPONENTS } from '$lib/components/app-dialogs/dialogs.ts'
 	import Button from '$lib/components/Button.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
@@ -24,6 +25,9 @@
 	// to allow better trees shaking and inlining
 	const mainStore = setMainStoreContext(new MainStore())
 	const player = setPlayerStoreContext(new PlayerStore())
+	onDestroy(() => {
+		player.destroy()
+	})
 
 	let pageContainer = $state<HTMLElement | null>(null)
 
@@ -114,10 +118,36 @@
 
 <svelte:window
 	onkeydown={(e) => {
-		if (e.key === ' ' && !(e.target instanceof HTMLInputElement)) {
+		const target = e.target
+		const isEditableTarget =
+			target instanceof HTMLInputElement ||
+			target instanceof HTMLTextAreaElement ||
+			(target instanceof HTMLElement && target.isContentEditable)
+		const hasOpenDialog =
+			typeof document !== 'undefined' && document.querySelector('dialog[open]') !== null
+		const canUsePlayerArrowKeys =
+			!hasOpenDialog &&
+			(page.url.pathname.startsWith('/player') ||
+				(!page.data.noPlayerOverlay && !isShortsPage && !player.isQueueEmpty))
+
+		if (isEditableTarget) {
+			return
+		}
+
+		if (e.key === ' ' && !(target instanceof HTMLInputElement)) {
 			e.preventDefault()
 
 			player.togglePlay()
+		}
+
+		if (canUsePlayerArrowKeys && e.key === 'ArrowLeft') {
+			e.preventDefault()
+			player.seek(Math.max(player.currentTime - 15, 0))
+		}
+
+		if (canUsePlayerArrowKeys && e.key === 'ArrowRight') {
+			e.preventDefault()
+			player.seek(Math.min(player.currentTime + 15, player.duration || Infinity))
 		}
 	}}
 />

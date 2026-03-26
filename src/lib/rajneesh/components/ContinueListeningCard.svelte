@@ -10,6 +10,7 @@
 	interface ResumeCardData {
 		track: TrackData
 		album: Album | undefined
+		listenedMinutes: number
 	}
 
 	interface Props {
@@ -20,6 +21,14 @@
 	const { card, onResume }: Props = $props()
 
 	const artworkSrc = createManagedArtwork(() => card.album?.image ?? card.track?.image?.small)
+	const listenedLabel = $derived.by(() => {
+		if (card.listenedMinutes < 60) {
+			return 'few minutes listened'
+		}
+
+		const hours = Math.floor(card.listenedMinutes / 60)
+		return `${hours} hour${hours === 1 ? '' : 's'} listened`
+	})
 </script>
 
 <div class="relative z-0 flex h-full w-full flex-col overflow-clip rounded-2xl bg-surfaceContainerHigh">
@@ -34,6 +43,9 @@
 			<div class="flex min-w-0 flex-col">
 				<div class="line-clamp-2 text-headline-sm">
 					{formatNameOrUnknown(card.track.name)}
+				</div>
+				<div class="text-body-sm opacity-70">
+					{listenedLabel}
 				</div>
 			</div>
 		</div>

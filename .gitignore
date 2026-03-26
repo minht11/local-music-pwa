@@ -7,3 +7,4 @@ static/pagefind
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 coverage
+/.idea

@@ -1,105 +1,17 @@
-<script lang="ts" module>
-	import {
-		BG_MUSIC_OPTIONS,
-		getSelectedBgMusic,
-		setSelectedBgMusic,
-		getBgMusicVolume,
-		setBgMusicVolume,
-	} from '$lib/rajneesh/pages/shorts/bg-music-state.ts'
-
-	let bgAudio: HTMLAudioElement | null = null
-	let bgMusicPlaying = $state(false)
-	let selectedBgMusicId = $state('none')
-	let bgVolume = $state(0.15)
-	let _initialized = false
-	let _mountCount = 0
-
-	function ensureInitialized() {
-		if (_initialized) return
-		if (typeof localStorage === 'undefined') return
-		_initialized = true
-		selectedBgMusicId = getSelectedBgMusic()
-		bgVolume = getBgMusicVolume()
-	}
-
-	function selectBgMusic(id: string, isPlaying: boolean) {
-		selectedBgMusicId = id
-		setSelectedBgMusic(id)
-
-		if (bgAudio) {
-			bgAudio.pause()
-			bgAudio.removeAttribute('src')
-			bgAudio.load()
-			bgAudio = null
-			bgMusicPlaying = false
-		}
-
-		const option = BG_MUSIC_OPTIONS.find((o) => o.id === id)
-		if (option?.url && isPlaying) {
-			bgAudio = new Audio(option.url)
-			bgAudio.loop = true
-			bgAudio.volume = bgVolume
-			bgAudio.play().then(() => {
-				bgMusicPlaying = true
-			}).catch(() => {
-				bgMusicPlaying = false
-			})
-		}
-	}
-
-	function syncBgMusic() {
-		const option = BG_MUSIC_OPTIONS.find((o) => o.id === selectedBgMusicId)
-		if (!option?.url) {
-			if (bgAudio) {
-				bgAudio.pause()
-				bgAudio = null
-			}
-			bgMusicPlaying = false
-			return
-		}
-
-		if (!bgAudio) {
-			bgAudio = new Audio(option.url)
-			bgAudio.loop = true
-			bgAudio.volume = bgVolume
-			bgAudio.addEventListener('loadedmetadata', () => {
-				if (bgAudio) bgAudio.currentTime = Math.random() * bgAudio.duration
-			}, { once: true })
-		}
-		bgAudio.play().then(() => {
-			bgMusicPlaying = true
-		}).catch(() => {
-			bgMusicPlaying = false
-		})
-	}
-
-	function pauseBgMusic() {
-		bgAudio?.pause()
-		bgMusicPlaying = false
-	}
-
-	function destroyBgMusic() {
-		if (bgAudio) {
-			bgAudio.pause()
-			bgAudio.removeAttribute('src')
-			bgAudio.load()
-			bgAudio = null
-		}
-		bgMusicPlaying = false
-	}
-
-	function onBgVolumeChange() {
-		setBgMusicVolume(bgVolume)
-		if (bgAudio) bgAudio.volume = bgVolume
-	}
-
-	export { syncBgMusic, pauseBgMusic, destroyBgMusic }
-</script>
-
 <script lang="ts">
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import ActiveIndicator from '$lib/components/player/buttons/ActiveIndicator.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
+	import { BG_MUSIC_OPTIONS } from '$lib/rajneesh/pages/shorts/bg-music-state.ts'
+	import {
+		bgMusicState,
+		initializeBgMusic,
+		pauseBgMusic,
+		retainBgMusicConsumer,
+		selectBgMusic,
+		syncBgMusic,
+		updateBgMusicVolume,
+	} from '$lib/rajneesh/stores/bg-music.svelte.ts'
 
 	const { class: className }: { class?: ClassValue } = $props()
 
@@ -109,15 +21,11 @@
 	let pickerEl: HTMLDivElement | undefined
 	let pickerTop = $state(0)
 	let pickerRight = $state(0)
+	initializeBgMusic()
 
-	ensureInitialized()
-	_mountCount++
-
-	$effect(() => () => {
-		_mountCount--
-		if (_mountCount === 0) {
-			destroyBgMusic()
-		}
+	$effect(() => {
+		const releaseConsumer = retainBgMusicConsumer()
+		return releaseConsumer
 	})
 
 	function portal(node: HTMLElement) {
@@ -173,9 +81,9 @@
 	>
 		<Icon
 			type="vinylDisc"
-			class={['disc-spin-bg', bgMusicPlaying && 'disc-spin-bg-playing']}
+			class={['disc-spin-bg', bgMusicState.bgMusicPlaying && 'disc-spin-bg-playing']}
 		/>
-		<ActiveIndicator active={selectedBgMusicId !== 'none'} />
+		<ActiveIndicator active={bgMusicState.selectedBgMusicId !== 'none'} />
 	</IconButton>
 </div>
 
@@ -192,7 +100,7 @@
 				onclick={() => { selectBgMusic(option.id, player.playing); showPicker = false }}
 				class={[
 					'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-body-sm transition-colors',
-					selectedBgMusicId === option.id
+					bgMusicState.selectedBgMusicId === option.id
 						? 'bg-secondaryContainer/80 text-onSecondaryContainer'
 						: 'text-onSurface/80 hover:bg-onSurface/5',
 				]}
@@ -205,7 +113,7 @@
 			</button>
 		{/each}
 
-		{#if selectedBgMusicId !== 'none'}
+		{#if bgMusicState.selectedBgMusicId !== 'none'}
 			<div class="mt-1 border-t border-onSurface/10 px-1 pt-3 pb-1">
 				<div class="flex items-center gap-2">
 					<Icon type="volumeMid" class="size-3.5 shrink-0 opacity-50" />
@@ -214,8 +122,8 @@
 						min="0"
 						max="1"
 						step="0.01"
-						bind:value={bgVolume}
-						oninput={onBgVolumeChange}
+						bind:value={bgMusicState.bgVolume}
+						oninput={() => updateBgMusicVolume(bgMusicState.bgVolume)}
 						class="bg-music-slider flex-1"
 					/>
 				</div>

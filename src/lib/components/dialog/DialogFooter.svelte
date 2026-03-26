@@ -21,7 +21,7 @@
 </script>
 
 {#if buttons?.length}
-	<div data-dialog-footer class="flex justify-end gap-2 p-6">
+	<div data-dialog-footer class="flex flex-wrap justify-end gap-2 p-4 sm:p-6">
 		{#each buttons as button}
 			<Button
 				kind={button.kind ?? 'flat'}

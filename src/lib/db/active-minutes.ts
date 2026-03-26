@@ -1,7 +1,6 @@
 import type { ActiveMinute } from './database.ts'
 import { getDatabase } from './database.ts'
 import { dispatchDatabaseChangedEvent } from './events.ts'
-import { rajneeshLog } from '$lib/rajneesh/index.ts'
 
 export type ActiveMinuteDraft = ActiveMinute
 
@@ -16,7 +15,6 @@ export const addActiveMinute = async (minute: ActiveMinuteDraft): Promise<Active
 		trackTimestampMs: minute.trackTimestampMs,
 		playbackRate: minute.playbackRate,
 	}
-	rajneeshLog('[ActiveMinute] Persisting minute', cleanMinute)
 	await db.put('activeMinutes', cleanMinute as ActiveMinute)
 	const value: ActiveMinute = { ...cleanMinute }
 
@@ -52,7 +50,6 @@ export const getLatestActiveMinutesByTrack = async (): Promise<Map<string, Activ
 		}
 	}
 
-	rajneeshLog('[ActiveMinute] Loaded latest minutes by track', latestByTrack.size)
 	return latestByTrack
 }
 
@@ -75,7 +72,6 @@ export const clearActiveMinutesForTrack = async (trackId: string): Promise<void>
 	await tx.done
 
 	if (changes.length > 0) {
-		rajneeshLog('[ActiveMinute] Cleared minutes for track', trackId, changes.length)
 		dispatchDatabaseChangedEvent(changes)
 	}
 }

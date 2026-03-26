@@ -18,8 +18,6 @@ import {
 	type ActiveMinuteDraft,
 } from '$lib/db/active-minutes.ts'
 import type { ActiveMinute } from '$lib/db/database.ts'
-import { rajneeshLog } from '$lib/rajneesh/index.ts'
-import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 import { trackListenedMinute } from '$lib/rajneesh/analytics/posthog'
 import {
 	ensureCompletedTracksLoaded,
@@ -29,9 +27,36 @@ import {
 
 export interface PlayTrackOptions {
 	shuffle?: boolean
+	startTimeSeconds?: number
+	sourceContext?: 'library' | 'shorts'
 }
 
 export type PlayerRepeat = 'none' | 'one' | 'all'
+
+const PLAYER_AUDIO_OWNER_KEY = '__rajneesh_player_audio_owner__'
+type PlayerAudioOwnerGlobal = typeof globalThis & {
+	[PLAYER_AUDIO_OWNER_KEY]?: HTMLAudioElement
+}
+
+const claimPlayerAudioOwnership = (audio: HTMLAudioElement): void => {
+	const globalState = globalThis as PlayerAudioOwnerGlobal
+	const currentOwner = globalState[PLAYER_AUDIO_OWNER_KEY]
+	if (currentOwner && currentOwner !== audio) {
+		currentOwner.pause()
+		cleanupTrackAudio(currentOwner)
+		currentOwner.removeAttribute('src')
+		currentOwner.load()
+	}
+
+	globalState[PLAYER_AUDIO_OWNER_KEY] = audio
+}
+
+const releasePlayerAudioOwnership = (audio: HTMLAudioElement): void => {
+	const globalState = globalThis as PlayerAudioOwnerGlobal
+	if (globalState[PLAYER_AUDIO_OWNER_KEY] === audio) {
+		delete globalState[PLAYER_AUDIO_OWNER_KEY]
+	}
+}
 
 export class PlayerStore {
 	#main = useMainStore()
@@ -48,6 +73,8 @@ export class PlayerStore {
 
 	loading: boolean = $state(false)
 
+	playbackError: string | null = $state(null)
+
 	currentTime: number = $state(0)
 
 	duration: number = $state(0)
@@ -59,6 +86,7 @@ export class PlayerStore {
 	currentActiveMinute: ActiveMinuteDraft | null = $state(null)
 	#activeMinutesByTrack = $state(new Map<string, ActiveMinute>())
 	#didRestoreFromHistory = false
+	#onDatabaseChangeCleanup: (() => void) | null = null
 
 	get volume() {
 		if (!this.#main.volumeSliderEnabled) {
@@ -82,6 +110,9 @@ export class PlayerStore {
 	#itemsIdsOriginalOrder = $state<number[]>([])
 	#itemsIdsShuffled = $state<number[] | null>(null)
 	#autoplayOnLoad = true
+	#pendingStartTimeSeconds: number | null = null
+	sourceContext: 'library' | 'shorts' = $state('library')
+	sourceStartTimeSeconds: number | null = $state(null)
 
 	itemsIds: readonly number[] = $derived(
 		this.#itemsIdsShuffled ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
@@ -107,6 +138,7 @@ export class PlayerStore {
 		persist('player', this, ['volume', 'shuffle', 'repeat', 'muted'])
 
 		const audio = this.#audio
+		claimPlayerAudioOwnership(audio)
 
 		void this.#initializeFromHistory()
 
@@ -117,7 +149,15 @@ export class PlayerStore {
 				return
 			}
 
-			void audio[this.playing ? 'play' : 'pause']()
+			if (this.playing) {
+				claimPlayerAudioOwnership(audio)
+				void audio.play().catch(() => {
+					this.playing = false
+				})
+				return
+			}
+
+			audio.pause()
 		})
 
 		const onAudioPlayPauseHandler = () => {
@@ -132,7 +172,6 @@ export class PlayerStore {
 		audio.onended = () => {
 			if (this.activeTrack) {
 				void markTrackCompleted(this.activeTrack.uuid)
-				rajneeshLog('[ActiveMinute] Track ended, clearing progress', this.activeTrack.uuid)
 				this.destroyCurrentActiveMinute()
 				void this.clearTrackTimestamp(this.activeTrack.uuid)
 			}
@@ -152,13 +191,12 @@ export class PlayerStore {
 
 		audio.onpause = () => {
 			onAudioPlayPauseHandler()
-			rajneeshLog('[ActiveMinute] Pause, discarding current minute')
 			this.destroyCurrentActiveMinute()
 		}
 		audio.onplay = () => {
 			onAudioPlayPauseHandler()
+			this.playbackError = null
 			if (this.activeTrack) {
-				rajneeshLog('[ActiveMinute] Play, ensuring minute', this.activeTrack.uuid, audio.currentTime)
 				this.ensureActiveMinuteForCurrentTime(this.activeTrack.uuid, audio.currentTime)
 			}
 		}
@@ -168,15 +206,12 @@ export class PlayerStore {
 		}
 		audio.oncanplay = () => {
 			this.loading = false
+			this.playbackError = null
 		}
 		audio.onerror = () => {
 			this.loading = false
 			this.playing = false
-			snackbar({
-				id: 'playback-error',
-				message: m.errorPlaybackFailed(),
-				duration: 4000,
-			})
+			this.playbackError = m.errorPlaybackFailed()
 		}
 
 		audio.ondurationchange = () => {
@@ -220,12 +255,14 @@ export class PlayerStore {
 
 				reset.cancel()
 				this.resetAudio()
-				const savedTimestamp = this.getSavedTrackTimestamp(track.uuid)
+				const savedTimestamp = this.#pendingStartTimeSeconds ?? this.getSavedTrackTimestamp(track.uuid)
+				this.#pendingStartTimeSeconds = null
 				this.currentTime = savedTimestamp
 				const shouldAutoplay = this.#autoplayOnLoad
 				this.#autoplayOnLoad = true
+				this.playbackError = null
 				this.loading = true
-			void loadTrackAudio(this.#audio, track.file, track.uuid).then(async (loaded) => {
+				void loadTrackAudio(this.#audio, track.file, track.uuid).then(async (loaded) => {
 					if (prevTrack?.id !== track.id) {
 						return
 					}
@@ -233,6 +270,8 @@ export class PlayerStore {
 					if (!loaded) {
 						this.playing = false
 						this.loading = false
+						this.playbackError = m.errorPlaybackFailed()
+						return
 					}
 
 					prevTrack.loaded = loaded
@@ -251,7 +290,13 @@ export class PlayerStore {
 					}
 
 					if (shouldAutoplay) {
-						await audio.play()
+						try {
+							await audio.play()
+						} catch {
+							this.playing = false
+							this.loading = false
+							this.playbackError = m.errorPlaybackFailed()
+						}
 					} else {
 						audio.pause()
 						this.playing = false
@@ -261,13 +306,14 @@ export class PlayerStore {
 				untrack(() => {
 					this.playing = false
 				})
+				this.playbackError = null
 				reset()
 
 				prevTrack = null
 			}
 		})
 
-		onDatabaseChange((changes) => {
+		this.#onDatabaseChangeCleanup = onDatabaseChange((changes) => {
 			for (const change of changes) {
 				if (change.storeName !== 'tracks') {
 					continue
@@ -341,7 +387,11 @@ export class PlayerStore {
 			return
 		}
 
-		this.playing = force ?? !this.playing
+		const nextPlaying = force ?? !this.playing
+		if (nextPlaying) {
+			this.playbackError = null
+		}
+		this.playing = nextPlaying
 	}
 
 	playNext = (): void => {
@@ -367,7 +417,10 @@ export class PlayerStore {
 		queue?: readonly number[],
 		options: PlayTrackOptions = {},
 	): void => {
+		this.playbackError = null
 		this.#autoplayOnLoad = true
+		this.sourceContext = options.sourceContext ?? 'library'
+		this.sourceStartTimeSeconds = options.startTimeSeconds ?? null
 		if (queue) {
 			this.#itemsIdsOriginalOrder = [...queue]
 			// Unless explicitly set, shuffle is reset when new queue is passed
@@ -385,8 +438,18 @@ export class PlayerStore {
 			return
 		}
 
-		this.#activeTrackIndex = options.shuffle ? 0 : trackIndex
-		this.currentTime = 0
+		this.#pendingStartTimeSeconds = options.startTimeSeconds ?? null
+		const nextIndex = options.shuffle ? 0 : trackIndex
+		const nextTrackId = this.itemsIds[nextIndex]
+		const isSameTrack = nextTrackId !== undefined && nextTrackId === this.activeTrack?.id
+
+		this.#activeTrackIndex = nextIndex
+		if (isSameTrack) {
+			const nextTime = options.startTimeSeconds ?? this.currentTime
+			this.seek(nextTime)
+		} else {
+			this.currentTime = options.startTimeSeconds ?? 0
+		}
 		this.togglePlay(true)
 	}
 
@@ -395,7 +458,10 @@ export class PlayerStore {
 		queue?: readonly number[],
 		options: PlayTrackOptions = {},
 	): void => {
+		this.playbackError = null
 		this.#autoplayOnLoad = false
+		this.sourceContext = options.sourceContext ?? 'library'
+		this.sourceStartTimeSeconds = options.startTimeSeconds ?? null
 		if (queue) {
 			this.#itemsIdsOriginalOrder = [...queue]
 			this.shuffle = options.shuffle ?? false
@@ -412,14 +478,73 @@ export class PlayerStore {
 			return
 		}
 
-		this.#activeTrackIndex = options.shuffle ? 0 : trackIndex
-		this.currentTime = 0
+		this.#pendingStartTimeSeconds = options.startTimeSeconds ?? null
+		const nextIndex = options.shuffle ? 0 : trackIndex
+		const nextTrackId = this.itemsIds[nextIndex]
+		const isSameTrack = nextTrackId !== undefined && nextTrackId === this.activeTrack?.id
+
+		this.#activeTrackIndex = nextIndex
+		if (isSameTrack) {
+			const nextTime = options.startTimeSeconds ?? this.currentTime
+			this.seek(nextTime)
+		} else {
+			this.currentTime = options.startTimeSeconds ?? 0
+		}
 		this.playing = false
 	}
 
 	seek = (time: number): void => {
 		this.currentTime = time
 		this.#audio.currentTime = time
+	}
+
+	retryPlayback = (): void => {
+		const track = this.activeTrack
+		if (!track) {
+			return
+		}
+
+		const audio = this.#audio
+		const targetTime = this.currentTime
+		this.playbackError = null
+		this.resetAudio()
+		this.currentTime = targetTime
+		this.loading = true
+		this.playing = true
+
+		void loadTrackAudio(audio, track.file, track.uuid).then(async (loaded) => {
+			// Ignore stale retry completions after track changed.
+			if (this.activeTrack?.id !== track.id) {
+				return
+			}
+
+			if (!loaded) {
+				this.playing = false
+				this.loading = false
+				this.playbackError = m.errorPlaybackFailed()
+				return
+			}
+
+			if (targetTime > 0) {
+				if (audio.readyState >= 1) {
+					audio.currentTime = targetTime
+				} else {
+					const setTimeOnLoad = () => {
+						audio.currentTime = targetTime
+						audio.removeEventListener('loadedmetadata', setTimeOnLoad)
+					}
+					audio.addEventListener('loadedmetadata', setTimeOnLoad)
+				}
+			}
+
+			try {
+				await audio.play()
+			} catch {
+				this.playing = false
+				this.loading = false
+				this.playbackError = m.errorPlaybackFailed()
+			}
+		})
 	}
 
 	#getActiveMinuteTimestamp = (timestampMs: number): number => {
@@ -442,7 +567,6 @@ export class PlayerStore {
 			trackTimestampMs: minute.trackTimestampMs,
 			playbackRate: minute.playbackRate,
 		}
-		rajneeshLog('[ActiveMinute] Persisting completed minute', payload)
 		const saved = await addActiveMinute(payload)
 		this.#updateLatestActiveMinute(saved)
 		trackListenedMinute(payload)
@@ -451,7 +575,6 @@ export class PlayerStore {
 	#loadActiveMinutesCache = async (): Promise<void> => {
 		const latest = await getLatestActiveMinutesByTrack()
 		this.#activeMinutesByTrack = latest
-		rajneeshLog('[ActiveMinute] Cache loaded', latest.size)
 	}
 
 	#initializeFromHistory = async (): Promise<void> => {
@@ -514,12 +637,6 @@ export class PlayerStore {
 				trackTimestampMs,
 				playbackRate,
 			}
-			rajneeshLog('[ActiveMinute] New minute started', {
-				activeMinuteTimestampMs: currentMinuteTimestamp,
-				trackId,
-				trackTimestampMs,
-				playbackRate,
-			})
 		} else {
 			this.currentActiveMinute = {
 				...this.currentActiveMinute,
@@ -527,23 +644,11 @@ export class PlayerStore {
 				trackTimestampMs,
 				playbackRate,
 			}
-			rajneeshLog('[ActiveMinute] Minute updated', {
-				activeMinuteTimestampMs: currentMinuteTimestamp,
-				trackId,
-				trackTimestampMs,
-				playbackRate,
-			})
 		}
 	}
 
 	destroyCurrentActiveMinute = (): void => {
 		if (this.currentActiveMinute) {
-			rajneeshLog('[ActiveMinute] Discarding in-progress minute', {
-				activeMinuteTimestampMs: this.currentActiveMinute.activeMinuteTimestampMs,
-				trackId: this.currentActiveMinute.trackId,
-				trackTimestampMs: this.currentActiveMinute.trackTimestampMs,
-				playbackRate: this.currentActiveMinute.playbackRate,
-			})
 			this.currentActiveMinute = null
 		}
 	}
@@ -557,11 +662,6 @@ export class PlayerStore {
 			return
 		}
 
-		rajneeshLog('[ActiveMinute] Saving timestamp', {
-			trackId,
-			timestampSeconds,
-			duration: this.duration,
-		})
 		this.ensureActiveMinuteForCurrentTime(trackId, timestampSeconds)
 	}
 
@@ -580,7 +680,6 @@ export class PlayerStore {
 		this.#activeMinutesByTrack = next
 
 		if (this.currentActiveMinute?.trackId === trackId) {
-			rajneeshLog('[ActiveMinute] Clearing current minute for track', trackId)
 			this.currentActiveMinute = null
 		}
 	}
@@ -646,15 +745,28 @@ export class PlayerStore {
 		this.#itemsIdsOriginalOrder = []
 		this.#itemsIdsShuffled = null
 		this.#activeTrackIndex = -1
+		this.playbackError = null
+	}
+
+	destroy = (): void => {
+		this.playing = false
+		this.playbackError = null
+		this.destroyCurrentActiveMinute()
+		this.resetAudio()
+		releasePlayerAudioOwnership(this.#audio)
+		this.#onDatabaseChangeCleanup?.()
+		this.#onDatabaseChangeCleanup = null
 	}
 
 	resetAudio = (): void => {
-		if (!this.#audio.src) {
-			return
+		this.#audio.pause()
+
+		if (this.#audio.src) {
+			cleanupTrackAudio(this.#audio)
+			this.#audio.removeAttribute('src')
+			this.#audio.load()
 		}
 
-		cleanupTrackAudio(this.#audio)
-		this.#audio.src = ''
 		this.currentTime = 0
 		this.duration = 0
 		this.loading = false

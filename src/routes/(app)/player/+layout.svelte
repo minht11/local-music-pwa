@@ -106,6 +106,12 @@
 						/>
 					</div>
 				{/if}
+
+				{#if player.playbackError && track}
+					<div class="text-center text-body-md text-error">
+						{player.playbackError}
+					</div>
+				{/if}
 			</div>
 
 			<div class="flex h-18 w-full shrink-0 items-center rounded-2xl bg-secondaryContainer px-4">

@@ -2,6 +2,7 @@
 	import type { AnimationConfig } from 'svelte/animate'
 	import { type AnimationSequence, timeline } from '$lib/helpers/animations.ts'
 	import Icon, { type IconType } from '../icon/Icon.svelte'
+	import IconButton from '../IconButton.svelte'
 
 	export interface DialogOpenAccessor<S> {
 		get(): S | null
@@ -12,6 +13,8 @@
 		open?: boolean | DialogOpenAccessor<S>
 		title?: string
 		icon?: IconType
+		showCloseButton?: boolean
+		topRight?: Snippet<[{ close: () => void }]>
 		class?: ClassValue
 		children?: Snippet<[{ data: S; close: () => void }]>
 	}
@@ -22,6 +25,8 @@
 		open = $bindable(false),
 		title,
 		icon,
+		showCloseButton = false,
+		topRight,
 		class: className,
 		children,
 	}: DialogProps<S> = $props()
@@ -169,6 +174,11 @@
 	<dialog
 		{@attach onOpenAction}
 		out:outAni
+		onclick={(e) => {
+			if (e.target === e.currentTarget) {
+				close()
+			}
+		}}
 		onkeydown={(e) => {
 			if (e.key === 'Escape') {
 				close()
@@ -183,13 +193,34 @@
 			close()
 		}}
 		class={[
-			'm-auto flex flex-col rounded-3xl bg-surfaceContainerHigh text-onSurface contain-content select-none focus:outline-none',
+			'relative m-auto flex flex-col rounded-2xl bg-surfaceContainerHigh text-onSurface contain-content select-none focus:outline-none sm:rounded-3xl',
 			className,
 		]}
 	>
+		{#if showCloseButton || topRight}
+			<div class="absolute top-3 right-3 z-1 flex items-center gap-1 sm:top-4 sm:right-4 sm:gap-2">
+				{#if topRight}
+					{@render topRight({ close })}
+				{/if}
+
+				{#if showCloseButton}
+					<IconButton
+						icon="close"
+						class="bg-surfaceContainer"
+						tooltip="Close"
+						onclick={close}
+					/>
+				{/if}
+			</div>
+		{/if}
+
 		<header
 			bind:this={dialogHeader}
-			class={['flex flex-col gap-4 px-6 pt-6', icon && 'items-center justify-center text-center']}
+			class={[
+				'flex flex-col gap-3 px-4 pt-4 sm:gap-4 sm:px-6 sm:pt-6',
+				(showCloseButton || topRight) && 'pr-16 sm:pr-6',
+				icon && 'items-center justify-center text-center',
+			]}
 		>
 			{#if icon}
 				<Icon type={icon} class="text-secondary" />

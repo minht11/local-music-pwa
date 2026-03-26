@@ -83,6 +83,12 @@
 				{/if}
 			</div>
 		</div>
+
+		{#if player.playbackError && player.activeTrack}
+			<div class="px-3 pb-3 text-center text-body-sm text-error sm:px-0 sm:pb-0">
+				{player.playbackError}
+			</div>
+		{/if}
 	</div>
 </div>
 

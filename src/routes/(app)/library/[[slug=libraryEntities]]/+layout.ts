@@ -31,10 +31,12 @@ type LoadDataResult<Slug extends LibraryStoreName> = {
 
 const loadData = async <Slug extends LibraryStoreName>(
 	slug: Slug,
+	searchTermFromUrl = '',
 ): Promise<LoadDataResult<Slug>> => {
 	const config = configsMap[slug]
 	const searchFn = config.search ?? defaultSearchFn
 	const store = new LibraryStore(slug)
+	store.searchTerm = searchTermFromUrl
 
 	if (slug === 'home' || slug === 'shorts') {
 		return {
@@ -96,7 +98,8 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 		await whenCatalogReady()
 	}
 
-	const data = await loadData(slug)
+	const searchTermFromUrl = event.url.searchParams.get('search')?.trim() ?? ''
+	const data = await loadData(slug, searchTermFromUrl)
 
 	if (data.tracksCountQuery.value === 0 && slug !== 'home' && slug !== 'shorts') {
 		const hasV1Data = await checkForV1LegacyDatabaseData()

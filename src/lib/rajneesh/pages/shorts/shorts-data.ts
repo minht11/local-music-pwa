@@ -6,6 +6,7 @@ import type { Track } from '$lib/library/types.ts'
 export interface ShortItem {
 	url: string
 	trackId: string
+	trackDbId: number
 	startSeconds: number
 	albumName: string
 	albumUuid: string
@@ -22,8 +23,11 @@ const SEED_STORAGE_KEY = 'shorts-seed'
 let seededRandom: (() => number) | null = null
 
 function createMulberry32(seed: number): () => number {
+	let value = seed
+
 	return function mulberry32() {
-		let t = (seed += 0x6d2b79f5)
+		value += 0x6d2b79f5
+		let t = value
 		t = Math.imul(t ^ (t >>> 15), t | 1)
 		t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
 		return ((t ^ (t >>> 14)) >>> 0) / 4294967296
@@ -62,27 +66,6 @@ function getRandom(): number {
 
 const isEnglishTrack = (url: string): boolean =>
 	url.toLowerCase().includes('/english/')
-
-function slugify(value: string): string {
-	return value
-		.toLowerCase()
-		.trim()
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-+|-+$/g, '')
-}
-
-function getTrackId(track: Track, url: string): string {
-	try {
-		const parsed = new URL(url, 'https://shorts.local')
-		const fileName = parsed.pathname.split('/').pop() ?? ''
-		const baseName = fileName.replace(/\.[^.]+$/, '')
-		if (baseName) return slugify(baseName)
-	} catch {
-		// Ignore malformed URL and fallback to track fields
-	}
-
-	return slugify(`${track.album ?? 'unknown'}-${track.trackNo}`)
-}
 
 function getFilteredTracks(): Track[] {
 	const catalog = getCatalog()
@@ -123,7 +106,8 @@ function generateBatch(count: number): ShortItem[] {
 
 		batch.push({
 			url: file.url,
-			trackId: getTrackId(track, file.url),
+			trackId: track.uuid,
+			trackDbId: track.id,
 			startSeconds,
 			albumName: track.album ?? 'Unknown',
 			albumUuid: album?.uuid ?? '',
@@ -156,10 +140,13 @@ export function loadMoreShorts(): number {
 }
 
 export function ensureShortByTrackId(trackId: string, startFrom?: number): number {
-	const normalizedTrackId = slugify(trackId)
+	const normalizedTrackId = trackId.trim()
 	if (!normalizedTrackId) return -1
 
-	const requestedStart = Number.isFinite(startFrom) ? Math.max(0, Math.floor(startFrom!)) : undefined
+	const requestedStart =
+		startFrom !== undefined && Number.isFinite(startFrom)
+			? Math.max(0, Math.floor(startFrom))
+			: undefined
 
 	const existingIndex = items.findIndex((item) =>
 		item.trackId === normalizedTrackId
@@ -171,13 +158,14 @@ export function ensureShortByTrackId(trackId: string, startFrom?: number): numbe
 	for (const track of tracks) {
 		const file = track.file as RemoteFile | undefined
 		if (!file?.url || file.type !== 'remote') continue
-		if (getTrackId(track, file.url) !== normalizedTrackId) continue
+		if (track.uuid !== normalizedTrackId) continue
 
 		const catalog = getCatalog()
 		const album = catalog?.albums.find((a) => a.name === track.album)
 		const short: ShortItem = {
 			url: file.url,
 			trackId: normalizedTrackId,
+			trackDbId: track.id,
 			startSeconds: requestedStart ?? (Math.floor(getRandom() * (MAX_START - MIN_START + 1)) + MIN_START),
 			albumName: track.album ?? 'Unknown',
 			albumUuid: album?.uuid ?? '',

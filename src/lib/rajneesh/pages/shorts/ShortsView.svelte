@@ -1,75 +1,225 @@
 <script lang="ts">
-	import { goto } from '$app/navigation'
-	import { tick } from 'svelte'
+	import { goto, replaceState } from '$app/navigation'
+	import { onMount, tick } from 'svelte'
 	import Button from '$lib/components/Button.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
+	import { getLatestActiveMinutesByTrack } from '$lib/db/active-minutes.ts'
+	import { onDatabaseChange } from '$lib/db/events.ts'
+	import { dbGetAlbumTracksIdsByName, getLibraryItemIdFromUuid } from '$lib/library/get/ids.ts'
+	import { getLibraryValue } from '$lib/library/get/value.ts'
 	import { trackShortLiked } from '$lib/rajneesh/analytics/posthog.ts'
-	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
-	import { getCachedBlob } from '$lib/rajneesh/index.ts'
+	import {
+		ensureCompletedTracksLoaded,
+		isTrackCompleted,
+	} from '$lib/stores/completed-tracks.svelte.ts'
 	import {
 		lastShortsIndex,
 		lastShortsTotalCount,
-		savedPlaybackTime,
 		setLastShortsIndex,
-		setSavedPlaybackTime,
 	} from './shorts-state.ts'
 	import { ensureShortByTrackId, getShortsItems, loadMoreShorts } from './shorts-data.ts'
 	import { getLikedTrackIds, setTrackLiked } from './shorts-liked-state.ts'
+	import { BG_MUSIC_OPTIONS } from './bg-music-state.ts'
 	import {
-		BG_MUSIC_OPTIONS,
-		getSelectedBgMusic,
-		setSelectedBgMusic,
-		getBgMusicVolume,
-		setBgMusicVolume,
-	} from './bg-music-state.ts'
+		bgMusicState,
+		initializeBgMusic,
+		pauseBgMusic,
+		retainBgMusicConsumer,
+		selectBgMusic,
+		syncBgMusic,
+		updateBgMusicVolume,
+	} from '$lib/rajneesh/stores/bg-music.svelte.ts'
 
 	const player = usePlayer()
-	if (player.playing) {
-		player.playing = false
-	}
 
 	let shorts = $state(getShortsItems())
 
 	const LOAD_MORE_THRESHOLD = 5
 	const SCROLL_TIP_KEY = 'shorts-scroll-tip-shown'
+	const QUICK_EXIT_RESTORE_THRESHOLD_MS = 30_000
+
+	type QuickExitRestoreTarget = {
+		queue: number[]
+		startIndex: number
+		startTimeSeconds: number
+	}
 
 	let viewportEl: HTMLDivElement
 	let activeIndex = $state<number>(-1)
-	let isLoading = $state(true)
-	let autoplayBlocked = $state(false)
 	let showScrollTip = $state(!localStorage.getItem(SCROLL_TIP_KEY))
 	let observer: IntersectionObserver | null = null
 
-	let selectedBgMusicId = $state(getSelectedBgMusic())
 	let showBgMusicPicker = $state(false)
-	let bgAudio: HTMLAudioElement | null = null
-	let bgMusicPlaying = $state(false)
-	let bgVolume = $state(getBgMusicVolume())
-let lastThemeAppliedForIndex = -1
-let lastUrlUpdatedForIndex = -1
-let initialQueryIndex: number | null = null
-let isCurrentAudioPlaying = $state(false)
-let singleTapTimeout: ReturnType<typeof setTimeout> | null = null
-let likeBurstTimeout: ReturnType<typeof setTimeout> | null = null
-let likedTrackIds = $state(new Set<string>())
-let likeBurstVisible = $state(false)
-let likeBurstSeed = $state(0)
-let currentPlaybackTime = $state(0)
+	let lastUrlUpdatedForIndex = -1
+	let initialQueryIndex: number | null = null
+	let singleTapTimeout: ReturnType<typeof setTimeout> | null = null
+	let likeBurstTimeout: ReturnType<typeof setTimeout> | null = null
+	let activateShortTimeout: ReturnType<typeof setTimeout> | null = null
+	let likedTrackIds = $state(new Set<string>())
+	let likeBurstVisible = $state(false)
+	let likeBurstSeed = $state(0)
+	let pendingShortTrackId = $state<string | null>(null)
+	let lastActivatedShortKey = $state('')
+	let resumeSecondsByTrack = $state(new Map<string, number>())
+	let shortsSessionStartedAt = 0
+	let quickExitRestoreTriggered = false
+	let quickExitRestoreInFlight: Promise<void> | null = null
+	let skipQuickExitRestore = false
+	let quickExitRestoreTarget: QuickExitRestoreTarget | null = null
+	let quickExitRestoreTargetPromise: Promise<QuickExitRestoreTarget | null> | null = null
 
-const HEART_BURST_OFFSETS = [
-	{ x: 0, y: -96, delay: 0, scale: 1.2 },
-	{ x: 84, y: -54, delay: 0.04, scale: 0.9 },
-	{ x: 96, y: 14, delay: 0.08, scale: 1 },
-	{ x: 58, y: 86, delay: 0.12, scale: 0.85 },
-	{ x: -58, y: 86, delay: 0.16, scale: 0.9 },
-	{ x: -96, y: 14, delay: 0.2, scale: 1.1 },
-	{ x: -84, y: -54, delay: 0.24, scale: 0.8 },
-	{ x: 0, y: 0, delay: 0.06, scale: 1.35 },
-]
+	initializeBgMusic()
 
-const activeTrackLiked = $derived(
-	activeIndex >= 0 && !!shorts[activeIndex] && likedTrackIds.has(shorts[activeIndex].trackId)
-)
+	$effect(() => {
+		const releaseConsumer = retainBgMusicConsumer()
+		return releaseConsumer
+	})
+
+	const HEART_BURST_OFFSETS = [
+		{ x: 0, y: -96, delay: 0, scale: 1.2 },
+		{ x: 84, y: -54, delay: 0.04, scale: 0.9 },
+		{ x: 96, y: 14, delay: 0.08, scale: 1 },
+		{ x: 58, y: 86, delay: 0.12, scale: 0.85 },
+		{ x: -58, y: 86, delay: 0.16, scale: 0.9 },
+		{ x: -96, y: 14, delay: 0.2, scale: 1.1 },
+		{ x: -84, y: -54, delay: 0.24, scale: 0.8 },
+		{ x: 0, y: 0, delay: 0.06, scale: 1.35 },
+	]
+
+	const activeShort = $derived(activeIndex >= 0 ? shorts[activeIndex] : undefined)
+	const isShortActiveInPlayer = $derived(activeShort?.trackId === player.activeTrack?.uuid)
+	const isCurrentAudioPlaying = $derived(
+		isShortActiveInPlayer && player.playing && !player.loading && !pendingShortTrackId,
+	)
+	const hasPlaybackError = $derived(
+		isShortActiveInPlayer && !!player.playbackError && !pendingShortTrackId,
+	)
+	const isLoading = $derived(
+		(isShortActiveInPlayer && player.loading)
+		|| (!!pendingShortTrackId && pendingShortTrackId === activeShort?.trackId),
+	)
+	const currentPlaybackTime = $derived(
+		isShortActiveInPlayer ? player.currentTime : getShortStartSeconds(activeShort),
+	)
+	const activeTrackLiked = $derived(activeShort ? likedTrackIds.has(activeShort.trackId) : false)
+
+	async function resolveQuickExitRestoreTarget(): Promise<QuickExitRestoreTarget | null> {
+		await ensureCompletedTracksLoaded()
+		const latestMinutes = await getLatestActiveMinutesByTrack()
+		const latestMinute = Array.from(latestMinutes.values())
+			.filter((minute) => !isTrackCompleted(minute.trackId))
+			.sort((a, b) => b.activeMinuteTimestampMs - a.activeMinuteTimestampMs)[0]
+
+		if (!latestMinute) {
+			return null
+		}
+
+		const trackDbId = await getLibraryItemIdFromUuid('tracks', latestMinute.trackId)
+		if (!trackDbId) {
+			return null
+		}
+
+		const track = await getLibraryValue('tracks', trackDbId, true)
+		if (!track) {
+			return null
+		}
+
+		const albumTrackIds = await dbGetAlbumTracksIdsByName(track.album)
+		const startIndex = albumTrackIds.indexOf(trackDbId)
+
+		return {
+			queue: albumTrackIds.length > 0 ? albumTrackIds : [trackDbId],
+			startIndex: startIndex >= 0 ? startIndex : 0,
+			startTimeSeconds: Math.max(0, Math.floor(latestMinute.trackTimestampMs / 1000)),
+		}
+	}
+
+	function shouldRestoreTrackOnQuickExit(): boolean {
+		if (skipQuickExitRestore || quickExitRestoreTriggered || shortsSessionStartedAt <= 0) {
+			return false
+		}
+
+		const timeOnShortsMs = Date.now() - shortsSessionStartedAt
+		if (timeOnShortsMs >= QUICK_EXIT_RESTORE_THRESHOLD_MS) {
+			return false
+		}
+
+		return player.sourceContext === 'shorts'
+	}
+
+	async function restoreTrackOnQuickShortsExit(): Promise<void> {
+		if (!shouldRestoreTrackOnQuickExit()) {
+			return
+		}
+
+		if (quickExitRestoreInFlight) {
+			return quickExitRestoreInFlight
+		}
+
+		quickExitRestoreInFlight = (async () => {
+			const target =
+				quickExitRestoreTarget
+				?? (quickExitRestoreTargetPromise ? await quickExitRestoreTargetPromise : null)
+			if (!target) {
+				return
+			}
+
+			player.prepareTrack(target.startIndex, target.queue, {
+				startTimeSeconds: target.startTimeSeconds,
+				sourceContext: 'library',
+			})
+			quickExitRestoreTriggered = true
+		})().finally(() => {
+			quickExitRestoreInFlight = null
+		})
+
+		return quickExitRestoreInFlight
+	}
+
+	function getShortStartSeconds(item: (typeof activeShort) | undefined): number {
+		if (!item) {
+			return 0
+		}
+
+		const savedSeconds = resumeSecondsByTrack.get(item.trackId)
+		if (typeof savedSeconds === 'number' && savedSeconds > 0) {
+			return savedSeconds
+		}
+
+		return item.startSeconds
+	}
+
+async function refreshShortsFeed() {
+	await ensureCompletedTracksLoaded()
+	const latestMinutes = await getLatestActiveMinutesByTrack()
+	resumeSecondsByTrack = new Map(
+		[...latestMinutes.entries()].map(([trackId, minute]) => [
+			trackId,
+			Math.max(0, Math.floor(minute.trackTimestampMs / 1000)),
+		]),
+	)
+
+	let nextShorts = getShortsItems().filter((item) => !isTrackCompleted(item.trackId))
+	let attempts = 0
+	const minimumVisibleShorts = Math.max(20, activeIndex + 1)
+
+	while (nextShorts.length < minimumVisibleShorts && attempts < 8) {
+		loadMoreShorts()
+		nextShorts = getShortsItems().filter((item) => !isTrackCompleted(item.trackId))
+		attempts += 1
+	}
+
+	shorts = nextShorts
+
+	if (shorts.length === 0) {
+		activeIndex = -1
+		return
+	}
+
+	if (activeIndex >= shorts.length) {
+		activeIndex = shorts.length - 1
+	}
+}
 
 function formatTimestamp(seconds: number): string {
 	const mins = Math.floor(seconds / 60)
@@ -77,37 +227,23 @@ function formatTimestamp(seconds: number): string {
 	return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-function hslToHex(h: number, s: number, l: number): string {
-	const saturation = s / 100
-	const lightness = l / 100
-	const k = (n: number) => (n + h / 30) % 12
-	const a = saturation * Math.min(lightness, 1 - lightness)
-	const f = (n: number) =>
-		Math.round(255 * (lightness - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))))
-	return `#${[f(0), f(8), f(4)].map((x) => x.toString(16).padStart(2, '0')).join('')}`
-}
-
-function getRandomThemeHex(): string {
-	const hue = Math.floor(Math.random() * 360)
-	return hslToHex(hue, 72, 52)
-}
-
-function applyRandomThemeColor() {
-	const mainStore = useMainStore()
-	const randomHex = getRandomThemeHex()
-	void import('$lib/theme.ts').then(({ updateThemeCssVariables }) => {
-		updateThemeCssVariables(randomHex, mainStore.isThemeDark)
-	})
-}
-
 function updateShortsQueryParams(index: number) {
-	const item = shorts[index]
-	if (!item) return
-	const url = new URL(window.location.href)
-	url.searchParams.set('trackId', item.trackId)
-	url.searchParams.set('startFrom', String(item.startSeconds))
-	history.replaceState(history.state, '', url)
-}
+		const item = shorts[index]
+		if (!item) return
+		const url = new URL(window.location.href)
+		const nextTrackId = item.trackId
+		const nextStartFrom = String(getShortStartSeconds(item))
+		const currentTrackId = url.searchParams.get('trackId')
+		const currentStartFrom = url.searchParams.get('startFrom')
+
+		if (currentTrackId === nextTrackId && currentStartFrom === nextStartFrom) {
+			return
+		}
+
+		url.searchParams.set('trackId', item.trackId)
+		url.searchParams.set('startFrom', nextStartFrom)
+		replaceState(url, history.state)
+	}
 
 function hydrateFromQuery() {
 	const url = new URL(window.location.href)
@@ -122,7 +258,7 @@ function hydrateFromQuery() {
 
 	shorts = getShortsItems()
 	initialQueryIndex = index
-	setLastShortsIndex(index)
+	setLastShortsIndex(index, shorts.length)
 	activeIndex = index
 }
 
@@ -169,7 +305,7 @@ async function toggleLikeActiveShort() {
 	likedTrackIds = next
 }
 
-function triggerLikeBurst() {
+	function triggerLikeBurst() {
 	likeBurstSeed += 1
 	likeBurstVisible = true
 	if (likeBurstTimeout) clearTimeout(likeBurstTimeout)
@@ -179,78 +315,6 @@ function triggerLikeBurst() {
 	}, 1300)
 }
 
-	function selectBgMusic(id: string) {
-		selectedBgMusicId = id
-		setSelectedBgMusic(id)
-		showBgMusicPicker = false
-
-		if (bgAudio) {
-			bgAudio.pause()
-			bgAudio.removeAttribute('src')
-			bgAudio.load()
-			bgAudio = null
-			bgMusicPlaying = false
-		}
-
-		const option = BG_MUSIC_OPTIONS.find((o) => o.id === id)
-		if (option?.url && currentAudio && !currentAudio.paused) {
-			bgAudio = new Audio(option.url)
-			bgAudio.loop = true
-			bgAudio.volume = bgVolume
-			bgAudio.play().then(() => {
-				bgMusicPlaying = true
-			}).catch(() => {
-				bgMusicPlaying = false
-			})
-		}
-	}
-
-	function syncBgMusic() {
-		const option = BG_MUSIC_OPTIONS.find((o) => o.id === selectedBgMusicId)
-		if (!option?.url) {
-			if (bgAudio) {
-				bgAudio.pause()
-				bgAudio = null
-			}
-			bgMusicPlaying = false
-			return
-		}
-
-		if (!bgAudio) {
-			bgAudio = new Audio(option.url)
-			bgAudio.loop = true
-			bgAudio.volume = bgVolume
-			bgAudio.addEventListener('loadedmetadata', () => {
-				if (bgAudio) bgAudio.currentTime = Math.random() * bgAudio.duration
-			}, { once: true })
-		}
-		bgAudio.play().then(() => {
-			bgMusicPlaying = true
-		}).catch(() => {
-			bgMusicPlaying = false
-		})
-	}
-
-	function pauseBgMusic() {
-		bgAudio?.pause()
-		bgMusicPlaying = false
-	}
-
-	function onBgVolumeChange() {
-		setBgMusicVolume(bgVolume)
-		if (bgAudio) bgAudio.volume = bgVolume
-	}
-
-	function destroyBgMusic() {
-		if (bgAudio) {
-			bgAudio.pause()
-			bgAudio.removeAttribute('src')
-			bgAudio.load()
-			bgAudio = null
-		}
-		bgMusicPlaying = false
-	}
-
 	$effect(() => {
 		if (showScrollTip && activeIndex > 0) {
 			showScrollTip = false
@@ -258,208 +322,85 @@ function triggerLikeBurst() {
 		}
 	})
 
-	const audioPool = new Map<number, HTMLAudioElement>()
-	let currentAudio: HTMLAudioElement | null = null
-
 	function maybeLoadMore(index: number) {
 		if (index >= shorts.length - LOAD_MORE_THRESHOLD) {
 			loadMoreShorts()
-			shorts = getShortsItems()
+			void refreshShortsFeed()
 		}
 	}
 
-	async function getOrCreateAudio(index: number): Promise<HTMLAudioElement> {
-		let audio = audioPool.get(index)
-		if (audio) return audio
-		audio = new Audio()
-		audio.preload = 'auto'
-		audio.crossOrigin = 'anonymous'
-		const { url, startSeconds } = shorts[index]
-		const cachedBlob = await getCachedBlob(url)
-		if (cachedBlob) {
-			audio.src = URL.createObjectURL(cachedBlob)
-		} else {
-			audio.src = url
-		}
-		audio.currentTime = startSeconds
-		audioPool.set(index, audio)
-		return audio
-	}
-
-	function cleanupPoolAudio(audio: HTMLAudioElement) {
-		audio.pause()
-		if (audio.src.startsWith('blob:')) {
-			URL.revokeObjectURL(audio.src)
-		}
-		audio.removeAttribute('src')
-		audio.load()
-	}
-
-	function preloadAdjacent(index: number) {
-		for (const i of [index - 1, index + 1]) {
-			if (i >= 0 && i < shorts.length && !audioPool.has(i)) {
-				void getOrCreateAudio(i)
-			}
-		}
-		for (const [key, audio] of audioPool) {
-			if (Math.abs(key - index) > 1) {
-				cleanupPoolAudio(audio)
-				audioPool.delete(key)
-			}
-		}
-	}
-
-	async function playSlide(index: number) {
-		if (index < 0 || index >= shorts.length) return
-
-		if (currentAudio) {
-			currentAudio.pause()
-		}
-
-		isLoading = true
-		isCurrentAudioPlaying = false
-		pauseBgMusic()
-		const audio = await getOrCreateAudio(index)
-		if (activeIndex !== index) return
-		currentAudio = audio
-
-		audio.ontimeupdate = () => {
-			if (currentAudio === audio) {
-				currentPlaybackTime = audio.currentTime
-			}
-		}
-		audio.onplaying = () => {
-			if (currentAudio === audio) {
-				isLoading = false
-				isCurrentAudioPlaying = true
-				currentPlaybackTime = audio.currentTime
-				syncBgMusic()
-			}
-		}
-		audio.onwaiting = () => {
-			if (currentAudio === audio) {
-				isLoading = true
-				isCurrentAudioPlaying = false
-				pauseBgMusic()
-			}
-		}
-		audio.onpause = () => {
-			if (currentAudio === audio) {
-				isCurrentAudioPlaying = false
-				pauseBgMusic()
-			}
-		}
-		audio.onended = () => {
-			if (currentAudio === audio) {
-				isCurrentAudioPlaying = false
-			}
-		}
-		audio.onerror = () => {
-			if (currentAudio === audio) {
-				isLoading = false
-				isCurrentAudioPlaying = false
-				pauseBgMusic()
-				snackbar({
-					id: 'shorts-playback-error',
-					message: m.errorPlaybackFailed(),
-					duration: 4000,
-				})
-			}
-		}
-
-		if (savedPlaybackTime !== null && index === lastShortsIndex) {
-			audio.currentTime = savedPlaybackTime
-			setSavedPlaybackTime(null)
-		} else {
-			audio.currentTime = shorts[index].startSeconds
-		}
-		currentPlaybackTime = audio.currentTime
-		audio.play().catch((err) => {
-			isCurrentAudioPlaying = false
-			if (err.name === 'NotAllowedError') {
-				isLoading = false
-				autoplayBlocked = true
-			}
-		})
-
-		preloadAdjacent(index)
-	}
-
-function handleSingleTapToggle() {
-		if (autoplayBlocked) {
-			autoplayBlocked = false
-			if (activeIndex >= 0) playSlide(activeIndex)
+	function activateShort(index: number, autoplay = true) {
+		const item = shorts[index]
+		if (!item) return
+		if (isTrackCompleted(item.trackId)) {
+			void refreshShortsFeed()
 			return
 		}
 
-		if (!currentAudio && activeIndex >= 0) {
-			playSlide(activeIndex)
+		const startSeconds = getShortStartSeconds(item)
+
+		const isSameShortActive =
+			player.activeTrack?.uuid === item.trackId
+			&& player.sourceContext === 'shorts'
+			&& player.sourceStartTimeSeconds === startSeconds
+
+		if (isSameShortActive) {
+			pendingShortTrackId = null
 			return
 		}
 
-		if (!currentAudio) return
-
-	if (currentAudio.paused) {
-			isLoading = true
-			void currentAudio.play().catch((err) => {
-				isCurrentAudioPlaying = false
-				isLoading = false
-				if (err?.name === 'NotAllowedError') autoplayBlocked = true
+		pendingShortTrackId = item.trackId
+		if (autoplay) {
+			player.playTrack(0, [item.trackDbId], {
+				startTimeSeconds: startSeconds,
+				sourceContext: 'shorts',
 			})
 			return
 		}
 
-	if (isLoading) {
-		return
+		player.prepareTrack(0, [item.trackDbId], {
+			startTimeSeconds: startSeconds,
+			sourceContext: 'shorts',
+		})
 	}
 
-		currentAudio.pause()
-		isCurrentAudioPlaying = false
-		isLoading = false
-		pauseBgMusic()
-	}
+	function handleSingleTapToggle() {
+		if (!activeShort) return
 
-function handleUserTap(event: MouseEvent) {
-	if (showBgMusicPicker) {
-		showBgMusicPicker = false
-		return
-	}
-
-	// Double-tap: like/unlike current short.
-	if (event.detail === 2) {
-		if (singleTapTimeout) {
-			clearTimeout(singleTapTimeout)
-			singleTapTimeout = null
+		if (!isShortActiveInPlayer) {
+			activateShort(activeIndex)
+			return
 		}
-		void toggleLikeActiveShort()
-		return
-	}
 
-	// Single-tap: play/pause toggle (deferred to avoid firing on double-tap).
-	if (event.detail === 1) {
-		singleTapTimeout = setTimeout(() => {
-			handleSingleTapToggle()
-			singleTapTimeout = null
-		}, 220)
-	}
-}
-
-	function destroyPool() {
-		if (currentAudio && activeIndex >= 0) {
-			setSavedPlaybackTime(currentAudio.currentTime)
+		if (player.playbackError) {
+			player.retryPlayback()
+			return
 		}
-		destroyBgMusic()
-		isCurrentAudioPlaying = false
-		for (const [, audio] of audioPool) {
-			cleanupPoolAudio(audio)
-		}
-		audioPool.clear()
-		currentAudio = null
+
+		player.togglePlay()
 	}
 
-	function scrollToSlide(index: number) {
-		if (index < 0 || index >= shorts.length || !viewportEl) return
-		viewportEl.scrollTo({ top: index * viewportEl.clientHeight, behavior: 'smooth' })
+	function handleUserTap(event: MouseEvent) {
+		if (showBgMusicPicker) {
+			showBgMusicPicker = false
+			return
+		}
+
+		if (event.detail === 2) {
+			if (singleTapTimeout) {
+				clearTimeout(singleTapTimeout)
+				singleTapTimeout = null
+			}
+			void toggleLikeActiveShort()
+			return
+		}
+
+		if (event.detail === 1) {
+			singleTapTimeout = setTimeout(() => {
+				handleSingleTapToggle()
+				singleTapTimeout = null
+			}, 220)
+		}
 	}
 
 	function observeSlide(el: HTMLElement) {
@@ -471,12 +412,6 @@ function handleUserTap(event: MouseEvent) {
 			setLastShortsIndex(activeIndex, shorts.length)
 			maybeLoadMore(activeIndex)
 		}
-	})
-
-	$effect(() => {
-		if (activeIndex < 0 || activeIndex === lastThemeAppliedForIndex) return
-		lastThemeAppliedForIndex = activeIndex
-		applyRandomThemeColor()
 	})
 
 	$effect(() => {
@@ -507,8 +442,45 @@ function handleUserTap(event: MouseEvent) {
 		}
 	})
 
-	$effect(() => {
+	onMount(() => {
+		shortsSessionStartedAt = Date.now()
+		quickExitRestoreTargetPromise = resolveQuickExitRestoreTarget().then((target) => {
+			quickExitRestoreTarget = target
+			return target
+		})
+
+		const onVisibilityChange = () => {
+			if (document.visibilityState === 'hidden') {
+				void restoreTrackOnQuickShortsExit()
+			}
+		}
+
+		const onPageHide = () => {
+			void restoreTrackOnQuickShortsExit()
+		}
+
+		document.addEventListener('visibilitychange', onVisibilityChange)
+		window.addEventListener('pagehide', onPageHide)
+
+		void refreshShortsFeed()
 		hydrateFromQuery()
+
+		const releaseDatabaseChangeListener = onDatabaseChange((changes) => {
+			for (const change of changes) {
+				const storeName = change.storeName as string
+				if (storeName === 'completedTracks' || storeName === 'activeMinutes') {
+					void refreshShortsFeed()
+					return
+				}
+			}
+		})
+
+		return () => {
+			document.removeEventListener('visibilitychange', onVisibilityChange)
+			window.removeEventListener('pagehide', onPageHide)
+			void restoreTrackOnQuickShortsExit()
+			releaseDatabaseChangeListener()
+		}
 	})
 
 	$effect(() => {
@@ -548,10 +520,21 @@ function handleUserTap(event: MouseEvent) {
 	})
 
 	$effect(() => {
-		if (activeIndex >= 0) playSlide(activeIndex)
-	})
+		if (!activeShort) return
 
-	$effect(() => () => destroyPool())
+		const shortKey = `${activeShort.trackId}:${getShortStartSeconds(activeShort)}`
+		if (shortKey === lastActivatedShortKey) return
+
+		if (activateShortTimeout) {
+			clearTimeout(activateShortTimeout)
+		}
+
+		activateShortTimeout = setTimeout(() => {
+			lastActivatedShortKey = shortKey
+			activateShort(activeIndex)
+			activateShortTimeout = null
+		}, 140)
+	})
 
 	$effect(() => () => {
 		if (!singleTapTimeout) return
@@ -565,76 +548,23 @@ function handleUserTap(event: MouseEvent) {
 		likeBurstTimeout = null
 	})
 
+	$effect(() => () => {
+		if (!activateShortTimeout) return
+		clearTimeout(activateShortTimeout)
+		activateShortTimeout = null
+	})
+
 	$effect(() => {
-		const ms = navigator.mediaSession
-		if (activeIndex < 0 || !shorts[activeIndex]) {
-			ms.metadata = null
-			return
+		if (pendingShortTrackId && pendingShortTrackId === player.activeTrack?.uuid) {
+			pendingShortTrackId = null
 		}
-		const item = shorts[activeIndex]
-		ms.metadata = new MediaMetadata({
-			title: `${item.albumName} - ${item.trackIndex}`,
-			artist: 'Osho',
-			album: item.albumName,
-			artwork: [{
-				src: new URL('/artwork.svg', location.origin).toString(),
-				sizes: '512x512',
-			}],
-		})
 	})
 
 	$effect(() => {
-		navigator.mediaSession.playbackState = isCurrentAudioPlaying ? 'playing' : 'paused'
-	})
-
-	$effect(() => {
-		const ms = navigator.mediaSession
-		const setHandler = ms.setActionHandler.bind(ms)
-
-		setHandler('play', () => {
-			if (autoplayBlocked) {
-				autoplayBlocked = false
-				if (activeIndex >= 0) playSlide(activeIndex)
-				return
-			}
-			if (currentAudio?.paused) {
-				void currentAudio.play()
-			}
-		})
-		setHandler('pause', () => {
-			if (currentAudio && !currentAudio.paused) {
-				currentAudio.pause()
-				isCurrentAudioPlaying = false
-				pauseBgMusic()
-			}
-		})
-		setHandler('nexttrack', () => {
-			if (activeIndex < shorts.length - 1) scrollToSlide(activeIndex + 1)
-		})
-		setHandler('previoustrack', () => {
-			if (activeIndex > 0) scrollToSlide(activeIndex - 1)
-		})
-		setHandler('seekbackward', () => {
-			if (currentAudio) currentAudio.currentTime = Math.max(currentAudio.currentTime - 10, 0)
-		})
-		setHandler('seekforward', () => {
-			if (currentAudio) {
-				currentAudio.currentTime = Math.min(
-					currentAudio.currentTime + 10,
-					currentAudio.duration || Infinity,
-				)
-			}
-		})
-
-		return () => {
-			setHandler('play', player.togglePlay.bind(null, true))
-			setHandler('pause', player.togglePlay.bind(null, false))
-			setHandler('previoustrack', player.playPrev)
-			setHandler('nexttrack', player.playNext)
-			setHandler('seekbackward', () => player.seek(Math.max(player.currentTime - 10, 0)))
-			setHandler('seekforward', () => player.seek(player.currentTime + 10))
-			ms.metadata = null
-			ms.playbackState = 'none'
+		if (isShortActiveInPlayer && player.playing && !player.loading) {
+			syncBgMusic()
+		} else {
+			pauseBgMusic()
 		}
 	})
 </script>
@@ -685,8 +615,7 @@ function handleUserTap(event: MouseEvent) {
 								type="vinylDisc"
 								class={[
 									'size-24 opacity-70 sm:size-32',
-									activeIndex === i && 'disc-spin',
-									activeIndex === i && isCurrentAudioPlaying && 'disc-spin-playing',
+									activeIndex === i && isCurrentAudioPlaying && 'disc-spin',
 								]}
 							/>
 						</div>
@@ -715,11 +644,22 @@ function handleUserTap(event: MouseEvent) {
 								</Button>
 							{/if}
 
-							{#if activeIndex === i && !isCurrentAudioPlaying && !isLoading && !autoplayBlocked}
-								<span class="text-body-md opacity-70">Paused</span>
+							{#if activeIndex === i}
+								<Button
+									kind="outlined"
+									class="text-body-md"
+									onclick={(e) => {
+										e.stopPropagation()
+										skipQuickExitRestore = true
+										void goto('/player')
+									}}
+								>
+									<Icon type="play" class="size-4" />
+									Open in Player
+								</Button>
 							{/if}
 
-							{#if activeIndex === i && autoplayBlocked}
+							{#if activeIndex === i && !isCurrentAudioPlaying && !isLoading && !hasPlaybackError}
 								<span class="rounded-full border border-outlineVariant/45 bg-surfaceContainerHigh px-3 py-1.5 text-body-md">
 									Tap anywhere to play
 								</span>
@@ -730,6 +670,23 @@ function handleUserTap(event: MouseEvent) {
 									<div class="loader-inline"></div>
 									Loading
 								</span>
+							{/if}
+
+							{#if activeIndex === i && hasPlaybackError}
+								<div class="inline-flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-error/30 bg-errorContainer/80 px-3 py-2 text-body-sm text-onErrorContainer">
+									<span>{player.playbackError}</span>
+									<Button
+										kind="outlined"
+										class="!h-8 !px-3"
+										onclick={(e) => {
+											e.stopPropagation()
+											player.retryPlayback()
+										}}
+									>
+										<Icon type="cached" class="size-4" />
+										Retry
+									</Button>
+								</div>
 							{/if}
 						</div>
 					</div>
@@ -759,10 +716,10 @@ function handleUserTap(event: MouseEvent) {
 			<div class="px-3 pb-2 pt-1 text-body-sm font-medium opacity-50">Background Music</div>
 			{#each BG_MUSIC_OPTIONS as option (option.id)}
 				<button
-					onclick={() => selectBgMusic(option.id)}
+					onclick={() => selectBgMusic(option.id, player.playing)}
 					class={[
 						'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-body-sm transition-colors',
-						selectedBgMusicId === option.id
+						bgMusicState.selectedBgMusicId === option.id
 							? 'bg-secondaryContainer/80 text-onSecondaryContainer'
 							: 'text-onSurface/80 hover:bg-onSurface/5',
 					]}
@@ -775,7 +732,7 @@ function handleUserTap(event: MouseEvent) {
 				</button>
 			{/each}
 
-			{#if selectedBgMusicId !== 'none'}
+			{#if bgMusicState.selectedBgMusicId !== 'none'}
 				<div class="mt-1 border-t border-onSurface/10 px-1 pt-3 pb-1">
 					<div class="flex items-center gap-2">
 						<Icon type="volumeMid" class="size-3.5 shrink-0 opacity-50" />
@@ -784,8 +741,8 @@ function handleUserTap(event: MouseEvent) {
 							min="0"
 							max="1"
 							step="0.01"
-							bind:value={bgVolume}
-							oninput={onBgVolumeChange}
+							bind:value={bgMusicState.bgVolume}
+							oninput={() => updateBgMusicVolume(bgMusicState.bgVolume)}
 							class="bg-music-slider flex-1"
 						/>
 					</div>
@@ -799,14 +756,14 @@ function handleUserTap(event: MouseEvent) {
 			onclick={() => { showBgMusicPicker = !showBgMusicPicker }}
 			class={[
 				'flex size-10 items-center justify-center rounded-full shadow-lg backdrop-blur-md transition-colors',
-				bgMusicPlaying
+				bgMusicState.bgMusicPlaying
 					? 'bg-secondaryContainer/90 text-onSecondaryContainer'
 					: 'bg-surfaceContainer/80 text-onSurface/70',
 			]}
 		>
 			<Icon
 				type="vinylDisc"
-				class={['size-5 disc-spin-bg', bgMusicPlaying && 'disc-spin-bg-playing']}
+				class={['size-5 disc-spin-bg', bgMusicState.bgMusicPlaying && 'disc-spin-bg-playing']}
 			/>
 		</button>
 
@@ -850,10 +807,6 @@ function handleUserTap(event: MouseEvent) {
 	}
 	:global(.disc-spin) {
 		animation: spin 6s linear infinite;
-		animation-play-state: paused;
-	}
-	:global(.disc-spin-playing) {
-		animation-play-state: running;
 	}
 	:global(.disc-spin-bg) {
 		animation: spin 3s linear infinite;
