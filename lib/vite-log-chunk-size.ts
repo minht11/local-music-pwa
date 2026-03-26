@@ -44,15 +44,13 @@ export const logChunkSizePlugin = (): Plugin => {
 
 			setTimeout(async () => {
 				const { jsInfo, totalInfo } = await dirSize('./build/_app/immutable')
-				// biome-ignore lint/suspicious/noConsole: log
-				console.log(
+				console.info(
 					'Size of JS chunks:',
 					jsInfo.size / 1024,
 					'KB. Files count:',
 					jsInfo.count,
 				)
-				// biome-ignore lint/suspicious/noConsole: log
-				console.log(
+				console.info(
 					'Size of all files:',
 					totalInfo.size / 1024,
 					'KB. Files count:',

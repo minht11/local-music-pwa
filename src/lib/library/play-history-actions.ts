@@ -16,32 +16,31 @@ export const dbAddToPlayHistory = async (trackId: number): Promise<void> => {
 	const tx = db.transaction('playHistory', 'readwrite')
 	const store = tx.objectStore('playHistory')
 
-	const existingEntryId = await store.index('trackId').getKey(trackId)
+	// If the same track is already the most recent entry, just bump its timestamp
+	// instead of inserting a duplicate.
+	const lastEntry = await store.index('playedAt').openCursor(null, 'prev')
+	if (lastEntry?.value.trackId === trackId) {
+		await lastEntry.update({ ...lastEntry.value, playedAt: Date.now() })
+		await tx.done
+		notifyPlayHistoryChange()
+		return
+	}
 
-	const newEntry: Omit<PlayHistoryEntry, 'id'> & { id?: number } = {
+	const newEntry: Omit<PlayHistoryEntry, 'id'> = {
 		trackId,
 		playedAt: Date.now(),
 	}
 
-	if (existingEntryId !== undefined) {
-		newEntry.id = existingEntryId
-	}
+	await store.add(newEntry as PlayHistoryEntry)
 
-	await store.put(newEntry as PlayHistoryEntry)
-	/**
- * 
- * Truncation deletes the newest plays, keeps the oldest
-play-history-actions.ts:33
-
-openCursor() defaults to ascending order — oldest playedAt first. advance(100) moves to position 101. The while loop then deletes position 101 onward, which are the newer entries. The 100 oldest plays survive:
-
-TODO
- */
-	let cursor = await store.index('playedAt').openCursor()
+	// Keep only the most recent PLAY_HISTORY_LIMIT entries.
+	// 'prev' opens in descending order (newest first), so advance(limit) lands on
+	// the oldest entry that exceeds the cap, and everything from there is deleted.
+	let cursor = await store.index('playedAt').openCursor(null, 'prev')
 	cursor = (await cursor?.advance(PLAY_HISTORY_LIMIT)) ?? null
 
 	// Delete all entries that exceed the limit
-	while (cursor) {
+	while (cursor !== null) {
 		await cursor.delete()
 		cursor = await cursor.continue()
 	}
@@ -56,10 +55,8 @@ export const dbRemoveFromPlayHistory = async (trackId: number): Promise<void> =>
 	const tx = db.transaction('playHistory', 'readwrite')
 	const store = tx.objectStore('playHistory')
 
-	const historyId = await store.index('trackId').getKey(trackId)
-	if (historyId !== undefined) {
-		await store.delete(historyId)
-	}
+	const historyIds = await store.index('trackId').getAllKeys(trackId)
+	await Promise.all(historyIds.map((id) => store.delete(id)))
 	await tx.done
 
 	notifyPlayHistoryChange()

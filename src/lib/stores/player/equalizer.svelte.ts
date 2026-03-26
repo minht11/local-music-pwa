@@ -81,7 +81,7 @@ export class EqualizerStore {
 		})
 	}
 
-	resumeContext(): Promise<void> {
+	resumeContext = (): Promise<void> => {
 		if (this.#audioContext.state === 'suspended') {
 			return this.#audioContext.resume()
 		}
@@ -89,17 +89,17 @@ export class EqualizerStore {
 		return Promise.resolve()
 	}
 
-	setBand(index: number, gain: number): void {
+	setBand = (index: number, gain: number): void => {
 		this.bands[index] = gain
 		this.selectedPreset = null
 	}
 
-	applyPreset(name: BuiltinEqPresetKey): void {
+	applyPreset = (name: BuiltinEqPresetKey): void => {
 		this.bands = [...EQ_PRESET_GAINS[name]]
 		this.selectedPreset = name
 	}
 
-	reset(): void {
+	reset = (): void => {
 		this.applyPreset('flat')
 	}
 }
