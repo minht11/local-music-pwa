@@ -841,8 +841,14 @@
     [
       "Geeta Darshan",
       "Hindi discourses",
-      false,
-      null,
+      true,
+      [
+        181,
+        "geeta-darshan-{i}",
+        "https://archive.org/download/osho-audio-discourses-collection/OSHO_WORLD/Hindi/040-Geeta%20Darshan/",
+        "OSHO-Geeta_Darshan_{i}.mp3",
+        2
+      ],
       null
     ],
     [
