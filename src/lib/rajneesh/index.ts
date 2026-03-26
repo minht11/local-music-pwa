@@ -39,7 +39,7 @@ export type {
 } from './catalog/index.ts'
 
 // Initialization
-export { initializeRajneesh, isRajneeshInitialized } from './init.ts'
+export { initializeRajneesh, isRajneeshInitialized, refreshRajneeshCatalog } from './init.ts'
 
 // Stores
 export {

@@ -167,6 +167,13 @@
 	"settingsThemeLight": "Light",
 	"settingsTracksInAppStorageTooltip": "This contains tracks stored in app storage and/or data you migrated from Snae Player v1",
 	"settingsTracksInsideAppMemory": "Tracks inside app storage",
+	"settingsUpdatesTitle": "Updates",
+	"settingsUpdatesSubtitle": "Fetch latest app code and content catalog",
+	"settingsUpdatesRefreshNow": "Refresh now",
+	"settingsUpdatesChecking": "Checking...",
+	"settingsUpdatesReloading": "App update found. Reloading...",
+	"settingsUpdatesCatalogRefreshed": "Catalog refreshed",
+	"settingsUpdatesNoChanges": "You already have the latest app and catalog",
 
 	"shuffle": "Shuffle",
 	"successfullyRemovedTracks": "Successfully removed {count} tracks",

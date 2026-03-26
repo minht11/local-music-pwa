@@ -1,20 +1,21 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte'
-	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import Select from '$lib/components/Select.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import Spinner from '$lib/components/Spinner.svelte'
 	import Switch from '$lib/components/Switch.svelte'
+	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import { isDatabaseOperationPending } from '$lib/db/lock-database.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { supportsChangingAudioVolume } from '$lib/helpers/audio.ts'
 	import { Debounced } from '$lib/helpers/debounced.svelte.ts'
 	import { isFileSystemAccessSupported } from '$lib/helpers/file-system.ts'
+	import { forceServiceWorkerUpdate } from '$lib/helpers/register-sw.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import { navigateToExternal } from '$lib/helpers/utils/navigate.ts'
 	import { isRajneeshEnabled } from '$lib/rajneesh/feature-flags.ts'
-	import { getCatalog } from '$lib/rajneesh/index.ts'
+	import { getCatalog, refreshRajneeshCatalog } from '$lib/rajneesh/index.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
 	import { getLocale, type Locale, setLocale } from '$paraglide/runtime.js'
 	import DirectoriesList from './components/DirectoriesList.svelte'
@@ -77,6 +78,7 @@
 	const isDatabasePending = $derived(isDatabasePendingGetter.current)
 
 	const directContactLink = $derived.by(() => getCatalog()?.directContactLink)
+	let isUpdateRefreshPending = $state(false)
 
 	const listeningStatLabel = $derived.by(() => {
 		if (listenedMinutes < 60) {
@@ -85,6 +87,38 @@
 
 		return m.settingsStatsListeningHours({ hours: Math.floor(listenedMinutes / 60) })
 	})
+
+	const refreshUpdates = async () => {
+		if (isUpdateRefreshPending) return
+
+		isUpdateRefreshPending = true
+
+		try {
+			const catalogRefreshed = await refreshRajneeshCatalog()
+			const appUpdateApplied = await forceServiceWorkerUpdate()
+
+			if (appUpdateApplied) {
+				snackbar({
+					id: 'settings-force-update',
+					message: m.settingsUpdatesReloading(),
+					duration: false,
+					controls: false,
+				})
+				return
+			}
+
+			snackbar({
+				id: 'settings-force-update',
+				message: catalogRefreshed
+					? m.settingsUpdatesCatalogRefreshed()
+					: m.settingsUpdatesNoChanges(),
+			})
+		} catch (error) {
+			snackbar.unexpectedError(error)
+		} finally {
+			isUpdateRefreshPending = false
+		}
+	}
 </script>
 
 {#if !isRajneeshEnabled()}
@@ -115,6 +149,27 @@
 {/if}
 
 <InstallAppBanner class="settings-max-width mt-6" />
+
+<section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
+	<div class="px-4 pt-4 text-title-sm">{m.settingsUpdatesTitle()}</div>
+	<div class="flex items-center justify-between gap-4 p-4 max-sm:flex-col max-sm:items-start">
+		<div class="text-body-md text-onSurfaceVariant">
+			{m.settingsUpdatesSubtitle()}
+		</div>
+		<Button
+			kind="outlined"
+			disabled={isUpdateRefreshPending}
+			onclick={() => {
+				void refreshUpdates()
+			}}
+		>
+			{#if isUpdateRefreshPending}
+				<Spinner class="size-5" />
+			{/if}
+			{isUpdateRefreshPending ? m.settingsUpdatesChecking() : m.settingsUpdatesRefreshNow()}
+		</Button>
+	</div>
+</section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
 	<div class="px-4 pt-4 text-title-sm">{m.settingsStatsTitle()}</div>

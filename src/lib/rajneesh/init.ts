@@ -5,8 +5,35 @@
 
 import { rajneeshLog, isRajneeshEnabled } from './feature-flags.ts'
 import { initializeCatalog } from './stores/catalog.svelte.ts'
+import type { CompactCatalogV1 } from './catalog/schema-json.ts'
 
 let initialized = false
+const catalogPath = '/rajneesh/catalog.json'
+
+const fetchCatalog = async (): Promise<CompactCatalogV1> => {
+	rajneeshLog(`Fetching catalog from ${catalogPath}...`)
+	const response = await fetch(catalogPath, { cache: 'no-cache' })
+
+	if (!response.ok) {
+		throw new Error(`Failed to fetch catalog: ${response.status} ${response.statusText}`)
+	}
+
+	return response.json() as Promise<CompactCatalogV1>
+}
+
+const clearCatalogFromAllCaches = async (): Promise<void> => {
+	if (!('caches' in window)) {
+		return
+	}
+
+	const cacheNames = await caches.keys()
+	await Promise.all(
+		cacheNames.map(async (cacheName) => {
+			const cache = await caches.open(cacheName)
+			await cache.delete(catalogPath)
+		}),
+	)
+}
 
 /**
  * Initialize all Rajneesh features.
@@ -26,17 +53,7 @@ export const initializeRajneesh = async (): Promise<void> => {
 	rajneeshLog('Initializing Rajneesh features...')
 
 	try {
-		// Fetch the catalog JSON
-		rajneeshLog('Fetching catalog from /catalog.json...')
-		const response = await fetch('/rajneesh/catalog.json')
-
-		if (!response.ok) {
-			throw new Error(
-				`Failed to fetch catalog: ${response.status} ${response.statusText}`,
-			)
-		}
-
-		const json = await response.json()
+		const json = await fetchCatalog()
 
 		// Initialize the catalog
 		await initializeCatalog(json)
@@ -54,3 +71,20 @@ export const initializeRajneesh = async (): Promise<void> => {
  * Check if Rajneesh has been initialized
  */
 export const isRajneeshInitialized = (): boolean => initialized
+
+/**
+ * Force refresh catalog from network and update in-memory state.
+ * Clears stale service-worker cache entry first when available.
+ */
+export const refreshRajneeshCatalog = async (): Promise<boolean> => {
+	if (!isRajneeshEnabled()) {
+		return false
+	}
+
+	await clearCatalogFromAllCaches()
+	const json = await fetchCatalog()
+	await initializeCatalog(json)
+	initialized = true
+
+	return true
+}
