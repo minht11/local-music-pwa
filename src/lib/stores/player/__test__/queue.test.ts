@@ -79,6 +79,13 @@ describe('QueueStore', () => {
 			expect(q.itemsIds[0]).toBe(20)
 		})
 
+		it('shuffled list contains all original IDs', () => {
+			const q = new QueueStore()
+			q.setTrack(0, [10, 20, 30, 40, 50])
+			q.toggleShuffle()
+			expect([...q.itemsIds].sort((a, b) => a - b)).toEqual([10, 20, 30, 40, 50])
+		})
+
 		it('disables shuffle and restores original order with correct active index', () => {
 			const q = new QueueStore()
 			q.setTrack(1, [10, 20, 30])
@@ -87,6 +94,39 @@ describe('QueueStore', () => {
 			expect(q.shuffle).toBe(false)
 			expect(q.itemsIds).toEqual([10, 20, 30])
 			expect(q.activeTrackIndex).toBe(1)
+		})
+
+		it('preserves the active track ID when disabling after navigating in shuffle mode', () => {
+			const q = new QueueStore()
+			q.setTrack(0, [10, 20, 30])
+			q.toggleShuffle()
+			// Navigate to the second position in the shuffled list
+			const navigatedId = q.itemsIds[1] as number
+			q.setTrack(1)
+			q.toggleShuffle()
+			expect(q.activeTrackId).toBe(navigatedId)
+			expect(q.itemsIds).toEqual([10, 20, 30])
+		})
+
+		it('sets active index to -1 when enabling with no active track', () => {
+			const q = new QueueStore()
+			q.setTrack(0, [10, 20, 30])
+			q.removeFromQueue(0) // removes the active track → index becomes -1
+			q.toggleShuffle()
+			expect(q.shuffle).toBe(true)
+			expect(q.activeTrackIndex).toBe(-1)
+			expect([...q.itemsIds].sort((a, b) => a - b)).toEqual([20, 30])
+		})
+
+		it('toggles gracefully on an empty queue', () => {
+			const q = new QueueStore()
+			q.toggleShuffle()
+			expect(q.shuffle).toBe(true)
+			expect(q.activeTrackIndex).toBe(-1)
+			expect(q.itemsIds).toEqual([])
+			q.toggleShuffle()
+			expect(q.shuffle).toBe(false)
+			expect(q.activeTrackIndex).toBe(-1)
 		})
 	})
 
@@ -110,6 +150,16 @@ describe('QueueStore', () => {
 			expect(q.activeTrackIndex).toBe(-1)
 			q.addToQueue(5)
 			expect(q.activeTrackIndex).toBe(0)
+		})
+
+		it('while shuffled, added track is visible immediately and survives toggle-off', () => {
+			const q = new QueueStore()
+			q.setTrack(0, [10, 20])
+			q.toggleShuffle()
+			q.addToQueue(30)
+			expect(q.itemsIds).toContain(30)
+			q.toggleShuffle()
+			expect(q.itemsIds).toContain(30)
 		})
 	})
 
