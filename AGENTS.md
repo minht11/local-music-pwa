@@ -529,6 +529,7 @@ pnpm run build        # Production build
 pnpm run preview      # Preview build
 
 # Code Quality
+pnpm run i18n-check   # Validate translations in messages/*.json
 pnpm run type-check   # Type checking
 pnpm run biome-check  # Linting
 pnpm run biome-fix    # Fix linting issues
@@ -553,6 +554,8 @@ pnpm run coverage     # Test coverage
 - Include accessibility attributes
 - Use `invariant()` for runtime checks
 - Clear test mocks in `afterEach`
+- Run `pnpm run i18n-check` after adding/changing i18n keys
+- Keep i18n placeholders exactly aligned with English keys (`{count}`, `{name}`, etc.)
 
 #### Never Do ❌
 

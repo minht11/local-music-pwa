@@ -33,7 +33,8 @@
 			"**",
 			"!**/.generated",
 			// Biome parser incorrectly errors on TS syntax.
-			"!src/lib/components/VirtualContainer.svelte"
+			"!src/lib/components/VirtualContainer.svelte",
+			"!static/supported-browser-check.js"
 		]
 	},
 	"formatter": {
