@@ -3,6 +3,31 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
 import { clearDatabaseStores } from '$lib/helpers/test-helpers.ts'
 import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
+import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/library/types.ts'
+
+const seedTrack = async (id: number) => {
+	const db = await getDatabase()
+	const trackData: Track = {
+		id,
+		uuid: `track-${id}`,
+		name: `Track ${id}`,
+		artists: ['Artist'],
+		album: 'Album',
+		year: '2026',
+		duration: 180,
+		genre: [],
+		trackNo: 1,
+		trackOf: 1,
+		discNo: 1,
+		discOf: 1,
+		fileName: `track-${id}.mp3`,
+		directory: LEGACY_NO_NATIVE_DIRECTORY,
+		scannedAt: Date.now(),
+		file: new File(['x'], `track-${id}.mp3`, { type: 'audio/mpeg' }),
+	}
+
+	await db.add('tracks', trackData)
+}
 
 describe('play history actions', () => {
 	afterEach(async () => {
@@ -16,6 +41,9 @@ describe('play history actions', () => {
 			now += 1
 			return now
 		})
+
+		await seedTrack(1)
+		await seedTrack(2)
 
 		await dbAddToPlayHistory(1)
 		await dbAddToPlayHistory(2)
@@ -36,6 +64,8 @@ describe('play history actions', () => {
 			return now
 		})
 
+		await seedTrack(10)
+
 		await dbAddToPlayHistory(10)
 		await dbAddToPlayHistory(10)
 		await dbAddToPlayHistory(10)
@@ -55,6 +85,7 @@ describe('play history actions', () => {
 		})
 
 		for (let trackId = 1; trackId <= 120; trackId += 1) {
+			await seedTrack(trackId)
 			await dbAddToPlayHistory(trackId)
 		}
 

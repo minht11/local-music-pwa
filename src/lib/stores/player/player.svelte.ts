@@ -73,6 +73,8 @@ export class PlayerStore {
 		persist('player', this, ['volume', 'repeat', 'muted'])
 		persist('player', this.#queue, ['shuffle'])
 
+		this.equalizer.init()
+
 		const audio = this.#audio
 
 		// Plain (non-$state) so reads inside the effect don't create subscriptions.
@@ -305,23 +307,7 @@ export class PlayerStore {
 
 	addToQueue = this.#queue.addToQueue
 
-	removeFromQueue = (index: number): void => {
-		if (index === this.#queue.activeTrackIndex) {
-			const activeTrackId = this.#queue.activeTrackId
-			if (activeTrackId !== null) {
-				this.#savePlayHistory(activeTrackId)
-			}
-		}
+	removeFromQueue = this.#queue.removeFromQueue
 
-		this.#queue.removeFromQueue(index)
-	}
-
-	clearQueue = (): void => {
-		const activeTrackId = this.#queue.activeTrackId
-		if (activeTrackId !== null) {
-			this.#savePlayHistory(activeTrackId)
-		}
-
-		this.#queue.clearQueue()
-	}
+	clearQueue = this.#queue.clearQueue
 }

@@ -13,8 +13,15 @@ const notifyPlayHistoryChange = () => {
 
 export const dbAddToPlayHistory = async (trackId: number): Promise<void> => {
 	const db = await getDatabase()
-	const tx = db.transaction('playHistory', 'readwrite')
+	const tx = db.transaction(['tracks', 'playHistory'], 'readwrite')
+	const tracksStore = tx.objectStore('tracks')
 	const store = tx.objectStore('playHistory')
+
+	const track = await tracksStore.get(trackId)
+	if (!track) {
+		await tx.done
+		return
+	}
 
 	// Keep one entry per track in history by replacing any previous occurrences.
 	const existingIds = await store.index('trackId').getAllKeys(trackId)

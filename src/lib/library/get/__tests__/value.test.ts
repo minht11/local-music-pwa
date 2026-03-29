@@ -162,7 +162,7 @@ describe('getLibraryValue', () => {
 				uuid: 'album-uuid-1',
 				artists: ['Test Artist'],
 				year: '2023',
-				image: new Blob(),
+				image: {} as Blob,
 			}
 
 			await db.add('albums', albumData)
