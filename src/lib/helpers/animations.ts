@@ -6,7 +6,7 @@ export const animateEmpty = (
 
 export interface SequenceKeyframeAnimationOptions extends KeyframeAnimationOptions {
 	/** '<' means start at the same time as previous animation */
-	at?: '<' | 'after'
+	at?: '<' 
 }
 
 export type AnimationSequence = [

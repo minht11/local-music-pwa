@@ -1,3 +1,43 @@
+const SHIFT = 3 // quantize 8-bit -> 5-bit
+const BINS = 32 * 32 * 32 // 5-bit bins
+const hueBins = 360 // hue histogram bins (1° each) - increased for better resolution
+const hueWindow = 24 // accept ±24° around peak hue
+const alphaThreshold = 240 // ignore semi-transparent
+const minSat = 0.15 // ignore near-gray - increased to focus on vibrant colors
+const minVal = 0.15 // ignore near-black - increased to avoid dark noise
+const whiteSkipV = 0.94 // ignore near-white if also low sat
+const whiteSkipS = 0.15
+const satGamma = 2.2 // stronger accent preference for vibrant colors
+const valGamma = 0.4 // moderate brightness weight
+const centerBias = 0.15 // reduced center bias to avoid missing off-center accents
+
+// Helper: convert RGB → HSV
+function rgb2hsv(r: number, g: number, b: number) {
+	const rf = r / 255
+	const gf = g / 255
+	const bf = b / 255
+
+	const max = Math.max(rf, gf, bf)
+	const min = Math.min(rf, gf, bf)
+	const d = max - min
+
+	let h = 0
+	if (d > 0) {
+		if (max === rf) {
+			h = ((gf - bf) / d + (gf < bf ? 6 : 0)) * 60
+		} else if (max === gf) {
+			h = ((bf - rf) / d + 2) * 60
+		} else {
+			h = ((rf - gf) / d + 4) * 60
+		}
+	}
+
+	const s = max === 0 ? 0 : d / max
+	const v = max
+
+	return { h, s, v }
+}
+
 /**
  * Extract a single dominant accent color, ignoring white/gray backgrounds.
  * Two-pass approach:
@@ -5,19 +45,6 @@
  * 	2. Only count pixels near that hue, then pick most common 5-bit RGB bin.
  */
 export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height: number): number {
-	const SHIFT = 3 // quantize 8-bit -> 5-bit
-	const BINS = 32 * 32 * 32 // 5-bit bins
-	const hueBins = 360 // hue histogram bins (1° each) - increased for better resolution
-	const hueWindow = 24 // accept ±24° around peak hue
-	const alphaThreshold = 240 // ignore semi-transparent
-	const minSat = 0.15 // ignore near-gray - increased to focus on vibrant colors
-	const minVal = 0.15 // ignore near-black - increased to avoid dark noise
-	const whiteSkipV = 0.94 // ignore near-white if also low sat
-	const whiteSkipS = 0.15
-	const satGamma = 2.2 // stronger accent preference for vibrant colors
-	const valGamma = 0.4 // moderate brightness weight
-	const centerBias = 0.15 // reduced center bias to avoid missing off-center accents
-
 	// Hue histogram
 	const hueHist = new Float64Array(hueBins)
 
@@ -26,33 +53,6 @@ export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height
 	const cy = (height - 1) / 2
 	const sigma = 0.35 * Math.min(width, height)
 	const twoSigma2 = 2 * sigma * sigma
-
-	// Helper: convert RGB → HSV
-	function rgb2hsv(r: number, g: number, b: number) {
-		const rf = r / 255
-		const gf = g / 255
-		const bf = b / 255
-
-		const max = Math.max(rf, gf, bf)
-		const min = Math.min(rf, gf, bf)
-		const d = max - min
-
-		let h = 0
-		if (d > 0) {
-			if (max === rf) {
-				h = ((gf - bf) / d + (gf < bf ? 6 : 0)) * 60
-			} else if (max === gf) {
-				h = ((bf - rf) / d + 2) * 60
-			} else {
-				h = ((rf - gf) / d + 4) * 60
-			}
-		}
-
-		const s = max === 0 ? 0 : d / max
-		const v = max
-
-		return { h, s, v }
-	}
 
 	// PASS 1: Fill hue histogram
 	let col = 0

@@ -5,6 +5,8 @@ const waitForPageToLoad = () => {
 
 	if (document.readyState === 'loading') {
 		window.addEventListener('load', () => resolve(), { once: true })
+	} else {
+		resolve()
 	}
 
 	return promise

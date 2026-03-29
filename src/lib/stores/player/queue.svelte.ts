@@ -59,7 +59,11 @@ export class QueueStore {
 			}
 		}
 
-		this.#activeTrackIndex = this.itemsIds.length === 0 ? -1 : options.shuffle ? 0 : trackIndex
+		if (this.itemsIds.length === 0) {
+			this.#activeTrackIndex = -1
+		} else {
+			this.#activeTrackIndex = options.shuffle ? 0 : trackIndex
+		}
 	}
 
 	getNextIndex = (): number => {

@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
 import {
 	clearDatabaseStores,
@@ -70,9 +70,12 @@ const dbImportTestTrack = async (overrides: Partial<UnknownTrack> = {}): Promise
 describe('playlists', () => {
 	beforeEach(async () => {
 		await clearDatabaseStores()
-		vi.clearAllMocks()
 		trackCounter = 0
 		uuidCounter = 0
+	})
+
+	afterEach(() => {
+		vi.clearAllMocks()
 	})
 
 	describe('playlist creation', () => {

@@ -39,7 +39,7 @@
 	]}
 >
 	{#if src && !error}
-		<!-- biome-ignore lint/a11y/useAltText: false positive -->
+		<!-- biome-ignore lint/a11y/useAltText: false positive, alt exists -->
 		<img
 			{src}
 			{alt}

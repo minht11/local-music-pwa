@@ -128,6 +128,7 @@
 
 	"replaceDirectoryQ": "Replace directory?",
 	"selectAll": "Select all",
+	"selectedCount": "Selected {count}",
 	"settingPickColorFromArtwork": "Automatically pick color from currently playing song artwork",
 	"settings": "Settings",
 	"settingsAbout": "About",

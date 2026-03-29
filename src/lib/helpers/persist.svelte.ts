@@ -1,8 +1,14 @@
 const getValue = (key: string) => {
-	const valueRaw = localStorage.getItem(key)
-	const value = valueRaw === null || valueRaw === undefined ? null : JSON.parse(valueRaw)
+	try {
+		const valueRaw = localStorage.getItem(key)
+		const value = valueRaw === null || valueRaw === undefined ? null : JSON.parse(valueRaw)
 
-	return value
+		return value
+	} catch (error) {
+		console.error(`Failed to get persisted value for key "${key}"`, error)
+
+		return null
+	}
 }
 
 export const getPersistedValue = <T, D = null>(

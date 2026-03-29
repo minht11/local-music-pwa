@@ -7,6 +7,7 @@
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
+	import { isElementTextInput } from '$lib/helpers/input.ts'
 	import { setupOverlaySnippets } from '$lib/layout-bottom-bar.svelte'
 	import { DialogsStore } from '$lib/stores/dialogs/store.svelte.ts'
 	import { setDialogsStoreContext } from '$lib/stores/dialogs/use-store.ts'
@@ -103,7 +104,7 @@
 
 <svelte:window
 	onkeydown={(e) => {
-		if (e.key === ' ' && !(e.target instanceof HTMLInputElement)) {
+		if (e.key === ' ' && !isElementTextInput(e.target)) {
 			e.preventDefault()
 
 			player.togglePlay()

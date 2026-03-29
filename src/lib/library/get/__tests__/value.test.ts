@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
 import type { DatabaseChangeDetails } from '$lib/db/events.ts'
 import { clearDatabaseStores } from '$lib/helpers/test-helpers.ts'
@@ -26,6 +26,9 @@ describe('getLibraryValue', () => {
 	beforeEach(async () => {
 		await clearDatabaseStores()
 		clearLibraryValueCache()
+	})
+
+	afterEach(() => {
 		vi.clearAllMocks()
 	})
 

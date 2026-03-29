@@ -124,7 +124,7 @@
 			alignment={{ horizontal: 'left', vertical: 'bottom' }}
 		/>
 
-		<div class="rounded-md bg-primary px-2 py-1">Selected {selection.size}</div>
+		<div class="rounded-md bg-primary px-2 py-1">{m.selectedCount({ count: selection.size })}</div>
 
 		<Button
 			kind="flat"

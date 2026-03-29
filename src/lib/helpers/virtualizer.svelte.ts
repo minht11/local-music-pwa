@@ -13,11 +13,8 @@ export function createVirtualizerBase<
 	let virtualItems = $state(instance.getVirtualItems())
 	let totalSize = $state(instance.getTotalSize())
 
-	const handler = {
-		get(
-			target: Virtualizer<TScrollElement, TItemElement>,
-			prop: keyof Virtualizer<TScrollElement, TItemElement>,
-		) {
+	const virtualizer = new Proxy(instance, {
+		get(target, prop) {
 			switch (prop) {
 				case 'getVirtualItems':
 					return () => virtualItems
@@ -27,9 +24,7 @@ export function createVirtualizerBase<
 					return Reflect.get(target, prop)
 			}
 		},
-	}
-
-	const virtualizer = new Proxy(instance, handler)
+	})
 
 	$effect(() => {
 		const cleanup = untrack(() => {

@@ -1,6 +1,7 @@
 <script lang="ts" module>
 	import { createContext } from 'svelte'
 	import { timeline } from '$lib/helpers/animations.ts'
+	import { isElementTextInput } from '$lib/helpers/input.ts'
 	import { assign } from '$lib/helpers/utils/assign.ts'
 	import Menu from './Menu.svelte'
 	import { getMeasurementsFromAnchor, positionMenu } from './positioning.ts'
@@ -177,7 +178,7 @@
 		// Allow standard browser context menu on input[type='text'] elements,
 		// because creating custom menu for copy & paste
 		// with working text selection is hard.
-		if (el instanceof HTMLInputElement && el.type === 'text') {
+		if (isElementTextInput(el)) {
 			return
 		}
 

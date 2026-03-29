@@ -28,7 +28,7 @@ export class PlayerStore {
 	repeat: PlayerRepeat = $state('none')
 	playing: boolean = $state(false)
 	muted: boolean = $state(false)
-	#volume = $state(100)
+	#volume: number = $state(100)
 
 	get shuffle(): boolean {
 		return this.#queue.shuffle
@@ -213,8 +213,8 @@ export class PlayerStore {
 
 		// Done for minification purposes.
 		const setAction = ms.setActionHandler.bind(ms)
-		setAction('play', this.togglePlay.bind(null, true))
-		setAction('pause', this.togglePlay.bind(null, false))
+		setAction('play', () => this.togglePlay(true))
+		setAction('pause', () => this.togglePlay(false))
 		setAction('previoustrack', this.playPrev)
 		setAction('nexttrack', this.playNext)
 		setAction('seekbackward', () => {
