@@ -16,15 +16,9 @@ export const dbAddToPlayHistory = async (trackId: number): Promise<void> => {
 	const tx = db.transaction('playHistory', 'readwrite')
 	const store = tx.objectStore('playHistory')
 
-	// If the same track is already the most recent entry, just bump its timestamp
-	// instead of inserting a duplicate.
-	const lastEntry = await store.index('playedAt').openCursor(null, 'prev')
-	if (lastEntry?.value.trackId === trackId) {
-		await lastEntry.update({ ...lastEntry.value, playedAt: Date.now() })
-		await tx.done
-		notifyPlayHistoryChange()
-		return
-	}
+	// Keep one entry per track in history by replacing any previous occurrences.
+	const existingIds = await store.index('trackId').getAllKeys(trackId)
+	await Promise.all(existingIds.map((id) => store.delete(id)))
 
 	const newEntry: Omit<PlayHistoryEntry, 'id'> = {
 		trackId,
