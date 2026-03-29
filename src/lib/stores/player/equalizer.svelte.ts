@@ -44,12 +44,38 @@ export class EqualizerStore {
 	bands: number[] = $state([...EQ_PRESET_GAINS.flat])
 	selectedPreset: BuiltinEqPresetKey | null = $state('flat')
 
-	readonly #audioContext = new AudioContext()
-	readonly #filters: BiquadFilterNode[]
+	readonly #audio: HTMLAudioElement
+	#audioContext: AudioContext | null = null
+	#filters: BiquadFilterNode[] = []
 
 	constructor(audio: HTMLAudioElement) {
-		this.#filters = EQ_BANDS.map(({ frequency }) => {
-			const filter = this.#audioContext.createBiquadFilter()
+		this.#audio = audio
+
+		persist('equalizer', this, ['enabled', 'bands', 'selectedPreset'])
+
+		$effect(() => {
+			const enabled = this.enabled
+			const bands = this.bands
+			if (this.#filters.length === 0) {
+				return
+			}
+
+			invariant(this.#filters.length === bands.length)
+
+			for (const [index, filter] of this.#filters.entries()) {
+				filter.gain.value = enabled ? (bands[index] ?? 0) : 0
+			}
+		})
+	}
+
+	#ensureAudioGraph = (): AudioContext => {
+		if (this.#audioContext !== null) {
+			return this.#audioContext
+		}
+
+		const audioContext = new AudioContext()
+		const filters = EQ_BANDS.map(({ frequency }) => {
+			const filter = audioContext.createBiquadFilter()
 			filter.type = 'peaking'
 			filter.frequency.value = frequency
 			filter.Q.value = 1.41
@@ -58,32 +84,26 @@ export class EqualizerStore {
 			return filter
 		})
 
-		persist('equalizer', this, ['enabled', 'bands', 'selectedPreset'])
-
-		const source = this.#audioContext.createMediaElementSource(audio)
+		const source = audioContext.createMediaElementSource(this.#audio)
 
 		// Chain filters
 		let node: AudioNode = source
-		for (const filter of this.#filters) {
+		for (const filter of filters) {
 			node.connect(filter)
 			node = filter
 		}
-		node.connect(this.#audioContext.destination)
+		node.connect(audioContext.destination)
 
-		$effect(() => {
-			const enabled = this.enabled
-			invariant(this.#filters.length === this.bands.length)
+		this.#audioContext = audioContext
+		this.#filters = filters
 
-			for (let i = 0; i < this.#filters.length; i += 1) {
-				// biome-ignore lint/style/noNonNullAssertion: length is fixed at 10
-				this.#filters[i]!.gain.value = enabled ? (this.bands[i] ?? 0) : 0
-			}
-		})
+		return audioContext
 	}
 
 	resumeContext = (): Promise<void> => {
-		if (this.#audioContext.state === 'suspended') {
-			return this.#audioContext.resume()
+		const audioContext = this.#ensureAudioGraph()
+		if (audioContext.state === 'suspended') {
+			return audioContext.resume()
 		}
 
 		return Promise.resolve()
