@@ -58,6 +58,10 @@ export const keysListDatabaseChangeHandler = <Store extends LibraryStoreName>(
 				}
 
 				const index = value.indexOf(change.key)
+				if (index === -1) {
+					return value
+				}
+
 				value.splice(index, 1)
 
 				return value

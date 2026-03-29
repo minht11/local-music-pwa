@@ -135,7 +135,7 @@ interface LoadResult {
 export const load: PageLoad = async (event): Promise<LoadResult> => {
 	const { slug } = event.params
 	if (!slug || slug === 'tracks') {
-		redirect(301, '/library/tracks')
+		redirect(303, '/library/tracks')
 	}
 
 	const uuid = event.params.uuid

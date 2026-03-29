@@ -30,7 +30,7 @@ export type AudioLoadResult = 'loaded' | 'superseded' | 'failed'
 export class AudioLoader {
 	loading: boolean = $state(false)
 
-	readonly #onSrc: (src: string | null) => void
+	#onSrc: (src: string | null) => void
 	#currentSrc: string | null = null
 	#current = 0
 
@@ -44,7 +44,7 @@ export class AudioLoader {
 		this.loading = true
 		this.#clearSrc()
 
-		const trackFile = await getTrackFile(file)
+		const trackFile = await getTrackFile(file).catch(() => null)
 
 		if (this.#current !== gen) {
 			return 'superseded'
