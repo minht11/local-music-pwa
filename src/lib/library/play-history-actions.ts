@@ -17,30 +17,35 @@ export const dbAddToPlayHistory = async (trackId: number): Promise<void> => {
 	const tracksStore = tx.objectStore('tracks')
 	const store = tx.objectStore('playHistory')
 
-	const track = await tracksStore.get(trackId)
-	if (!track) {
+	// Don't add orphaned history records for tracks that are no longer in library.
+	const trackExists = (await tracksStore.count(trackId)) > 0
+	if (!trackExists) {
 		await tx.done
 		return
 	}
-
-	// Keep one entry per track in history by replacing any previous occurrences.
-	const existingIds = await store.index('trackId').getAllKeys(trackId)
-	await Promise.all(existingIds.map((id) => store.delete(id)))
 
 	const newEntry: Omit<PlayHistoryEntry, 'id'> = {
 		trackId,
 		playedAt: Date.now(),
 	}
 
-	await store.add(newEntry as PlayHistoryEntry)
+	const existingKey = await store.index('trackId').getKey(trackId)
+	if (existingKey === undefined) {
+		await store.add(newEntry as PlayHistoryEntry)
+	} else {
+		await store.put({
+			...newEntry,
+			id: existingKey,
+		})
+	}
 
 	// Keep only the most recent PLAY_HISTORY_LIMIT entries.
-	// 'prev' opens in descending order (newest first), so advance(limit) lands on
-	// the oldest entry that exceeds the cap, and everything from there is deleted.
+	// Start at newest and jump over the records we keep, then delete the tail.
 	let cursor = await store.index('playedAt').openCursor(null, 'prev')
-	cursor = (await cursor?.advance(PLAY_HISTORY_LIMIT)) ?? null
+	if (cursor !== null) {
+		cursor = await cursor.advance(PLAY_HISTORY_LIMIT)
+	}
 
-	// Delete all entries that exceed the limit
 	while (cursor !== null) {
 		await cursor.delete()
 		cursor = await cursor.continue()
