@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
 import { clearDatabaseStores, expectToBeDefined } from '$lib/helpers/test-helpers.ts'
-import { LEGACY_NO_NATIVE_DIRECTORY } from '$lib/library/types.ts'
+import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/library/types.ts'
 import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
 
 vi.mock('$lib/stores/main/use-store.ts', () => ({
@@ -53,8 +53,7 @@ const flush = async () => {
 
 const seedTrack = async (id: number) => {
 	const db = await getDatabase()
-
-	await db.add('tracks', {
+	const trackData: Track = {
 		id,
 		uuid: `track-${id}`,
 		name: `Track ${id}`,
@@ -71,7 +70,9 @@ const seedTrack = async (id: number) => {
 		directory: LEGACY_NO_NATIVE_DIRECTORY,
 		scannedAt: Date.now(),
 		file: new File(['x'], `track-${id}.mp3`, { type: 'audio/mpeg' }),
-	})
+	}
+
+	await db.add('tracks', trackData)
 }
 
 describe('PlayerStore play history', () => {
@@ -152,6 +153,58 @@ describe('PlayerStore play history', () => {
 
 		const db = await getDatabase()
 		expect(await db.getAll('playHistory')).toHaveLength(0)
+	})
+
+	it('does not save history on ended when repeat is one', async () => {
+		await seedTrack(4)
+		const player = new PlayerStore()
+
+		player.playTrack(0, [4])
+		await flush()
+		expectToBeDefined(audioInstance)
+
+		player.repeat = 'one'
+		audioInstance.currentTime = 179
+		audioInstance.duration = 180
+		audioInstance.onended?.()
+		await flush()
+
+		const db = await getDatabase()
+		expect(await db.getAll('playHistory')).toHaveLength(0)
+	})
+
+	it('saves history when queue is cleared while playing current track', async () => {
+		await seedTrack(5)
+		const player = new PlayerStore()
+
+		player.playTrack(0, [5])
+		expectToBeDefined(audioInstance)
+
+		audioInstance.currentTime = 120
+		audioInstance.duration = 180
+		player.clearQueue()
+
+		await flush()
+		const db = await getDatabase()
+
+		expect((await db.getAll('playHistory'))[0]?.trackId).toBe(5)
+	})
+
+	it('saves history when currently playing track is removed from queue', async () => {
+		await seedTrack(6)
+		const player = new PlayerStore()
+
+		player.playTrack(0, [6, 999])
+		expectToBeDefined(audioInstance)
+
+		audioInstance.currentTime = 90
+		audioInstance.duration = 180
+		player.removeFromQueue(0)
+
+		await flush()
+		const db = await getDatabase()
+
+		expect((await db.getAll('playHistory'))[0]?.trackId).toBe(6)
 	})
 })
 

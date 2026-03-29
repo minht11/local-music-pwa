@@ -87,15 +87,13 @@ export class PlayerStore {
 			}
 		}, 100)
 
-		$effect(() => {
-			const track = this.activeTrack
-
+		const trackChanged = (track: TrackData | undefined) => {
 			if (!track) {
 				if (prevTrackId !== null) {
+					this.#savePlayHistory(prevTrackId)
+
 					prevTrackId = null
-					untrack(() => {
-						this.playing = false
-					})
+					this.playing = false
 				}
 				scheduleAudioReset()
 				return
@@ -108,10 +106,7 @@ export class PlayerStore {
 			scheduleAudioReset.cancel()
 
 			if (prevTrackId !== null) {
-				untrack(() => {
-					invariant(prevTrackId !== null)
-					this.#savePlayHistory(prevTrackId)
-				})
+				this.#savePlayHistory(prevTrackId)
 			}
 
 			prevTrackId = track.id
@@ -122,6 +117,14 @@ export class PlayerStore {
 				if (result === 'failed') {
 					this.playing = false
 				}
+			})
+		}
+
+		$effect(() => {
+			const track = this.activeTrack
+
+			untrack(() => {
+				trackChanged(track)
 			})
 		})
 
@@ -302,7 +305,23 @@ export class PlayerStore {
 
 	addToQueue = this.#queue.addToQueue
 
-	removeFromQueue = this.#queue.removeFromQueue
+	removeFromQueue = (index: number): void => {
+		if (index === this.#queue.activeTrackIndex) {
+			const activeTrackId = this.#queue.activeTrackId
+			if (activeTrackId !== null) {
+				this.#savePlayHistory(activeTrackId)
+			}
+		}
 
-	clearQueue = this.#queue.clearQueue
+		this.#queue.removeFromQueue(index)
+	}
+
+	clearQueue = (): void => {
+		const activeTrackId = this.#queue.activeTrackId
+		if (activeTrackId !== null) {
+			this.#savePlayHistory(activeTrackId)
+		}
+
+		this.#queue.clearQueue()
+	}
 }
