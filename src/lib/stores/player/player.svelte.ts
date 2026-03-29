@@ -108,11 +108,9 @@ export class PlayerStore {
 			scheduleAudioReset.cancel()
 
 			if (prevTrackId !== null) {
-				const playedTime = audio.currentTime
-				const totalDuration = audio.duration
 				untrack(() => {
 					invariant(prevTrackId !== null)
-					this.#savePlayHistory(prevTrackId, playedTime, totalDuration)
+					this.#savePlayHistory(prevTrackId)
 				})
 			}
 
@@ -167,6 +165,11 @@ export class PlayerStore {
 				this.repeat === 'none' &&
 				this.#queue.activeTrackIndex === this.#queue.itemsIds.length - 1
 			) {
+				const trackId = this.#queue.activeTrackId
+				if (trackId !== null) {
+					this.#savePlayHistory(trackId)
+				}
+
 				this.togglePlay(false)
 				return
 			}
@@ -225,7 +228,10 @@ export class PlayerStore {
 		})
 	}
 
-	#savePlayHistory = (trackId: number, playedTime: number, totalDuration: number): void => {
+	#savePlayHistory = (trackId: number): void => {
+		const playedTime = this.#audio.currentTime
+		const totalDuration = this.#audio.duration
+
 		const percentageThreshold = 0.5
 		const timeThreshold = 30
 
