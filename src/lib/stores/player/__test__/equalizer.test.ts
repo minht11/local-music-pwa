@@ -73,11 +73,6 @@ describe('EqualizerStore', () => {
 
 		const store = new EqualizerStore({} as HTMLAudioElement)
 		expect(instances).toHaveLength(0)
-		expect(persist).toHaveBeenCalledWith('equalizer', store, [
-			'enabled',
-			'bands',
-			'selectedPreset',
-		])
 
 		await store.resumeContext()
 

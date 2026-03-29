@@ -50,7 +50,9 @@ export class EqualizerStore {
 
 	constructor(audio: HTMLAudioElement) {
 		this.#audio = audio
+	}
 
+	init = (): void => {
 		persist('equalizer', this, ['enabled', 'bands', 'selectedPreset'])
 
 		$effect(() => {
