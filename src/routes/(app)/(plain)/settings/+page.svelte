@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { tooltip } from '$lib/attachments/tooltip.ts'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import Select from '$lib/components/Select.svelte'
 	import Separator from '$lib/components/Separator.svelte'
+	import Slider from '$lib/components/Slider.svelte'
 	import Spinner from '$lib/components/Spinner.svelte'
 	import Switch from '$lib/components/Switch.svelte'
 	import { isDatabaseOperationPending } from '$lib/db/lock-database.ts'
@@ -13,6 +15,10 @@
 	import { isFileSystemAccessSupported } from '$lib/helpers/file-system.ts'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
+	import {
+		PLAYER_PLAYBACK_RATE_MAX,
+		PLAYER_PLAYBACK_RATE_MIN,
+	} from '$lib/stores/player/player.svelte.ts'
 	import { getLocale, type Locale, setLocale } from '$paraglide/runtime.js'
 	import DirectoriesList from './components/DirectoriesList.svelte'
 	import InstallAppBanner from './components/InstallAppBanner.svelte'
@@ -78,6 +84,10 @@
 	const isDatabasePending = $derived(isDatabasePendingGetter.current)
 </script>
 
+{#snippet heading(text: string)}
+	<div class="px-4 pt-4 text-title-sm text-onSurfaceVariant">{text}</div>
+{/snippet}
+
 <section class="card settings-max-width mx-auto w-full overflow-clip">
 	<div class="flex flex-col p-4">
 		<div class="flex items-center gap-2 text-title-sm">
@@ -106,7 +116,7 @@
 <InstallAppBanner class="settings-max-width mt-6" />
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
-	<div class="px-4 pt-4 text-title-sm">{m.settingsAppearance()}</div>
+	{@render heading(m.settingsAppearance())}
 
 	<div class="flex items-center justify-between p-4">
 		<div>{m.settingsApplicationTheme()}</div>
@@ -193,7 +203,7 @@
 </section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
-	<div class="px-4 pt-4 text-title-sm">{m.player()}</div>
+	{@render heading(m.player())}
 
 	{#if supportsChangingAudioVolume()}
 		<div class="flex items-center justify-between p-4">
@@ -205,7 +215,7 @@
 		<Separator />
 	{/if}
 
-	<div class="flex items-center justify-between p-4">
+	<div class="flex flex-col justify-between gap-y-4 p-4 sm:flex-row sm:items-center">
 		<div class="flex items-center gap-2">
 			<div>{m.equalizerTitle()}</div>
 
@@ -226,6 +236,55 @@
 		>
 			{m.equalizerOpenEqualizer()}
 		</Button>
+	</div>
+
+	<Separator />
+
+	<div class="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center">
+		<div>{m.settingsPlaybackSpeed()}</div>
+
+		<div class="flex w-full items-center gap-3 sm:w-56">
+			<div class="w-12 text-center text-label-lg tabular-nums sm:text-right">
+				{player.playbackRate}x
+			</div>
+
+			<Slider
+				min={PLAYER_PLAYBACK_RATE_MIN}
+				max={PLAYER_PLAYBACK_RATE_MAX}
+				step={0.05}
+				bind:value={player.playbackRate}
+			/>
+		</div>
+	</div>
+
+	<div class="flex justify-end px-4 pb-4">
+		<Button
+			kind="outlined"
+			disabled={player.playbackRate === 1}
+			onclick={() => {
+				player.playbackRate = 1
+			}}
+		>
+			{m.settingsPlaybackSpeedReset()}
+		</Button>
+	</div>
+
+	<Separator />
+
+	<div class="flex items-center justify-between p-4">
+		<div class="flex items-center gap-2">
+			<div>{m.settingsPreservePitch()}</div>
+
+			<button
+				type="button"
+				class="interactable flex size-6 items-center justify-center rounded-full text-onSurfaceVariant"
+				{@attach tooltip(m.settingsPreservePitchInfo())}
+			>
+				<Icon type="information" class="size-4" />
+			</button>
+		</div>
+
+		<Switch bind:checked={player.preservePitch} />
 	</div>
 </section>
 

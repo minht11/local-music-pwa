@@ -15,6 +15,9 @@ export type { PlayTrackOptions }
 
 export type PlayerRepeat = 'none' | 'one' | 'all'
 
+export const PLAYER_PLAYBACK_RATE_MIN = 0.5
+export const PLAYER_PLAYBACK_RATE_MAX = 2
+
 export class PlayerStore {
 	readonly #main = useMainStore()
 
@@ -29,6 +32,9 @@ export class PlayerStore {
 	playing: boolean = $state(false)
 	muted: boolean = $state(false)
 	#volume: number = $state(100)
+
+	playbackRate: number = $state(1)
+	preservePitch: boolean = $state(true)
 
 	get shuffle(): boolean {
 		return this.#queue.shuffle
@@ -70,7 +76,7 @@ export class PlayerStore {
 	artworkSrc: string | undefined = $derived.by(this.#artwork)
 
 	constructor() {
-		persist('player', this, ['volume', 'repeat', 'muted'])
+		persist('player', this, ['volume', 'repeat', 'muted', 'playbackRate', 'preservePitch'])
 		persist('player', this.#queue, ['shuffle'])
 
 		this.equalizer.init()
@@ -189,6 +195,27 @@ export class PlayerStore {
 		audio.ontimeupdate = throttle(() => {
 			this.currentTime = audio.currentTime
 		}, 250)
+
+		const setPlaybackRate = () => {
+			audio.playbackRate = clamp(
+				this.playbackRate,
+				PLAYER_PLAYBACK_RATE_MIN,
+				PLAYER_PLAYBACK_RATE_MAX,
+			)
+		}
+
+		audio.onloadedmetadata = () => {
+			// Audio change resets playbackRate
+			setPlaybackRate()
+		}
+
+		$effect(() => {
+			setPlaybackRate()
+		})
+
+		$effect(() => {
+			audio.preservesPitch = this.preservePitch
+		})
 
 		$effect(() => {
 			// Humans perceive volume logarithmically

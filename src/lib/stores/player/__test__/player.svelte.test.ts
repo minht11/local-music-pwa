@@ -79,6 +79,8 @@ class MockAudio {
 	currentTime = 0
 	duration = 0
 	volume = 1
+	playbackRate = 1
+	preservesPitch = true
 
 	onplay: (() => void) | null = null
 	onpause: (() => void) | null = null
@@ -406,6 +408,17 @@ describe('PlayerStore', () => {
 
 			expect(player.currentTime).toBe(42)
 			expect(audioInstance.currentTime).toBe(42)
+		})
+
+		it('preservePitch updates audio pitch-preserve flags', () => {
+			using pl = createPlayerInRoot()
+			const { player } = pl
+			expectToBeDefined(audioInstance)
+
+			player.preservePitch = false
+			flushSync()
+
+			expect(audioInstance.preservesPitch).toBe(false)
 		})
 
 		it('playTrack on same active track seeks to start', async () => {
