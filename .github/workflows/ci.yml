@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+env:
+  PUBLIC_FALLBACK_PAGE: ${{ vars.PUBLIC_FALLBACK_PAGE }}
+  PUBLIC_GOAT_COUNTER_URL: ${{ vars.PUBLIC_GOAT_COUNTER_URL }}
+
 jobs:
   code-quality:
     runs-on: ubuntu-latest
@@ -18,8 +22,6 @@ jobs:
         with:
           node-version: 24.12.0
           cache: "pnpm"
-      - run: $echo $PUBLIC_GOAT_COUNTER_URL
-
       - run: pnpm install
       - name: Build generated files
         run: pnpm run build
