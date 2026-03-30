@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest'
-import { persist } from '$lib/helpers/persist.svelte.ts'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
 
 vi.mock('$lib/helpers/persist.svelte.ts', () => ({
