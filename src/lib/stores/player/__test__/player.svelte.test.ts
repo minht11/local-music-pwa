@@ -81,8 +81,6 @@ class MockAudio {
 	volume = 1
 	playbackRate = 1
 	preservesPitch = true
-	mozPreservesPitch = true
-	webkitPreservesPitch = true
 
 	onplay: (() => void) | null = null
 	onpause: (() => void) | null = null
@@ -421,8 +419,6 @@ describe('PlayerStore', () => {
 			flushSync()
 
 			expect(audioInstance.preservesPitch).toBe(false)
-			expect(audioInstance.mozPreservesPitch).toBe(false)
-			expect(audioInstance.webkitPreservesPitch).toBe(false)
 		})
 
 		it('playTrack on same active track seeks to start', async () => {
