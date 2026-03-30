@@ -196,12 +196,21 @@ export class PlayerStore {
 			this.currentTime = audio.currentTime
 		}, 250)
 
-		$effect(() => {
+		const setPlaybackRate = () => {
 			audio.playbackRate = clamp(
 				this.playbackRate,
 				PLAYER_PLAYBACK_RATE_MIN,
 				PLAYER_PLAYBACK_RATE_MAX,
 			)
+		}
+
+		audio.onloadedmetadata = () => {
+			// Audio change resets playbackRate
+			setPlaybackRate()
+		}
+
+		$effect(() => {
+			setPlaybackRate()
 		})
 
 		$effect(() => {
