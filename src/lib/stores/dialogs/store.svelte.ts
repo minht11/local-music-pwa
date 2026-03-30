@@ -19,6 +19,8 @@ export class DialogsStore {
 
 	editPlaylistDialogOpen: UpdatePlaylistOptions | null = $state(null)
 
+	equalizerDialogOpen: boolean = $state(false)
+
 	removeFromLibraryOpen: RemoveLibraryItemOptions | null = $state(null)
 
 	addTrackToPlaylistDialogOpen: readonly number[] | null = $state(null)

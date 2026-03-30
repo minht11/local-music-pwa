@@ -11,8 +11,7 @@
 		EQ_MIN_GAIN,
 	} from '$lib/stores/player/equalizer.svelte.ts'
 
-	let { open = $bindable(false) }: { open?: boolean } = $props()
-
+	const dialogs = useDialogsStore()
 	const player = usePlayer()
 	const eq = $derived(player.equalizer)
 
@@ -29,7 +28,7 @@
 	]
 </script>
 
-<Dialog bind:open class="[--dialog-width:--spacing(160)]">
+<Dialog bind:open={dialogs.equalizerDialogOpen} class="[--dialog-width:--spacing(160)]">
 	{#snippet header()}
 		<header data-dialog-header class="flex items-center justify-between px-6 py-6">
 			<div class="text-headline-sm">{m.equalizerTitle()}</div>

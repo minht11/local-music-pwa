@@ -35,6 +35,7 @@
 	"equalizerPresetRock": "Rock",
 	"equalizerPresetTrebleBoost": "Treble Boost",
 	"equalizerReset": "Reset",
+	"equalizerStatusEnabled": "Enabled",
 	"equalizerTitle": "Equalizer",
 
 	"errorPageDoesNotExist": "Looks like this page doesn't exist.",

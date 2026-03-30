@@ -7,13 +7,13 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
+	import ActiveIndicator from '$lib/components/player/buttons/ActiveIndicator.svelte'
 	import PlayerFavoriteButton from '$lib/components/player/buttons/PlayerFavoriteButton.svelte'
 	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
 	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
-	import EqualizerDialog from '$lib/components/player/EqualizerDialog.svelte'
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
@@ -32,6 +32,7 @@
 
 	const mainStore = useMainStore()
 	const player = usePlayer()
+	const dialogs = useDialogsStore()
 	const activeTrack = $derived(player.activeTrack)
 
 	const isSelectedTabQueue = $derived(
@@ -41,8 +42,6 @@
 	const { isCompactHorizontal, isCompactVertical, layoutMode } = $derived(
 		getLayoutProps(page.route.id),
 	)
-
-	let equalizerOpen = $state(false)
 </script>
 
 {#snippet playerSnippet()}
@@ -129,10 +128,15 @@
 					<PlayerFavoriteButton />
 
 					<IconButton
-						icon="equalizer"
 						tooltip={m.equalizerOpenEqualizer()}
-						onclick={() => (equalizerOpen = true)}
-					/>
+						onclick={() => {
+							dialogs.equalizerDialogOpen = true
+						}}
+					>
+						<Icon type="equalizer" />
+
+						<ActiveIndicator active={player.equalizer.enabled} />
+					</IconButton>
 
 					{#if layoutMode === 'list'}
 						<IconButton tooltip={m.playerOpenQueue()} icon="trayFull" as="a" href="/player/queue" />
@@ -269,8 +273,6 @@
 	noListStableGutter
 	noPlayerOverlayPadding
 />
-
-<EqualizerDialog bind:open={equalizerOpen} />
 
 <style lang="postcss">
 	@reference '../../../app.css';
