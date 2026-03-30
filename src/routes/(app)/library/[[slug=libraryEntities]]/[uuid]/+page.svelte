@@ -20,6 +20,7 @@
 	const { data } = $props()
 
 	const main = useMainStore()
+	const dialogs = useDialogsStore()
 	const player = usePlayer()
 
 	// svelte-ignore state_referenced_locally
@@ -90,7 +91,7 @@
 				return [addToQueueMenuItem]
 			}
 
-			return [addToQueueMenuItem, ...getPlaylistMenuItems(main, item as Playlist)]
+			return [addToQueueMenuItem, ...getPlaylistMenuItems(dialogs, item as Playlist)]
 		}
 
 		return [
@@ -98,13 +99,13 @@
 			{
 				label: m.libraryAddToPlaylist(),
 				action: () => {
-					main.addTrackToPlaylistDialogOpen = tracks.tracksIds
+					dialogs.addTrackToPlaylistDialogOpen = tracks.tracksIds
 				},
 			},
 			{
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					main.removeFromLibraryOpen = {
+					dialogs.removeFromLibraryOpen = {
 						type: 'single',
 						id: item.id,
 						name: item.name,
@@ -126,8 +127,8 @@
 	const artists = $derived(slug === 'albums' && formatArtists((item as AlbumData).artists))
 </script>
 
-{#if !isWideLayout.current || !main.librarySplitLayoutEnabled}
-	<Header title={data.singularTitle()} mode="fixed" />
+{#if !(isWideLayout.current && main.librarySplitLayoutEnabled)}
+	<Header title={data.singularTitle()} />
 {/if}
 
 <div class="@container flex grow flex-col px-4 pb-4">

@@ -2,11 +2,6 @@
 	import Dialog, { type DialogProps } from './Dialog.svelte'
 	import DialogFooter, { type DialogButton } from './DialogFooter.svelte'
 
-	export interface DialogOpenAccessor<S> {
-		get(): S | null
-		close(): void
-	}
-
 	export interface CommonDialogProps<S> extends DialogProps<S> {
 		buttons?: DialogButton[] | ((data: S) => DialogButton[])
 		onsubmit?: (e: SubmitEvent, data: S) => void
@@ -26,15 +21,16 @@
 	const getButtonItems = (data: S) => {
 		if (typeof buttons === 'function') {
 			return buttons(data)
-		} else {
-			return buttons
 		}
+
+		return buttons
 	}
 </script>
 
 <Dialog bind:open class={className} {...props}>
 	{#snippet children({ data, close })}
 		<form
+			data-dialog-body
 			method="dialog"
 			class="contents"
 			onsubmit={(e) => {

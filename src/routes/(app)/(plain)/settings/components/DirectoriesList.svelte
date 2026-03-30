@@ -100,6 +100,7 @@
 {#snippet addButton(title: string, onclick: () => void)}
 	<button
 		{@attach ripple()}
+		type="button"
 		class={[
 			disabled ? 'bg-surfaceContainer/10 text-onSurface/54' : 'interactable',
 			'flex h-16 items-center gap-2 rounded-sm px-4 ring-1 ring-outlineVariant ring-inset',
@@ -168,7 +169,7 @@
 
 {#snippet directoryName(name: string | undefined)}
 	<span class="inline-flex h-[--spacing(4.125)] w-fit items-center gap-1 text-tertiary">
-		<Icon type="folder" class="mt-[2px] size-3" />
+		<Icon type="folder" class="mt-0.5 size-3" />
 
 		<span class="inline h-full w-fit max-w-25 truncate">{name}</span>
 	</span>

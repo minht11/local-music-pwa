@@ -12,28 +12,21 @@ import { preloadLibraryValue } from './value.ts'
 export type { PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
 export type { QueryResult } from '$lib/db/query/query.ts'
 
+const preloadLimit = 12
+
 const preloadLibraryListValues = async <Store extends LibraryStoreName>(
 	storeName: Store,
 	keys: number[],
 ) => {
-	if (
-		storeName === 'tracks' ||
-		storeName === 'albums' ||
-		storeName === 'artists' ||
-		storeName === 'playlists'
-	) {
-		const preload = Array.from({ length: Math.min(keys.length, 12) }, (_, index) => {
-			const id = keys[index]
-			if (id) {
-				return preloadLibraryValue(storeName, id)
-			}
+	const preload = Array.from({ length: Math.min(keys.length, preloadLimit) }, (_, index) => {
+		const id = keys[index]
+		if (id) {
+			return preloadLibraryValue(storeName, id)
+		}
 
-			return null
-		})
-		await Promise.all(preload)
-	} else if (import.meta.env.DEV) {
-		throw new Error(`Preloading ${storeName} is not supported`)
-	}
+		return null
+	})
+	await Promise.all(preload)
 }
 
 export const keysListDatabaseChangeHandler = <Store extends LibraryStoreName>(
@@ -65,6 +58,10 @@ export const keysListDatabaseChangeHandler = <Store extends LibraryStoreName>(
 				}
 
 				const index = value.indexOf(change.key)
+				if (index === -1) {
+					return value
+				}
+
 				value.splice(index, 1)
 
 				return value

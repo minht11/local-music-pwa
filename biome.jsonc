@@ -33,7 +33,8 @@
 			"**",
 			"!**/.generated",
 			// Biome parser incorrectly errors on TS syntax.
-			"!src/lib/components/WrapTranslation.svelte"
+			"!src/lib/components/VirtualContainer.svelte",
+			"!static/supported-browser-check.js"
 		]
 	},
 	"formatter": {
@@ -104,18 +105,28 @@
 						"defaultVisibility": "package"
 					}
 				},
-				"useSingleJsDocAsterisk": "error"
+				"useSingleJsDocAsterisk": "error",
+				"noUnknownFunction": {
+					"level": "on",
+					"options": {
+						"ignore": ["theme"]
+					}
+				}
 			},
 			"nursery": {
 				"noFloatingPromises": "error",
-				"noImportCycles": "error",
 				"noMisusedPromises": "error",
-				"noDeprecatedImports": "on"
+				"noNestedPromises": "error",
+				"noIncrementDecrement": "error",
+				"noUnnecessaryConditions": "error",
+				"noUselessReturn": "error",
+				"useConsistentMethodSignatures": "error"
 			},
 			"complexity": {
 				"useSimplifiedLogicExpression": "error",
 				"useNumericLiterals": "error",
-				"noCommaOperator": "error"
+				"noCommaOperator": "error",
+				"noImportantStyles": "off"
 			},
 			"suspicious": {
 				"useAwait": "error",
@@ -131,7 +142,12 @@
 					"options": {
 						"ignore": ["slot"]
 					}
-				}
+				},
+				"noImportCycles": "error",
+				"noDeprecatedImports": "on"
+			},
+			"a11y": {
+				"noSvgWithoutTitle": "off"
 			}
 		}
 	},
@@ -142,7 +158,15 @@
 			"jsxQuoteStyle": "single",
 			"indentWidth": 4
 		},
-		"globals": ["m", "invariant", "usePlayer", "useMainStore", "untrack", "snackbar"]
+		"globals": [
+			"m",
+			"invariant",
+			"usePlayer",
+			"useMainStore",
+			"useDialogsStore",
+			"untrack",
+			"snackbar"
+		]
 	},
 	"json": {
 		"formatter": {
@@ -158,6 +182,9 @@
 			"quoteStyle": "single"
 		}
 	},
+	"html": {
+		"experimentalFullSupportEnabled": true
+	},
 	"overrides": [
 		{
 			"includes": ["**/*.svelte", "!**/*.svelte.ts"],
@@ -170,13 +197,10 @@
 					"correctness": {
 						"noUndeclaredVariables": "off",
 						"noUnusedVariables": "off",
-						"noUnusedImports": "off",
-						"noPrivateImports": {
-							"level": "error",
-							"options": {
-								"defaultVisibility": "public"
-							}
-						}
+						"noUnusedImports": "off"
+					},
+					"complexity": {
+						"noCommaOperator": "off"
 					}
 				}
 			}

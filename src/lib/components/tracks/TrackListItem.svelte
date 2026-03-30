@@ -65,7 +65,11 @@
 	]}
 	ariaLabel={m.trackPlay({ name: track?.name ?? '' })}
 	{ariaRowIndex}
-	onclick={(e) => onclick?.(track!, e)}
+	onclick={(e) => {
+		if (track) {
+			onclick?.(track, e)
+		}
+	}}
 	{onpointerenter}
 	oncontextmenu={(e) => {
 		if (!menuItemsWithItem) {
@@ -152,7 +156,7 @@
 			<div
 				class={[
 					'w-16 items-center justify-items-end',
-					!selectionEnabled ? 'hidden @sm:grid' : 'grid',
+					selectionEnabled ? 'grid' : 'hidden @sm:grid',
 				]}
 			>
 				{#if !selectionEnabled}
@@ -165,7 +169,7 @@
 
 				<IconButton
 					tabindex={-1}
-					tooltip={'Select track'}
+					tooltip={''}
 					class={[
 						'stack-in-grid',
 						selectionEnabled

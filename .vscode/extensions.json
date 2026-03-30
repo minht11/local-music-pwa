@@ -1,5 +1,3 @@
 {
-  "recommendations": [
-    "inlang.vs-code-extension"
-  ]
+	"recommendations": ["bradlc.vscode-tailwindcss", "biomejs.biome", "svelte.svelte-vscode"]
 }

@@ -14,12 +14,12 @@ const getSmallImageDimensions = (
 	if (originalWidth > originalHeight) {
 		const ratio = originalHeight / originalWidth
 
-		return [smallerTarget, smallerTarget * ratio]
+		return [smallerTarget, Math.floor(smallerTarget * ratio)]
 	}
 
 	const ratio = originalWidth / originalHeight
 
-	return [smallerTarget * ratio, smallerTarget]
+	return [Math.floor(smallerTarget * ratio), smallerTarget]
 }
 
 export type ArtworkRelatedData = {
@@ -33,6 +33,7 @@ export type ArtworkRelatedData = {
 
 const isSafari = isSafariCheck()
 
+/** @public */
 export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRelatedData> => {
 	let bitmap: ImageBitmap | undefined
 	try {
@@ -42,7 +43,6 @@ export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRel
 		const canvas = new OffscreenCanvas(tw, th)
 		const ctx = canvas.getContext('2d')
 		invariant(ctx)
-		ctx.imageSmoothingEnabled = false
 
 		// Draw smaller image version
 		ctx.drawImage(bitmap, 0, 0, tw, th)

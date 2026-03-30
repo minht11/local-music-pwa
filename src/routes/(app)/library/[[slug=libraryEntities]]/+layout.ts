@@ -2,7 +2,6 @@ import { redirect } from '@sveltejs/kit'
 import { innerWidth } from 'svelte/reactivity/window'
 import type { RouteId } from '$app/types'
 import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
-import { checkForV1LegacyDatabaseData } from '$lib/db/v1-legacy/database.ts'
 import { getLibraryItemIds } from '$lib/library/get/ids.ts'
 import {
 	createLibraryItemKeysPageQuery,
@@ -35,7 +34,7 @@ const loadData = async <Slug extends LibraryStoreName>(
 	const store = new LibraryStore(slug)
 
 	const itemsIdsQueryPromise = createLibraryItemKeysPageQuery(slug, {
-		key: () => [slug, store.sortByKey, store.order, store.searchTerm],
+		key: () => [slug, store.sortByKey, store.order, store.searchTerm.toLowerCase().trim()],
 		fetcher: async ([name, sortKey, order, searchTerm]) => {
 			const result = await getLibraryItemIds(name, {
 				sort: sortKey,
@@ -53,7 +52,7 @@ const loadData = async <Slug extends LibraryStoreName>(
 	})
 
 	const [itemsIdsQuery, tracksCountQuery] = await Promise.all([
-		await itemsIdsQueryPromise,
+		itemsIdsQueryPromise,
 		createTracksCountPageQuery(),
 	])
 
@@ -77,18 +76,10 @@ type LoadResult = LoadDataResult<LibraryStoreName> & {
 export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 	const { slug } = event.params
 	if (!slug) {
-		redirect(301, '/library/tracks')
+		redirect(303, '/library/tracks')
 	}
 
 	const data = await loadData(slug)
-
-	if (data.tracksCountQuery.value === 0) {
-		const hasV1Data = await checkForV1LegacyDatabaseData()
-
-		if (hasV1Data) {
-			redirect(307, '/v1-migration')
-		}
-	}
 
 	const isWideLayout = () => (innerWidth.current ?? 0) > 1154
 	// We pass params here so that inside page we can benefit from $derived caching
@@ -114,7 +105,7 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 
 	defineViewTransitionMatcher((to, from) => {
 		const libraryRoute: RouteId = '/(app)/library/[[slug=libraryEntities]]'
-		const detailsRoute: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]'
+		const detailsRoute: RouteId = `${libraryRoute}/[uuid]`
 
 		if (to === libraryRoute && from === libraryRoute) {
 			return { view: 'library' }

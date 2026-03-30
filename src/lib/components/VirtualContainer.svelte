@@ -34,7 +34,7 @@
 		offsetWidth = $bindable(0),
 	}: Props = $props()
 
-	const scrollContainerTarget = useScrollTarget()
+	const scrollTarget = useScrollTarget()
 
 	type VirtualizerTargetOptions<E extends Window | Element> = Pick<
 		VirtualizerOptions<E, Element>,
@@ -46,7 +46,7 @@
 	>
 
 	const scrollTargetOptions = $derived.by(() => {
-		const target = scrollContainerTarget.scrollTarget
+		const target = scrollTarget.current
 
 		if (target instanceof Window) {
 			const options: VirtualizerTargetOptions<Window> = {
@@ -144,7 +144,13 @@
 		e.preventDefault()
 
 		if (container && doesElementHasFocus(container)) {
-			findRow(0)?.focus()
+			virtualizer.scrollToIndex(0, {
+				behavior: 'smooth',
+			})
+			// TODO. Should somehow await for scroll to finish.
+			queueMicrotask(() => {
+				findRow(0)?.focus()
+			})
 
 			return
 		}

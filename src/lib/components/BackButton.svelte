@@ -13,7 +13,7 @@
 			return window.navigation.canGoBack
 		}
 
-		// This will not handle
+		// This will not be a reliable check, but better than nothing
 		return window.history.length > 1
 	}
 

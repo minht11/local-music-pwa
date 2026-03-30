@@ -27,6 +27,7 @@
 	)
 
 	const main = useMainStore()
+	const dialogs = useDialogsStore()
 
 	const itemsIds = $derived(data.itemsIdsQuery.value)
 	const slug = $derived(data.slug)
@@ -142,7 +143,7 @@
 						<Button
 							kind="outlined"
 							onclick={() => {
-								main.createNewPlaylistDialogOpen = true
+								dialogs.createNewPlaylistDialogOpen = true
 							}}
 						>
 							<Icon type="plus" />
@@ -185,7 +186,7 @@
 								items={itemsIds}
 								menuItems={{
 									disabled: (playlist) => playlist.id === FAVORITE_PLAYLIST_ID,
-									items: (playlist) => getPlaylistMenuItems(main, playlist),
+									items: (playlist) => getPlaylistMenuItems(dialogs, playlist),
 								}}
 								onItemClick={({ playlist }) => {
 									const detailsViewId: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]'
@@ -209,16 +210,8 @@
 			]}
 		>
 			{#key page.url.pathname}
-				{@render children?.()}
+				{@render children()}
 			{/key}
 		</div>
 	{/snippet}
 </ListDetailsLayout>
-
-<style lang="postcss">
-	@reference '../../../../app.css';
-
-	.desktop-sidebar {
-		left: max(0, (100% - var(--app-max-content-width)) / 2);
-	}
-</style>

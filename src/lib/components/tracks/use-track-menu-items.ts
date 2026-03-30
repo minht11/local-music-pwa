@@ -43,7 +43,7 @@ export const useTrackMenuItems = (
 	getMenuItemsFn: () => ((track: TrackData, index: number) => MenuItem[]) | null | undefined,
 	predefinedItemsOptions: () => Partial<Record<PredefinedTrackMenuItemOption, boolean>>,
 ) => {
-	const main = useMainStore()
+	const dialogs = useDialogsStore()
 	const player = usePlayer()
 
 	const filterPredefinedItems = (items: UnfilteredPredefinedMenuItem[]) => {
@@ -75,7 +75,7 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableAddToPlaylist',
 				label: m.libraryAddToPlaylist(),
 				action: () => {
-					main.addTrackToPlaylistDialogOpen = [track.id]
+					dialogs.addTrackToPlaylistDialogOpen = [track.id]
 				},
 			},
 			{
@@ -110,7 +110,7 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableRemoveFromLibrary',
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					main.removeFromLibraryOpen = {
+					dialogs.removeFromLibraryOpen = {
 						type: 'single',
 						name: track.name,
 						id: track.id,
@@ -134,7 +134,7 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableAddToPlaylist',
 				label: m.libraryAddToPlaylist(),
 				action: () => {
-					main.addTrackToPlaylistDialogOpen = trackIds
+					dialogs.addTrackToPlaylistDialogOpen = trackIds
 				},
 			},
 			{
@@ -150,9 +150,7 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableAddToQueue',
 				label: m.playerAddToQueue(),
 				action: () => {
-					trackIds.forEach((trackId) => {
-						player.addToQueue(trackId)
-					})
+					player.addToQueue(trackIds)
 				},
 			},
 			{
@@ -168,7 +166,7 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableRemoveFromLibrary',
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					main.removeFromLibraryOpen = {
+					dialogs.removeFromLibraryOpen = {
 						type: 'multiple',
 						ids: trackIds,
 						storeName: 'tracks',

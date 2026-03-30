@@ -83,6 +83,12 @@ export interface PlaylistEntry {
 	addedAt: number
 }
 
+export interface PlayHistoryEntry {
+	id: number
+	trackId: number
+	playedAt: number
+}
+
 export interface Directory {
 	id: number
 	handle: FileSystemDirectoryHandle

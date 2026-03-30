@@ -1,8 +1,14 @@
 const getValue = (key: string) => {
-	const valueRaw = localStorage.getItem(key)
-	const value = valueRaw === null || valueRaw === undefined ? null : JSON.parse(valueRaw)
+	try {
+		const valueRaw = localStorage.getItem(key)
+		const value = valueRaw === null || valueRaw === undefined ? null : JSON.parse(valueRaw)
 
-	return value
+		return value
+	} catch (error) {
+		console.error(`Failed to get persisted value for key "${key}"`, error)
+
+		return null
+	}
 }
 
 export const getPersistedValue = <T, D = null>(
@@ -16,10 +22,8 @@ export const getPersistedValue = <T, D = null>(
 	return value ?? defaultValue
 }
 
-export const persist = <T>(storeName: string, instance: T, keys: (keyof T)[]): void => {
+export const persist = <T>(storeName: string, instance: T, keys: (keyof T & string)[]): void => {
 	for (const key of keys) {
-		invariant(typeof key === 'string', 'Key must be a string')
-
 		const fullKey = `snaeplayer-${storeName}.${key}`
 
 		const value = getValue(fullKey)

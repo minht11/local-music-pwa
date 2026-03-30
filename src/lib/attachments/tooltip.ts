@@ -23,7 +23,7 @@ export const tooltip = (message: string | undefined): Attachment<HTMLElement> =>
 			return
 		}
 
-		const anchorName = `--tooltip-${crypto.randomUUID().slice(0, 4)}`
+		const anchorName = `--tooltip-${crypto.randomUUID().slice(0, 6)}`
 
 		target.setAttribute('title', message)
 
@@ -49,7 +49,7 @@ export const tooltip = (message: string | undefined): Attachment<HTMLElement> =>
 			// @ts-expect-error missing types
 			target.style.anchorName = anchorName
 
-			tooltipElement = tooltipElement ?? cloneTooltipTemplate()
+			tooltipElement = cloneTooltipTemplate()
 			tooltipElement.textContent = message
 			// @ts-expect-error missing types
 			tooltipElement.style.positionAnchor = anchorName
@@ -73,7 +73,7 @@ export const tooltip = (message: string | undefined): Attachment<HTMLElement> =>
 				target.setAttribute('title', message)
 			}
 
-			target.style.removeProperty('anchorName')
+			target.style.removeProperty('anchor-name')
 			if (tooltipElement) {
 				tooltipElement.remove()
 				tooltipElement = null

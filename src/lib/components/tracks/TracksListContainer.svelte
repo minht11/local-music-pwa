@@ -1,5 +1,4 @@
 <script lang="ts" module>
-	import { isPrimaryModifierKey } from '$lib/helpers/utils/ua.ts'
 	import { useSetOverlaySnippet } from '$lib/layout-bottom-bar.svelte.ts'
 	import type { TrackData } from '$lib/library/get/value.ts'
 	import Button from '../Button.svelte'
@@ -7,13 +6,20 @@
 	import MenuButton from '../MenuButton.svelte'
 	import type { MenuItem } from '../menu/types.ts'
 	import VirtualContainer from '../VirtualContainer.svelte'
-	import { SelectionTracker } from './selection.svelte.ts'
 	import TrackListItem from './TrackListItem.svelte'
 	import { type PredefinedTrackMenuItemOption, useTrackMenuItems } from './use-track-menu-items.ts'
+	import { useTrackSelectionController } from './use-track-selection-controller.svelte.ts'
 	export interface TrackItemClick {
 		track: TrackData
 		items: readonly number[]
 		index: number
+	}
+
+	interface Props {
+		items: readonly number[]
+		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItemOption, boolean>>
+		menuItems?: (track: TrackData, index: number) => MenuItem[]
+		onItemClick?: (data: TrackItemClick) => void
 	}
 </script>
 
@@ -22,13 +28,6 @@
 
 	const defaultOnItemClick = (data: TrackItemClick) => {
 		player.playTrack(data.index, data.items)
-	}
-
-	interface Props {
-		items: readonly number[]
-		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItemOption, boolean>>
-		menuItems?: (track: TrackData, index: number) => MenuItem[]
-		onItemClick?: (data: TrackItemClick) => void
 	}
 
 	const {
@@ -43,77 +42,30 @@
 		() => predefinedMenuItems,
 	)
 
-	const selection = new SelectionTracker()
-
-	let hoverRangeEnd = $state<number | null>(null)
-	let hoverRangeAnchor = $state<number | null>(null)
-	let isShiftActive = $state(false)
-
-	const cancelSelection = () => {
-		selection.clear()
-		hoverRangeEnd = null
-		hoverRangeAnchor = null
-	}
+	const selection = useTrackSelectionController({
+		items: () => items,
+	})
 
 	$effect(() => {
 		void items
 		void items.length
 
 		untrack(() => {
-			cancelSelection()
+			selection.cancelSelection()
 		})
 	})
 
 	useSetOverlaySnippet('above-player', () => (selection.selectionEnabled ? multiselectPane : null))
-
-	const documentKeyDownHandler = (e: KeyboardEvent) => {
-		if (e.key === 'Shift') {
-			isShiftActive = true
-		}
-
-		// Only handle these shortcuts when in selection mode
-		if (!selection.selectionEnabled) {
-			return
-		}
-
-		if (e.key === 'Escape') {
-			cancelSelection()
-		}
-
-		// Handle Cmd/Ctrl+A for select all
-		if (e.key === 'a' && isPrimaryModifierKey(e)) {
-			e.preventDefault()
-			selection.selectMany(items)
-		}
-	}
-
-	const documentKeyUpHandler = (e: KeyboardEvent) => {
-		if (e.key === 'Shift') {
-			isShiftActive = false
-			hoverRangeAnchor = null
-		}
-	}
-
-	const isInHoverRange = (index: number) => {
-		if (!isShiftActive || hoverRangeEnd === null) {
-			return false
-		}
-
-		// Use lastSelectedIndex if it exists, otherwise use hoverRangeAnchor
-		const anchor = selection.lastSelectedIndex ?? hoverRangeAnchor
-
-		if (anchor === null) {
-			return false
-		}
-
-		const min = Math.min(anchor, hoverRangeEnd)
-		const max = Math.max(anchor, hoverRangeEnd)
-
-		return index >= min && index <= max
-	}
 </script>
 
-<svelte:document onkeydown={documentKeyDownHandler} onkeyup={documentKeyUpHandler} />
+<svelte:document
+	onkeydown={(e) => {
+		selection.handleDocumentKeyDown(e)
+	}}
+	onkeyup={(e) => {
+		selection.handleDocumentKeyUp(e)
+	}}
+/>
 
 {#snippet multiselectPane()}
 	<div
@@ -124,7 +76,9 @@
 			alignment={{ horizontal: 'left', vertical: 'bottom' }}
 		/>
 
-		<div class="rounded-md bg-primary px-2 py-1">Selected {selection.size}</div>
+		<div class="rounded-md bg-primary px-2 py-1">
+			{m.selectedCount({ count: selection.size })}
+		</div>
 
 		<Button
 			kind="flat"
@@ -141,7 +95,7 @@
 			tooltip={m.libraryAddToPlaylist()}
 			icon="close"
 			onclick={() => {
-				cancelSelection()
+				selection.cancelSelection()
 			}}
 		/>
 	</div>
@@ -160,84 +114,28 @@
 			class="virtual-item top-0 left-0 w-full"
 			ariaRowIndex={item.index}
 			selectionEnabled={selection.selectionEnabled}
-			selectionHover={isInHoverRange(item.index)}
+			selectionHover={selection.isInHoverRange(item.index)}
 			selected={selection.has(trackId)}
 			menuItems={(track) => getMenuItems(track, item.index)}
 			onclick={(track, e) => {
-				// Handle Cmd/Ctrl-click to toggle selection
-				if (isPrimaryModifierKey(e)) {
-					e.preventDefault()
-
-					selection.toggle(trackId, item.index)
-					return
-				}
-
-				// Handle Shift-click for range selection/deselection
-				if (e.shiftKey) {
-					e.preventDefault()
-					if (!selection.selectionEnabled) {
-						selection.selectionEnabled = true
-					}
-
-					// Toggle range from last selected index to current
-					if (selection.lastSelectedIndex !== null) {
-						const min = Math.min(selection.lastSelectedIndex, item.index)
-						const max = Math.max(selection.lastSelectedIndex, item.index)
-						const rangeIds: number[] = []
-
-						let allSelected = true
-						for (let i = min; i <= max; i++) {
-							const itemAtIndex = items[i]
-							if (itemAtIndex !== undefined) {
-								rangeIds.push(itemAtIndex)
-								if (allSelected && !selection.has(itemAtIndex)) {
-									allSelected = false
-								}
-							}
-						}
-
-						if (allSelected) {
-							// Unselect all in range
-							selection.unselectMany(rangeIds)
-						} else {
-							// Select all in range
-							selection.selectMany(rangeIds)
-						}
-
-						// Update last selected index to current position
-						selection.lastSelectedIndex = item.index
-					} else {
-						// No previous selection, just select this one
-						selection.select(trackId, item.index)
-					}
-					return
-				}
-
-				// Normal click - if selection mode is active, toggle selection
-				if (selection.selectionEnabled) {
-					selection.toggle(trackId, item.index)
-					return
-				}
-
-				onItemClick({
-					track,
-					items,
+				selection.handleItemClick({
+					event: e,
+					trackId,
 					index: item.index,
+					onClick: () => {
+						onItemClick({
+							track,
+							items,
+							index: item.index,
+						})
+					},
 				})
 			}}
 			onpointerenter={() => {
-				// Update hover index when shift is active (for preview) or when in selection mode
-				if (isShiftActive || selection.selectionEnabled) {
-					hoverRangeEnd = item.index
-
-					// Set anchor on first hover when shift is active and no selection exists
-					if (isShiftActive && hoverRangeAnchor === null && selection.lastSelectedIndex === null) {
-						hoverRangeAnchor = item.index
-					}
-				}
+				selection.handlePointerEnter(item.index)
 			}}
 			toggleSelection={() => {
-				selection.toggle(trackId, item.index)
+				selection.toggleSelection(trackId, item.index)
 			}}
 		/>
 	{/snippet}

@@ -5,7 +5,6 @@ import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
-import { themeColorsPlugin } from './lib/vite-plugin-theme-colors.ts'
 
 const getAutoImportPlugin = (dts: string | false = false) =>
 	AutoImport({
@@ -15,6 +14,7 @@ const getAutoImportPlugin = (dts: string | false = false) =>
 				'$paraglide/messages': [['*', 'm']],
 				'$lib/stores/player/use-store.ts': ['usePlayer'],
 				'$lib/stores/main/use-store.ts': ['useMainStore'],
+				'$lib/stores/dialogs/use-store.ts': ['useDialogsStore'],
 				'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
 				'$lib/components/snackbar/snackbar.ts': ['snackbar'],
 				'tiny-invariant': [['default', 'invariant']],
@@ -42,8 +42,8 @@ export default defineConfig({
 		target: ['chrome130', 'safari18'],
 		rolldownOptions: {
 			output: {
-				legalComments: 'none',
-				codeSplitting: {
+				comments: false,
+				advancedChunks: {
 					groups: [
 						{
 							// Merge all css into a single file
@@ -67,10 +67,6 @@ export default defineConfig({
 		plugins: () => [getAutoImportPlugin()],
 	},
 	plugins: [
-		themeColorsPlugin({
-			defaultColorSeed: '#cc9724',
-			output: `${import.meta.dirname}/.generated/theme-colors.css`,
-		}),
 		imagetools(),
 		tailwindcss(),
 		sveltekit(),

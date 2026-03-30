@@ -29,7 +29,7 @@
 		class="flex h-full w-full flex-col items-center justify-between gap-4 sm:px-4 sm:pt-2 sm:pb-4"
 	>
 		<Timeline class="max-sm:hidden" />
-		<div class="hello flex h-min w-full grow grid-cols-[1fr_max-content_1fr] items-center sm:grid">
+		<div class="flex h-min w-full grow grid-cols-[1fr_max-content_1fr] items-center sm:grid">
 			<div class="flex grow items-center">
 				<Button
 					as="a"

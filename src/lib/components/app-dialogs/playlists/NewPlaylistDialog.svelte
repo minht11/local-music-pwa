@@ -3,7 +3,7 @@
 	import TextField from '$lib/components/TextField.svelte'
 	import { createPlaylist } from '$lib/library/playlists-actions.ts'
 
-	const main = useMainStore()
+	const dialogs = useDialogsStore()
 
 	const onSubmitHandler = async (event: SubmitEvent) => {
 		const formData = new FormData(event.target as HTMLFormElement)
@@ -12,12 +12,12 @@
 
 		await createPlaylist(name, description)
 
-		main.createNewPlaylistDialogOpen = false
+		dialogs.createNewPlaylistDialogOpen = false
 	}
 </script>
 
 <CommonDialog
-	bind:open={main.createNewPlaylistDialogOpen}
+	bind:open={dialogs.createNewPlaylistDialogOpen}
 	icon="addPlaylist"
 	title={m.libraryCreateNewPlaylist()}
 	buttons={[

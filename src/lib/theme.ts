@@ -97,7 +97,7 @@ const createTonalPalette = (hue: number, chroma: number) => ({
 })
 
 interface TonalPalette {
-	tone(argb: number): number
+	tone: (argb: number) => number
 }
 
 type ThemeEntry = [key: PaletteToken, hexValue: string]

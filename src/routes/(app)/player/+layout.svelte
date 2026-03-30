@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
 	import BackButton from '$lib/components/BackButton.svelte'
 	import Button from '$lib/components/Button.svelte'
@@ -12,35 +13,50 @@
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
+	import EqualizerDialog from '$lib/components/player/EqualizerDialog.svelte'
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
+	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
 	import Slider from '$lib/components/Slider.svelte'
+	import Tabs from '$lib/components/Tabs.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import { initPageQueries } from '$lib/db/query/page-query.svelte.js'
 	import { formatArtists, getItemLanguage } from '$lib/helpers/utils/text.ts'
+	import { clearPlayHistory, dbRemoveFromPlayHistory } from '$lib/library/play-history-actions.js'
+	import { getLayoutProps } from './layout-props.ts'
 
 	const { data } = $props()
 
+	// svelte-ignore state_referenced_locally
+	initPageQueries(data)
+
 	const mainStore = useMainStore()
 	const player = usePlayer()
-	const track = $derived(player.activeTrack)
+	const activeTrack = $derived(player.activeTrack)
 
-	const sizes = $derived(data.sizes())
-	const isCompactVertical = $derived(sizes.isCompactVertical)
-	const layoutMode = $derived(data.layoutMode(sizes.isCompact, page.url.pathname))
+	const isSelectedTabQueue = $derived(
+		page.route.id === '/(app)/player' || page.route.id === '/(app)/player/queue',
+	)
+
+	const { isCompactHorizontal, isCompactVertical, layoutMode } = $derived(
+		getLayoutProps(page.route.id),
+	)
+
+	let equalizerOpen = $state(false)
 </script>
 
 {#snippet playerSnippet()}
 	<div
 		class={[
-			layoutMode === 'both' && 'w-100',
+			layoutMode === 'both' && 'w-100 2xl:w-[28dvw]',
 			layoutMode === 'list' && 'mx-auto w-full',
 			'player-content z-0 grow items-center gap-x-6 overflow-clip bg-secondaryContainerVariant px-2 pb-2',
-			isCompactVertical && !sizes.isCompactHorizontal && 'player-content-horizontal',
+			isCompactVertical && !isCompactHorizontal && 'player-content-horizontal',
 		]}
 	>
 		<div
 			class={[
-				isCompactVertical && !sizes.isCompactHorizontal ? 'absolute top-0 left-0 h-14' : 'h-16',
+				isCompactVertical && !isCompactHorizontal ? 'absolute top-0 left-0 h-14' : 'h-16',
 				'flex w-full items-center justify-between gap-2 [grid-area:header]',
 			]}
 		>
@@ -98,19 +114,25 @@
 			</div>
 
 			<div class="flex h-18 w-full shrink-0 items-center rounded-2xl bg-secondaryContainer px-4">
-				{#if track}
+				{#if activeTrack}
 					<div class="mr-2 min-w-6 text-center text-body-lg tabular-nums">
 						{player.activeTrackIndex + 1}
 					</div>
 
-					<div class="grid overflow-hidden" lang={getItemLanguage(track.language)}>
-						<div class="truncate text-body-lg">{track.name}</div>
-						<div class="truncate text-body-md">{formatArtists(track.artists)}</div>
+					<div class="grid overflow-hidden" lang={getItemLanguage(activeTrack.language)}>
+						<div class="truncate text-body-lg">{activeTrack.name}</div>
+						<div class="truncate text-body-md">{formatArtists(activeTrack.artists)}</div>
 					</div>
 				{/if}
 
 				<div class="ml-auto flex gap-1">
 					<PlayerFavoriteButton />
+
+					<IconButton
+						icon="equalizer"
+						tooltip={m.equalizerOpenEqualizer()}
+						onclick={() => (equalizerOpen = true)}
+					/>
 
 					{#if layoutMode === 'list'}
 						<IconButton tooltip={m.playerOpenQueue()} icon="trayFull" as="a" href="/player/queue" />
@@ -121,78 +143,125 @@
 	</div>
 {/snippet}
 
-{#snippet queueActions()}
-	<IconButton
-		tooltip={m.playerClearQueue()}
-		disabled={player.isQueueEmpty}
-		icon="trayRemove"
-		onclick={player.clearQueue}
-	/>
+{#snippet emptyList(title: string)}
+	<div class="m-auto flex flex-col items-center text-center">
+		<Icon type="playlistMusic" class="color-onSecondaryContainer my-auto size-35 opacity-54" />
+
+		<div class="mb-4 text-body-lg">{title}</div>
+		<Button kind="outlined" as="a" href="/library/tracks">
+			{m.playerQueuePlaySomething()}
+		</Button>
+	</div>
 {/snippet}
 
 {#snippet queueSnippet()}
-	{#if layoutMode === 'details'}
-		<Header title={m.queue()}>
-			{#if layoutMode === 'details'}
-				{@render queueActions()}
-			{/if}
-		</Header>
-	{/if}
-
-	<div class="flex w-full grow flex-col">
-		{#if layoutMode !== 'details'}
-			<div class="flex h-16 items-center border-b border-onSecondaryContainer/24 px-4">
-				<div class="w-10"></div>
-
-				<div class="mx-auto text-title-lg">
-					{m.queue()}
-				</div>
-
-				{@render queueActions()}
-			</div>
-		{/if}
-
-		<div class="flex grow p-4">
-			{#if player.isQueueEmpty}
-				<div class="m-auto flex flex-col items-center text-center">
-					<Icon
-						type="playlistMusic"
-						class="color-onSecondaryContainer my-auto size-35 opacity-54"
-					/>
-
-					<div class="mb-4 text-body-lg">{m.playerQueueEmpty()}</div>
-					<Button kind="outlined" as="a" href="/library/tracks">
-						{m.playerQueuePlaySomething()}
-					</Button>
-				</div>
-			{:else}
-				<TracksListContainer
-					items={player.itemsIds}
-					predefinedMenuItems={{
-						disableAddToQueue: true,
-					}}
-					menuItems={(_track, index) => [
-						{
-							label: m.playerRemoveFromQueue(),
-							action: () => {
-								player.removeFromQueue(index)
-							},
-						},
+	<!--
+		For view transition to work correctly we need to clip the captured element size
+		so we can't use root scroller here.
+	-->
+	<ScrollContainer
+		class="flex h-dvh scroll-pt-(--app-header-height) flex-col overflow-auto contain-strict scrollbar-gutter-stable"
+	>
+		<Header
+			mode="sticky"
+			noBackButton={layoutMode !== 'details'}
+			class={(isElevated) => [
+				'border-b',
+				isElevated ? 'border-transparent' : 'border-onSecondaryContainer/24',
+			]}
+		>
+			<div class="absolute inset-0 m-auto size-max">
+				<Tabs
+					selectedIndex={isSelectedTabQueue ? 0 : 1}
+					items={[
+						{ id: 'queue', text: m.queue() },
+						{ id: 'history', text: m.playerHistory() },
 					]}
-					onItemClick={({ index }) => {
-						player.playTrack(index)
+					onchange={(item) => {
+						void goto(`/player/${item.id}`, { replaceState: true })
 					}}
+				>
+					{#snippet text(item)}
+						{item.text}
+					{/snippet}
+				</Tabs>
+			</div>
+
+			{#if isSelectedTabQueue}
+				<IconButton
+					tooltip={m.playerClearQueue()}
+					disabled={player.isQueueEmpty}
+					icon="trayRemove"
+					onclick={player.clearQueue}
+				/>
+			{:else}
+				<IconButton
+					tooltip={m.playerClearHistory()}
+					disabled={data.historyTrackIds.value.length === 0}
+					icon="trayRemove"
+					onclick={() => void clearPlayHistory()}
 				/>
 			{/if}
+		</Header>
+
+		<div class="mx-auto flex w-full max-w-(--app-max-content-width) grow flex-col">
+			<div class="flex grow p-4">
+				{#if isSelectedTabQueue}
+					{#if player.isQueueEmpty}
+						{@render emptyList(m.playerQueueEmpty())}
+					{:else}
+						<TracksListContainer
+							items={player.itemsIds}
+							predefinedMenuItems={{
+								disableAddToQueue: true,
+							}}
+							menuItems={(_track, index) => [
+								{
+									label: m.playerRemoveFromQueue(),
+									action: () => {
+										player.removeFromQueue(index)
+									},
+								},
+							]}
+							onItemClick={({ index }) => {
+								player.playTrack(index)
+							}}
+						/>
+					{/if}
+				{:else if data.historyTrackIds.value.length === 0}
+					{@render emptyList(m.playerHistoryEmpty())}
+				{:else}
+					<TracksListContainer
+						items={data.historyTrackIds.value}
+						menuItems={(item) => [
+							{
+								label: m.playerRemoveFromHistory(),
+								action: () => {
+									void dbRemoveFromPlayHistory(item.id)
+								},
+							},
+						]}
+						onItemClick={({ track }) => {
+							const trackIndexInQueue = player.itemsIds.indexOf(track.id)
+							if (trackIndexInQueue !== -1) {
+								player.playTrack(trackIndexInQueue)
+								return
+							}
+
+							player.playTrack(0, [track.id])
+						}}
+					/>
+				{/if}
+			</div>
 		</div>
-	</div>
+	</ScrollContainer>
 {/snippet}
 
 <ListDetailsLayout
 	id="full-player"
 	mode={layoutMode}
 	class={[
-		'mx-auto w-full max-w-300 grow active-view-player:view-name-[pl-card]',
+		'grow active-view-player:view-name-[pl-card]',
 		layoutMode === 'both' && 'bg-secondaryContainer',
 	]}
 	list={playerSnippet}
@@ -200,6 +269,8 @@
 	noListStableGutter
 	noPlayerOverlayPadding
 />
+
+<EqualizerDialog bind:open={equalizerOpen} />
 
 <style lang="postcss">
 	@reference '../../../app.css';
@@ -237,17 +308,17 @@
 			translate: var(--mp-left) calc(var(--mp-bottom) - var(--mp-height));
 		}
 		to {
-			width: var(--fp-width);
-			height: 100svh;
-			translate: var(--fp-left) 0;
+			width: 100dvw;
+			height: 100dvh;
+			translate: 0 0;
 		}
 	}
 
 	@keyframes -global-view-player-card-morph-exit {
 		from {
-			width: var(--fp-width);
-			height: 100svh;
-			translate: var(--fp-left) 0;
+			width: 100dvw;
+			height: 100dvh;
+			translate: 0 0;
 		}
 		to {
 			width: var(--mp-width);
@@ -270,8 +341,8 @@
 			transform: none;
 			height: 100%;
 			animation:
-				view-player-container-rounded 400ms var(--ease-standard),
-				var(--vt-pl-card-morph-ani) 400ms var(--ease-standard);
+				view-player-container-rounded 400ms var(--ease-standard) forwards,
+				var(--vt-pl-card-morph-ani) 400ms var(--ease-standard) forwards;
 		}
 
 		&::view-transition-old(pl-card),
@@ -298,7 +369,6 @@
 
 			&::view-transition-new(pl-card) {
 				object-fit: cover;
-				object-position: 0 calc(-1 * var(--fp-scroll-top));
 			}
 		}
 
@@ -309,7 +379,6 @@
 
 			&::view-transition-old(pl-card) {
 				object-fit: cover;
-				object-position: 0 calc(-1 * var(--fp-scroll-top));
 			}
 
 			&::view-transition-new(pl-card) {

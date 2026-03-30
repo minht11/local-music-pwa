@@ -1,47 +1,85 @@
 import { getDatabase } from '$lib/db/database.ts'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system.ts'
+import { SerialQueue } from '$lib/helpers/serial-queue.ts'
 import { dbRemoveTrack } from '$lib/library/remove.ts'
 import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/library/types.ts'
 import { dbImportTrack } from './import-track.ts'
-import { parseTrack } from './parse/parse-track.ts'
+import { getArtworkRelatedData } from './parse/format-artwork.ts'
+import { parseTrackMetadata } from './parse/parse-track.ts'
 import type { TracksScanMessage, TracksScanOptions } from './types.ts'
 
 declare const self: DedicatedWorkerGlobalScope
 
-interface ImportTrackOptions {
+interface TrackEnqueueOptions {
+	scannedAt: number
 	unwrappedFile: File
 	file: FileEntity
 	directoryId: number
 	/** In cases when track already was imported */
-	trackId: number | undefined
-	uuid: string | undefined
+	trackId?: number
+	uuid?: string
 }
 
-const importTrack = async (options: ImportTrackOptions): Promise<number | null> => {
-	try {
-		const metadata = await parseTrack(options.unwrappedFile)
-		if (!metadata) {
-			return null
+/**
+ * A three-stage pipeline for track ingestion:
+ * 1. [PARSING]  - Blocks the caller; processes one file at a time.
+ * 2. [ARTWORK]  - Background serial queue for I/O-heavy image processing.
+ * 3. [IMPORT]   - Background serial queue for final database writes.
+ * - This "conveyor belt" allows the caller to parse the next track while
+ * previous tracks progress through artwork and import stages concurrently.
+ */
+class TrackProcessor {
+	#artworkQueue = new SerialQueue()
+	#importQueue = new SerialQueue()
+
+	#tracker: StatusTracker
+	#onImportSuccess?: (trackId: number) => void
+
+	constructor(tracker: StatusTracker, onImportSuccess?: (trackId: number) => void) {
+		this.#tracker = tracker
+		this.#onImportSuccess = onImportSuccess
+	}
+
+	async parseAndEnqueue(options: TrackEnqueueOptions) {
+		const parsed = await parseTrackMetadata(options.unwrappedFile)
+		if (!parsed) {
+			return
 		}
 
-		const id = await dbImportTrack(
-			{
-				...metadata,
-				file: options.file,
-				directory: options.directoryId,
-				fileName: options.file.name,
-				scannedAt: Date.now(),
-				uuid: options.uuid ?? crypto.randomUUID(),
-			},
-			options.trackId,
-		)
+		this.#artworkQueue.enqueue(async () => {
+			const artworkData = parsed.imageBlob
+				? await getArtworkRelatedData(parsed.imageBlob)
+				: undefined
 
-		return id
-	} catch (err) {
-		// We ignore errors and just skip the track.
-		console.error(err)
+			this.#importQueue.enqueue(async () => {
+				try {
+					const trackId = await dbImportTrack(
+						{
+							...parsed.data,
+							...artworkData,
+							file: options.file,
+							directory: options.directoryId,
+							fileName: options.file.name,
+							scannedAt: options.scannedAt,
+							uuid: options.uuid ?? crypto.randomUUID(),
+						},
+						options.trackId,
+					)
 
-		return null
+					this.#onImportSuccess?.(trackId)
+					this.#tracker.newlyImported += 1
+				} catch (err) {
+					console.error(err)
+				} finally {
+					this.#tracker.sendMsg(false)
+				}
+			})
+		})
+	}
+
+	async drain(): Promise<void> {
+		await this.#artworkQueue.drain()
+		await this.#importQueue.drain()
 	}
 }
 
@@ -52,11 +90,33 @@ class StatusTracker {
 
 	total = 0
 
-	constructor(total: number) {
+	#pendingTimeout: number | null = null
+
+	#timeId: string
+
+	constructor(total: number, timeId: string) {
 		this.total = total
+		this.#timeId = timeId
+
+		console.time(this.#timeId)
 	}
 
 	sendMsg = (finished: boolean) => {
+		if (finished) {
+			console.timeEnd(this.#timeId)
+			if (this.#pendingTimeout) {
+				self.clearTimeout(this.#pendingTimeout)
+			}
+		} else {
+			if (this.#pendingTimeout) {
+				return
+			}
+
+			this.#pendingTimeout = self.setTimeout(() => {
+				this.#pendingTimeout = null
+			}, 200)
+		}
+
 		const message: TracksScanMessage = {
 			finished,
 			count: {
@@ -89,16 +149,6 @@ const findTrackByMixedFileEntity = async (handle: FileEntity, tracks: Track[]) =
 			continue
 		}
 
-		// No reliable way to compare two Files,
-		// so we compare their names and size
-		if (
-			existingFile instanceof File &&
-			handle instanceof File &&
-			existingFile.size === handle.size
-		) {
-			return track
-		}
-
 		if (
 			existingFile instanceof FileSystemFileHandle &&
 			handle instanceof FileSystemFileHandle
@@ -108,6 +158,16 @@ const findTrackByMixedFileEntity = async (handle: FileEntity, tracks: Track[]) =
 				return track
 			}
 		}
+
+		// No reliable way to compare two Files,
+		// so we compare their names and size
+		if (
+			existingFile instanceof File &&
+			handle instanceof File &&
+			existingFile.size === handle.size
+		) {
+			return track
+		}
 	}
 
 	return null
@@ -116,15 +176,19 @@ const findTrackByMixedFileEntity = async (handle: FileEntity, tracks: Track[]) =
 const scanExistingDirectory = async (handles: FileEntity[], directoryId: number) => {
 	const db = await getDatabase()
 
-	const tracker = new StatusTracker(handles.length)
+	const tracker = new StatusTracker(handles.length, 'SCAN_EXISTING_DIR')
 	const scannedTracksIds = new Set<number>()
+	const processor = new TrackProcessor(tracker, (trackId) => {
+		scannedTracksIds.add(trackId)
+	})
+
+	const scannedAt = Date.now()
 
 	const findTrackFn =
 		directoryId === LEGACY_NO_NATIVE_DIRECTORY
 			? findTrackByMixedFileEntity
 			: findTrackByFileHandle
 
-	console.time('SCAN_EXISTING_DIR')
 	for (const handle of handles) {
 		tracker.current += 1
 
@@ -148,29 +212,26 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 				// File was not modified since last scan
 				if (unwrappedFile.lastModified <= existingTrack.scannedAt) {
 					scannedTracksIds.add(existingTrack.id)
+					tracker.sendMsg(false)
+
 					continue
 				}
 			}
 
-			const trackId = await importTrack({
+			await processor.parseAndEnqueue({
 				unwrappedFile,
 				file: handle,
 				directoryId,
 				trackId: existingTrack?.id,
 				uuid: existingTrack?.uuid,
+				scannedAt,
 			})
-
-			if (trackId !== null) {
-				scannedTracksIds.add(trackId)
-
-				tracker.newlyImported += 1
-			}
 		} catch {
 			// we ignore errors and just move on to the next track.
 		}
-
-		tracker.sendMsg(false)
 	}
+
+	await processor.drain()
 
 	if (directoryId === LEGACY_NO_NATIVE_DIRECTORY) {
 		tracker.sendMsg(true)
@@ -186,43 +247,33 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 			await dbRemoveTrack(trackId).catch(console.warn)
 		}
 	}
-	console.timeEnd('SCAN_EXISTING_DIR')
 
 	tracker.sendMsg(true)
 }
 
-const scanNewDirectory = async (
-	items: { uuid: string; file: FileEntity }[],
-	directoryId: number,
-) => {
-	const tracker = new StatusTracker(items.length)
+const scanNewDirectory = async (handles: FileEntity[], directoryId: number) => {
+	const tracker = new StatusTracker(handles.length, 'SCAN_NEW_DIR')
+	const processor = new TrackProcessor(tracker)
+	const scannedAt = Date.now()
 
-	console.time('SCAN_NEW_DIR')
-	for (const item of items) {
+	for (const handle of handles) {
 		tracker.current += 1
-
-		const handle = item.file
 
 		try {
 			const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
-			const trackId = await importTrack({
+
+			await processor.parseAndEnqueue({
 				unwrappedFile,
 				file: handle,
 				directoryId,
-				trackId: undefined,
-				uuid: item.uuid,
+				scannedAt,
 			})
-
-			if (trackId !== null) {
-				tracker.newlyImported += 1
-			}
 		} catch {
 			// we ignore errors and just move on to the next track
 		}
-
-		tracker.sendMsg(false)
 	}
-	console.timeEnd('SCAN_NEW_DIR')
+
+	await processor.drain()
 
 	tracker.sendMsg(true)
 }
@@ -230,12 +281,7 @@ const scanNewDirectory = async (
 export const workerAction = async (options: TracksScanOptions) => {
 	if (options.action === 'directory-add') {
 		const handles = await getFileHandlesRecursively(options.dirHandle)
-		const items = handles.map((handle) => ({
-			uuid: crypto.randomUUID(),
-			file: handle,
-		}))
-
-		await scanNewDirectory(items, options.dirId)
+		await scanNewDirectory(handles, options.dirId)
 
 		return
 	}
@@ -247,15 +293,7 @@ export const workerAction = async (options: TracksScanOptions) => {
 		return
 	}
 
-	if (options.action === 'legacy-files-migrate-from-v1') {
-		await scanNewDirectory(options.files, LEGACY_NO_NATIVE_DIRECTORY)
-
-		return
-	}
-
 	if (options.action === 'legacy-files-add') {
 		await scanExistingDirectory(options.files, LEGACY_NO_NATIVE_DIRECTORY)
-
-		return
 	}
 }

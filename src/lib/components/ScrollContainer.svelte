@@ -9,7 +9,7 @@
 		const nodeGetter = getContext<() => ScrollTargetElement>(contextKey)
 
 		return {
-			get scrollTarget(): Element | Window {
+			get current(): Element | Window {
 				const node = nodeGetter?.()
 
 				return node ?? window

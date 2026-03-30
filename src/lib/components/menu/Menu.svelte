@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte'
 	import { ripple } from '$lib/attachments/ripple.ts'
-	import Icon from '../icon/Icon.svelte'
 	import type { MenuItem } from './types.ts'
 
 	type Handler = (el: HTMLDialogElement) => void
@@ -89,8 +88,9 @@
 			<button
 				{@attach ripple()}
 				role="menuitem"
+				type="button"
 				class={[
-					'interactable relative flex min-h-10 grow items-center gap-4 px-4 py-2 text-left text-body-md -outline-offset-2 select-none',
+					'interactable relative flex min-h-10 grow items-center px-4 py-2 text-left text-body-md -outline-offset-2 select-none',
 					item.selected && 'bg-surfaceVariant text-primary',
 				]}
 				onclick={() => {
@@ -98,10 +98,6 @@
 					close()
 				}}
 			>
-				{#if item.icon}
-					<Icon type={item.icon} class="mr-4" />
-				{/if}
-
 				{item.label}
 			</button>
 		{/each}

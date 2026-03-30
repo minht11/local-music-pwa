@@ -1,11 +1,11 @@
 import type { AfterNavigate, OnNavigate } from '@sveltejs/kit'
 import { browser } from '$app/environment'
-import { afterNavigate, onNavigate } from '$app/navigation'
+import { onNavigate } from '$app/navigation'
 import type { RouteId } from '$app/types'
 import { getActiveRipplesCount } from './attachments/ripple.ts'
 import { wait } from './helpers/utils/wait.ts'
 
-export type AppViewTransitionType = 'regular' | 'player' | 'library'
+export type AppViewTransitionType = 'regular' | 'player' | 'library' | 'disabled'
 
 export type AppViewTransitionTypeMatcherResult = {
 	view: AppViewTransitionType
@@ -21,6 +21,8 @@ const matchers: (AppViewTransitionTypeMatcher | undefined)[] = []
 
 export const defineViewTransitionMatcher = (callback: AppViewTransitionTypeMatcher): void => {
 	matchers.unshift(callback)
+	// We only care about last and current matcher,
+	// matches from previous routes are not relevant.
 	matchers.length = 2
 }
 
@@ -78,16 +80,9 @@ const resolveView = (nav: OnNavigate | AfterNavigate) => {
 	return { view, isBackwards }
 }
 
-export const setupAppViewTransitions = (
-	containerElement: () => HTMLElement | null,
-	disabled: () => boolean,
-): void => {
+export const setupAppViewTransitions = (disabled: () => boolean): void => {
 	onNavigate(async (nav) => {
-		if (disabled()) {
-			return
-		}
-
-		if (viewTransitionsUnsupported) {
+		if (disabled() || viewTransitionsUnsupported) {
 			return
 		}
 
@@ -99,6 +94,10 @@ export const setupAppViewTransitions = (
 		}
 
 		const { view, isBackwards } = resolveView(nav)
+
+		if (view === 'disabled') {
+			return
+		}
 
 		document.startViewTransition({
 			update: () => {
@@ -119,26 +118,4 @@ export const setupAppViewTransitions = (
 
 		return promise
 	})
-
-	// Firefox does not support View Transitions after it does this could be removed.
-	// https://bugzilla.mozilla.org/show_bug.cgi?id=1823896
-	if (viewTransitionsUnsupported) {
-		afterNavigate((nav) => {
-			if (disabled()) {
-				return
-			}
-
-			const { view } = resolveView(nav)
-			if (view === 'library') {
-				return
-			}
-
-			const element = containerElement()
-			if (!element) {
-				return
-			}
-
-			element.animate({ opacity: [0, 1] }, { duration: 175, easing: 'linear' })
-		})
-	}
 }

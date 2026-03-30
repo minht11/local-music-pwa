@@ -1,17 +1,21 @@
+const isMobileRegex = /Android|iPhone|iPad|iPod/i
+const isMacRegex = /Macintosh|Mac OS X/i
+const isWindowsRegex = /Windows/i
+
 /** @public */
 export const isMobile = (): boolean => {
 	if (navigator.userAgentData) {
 		return navigator.userAgentData.mobile
 	}
 
-	return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+	return isMobileRegex.test(navigator.userAgent)
 }
 
 /** @public */
 export const isSafari = () => {
 	const ua = navigator.userAgent.toLowerCase()
 
-	return ua.indexOf('safari') !== -1 && ua.indexOf('chrome') === -1
+	return ua.includes('applewebkit') && !ua.includes('chrome') && !ua.includes('chromium')
 }
 
 /** @public */
@@ -20,7 +24,7 @@ export const isMac = (): boolean => {
 		return navigator.userAgentData.platform === 'macOS'
 	}
 
-	return navigator.platform.toUpperCase().indexOf('MAC') >= 0
+	return isMacRegex.test(navigator.userAgent)
 }
 
 /** @public */
@@ -29,7 +33,7 @@ export const isWindows = (): boolean => {
 		return navigator.userAgentData.platform === 'Windows'
 	}
 
-	return navigator.platform.toUpperCase().indexOf('WIN') >= 0
+	return isWindowsRegex.test(navigator.userAgent)
 }
 
 /**
@@ -38,5 +42,9 @@ export const isWindows = (): boolean => {
  * @public
  */
 export const isPrimaryModifierKey = (event: KeyboardEvent | MouseEvent): boolean => {
-	return isMac() ? event.metaKey : event.ctrlKey
+	if (isMac()) {
+		return event.metaKey
+	}
+
+	return event.ctrlKey
 }

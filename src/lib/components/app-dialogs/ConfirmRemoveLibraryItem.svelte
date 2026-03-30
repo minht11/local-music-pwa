@@ -11,7 +11,7 @@
 	} from '$lib/library/remove.ts'
 	import type { LibraryStoreName } from '$lib/library/types'
 
-	const main = useMainStore()
+	const dialogs = useDialogsStore()
 
 	const removeSingle = createUIAction(
 		m.libraryItemRemovedFromLibrary(),
@@ -41,9 +41,9 @@
 
 <CommonDialog
 	open={{
-		get: () => main.removeFromLibraryOpen,
+		get: () => dialogs.removeFromLibraryOpen,
 		close: () => {
-			main.removeFromLibraryOpen = null
+			dialogs.removeFromLibraryOpen = null
 		},
 	}}
 	title={(data) => {
@@ -62,12 +62,12 @@
 			title: m.libraryCancel(),
 		},
 		{
-			title: 'Remove',
+			title: m.libraryRemove(),
 			type: 'submit',
 		},
 	]}
 	onsubmit={(_, data) => {
-		main.removeFromLibraryOpen = null
+		dialogs.removeFromLibraryOpen = null
 
 		if (data.type === 'multiple') {
 			void removeMultiple(data.storeName, data.ids)

@@ -96,39 +96,25 @@ export class QueryImpl<K extends QueryKey, Result> {
 		})
 	}
 
-	#loadWithKey = (key: K, normalizedKey: QueryKeyPrimitiveValue) => {
-		const { promise, resolve } = Promise.withResolvers<void>()
-
+	#loadWithKey = async (key: K, normalizedKey: QueryKeyPrimitiveValue) => {
 		try {
 			const result = this.options.fetcher(key)
 
 			if (result instanceof Promise) {
-				result
-					.then((value) => {
-						// We only need to set loading state if it is async
-						assign(this.state, {
-							status: 'loading',
-							error: undefined,
-						})
+				// We only need to set loading state if it is async
+				assign(this.state, {
+					status: 'loading',
+					error: undefined,
+				})
 
-						this.#setLoadedState(value, normalizedKey)
-					})
-					.catch((e) => {
-						this.#setErrorState(e, normalizedKey)
-					})
-					.finally(() => {
-						resolve()
-					})
+				const resultValue = await result
+				this.#setLoadedState(resultValue, normalizedKey)
 			} else {
 				this.#setLoadedState(result, normalizedKey)
-				resolve()
 			}
 		} catch (e) {
 			this.#setErrorState(e, normalizedKey)
-			resolve()
 		}
-
-		return promise
 	}
 
 	load = (): Promise<void> => {
@@ -148,7 +134,7 @@ export class QueryImpl<K extends QueryKey, Result> {
 					return
 				}
 
-				this.#loadWithKey(key, normalizedKey)
+				void this.#loadWithKey(key, normalizedKey)
 			})
 		})
 

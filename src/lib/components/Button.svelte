@@ -47,7 +47,7 @@
 </script>
 
 <svelte:element
-	this={(!disabled ? as : 'button') as AllowedButtonElement}
+	this={(disabled ? 'button' : as) as AllowedButtonElement}
 	{@attach ripple({ stopPropagation: true })}
 	{@attach tooltip(tooltipMessage)}
 	{...restProps}

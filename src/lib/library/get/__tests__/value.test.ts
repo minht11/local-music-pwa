@@ -1,7 +1,8 @@
 import 'fake-indexeddb/auto'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
 import type { DatabaseChangeDetails } from '$lib/db/events.ts'
+import { clearDatabaseStores } from '$lib/helpers/test-helpers.ts'
 import {
 	clearLibraryValueCache,
 	getLibraryValue,
@@ -10,7 +11,6 @@ import {
 	shouldRefetchLibraryValue,
 } from '$lib/library/get/value.ts'
 import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID } from '$lib/library/types.ts'
-import { clearDatabaseStores } from '../../shared.ts'
 
 // Mock crypto.randomUUID for consistent UUIDs
 vi.stubGlobal('crypto', {
@@ -26,6 +26,9 @@ describe('getLibraryValue', () => {
 	beforeEach(async () => {
 		await clearDatabaseStores()
 		clearLibraryValueCache()
+	})
+
+	afterEach(() => {
 		vi.clearAllMocks()
 	})
 
@@ -159,7 +162,7 @@ describe('getLibraryValue', () => {
 				uuid: 'album-uuid-1',
 				artists: ['Test Artist'],
 				year: '2023',
-				image: new Blob(),
+				image: {} as Blob,
 			}
 
 			await db.add('albums', albumData)

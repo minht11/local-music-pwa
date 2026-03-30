@@ -118,7 +118,7 @@ const dbReplaceDirectories = async (
 			(): DatabaseChangeDetails => ({
 				key: directoryId,
 				storeName: 'directories',
-				operation: 'add',
+				operation: 'update',
 			}),
 		)
 
@@ -189,10 +189,7 @@ export const replaceDirectories = async (
 export const dbRemoveDirectory = async (directoryId: number): Promise<void> => {
 	const db = await getDatabase()
 
-	const tx = db.transaction(['directories', 'tracks'])
-	const [tracksToBeRemoved] = await Promise.all([
-		tx.objectStore('tracks').index('directory').getAllKeys(directoryId),
-	])
+	const tracksToBeRemoved = await db.getAllKeysFromIndex('tracks', 'directory', directoryId)
 
 	for (const trackId of tracksToBeRemoved) {
 		await dbRemoveTrack(trackId)

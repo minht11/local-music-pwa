@@ -4,10 +4,12 @@ import type {
 	Album,
 	Artist,
 	Directory,
+	PlayHistoryEntry,
 	Playlist,
 	PlaylistEntry,
 	Track,
 } from '$lib/library/types.ts'
+import type { DbBaseChange, DbStandardChange } from './events.ts'
 
 export interface AppDB extends DBSchema {
 	tracks: {
@@ -29,7 +31,7 @@ export interface AppDB extends DBSchema {
 			byAlbumSorted: [album: string, name: string, trackNo: number, discNo: number]
 		}
 		meta: {
-			notAllowedOperations: undefined
+			operations: DbStandardChange<'tracks'>
 		}
 	}
 	albums: {
@@ -37,7 +39,7 @@ export interface AppDB extends DBSchema {
 		value: Album
 		indexes: Pick<Album, 'uuid' | 'name' | 'artists' | 'year'>
 		meta: {
-			notAllowedOperations: undefined
+			operations: DbStandardChange<'albums'>
 		}
 	}
 	artists: {
@@ -45,7 +47,7 @@ export interface AppDB extends DBSchema {
 		value: Artist
 		indexes: Pick<Artist, 'uuid' | 'name'>
 		meta: {
-			notAllowedOperations: undefined
+			operations: DbStandardChange<'artists'>
 		}
 	}
 	playlists: {
@@ -53,7 +55,7 @@ export interface AppDB extends DBSchema {
 		value: Playlist
 		indexes: Pick<Playlist, 'uuid' | 'name' | 'createdAt'>
 		meta: {
-			notAllowedOperations: undefined
+			operations: DbStandardChange<'playlists'>
 		}
 	}
 	playlistEntries: {
@@ -63,7 +65,9 @@ export interface AppDB extends DBSchema {
 			playlistTrack: [playlistId: number, trackId: number]
 		}
 		meta: {
-			notAllowedOperations: 'update'
+			operations:
+				| DbBaseChange<'playlistEntries', 'add', true>
+				| DbBaseChange<'playlistEntries', 'delete', true>
 		}
 	}
 	directories: {
@@ -71,7 +75,17 @@ export interface AppDB extends DBSchema {
 		value: Directory
 		indexes: Pick<Directory, 'id'>
 		meta: {
-			notAllowedOperations: undefined
+			operations: DbStandardChange<'directories'>
+		}
+	}
+	playHistory: {
+		key: number
+		value: PlayHistoryEntry
+		indexes: Pick<PlayHistoryEntry, 'trackId' | 'playedAt'>
+		meta: {
+			operations: {
+				storeName: 'playHistory'
+			}
 		}
 	}
 }
@@ -99,7 +113,7 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 	})
 
 const openAppDatabase = () =>
-	openDB<AppDB>('snae-app-data', 2, {
+	openDB<AppDB>('snae-app-data', 3, {
 		async upgrade(db, oldVersion, _newVersion, tx) {
 			const { objectStoreNames } = db
 
@@ -191,6 +205,12 @@ const openAppDatabase = () =>
 
 			if (!objectStoreNames.contains('directories')) {
 				createStore(db, 'directories')
+			}
+
+			if (!objectStoreNames.contains('playHistory')) {
+				const store = createStore(db, 'playHistory')
+				createIndexes(store, ['trackId'], { unique: true })
+				createIndexes(store, ['playedAt'])
 			}
 		},
 	})

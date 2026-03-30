@@ -5,7 +5,7 @@
 	const { children } = $props()
 </script>
 
-<Header title={page.data.title} mode="fixed" />
+<Header title={page.data.title} />
 
 <div class="flex grow flex-col px-4">
 	{@render children()}

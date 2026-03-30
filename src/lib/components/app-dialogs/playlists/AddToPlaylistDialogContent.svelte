@@ -26,8 +26,8 @@
 			getLibraryItemIds('playlists', {
 				sort: 'createdAt',
 				order: 'desc',
-				searchTerm,
-				searchFn: (p, term) => p.name.includes(term),
+				searchTerm: searchTerm.trim().toLowerCase(),
+				searchFn: (p, term) => p.name.trim().toLowerCase().includes(term),
 			}),
 		onDatabaseChange: (changes) => {
 			for (const change of changes) {

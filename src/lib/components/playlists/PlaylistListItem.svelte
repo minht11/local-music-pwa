@@ -44,7 +44,7 @@
 	const playlist = $derived(data.value)
 
 	const menuItemsWithItem = $derived.by(() => {
-		if (!playlist || !menuItems) {
+		if (!(playlist && menuItems)) {
 			return undefined
 		}
 
@@ -64,7 +64,10 @@
 	class={['h-14 text-left', active && 'bg-onSurfaceVariant/10 text-onSurfaceVariant', className]}
 	ariaLabel={`Play ${playlist?.name}`}
 	{ariaRowIndex}
-	onclick={() => onclick?.(playlist!)}
+	onclick={() => {
+		invariant(playlist)
+		onclick?.(playlist)
+	}}
 >
 	<div role="cell" class="track-item grow items-center gap-5">
 		{#if typeof icon === 'function'}

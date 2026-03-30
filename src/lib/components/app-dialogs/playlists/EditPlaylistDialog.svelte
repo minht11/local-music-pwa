@@ -3,8 +3,8 @@
 	import TextField from '$lib/components/TextField.svelte'
 	import { updatePlaylist } from '$lib/library/playlists-actions'
 
-	const main = useMainStore()
-	const data = $derived(main.editPlaylistDialogOpen)
+	const dialogs = useDialogsStore()
+	const data = $derived(dialogs.editPlaylistDialogOpen)
 
 	const submitHandler = async (event: SubmitEvent) => {
 		invariant(data !== null, 'Playlist to edit is not set')
@@ -19,16 +19,16 @@
 			description,
 		})
 		if (success) {
-			main.editPlaylistDialogOpen = null
+			dialogs.editPlaylistDialogOpen = null
 		}
 	}
 </script>
 
 <CommonDialog
 	open={{
-		get: () => main.editPlaylistDialogOpen,
+		get: () => dialogs.editPlaylistDialogOpen,
 		close: () => {
-			main.editPlaylistDialogOpen = null
+			dialogs.editPlaylistDialogOpen = null
 		},
 	}}
 	icon="addPlaylist"

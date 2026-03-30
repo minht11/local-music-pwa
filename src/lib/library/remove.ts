@@ -5,7 +5,7 @@ import type { LibraryStoreName } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<
 	AppDB,
-	('directories' | 'tracks' | 'albums' | 'artists' | 'playlistEntries')[],
+	('directories' | 'tracks' | 'albums' | 'artists' | 'playlistEntries' | 'playHistory')[],
 	'readwrite'
 >
 
@@ -42,7 +42,7 @@ const dbRemoveTrackRelatedData = async <
 		return
 	}
 
-	relatedItemStore.delete(relatedItem.id)
+	await relatedItemStore.delete(relatedItem.id)
 
 	const change: DatabaseChangeDetails = {
 		storeName: relatedItemStoreName,
@@ -51,6 +51,21 @@ const dbRemoveTrackRelatedData = async <
 	}
 
 	return change
+}
+
+const dbRemoveTrackFromPlayHistoryWithTx = async (
+	tx: TrackOperationsTransaction,
+	trackId: number,
+): Promise<DatabaseChangeDetails | undefined> => {
+	const store = tx.objectStore('playHistory')
+	const historyIds = await store.index('trackId').getAllKeys(trackId)
+	if (historyIds.length === 0) {
+		return
+	}
+
+	await Promise.all(historyIds.map((id) => store.delete(id)))
+
+	return { storeName: 'playHistory' }
 }
 
 const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
@@ -81,7 +96,10 @@ const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
 
 export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 	const db = await getDatabase()
-	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistEntries'], 'readwrite')
+	const tx = db.transaction(
+		['tracks', 'albums', 'artists', 'playlistEntries', 'playHistory'],
+		'readwrite',
+	)
 
 	const track = await tx.objectStore('tracks').get(trackId)
 	if (!track) {
@@ -90,9 +108,10 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 
 	await tx.objectStore('tracks').delete(trackId)
 
-	const [albumChange, playlistChanges, ...artistsChanges] = await Promise.all([
+	const [albumChange, playlistChanges, historyChange, ...artistsChanges] = await Promise.all([
 		dbRemoveTrackRelatedData(tx, 'album', 'albums', track.album),
 		dbRemoveTrackFromAllPlaylists(trackId),
+		dbRemoveTrackFromPlayHistoryWithTx(tx, trackId),
 		...track.artists.map((artist) =>
 			dbRemoveTrackRelatedData(tx, 'artists', 'artists', artist),
 		),
@@ -106,6 +125,7 @@ export const dbRemoveTrack = async (trackId: number): Promise<void> => {
 			key: trackId,
 		},
 		albumChange,
+		historyChange,
 		...artistsChanges,
 		...playlistChanges,
 	])

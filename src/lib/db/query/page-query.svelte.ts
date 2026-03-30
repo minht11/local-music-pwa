@@ -19,12 +19,19 @@ const pageQueryHydrateSymbol: unique symbol = Symbol()
 class PageQueryResultBox<Result> extends QueryResultBox<Result> {
 	#setupListeners: () => void
 
+	#hydrated = false
+
 	constructor(state: QueryStateInternal<Result>, setupListeners: () => void) {
 		super(state)
 		this.#setupListeners = setupListeners
 	}
 
 	[pageQueryHydrateSymbol](): void {
+		if (this.#hydrated) {
+			return
+		}
+
+		this.#hydrated = true
 		this.#setupListeners()
 	}
 }

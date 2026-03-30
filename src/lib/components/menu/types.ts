@@ -1,5 +1,3 @@
-import type { IconType } from '../icon/Icon.svelte'
-
 export type MenuPosition = {
 	top: number
 	left: number
@@ -31,7 +29,6 @@ export type MenuOptions = (MenuAnchorOptions | MenuPositionOptions) & MenuSize
 /** @public */
 export interface MenuItem {
 	label: string
-	icon?: IconType
 	selected?: boolean
 	action: () => void
 }

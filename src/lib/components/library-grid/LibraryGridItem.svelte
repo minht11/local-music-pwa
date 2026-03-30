@@ -37,7 +37,7 @@
 	}: LibraryItemGridItemProps<Type> = $props()
 
 	const menu = useMenu()
-	const main = useMainStore()
+	const dialogs = useDialogsStore()
 	const player = usePlayer()
 
 	type Value = LibraryGridItemValue<Type>
@@ -78,7 +78,7 @@
 		}
 	})
 
-	const dbGetAlbumOrArtistTrackIdsByName = async (name: string) => {
+	const dbGetAlbumOrArtistTrackIdsByName = (name: string) => {
 		if (type === 'albums') {
 			return dbGetAlbumTracksIdsByName(name)
 		}
@@ -87,7 +87,7 @@
 	}
 
 	const menuItems = () => {
-		if (!item || !linkProps) {
+		if (!(item && linkProps)) {
 			return []
 		}
 
@@ -116,7 +116,7 @@
 					try {
 						const tracksIds = await dbGetAlbumOrArtistTrackIdsByName(item.name)
 
-						main.addTrackToPlaylistDialogOpen = tracksIds
+						dialogs.addTrackToPlaylistDialogOpen = tracksIds
 					} catch (error) {
 						snackbar.unexpectedError(error)
 					}
@@ -125,7 +125,7 @@
 			{
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					main.removeFromLibraryOpen = {
+					dialogs.removeFromLibraryOpen = {
 						type: 'single',
 						id: item.id,
 						name: item.name,

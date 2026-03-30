@@ -1,6 +1,11 @@
 import 'fake-indexeddb/auto'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
+import {
+	clearDatabaseStores,
+	dbGetAllAndExpectLength,
+	expectToBeDefined,
+} from '$lib/helpers/test-helpers.ts'
 import {
 	createPlaylist,
 	dbAddTracksToPlaylistsWithTx,
@@ -16,7 +21,6 @@ import {
 } from '$lib/library/playlists-actions.ts'
 import { dbImportTrack } from '$lib/library/scan-actions/scanner/import-track.ts'
 import { FAVORITE_PLAYLIST_ID, type UnknownTrack } from '$lib/library/types.ts'
-import { clearDatabaseStores, dbGetAllAndExpectLength, expectToBeDefined } from '../../shared.ts'
 
 vi.mock('$lib/components/snackbar/snackbar', () => ({
 	snackbar: Object.assign(vi.fn(), {
@@ -66,9 +70,12 @@ const dbImportTestTrack = async (overrides: Partial<UnknownTrack> = {}): Promise
 describe('playlists', () => {
 	beforeEach(async () => {
 		await clearDatabaseStores()
-		vi.clearAllMocks()
 		trackCounter = 0
 		uuidCounter = 0
+	})
+
+	afterEach(() => {
+		vi.clearAllMocks()
 	})
 
 	describe('playlist creation', () => {

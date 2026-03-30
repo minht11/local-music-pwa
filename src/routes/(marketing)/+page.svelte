@@ -58,7 +58,7 @@
 	<link rel="canonical" href={page.url.href} />
 </svelte:head>
 
-<Header title={m.appName()} noBackButton mode="fixed-no-spacer">
+<Header title={m.appName()} noBackButton>
 	<IconButton
 		as="a"
 		href="https://github.com/minht11/local-music-pwa"

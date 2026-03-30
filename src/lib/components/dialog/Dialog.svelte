@@ -4,8 +4,8 @@
 	import Icon, { type IconType } from '../icon/Icon.svelte'
 
 	export interface DialogOpenAccessor<S> {
-		get(): S | null
-		close(): void
+		get: () => S | null
+		close: () => void
 	}
 
 	export interface DialogProps<S> {
@@ -13,6 +13,7 @@
 		title?: string | ((data: S) => string)
 		icon?: IconType
 		class?: ClassValue
+		header?: Snippet<[{ data: S; close: () => void }]>
 		children?: Snippet<[{ data: S; close: () => void }]>
 	}
 </script>
@@ -23,6 +24,7 @@
 		title,
 		icon,
 		class: className,
+		header,
 		children,
 	}: DialogProps<S> = $props()
 
@@ -30,9 +32,9 @@
 	const isOpen = $derived.by(() => {
 		if (typeof open === 'object') {
 			return openData !== null
-		} else {
-			return open
 		}
+
+		return open
 	})
 
 	const titleText = $derived.by(() => {
@@ -51,13 +53,12 @@
 		}
 	}
 
-	let dialogHeader = $state<HTMLElement>()!
+	const getParts = (dialog: HTMLDialogElement) => {
+		const dialogHeader = dialog.querySelector<HTMLElement>('[data-dialog-header]')
+		const dialogBody = dialog.querySelector<HTMLElement>('[data-dialog-content]')
+		const dialogFooter = dialog.querySelector<HTMLElement>('[data-dialog-footer]')
 
-	const getParts = () => {
-		const dialogBody = dialogHeader.querySelector<HTMLElement>('[data-dialog-content]')
-		const dialogFooter = dialogHeader.querySelector<HTMLElement>('[data-dialog-footer]')
-
-		return { dialogBody, dialogFooter }
+		return { dialogHeader, dialogBody, dialogFooter }
 	}
 
 	const animateBackdrop = (dialog: HTMLDialogElement, isOut = false) => {
@@ -83,7 +84,7 @@
 	}
 
 	const animateIn = (dialog: HTMLDialogElement) => {
-		const { dialogBody, dialogFooter } = getParts()
+		const { dialogHeader, dialogBody, dialogFooter } = getParts(dialog)
 
 		const fade = (el: HTMLElement | null): AnimationSequence | null =>
 			el ? [el, { opacity: [0, 1] }, { duration: 300, at: '<' }] : null
@@ -102,8 +103,8 @@
 				},
 			] satisfies AnimationSequence,
 			fade(dialogHeader),
-			dialogBody && fade(dialogBody),
-			dialogFooter && fade(dialogFooter),
+			fade(dialogBody),
+			fade(dialogFooter),
 			dialogFooter &&
 				([
 					dialogFooter,
@@ -121,7 +122,7 @@
 	}
 
 	const animateOut = (dialog: HTMLDialogElement) => {
-		const { dialogBody, dialogFooter } = getParts()
+		const { dialogHeader, dialogBody, dialogFooter } = getParts(dialog)
 
 		const fade = (el: HTMLElement | null): AnimationSequence | null =>
 			el ? [el, { opacity: [1, 0] }, { duration: 300, at: '<' }] : null
@@ -148,7 +149,7 @@
 			fade(dialogFooter),
 			fade(dialogBody),
 			fade(dialogHeader),
-		].filter((x) => x !== null)
+		].filter((x) => x !== null && x !== undefined)
 
 		return timeline(frames, {
 			defaultOptions: {
@@ -168,7 +169,7 @@
 
 		// TODO. A hack until svelte supports non duration based animations
 		return {
-			duration: 300,
+			duration: 400,
 		}
 	}
 </script>
@@ -195,18 +196,22 @@
 			className,
 		]}
 	>
-		<header
-			bind:this={dialogHeader}
-			class={['flex flex-col gap-4 px-6 pt-6', icon && 'items-center justify-center text-center']}
-		>
-			{#if icon}
-				<Icon type={icon} class="text-secondary" />
-			{/if}
+		{#if header}
+			{@render header({ data: openData!, close })}
+		{:else}
+			<div
+				data-dialog-header
+				class={['flex flex-col gap-4 px-6 pt-6', icon && 'items-center justify-center text-center']}
+			>
+				{#if icon}
+					<Icon type={icon} class="text-secondary" />
+				{/if}
 
-			{#if titleText}
-				<div class="text-headline-sm">{titleText}</div>
-			{/if}
-		</header>
+				{#if titleText}
+					<div class="text-headline-sm">{titleText}</div>
+				{/if}
+			</div>
+		{/if}
 
 		<div class="flex shrink flex-col overflow-hidden">
 			{@render children?.({
@@ -228,7 +233,7 @@
 		max-width: initial !important;
 		max-height: min(100% - --spacing(6) * 2, var(--dialog-height, 100%), --spacing(150)) !important;
 		width: clamp(
-			var(--dialog-width, --spacing(70)),
+			--spacing(70),
 			var(--dialog-width, --spacing(100)),
 			100% - --spacing(8)
 		) !important;

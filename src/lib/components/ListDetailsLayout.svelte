@@ -30,13 +30,13 @@
 	let isBothMode = $derived(mode === 'both')
 </script>
 
-<div {id} class={['!flex !flex-col', className]}>
+<div {id} class={['flex! flex-col!', className]}>
 	<div class="flex h-full grow">
 		{#if isBothMode}
 			<ScrollContainer
 				bind:offsetWidth={listOffsetWidth}
 				class={[
-					'fixed top-0 flex max-h-[100svh] min-h-full shrink-0 flex-col overflow-y-auto overscroll-contain',
+					'fixed top-0 flex max-h-dvh min-h-full shrink-0 flex-col overflow-y-auto overscroll-contain',
 					!noPlayerOverlayPadding && 'pb-[calc(var(--bottom-overlay-height)+16px)]',
 					!noListStableGutter && 'scrollbar-gutter-stable',
 				]}

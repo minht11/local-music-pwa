@@ -26,7 +26,7 @@
 			<Button
 				kind={button.kind ?? 'flat'}
 				class={['min-w-15', button.align === 'left' && 'mr-auto']}
-				type={button.type !== 'close' ? button.type : 'button'}
+				type={button.type === 'close' ? 'button' : button.type}
 				onclick={async () => {
 					await button.action?.(state as S)
 					if (!button.type || button.type === 'close') {

@@ -19,6 +19,10 @@ export class Debounced<T> {
 		$effect(() => {
 			const value = getter()
 			debouncedFn(value)
+
+			return () => {
+				debouncedFn.cancel()
+			}
 		})
 	}
 }

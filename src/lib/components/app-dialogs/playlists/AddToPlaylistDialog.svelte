@@ -4,10 +4,10 @@
 	import Separator from '$lib/components/Separator.svelte'
 	import AddToPlaylistDialogContent from './AddToPlaylistDialogContent.svelte'
 
-	const main = useMainStore()
+	const dialogs = useDialogsStore()
 
 	const dialogTitle = () => {
-		const count = main.addTrackToPlaylistDialogOpen?.length ?? 0
+		const count = dialogs.addTrackToPlaylistDialogOpen?.length ?? 0
 		const countLabel = count > 1 ? ` (${count})` : ''
 
 		return `${m.libraryAddToPlaylist()}${countLabel}`
@@ -16,9 +16,9 @@
 
 <Dialog
 	open={{
-		get: () => main.addTrackToPlaylistDialogOpen,
+		get: () => dialogs.addTrackToPlaylistDialogOpen,
 		close: () => {
-			main.addTrackToPlaylistDialogOpen = null
+			dialogs.addTrackToPlaylistDialogOpen = null
 		},
 	}}
 	title={dialogTitle()}
@@ -42,7 +42,7 @@
 								align: 'left',
 								type: 'button',
 								action: () => {
-									main.createNewPlaylistDialogOpen = true
+									dialogs.createNewPlaylistDialogOpen = true
 								},
 							},
 							{

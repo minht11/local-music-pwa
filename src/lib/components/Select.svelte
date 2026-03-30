@@ -40,10 +40,11 @@
 		className,
 	]}
 	role="combobox"
-	aria-controls="popupId"
-	aria-owns="popupId"
+	aria-controls={popupId}
+	aria-owns={popupId}
 	aria-expanded={isOpen}
 	popovertarget={popupId}
+	type="button"
 >
 	<div class="truncate">
 		{#if selectedItem}
@@ -73,6 +74,7 @@
 			{@attach ripple()}
 			role="option"
 			aria-selected={item[key] === selected}
+			type="button"
 			class={[
 				'interactable flex h-10 w-full cursor-pointer items-center overflow-hidden px-4 -outline-offset-2',
 				item[key] === selected && 'text-primary',

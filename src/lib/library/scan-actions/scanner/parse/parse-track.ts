@@ -1,6 +1,5 @@
 import { parseBlob } from 'music-metadata'
 import { type ParsedTrackData, UNKNOWN_ITEM } from '$lib/library/types.ts'
-import { getArtworkRelatedData } from './format-artwork.ts'
 
 // This limit is a bit arbitrary.
 const FILE_SIZE_LIMIT_500MB = 5e8
@@ -8,7 +7,9 @@ const FILE_SIZE_LIMIT_500MB = 5e8
 const artistSeparatorRegex = /,|&/
 
 /** @public */
-export const parseTrack = async (file: File): Promise<ParsedTrackData | null> => {
+export const parseTrackMetadata = async (
+	file: File,
+): Promise<{ data: ParsedTrackData; imageBlob?: Blob } | null> => {
 	// Ignore files bigger than limit because of
 	// potential performance issues.
 	if (file.size > FILE_SIZE_LIMIT_500MB) {
@@ -18,6 +19,7 @@ export const parseTrack = async (file: File): Promise<ParsedTrackData | null> =>
 	const tags = await parseBlob(file, {
 		duration: true,
 		mkvUseIndex: true,
+		skipPostHeaders: true,
 	})
 
 	const { common } = tags
@@ -26,10 +28,9 @@ export const parseTrack = async (file: File): Promise<ParsedTrackData | null> =>
 	const picture = common.picture?.[0]
 	if (picture) {
 		const imageData = new Uint8ClampedArray(picture.data)
-		imageBlob = new Blob([imageData], { type: picture.type })
+		imageBlob = new Blob([imageData], { type: picture.format })
 	}
 
-	const artworkData = imageBlob && (await getArtworkRelatedData(imageBlob))
 	const artists =
 		common.artists
 			?.flatMap((artist) => artist.split(artistSeparatorRegex))
@@ -40,15 +41,17 @@ export const parseTrack = async (file: File): Promise<ParsedTrackData | null> =>
 		album: common.album ?? UNKNOWN_ITEM,
 		artists: artists.length > 0 ? artists : [UNKNOWN_ITEM],
 		genre: common.genre || [],
-		trackNo: common.track.no || 0,
-		trackOf: common.track.of || 0,
-		discNo: common.disk.no || 0,
-		discOf: common.disk.of || 0,
+		trackNo: common.track.no ?? 0,
+		trackOf: common.track.of ?? 0,
+		discNo: common.disk.no ?? 0,
+		discOf: common.disk.of ?? 0,
 		year: common.year?.toString() ?? UNKNOWN_ITEM,
-		duration: tags.format.duration || 0,
+		duration: tags.format.duration ?? 0,
 		language: common.language?.trim(),
-		...artworkData,
 	}
 
-	return trackData
+	return {
+		data: trackData,
+		imageBlob,
+	}
 }
