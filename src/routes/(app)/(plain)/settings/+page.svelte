@@ -24,6 +24,8 @@
 	initPageQueries(data)
 
 	const mainStore = useMainStore()
+	const player = usePlayer()
+	const dialogs = useDialogsStore()
 
 	const directories = $derived(data.directoriesQuery.value)
 
@@ -188,18 +190,43 @@
 			class="w-40"
 		/>
 	</div>
+</section>
 
-	<Separator />
+<section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
+	<div class="px-4 pt-4 text-title-sm">{m.player()}</div>
 
 	{#if supportsChangingAudioVolume()}
 		<div class="flex items-center justify-between p-4">
-			<div>
-				{m.settingsDisplayVolumeSlider()}
-			</div>
+			<div>{m.settingsDisplayVolumeSlider()}</div>
 
 			<Switch bind:checked={mainStore.volumeSliderEnabled} />
 		</div>
+
+		<Separator />
 	{/if}
+
+	<div class="flex items-center justify-between p-4">
+		<div class="flex items-center gap-2">
+			<div>{m.equalizerTitle()}</div>
+
+			{#if player.equalizer.enabled}
+				<div
+					class="rounded-full bg-primaryContainer px-2 py-0.5 text-label-sm text-onPrimaryContainer"
+				>
+					{m.equalizerStatusEnabled()}
+				</div>
+			{/if}
+		</div>
+
+		<Button
+			kind="toned"
+			onclick={() => {
+				dialogs.equalizerDialogOpen = true
+			}}
+		>
+			{m.equalizerOpenEqualizer()}
+		</Button>
+	</div>
 </section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
