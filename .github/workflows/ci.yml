@@ -6,19 +6,22 @@ on:
     branches:
       - main
 
+env:
+  PUBLIC_FALLBACK_PAGE: ${{ vars.PUBLIC_FALLBACK_PAGE }}
+  PUBLIC_GOAT_COUNTER_URL: ${{ vars.PUBLIC_GOAT_COUNTER_URL }}
+
 jobs:
   code-quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v6.0.2
+      - uses: pnpm/action-setup@v5.0.0
         with:
           run_install: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6.3.0
         with:
           node-version: 24.12.0
           cache: "pnpm"
-
       - run: pnpm install
       - name: Build generated files
         run: pnpm run build

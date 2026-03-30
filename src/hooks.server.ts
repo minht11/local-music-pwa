@@ -1,6 +1,6 @@
 import type { Handle } from '@sveltejs/kit'
 import { ICON_PATHS } from '$lib/components/icon/icon-paths.server.ts'
-import { PUBLIC_FALLBACK_PAGE } from '$env/static/public'
+import { PUBLIC_FALLBACK_PAGE, PUBLIC_GOAT_COUNTER_URL } from '$env/static/public'
 import { THEME_PALLETTE_DARK, THEME_PALLETTE_LIGHT } from './server/theme-colors.ts'
 
 const getThemeColorMeta = (color: string | undefined, theme: 'dark' | 'light') =>
@@ -36,9 +36,13 @@ const replaceSvgIconPaths = (html: string) => {
 	)
 }
 
+const replaceGoatCounterUrl = (html: string) =>
+	html.replaceAll('%snae.goat-counter-url%', PUBLIC_GOAT_COUNTER_URL)
+
 const transformPageChunk = ({ html }: { html: string }) => {
 	html = replaceSvgIconPaths(html)
 	html = replaceThemeColorMeta(html)
+	html = replaceGoatCounterUrl(html)
 
 	return html
 }
