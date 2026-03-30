@@ -205,9 +205,7 @@ export class PlayerStore {
 		})
 
 		$effect(() => {
-			const preservePitch = this.preservePitch
-
-			audio.preservesPitch = preservePitch
+			audio.preservesPitch = this.preservePitch
 		})
 
 		$effect(() => {
