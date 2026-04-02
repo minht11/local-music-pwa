@@ -214,7 +214,7 @@ export const removeDirectory = async (id: number): Promise<void> => {
 }
 
 /** @private */
-export const dbImportLegacyFiles = async (files: File[]): Promise<void> =>
+export const dbImportLegacyFiles = (files: File[]): Promise<void> =>
 	scanTracks({
 		action: 'legacy-files-add',
 		files,

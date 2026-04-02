@@ -24,7 +24,7 @@ describe('QueueStore', () => {
 			q.setTrack(0, [1, 2, 3, 4, 5], { shuffle: true })
 			expect(q.shuffle).toBe(true)
 			expect(q.activeTrackIndex).toBe(0)
-			expect([...q.itemsIds].sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5])
+			expect(q.itemsIds.toSorted((a, b) => a - b)).toEqual([1, 2, 3, 4, 5])
 		})
 
 		it('disables shuffle when new queue is passed without shuffle option', () => {
@@ -83,7 +83,7 @@ describe('QueueStore', () => {
 			const q = new QueueStore()
 			q.setTrack(0, [10, 20, 30, 40, 50])
 			q.toggleShuffle()
-			expect([...q.itemsIds].sort((a, b) => a - b)).toEqual([10, 20, 30, 40, 50])
+			expect(q.itemsIds.toSorted((a, b) => a - b)).toEqual([10, 20, 30, 40, 50])
 		})
 
 		it('disables shuffle and restores original order with correct active index', () => {
@@ -115,7 +115,7 @@ describe('QueueStore', () => {
 			q.toggleShuffle()
 			expect(q.shuffle).toBe(true)
 			expect(q.activeTrackIndex).toBe(-1)
-			expect([...q.itemsIds].sort((a, b) => a - b)).toEqual([20, 30])
+			expect(q.itemsIds.toSorted((a, b) => a - b)).toEqual([20, 30])
 		})
 
 		it('toggles gracefully on an empty queue', () => {

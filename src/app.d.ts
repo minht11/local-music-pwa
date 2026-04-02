@@ -1,6 +1,11 @@
 import type { Snippet as SnippetInternal } from 'svelte'
 import type { ClassValue as ClassValueInternal } from 'svelte/elements'
 
+declare module '$env/static/public' {
+	const PUBLIC_FALLBACK_PAGE: string
+	const PUBLIC_GOAT_COUNTER_URL: string
+}
+
 declare global {
 	namespace App {
 		// interface Error {}
