@@ -9,6 +9,7 @@
 		getFilesFromLegacyDirectory,
 		isFileSystemAccessSupported,
 	} from '$lib/helpers/file-system.ts'
+	import { isAndroid } from '$lib/helpers/utils/ua.ts'
 	import {
 		checkNewDirectoryStatus,
 		importLegacyFiles,
@@ -32,6 +33,7 @@
 		newDirHandle: FileSystemDirectoryHandle
 	}
 
+	const isAndroidPlatform = isAndroid()
 	let reparentDirectory = $state<ReparentDirectory | null>(null)
 
 	const addNewDirectoryHandler = async () => {
@@ -137,7 +139,8 @@
 			</div>
 
 			<div class="ml-auto flex items-center gap-1">
-				{#if !dir.legacy}
+				<!-- Chromium on Android broke persisted handles https://issues.chromium.org/issues/499064852 -->
+				{#if !(dir.legacy || isAndroidPlatform)}
 					<IconButton
 						{disabled}
 						icon="cached"

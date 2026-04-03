@@ -1,8 +1,8 @@
-import { parseBlob } from 'music-metadata'
+import { parseBuffer } from 'music-metadata'
 import { type ParsedTrackData, UNKNOWN_ITEM } from '$lib/library/types.ts'
 
 // This limit is a bit arbitrary.
-const FILE_SIZE_LIMIT_500MB = 5e8
+const FILE_SIZE_LIMIT_300MB = 300 * 1024 * 1024
 
 const artistSeparatorRegex = /,|&/
 
@@ -12,15 +12,27 @@ export const parseTrackMetadata = async (
 ): Promise<{ data: ParsedTrackData; imageBlob?: Blob } | null> => {
 	// Ignore files bigger than limit because of
 	// potential performance issues.
-	if (file.size > FILE_SIZE_LIMIT_500MB) {
+	if (file.size > FILE_SIZE_LIMIT_300MB) {
 		return null
 	}
 
-	const tags = await parseBlob(file, {
-		duration: true,
-		mkvUseIndex: true,
-		skipPostHeaders: true,
-	})
+	// Loading whole file into memory all at once is faster than streaming it,
+	// especially on Android where many small FS reads can be very slow.
+	const arrayBuffer = await file.arrayBuffer()
+	const buffer = new Uint8Array(arrayBuffer)
+
+	const tags = await parseBuffer(
+		buffer,
+		{
+			mimeType: file.type,
+			size: file.size,
+		},
+		{
+			duration: true,
+			mkvUseIndex: true,
+			skipPostHeaders: true,
+		},
+	)
 
 	const { common } = tags
 
