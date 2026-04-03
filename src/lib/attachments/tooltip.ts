@@ -46,12 +46,10 @@ export const tooltip = (message: string | undefined): Attachment<HTMLElement> =>
 
 			// Remove attribute to prevent default browser tooltip
 			target.removeAttribute('title')
-			// @ts-expect-error missing types
 			target.style.anchorName = anchorName
 
 			tooltipElement = cloneTooltipTemplate()
 			tooltipElement.textContent = message
-			// @ts-expect-error missing types
 			tooltipElement.style.positionAnchor = anchorName
 
 			document.body.appendChild(tooltipElement)

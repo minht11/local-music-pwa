@@ -97,6 +97,9 @@
 
 	"player": "Grotuvas",
 	"playerAddToQueue": "Pridėti į eilę",
+	"playerAudioErrorLoadError": "Nepavyko įkelti garso įrašo \"{name}\"",
+	"playerAudioErrorNotFound": "Garso failas \"{name}\" nerastas. Gali būti perkeltas arba ištrintas.",
+	"playerAudioErrorPermissionDenied": "Trūksta leidimo įkelti garso įrašą \"{name}\". Suteikite naršyklės leidimą ir bandykite dar kartą.",
 	"playerClearHistory": "Išvalyti istoriją",
 	"playerClearQueue": "Išvalyti eilę",
 	"playerDecreaseVolume": "Sumažinti garsumą",

@@ -3,7 +3,7 @@ import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
-import { formatArtists } from '$lib/helpers/utils/text.ts'
+import { formatArtists, truncate } from '$lib/helpers/utils/text.ts'
 import { throttle } from '$lib/helpers/utils/throttle.ts'
 import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
 import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
@@ -92,6 +92,7 @@ export class PlayerStore {
 				this.#audioLoader.reset()
 				this.currentTime = 0
 				this.duration = 0
+				this.playing = false
 			}
 		}, 100)
 
@@ -101,7 +102,6 @@ export class PlayerStore {
 					this.#savePlayHistory(prevTrackId)
 
 					prevTrackId = null
-					this.playing = false
 				}
 				scheduleAudioReset()
 				return
@@ -121,9 +121,23 @@ export class PlayerStore {
 			this.currentTime = 0
 			this.duration = 0
 
-			void this.#audioLoader.load(track.file).then((result) => {
-				if (result === 'failed') {
-					this.playing = false
+			void this.#audioLoader.load(track.directory, track.file).then((result) => {
+				if (result.status === 'failed') {
+					const name = truncate(track.name, 30)
+					const errorMap = {
+						'not-found': m.playerAudioErrorNotFound,
+						'permission-denied': m.playerAudioErrorPermissionDenied,
+						error: m.playerAudioErrorLoadError,
+					}
+
+					snackbar({
+						message: errorMap[result.reason]({ name }),
+						id: 'failed-to-load-audio',
+						duration: 10_000,
+					})
+
+					prevTrackId = null
+					this.#queue.setTrack(-1)
 				}
 			})
 		}

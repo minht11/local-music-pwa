@@ -1,6 +1,7 @@
 const isMobileRegex = /Android|iPhone|iPad|iPod/i
 const isMacRegex = /Macintosh|Mac OS X/i
 const isWindowsRegex = /Windows/i
+const isAndroidRegex = /Android/i
 
 /** @public */
 export const isMobile = (): boolean => {
@@ -34,6 +35,25 @@ export const isWindows = (): boolean => {
 	}
 
 	return isWindowsRegex.test(navigator.userAgent)
+}
+
+export const isAndroid = (): boolean => {
+	if (navigator.userAgentData) {
+		return navigator.userAgentData.platform === 'Android'
+	}
+
+	return isAndroidRegex.test(navigator.userAgent)
+}
+
+export const isChromiumBased = (): boolean => {
+	// All of our supported Chromium versions will have this property
+	if (navigator.userAgentData) {
+		return navigator.userAgentData.brands.some((brand) =>
+			brand.brand.toLowerCase().includes('chromium'),
+		)
+	}
+
+	return false
 }
 
 /**

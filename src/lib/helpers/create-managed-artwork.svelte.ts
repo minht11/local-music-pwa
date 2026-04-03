@@ -60,16 +60,16 @@ export const createManagedArtwork = (getImage: () => Blob | undefined | null) =>
 			return null
 		}
 
-		let artwork = cache.get(image)
-		if (artwork) {
-			artwork.refs.add(key)
+		let artworkInstance = cache.get(image)
+		if (artworkInstance) {
+			artworkInstance.refs.add(key)
 		} else {
-			artwork = new Artwork(image, key)
+			artworkInstance = new Artwork(image, key)
 
-			cache.set(image, artwork)
+			cache.set(image, artworkInstance)
 		}
 
-		return artwork
+		return artworkInstance
 	})
 
 	$effect(() => {

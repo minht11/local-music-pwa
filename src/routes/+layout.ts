@@ -18,8 +18,8 @@ const initLocale = () => {
 if (browser) {
 	const locale = initLocale()
 	overwriteGetLocale(() => locale)
-	overwriteSetLocale((locale) => {
-		localStorage.setItem('snae-locale', locale)
+	overwriteSetLocale((newLocale) => {
+		localStorage.setItem('snae-locale', newLocale)
 		window.location.reload()
 	})
 

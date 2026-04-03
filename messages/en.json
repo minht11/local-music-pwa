@@ -98,6 +98,9 @@
 
 	"player": "Player",
 	"playerAddToQueue": "Add to queue",
+	"playerAudioErrorLoadError": "Failed to load audio for \"{name}\"",
+	"playerAudioErrorNotFound": "Audio file not found for \"{name}\". It might have been moved or deleted.",
+	"playerAudioErrorPermissionDenied": "Permission denied to load audio for \"{name}\". Please grant browser permission and try again.",
 	"playerClearHistory": "Clear history",
 	"playerClearQueue": "Clear queue",
 	"playerDecreaseVolume": "Decrease volume",

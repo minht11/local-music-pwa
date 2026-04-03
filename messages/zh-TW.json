@@ -97,6 +97,9 @@
 
 	"player": "播放器",
 	"playerAddToQueue": "新增到佇列",
+	"playerAudioErrorLoadError": "無法載入\"{name}\"的音訊",
+	"playerAudioErrorNotFound": "找不到\"{name}\"的音訊檔案。該檔案可能已被移動或刪除。",
+	"playerAudioErrorPermissionDenied": "沒有權限載入\"{name}\"的音訊。請授予瀏覽器權限後再試一次。",
 	"playerClearHistory": "清除歷史記錄",
 	"playerClearQueue": "清空佇列",
 	"playerDecreaseVolume": "降低音量",

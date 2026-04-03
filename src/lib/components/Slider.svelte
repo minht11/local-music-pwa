@@ -33,9 +33,9 @@
 	let trackSize = $state(0)
 
 	const getValueFromPercentage = (percentage: number, rangeMin: number, rangeMax: number) => {
-		const value = (percentage / 100) * (rangeMax - rangeMin) + rangeMin
+		const newValue = (percentage / 100) * (rangeMax - rangeMin) + rangeMin
 
-		return value
+		return newValue
 	}
 
 	interface TrackBorderOptions {
