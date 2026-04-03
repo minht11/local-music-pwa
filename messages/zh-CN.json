@@ -97,6 +97,9 @@
 
 	"player": "播放器",
 	"playerAddToQueue": "添加到队列",
+	"playerAudioErrorLoadError": "无法加载\"{name}\"的音频",
+	"playerAudioErrorNotFound": "未找到\"{name}\"的音频文件。该文件可能已被移动或删除。",
+	"playerAudioErrorPermissionDenied": "没有权限加载\"{name}\"的音频。请授予浏览器权限后重试。",
 	"playerClearHistory": "清除历史记录",
 	"playerClearQueue": "清空队列",
 	"playerDecreaseVolume": "降低音量",

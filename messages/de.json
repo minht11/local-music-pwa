@@ -97,6 +97,9 @@
 
 	"player": "Player",
 	"playerAddToQueue": "Zur Warteschlange hinzufügen",
+	"playerAudioErrorLoadError": "Audio für \"{name}\" konnte nicht geladen werden",
+	"playerAudioErrorNotFound": "Audiodatei für \"{name}\" nicht gefunden. Sie wurde möglicherweise verschoben oder gelöscht.",
+	"playerAudioErrorPermissionDenied": "Keine Berechtigung, Audio für \"{name}\" zu laden. Bitte erteilen Sie die Browser-Berechtigung und versuchen Sie es erneut.",
 	"playerClearHistory": "Verlauf löschen",
 	"playerClearQueue": "Warteschlange löschen",
 	"playerDecreaseVolume": "Lautstärke verringern",
