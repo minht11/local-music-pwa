@@ -12,7 +12,7 @@
 	}
 </script>
 
-{#if snackbarItems.length !== 0}
+{#if snackbarItems.length > 0}
 	{#each snackbarItems as item (item.id)}
 		<div class="pointer-events-auto top-auto col-3" animate:flip={{ duration: 140 }}>
 			<Snackbar {...item} ondismiss={dismissHandler} />

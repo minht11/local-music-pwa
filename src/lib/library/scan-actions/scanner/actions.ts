@@ -208,14 +208,12 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 
 			const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
 
-			if (existingTrack) {
-				// File was not modified since last scan
-				if (unwrappedFile.lastModified <= existingTrack.scannedAt) {
-					scannedTracksIds.add(existingTrack.id)
-					tracker.sendMsg(false)
+			// File was not modified since last scan
+			if (existingTrack && unwrappedFile.lastModified <= existingTrack.scannedAt) {
+				scannedTracksIds.add(existingTrack.id)
+				tracker.sendMsg(false)
 
-					continue
-				}
+				continue
 			}
 
 			await processor.parseAndEnqueue({

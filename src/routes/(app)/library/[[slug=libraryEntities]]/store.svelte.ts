@@ -14,10 +14,8 @@ export class LibraryStore<Slug extends LibraryStoreName> {
 
 		// Previous version used 'album' key for sorting track by album.
 		// Update value after loading persisted state.
-		if (slug === 'tracks') {
-			if (this.sortByKey === 'album') {
-				this.sortByKey = 'byAlbumSorted' as LibraryItemSortKey<Slug>
-			}
+		if (slug === 'tracks' && this.sortByKey === 'album') {
+			this.sortByKey = 'byAlbumSorted' as LibraryItemSortKey<Slug>
 		}
 	}
 }

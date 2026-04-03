@@ -86,6 +86,21 @@
 				"useExportType": "error",
 				"noUselessElse": "error",
 				"useShorthandFunctionType": "error",
+				"useNumericSeparators": "error",
+				"noSubstr": "error",
+				"useTrimStartEnd": "error",
+				"useObjectSpread": "error",
+				"useGroupedAccessorPairs": "error",
+				"useForOf": "error",
+				"useDeprecatedReason": "error",
+				"useAtIndex": "error",
+				"noYodaExpression": "error",
+				"useConsistentArrowReturn": "error",
+				"useArrayLiterals": "error",
+				"useCollapsedIf": "error",
+				"useConsistentTypeDefinitions": "error",
+				"useExplicitLengthCheck": "error",
+				"noShoutyConstants": "error",
 				"noRestrictedImports": {
 					"level": "error",
 					"options": {
@@ -148,6 +163,9 @@
 			},
 			"a11y": {
 				"noSvgWithoutTitle": "off"
+			},
+			"performance": {
+				"useTopLevelRegex": "error"
 			}
 		}
 	},

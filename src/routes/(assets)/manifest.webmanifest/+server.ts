@@ -34,10 +34,9 @@ const manifest = {
 	],
 }
 
-export const GET = () => {
-	return new Response(JSON.stringify(manifest), {
+export const GET = () =>
+	new Response(JSON.stringify(manifest), {
 		headers: {
 			'Content-Type': 'application/manifest+json',
 		},
 	})
-}

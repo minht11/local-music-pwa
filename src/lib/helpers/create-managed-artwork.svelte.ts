@@ -85,10 +85,8 @@ export const createManagedArtwork = (getImage: () => Blob | undefined | null) =>
 				scheduleCleanup(savedArtwork)
 			}
 
-			if (import.meta.env.DEV) {
-				if (!savedArtwork.refs.has(key)) {
-					console.warn('Trying to release artwork that is not in use', savedArtwork)
-				}
+			if (import.meta.env.DEV && !savedArtwork.refs.has(key)) {
+				console.warn('Trying to release artwork that is not in use', savedArtwork)
 			}
 
 			savedArtwork.refs.delete(key)

@@ -194,7 +194,7 @@ export function getPrimaryColor(pixels: Uint8ClampedArray, width: number, height
 		}
 	}
 	if (bestIdx < 0 || bestW === 0) {
-		return 0xff000000
+		return 0xff_00_00_00
 	}
 
 	// Calculate weighted average of actual pixel colors in the winning bin

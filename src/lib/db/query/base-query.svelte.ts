@@ -3,25 +3,25 @@ import { type DatabaseChangeDetailsList, onDatabaseChange } from '../events.ts'
 
 export type QueryStatus = 'loading' | 'loaded' | 'error'
 
-type QueryBaseResult = {
+interface QueryBaseResult {
 	status: QueryStatus
 }
 
-type QueryLoadedResult<Result> = {
+interface QueryLoadedResult<Result> {
 	status: 'loaded'
 	loading: false
 	value: Result
 	error: undefined
 }
 
-type QueryLoadingResult<Result> = {
+interface QueryLoadingResult<Result> {
 	status: 'loading'
 	loading: true
 	value: Result | undefined
 	error: undefined
 }
 
-type QueryErrorResult<Result> = {
+interface QueryErrorResult<Result> {
 	status: 'error'
 	loading: false
 	value: Result | undefined
@@ -33,7 +33,7 @@ export type QueryResult<Result> = QueryBaseResult &
 
 export type QueryMutate<Result> = (value: Result | ((prev: Result | undefined) => Result)) => void
 
-export type DbChangeActions<Result> = {
+export interface DbChangeActions<Result> {
 	mutate: QueryMutate<Result>
 	refetch: () => void
 }

@@ -9,9 +9,7 @@ export const prerender = true
 // - Google search results
 const sizes = [16, 32, 48, 128, 192] as const
 
-export const entries: EntryGenerator = () => {
-	return sizes.map((size) => ({ size: size.toString() }))
-}
+export const entries: EntryGenerator = () => sizes.map((size) => ({ size: size.toString() }))
 
 export const GET: RequestHandler = async ({ fetch, params }) => {
 	const response = await fetch('/icons/responsive.svg')
