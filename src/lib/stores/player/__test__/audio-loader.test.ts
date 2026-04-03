@@ -1,4 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+
+vi.mock('$lib/helpers/utils/ua', () => ({
+	isAndroid: () => false,
+	isChromiumBased: () => false,
+}))
+
 import { AudioLoader } from '$lib/stores/player/audio-loader.svelte.ts'
 
 const createObjectURL = vi.fn((file: File) => `blob:mock/${file.name}`)
@@ -41,7 +47,7 @@ describe('AudioLoader', () => {
 			const onSrc = vi.fn()
 			const loader = new AudioLoader(onSrc)
 
-			expect(await loader.load(new File([''], 'song.mp3'))).toBe('loaded')
+			expect(await loader.load(-1, new File([''], 'song.mp3'))).toEqual({ status: 'loaded' })
 			expect(onSrc).toHaveBeenLastCalledWith('blob:mock/song.mp3')
 			expect(loader.loading).toBe(false)
 		})
@@ -50,7 +56,9 @@ describe('AudioLoader', () => {
 			const onSrc = vi.fn()
 			const file = new File([''], 'song.mp3')
 
-			expect(await new AudioLoader(onSrc).load(makeHandle('granted', file))).toBe('loaded')
+			expect(await new AudioLoader(onSrc).load(1, makeHandle('granted', file))).toEqual({
+				status: 'loaded',
+			})
 			expect(onSrc).toHaveBeenLastCalledWith('blob:mock/song.mp3')
 		})
 
@@ -58,21 +66,76 @@ describe('AudioLoader', () => {
 			const onSrc = vi.fn()
 			const loader = new AudioLoader(onSrc)
 
-			expect(await loader.load(makeHandle('denied'))).toBe('failed')
+			expect(await loader.load(1, makeHandle('denied'))).toEqual({
+				status: 'failed',
+				reason: 'permission-denied',
+			})
 			expect(onSrc).not.toHaveBeenCalledWith(expect.stringContaining('blob:'))
+			expect(loader.loading).toBe(false)
+		})
+
+		it('returns failed when prompt permission request throws', async () => {
+			const onSrc = vi.fn()
+			const loader = new AudioLoader(onSrc)
+			const handle = {
+				queryPermission: vi.fn().mockResolvedValue('prompt' as PermissionState),
+				requestPermission: vi.fn().mockRejectedValue(new Error('user activation required')),
+				getFile: vi.fn(),
+			} as unknown as FileSystemFileHandle
+
+			expect(await loader.load(1, handle)).toEqual({
+				status: 'failed',
+				reason: 'permission-denied',
+			})
+			expect(handle.requestPermission).toHaveBeenCalled()
+			expect(handle.getFile).not.toHaveBeenCalled()
+			expect(loader.loading).toBe(false)
+		})
+
+		it('returns failed with reason not-found when getFile throws NotFoundError', async () => {
+			const onSrc = vi.fn()
+			const loader = new AudioLoader(onSrc)
+			const handle = {
+				queryPermission: vi.fn().mockResolvedValue('granted' as PermissionState),
+				requestPermission: vi.fn(),
+				getFile: vi.fn().mockRejectedValue(new DOMException('missing', 'NotFoundError')),
+			} as unknown as FileSystemFileHandle
+
+			expect(await loader.load(1, handle)).toEqual({
+				status: 'failed',
+				reason: 'not-found',
+			})
+			expect(loader.loading).toBe(false)
+		})
+
+		it('returns failed with reason error when getFile throws unknown error', async () => {
+			const onSrc = vi.fn()
+			const loader = new AudioLoader(onSrc)
+			const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+			const handle = {
+				queryPermission: vi.fn().mockResolvedValue('granted' as PermissionState),
+				requestPermission: vi.fn(),
+				getFile: vi.fn().mockRejectedValue(new Error('boom')),
+			} as unknown as FileSystemFileHandle
+
+			expect(await loader.load(1, handle)).toEqual({
+				status: 'failed',
+				reason: 'error',
+			})
+			expect(consoleError).toHaveBeenCalled()
 			expect(loader.loading).toBe(false)
 		})
 
 		it('requests permission when state is prompt', async () => {
 			const handle = makeHandle('prompt')
-			await new AudioLoader(vi.fn()).load(handle)
+			await new AudioLoader(vi.fn()).load(1, handle)
 			expect(handle.requestPermission).toHaveBeenCalled()
 		})
 
 		it('revokes previous blob URL before loading a new file', async () => {
 			const loader = new AudioLoader(vi.fn())
-			await loader.load(new File([''], 'first.mp3'))
-			await loader.load(new File([''], 'second.mp3'))
+			await loader.load(-1, new File([''], 'first.mp3'))
+			await loader.load(-1, new File([''], 'second.mp3'))
 			expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock/first.mp3')
 		})
 
@@ -81,13 +144,13 @@ describe('AudioLoader', () => {
 			const loader = new AudioLoader(onSrc)
 			const { handle, resolveFile } = makeSlowHandle()
 
-			const slow = loader.load(handle)
-			const fast = loader.load(new File([''], 'fast.mp3'))
+			const slow = loader.load(1, handle)
+			const fast = loader.load(-1, new File([''], 'fast.mp3'))
 			resolveFile(new File([''], 'slow.mp3'))
 
 			const [slowResult, fastResult] = await Promise.all([slow, fast])
-			expect(slowResult).toBe('superseded')
-			expect(fastResult).toBe('loaded')
+			expect(slowResult).toEqual({ status: 'superseded' })
+			expect(fastResult).toEqual({ status: 'loaded' })
 			expect(onSrc).toHaveBeenLastCalledWith('blob:mock/fast.mp3')
 		})
 	})
@@ -96,7 +159,7 @@ describe('AudioLoader', () => {
 		it('calls onSrc(null), revokes blob URL, and sets loading false', async () => {
 			const onSrc = vi.fn()
 			const loader = new AudioLoader(onSrc)
-			await loader.load(new File([''], 'song.mp3'))
+			await loader.load(-1, new File([''], 'song.mp3'))
 
 			loader.reset()
 
@@ -109,11 +172,11 @@ describe('AudioLoader', () => {
 			const loader = new AudioLoader(vi.fn())
 			const { handle, resolveFile } = makeSlowHandle()
 
-			const pending = loader.load(handle)
+			const pending = loader.load(1, handle)
 			loader.reset()
 			resolveFile(new File([''], 'song.mp3'))
 
-			expect(await pending).toBe('superseded')
+			expect(await pending).toEqual({ status: 'superseded' })
 			expect(loader.loading).toBe(false)
 		})
 	})
