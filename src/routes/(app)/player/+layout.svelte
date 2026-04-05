@@ -216,6 +216,11 @@
 					{:else}
 						<TracksListContainer
 							items={player.itemsIds}
+							reorderEnabled
+							favoriteEnabled={false}
+							onReorder={(fromIndex, toIndex) => {
+								player.moveQueueItem(fromIndex, toIndex)
+							}}
 							predefinedMenuItems={{
 								disableAddToQueue: true,
 							}}

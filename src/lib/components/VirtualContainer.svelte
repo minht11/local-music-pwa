@@ -19,6 +19,7 @@
 		lanes?: number
 		size: number
 		gap?: number
+		forceRenderIndexes?: readonly number[]
 		offsetWidth?: number
 		key: (index: number) => string | number
 		children: Snippet<[VirtualItem]>
@@ -29,6 +30,7 @@
 		lanes = 1,
 		gap = 0,
 		size: itemSize,
+		forceRenderIndexes = [],
 		key,
 		children,
 		offsetWidth = $bindable(0),
@@ -89,6 +91,14 @@
 
 			if (focusIndex !== -1 && focusIndex > initialEnd) {
 				arr.push(focusIndex)
+			}
+
+			for (const index of forceRenderIndexes) {
+				if (index < 0 || index >= range.count || arr.includes(index)) {
+					continue
+				}
+
+				arr.push(index)
 			}
 
 			return arr

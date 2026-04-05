@@ -124,6 +124,47 @@ export class QueueStore {
 		this.#activeTrackIndex = -1
 	}
 
+	moveQueueItem = (fromIndex: number, toIndex: number): void => {
+		if (
+			fromIndex < 0 ||
+			fromIndex >= this.itemsIds.length ||
+			toIndex < 0 ||
+			toIndex >= this.itemsIds.length ||
+			fromIndex === toIndex
+		) {
+			return
+		}
+
+		// Manual reorder uses the currently visible order as source of truth.
+		if (this.#itemsIdsShuffled) {
+			this.#itemsIdsOriginalOrder = [...this.#itemsIdsShuffled]
+			this.#itemsIdsShuffled = null
+			this.shuffle = false
+		}
+
+		const movedTrackId = this.#itemsIdsOriginalOrder[fromIndex]
+		if (movedTrackId === undefined) {
+			return
+		}
+
+		this.#itemsIdsOriginalOrder.splice(fromIndex, 1)
+		this.#itemsIdsOriginalOrder.splice(toIndex, 0, movedTrackId)
+
+		if (this.#activeTrackIndex === fromIndex) {
+			this.#activeTrackIndex = toIndex
+			return
+		}
+
+		if (fromIndex < this.#activeTrackIndex && toIndex >= this.#activeTrackIndex) {
+			this.#activeTrackIndex -= 1
+			return
+		}
+
+		if (fromIndex > this.#activeTrackIndex && toIndex <= this.#activeTrackIndex) {
+			this.#activeTrackIndex += 1
+		}
+	}
+
 	#removeByIndex = (index: number, trackId: number): void => {
 		if (this.#itemsIdsShuffled) {
 			this.#itemsIdsShuffled.splice(index, 1)
