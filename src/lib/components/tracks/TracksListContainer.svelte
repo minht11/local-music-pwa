@@ -21,8 +21,8 @@
 		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItemOption, boolean>>
 		menuItems?: (track: TrackData, index: number) => MenuItem[]
 		onItemClick?: (data: TrackItemClick) => void
-		reorderEnabled?: boolean
-		favoriteEnabled?: boolean
+		showReorderButton?: boolean
+		showFavoriteButton?: boolean
 		onReorder?: (fromIndex: number, toIndex: number) => void
 	}
 </script>
@@ -39,8 +39,8 @@
 		menuItems,
 		predefinedMenuItems = {},
 		onItemClick = defaultOnItemClick,
-		reorderEnabled = false,
-		favoriteEnabled = true,
+		showReorderButton = false,
+		showFavoriteButton = true,
 		onReorder,
 	}: Props = $props()
 
@@ -54,7 +54,7 @@
 	})
 
 	const dragController = useTrackDragController({
-		items: () => items,
+		itemsCount: () => items.length,
 		onReorder: (from, to) => onReorder?.(from, to),
 		onStart: () => selection.cancelSelection(),
 	})
@@ -131,8 +131,8 @@
 			selectionEnabled={selection.selectionEnabled}
 			selectionHover={selection.isInHoverRange(item.index)}
 			selected={selection.has(trackId)}
-			{reorderEnabled}
-			{favoriteEnabled}
+			{showReorderButton}
+			{showFavoriteButton}
 			reorderDragging={drag?.fromIndex === item.index}
 			reorderInsertBefore={drag !== null && drag.insertIndex === item.index}
 			reorderInsertAfter={drag !== null && drag.insertIndex === item.index + 1}
@@ -188,8 +188,8 @@
 				selectionHover={false}
 				selected={selection.has(previewTrackId)}
 				menuItems={(track) => getMenuItems(track, drag.fromIndex)}
-				{reorderEnabled}
-				{favoriteEnabled}
+				{showReorderButton}
+				{showFavoriteButton}
 				reorderDragging={false}
 				reorderInsertBefore={false}
 				reorderInsertAfter={false}

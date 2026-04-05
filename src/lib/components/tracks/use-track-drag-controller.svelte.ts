@@ -14,13 +14,13 @@ interface DragState {
 }
 
 interface UseTrackDragControllerOptions {
-	items: () => readonly number[]
+	itemsCount: () => number
 	onReorder: ((from: number, to: number) => void) | undefined
 	onStart?: () => void
 }
 
 export const useTrackDragController = ({
-	items,
+	itemsCount,
 	onReorder,
 	onStart,
 }: UseTrackDragControllerOptions) => {
@@ -112,8 +112,8 @@ export const useTrackDragController = ({
 	}
 
 	const start = (index: number, e: PointerEvent) => {
-		const itemCount = items().length
-		if (!onReorder || index < 0 || index >= itemCount) {
+		const count = itemsCount()
+		if (!onReorder || index < 0 || index >= count) {
 			return
 		}
 
@@ -132,7 +132,7 @@ export const useTrackDragController = ({
 		const rowRect = rowElement.getBoundingClientRect()
 		pointerOffsetY = e.clientY - rowRect.top
 		activePointerId = e.pointerId
-		dragItemCount = itemCount
+		dragItemCount = count
 
 		drag = {
 			fromIndex: index,

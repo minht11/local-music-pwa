@@ -21,8 +21,8 @@
 		selectionEnabled: boolean
 		selectionHover: boolean
 		selected: boolean
-		reorderEnabled?: boolean
-		favoriteEnabled?: boolean
+		showReorderButton?: boolean
+		showFavoriteButton?: boolean
 		reorderDragging?: boolean
 		reorderInsertBefore?: boolean
 		reorderInsertAfter?: boolean
@@ -30,7 +30,7 @@
 		onclick?: (track: TrackData, e: KeyboardEvent | MouseEvent) => void
 		onpointerenter?: (e: PointerEvent) => void
 		onReorderPointerDown?: (e: PointerEvent) => void
-		toggleSelection?: (isSelected: boolean) => void
+		toggleSelection?: () => void
 	}
 
 	const {
@@ -42,8 +42,8 @@
 		selectionEnabled,
 		selectionHover,
 		selected,
-		reorderEnabled = false,
-		favoriteEnabled = true,
+		showReorderButton = false,
+		showFavoriteButton = true,
 		reorderDragging = false,
 		reorderInsertBefore = false,
 		reorderInsertAfter = false,
@@ -95,7 +95,7 @@
 		if (e.pointerType === 'touch') {
 			if (!selectionEnabled) {
 				// Enter selection mode and select this item
-				toggleSelection?.(true)
+				toggleSelection?.()
 			}
 
 			return
@@ -163,7 +163,7 @@
 		</div>
 
 		<div role="gridcell" class="flex gap-1">
-			{#if reorderEnabled && !selectionEnabled}
+			{#if showReorderButton && !selectionEnabled}
 				<button
 					type="button"
 					tabindex={-1}
@@ -178,7 +178,7 @@
 				</button>
 			{/if}
 
-			{#if favoriteEnabled}
+			{#if showFavoriteButton}
 				<FavoriteButton
 					class={['hidden @sm:flex', selectionEnabled && 'invisible']}
 					trackId={track.id}
@@ -219,7 +219,7 @@
 							// otherwise let parent handle toggling
 							if (!selectionEnabled) {
 								e.stopPropagation()
-								toggleSelection?.(true)
+								toggleSelection?.()
 							}
 						}}
 					>

@@ -216,8 +216,8 @@
 					{:else}
 						<TracksListContainer
 							items={player.itemsIds}
-							reorderEnabled
-							favoriteEnabled={false}
+							showReorderButton
+							showFavoriteButton={false}
 							onReorder={(fromIndex, toIndex) => {
 								player.moveQueueItem(fromIndex, toIndex)
 							}}
