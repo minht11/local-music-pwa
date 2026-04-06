@@ -47,13 +47,16 @@
 		reorderDragging = false,
 		reorderInsertBefore = false,
 		reorderInsertAfter = false,
-		ariaRowIndex,
+		ariaRowIndex: ariaRowIndexProp,
 		menuItems,
 		onclick,
 		onpointerenter,
 		onReorderPointerDown,
 		toggleSelection,
 	}: Props = $props()
+
+	// ariaRowIndexProp rerenders a lot even when it doesn't change
+	const ariaRowIndex = $derived(ariaRowIndexProp)
 
 	const query = createTrackQuery(() => trackId)
 	const { value: track, loading } = $derived(query)
