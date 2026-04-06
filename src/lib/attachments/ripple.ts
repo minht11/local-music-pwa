@@ -35,7 +35,7 @@ const markForOrExitRipple = (ripple: HTMLSpanElement) => {
 }
 
 const onExitHandler = () => {
-	if (!activeRipples.size) {
+	if (activeRipples.size === 0) {
 		return
 	}
 
@@ -114,8 +114,9 @@ export interface RippleOptions {
 	stopPropagation?: boolean
 }
 
-export const ripple = (options: RippleOptions = {}): Attachment<HTMLElement> => {
-	return (node) => {
+export const ripple =
+	(options: RippleOptions = {}): Attachment<HTMLElement> =>
+	(node) => {
 		const cleanup = on(node, 'pointerdown', (e) => {
 			if (options?.stopPropagation) {
 				e.stopPropagation()
@@ -125,4 +126,3 @@ export const ripple = (options: RippleOptions = {}): Attachment<HTMLElement> => 
 		})
 		return cleanup
 	}
-}

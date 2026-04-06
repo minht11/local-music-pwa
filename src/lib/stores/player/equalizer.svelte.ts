@@ -10,7 +10,7 @@ export const EQ_BANDS = [
 	{ frequency: 2000, label: '2 kHz' },
 	{ frequency: 4000, label: '4 kHz' },
 	{ frequency: 8000, label: '8 kHz' },
-	{ frequency: 16000, label: '16 kHz' },
+	{ frequency: 16_000, label: '16 kHz' },
 ] as const
 
 export type BuiltinEqPresetKey =

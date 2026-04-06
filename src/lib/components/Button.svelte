@@ -20,6 +20,7 @@
 		tooltip?: string
 		children?: Snippet
 		onclick?: (event: MouseEvent) => void
+		onpointerdown?: (event: PointerEvent) => void
 	}
 </script>
 

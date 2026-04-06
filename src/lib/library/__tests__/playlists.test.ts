@@ -38,7 +38,7 @@ vi.stubGlobal('crypto', {
 })
 
 vi.stubGlobal('Date', {
-	now: vi.fn(() => 1234567890),
+	now: vi.fn(() => 1_234_567_890),
 })
 
 let trackCounter = 0
@@ -88,7 +88,7 @@ describe('playlists', () => {
 			expect(playlist?.name).toBe('Test Playlist')
 			expect(playlist?.description).toBe('My description')
 			expect(playlist?.uuid).toBe('test-uuid-1')
-			expect(playlist?.createdAt).toBe(1234567890)
+			expect(playlist?.createdAt).toBe(1_234_567_890)
 		})
 	})
 
@@ -147,7 +147,7 @@ describe('playlists', () => {
 			expect(playlist.name).toBe('Updated Name')
 			expect(playlist.description).toBe('Updated description')
 			expect(playlist.uuid).toBe('test-uuid-1')
-			expect(playlist.createdAt).toBe(1234567890)
+			expect(playlist.createdAt).toBe(1_234_567_890)
 		})
 
 		it('fails to update non-existent playlist', async () => {
@@ -318,7 +318,7 @@ describe('playlists', () => {
 			expectToBeDefined(entry)
 			expect(entry.playlistId).toBe(FAVORITE_PLAYLIST_ID)
 			expect(entry.trackId).toBe(trackId)
-			expect(entry.addedAt).toBe(1234567890)
+			expect(entry.addedAt).toBe(1_234_567_890)
 		})
 
 		it('removes track from favorites', async () => {
@@ -350,7 +350,7 @@ describe('playlists', () => {
 				id: expect.any(Number),
 				playlistId,
 				trackId,
-				addedAt: 1234567890,
+				addedAt: 1_234_567_890,
 			})
 		})
 

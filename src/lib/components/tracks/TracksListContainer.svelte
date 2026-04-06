@@ -7,6 +7,7 @@
 	import type { MenuItem } from '../menu/types.ts'
 	import VirtualContainer from '../VirtualContainer.svelte'
 	import TrackListItem from './TrackListItem.svelte'
+	import { useTrackDragController } from './use-track-drag-controller.svelte.ts'
 	import { type PredefinedTrackMenuItemOption, useTrackMenuItems } from './use-track-menu-items.ts'
 	import { useTrackSelectionController } from './use-track-selection-controller.svelte.ts'
 	export interface TrackItemClick {
@@ -20,6 +21,9 @@
 		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItemOption, boolean>>
 		menuItems?: (track: TrackData, index: number) => MenuItem[]
 		onItemClick?: (data: TrackItemClick) => void
+		showReorderButton?: boolean
+		showFavoriteButton?: boolean
+		onReorder?: (fromIndex: number, toIndex: number) => void
 	}
 </script>
 
@@ -35,6 +39,9 @@
 		menuItems,
 		predefinedMenuItems = {},
 		onItemClick = defaultOnItemClick,
+		showReorderButton = false,
+		showFavoriteButton = true,
+		onReorder,
 	}: Props = $props()
 
 	const { getMenuItems, getMultiSelectMenuItems } = useTrackMenuItems(
@@ -46,6 +53,12 @@
 		items: () => items,
 	})
 
+	const dragController = useTrackDragController({
+		itemsCount: () => items.length,
+		onReorder: (from, to) => onReorder?.(from, to),
+		onStart: () => selection.cancelSelection(),
+	})
+
 	$effect(() => {
 		void items
 		void items.length
@@ -55,17 +68,10 @@
 		})
 	})
 
+	$effect(() => () => dragController.stop())
+
 	useSetOverlaySnippet('above-player', () => (selection.selectionEnabled ? multiselectPane : null))
 </script>
-
-<svelte:document
-	onkeydown={(e) => {
-		selection.handleDocumentKeyDown(e)
-	}}
-	onkeyup={(e) => {
-		selection.handleDocumentKeyUp(e)
-	}}
-/>
 
 {#snippet multiselectPane()}
 	<div
@@ -101,21 +107,35 @@
 	</div>
 {/snippet}
 
-<VirtualContainer size={72} count={items.length} key={(index) => `${items[index]}-${index}`}>
+<VirtualContainer
+	size={72}
+	count={items.length}
+	forceRenderIndexes={dragController.drag === null ? [] : [dragController.drag.fromIndex]}
+	key={(index) => `${items[index]}-${index}`}
+>
 	{#snippet children(item)}
 		{@const trackId = items[item.index] as number}
 		{@const active = player.activeTrack?.id === trackId}
+		{@const drag = dragController.drag}
 
 		<TrackListItem
 			{trackId}
 			{active}
 			activePlaying={player.playing && active}
-			style="transform: translateY({item.start}px)"
-			class="virtual-item top-0 left-0 w-full"
+			style={`transform: translateY(${item.start}px)`}
+			class={[
+				'virtual-item top-0 left-0 w-full',
+				drag !== null && 'no-drag-hover hover:bg-transparent!',
+			]}
 			ariaRowIndex={item.index}
 			selectionEnabled={selection.selectionEnabled}
 			selectionHover={selection.isInHoverRange(item.index)}
 			selected={selection.has(trackId)}
+			{showReorderButton}
+			{showFavoriteButton}
+			reorderDragging={drag?.fromIndex === item.index}
+			reorderInsertBefore={drag !== null && drag.insertIndex === item.index}
+			reorderInsertAfter={drag !== null && drag.insertIndex === item.index + 1}
 			menuItems={(track) => getMenuItems(track, item.index)}
 			onclick={(track, e) => {
 				selection.handleItemClick({
@@ -132,11 +152,65 @@
 				})
 			}}
 			onpointerenter={() => {
-				selection.handlePointerEnter(item.index)
+				if (dragController.drag === null) {
+					selection.handlePointerEnter(item.index)
+				}
 			}}
 			toggleSelection={() => {
 				selection.toggleSelection(trackId, item.index)
 			}}
+			onReorderPointerDown={(e) => {
+				dragController.start(item.index, e)
+			}}
 		/>
 	{/snippet}
 </VirtualContainer>
+
+{#if dragController.drag !== null}
+	{@const drag = dragController.drag}
+	{@const previewTrackId = items[drag.fromIndex]}
+	{#if previewTrackId !== undefined}
+		<div
+			popover="manual"
+			class="drag-preview-popover @container opacity-80"
+			style={`top:${drag.preview.top}px;left:${drag.preview.left}px;width:${drag.preview.width}px;`}
+			{@attach (el) => {
+				el.showPopover()
+			}}
+		>
+			<TrackListItem
+				trackId={previewTrackId}
+				active={player.activeTrack?.id === previewTrackId}
+				activePlaying={player.playing && player.activeTrack?.id === previewTrackId}
+				class="pointer-events-none z-40 bg-surfaceContainerHigh shadow-lg"
+				ariaRowIndex={drag.fromIndex}
+				selectionEnabled={selection.selectionEnabled}
+				selectionHover={false}
+				selected={selection.has(previewTrackId)}
+				menuItems={(track) => getMenuItems(track, drag.fromIndex)}
+				{showReorderButton}
+				{showFavoriteButton}
+				reorderDragging={false}
+				reorderInsertBefore={false}
+				reorderInsertAfter={false}
+			/>
+		</div>
+	{/if}
+{/if}
+
+<style lang="postcss">
+	:global(.no-drag-hover .interactable) {
+		pointer-events: none;
+	}
+
+	.drag-preview-popover {
+		margin: 0;
+		padding: 0;
+		border: none;
+		background: transparent;
+		position: fixed;
+		inset: auto;
+		overflow: visible;
+		pointer-events: none;
+	}
+</style>

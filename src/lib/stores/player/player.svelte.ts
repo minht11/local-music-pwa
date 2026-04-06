@@ -350,5 +350,7 @@ export class PlayerStore {
 
 	removeFromQueue = this.#queue.removeFromQueue
 
+	moveQueueItem = this.#queue.moveQueueItem
+
 	clearQueue = this.#queue.clearQueue
 }

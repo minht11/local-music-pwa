@@ -13,8 +13,8 @@ const defineQuery =
 	<AllowEmpty extends boolean = false>(
 		idGetter: () => number,
 		options: LibraryValueQueryOptions<AllowEmpty> = {},
-	): QueryResult<GetLibraryValueResult<Store, AllowEmpty>> => {
-		return createQuery({
+	): QueryResult<GetLibraryValueResult<Store, AllowEmpty>> =>
+		createQuery({
 			key: idGetter,
 			fetcher: (id) => getLibraryValue(storeName, id, options.allowEmpty),
 			onDatabaseChange: (changes, { refetch }) => {
@@ -23,7 +23,6 @@ const defineQuery =
 				}
 			},
 		})
-	}
 
 type LibraryItemQuery<Store extends LibraryStoreName> = ReturnType<typeof defineQuery<Store>>
 

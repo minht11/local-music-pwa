@@ -1,4 +1,4 @@
-export type MenuPosition = {
+export interface MenuPosition {
 	top: number
 	left: number
 }

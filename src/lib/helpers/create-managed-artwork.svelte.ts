@@ -1,24 +1,22 @@
 class Artwork {
-	static index = 0
+	static idCounter = 0
 
-	// Used for debugging purposes
-	index = -1
+	static createRefId() {
+		const index = Artwork.idCounter
+		Artwork.idCounter += 1
+
+		return index
+	}
 
 	image: Blob
 
 	url: string
 
-	refs = new Set<symbol>()
+	refs = new Set<number>()
 
-	constructor(image: Blob, key: symbol) {
+	constructor(image: Blob) {
 		this.image = image
 		this.url = URL.createObjectURL(image)
-		this.refs.add(key)
-
-		if (import.meta.env.DEV) {
-			this.index = Artwork.index
-			Artwork.index += 1
-		}
 	}
 }
 
@@ -51,7 +49,7 @@ const scheduleCleanup = (artwork: Artwork) => {
 }
 
 export const createManagedArtwork = (getImage: () => Blob | undefined | null) => {
-	const key = Symbol()
+	const refId = Artwork.createRefId()
 
 	const artwork = $derived.by(() => {
 		const image = getImage()
@@ -61,13 +59,13 @@ export const createManagedArtwork = (getImage: () => Blob | undefined | null) =>
 		}
 
 		let artworkInstance = cache.get(image)
-		if (artworkInstance) {
-			artworkInstance.refs.add(key)
-		} else {
-			artworkInstance = new Artwork(image, key)
+		if (!artworkInstance) {
+			artworkInstance = new Artwork(image)
 
 			cache.set(image, artworkInstance)
 		}
+
+		artworkInstance.refs.add(refId)
 
 		return artworkInstance
 	})
@@ -85,13 +83,11 @@ export const createManagedArtwork = (getImage: () => Blob | undefined | null) =>
 				scheduleCleanup(savedArtwork)
 			}
 
-			if (import.meta.env.DEV) {
-				if (!savedArtwork.refs.has(key)) {
-					console.warn('Trying to release artwork that is not in use', savedArtwork)
-				}
+			if (import.meta.env.DEV && !savedArtwork.refs.has(refId)) {
+				console.warn('Trying to release artwork that is not in use', savedArtwork)
 			}
 
-			savedArtwork.refs.delete(key)
+			savedArtwork.refs.delete(refId)
 		}
 	})
 

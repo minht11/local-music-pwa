@@ -20,10 +20,9 @@ const artwork = `
 
 export const prerender = true
 
-export const GET = () => {
-	return new Response(artwork, {
+export const GET = () =>
+	new Response(artwork, {
 		headers: {
 			'Content-Type': 'image/svg+xml',
 		},
 	})
-}

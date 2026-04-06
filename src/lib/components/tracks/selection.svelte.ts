@@ -2,14 +2,21 @@ import { SvelteSet } from 'svelte/reactivity'
 
 export class SelectionTracker {
 	#selectedIds: Set<number> = new SvelteSet<number>()
+	#selectionEnabled = $state(false)
 
 	get selectedIds() {
 		return Array.from(this.#selectedIds)
 	}
 
-	selectionEnabled = $state(false)
+	get selectionEnabled() {
+		return this.#selectionEnabled
+	}
 
-	lastSelectedIndex: number | null = null
+	rangeAnchor: number | null = null
+
+	enterSelectionMode() {
+		this.#selectionEnabled = true
+	}
 
 	toggle(id: number, index: number) {
 		if (this.#selectedIds.has(id)) {
@@ -18,25 +25,25 @@ export class SelectionTracker {
 			this.#selectedIds.add(id)
 		}
 
-		this.selectionEnabled = this.#selectedIds.size > 0
-		if (this.selectionEnabled) {
-			this.lastSelectedIndex = index
+		this.#selectionEnabled = this.#selectedIds.size > 0
+		if (this.#selectionEnabled) {
+			this.rangeAnchor = index
 		} else {
-			this.lastSelectedIndex = null
+			this.rangeAnchor = null
 		}
 	}
 
 	select(id: number, index: number) {
 		this.#selectedIds.add(id)
-		this.selectionEnabled = true
-		this.lastSelectedIndex = index
+		this.#selectionEnabled = true
+		this.rangeAnchor = index
 	}
 
 	unselect(id: number) {
 		this.#selectedIds.delete(id)
-		this.selectionEnabled = this.#selectedIds.size > 0
-		if (!this.selectionEnabled) {
-			this.lastSelectedIndex = null
+		this.#selectionEnabled = this.#selectedIds.size > 0
+		if (!this.#selectionEnabled) {
+			this.rangeAnchor = null
 		}
 	}
 
@@ -45,7 +52,7 @@ export class SelectionTracker {
 			this.#selectedIds.add(id)
 		}
 
-		this.selectionEnabled = this.#selectedIds.size > 0
+		this.#selectionEnabled = this.#selectedIds.size > 0
 	}
 
 	unselectMany(ids: readonly number[]) {
@@ -53,9 +60,23 @@ export class SelectionTracker {
 			this.#selectedIds.delete(id)
 		}
 
-		this.selectionEnabled = this.#selectedIds.size > 0
-		if (!this.selectionEnabled) {
-			this.lastSelectedIndex = null
+		this.#selectionEnabled = this.#selectedIds.size > 0
+		if (!this.#selectionEnabled) {
+			this.rangeAnchor = null
+		}
+	}
+
+	/** Sets rangeAnchor only when there is no anchor yet (hover-preview entry point). */
+	setHoverAnchor(index: number) {
+		if (this.rangeAnchor === null) {
+			this.rangeAnchor = index
+		}
+	}
+
+	/** Clears rangeAnchor when no items are selected (Shift release with no selection). */
+	clearHoverAnchor() {
+		if (!this.#selectionEnabled) {
+			this.rangeAnchor = null
 		}
 	}
 
@@ -65,8 +86,8 @@ export class SelectionTracker {
 
 	clear() {
 		this.#selectedIds.clear()
-		this.selectionEnabled = false
-		this.lastSelectedIndex = null
+		this.#selectionEnabled = false
+		this.rangeAnchor = null
 	}
 
 	get size() {

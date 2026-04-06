@@ -22,7 +22,7 @@ const getSmallImageDimensions = (
 	return [Math.floor(smallerTarget * ratio), smallerTarget]
 }
 
-export type ArtworkRelatedData = {
+export interface ArtworkRelatedData {
 	image: {
 		optimized: boolean
 		full: Blob

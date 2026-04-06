@@ -5,7 +5,7 @@ export const createUIAction = <P extends unknown[] = []>(
 	successMessage: string | false,
 	action: (...params: P) => Promise<void>,
 ) => {
-	return async (...params: P): Promise<void> => {
+	const wrappedAction = async (...params: P): Promise<void> => {
 		try {
 			await action(...params)
 			if (successMessage) {
@@ -16,4 +16,6 @@ export const createUIAction = <P extends unknown[] = []>(
 			snackbar.unexpectedError(error)
 		}
 	}
+
+	return wrappedAction
 }

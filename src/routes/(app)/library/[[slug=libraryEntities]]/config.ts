@@ -4,7 +4,7 @@ import type { LibraryStoreName } from '$lib/library/types'
 
 export type LibrarySearchFn<Value> = (value: Value, searchTerm: string) => boolean
 
-export type SortOption<Store extends LibraryStoreName> = {
+export interface SortOption<Store extends LibraryStoreName> {
 	name: string
 	key: LibraryItemSortKey<Store>
 }

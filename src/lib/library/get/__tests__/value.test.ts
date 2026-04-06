@@ -19,7 +19,7 @@ vi.stubGlobal('crypto', {
 
 // Mock Date.now for consistent timestamps
 vi.stubGlobal('Date', {
-	now: vi.fn(() => 1234567890),
+	now: vi.fn(() => 1_234_567_890),
 })
 
 describe('getLibraryValue', () => {
@@ -51,7 +51,7 @@ describe('getLibraryValue', () => {
 				discNo: 1,
 				discOf: 1,
 				file: {} as File,
-				scannedAt: 1234567890,
+				scannedAt: 1_234_567_890,
 				fileName: 'test-track.mp3',
 				directory: 1,
 			}
@@ -85,7 +85,7 @@ describe('getLibraryValue', () => {
 				discNo: 1,
 				discOf: 1,
 				file: {} as File,
-				scannedAt: 1234567890,
+				scannedAt: 1_234_567_890,
 				fileName: 'test-track.mp3',
 				directory: 1,
 			}
@@ -97,7 +97,7 @@ describe('getLibraryValue', () => {
 				id: 1,
 				playlistId: FAVORITE_PLAYLIST_ID,
 				trackId: 1,
-				addedAt: 1234567890,
+				addedAt: 1_234_567_890,
 			})
 
 			const result = await getLibraryValue('tracks', 1)
@@ -135,7 +135,7 @@ describe('getLibraryValue', () => {
 				discNo: 1,
 				discOf: 1,
 				file: {} as File,
-				scannedAt: 1234567890,
+				scannedAt: 1_234_567_890,
 				fileName: 'test-track.mp3',
 				directory: 1,
 			}
@@ -224,7 +224,7 @@ describe('getLibraryValue', () => {
 				name: 'Test Playlist',
 				description: '',
 				uuid: 'playlist-uuid-1',
-				createdAt: 1234567890,
+				createdAt: 1_234_567_890,
 			}
 
 			await db.add('playlists', playlistData)
@@ -280,7 +280,7 @@ describe('getLibraryValue', () => {
 				discNo: 1,
 				discOf: 1,
 				file: {} as File,
-				scannedAt: 1234567890,
+				scannedAt: 1_234_567_890,
 				fileName: 'test-track.mp3',
 				directory: 1,
 			}
@@ -332,7 +332,7 @@ describe('getLibraryValue', () => {
 						id: 1,
 						playlistId: FAVORITE_PLAYLIST_ID,
 						trackId: 1,
-						addedAt: 1234567890,
+						addedAt: 1_234_567_890,
 					},
 				},
 			]
@@ -435,7 +435,7 @@ describe('getLibraryValue', () => {
 				discNo: 1,
 				discOf: 1,
 				file: {} as File,
-				scannedAt: 1234567890,
+				scannedAt: 1_234_567_890,
 				fileName: 'test-track.mp3',
 				directory: 1,
 			}

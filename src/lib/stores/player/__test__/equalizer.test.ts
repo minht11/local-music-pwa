@@ -5,7 +5,7 @@ vi.mock('$lib/helpers/persist.svelte.ts', () => ({
 	persist: vi.fn(),
 }))
 
-type MockFilter = {
+interface MockFilter {
 	connect: ReturnType<typeof vi.fn>
 	type: BiquadFilterType
 	frequency: { value: number }

@@ -2,7 +2,6 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 	import { formatArtists, formatNameOrUnknown, getItemLanguage } from '$lib/helpers/utils/text.ts'
-	import { isMobile } from '$lib/helpers/utils/ua.ts'
 	import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
 	import Artwork from '../Artwork.svelte'
 	import FavoriteButton from '../FavoriteButton.svelte'
@@ -22,10 +21,16 @@
 		selectionEnabled: boolean
 		selectionHover: boolean
 		selected: boolean
+		showReorderButton?: boolean
+		showFavoriteButton?: boolean
+		reorderDragging?: boolean
+		reorderInsertBefore?: boolean
+		reorderInsertAfter?: boolean
 		menuItems?: (track: TrackData) => MenuItem[]
 		onclick?: (track: TrackData, e: KeyboardEvent | MouseEvent) => void
 		onpointerenter?: (e: PointerEvent) => void
-		toggleSelection?: (isSelected: boolean) => void
+		onReorderPointerDown?: (e: PointerEvent) => void
+		toggleSelection?: () => void
 	}
 
 	const {
@@ -37,12 +42,21 @@
 		selectionEnabled,
 		selectionHover,
 		selected,
-		ariaRowIndex,
+		showReorderButton = false,
+		showFavoriteButton = true,
+		reorderDragging = false,
+		reorderInsertBefore = false,
+		reorderInsertAfter = false,
+		ariaRowIndex: ariaRowIndexProp,
 		menuItems,
 		onclick,
 		onpointerenter,
+		onReorderPointerDown,
 		toggleSelection,
 	}: Props = $props()
+
+	// ariaRowIndexProp rerenders a lot even when it doesn't change
+	const ariaRowIndex = $derived(ariaRowIndexProp)
 
 	const query = createTrackQuery(() => trackId)
 	const { value: track, loading } = $derived(query)
@@ -57,11 +71,13 @@
 	{style}
 	tabindex={-1}
 	class={[
-		'group h-18 text-left',
+		'track-item-container group relative h-18 text-left',
 		active ? 'bg-onSurfaceVariant/10 text-onSurfaceVariant' : 'color-onSurfaceVariant',
 		className,
 		selected && 'bg-primary/5',
 		selectionHover && 'bg-tertiary/10',
+		reorderDragging && 'bg-transparent',
+		reorderDragging && 'track-item-container-dragging',
 	]}
 	ariaLabel={m.trackPlay({ name: track?.name ?? '' })}
 	{ariaRowIndex}
@@ -79,11 +95,12 @@
 		e.preventDefault()
 
 		// On mobile, enter selection mode instead of showing context menu
-		if (isMobile()) {
+		if (e.pointerType === 'touch') {
 			if (!selectionEnabled) {
 				// Enter selection mode and select this item
-				toggleSelection?.(true)
+				toggleSelection?.()
 			}
+
 			return
 		}
 
@@ -93,6 +110,15 @@
 		})
 	}}
 >
+	{#if reorderInsertBefore || reorderInsertAfter}
+		<div
+			class={[
+				'pointer-events-none absolute right-2 left-2 z-20 h-0.5 bg-primary',
+				reorderInsertBefore ? 'top-0' : 'bottom-0',
+			]}
+		></div>
+	{/if}
+
 	<div role="gridcell">
 		<Artwork
 			src={artworkSrc()}
@@ -123,7 +149,7 @@
 		<div
 			role="gridcell"
 			class="track-item grow items-center gap-5"
-			lang={getItemLanguage(track?.language)}
+			lang={getItemLanguage(track.language)}
 		>
 			<div class="flex flex-col truncate">
 				<div class={[active ? 'text-primary' : 'color-onSurface', 'truncate']}>
@@ -140,12 +166,29 @@
 		</div>
 
 		<div role="gridcell" class="flex gap-1">
-			<FavoriteButton
-				class={['hidden @sm:flex', selectionEnabled && 'invisible']}
-				trackId={track.id}
-				favorite={track.favorite}
-				tabindex={-1}
-			/>
+			{#if showReorderButton && !selectionEnabled}
+				<button
+					type="button"
+					tabindex={-1}
+					class="interactable flex size-11 shrink-0 touch-none items-center justify-center rounded-full"
+					onclick={(e) => {
+						e.preventDefault()
+						e.stopPropagation()
+					}}
+					onpointerdown={onReorderPointerDown}
+				>
+					<Icon type="dragHorizontal" />
+				</button>
+			{/if}
+
+			{#if showFavoriteButton}
+				<FavoriteButton
+					class={['hidden @sm:flex', selectionEnabled && 'invisible']}
+					trackId={track.id}
+					favorite={track.favorite}
+					tabindex={-1}
+				/>
+			{/if}
 
 			<MenuButton
 				class={[selectionEnabled && 'invisible']}
@@ -154,48 +197,47 @@
 			/>
 
 			<div
-				class={[
-					'w-16 items-center justify-items-end',
-					selectionEnabled ? 'grid' : 'hidden @sm:grid',
-				]}
+				class={['items-center justify-end gap-1', selectionEnabled ? 'flex' : 'hidden @sm:flex']}
 			>
-				{#if !selectionEnabled}
-					<div
-						class="text-right tabular-nums stack-in-grid group-focus-within:opacity-0 group-hover:opacity-0"
-					>
-						{formatDuration(track.duration)}
-					</div>
-				{/if}
+				<div class="relative grid w-11 items-center justify-items-end">
+					{#if !selectionEnabled}
+						<div
+							class="text-right tabular-nums stack-in-grid group-focus-within:opacity-0 group-hover:opacity-0"
+						>
+							{formatDuration(track.duration)}
+						</div>
+					{/if}
 
-				<IconButton
-					tabindex={-1}
-					tooltip={''}
-					class={[
-						'stack-in-grid',
-						selectionEnabled
-							? ''
-							: 'opacity-0 group-focus-within:opacity-100 group-hover:opacity-100',
-					]}
-					onclick={(e) => {
-						// If selection is not enabled, enable it
-						// otherwise let parent handle toggling
-						if (!selectionEnabled) {
-							e.stopPropagation()
-							toggleSelection?.(true)
-						}
-					}}
-				>
-					<div
+					<IconButton
+						tabindex={-1}
+						tooltip={''}
 						class={[
-							'flex size-5 items-center justify-center rounded-sm border-2',
-							selected && 'border-primary bg-primary text-onPrimary',
+							'stack-in-grid',
+							selectionEnabled
+								? ''
+								: 'opacity-0 group-focus-within:opacity-100 group-hover:opacity-100',
 						]}
+						onclick={(e) => {
+							// If selection is not enabled, enable it
+							// otherwise let parent handle toggling
+							if (!selectionEnabled) {
+								e.stopPropagation()
+								toggleSelection?.()
+							}
+						}}
 					>
-						{#if selected}
-							<Icon type="check" class="size-5" />
-						{/if}
-					</div>
-				</IconButton>
+						<div
+							class={[
+								'flex size-5 items-center justify-center rounded-sm border-2',
+								selected && 'border-primary bg-primary text-onPrimary',
+							]}
+						>
+							{#if selected}
+								<Icon type="check" class="size-5" />
+							{/if}
+						</div>
+					</IconButton>
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -203,6 +245,10 @@
 
 <style lang="postcss">
 	@reference '../../../app.css';
+
+	:global(.track-item-container-dragging) [role='gridcell'] {
+		opacity: 25%;
+	}
 
 	.track-item {
 		--grid-cols: 1fr;

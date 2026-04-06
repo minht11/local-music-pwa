@@ -98,7 +98,7 @@
 </script>
 
 <div
-	class={['slider relative flex select-none', vertical ? 'h-full' : 'w-full']}
+	class={['slider relative flex overflow-hidden select-none', vertical ? 'h-full' : 'w-full']}
 	bind:clientWidth={
 		null,
 		(width: number) => {
