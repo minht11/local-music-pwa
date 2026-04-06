@@ -8,20 +8,15 @@ class Artwork {
 		return index
 	}
 
-	// Used for debugging purposes
-	id: number
-
 	image: Blob
 
 	url: string
 
 	refs = new Set<number>()
 
-	constructor(image: Blob, id: number) {
+	constructor(image: Blob) {
 		this.image = image
 		this.url = URL.createObjectURL(image)
-		this.refs.add(id)
-		this.id = id
 	}
 }
 
@@ -64,13 +59,13 @@ export const createManagedArtwork = (getImage: () => Blob | undefined | null) =>
 		}
 
 		let artworkInstance = cache.get(image)
-		if (artworkInstance) {
-			artworkInstance.refs.add(refId)
-		} else {
-			artworkInstance = new Artwork(image, refId)
+		if (!artworkInstance) {
+			artworkInstance = new Artwork(image)
 
 			cache.set(image, artworkInstance)
 		}
+
+		artworkInstance.refs.add(refId)
 
 		return artworkInstance
 	})
