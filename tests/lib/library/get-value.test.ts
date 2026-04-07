@@ -9,7 +9,6 @@ import {
 	preloadLibraryValue,
 	shouldRefetchLibraryValue,
 } from '$lib/library/get/value.ts'
-import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID } from '$lib/library/types.ts'
 import { clearDatabaseStores } from '../../shared.ts'
 
 // Mock crypto.randomUUID for consistent UUIDs
@@ -30,7 +29,7 @@ describe('getLibraryValue', () => {
 	})
 
 	describe('tracks', () => {
-		it('should return track data with favorite status false', async () => {
+		it('should return track data', async () => {
 			const db = await getDatabase()
 
 			// Insert a track
@@ -60,49 +59,6 @@ describe('getLibraryValue', () => {
 			expect(result).toEqual({
 				...trackData,
 				type: 'track',
-				favorite: false,
-			})
-		})
-
-		it('should return track data with favorite status true when track is in favorites', async () => {
-			const db = await getDatabase()
-
-			// Insert a track
-			const trackData = {
-				id: 1,
-				name: 'Test Track',
-				album: 'Test Album',
-				artists: ['Test Artist'],
-				uuid: 'track-uuid-1',
-				year: '2023',
-				duration: 180,
-				genre: ['Rock'],
-				trackNo: 1,
-				trackOf: 10,
-				discNo: 1,
-				discOf: 1,
-				file: {} as File,
-				scannedAt: 1234567890,
-				fileName: 'test-track.mp3',
-				directory: 1,
-			}
-
-			await db.add('tracks', trackData)
-
-			// Add track to favorites
-			await db.add('playlistEntries', {
-				id: 1,
-				playlistId: FAVORITE_PLAYLIST_ID,
-				trackId: 1,
-				addedAt: 1234567890,
-			})
-
-			const result = await getLibraryValue('tracks', 1)
-
-			expect(result).toEqual({
-				...trackData,
-				type: 'track',
-				favorite: true,
 			})
 		})
 
@@ -234,19 +190,6 @@ describe('getLibraryValue', () => {
 			})
 		})
 
-		it('should return favorite playlist for FAVORITE_PLAYLIST_ID', async () => {
-			const result = await getLibraryValue('playlists', FAVORITE_PLAYLIST_ID)
-
-			expect(result).toEqual({
-				type: 'playlist',
-				id: FAVORITE_PLAYLIST_ID,
-				uuid: FAVORITE_PLAYLIST_UUID,
-				description: '',
-				name: 'Favorites',
-				createdAt: 0,
-			})
-		})
-
 		it('should throw LibraryValueNotFoundError for non-existent playlist', async () => {
 			await expect(getLibraryValue('playlists', 999)).rejects.toThrow(
 				LibraryValueNotFoundError,
@@ -295,7 +238,6 @@ describe('getLibraryValue', () => {
 			expect(result).toEqual({
 				...trackData,
 				type: 'track',
-				favorite: false,
 			})
 		})
 
@@ -312,25 +254,6 @@ describe('getLibraryValue', () => {
 					storeName: 'tracks',
 					operation: 'update',
 					key: 1,
-				},
-			]
-
-			const result = shouldRefetchLibraryValue('tracks', 1, changes)
-			expect(result).toBe(true)
-		})
-
-		it('should return true when track favorite status changes', () => {
-			const changes: readonly DatabaseChangeDetails[] = [
-				{
-					storeName: 'playlistEntries',
-					operation: 'add',
-					key: 1,
-					value: {
-						id: 1,
-						playlistId: FAVORITE_PLAYLIST_ID,
-						trackId: 1,
-						addedAt: 1234567890,
-					},
 				},
 			]
 

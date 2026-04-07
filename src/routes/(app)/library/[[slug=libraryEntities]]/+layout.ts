@@ -9,7 +9,7 @@ import {
 	type PageQueryResult,
 } from '$lib/library/get/ids-queries.ts'
 import { createTracksCountPageQuery } from '$lib/library/tracks-queries.ts'
-import { FAVORITE_PLAYLIST_ID, type LibraryStoreName } from '$lib/library/types.ts'
+import { type LibraryStoreName } from '$lib/library/types.ts'
 import { isRajneeshEnabled } from '$lib/rajneesh/feature-flags.ts'
 import { whenCatalogReady } from '$lib/rajneesh/stores/catalog.svelte.ts'
 import { getPersistedLibrarySplitLayoutEnabled } from '$lib/stores/main/store.svelte.ts'
@@ -29,22 +29,41 @@ type LoadDataResult<Slug extends LibraryStoreName> = {
 	}
 }[Slug]
 
-const loadData = async <Slug extends LibraryStoreName>(
+type RouteSlug = LibraryStoreName | 'bookmarks'
+
+type SpecialRouteSlug = 'home' | 'shorts' | 'bookmarks'
+
+const buildSpecialRouteData = <
+	Slug extends SpecialRouteSlug,
+	Config extends (typeof configsMap)[Slug],
+>(
+	config: Config,
+	store: LibraryStore<any>,
+	slug: Slug,
+) => {
+	return {
+		...config,
+		store,
+		itemsIdsQuery: { value: [] } as PageQueryResult<number[]>,
+		tracksCountQuery: { value: slug === 'bookmarks' ? 1 : 0 } as PageQueryResult<number>,
+	}
+}
+
+const loadData = async <Slug extends RouteSlug>(
 	slug: Slug,
 	searchTermFromUrl = '',
-): Promise<LoadDataResult<Slug>> => {
-	const config = configsMap[slug]
+): Promise<
+	Slug extends LibraryStoreName
+		? LoadDataResult<Extract<Slug, LibraryStoreName>>
+		: ReturnType<typeof buildSpecialRouteData>
+> => {
+	const config = configsMap[slug as keyof typeof configsMap]
 	const searchFn = config.search ?? defaultSearchFn
 	const store = new LibraryStore(slug)
 	store.searchTerm = searchTermFromUrl
 
-	if (slug === 'home' || slug === 'shorts') {
-		return {
-			...config,
-			store,
-			itemsIdsQuery: { value: [] },
-			tracksCountQuery: { value: 0 },
-		} as any
+	if (slug === 'home' || slug === 'shorts' || slug === 'bookmarks') {
+		return buildSpecialRouteData(config as any, store, slug) as any
 	}
 
 	const itemsIdsQueryPromise = createLibraryItemKeysPageQuery(slug, {
@@ -57,10 +76,6 @@ const loadData = async <Slug extends LibraryStoreName>(
 				searchTerm: normalizedSearchTerm,
 				searchFn: (value) => searchFn(value, normalizedSearchTerm),
 			})
-
-			if (slug === 'playlists') {
-				return [FAVORITE_PLAYLIST_ID, ...result]
-			}
 
 			return result
 		},
@@ -79,7 +94,10 @@ const loadData = async <Slug extends LibraryStoreName>(
 	}
 }
 
-type LoadResult = LoadDataResult<LibraryStoreName> & {
+type LoadResult =
+	| LoadDataResult<LibraryStoreName>
+	| ReturnType<typeof buildSpecialRouteData>
+	& {
 	isWideLayout: () => boolean
 	layoutMode: (
 		splitViewAllowed: boolean,
@@ -116,7 +134,7 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 		isWide: boolean,
 		itemUuid: string | undefined,
 	): LayoutMode => {
-		if (slug === 'tracks' || slug === 'home' || slug === 'shorts') {
+		if (slug === 'tracks' || slug === 'home' || slug === 'shorts' || slug === 'bookmarks') {
 			return 'list'
 		}
 

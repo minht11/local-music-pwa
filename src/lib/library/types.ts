@@ -1,6 +1,13 @@
 import type { FileEntity } from '$lib/helpers/file-system.ts'
 
-export type LibraryStoreName = 'tracks' | 'albums' | 'artists' | 'playlists' | 'home' | 'shorts' | 'explore'
+export type LibraryStoreName =
+	| 'tracks'
+	| 'albums'
+	| 'artists'
+	| 'playlists'
+	| 'home'
+	| 'shorts'
+	| 'explore'
 
 /**
  * Used in browsers where `showDirectoryPicker` is not supported.
@@ -9,10 +16,6 @@ export type LibraryStoreName = 'tracks' | 'albums' | 'artists' | 'playlists' | '
  * where directories were not used `FileSystemHandle`.
  */
 export const LEGACY_NO_NATIVE_DIRECTORY = -1
-
-/** Special type of playlist which user cannot modify */
-export const FAVORITE_PLAYLIST_ID = -1
-export const FAVORITE_PLAYLIST_UUID = 'favorites'
 
 /**
  * Used to represent unknown Artist/Album and other values inside database

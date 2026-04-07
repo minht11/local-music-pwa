@@ -8,11 +8,7 @@ import {
 	getLibraryItemIdFromUuid,
 } from '$lib/library/get/ids.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
-import {
-	FAVORITE_PLAYLIST_ID,
-	FAVORITE_PLAYLIST_UUID,
-	type LibraryStoreName,
-} from '$lib/library/types.ts'
+import { type LibraryStoreName } from '$lib/library/types.ts'
 import { isRajneeshEnabled } from '$lib/rajneesh/feature-flags.ts'
 import { whenCatalogReady } from '$lib/rajneesh/stores/catalog.svelte.ts'
 import type { PageLoad } from './$types.d.ts'
@@ -151,11 +147,7 @@ export const load: PageLoad = async (event): Promise<LoadResult> => {
 	}
 
 	let id: number | undefined
-	if (uuid === FAVORITE_PLAYLIST_UUID) {
-		id = FAVORITE_PLAYLIST_ID
-	} else {
-		id = await getLibraryItemIdFromUuid(slug, uuid)
-	}
+	id = await getLibraryItemIdFromUuid(slug, uuid)
 
 	if (!id) {
 		error(404)

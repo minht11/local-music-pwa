@@ -25,7 +25,6 @@
 	"errorPageDoesNotExist": "Looks like this page doesn't exist.",
 	"errorPlaybackFailed": "Unable to play this track.",
 	"errorUnexpected": "An unexpected error occurred.",
-	"favorites": "Favorites",
 	"foundAnIssue": "Found an issue?",
 	"goBack": "Go back",
 	"library": "Library",
@@ -178,10 +177,7 @@
 	"shuffle": "Shuffle",
 	"successfullyRemovedTracks": "Successfully removed {count} tracks",
 	"track": "Track",
-	"trackAddToFavorites": "Add to favorites",
-
 	"trackPlay": "Play {name}",
-	"trackRemoveFromFavorites": "Remove from favorites",
 	"tracks": "Tracks",
 	"trackViewAlbum": "View album",
 	"trackViewArtist": "View artist",

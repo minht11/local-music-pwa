@@ -5,6 +5,7 @@ import { getPersistedValue, persist } from '$lib/helpers/persist.svelte.ts'
 import { isMobile } from '$lib/helpers/utils/ua.ts'
 import type { UpdatePlaylistOptions } from '$lib/library/playlists-actions'
 import type { LibraryStoreName } from '$lib/library/types'
+import type { BookmarkDialogState } from '$lib/rajneesh/bookmarks/dialog-state.ts'
 
 export type AppTheme = 'light' | 'dark'
 export type AppThemeOption = AppTheme | 'auto'
@@ -88,6 +89,8 @@ export class MainStore {
 	removeLibraryItemOpen: RemoveLibraryItemOptions | null = $state(null)
 
 	addTrackToPlaylistDialogOpen: number[] | null = $state(null)
+
+	bookmarkDialogOpen: BookmarkDialogState | null = $state(null)
 
 	appInstallPromptEvent: BeforeInstallPromptEvent | null = $state(null)
 

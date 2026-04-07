@@ -28,7 +28,6 @@ export const rajneeshGetLibraryValue = async <Store extends LibraryStoreName>(
 				...track,
 				image: fallbackImage,
 				type: 'track',
-				favorite: false, // Favorites not implemented in memory yet
 			}
 		}
 	} else if (storeName === 'albums') {

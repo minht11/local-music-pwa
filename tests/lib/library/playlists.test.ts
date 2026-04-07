@@ -10,12 +10,11 @@ import {
 	dbRemoveTracksFromPlaylistsWithTx,
 	getPlaylistEntriesDatabaseStore,
 	removeTrackEntryFromPlaylist,
-	toggleFavoriteTrack,
 	type UpdatePlaylistOptions,
 	updatePlaylist,
 } from '$lib/library/playlists-actions.ts'
 import { dbImportTrack } from '$lib/library/scan-actions/scanner/import-track.ts'
-import { FAVORITE_PLAYLIST_ID, type UnknownTrack } from '$lib/library/types.ts'
+import type { UnknownTrack } from '$lib/library/types.ts'
 import { clearDatabaseStores, dbGetAllAndExpectLength, expectToBeDefined } from '../../shared.ts'
 
 vi.mock('$lib/components/snackbar/snackbar', () => ({
@@ -296,32 +295,6 @@ describe('playlists', () => {
 			})
 
 			expect(result).toBe(false)
-		})
-	})
-
-	describe('favorites functionality', () => {
-		it('adds track to favorites', async () => {
-			const trackId = await dbImportTestTrack()
-
-			await toggleFavoriteTrack(false, trackId)
-
-			const db = await getDatabase()
-			const [entry] = await db.getAll('playlistEntries')
-
-			expectToBeDefined(entry)
-			expect(entry.playlistId).toBe(FAVORITE_PLAYLIST_ID)
-			expect(entry.trackId).toBe(trackId)
-			expect(entry.addedAt).toBe(1234567890)
-		})
-
-		it('removes track from favorites', async () => {
-			const trackId = await dbImportTestTrack()
-
-			await toggleFavoriteTrack(false, trackId)
-			await dbGetAllAndExpectLength('playlistEntries', 1)
-
-			await toggleFavoriteTrack(true, trackId)
-			await dbGetAllAndExpectLength('playlistEntries', 0)
 		})
 	})
 

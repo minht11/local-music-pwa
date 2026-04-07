@@ -2,7 +2,12 @@ import type { DbValue } from '$lib/db/database.ts'
 import type { LibraryItemSortKey } from '$lib/library/get/ids.ts'
 import type { LibraryStoreName } from '$lib/library/types'
 
-import { exploreConfig, homeConfig, shortsConfig } from '$lib/rajneesh/config/library-config.ts'
+import {
+	bookmarksConfig,
+	exploreConfig,
+	homeConfig,
+	shortsConfig,
+} from '$lib/rajneesh/config/library-config.ts'
 
 export type LibrarySearchFn<Value> = (value: Value, searchTerm: string) => boolean
 
@@ -106,12 +111,15 @@ type LibraryRouteConfigsMap = {
 	[Slug in LibraryStoreName]: LibraryRouteConfig<Slug>
 }
 
-export const configsMap: LibraryRouteConfigsMap = {
+export const configsMap = {
 	tracks: trackConfig,
 	albums: albumConfig,
 	artists: artistConfig,
 	playlists: playlistConfig,
+	bookmarks: bookmarksConfig,
 	home: homeConfig,
 	shorts: shortsConfig,
 	explore: exploreConfig,
+} satisfies LibraryRouteConfigsMap & {
+	bookmarks: typeof bookmarksConfig
 }

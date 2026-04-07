@@ -5,9 +5,6 @@ import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/d
 import { createUIAction } from '$lib/helpers/ui-action.ts'
 import { truncate } from '$lib/helpers/utils/text.ts'
 import type { Playlist, PlaylistEntry } from '$lib/library/types.ts'
-import { FAVORITE_PLAYLIST_ID } from './types.ts'
-
-export { FAVORITE_PLAYLIST_ID } from './types.ts'
 
 export const dbCreatePlaylist = async (
 	name: string,
@@ -256,63 +253,3 @@ export const removeTrackEntryFromPlaylist = createUIAction(
 	m.libraryTrackRemovedFromPlaylist(),
 	(playlistEntryId: number) => dbRemoveTrackEntryFromPlaylist(playlistEntryId),
 )
-
-const dbAddTrackToFavorites = async (trackId: number): Promise<void> => {
-	const db = await getDatabase()
-
-	const playlistEntry: Omit<PlaylistEntry, 'id'> = {
-		playlistId: FAVORITE_PLAYLIST_ID,
-		trackId,
-		addedAt: Date.now(),
-	}
-
-	const key = await db.add('playlistEntries', playlistEntry as PlaylistEntry)
-
-	dispatchDatabaseChangedEvent({
-		operation: 'add',
-		storeName: 'playlistEntries',
-		key,
-		value: {
-			...playlistEntry,
-			id: key,
-		},
-	})
-}
-
-const dbRemoveTrackFromFavorites = async (trackId: number): Promise<void> => {
-	const db = await getDatabase()
-
-	const entry = await db.getFromIndex('playlistEntries', 'playlistTrack', [
-		FAVORITE_PLAYLIST_ID,
-		trackId,
-	])
-	invariant(entry)
-
-	await db.delete('playlistEntries', entry.id)
-
-	dispatchDatabaseChangedEvent({
-		operation: 'delete',
-		storeName: 'playlistEntries',
-		key: entry.id,
-		value: entry,
-	})
-}
-
-export const toggleFavoriteTrack = async (
-	shouldBeRemoved: boolean,
-	trackId: number,
-): Promise<boolean> => {
-	try {
-		if (shouldBeRemoved) {
-			await dbRemoveTrackFromFavorites(trackId)
-		} else {
-			await dbAddTrackToFavorites(trackId)
-		}
-
-		return true
-	} catch (error) {
-		snackbar.unexpectedError(error)
-
-		return false
-	}
-}

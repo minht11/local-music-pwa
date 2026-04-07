@@ -11,10 +11,7 @@
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 	import { formatArtists, formatNameOrUnknown } from '$lib/helpers/utils/text.ts'
 	import type { AlbumData, TrackData } from '$lib/library/get/value.ts'
-	import {
-		FAVORITE_PLAYLIST_ID,
-		removeTrackEntryFromPlaylist,
-	} from '$lib/library/playlists-actions.ts'
+	import { removeTrackEntryFromPlaylist } from '$lib/library/playlists-actions.ts'
 	import { type Album, type Playlist, UNKNOWN_ITEM } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 
@@ -57,10 +54,6 @@
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
 
 	const playlistTrackMenuItems = (track: TrackData) => {
-		if (item.id === FAVORITE_PLAYLIST_ID) {
-			return []
-		}
-
 		return [
 			{
 				label: m.libraryTrackRemoveFromPlaylist(),
@@ -86,10 +79,6 @@
 					}
 
 		if (slug === 'playlists') {
-			if (item.id === FAVORITE_PLAYLIST_ID) {
-				return [addToQueueMenuItem]
-			}
-
 			return [addToQueueMenuItem, ...getPlaylistMenuItems(main, item as Playlist)]
 		}
 

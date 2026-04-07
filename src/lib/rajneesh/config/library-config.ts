@@ -44,3 +44,10 @@ export const exploreConfig: LibraryRouteConfig<'explore'> = {
 	},
 	sortOptions: () => [nameSortOption],
 }
+
+export const bookmarksConfig: Omit<LibraryRouteConfig<'home'>, 'slug'> & { slug: 'bookmarks' } = {
+	slug: 'bookmarks',
+	singularTitle: () => 'Bookmark',
+	pluralTitle: () => 'Bookmarks',
+	sortOptions: () => [],
+}

@@ -2,7 +2,7 @@ import { WeakLRUCache } from 'weak-lru-cache'
 import { type DbKey, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, onDatabaseChange } from '$lib/db/events.ts'
 import type { Album, Artist, Playlist, Track } from '$lib/library/types.ts'
-import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryStoreName } from '../types.ts'
+import { type LibraryStoreName } from '../types.ts'
 import { isRajneeshEnabled } from '$lib/rajneesh/feature-flags.ts'
 import { rajneeshGetLibraryValue } from '$lib/rajneesh/hooks/get-value.ts'
 
@@ -43,7 +43,6 @@ const defaultRefreshOnDatabaseChanges = (
 
 export interface TrackData extends Track {
 	type: 'track'
-	favorite: boolean
 }
 
 const trackConfig: QueryConfig<TrackData> = {
@@ -54,16 +53,7 @@ const trackConfig: QueryConfig<TrackData> = {
 		}
 
 		const db = await getDatabase()
-		const tx = db.transaction(['tracks', 'playlistEntries'], 'readonly')
-
-		const [item, favorite] = await Promise.all([
-			tx.objectStore('tracks').get(id),
-			tx
-				.objectStore('playlistEntries')
-				.index('playlistTrack')
-				.get([FAVORITE_PLAYLIST_ID, id]),
-			tx.done,
-		])
+		const item = await db.get('tracks', id)
 
 		if (!item) {
 			return undefined
@@ -72,22 +62,10 @@ const trackConfig: QueryConfig<TrackData> = {
 		return {
 			...item,
 			type: 'track',
-			favorite: !!favorite,
 		} as TrackData
 	},
 	shouldRefetch: (itemId, changes) => {
 		for (const change of changes) {
-			if (change.storeName === 'playlistEntries') {
-				const playlistEntry = change.value
-
-				if (
-					playlistEntry.playlistId === FAVORITE_PLAYLIST_ID &&
-					itemId === playlistEntry.trackId
-				) {
-					return true
-				}
-			}
-
 			if (change.storeName === 'tracks' && change.key === itemId) {
 				return true
 			}
@@ -98,15 +76,6 @@ const trackConfig: QueryConfig<TrackData> = {
 }
 
 const tracksDataDatabaseChangeHandler = (change: DatabaseChangeDetails) => {
-	if (change.storeName === 'playlistEntries') {
-		const playlistEntry = change.value
-
-		if (playlistEntry.playlistId === FAVORITE_PLAYLIST_ID) {
-			const cacheKey = getCacheKey('tracks', playlistEntry.trackId)
-			valueCache.delete(cacheKey)
-		}
-	}
-
 	if (
 		(change.storeName === 'tracks' && change.operation === 'delete') ||
 		change.operation === 'update'
@@ -162,22 +131,7 @@ export interface PlaylistData extends Playlist {
 }
 
 const playlistsConfig: QueryConfig<PlaylistData> = {
-	fetch: (id) => {
-		if (id === FAVORITE_PLAYLIST_ID) {
-			const favoritePlaylist: PlaylistData = {
-				type: 'playlist',
-				id: FAVORITE_PLAYLIST_ID,
-				uuid: FAVORITE_PLAYLIST_UUID,
-				name: m.favorites(),
-				description: '',
-				createdAt: 0,
-			}
-
-			return Promise.resolve(favoritePlaylist)
-		}
-
-		return dbGetValue('playlists', 'playlist', id)
-	},
+	fetch: (id) => dbGetValue('playlists', 'playlist', id),
 	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'playlists'),
 }
 

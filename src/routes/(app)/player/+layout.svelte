@@ -8,11 +8,11 @@
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import PlayerFavoriteButton from '$lib/components/player/buttons/PlayerFavoriteButton.svelte'
 	import SeekBackButton from '$lib/components/player/buttons/SeekBackButton.svelte'
-	import SeekForwardButton from '$lib/components/player/buttons/SeekForwardButton.svelte'
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
 	import BgMusicButton from '$lib/rajneesh/components/player/BgMusicButton.svelte'
+	import PlayerBookmarkButton from '$lib/rajneesh/components/player/PlayerBookmarkButton.svelte'
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
 	import Slider from '$lib/components/Slider.svelte'
@@ -80,7 +80,7 @@
 
 					<PlayTogglePillButton />
 
-					<SeekForwardButton />
+					<PlayerBookmarkButton />
 
 					{#if isRajneeshEnabled()}
 						<BgMusicButton />

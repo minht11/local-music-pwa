@@ -4,12 +4,12 @@
 	import Icon from './icon/Icon.svelte'
 	import PlayerFavoriteButton from './player/buttons/PlayerFavoriteButton.svelte'
 	import SeekBackButton from './player/buttons/SeekBackButton.svelte'
-	import SeekForwardButton from './player/buttons/SeekForwardButton.svelte'
 	import PlayToggleButton from './player/buttons/PlayToggleButton.svelte'
 	import MainControls from './player/MainControls.svelte'
 	import PlayerArtwork from './player/PlayerArtwork.svelte'
 	import Timeline from './player/Timeline.svelte'
 	import VolumeSlider from './player/VolumeSlider.svelte'
+	import PlayerBookmarkButton from '$lib/rajneesh/components/player/PlayerBookmarkButton.svelte'
 
 	const { class: className }: { class?: ClassValue } = $props()
 
@@ -72,7 +72,7 @@
 			<div class="ml-auto flex gap-2 pr-2 sm:hidden">
 				<SeekBackButton class="max-xss:hidden" />
 				<PlayToggleButton />
-				<SeekForwardButton class="max-xss:hidden" />
+				<PlayerBookmarkButton />
 			</div>
 
 			<MainControls class="max-sm:hidden" />

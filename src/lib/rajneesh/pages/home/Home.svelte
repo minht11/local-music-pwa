@@ -11,6 +11,7 @@
 	import type { Album } from '$lib/library/types.ts'
 	import ContinueListeningCard from '$lib/rajneesh/components/ContinueListeningCard.svelte'
 	import InstallAppBanner from '$lib/rajneesh/components/InstallAppBanner.svelte'
+import HomeBookmarksSection from '$lib/rajneesh/pages/home/HomeBookmarksSection.svelte'
 
 	const player = usePlayer()
 	const menu = useMenu()
@@ -916,6 +917,7 @@
 		{@render devNote()}
 
 		{@render discoverSection()}
+		<HomeBookmarksSection />
 
 		<section class="relative py-4">
 			<div class="mb-4 flex items-center justify-between gap-3">
@@ -941,6 +943,7 @@
 		{@render devNote()}
 
 		{@render discoverSection()}
+		<HomeBookmarksSection />
 
 		<div class="flex h-full flex-col items-center justify-center text-center"></div>
 	</div>
