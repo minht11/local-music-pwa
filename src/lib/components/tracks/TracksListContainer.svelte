@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation'
 	import { resolve } from '$app/paths'
 	import type { TrackData } from '$lib/library/get/value.ts'
-	import { toggleFavoriteTrack } from '$lib/library/playlists-actions'
 	import { canPlayTrackFile } from '$lib/rajneesh/hooks/can-play-track.ts'
 	import { getRelatedUuid } from '$lib/rajneesh/hooks/get-related-uuid.ts'
 	import {
@@ -20,7 +19,6 @@
 		| 'addToQueue'
 		| 'addToPlaylist'
 		| 'removeFromLibrary'
-		| 'addToFavorites'
 		| 'toggleCompleted'
 		| 'viewAlbum'
 		| 'viewArtist'
@@ -90,7 +88,7 @@
 		const predefinedMenuItemsList: (PredefinedMenuItem | FalsyValue)[] = [
 			{
 				predefinedKey: 'addToQueue',
-				label: m.playerAddToQueue(),
+				label: 'Add to Play later',
 				action: () => {
 					player.addToQueue(track.id)
 				},

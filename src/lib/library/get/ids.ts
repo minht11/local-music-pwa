@@ -50,7 +50,7 @@ export const getLibraryItemIds = async <Store extends LibraryStoreName>(
 	options: SortOptions<Store>,
 ): Promise<number[]> => {
 	// RAJNEESH HOOK
-	if (isRajneeshEnabled()) {
+	if (isRajneeshEnabled() && store !== 'playlists' && store !== 'bookmarks') {
 		return rajneeshGetLibraryItemIds(store, options)
 	}
 
@@ -111,7 +111,7 @@ export const getLibraryItemIdFromUuid = async (
 	uuid: string,
 ): Promise<number | undefined> => {
 	// RAJNEESH HOOK
-	if (isRajneeshEnabled()) {
+	if (isRajneeshEnabled() && storeName !== 'playlists' && storeName !== 'bookmarks') {
 		return rajneeshGetIdFromUuid(storeName, uuid)
 	}
 

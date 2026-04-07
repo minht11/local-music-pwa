@@ -9,6 +9,7 @@
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 	import { setupOverlaySnippets } from '$lib/layout-bottom-bar.svelte'
+	import { restoreSharedBookmarkFromUrl } from '$lib/rajneesh/bookmarks/share.ts'
 	import { MainStore } from '$lib/stores/main/store.svelte.ts'
 	import { setMainStoreContext } from '$lib/stores/main/use-store.ts'
 	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
@@ -83,6 +84,7 @@
 
 	if (browser) {
 		void setupDirectoriesPermissionPrompt(directoriesPermissionSnackbar)
+		void restoreSharedBookmarkFromUrl(player)
 	}
 </script>
 

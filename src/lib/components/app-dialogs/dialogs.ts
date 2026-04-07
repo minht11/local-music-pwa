@@ -5,9 +5,11 @@ import AddToPlaylistDialog from './playlists/AddToPlaylistDialog.svelte'
 import EditPlaylistDialog from './playlists/EditPlaylistDialog.svelte'
 // biome-ignore lint/correctness/noPrivateImports: false positive
 import NewPlaylistDialog from './playlists/NewPlaylistDialog.svelte'
+import BookmarkDialog from '$lib/rajneesh/bookmarks/components/BookmarkDialog.svelte'
 
 export const APP_DIALOGS_COMPONENTS = [
 	ConfirmRemoveLibraryItem,
+	BookmarkDialog,
 	AddToPlaylistDialog,
 	NewPlaylistDialog,
 	EditPlaylistDialog,

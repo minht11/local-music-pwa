@@ -15,8 +15,8 @@
 	import { initPageQueriesDynamic } from '$lib/db/query/page-query.svelte.ts'
 	import { isMobile } from '$lib/helpers/utils/ua.ts'
 	import { useSetOverlaySnippet } from '$lib/layout-bottom-bar.svelte.ts'
-	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
+	import BookmarksPage from '$lib/rajneesh/bookmarks/pages/BookmarksPage.svelte'
 	import { isRajneeshEnabled } from '$lib/rajneesh/feature-flags.ts'
 	import Home from '$lib/rajneesh/pages/home/Home.svelte'
 	import ShortsView from '$lib/rajneesh/pages/shorts/ShortsView.svelte'
@@ -139,7 +139,7 @@
 					</div>
 				{/if}
 
-				{#if data.tracksCountQuery.value === 0 && slug !== 'playlists' && slug !== 'home' && slug !== 'shorts' && !isRajneeshEnabled()}
+				{#if data.tracksCountQuery.value === 0 && slug !== 'playlists' && slug !== 'home' && slug !== 'shorts' && slug !== 'bookmarks' && !isRajneeshEnabled()}
 					<div class="my-auto flex flex-col items-center text-center">
 						<div class="mb-1 text-title-lg">{m.libraryEmpty()}</div>
 						{m.libraryStartByAdding()}
@@ -154,6 +154,8 @@
 							<Home />
 						{:else if slug === 'shorts'}
 							<ShortsView />
+						{:else if slug === 'bookmarks'}
+							<BookmarksPage searchTerm={data.store.searchTerm} />
 						{:else if slug === 'explore' && data.store.searchTerm.trim()}
 							<div class="flex flex-col gap-6">
 								{#if itemsIds.length > 0}
@@ -184,7 +186,6 @@
 							<PlaylistListContainer
 								items={itemsIds}
 								menuItems={{
-									disabled: (playlist) => playlist.id === FAVORITE_PLAYLIST_ID,
 									items: (playlist) => getPlaylistMenuItems(main, playlist),
 								}}
 								onItemClick={({ playlist }) => {

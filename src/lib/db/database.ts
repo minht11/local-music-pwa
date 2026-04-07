@@ -22,6 +22,15 @@ export interface CompletedTrack {
 	completedAt: number
 }
 
+export interface BookmarkRecord {
+	id?: number
+	trackId: number
+	timestampSeconds: number
+	note?: string
+	createdAt: number
+	updatedAt: number
+}
+
 export interface AppDB extends DBSchema {
 	tracks: {
 		key: number
@@ -119,6 +128,15 @@ export interface AppDB extends DBSchema {
 			completedAt: number
 		}
 	}
+	bookmarks: {
+		key: number
+		value: BookmarkRecord
+		indexes: {
+			trackId: number
+			createdAt: number
+			updatedAt: number
+		}
+	}
 }
 
 export type AppStoreNames = StoreNames<AppDB>
@@ -144,7 +162,7 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 	})
 
 const openAppDatabase = () =>
-	openDB<AppDB>('snae-app-data', 6, {
+	openDB<AppDB>('snae-app-data', 7, {
 		async upgrade(db, oldVersion, _newVersion, tx) {
 			const { objectStoreNames } = db
 
@@ -263,6 +281,11 @@ const openAppDatabase = () =>
 				const store = createStore(db, 'completedTracks')
 				createIndexes(store, ['trackId'], { unique: true })
 				createIndexes(store, ['completedAt'])
+			}
+
+			if (!objectStoreNames.contains('bookmarks')) {
+				const store = createStore(db, 'bookmarks')
+				createIndexes(store, ['trackId', 'createdAt', 'updatedAt'])
 			}
 		},
 	})

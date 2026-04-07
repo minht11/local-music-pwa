@@ -9,6 +9,10 @@ export const rajneeshGetLibraryValue = async <Store extends LibraryStoreName>(
 	storeName: Store,
 	id: number,
 ): Promise<any | undefined> => {
+	if (storeName === 'playlists' || storeName === 'bookmarks') {
+		return undefined
+	}
+
 	const catalog = getCatalog()
 	if (!catalog) return undefined
 
@@ -28,7 +32,6 @@ export const rajneeshGetLibraryValue = async <Store extends LibraryStoreName>(
 				...track,
 				image: fallbackImage,
 				type: 'track',
-				favorite: false, // Favorites not implemented in memory yet
 			}
 		}
 	} else if (storeName === 'albums') {

@@ -6,12 +6,12 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
-	import PlayerFavoriteButton from '$lib/components/player/buttons/PlayerFavoriteButton.svelte'
 	import SeekBackButton from '$lib/components/player/buttons/SeekBackButton.svelte'
 	import SeekForwardButton from '$lib/components/player/buttons/SeekForwardButton.svelte'
 	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
 	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
 	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
+	import BookmarkActionButton from '$lib/rajneesh/components/player/BookmarkActionButton.svelte'
 	import BgMusicButton from '$lib/rajneesh/components/player/BgMusicButton.svelte'
 	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
 	import Timeline from '$lib/components/player/Timeline.svelte'
@@ -80,7 +80,11 @@
 
 					<PlayTogglePillButton />
 
-					<SeekForwardButton />
+					{#if isRajneeshEnabled()}
+						<BookmarkActionButton />
+					{:else}
+						<SeekForwardButton />
+					{/if}
 
 					{#if isRajneeshEnabled()}
 						<BgMusicButton />
@@ -127,9 +131,8 @@
 				{/if}
 
 				<div class="ml-auto flex gap-1">
-					<PlayerFavoriteButton />
-
 					{#if layoutMode === 'list'}
+						<BookmarkActionButton />
 						<IconButton tooltip={m.playerOpenQueue()} icon="trayFull" as="a" href="/player/queue" />
 					{/if}
 				</div>

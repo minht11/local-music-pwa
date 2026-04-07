@@ -1,8 +1,9 @@
 import { WeakLRUCache } from 'weak-lru-cache'
+import type { BookmarkRecord } from '$lib/db/database.ts'
 import { type DbKey, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, onDatabaseChange } from '$lib/db/events.ts'
 import type { Album, Artist, Playlist, Track } from '$lib/library/types.ts'
-import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryStoreName } from '../types.ts'
+import type { LibraryStoreName } from '../types.ts'
 import { isRajneeshEnabled } from '$lib/rajneesh/feature-flags.ts'
 import { rajneeshGetLibraryValue } from '$lib/rajneesh/hooks/get-value.ts'
 
@@ -43,7 +44,6 @@ const defaultRefreshOnDatabaseChanges = (
 
 export interface TrackData extends Track {
 	type: 'track'
-	favorite: boolean
 }
 
 const trackConfig: QueryConfig<TrackData> = {
@@ -54,16 +54,7 @@ const trackConfig: QueryConfig<TrackData> = {
 		}
 
 		const db = await getDatabase()
-		const tx = db.transaction(['tracks', 'playlistEntries'], 'readonly')
-
-		const [item, favorite] = await Promise.all([
-			tx.objectStore('tracks').get(id),
-			tx
-				.objectStore('playlistEntries')
-				.index('playlistTrack')
-				.get([FAVORITE_PLAYLIST_ID, id]),
-			tx.done,
-		])
+		const item = await db.get('tracks', id)
 
 		if (!item) {
 			return undefined
@@ -72,22 +63,10 @@ const trackConfig: QueryConfig<TrackData> = {
 		return {
 			...item,
 			type: 'track',
-			favorite: !!favorite,
 		} as TrackData
 	},
 	shouldRefetch: (itemId, changes) => {
 		for (const change of changes) {
-			if (change.storeName === 'playlistEntries') {
-				const playlistEntry = change.value
-
-				if (
-					playlistEntry.playlistId === FAVORITE_PLAYLIST_ID &&
-					itemId === playlistEntry.trackId
-				) {
-					return true
-				}
-			}
-
 			if (change.storeName === 'tracks' && change.key === itemId) {
 				return true
 			}
@@ -98,15 +77,6 @@ const trackConfig: QueryConfig<TrackData> = {
 }
 
 const tracksDataDatabaseChangeHandler = (change: DatabaseChangeDetails) => {
-	if (change.storeName === 'playlistEntries') {
-		const playlistEntry = change.value
-
-		if (playlistEntry.playlistId === FAVORITE_PLAYLIST_ID) {
-			const cacheKey = getCacheKey('tracks', playlistEntry.trackId)
-			valueCache.delete(cacheKey)
-		}
-	}
-
 	if (
 		(change.storeName === 'tracks' && change.operation === 'delete') ||
 		change.operation === 'update'
@@ -123,7 +93,7 @@ const dbGetValue = async <Store extends LibraryStoreName, const T extends string
 	id: number,
 ) => {
 	// RAJNEESH HOOK
-	if (isRajneeshEnabled()) {
+	if (isRajneeshEnabled() && storeName !== 'playlists' && storeName !== 'bookmarks') {
 		const val = await rajneeshGetLibraryValue(storeName, id)
 		return val
 	}
@@ -161,24 +131,18 @@ export interface PlaylistData extends Playlist {
 	type: 'playlist'
 }
 
+export interface BookmarkData extends BookmarkRecord {
+	type: 'bookmark'
+}
+
 const playlistsConfig: QueryConfig<PlaylistData> = {
-	fetch: (id) => {
-		if (id === FAVORITE_PLAYLIST_ID) {
-			const favoritePlaylist: PlaylistData = {
-				type: 'playlist',
-				id: FAVORITE_PLAYLIST_ID,
-				uuid: FAVORITE_PLAYLIST_UUID,
-				name: m.favorites(),
-				description: '',
-				createdAt: 0,
-			}
-
-			return Promise.resolve(favoritePlaylist)
-		}
-
-		return dbGetValue('playlists', 'playlist', id)
-	},
+	fetch: (id) => dbGetValue('playlists', 'playlist', id),
 	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'playlists'),
+}
+
+const bookmarksConfig: QueryConfig<BookmarkData> = {
+	fetch: (id) => dbGetValue('bookmarks', 'bookmark', id),
+	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'bookmarks'),
 }
 
 interface LibraryValueMap {
@@ -186,6 +150,7 @@ interface LibraryValueMap {
 	albums: AlbumData
 	artists: ArtistData
 	playlists: PlaylistData
+	bookmarks: BookmarkData
 }
 
 type LibraryValue<Store extends LibraryStoreName = LibraryStoreName> = LibraryValueMap[Store]
@@ -199,6 +164,7 @@ const libraryConfigMap = {
 	albums: albumConfig,
 	artists: artistConfig,
 	playlists: playlistsConfig,
+	bookmarks: bookmarksConfig,
 } satisfies LibraryConfigMap
 
 type LibraryCachedValue<Store extends LibraryStoreName = LibraryStoreName> =
@@ -249,7 +215,12 @@ if (!import.meta.env.SSR) {
 		for (const change of changes) {
 			const { storeName } = change
 
-			if (storeName === 'albums' || storeName === 'artists' || storeName === 'playlists') {
+			if (
+				storeName === 'albums' ||
+				storeName === 'artists' ||
+				storeName === 'playlists' ||
+				storeName === 'bookmarks'
+			) {
 				if (change.operation === 'delete' || change.operation === 'update') {
 					const cacheKey = getCacheKey(storeName, change.key)
 					valueCache.delete(cacheKey)

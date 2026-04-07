@@ -8,7 +8,7 @@ import {
 	dbCreatePlaylist,
 	getPlaylistEntriesDatabaseStore,
 } from '../playlists-actions.ts'
-import { FAVORITE_PLAYLIST_ID, LEGACY_NO_NATIVE_DIRECTORY } from '../types.ts'
+import { LEGACY_NO_NATIVE_DIRECTORY } from '../types.ts'
 import { scanTracks } from './scan-tracks.ts'
 
 const prepareLegacyFiles = async () => {
@@ -93,17 +93,6 @@ const dbMigrateV1LegacyData = async () => {
 		}
 	}
 
-	try {
-		const favorites = await getV1LegacyDatabaseValue('favorites')
-		if (favorites) {
-			await dbAddTracksToPlaylistsWithTx(await getPlaylistEntriesDatabaseStore(), {
-				playlistIds: [FAVORITE_PLAYLIST_ID],
-				trackIds: mapTrackLegacyIdsToNewIds(favorites),
-			})
-		}
-	} catch (error) {
-		console.error('Error while adding legacy favorites', error)
-	}
 }
 
 export const migrateV1LegacyData = async () => {

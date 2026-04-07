@@ -22,6 +22,10 @@ export const rajneeshGetLibraryItemIds = async <Store extends LibraryStoreName>(
 	store: Store,
 	options: SortOptions<Store>,
 ): Promise<number[]> => {
+	if (store === 'playlists' || store === 'bookmarks' || store === 'home' || store === 'shorts') {
+		return []
+	}
+
 	const catalog = getCatalog()
 	
 	if (!catalog) {
@@ -141,6 +145,10 @@ export const rajneeshGetIdFromUuid = (
 	storeName: LibraryStoreName,
 	uuid: string,
 ): number | undefined => {
+	if (storeName === 'playlists' || storeName === 'bookmarks') {
+		return undefined
+	}
+
 	const catalog = getCatalog()
 	if (!catalog) return undefined
 

@@ -1,6 +1,5 @@
 <script lang="ts" module>
 	import { createPlaylistQuery } from '$lib/library/get/value-queries.ts'
-	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions'
 	import type { Playlist } from '$lib/library/types.ts'
 	import type { IconType } from '../icon/Icon.svelte'
 	import Icon from '../icon/Icon.svelte'
@@ -53,7 +52,7 @@
 		return () => menuItems(playlist)
 	})
 
-	const fallbackIcon = () => (playlistId === FAVORITE_PLAYLIST_ID ? 'favorite' : 'playlist')
+	const fallbackIcon = () => 'playlist'
 </script>
 
 <ListItem

@@ -5,6 +5,7 @@
 	import RepeatButton from './buttons/RepeatButton.svelte'
 	import ShuffleButton from './buttons/ShuffleButton.svelte'
 	import { isRajneeshEnabled } from '$lib/rajneesh/index.ts'
+	import BookmarkActionButton from '$lib/rajneesh/components/player/BookmarkActionButton.svelte'
 	import SpeedControlButton from '$lib/rajneesh/components/player/SpeedControlButton.svelte'
 	import BgMusicButton from '$lib/rajneesh/components/player/BgMusicButton.svelte'
 
@@ -22,7 +23,11 @@
 
 	<PlayTogglePillButton />
 
-	<SeekForwardButton />
+	{#if isRajneeshEnabled()}
+		<BookmarkActionButton />
+	{:else}
+		<SeekForwardButton />
+	{/if}
 
 	{#if isRajneeshEnabled()}
 		<BgMusicButton />

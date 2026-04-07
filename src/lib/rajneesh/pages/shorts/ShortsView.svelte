@@ -3,11 +3,12 @@
 	import { onMount, tick } from 'svelte'
 	import Button from '$lib/components/Button.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
+	import { snackbar } from '$lib/components/snackbar/snackbar.ts'
 	import { getLatestActiveMinutesByTrack } from '$lib/db/active-minutes.ts'
 	import { onDatabaseChange } from '$lib/db/events.ts'
 	import { dbGetAlbumTracksIdsByName, getLibraryItemIdFromUuid } from '$lib/library/get/ids.ts'
 	import { getLibraryValue } from '$lib/library/get/value.ts'
-	import { trackShortLiked } from '$lib/rajneesh/analytics/posthog.ts'
+	import { createBookmark } from '$lib/rajneesh/bookmarks/bookmarks.ts'
 	import {
 		ensureCompletedTracksLoaded,
 		isTrackCompleted,
@@ -18,7 +19,6 @@
 		setLastShortsIndex,
 	} from './shorts-state.ts'
 	import { ensureShortByTrackId, getShortsItems, loadMoreShorts } from './shorts-data.ts'
-	import { getLikedTrackIds, setTrackLiked } from './shorts-liked-state.ts'
 	import { BG_MUSIC_OPTIONS } from './bg-music-state.ts'
 	import {
 		bgMusicState,
@@ -31,6 +31,7 @@
 	} from '$lib/rajneesh/stores/bg-music.svelte.ts'
 
 	const player = usePlayer()
+	const main = useMainStore()
 
 	let shorts = $state(getShortsItems())
 
@@ -53,11 +54,7 @@
 	let lastUrlUpdatedForIndex = -1
 	let initialQueryIndex: number | null = null
 	let singleTapTimeout: ReturnType<typeof setTimeout> | null = null
-	let likeBurstTimeout: ReturnType<typeof setTimeout> | null = null
 	let activateShortTimeout: ReturnType<typeof setTimeout> | null = null
-	let likedTrackIds = $state(new Set<string>())
-	let likeBurstVisible = $state(false)
-	let likeBurstSeed = $state(0)
 	let pendingShortTrackId = $state<string | null>(null)
 	let lastActivatedShortKey = $state('')
 	let resumeSecondsByTrack = $state(new Map<string, number>())
@@ -75,17 +72,6 @@
 		return releaseConsumer
 	})
 
-	const HEART_BURST_OFFSETS = [
-		{ x: 0, y: -96, delay: 0, scale: 1.2 },
-		{ x: 84, y: -54, delay: 0.04, scale: 0.9 },
-		{ x: 96, y: 14, delay: 0.08, scale: 1 },
-		{ x: 58, y: 86, delay: 0.12, scale: 0.85 },
-		{ x: -58, y: 86, delay: 0.16, scale: 0.9 },
-		{ x: -96, y: 14, delay: 0.2, scale: 1.1 },
-		{ x: -84, y: -54, delay: 0.24, scale: 0.8 },
-		{ x: 0, y: 0, delay: 0.06, scale: 1.35 },
-	]
-
 	const activeShort = $derived(activeIndex >= 0 ? shorts[activeIndex] : undefined)
 	const isShortActiveInPlayer = $derived(activeShort?.trackId === player.activeTrack?.uuid)
 	const isCurrentAudioPlaying = $derived(
@@ -101,7 +87,6 @@
 	const currentPlaybackTime = $derived(
 		isShortActiveInPlayer ? player.currentTime : getShortStartSeconds(activeShort),
 	)
-	const activeTrackLiked = $derived(activeShort ? likedTrackIds.has(activeShort.trackId) : false)
 
 	async function resolveQuickExitRestoreTarget(): Promise<QuickExitRestoreTarget | null> {
 		await ensureCompletedTracksLoaded()
@@ -287,32 +272,29 @@ async function handleShareShort() {
 	}
 }
 
-async function toggleLikeActiveShort() {
+async function saveBookmarkForActiveShort() {
 	const item = shorts[activeIndex]
 	if (!item) return
 
-	const willLike = !likedTrackIds.has(item.trackId)
-	await setTrackLiked(item.trackId, willLike)
-
-	const next = new Set(likedTrackIds)
-	if (willLike) {
-		next.add(item.trackId)
-		triggerLikeBurst()
-		trackShortLiked({ trackId: item.trackId })
-	} else {
-		next.delete(item.trackId)
+	try {
+		const timestampSeconds =
+			isShortActiveInPlayer && player.currentTime > 0 ? player.currentTime : getShortStartSeconds(item)
+		const bookmarkId = await createBookmark({
+			trackId: item.trackDbId,
+			timestampSeconds,
+		})
+		main.bookmarkDialogOpen = { bookmarkId }
+	} catch (error) {
+		snackbar.unexpectedError(error)
 	}
-	likedTrackIds = next
 }
 
-	function triggerLikeBurst() {
-	likeBurstSeed += 1
-	likeBurstVisible = true
-	if (likeBurstTimeout) clearTimeout(likeBurstTimeout)
-	likeBurstTimeout = setTimeout(() => {
-		likeBurstVisible = false
-		likeBurstTimeout = null
-	}, 1300)
+function addActiveShortToPlayLater() {
+	const item = shorts[activeIndex]
+	if (!item) return
+
+	player.addToQueue(item.trackDbId)
+	snackbar('Added to Play later')
 }
 
 	$effect(() => {
@@ -391,7 +373,7 @@ async function toggleLikeActiveShort() {
 				clearTimeout(singleTapTimeout)
 				singleTapTimeout = null
 			}
-			void toggleLikeActiveShort()
+			void saveBookmarkForActiveShort()
 			return
 		}
 
@@ -418,17 +400,6 @@ async function toggleLikeActiveShort() {
 		if (activeIndex < 0 || activeIndex === lastUrlUpdatedForIndex) return
 		lastUrlUpdatedForIndex = activeIndex
 		updateShortsQueryParams(activeIndex)
-	})
-
-	$effect(() => {
-		let cancelled = false
-		void getLikedTrackIds().then((ids) => {
-			if (cancelled) return
-			likedTrackIds = new Set(ids)
-		})
-		return () => {
-			cancelled = true
-		}
 	})
 
 	// Ensure we regenerate enough shorts to reach the last seen index.
@@ -543,12 +514,6 @@ async function toggleLikeActiveShort() {
 	})
 
 	$effect(() => () => {
-		if (!likeBurstTimeout) return
-		clearTimeout(likeBurstTimeout)
-		likeBurstTimeout = null
-	})
-
-	$effect(() => () => {
 		if (!activateShortTimeout) return
 		clearTimeout(activateShortTimeout)
 		activateShortTimeout = null
@@ -596,21 +561,6 @@ async function toggleLikeActiveShort() {
 				<div class="relative z-10 flex min-h-[calc(100dvh-7rem)] w-full flex-col items-center justify-center">
 					<div class="mb-6 flex items-center justify-center">
 						<div class="relative flex size-56 items-center justify-center rounded-full border border-outlineVariant/45 bg-surfaceContainerHigh shadow-inner sm:size-72">
-							{#if activeIndex === i && likeBurstVisible}
-								{#key likeBurstSeed}
-									<div class="like-burst-layer">
-										{#each HEART_BURST_OFFSETS as burst}
-											<div
-												class="like-burst-heart"
-												style={`--like-tx:${burst.x}px;--like-ty:${burst.y}px;--like-delay:${burst.delay}s;--like-scale:${burst.scale};`}
-											>
-												<Icon type="favorite" class="size-full" />
-											</div>
-										{/each}
-									</div>
-								{/key}
-							{/if}
-
 							<Icon
 								type="vinylDisc"
 								class={[
@@ -768,19 +718,33 @@ async function toggleLikeActiveShort() {
 		</button>
 
 		<button
-			onclick={toggleLikeActiveShort}
+			onclick={(e) => {
+				e.stopPropagation()
+				void saveBookmarkForActiveShort()
+			}}
 			class={[
 				'flex size-10 items-center justify-center rounded-full shadow-lg backdrop-blur-md transition-colors hover:bg-surfaceContainerHigh',
-				activeTrackLiked
-					? 'bg-secondaryContainer/90 text-onSecondaryContainer'
-					: 'bg-surfaceContainer/80 text-onSurface/70',
+				'bg-surfaceContainer/80 text-onSurface/70',
 			]}
 		>
-			<Icon type={activeTrackLiked ? 'favorite' : 'favoriteOutline'} class="size-5" />
+			<Icon type="bookmarkOutline" class="size-5" />
 		</button>
 
 		<button
-			onclick={handleShareShort}
+			onclick={(e) => {
+				e.stopPropagation()
+				addActiveShortToPlayLater()
+			}}
+			class="flex size-10 items-center justify-center rounded-full bg-surfaceContainer/80 text-onSurface/70 shadow-lg backdrop-blur-md transition-colors hover:bg-surfaceContainerHigh"
+		>
+			<Icon type="playlistMusic" class="size-5" />
+		</button>
+
+		<button
+			onclick={(e) => {
+				e.stopPropagation()
+				void handleShareShort()
+			}}
 			class="flex size-10 items-center justify-center rounded-full bg-surfaceContainer/80 text-onSurface/70 shadow-lg backdrop-blur-md transition-colors hover:bg-surfaceContainerHigh"
 		>
 			<Icon type="shareVariant" class="size-5" />
@@ -814,50 +778,6 @@ async function toggleLikeActiveShort() {
 	}
 	:global(.disc-spin-bg-playing) {
 		animation-play-state: running;
-	}
-	.like-burst-layer {
-		position: absolute;
-		inset: -10%;
-		pointer-events: none;
-	}
-	.like-burst-heart {
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		width: 26px;
-		height: 26px;
-		transform: translate(-50%, -50%) scale(0.2);
-		opacity: 0;
-		color: var(--color-onSecondaryContainer);
-		animation: like-burst 1s cubic-bezier(0.18, 0.85, 0.24, 1) forwards;
-		animation-delay: var(--like-delay, 0s);
-	}
-	@keyframes like-burst {
-		0% {
-			opacity: 0;
-			transform: translate(-50%, -50%) scale(0.2);
-		}
-		14% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 1;
-			transform:
-				translate(
-					calc(-50% + var(--like-tx, 0px)),
-					calc(-50% + var(--like-ty, 0px))
-				)
-				scale(var(--like-scale, 1));
-		}
-		100% {
-			opacity: 0;
-			transform:
-				translate(
-					calc(-50% + calc(var(--like-tx, 0px) * 1.15)),
-					calc(-50% + calc(var(--like-ty, 0px) * 1.15))
-				)
-				scale(calc(var(--like-scale, 1) * 0.5));
-		}
 	}
 	@keyframes spin {
 		to {

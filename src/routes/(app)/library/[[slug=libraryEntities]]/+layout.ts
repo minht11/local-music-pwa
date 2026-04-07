@@ -9,7 +9,7 @@ import {
 	type PageQueryResult,
 } from '$lib/library/get/ids-queries.ts'
 import { createTracksCountPageQuery } from '$lib/library/tracks-queries.ts'
-import { FAVORITE_PLAYLIST_ID, type LibraryStoreName } from '$lib/library/types.ts'
+import type { LibraryStoreName } from '$lib/library/types.ts'
 import { isRajneeshEnabled } from '$lib/rajneesh/feature-flags.ts'
 import { whenCatalogReady } from '$lib/rajneesh/stores/catalog.svelte.ts'
 import { getPersistedLibrarySplitLayoutEnabled } from '$lib/stores/main/store.svelte.ts'
@@ -38,7 +38,7 @@ const loadData = async <Slug extends LibraryStoreName>(
 	const store = new LibraryStore(slug)
 	store.searchTerm = searchTermFromUrl
 
-	if (slug === 'home' || slug === 'shorts') {
+	if (slug === 'home' || slug === 'shorts' || slug === 'bookmarks') {
 		return {
 			...config,
 			store,
@@ -57,10 +57,6 @@ const loadData = async <Slug extends LibraryStoreName>(
 				searchTerm: normalizedSearchTerm,
 				searchFn: (value) => searchFn(value, normalizedSearchTerm),
 			})
-
-			if (slug === 'playlists') {
-				return [FAVORITE_PLAYLIST_ID, ...result]
-			}
 
 			return result
 		},
@@ -101,7 +97,7 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 	const searchTermFromUrl = event.url.searchParams.get('search')?.trim() ?? ''
 	const data = await loadData(slug, searchTermFromUrl)
 
-	if (data.tracksCountQuery.value === 0 && slug !== 'home' && slug !== 'shorts') {
+	if (data.tracksCountQuery.value === 0 && slug !== 'home' && slug !== 'shorts' && slug !== 'bookmarks') {
 		const hasV1Data = await checkForV1LegacyDatabaseData()
 
 		if (hasV1Data) {
@@ -117,6 +113,10 @@ export const load: LayoutLoad = async (event): Promise<LoadResult> => {
 		itemUuid: string | undefined,
 	): LayoutMode => {
 		if (slug === 'tracks' || slug === 'home' || slug === 'shorts') {
+			return 'list'
+		}
+
+		if (slug === 'bookmarks') {
 			return 'list'
 		}
 

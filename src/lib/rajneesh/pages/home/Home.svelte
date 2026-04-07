@@ -11,9 +11,10 @@
 	import type { Album } from '$lib/library/types.ts'
 	import ContinueListeningCard from '$lib/rajneesh/components/ContinueListeningCard.svelte'
 	import InstallAppBanner from '$lib/rajneesh/components/InstallAppBanner.svelte'
+	import HomeBookmarkCard from '$lib/rajneesh/bookmarks/components/HomeBookmarkCard.svelte'
+	import { createRecentBookmarksQuery } from '$lib/rajneesh/bookmarks/bookmarks.ts'
 
 	const player = usePlayer()
-	const menu = useMenu()
 	const DISCOVER_TOPICS_STORAGE_KEY = 'rajneesh-home-discover-topics'
 	const DISCOVER_TOPICS = [
 		'मुल्ला',
@@ -578,6 +579,8 @@
 	})
 
 	const resumeCards = $derived(latestResumeQuery.value ?? [])
+	const recentBookmarksQuery = createRecentBookmarksQuery(4)
+	const recentBookmarks = $derived(recentBookmarksQuery.value ?? [])
 	let resumeExpanded = $state(false)
 	let discoverTopicCatalog = $state<DiscoverTopic[]>(FALLBACK_DISCOVER_TOPIC_CATALOG)
 	let discoverTopics = $state<string[]>([])
@@ -746,6 +749,8 @@
 		void goto(`/library/explore?search=${encodeURIComponent(topic)}`)
 	}
 
+	const showBookmarksFirst = $derived(recentBookmarks.length > 0)
+
 	$effect(() => {
 		const firstCard = resumeCards[0]
 		if (!firstCard || !player.isQueueEmpty) {
@@ -855,13 +860,13 @@
 
 {#snippet searchBar()}
 	<div
-		class="@container sticky top-2 z-1 mt-2 mb-4 ml-auto flex w-full max-w-125 items-center gap-1 rounded-lg border border-primary/10 bg-surfaceContainerHighest px-2 @sm:gap-2"
+		class="@container sticky top-2 z-1 mt-2 mb-4 flex w-full items-center gap-1 rounded-lg border border-primary/10 bg-surfaceContainerHighest px-2 @sm:gap-2"
 	>
 		<input
 			type="text"
 			name="search"
 			placeholder={m.librarySearch()}
-			class="h-12 w-60 grow bg-transparent pl-2 text-body-md placeholder:text-onSurface/54 focus:outline-none"
+			class="h-12 min-w-0 grow bg-transparent pl-2 text-body-md placeholder:text-onSurface/54 focus:outline-none"
 			onfocus={openExploreSearch}
 			onclick={openExploreSearch}
 		/>
@@ -869,28 +874,11 @@
 		<Separator vertical class="my-auto hidden h-6 @sm:flex" />
 
 		<IconButton
-			ariaLabel={m.libraryOpenApplicationMenu()}
-			tooltip={m.libraryOpenApplicationMenu()}
-			icon="moreVertical"
-			onclick={(e) => {
-				const menuItems = [
-					{
-						label: m.settings(),
-						action: () => {
-							goto('/settings')
-						},
-					},
-				]
-					.filter(Boolean) as { label: string; action: () => void }[]
-
-				menu.showFromEvent(e, menuItems, {
-					width: 200,
-					anchor: true,
-					preferredAlignment: {
-						vertical: 'top',
-						horizontal: 'right',
-					},
-				})
+			ariaLabel={m.settings()}
+			tooltip={m.settings()}
+			icon="settings"
+			onclick={() => {
+				void goto('/settings')
 			}}
 		/>
 	</div>
@@ -909,13 +897,36 @@
 	</button>
 {/snippet}
 
+{#snippet bookmarksSection()}
+	{#if recentBookmarks.length > 0}
+		<section class="py-4">
+			<div class="mb-4 flex items-center justify-between gap-3">
+				<h2 class="text-title-lg">Bookmarks</h2>
+				<Button kind="flat" as="a" href="/library/bookmarks">View all</Button>
+			</div>
+
+			<div class="flex flex-col gap-2">
+				{#each recentBookmarks as bookmark (bookmark.id)}
+					<HomeBookmarkCard {bookmark} />
+				{/each}
+			</div>
+		</section>
+	{/if}
+{/snippet}
+
 {#if resumeCards.length > 0}
-	<div class="flex grow flex-col px-4 pb-4">
+	<div class="flex grow flex-col pb-4">
 		{@render searchBar()}
 		<InstallAppBanner class="mb-4" />
 		{@render devNote()}
+		{#if showBookmarksFirst}
+			{@render bookmarksSection()}
+		{/if}
 
 		{@render discoverSection()}
+		{#if !showBookmarksFirst}
+			{@render bookmarksSection()}
+		{/if}
 
 		<section class="relative py-4">
 			<div class="mb-4 flex items-center justify-between gap-3">
@@ -935,12 +946,18 @@
 		</section>
 	</div>
 {:else}
-	<div class="flex grow flex-col px-4 pb-4">
+	<div class="flex grow flex-col pb-4">
 		{@render searchBar()}
 		<InstallAppBanner class="mb-4" />
 		{@render devNote()}
+		{#if showBookmarksFirst}
+			{@render bookmarksSection()}
+		{/if}
 
 		{@render discoverSection()}
+		{#if !showBookmarksFirst}
+			{@render bookmarksSection()}
+		{/if}
 
 		<div class="flex h-full flex-col items-center justify-center text-center"></div>
 	</div>

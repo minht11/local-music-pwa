@@ -44,3 +44,10 @@ export const exploreConfig: LibraryRouteConfig<'explore'> = {
 	},
 	sortOptions: () => [nameSortOption],
 }
+
+export const bookmarksConfig: LibraryRouteConfig<'bookmarks'> = {
+	slug: 'bookmarks',
+	singularTitle: () => 'Bookmark',
+	pluralTitle: () => 'Bookmarks',
+	sortOptions: () => [],
+}
