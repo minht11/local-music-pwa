@@ -14,15 +14,9 @@ importers:
       '@material/material-color-utilities':
         specifier: ^0.4.0
         version: 0.4.0(patch_hash=ba9c0fd32469c32e8fbc40d212f789ab9438cca094fa57f398755793916bd133)
-      '@resvg/resvg-js':
-        specifier: ^2.6.2
-        version: 2.6.2
       '@tanstack/virtual-core':
         specifier: ^3.14.0
         version: 3.14.0
-      '@types/wicg-file-system-access':
-        specifier: ^2023.10.7
-        version: 2023.10.7
       idb:
         specifier: ^8.0.3
         version: 8.0.3
@@ -42,6 +36,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: 2.16.0
         version: 2.16.0
+      '@resvg/resvg-js':
+        specifier: ^2.6.2
+        version: 2.6.2
       '@sveltejs/adapter-static':
         specifier: ^3.0.10
         version: 3.0.10(@sveltejs/kit@2.57.1(@sveltejs/vite-plugin-svelte@7.0.0(svelte@5.55.4)(vite@8.0.8(@types/node@24.12.2)(jiti@2.6.1)))(svelte@5.55.4)(typescript@6.0.3)(vite@8.0.8(@types/node@24.12.2)(jiti@2.6.1)))
@@ -57,6 +54,9 @@ importers:
       '@types/node':
         specifier: ^24.12.2
         version: 24.12.2
+      '@types/wicg-file-system-access':
+        specifier: ^2023.10.7
+        version: 2023.10.7
       '@vitest/coverage-v8':
         specifier: ^4.1.4
         version: 4.1.4(vitest@4.1.4)
