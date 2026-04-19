@@ -5,7 +5,7 @@ export default mergeConfig(
 	viteConfig,
 	defineConfig({
 		test: {
-			environment: 'jsdom',
+			environment: 'happy-dom',
 			exclude: [...defaultExclude, '.generated/**', 'build/**'],
 			coverage: {
 				include: ['src/'],
