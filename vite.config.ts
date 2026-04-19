@@ -3,7 +3,7 @@ import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
-import { imagetools } from 'vite-imagetools'
+import { imageMetadataPlugin } from './lib/vite-image-metadata.ts'
 import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
 
 const getAutoImportPlugin = (dts: string | false = false) =>
@@ -67,7 +67,7 @@ export default defineConfig({
 		plugins: () => [getAutoImportPlugin()],
 	},
 	plugins: [
-		imagetools(),
+		imageMetadataPlugin(),
 		tailwindcss(),
 		sveltekit(),
 		paraglideVitePlugin({
