@@ -47,7 +47,6 @@
 		"@material/material-color-utilities": "^0.4.0",
 		"@resvg/resvg-js": "^2.6.2",
 		"@tanstack/virtual-core": "^3.14.0",
-		"@types/dom-navigation": "^1.0.7",
 		"@types/wicg-file-system-access": "^2023.10.7",
 		"idb": "^8.0.3",
 		"music-metadata": "^11.12.3",
