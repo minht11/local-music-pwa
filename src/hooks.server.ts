@@ -47,15 +47,9 @@ const transformPageChunk = ({ html }: { html: string }) => {
 	return html
 }
 
+// This will only run in dev/preview or build and not in production
+// since this we are using static adapter
 export const handle: Handle = async ({ event, resolve }) => {
-	// This will only run in dev/preview or build and not in production
-	// since this we are using static adapter
-
-	// https://svelte.dev/docs/cli/devtools-json
-	if (event.url.pathname === '/.well-known/appspecific/com.chrome.devtools.json') {
-		return new Response(undefined, { status: 404 })
-	}
-
 	// Adding this so service-worker can properly cache the 200.html
 	if (event.url.pathname === PUBLIC_FALLBACK_PAGE) {
 		const response = await resolve(event, { transformPageChunk })
