@@ -247,13 +247,14 @@ export class PlayerStore {
 				return
 			}
 
+			const fallbackArtworkSrc = new URL('/artwork.svg', location.origin).toString()
 			ms.metadata = new MediaMetadata({
 				title: track.name,
 				artist: formatArtists(track.artists),
 				album: track.album,
 				artwork: [
 					{
-						src: this.artworkSrc ?? new URL('/artwork.svg', location.origin).toString(),
+						src: this.artworkSrc ?? fallbackArtworkSrc,
 						sizes: '512x512',
 					},
 				],
