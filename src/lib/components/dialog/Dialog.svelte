@@ -37,6 +37,12 @@
 		return open
 	})
 
+	const getOpenData = () => {
+		invariant(openData)
+
+		return openData
+	}
+
 	const titleText = $derived.by(() => {
 		if (typeof title === 'function') {
 			return openData ? title(openData) : ''
@@ -197,7 +203,7 @@
 		]}
 	>
 		{#if header}
-			{@render header({ data: openData!, close })}
+			{@render header({ data: getOpenData(), close })}
 		{:else}
 			<div
 				data-dialog-header
@@ -215,7 +221,7 @@
 
 		<div class="flex shrink flex-col overflow-hidden">
 			{@render children?.({
-				data: openData!,
+				data: getOpenData(),
 				close,
 			})}
 		</div>
