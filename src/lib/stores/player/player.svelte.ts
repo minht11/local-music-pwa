@@ -273,6 +273,11 @@ export class PlayerStore {
 		setAction('seekforward', () => {
 			audio.currentTime = Math.min(audio.currentTime + 10, audio.duration)
 		})
+		setAction('seekto', ({ seekTime }) => {
+			if (seekTime != null) {
+				this.seek(seekTime)
+			}
+		})
 	}
 
 	#savePlayHistory = (trackId: number): void => {
