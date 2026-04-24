@@ -11,12 +11,14 @@ const getValue = (key: string) => {
 	}
 }
 
+const getFullKey = (storeName: string, key: string) => `snaeplayer-${storeName}.${key}`
+
 export const getPersistedValue = <T, D = null>(
 	storeName: string,
 	key: string,
 	defaultValue: D = null as D,
 ): T | D => {
-	const fullKey = `snaeplayer-${storeName}.${key}`
+	const fullKey = getFullKey(storeName, key)
 	const value = getValue(fullKey)
 
 	return value ?? defaultValue
@@ -24,7 +26,7 @@ export const getPersistedValue = <T, D = null>(
 
 export const persist = <T>(storeName: string, instance: T, keys: (keyof T & string)[]): void => {
 	for (const key of keys) {
-		const fullKey = `snaeplayer-${storeName}.${key}`
+		const fullKey = getFullKey(storeName, key)
 
 		const value = getValue(fullKey)
 		if (value !== null) {
