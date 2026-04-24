@@ -1,8 +1,7 @@
 <script lang="ts" module>
 	import ScrollContainer from './ScrollContainer.svelte'
 
-	// prettier-ignore
-	export type LayoutMode = 'both' | 'list' | 'details';
+	export type LayoutMode = 'both' | 'list' | 'details'
 </script>
 
 <script lang="ts">

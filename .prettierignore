@@ -19,3 +19,4 @@ yarn.lock
 *.json
 *.jsonc
 *.css
+*.html
