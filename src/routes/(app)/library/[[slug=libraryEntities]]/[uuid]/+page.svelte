@@ -144,7 +144,7 @@
 		{/if}
 
 		<div
-			class="relative z-0 flex h-full w-full flex-col overflow-clip rounded-2xl bg-surfaceContainerHigh"
+			class="relative z-0 flex size-full flex-col overflow-clip rounded-2xl bg-surfaceContainerHigh"
 		>
 			<div class="flex grow flex-col p-4">
 				<div class="flex items-center gap-2">

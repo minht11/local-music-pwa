@@ -44,7 +44,7 @@
 			{src}
 			{alt}
 			loading="eager"
-			class="h-full w-full object-cover"
+			class="size-full object-cover"
 			draggable="false"
 			onerror={() => {
 				error = true
