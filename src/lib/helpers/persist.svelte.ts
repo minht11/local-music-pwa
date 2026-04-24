@@ -34,6 +34,7 @@ export const persist = <T>(storeName: string, instance: T, keys: (keyof T & stri
 		}
 
 		let initial = true
+		// TODO. Move effect root once per all keys
 		$effect.root(() => {
 			$effect(() => {
 				const updatedValue = instance[key]

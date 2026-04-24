@@ -23,14 +23,10 @@
 	const dialogs = useDialogsStore()
 	const player = usePlayer()
 
-	// svelte-ignore state_referenced_locally
-	initPageQueries(data)
+	initPageQueries(() => data)
 
-	// svelte-ignore state_referenced_locally
-	const { itemQuery, tracksQuery } = data
-
-	const item = $derived(itemQuery.value)
-	const tracks = $derived(tracksQuery.value)
+	const item = $derived(data.itemQuery.value)
+	const tracks = $derived(data.tracksQuery.value)
 	const slug = $derived(data.slug)
 
 	const isFavoritesView = $derived(slug === 'playlists' && item.id === FAVORITE_PLAYLIST_ID)
