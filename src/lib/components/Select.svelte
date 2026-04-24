@@ -24,10 +24,10 @@
 
 	const selectedItem = $derived(items.find((item) => item[key] === selected))
 
-	const anchorId = $props.id()
-	const anchorName = `--select-anchor-${anchorId}`
+	const uid = $props.id()
+	const anchorName = `--select-anchor-${uid}`
 
-	const popupId = crypto.randomUUID()
+	const popupId = `select-popup-${uid}`
 	let popup = $state<HTMLDivElement | null>(null)
 	let isOpen = $state(false)
 </script>
