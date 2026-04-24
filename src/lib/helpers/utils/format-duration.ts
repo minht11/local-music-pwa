@@ -1,4 +1,4 @@
-const twoDigits = (num: number) => (num < 10 ? `0${num}` : num)
+const twoDigits = (num: number) => num.toString().padStart(2, '0')
 
 export const formatDuration = (seconds: number) => {
 	if (!Number.isFinite(seconds)) {

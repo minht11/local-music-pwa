@@ -238,6 +238,10 @@ export class PlayerStore {
 			audio.volume = (this.volume / 100) ** k
 		})
 
+		$effect(() => {
+			audio.muted = this.muted
+		})
+
 		const ms = window.navigator.mediaSession
 
 		$effect(() => {
