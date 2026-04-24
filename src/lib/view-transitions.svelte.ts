@@ -44,9 +44,9 @@ export const onViewTransitionPrepare = (listener: ViewTransitionReadyListener) =
 		listeners.add(listener)
 
 		return () => {
-			setTimeout(() => {
+			queueMicrotask(() => {
 				listeners.delete(listener)
-			}, 0)
+			})
 		}
 	})
 }

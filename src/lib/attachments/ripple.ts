@@ -45,8 +45,8 @@ const onExitHandler = () => {
 }
 
 if (!import.meta.env.SSR) {
-	document.addEventListener('pointercancel', onExitHandler)
-	document.addEventListener('pointerup', onExitHandler)
+	document.addEventListener('pointercancel', onExitHandler, { passive: true })
+	document.addEventListener('pointerup', onExitHandler, { passive: true })
 }
 
 const onPointerDownHandler = (e: PointerEvent) => {
