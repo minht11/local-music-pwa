@@ -182,7 +182,7 @@
 				trackId={previewTrackId}
 				active={player.activeTrack?.id === previewTrackId}
 				activePlaying={player.playing && player.activeTrack?.id === previewTrackId}
-				class="pointer-events-none z-40 bg-surfaceContainerHigh shadow-lg"
+				class="pointer-events-none bg-surfaceContainerHigh shadow-lg"
 				ariaRowIndex={drag.fromIndex}
 				selectionEnabled={selection.selectionEnabled}
 				selectionHover={false}
