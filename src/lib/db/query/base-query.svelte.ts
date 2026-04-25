@@ -51,7 +51,7 @@ const normalizeKey = <const K extends QueryKey>(key: K): QueryKeyPrimitiveValue 
 
 export interface QueryBaseOptions<K extends QueryKey, Result> {
 	key: K | (() => K)
-	fetcher: (key: K) => Promise<Result> | Result
+	fetcher: (key: K, signal: AbortSignal) => Promise<Result> | Result
 	onDatabaseChange?: DatabaseChangeHandler<Result>
 }
 
@@ -65,6 +65,8 @@ export class QueryImpl<K extends QueryKey, Result> {
 	})
 
 	resolvedKey: QueryKeyPrimitiveValue | undefined = undefined
+
+	#abortController: AbortController | undefined = undefined
 
 	options: QueryBaseOptions<K, Result>
 
@@ -97,8 +99,12 @@ export class QueryImpl<K extends QueryKey, Result> {
 	}
 
 	#loadWithKey = async (key: K, normalizedKey: QueryKeyPrimitiveValue) => {
+		this.#abortController?.abort()
+		const controller = new AbortController()
+		this.#abortController = controller
+
 		try {
-			const result = this.options.fetcher(key)
+			const result = this.options.fetcher(key, controller.signal)
 
 			if (result instanceof Promise) {
 				// We only need to set loading state if it is async

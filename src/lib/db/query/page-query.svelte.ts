@@ -66,30 +66,12 @@ export const createPageQuery = async <const K extends QueryKey, Result>(
  * Should be called inside page component.
  * @public
  */
-export const initPageQueries = (data: Record<string, unknown>): void => {
-	for (const query of Object.values(data)) {
-		if (query instanceof PageQueryResultBox) {
-			query[pageQueryHydrateSymbol]()
-		}
-	}
-}
-
-/**
- * Initialize pages queries once page is loaded.
- * Similar to `initPageQueries` with the main difference being
- * that it will reinitialize queries on every change of `source`.
- * Should be called inside page component.
- * @public
- */
-export const initPageQueriesDynamic = (
-	source: () => unknown,
-	data: () => Record<string, unknown>,
-): void => {
+export const initPageQueries = (data: () => Record<string, unknown>): void => {
 	$effect.pre(() => {
-		source() // track changes
-
-		untrack(() => {
-			initPageQueries(data())
-		})
+		for (const query of Object.values(data())) {
+			if (query instanceof PageQueryResultBox) {
+				query[pageQueryHydrateSymbol]()
+			}
+		}
 	})
 }

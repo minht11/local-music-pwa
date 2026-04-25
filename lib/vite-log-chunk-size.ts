@@ -4,7 +4,7 @@ import type { Plugin } from 'vite'
 
 /** @public */
 export const logChunkSizePlugin = (): Plugin => ({
-	name: logChunkSizePlugin.name,
+	name: 'vite-plugin-log-chunk-size',
 	apply: 'build',
 	enforce: 'post',
 	writeBundle() {

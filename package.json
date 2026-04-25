@@ -17,38 +17,34 @@
 		"prettier-fix": "prettier --write ./src",
 		"compile-i18n": "paraglide-js compile --project ./project.inlang",
 		"test": "vitest run",
-		"coverage": "vitest run --coverage",
 		"gen-color-theme": "node scripts/gen-color-theme.ts"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.4.10",
-		"@inlang/paraglide-js": "2.15.1",
+		"@biomejs/biome": "2.4.13",
+		"@inlang/paraglide-js": "2.16.0",
+		"@resvg/resvg-js": "^2.6.2",
 		"@sveltejs/adapter-static": "^3.0.10",
-		"@sveltejs/kit": "^2.56.1",
-		"@sveltejs/vite-plugin-svelte": "7.0.0",
-		"@tailwindcss/vite": "^4.2.2",
-		"@types/node": "^24.12.0",
-		"@vitest/coverage-v8": "^4.1.2",
+		"@sveltejs/kit": "^2.58.0",
+		"@tailwindcss/vite": "^4.2.4",
+		"@types/node": "^24.12.2",
+		"@types/wicg-file-system-access": "^2023.10.7",
 		"fake-indexeddb": "^6.2.5",
-		"jsdom": "^29.0.1",
-		"prettier": "^3.8.1",
+		"happy-dom": "^20.9.0",
+		"image-size": "^2.0.2",
+		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^3.5.1",
-		"prettier-plugin-tailwindcss": "^0.7.2",
-		"svelte": "5.55.1",
+		"prettier-plugin-tailwindcss": "^0.7.3",
+		"svelte": "5.55.5",
 		"svelte-check": "^4.4.6",
-		"tailwindcss": "^4.2.2",
-		"typescript": "^6.0.2",
+		"tailwindcss": "^4.2.4",
+		"typescript": "^6.0.3",
 		"unplugin-auto-import": "^21.0.0",
-		"vite": "8.0.5",
-		"vite-imagetools": "^10.0.0",
-		"vitest": "^4.1.2"
+		"vite": "8.0.10",
+		"vitest": "^4.1.5"
 	},
 	"dependencies": {
 		"@material/material-color-utilities": "^0.4.0",
-		"@resvg/resvg-js": "^2.6.2",
-		"@tanstack/virtual-core": "^3.13.23",
-		"@types/dom-navigation": "^1.0.7",
-		"@types/wicg-file-system-access": "^2023.10.7",
+		"@tanstack/virtual-core": "^3.14.0",
 		"idb": "^8.0.3",
 		"music-metadata": "^11.12.3",
 		"tiny-invariant": "^1.3.3",
@@ -57,5 +53,5 @@
 	"engines": {
 		"node": "24.12.0"
 	},
-	"packageManager": "pnpm@10.32.1"
+	"packageManager": "pnpm@11.0.0-rc.5"
 }

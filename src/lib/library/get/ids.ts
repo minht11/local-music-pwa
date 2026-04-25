@@ -8,11 +8,12 @@ export type LibraryItemSortKey<Store extends LibraryStoreName> = Exclude<
 	symbol
 >
 
-export interface SortOptions<Store extends LibraryStoreName> {
+export interface GetLibraryItemIdsOptions<Store extends LibraryStoreName> {
 	sort: LibraryItemSortKey<Store>
 	order?: SortOrder
 	searchTerm?: string
 	searchFn?: (value: AppDB[Store]['value'], term: string) => boolean
+	signal?: AbortSignal
 }
 
 type GetLibraryItemIdsIndex<Store extends LibraryStoreName> = IDBPIndex<
@@ -26,10 +27,15 @@ const getLibraryItemIdsWithSearchSlow = async <Store extends LibraryStoreName>(
 	storeIndex: GetLibraryItemIdsIndex<Store>,
 	searchTerm: string,
 	searchFn: (value: AppDB[Store]['value'], term: string) => boolean,
+	signal: AbortSignal | undefined,
 ) => {
 	const data: number[] = []
 
 	for await (const cursor of storeIndex.iterate()) {
+		if (signal?.aborted) {
+			break
+		}
+
 		if (searchFn(cursor.value, searchTerm)) {
 			data.push(cursor.primaryKey)
 		}
@@ -40,7 +46,7 @@ const getLibraryItemIdsWithSearchSlow = async <Store extends LibraryStoreName>(
 
 export const getLibraryItemIds = async <Store extends LibraryStoreName>(
 	store: Store,
-	options: SortOptions<Store>,
+	options: GetLibraryItemIdsOptions<Store>,
 ): Promise<number[]> => {
 	const db = await getDatabase()
 	const storeIndex = db.transaction(store).store.index(options.sort)
@@ -49,7 +55,12 @@ export const getLibraryItemIds = async <Store extends LibraryStoreName>(
 
 	let data: number[]
 	if (searchTerm && searchFn) {
-		data = await getLibraryItemIdsWithSearchSlow(storeIndex, searchTerm, searchFn)
+		data = await getLibraryItemIdsWithSearchSlow(
+			storeIndex,
+			searchTerm,
+			searchFn,
+			options.signal,
+		)
 	} else {
 		// Fast path
 		data = await db.getAllKeysFromIndex(store, options.sort)

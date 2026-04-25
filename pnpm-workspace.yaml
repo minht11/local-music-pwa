@@ -1,12 +1,8 @@
 engineStrict: true
 
-ignoredBuiltDependencies:
-  - '@biomejs/biome'
-  - '@tailwindcss/oxide'
-
-onlyBuiltDependencies:
-  - 'sharp'
+allowBuilds:
+  '@biomejs/biome': false
+  '@tailwindcss/oxide': false
 
 patchedDependencies:
-  'debug': 'patches/debug.patch'
   '@material/material-color-utilities': 'patches/@material__material-color-utilities.patch'

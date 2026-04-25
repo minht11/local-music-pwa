@@ -91,6 +91,7 @@ class StatusTracker {
 	total = 0
 
 	#pendingTimeout: number | null = null
+	#hasPendingMessage = false
 
 	#timeId: string
 
@@ -109,14 +110,23 @@ class StatusTracker {
 			}
 		} else {
 			if (this.#pendingTimeout) {
+				this.#hasPendingMessage = true
 				return
 			}
 
 			this.#pendingTimeout = self.setTimeout(() => {
 				this.#pendingTimeout = null
+				if (this.#hasPendingMessage) {
+					this.#hasPendingMessage = false
+					this.#postMessage(false)
+				}
 			}, 200)
 		}
 
+		this.#postMessage(finished)
+	}
+
+	#postMessage = (finished: boolean): void => {
 		const message: TracksScanMessage = {
 			finished,
 			count: {

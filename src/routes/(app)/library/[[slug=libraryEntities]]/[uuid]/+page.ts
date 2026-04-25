@@ -127,7 +127,6 @@ const createPlaylistTracksPageQuery = (
 
 interface LoadResult {
 	slug: DetailsSlug
-	libraryType: DetailsSlug
 	itemQuery: PageQueryResult<DbValue<DetailsSlug>>
 	tracksQuery: PageQueryResult<TracksQueryRegularResult | PlaylistTracksQueryResult>
 }
@@ -162,7 +161,6 @@ export const load: PageLoad = async (event): Promise<LoadResult> => {
 
 	return {
 		slug,
-		libraryType: slug,
 		itemQuery,
 		tracksQuery,
 	}

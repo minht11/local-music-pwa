@@ -3,49 +3,65 @@ const isMacRegex = /Macintosh|Mac OS X/i
 const isWindowsRegex = /Windows/i
 const isAndroidRegex = /Android/i
 
+const runOnce = <T>(fn: () => T): (() => T) => {
+	let result: T
+	let hasRun = false
+
+	return () => {
+		if (hasRun) {
+			return result
+		}
+
+		result = fn()
+		hasRun = true
+
+		return result
+	}
+}
+
 /** @public */
-export const isMobile = (): boolean => {
+export const isMobile = runOnce((): boolean => {
 	if (navigator.userAgentData) {
 		return navigator.userAgentData.mobile
 	}
 
 	return isMobileRegex.test(navigator.userAgent)
-}
+})
 
 /** @public */
-export const isSafari = () => {
+export const isSafari = runOnce(() => {
 	const ua = navigator.userAgent.toLowerCase()
 
 	return ua.includes('applewebkit') && !ua.includes('chrome') && !ua.includes('chromium')
-}
+})
 
 /** @public */
-export const isMac = (): boolean => {
+export const isMac = runOnce((): boolean => {
 	if (navigator.userAgentData?.platform) {
 		return navigator.userAgentData.platform === 'macOS'
 	}
 
 	return isMacRegex.test(navigator.userAgent)
-}
+})
 
 /** @public */
-export const isWindows = (): boolean => {
+export const isWindows = runOnce((): boolean => {
 	if (navigator.userAgentData?.platform) {
 		return navigator.userAgentData.platform === 'Windows'
 	}
 
 	return isWindowsRegex.test(navigator.userAgent)
-}
+})
 
-export const isAndroid = (): boolean => {
+export const isAndroid = runOnce((): boolean => {
 	if (navigator.userAgentData) {
 		return navigator.userAgentData.platform === 'Android'
 	}
 
 	return isAndroidRegex.test(navigator.userAgent)
-}
+})
 
-export const isChromiumBased = (): boolean => {
+export const isChromiumBased = runOnce((): boolean => {
 	// All of our supported Chromium versions will have this property
 	if (navigator.userAgentData) {
 		return navigator.userAgentData.brands.some((brand) =>
@@ -54,7 +70,7 @@ export const isChromiumBased = (): boolean => {
 	}
 
 	return false
-}
+})
 
 /**
  * Returns whether the primary modifier key is pressed.

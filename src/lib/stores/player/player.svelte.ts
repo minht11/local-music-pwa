@@ -238,6 +238,10 @@ export class PlayerStore {
 			audio.volume = (this.volume / 100) ** k
 		})
 
+		$effect(() => {
+			audio.muted = this.muted
+		})
+
 		const ms = window.navigator.mediaSession
 
 		$effect(() => {
@@ -247,13 +251,14 @@ export class PlayerStore {
 				return
 			}
 
+			const fallbackArtworkSrc = new URL('/artwork.svg', location.origin).toString()
 			ms.metadata = new MediaMetadata({
 				title: track.name,
 				artist: formatArtists(track.artists),
 				album: track.album,
 				artwork: [
 					{
-						src: this.artworkSrc ?? new URL('/artwork.svg', location.origin).toString(),
+						src: this.artworkSrc ?? fallbackArtworkSrc,
 						sizes: '512x512',
 					},
 				],
@@ -272,6 +277,7 @@ export class PlayerStore {
 		setAction('seekforward', () => {
 			audio.currentTime = Math.min(audio.currentTime + 10, audio.duration)
 		})
+		// seekto is handled by AudioElement default behavior
 	}
 
 	#savePlayHistory = (trackId: number): void => {

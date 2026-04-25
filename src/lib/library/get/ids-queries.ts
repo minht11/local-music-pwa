@@ -88,8 +88,8 @@ export const createLibraryItemKeysPageQuery = <
 ): Promise<PageQueryResult<number[]>> =>
 	createPageQuery({
 		...options,
-		fetcher: async (key) => {
-			const result = await options.fetcher(key)
+		fetcher: async (key, signal) => {
+			const result = await options.fetcher(key, signal)
 			await preloadLibraryListValues(storeName, result)
 
 			return result

@@ -1,11 +1,7 @@
 {
 	"extends": "./.generated/svelte-kit/tsconfig.json",
 	"compilerOptions": {
-		"types": [
-			"@types/dom-navigation",
-			"@types/wicg-file-system-access",
-			"./.generated/types/auto-imports.d.ts"
-		]
+		"types": ["@types/wicg-file-system-access", "./.generated/types/auto-imports.d.ts"]
 	},
 	"references": [
 		{

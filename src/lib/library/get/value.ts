@@ -55,7 +55,6 @@ const trackConfig: QueryConfig<TrackData> = {
 				.objectStore('playlistEntries')
 				.index('playlistTrack')
 				.get([FAVORITE_PLAYLIST_ID, id]),
-			tx.done,
 		])
 
 		if (!item) {

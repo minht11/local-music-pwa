@@ -9,7 +9,7 @@
 	}
 
 	export interface DialogProps<S> {
-		open?: boolean | DialogOpenAccessor<S>
+		open: boolean | DialogOpenAccessor<S>
 		title?: string | ((data: S) => string)
 		icon?: IconType
 		class?: ClassValue
@@ -28,7 +28,7 @@
 		children,
 	}: DialogProps<S> = $props()
 
-	const openData = $derived(typeof open === 'object' ? open?.get() : undefined)
+	const openData = $derived(typeof open === 'object' ? open.get() : undefined)
 	const isOpen = $derived.by(() => {
 		if (typeof open === 'object') {
 			return openData !== null
@@ -36,6 +36,8 @@
 
 		return open
 	})
+
+	const getOpenData = () => openData as S
 
 	const titleText = $derived.by(() => {
 		if (typeof title === 'function') {
@@ -197,7 +199,7 @@
 		]}
 	>
 		{#if header}
-			{@render header({ data: openData!, close })}
+			{@render header({ data: getOpenData(), close })}
 		{:else}
 			<div
 				data-dialog-header
@@ -215,7 +217,7 @@
 
 		<div class="flex shrink flex-col overflow-hidden">
 			{@render children?.({
-				data: openData!,
+				data: getOpenData(),
 				close,
 			})}
 		</div>

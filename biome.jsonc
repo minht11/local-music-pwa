@@ -182,6 +182,7 @@
 			"usePlayer",
 			"useMainStore",
 			"useDialogsStore",
+			"useMenu",
 			"untrack",
 			"snackbar"
 		]
@@ -201,24 +202,26 @@
 		}
 	},
 	"html": {
-		"experimentalFullSupportEnabled": true
+		"experimentalFullSupportEnabled": true,
+		"formatter": {
+			"enabled": true
+		}
 	},
 	"overrides": [
 		{
 			"includes": ["**/*.svelte", "!**/*.svelte.ts"],
 			"linter": {
 				"rules": {
-					"style": {
-						"useConst": "off",
-						"useImportType": "off"
-					},
 					"correctness": {
-						"noUndeclaredVariables": "off",
 						"noUnusedVariables": "off",
-						"noUnusedImports": "off"
+						"noUnusedImports": "off",
+						"noUnusedFunctionParameters": "off"
 					},
 					"complexity": {
 						"noCommaOperator": "off"
+					},
+					"suspicious": {
+						"noAssignInExpressions": "off"
 					}
 				}
 			}

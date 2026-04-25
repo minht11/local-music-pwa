@@ -26,8 +26,7 @@
 
 	const { data } = $props()
 
-	// svelte-ignore state_referenced_locally
-	initPageQueries(data)
+	initPageQueries(() => data)
 
 	const mainStore = useMainStore()
 	const player = usePlayer()
@@ -181,7 +180,7 @@
 					bind:value={
 						() => mainStore.customThemePaletteHex ?? '#000000', (value) => updateMainColor(value)
 					}
-					class="pointer-events-none absolute inset-0 h-full w-full appearance-none opacity-0"
+					class="pointer-events-none absolute inset-0 size-full appearance-none opacity-0"
 				/>
 			</Button>
 		</div>

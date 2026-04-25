@@ -6,9 +6,18 @@ import { animateEmpty } from '../helpers/animations.ts'
 const FADE_DURATION = 180
 const SCALE_DURATION = 400
 
-const rippleSpan = import.meta.env.SSR
-	? (null as unknown as HTMLSpanElement)
-	: document.createElement('span')
+const createRippleSpan = () => {
+	if (import.meta.env.SSR) {
+		return null as unknown as HTMLSpanElement
+	}
+
+	const span = document.createElement('span')
+	span.className = 'ripple'
+
+	return span
+}
+
+const rippleSpan = createRippleSpan()
 const activeRipples = new Map<HTMLSpanElement, boolean>()
 
 /** @public */
@@ -45,8 +54,8 @@ const onExitHandler = () => {
 }
 
 if (!import.meta.env.SSR) {
-	document.addEventListener('pointercancel', onExitHandler)
-	document.addEventListener('pointerup', onExitHandler)
+	document.addEventListener('pointercancel', onExitHandler, { passive: true })
+	document.addEventListener('pointerup', onExitHandler, { passive: true })
 }
 
 const onPointerDownHandler = (e: PointerEvent) => {
@@ -64,7 +73,6 @@ const onPointerDownHandler = (e: PointerEvent) => {
 	const rect = node.getBoundingClientRect()
 
 	const ripple = rippleSpan.cloneNode() as HTMLSpanElement
-	ripple.className = 'ripple'
 
 	// Use small value and scale it up to the right size,
 	// because that way less GPU memory is used

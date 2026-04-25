@@ -12,7 +12,7 @@
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { initPageQueriesDynamic } from '$lib/db/query/page-query.svelte.ts'
+	import { initPageQueries } from '$lib/db/query/page-query.svelte.js'
 	import { isMobile } from '$lib/helpers/utils/ua.ts'
 	import { useSetOverlaySnippet } from '$lib/layout-bottom-bar.svelte.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
@@ -21,10 +21,7 @@
 
 	const { data, children } = $props()
 
-	initPageQueriesDynamic(
-		() => data.slug,
-		() => data,
-	)
+	initPageQueries(() => data)
 
 	const main = useMainStore()
 	const dialogs = useDialogsStore()

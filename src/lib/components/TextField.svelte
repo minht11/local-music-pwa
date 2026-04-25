@@ -21,7 +21,7 @@
 		class: className,
 	}: TextFieldProps = $props()
 
-	const id = crypto.randomUUID()
+	const id = $props.id()
 
 	const validationIssue = $derived.by(() => {
 		const valueLength = value.length
