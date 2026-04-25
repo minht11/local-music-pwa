@@ -4,14 +4,21 @@
 
 	const { children } = $props()
 
-	afterNavigate((nav) => {
+	const countPageView = (id: string | null | undefined) => {
 		if (import.meta.env.DEV) {
 			return
 		}
 
 		window.goatcounter?.count({
-			path: nav.to?.route.id ?? 'unknown',
+			path: id ?? 'unknown',
 		})
+	}
+
+	// Initial page view
+	countPageView(page.route.id)
+
+	afterNavigate((nav) => {
+		countPageView(nav.to?.route?.id)
 	})
 
 	$effect(() => {
