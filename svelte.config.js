@@ -1,13 +1,11 @@
 /** @import { Config } from '@sveltejs/kit' */
 import adapter from '@sveltejs/adapter-static'
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'
 import { loadEnv } from 'vite'
 
 const env = loadEnv('production', process.cwd(), 'PUBLIC_')
 
 /** @type {Config} */
 const config = {
-	preprocess: vitePreprocess(),
 	compilerOptions: {
 		runes: true,
 		experimental: {
