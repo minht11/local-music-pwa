@@ -48,7 +48,7 @@ const transformPageChunk = ({ html }: { html: string }) => {
 }
 
 // This will only run in dev/preview or build and not in production
-// since this we are using static adapter
+// since we are using the static adapter
 export const handle: Handle = async ({ event, resolve }) => {
 	// Adding this so service-worker can properly cache the 200.html
 	if (event.url.pathname === PUBLIC_FALLBACK_PAGE) {

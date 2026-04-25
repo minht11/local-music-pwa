@@ -38,7 +38,7 @@
 	})
 
 	const getOpenData = () => {
-		invariant(openData)
+		invariant(openData != null)
 
 		return openData
 	}

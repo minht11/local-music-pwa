@@ -1,7 +1,7 @@
 const TEXT_INPUT_TYPES = new Set(['text', 'search', 'email', 'url', 'password', 'number'])
 
 /**
- * Checks if the given element is a text input (input[type="text"] or textarea).
+ * Checks if the given element is a text input or textarea.
  */
 export const isElementTextInput = (element: Element | EventTarget | undefined | null) => {
 	if (
