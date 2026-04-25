@@ -1,24 +1,24 @@
 <script module lang="ts">
-	import Dialog, { type DialogProps } from './Dialog.svelte'
+	import Dialog, { type DialogData, type DialogOpen, type DialogProps } from './Dialog.svelte'
 	import DialogFooter, { type DialogButton } from './DialogFooter.svelte'
 
-	export interface CommonDialogProps<S> extends DialogProps<S> {
-		buttons?: DialogButton[] | ((data: S) => DialogButton[])
-		onsubmit?: (e: SubmitEvent, data: S) => void
+	export interface CommonDialogProps<Open extends DialogOpen> extends DialogProps<Open> {
+		buttons?: DialogButton[] | ((data: DialogData<Open>) => DialogButton[])
+		onsubmit?: (e: SubmitEvent, data: DialogData<Open>) => void
 	}
 </script>
 
-<script lang="ts" generics="S = void">
+<script lang="ts" generics="Open extends DialogOpen">
 	let {
-		open = $bindable(false),
+		open = $bindable(false) as Open,
 		buttons,
 		onsubmit,
 		children: externalChildren,
 		class: className,
 		...props
-	}: CommonDialogProps<S> = $props()
+	}: CommonDialogProps<Open> = $props()
 
-	const getButtonItems = (data: S) => {
+	const getButtonItems = (data: DialogData<Open>) => {
 		if (typeof buttons === 'function') {
 			return buttons(data)
 		}

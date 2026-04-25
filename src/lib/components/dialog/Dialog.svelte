@@ -8,40 +8,63 @@
 		close: () => void
 	}
 
-	export interface DialogProps<S> {
-		open: boolean | DialogOpenAccessor<S>
-		title?: string | ((data: S) => string)
+	export type DialogOpen<S = unknown> = DialogOpenAccessor<S> | boolean
+
+	export type DialogData<Open extends DialogOpen> =
+		Open extends DialogOpenAccessor<infer S> ? S : undefined
+
+	interface DialogBaseProps<Data> {
+		title?: string | ((data: Data) => string)
 		icon?: IconType
 		class?: ClassValue
-		header?: Snippet<[{ data: S; close: () => void }]>
-		children?: Snippet<[{ data: S; close: () => void }]>
+		header?: Snippet<[{ data: Data; close: () => void }]>
+		children?: Snippet<[{ data: Data; close: () => void }]>
+	}
+
+	export interface DialogProps<Open extends DialogOpen> extends DialogBaseProps<DialogData<Open>> {
+		open: Open
 	}
 </script>
 
-<script lang="ts" generics="S">
+<script lang="ts" generics="Open extends DialogOpen">
 	let {
-		open = $bindable(false),
+		open = $bindable(false) as Open,
 		title,
 		icon,
 		class: className,
 		header,
 		children,
-	}: DialogProps<S> = $props()
+	}: DialogProps<Open> = $props()
 
-	const openData = $derived(typeof open === 'object' ? open.get() : undefined)
-	const isOpen = $derived.by(() => {
-		if (typeof open === 'object') {
-			return openData !== null
+	type UnwrapOpen =
+		| {
+				isOpen: true
+				data: DialogData<Open>
+		  }
+		| {
+				isOpen: false
+				data: null
+		  }
+
+	const state = $derived.by(() => {
+		if (typeof open === 'boolean') {
+			return {
+				isOpen: open,
+				data: undefined,
+			} as UnwrapOpen
 		}
 
-		return open
-	})
+		const data = open.get()
 
-	const getOpenData = () => openData as S
+		return {
+			isOpen: data !== null,
+			data,
+		} as UnwrapOpen
+	})
 
 	const titleText = $derived.by(() => {
 		if (typeof title === 'function') {
-			return openData ? title(openData) : ''
+			return state.data ? title(state.data) : ''
 		}
 
 		return title
@@ -51,7 +74,7 @@
 		if (typeof open === 'object') {
 			open.close()
 		} else {
-			open = false
+			open = false as Open
 		}
 	}
 
@@ -176,7 +199,7 @@
 	}
 </script>
 
-{#if isOpen}
+{#if state.isOpen}
 	<dialog
 		{@attach onOpenAction}
 		out:outAni
@@ -199,7 +222,7 @@
 		]}
 	>
 		{#if header}
-			{@render header({ data: getOpenData(), close })}
+			{@render header({ data: state.data, close })}
 		{:else}
 			<div
 				data-dialog-header
@@ -217,7 +240,7 @@
 
 		<div class="flex shrink flex-col overflow-hidden">
 			{@render children?.({
-				data: getOpenData(),
+				data: state.data,
 				close,
 			})}
 		</div>
