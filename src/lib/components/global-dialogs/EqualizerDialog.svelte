@@ -11,13 +11,13 @@
 		EQ_MIN_GAIN,
 	} from '$lib/stores/player/equalizer.svelte.ts'
 
-	export interface Props {
+	export interface EqualizerDialogProps {
 		open: DialogOpenAccessor<boolean>
 	}
 </script>
 
 <script lang="ts">
-	let { open }: Props = $props()
+	let { open }: EqualizerDialogProps = $props()
 
 	const player = usePlayer()
 	const eq = $derived(player.equalizer)

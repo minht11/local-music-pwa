@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { browser } from '$app/environment'
 	import { navigating, page } from '$app/state'
+	import Button from '$lib/components/Button.svelte'
 	import {
 		APP_DIALOGS_COMPONENTS_MAP,
 		APP_DIALOGS_KEYS,
-	} from '$lib/components/app-dialogs/dialogs.ts'
-	import Button from '$lib/components/Button.svelte'
+	} from '$lib/components/global-dialogs/dialogs.ts'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'

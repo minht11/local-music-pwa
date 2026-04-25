@@ -1,6 +1,9 @@
 import type { ComponentProps } from 'svelte'
-import type { APP_DIALOGS_COMPONENTS_MAP, AppDialogKey } from '$lib/components/app-dialogs/dialogs'
 import type { DialogData, DialogOpenAccessor } from '$lib/components/dialog/Dialog.svelte'
+import type {
+	APP_DIALOGS_COMPONENTS_MAP,
+	AppDialogKey,
+} from '$lib/components/global-dialogs/dialogs'
 
 type DialogOpenProp<K extends AppDialogKey> = ComponentProps<
 	(typeof APP_DIALOGS_COMPONENTS_MAP)[K]

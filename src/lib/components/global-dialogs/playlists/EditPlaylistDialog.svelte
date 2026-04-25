@@ -4,13 +4,13 @@
 	import TextField from '$lib/components/TextField.svelte'
 	import { type UpdatePlaylistOptions, updatePlaylist } from '$lib/library/playlists-actions'
 
-	export interface Props {
+	export interface EditPlaylistDialogProps {
 		open: DialogOpenAccessor<UpdatePlaylistOptions>
 	}
 </script>
 
 <script lang="ts">
-	let { open }: Props = $props()
+	let { open }: EditPlaylistDialogProps = $props()
 
 	const submitHandler = async (event: SubmitEvent, data: UpdatePlaylistOptions) => {
 		invariant(data !== null, 'Playlist to edit is not set')

@@ -4,13 +4,13 @@
 	import Separator from '$lib/components/Separator.svelte'
 	import AddToPlaylistDialogContent from './AddToPlaylistDialogContent.svelte'
 
-	export interface Props {
+	export interface AddToPlaylistDialogProps {
 		open: DialogOpenAccessor<readonly number[]>
 	}
 </script>
 
 <script lang="ts">
-	let { open }: Props = $props()
+	let { open }: AddToPlaylistDialogProps = $props()
 
 	const dialogs = useDialogsStore()
 

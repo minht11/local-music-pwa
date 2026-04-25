@@ -4,13 +4,13 @@
 	import TextField from '$lib/components/TextField.svelte'
 	import { createPlaylist } from '$lib/library/playlists-actions.ts'
 
-	export interface Props {
+	export interface NewPlaylistDialogProps {
 		open: DialogOpenAccessor<boolean>
 	}
 </script>
 
 <script lang="ts">
-	let { open }: Props = $props()
+	let { open }: NewPlaylistDialogProps = $props()
 
 	const onSubmitHandler = async (event: SubmitEvent) => {
 		const formData = new FormData(event.target as HTMLFormElement)

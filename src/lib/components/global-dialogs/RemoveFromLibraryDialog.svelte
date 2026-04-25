@@ -25,13 +25,13 @@
 				storeName: 'tracks'
 		  }
 
-	export interface Props {
+	export interface RemoveFromLibraryDialogProps {
 		open: DialogOpenAccessor<RemoveLibraryItemOptions>
 	}
 </script>
 
 <script lang="ts">
-	let { open }: Props = $props()
+	let { open }: RemoveFromLibraryDialogProps = $props()
 
 	const removeSingle = createUIAction(
 		m.libraryItemRemovedFromLibrary(),
