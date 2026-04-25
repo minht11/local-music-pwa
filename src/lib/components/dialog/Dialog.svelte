@@ -37,11 +37,7 @@
 		return open
 	})
 
-	const getOpenData = () => {
-		invariant(openData != null)
-
-		return openData
-	}
+	const getOpenData = () => openData as S
 
 	const titleText = $derived.by(() => {
 		if (typeof title === 'function') {
