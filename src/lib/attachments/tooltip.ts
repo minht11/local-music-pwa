@@ -16,14 +16,16 @@ const cloneTooltipTemplate = () => {
 }
 
 const supportsCssAnchor = browser && CSS.supports('anchor-name', '--a')
+let tooltipCounter = 0
 
 export const tooltip = (message: string | undefined): Attachment<HTMLElement> => {
+	tooltipCounter += 1
+	const anchorName = `--tooltip-${tooltipCounter}`
+
 	return (target) => {
 		if (!message || import.meta.env.SSR || !supportsCssAnchor) {
 			return
 		}
-
-		const anchorName = `--tooltip-${crypto.randomUUID().slice(0, 6)}`
 
 		target.setAttribute('title', message)
 

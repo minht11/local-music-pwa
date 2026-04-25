@@ -9,7 +9,7 @@
 	}
 
 	export interface DialogProps<S> {
-		open?: boolean | DialogOpenAccessor<S>
+		open: boolean | DialogOpenAccessor<S>
 		title?: string | ((data: S) => string)
 		icon?: IconType
 		class?: ClassValue
@@ -28,7 +28,7 @@
 		children,
 	}: DialogProps<S> = $props()
 
-	const openData = $derived(typeof open === 'object' ? open?.get() : undefined)
+	const openData = $derived(typeof open === 'object' ? open.get() : undefined)
 	const isOpen = $derived.by(() => {
 		if (typeof open === 'object') {
 			return openData !== null
