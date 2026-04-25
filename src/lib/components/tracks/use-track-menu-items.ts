@@ -75,7 +75,7 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableAddToPlaylist',
 				label: m.libraryAddToPlaylist(),
 				action: () => {
-					dialogs.addTrackToPlaylistDialogOpen = [track.id]
+					dialogs.openDialog('addToPlaylist', [track.id])
 				},
 			},
 			{
@@ -110,12 +110,12 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableRemoveFromLibrary',
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					dialogs.removeFromLibraryOpen = {
+					dialogs.openDialog('removeFromLibrary', {
 						type: 'single',
 						name: track.name,
 						id: track.id,
 						storeName: 'tracks',
-					}
+					})
 				},
 			},
 		]
@@ -134,7 +134,7 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableAddToPlaylist',
 				label: m.libraryAddToPlaylist(),
 				action: () => {
-					dialogs.addTrackToPlaylistDialogOpen = trackIds
+					dialogs.openDialog('addToPlaylist', trackIds)
 				},
 			},
 			{
@@ -166,11 +166,11 @@ export const useTrackMenuItems = (
 				predefinedKey: 'disableRemoveFromLibrary',
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					dialogs.removeFromLibraryOpen = {
+					dialogs.openDialog('removeFromLibrary', {
 						type: 'multiple',
 						ids: trackIds,
 						storeName: 'tracks',
-					}
+					})
 				},
 			},
 		]

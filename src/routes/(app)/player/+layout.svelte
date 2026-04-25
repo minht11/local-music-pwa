@@ -129,7 +129,7 @@
 					<IconButton
 						tooltip={m.equalizerOpenEqualizer()}
 						onclick={() => {
-							dialogs.equalizerDialogOpen = true
+							dialogs.openDialog('equalizer')
 						}}
 					>
 						<Icon type="equalizer" />

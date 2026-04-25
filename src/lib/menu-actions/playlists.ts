@@ -6,22 +6,22 @@ export const getPlaylistMenuItems = (dialogs: DialogsStore, playlist: Playlist):
 	{
 		label: m.libraryEditPlaylist(),
 		action: () => {
-			dialogs.editPlaylistDialogOpen = {
+			dialogs.openDialog('editPlaylist', {
 				id: playlist.id,
 				name: playlist.name,
 				description: playlist.description,
-			}
+			})
 		},
 	},
 	{
 		label: m.libraryRemoveFromLibrary(),
 		action: () => {
-			dialogs.removeFromLibraryOpen = {
+			dialogs.openDialog('removeFromLibrary', {
 				type: 'single',
 				id: playlist.id,
 				name: playlist.name,
 				storeName: 'playlists',
-			}
+			})
 		},
 	},
 ]

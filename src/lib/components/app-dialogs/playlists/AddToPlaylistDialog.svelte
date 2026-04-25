@@ -1,28 +1,28 @@
-<script lang="ts">
-	import Dialog from '$lib/components/dialog/Dialog.svelte'
+<script lang="ts" module>
+	import Dialog, { type DialogOpenAccessor } from '$lib/components/dialog/Dialog.svelte'
 	import DialogFooter from '$lib/components/dialog/DialogFooter.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import AddToPlaylistDialogContent from './AddToPlaylistDialogContent.svelte'
 
+	export interface Props {
+		open: DialogOpenAccessor<readonly number[]>
+	}
+</script>
+
+<script lang="ts">
+	let { open }: Props = $props()
+
 	const dialogs = useDialogsStore()
 
-	const dialogTitle = () => {
-		const count = dialogs.addTrackToPlaylistDialogOpen?.length ?? 0
+	const dialogTitle = (tracks: readonly number[]) => {
+		const count = tracks.length ?? 0
 		const countLabel = count > 1 ? ` (${count})` : ''
 
 		return `${m.libraryAddToPlaylist()}${countLabel}`
 	}
 </script>
 
-<Dialog
-	open={{
-		get: () => dialogs.addTrackToPlaylistDialogOpen,
-		close: () => {
-			dialogs.addTrackToPlaylistDialogOpen = null
-		},
-	}}
-	title={dialogTitle()}
->
+<Dialog {open} title={dialogTitle}>
 	{#snippet children({ data: trackIds, close })}
 		<svelte:boundary
 			onerror={(e) => {
@@ -42,7 +42,7 @@
 								align: 'left',
 								type: 'button',
 								action: () => {
-									dialogs.createNewPlaylistDialogOpen = true
+									dialogs.openDialog('newPlaylist')
 								},
 							},
 							{

@@ -230,7 +230,7 @@
 		<Button
 			kind="toned"
 			onclick={() => {
-				dialogs.equalizerDialogOpen = true
+				dialogs.openDialog('equalizer')
 			}}
 		>
 			{m.equalizerOpenEqualizer()}

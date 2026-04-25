@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment'
 	import { navigating, page } from '$app/state'
-	import { APP_DIALOGS_COMPONENTS } from '$lib/components/app-dialogs/dialogs.ts'
+	import {
+		APP_DIALOGS_COMPONENTS_MAP,
+		APP_DIALOGS_KEYS,
+	} from '$lib/components/app-dialogs/dialogs.ts'
 	import Button from '$lib/components/Button.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
@@ -27,7 +30,7 @@
 	// to allow better trees shaking and inlining
 	const mainStore = setMainStoreContext(new MainStore())
 	const player = setPlayerStoreContext(new PlayerStore())
-	setDialogsStoreContext(new DialogsStore())
+	const dialogs = setDialogsStoreContext(new DialogsStore())
 
 	setupTheme()
 	setupGlobalMenu()
@@ -146,8 +149,10 @@
 	<MenuRenderer />
 </div>
 
-{#each APP_DIALOGS_COMPONENTS as Dialog}
-	<Dialog />
+{#each APP_DIALOGS_KEYS as dialogKey}
+	{@const DialogComponent = APP_DIALOGS_COMPONENTS_MAP[dialogKey]}
+
+	<DialogComponent open={dialogs.getAccessor(dialogKey)} />
 {/each}
 
 <style lang="postcss">

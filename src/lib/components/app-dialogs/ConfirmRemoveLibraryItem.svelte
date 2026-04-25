@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" module>
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import { createUIAction } from '$lib/helpers/ui-action'
 	import { truncate } from '$lib/helpers/utils/text.ts'
@@ -10,8 +10,28 @@
 		dbRemoveTrack,
 	} from '$lib/library/remove.ts'
 	import type { LibraryStoreName } from '$lib/library/types'
+	import type { DialogOpenAccessor } from '../dialog/Dialog.svelte'
 
-	const dialogs = useDialogsStore()
+	type RemoveLibraryItemOptions =
+		| {
+				type: 'single'
+				id: number
+				name: string
+				storeName: LibraryStoreName
+		  }
+		| {
+				type: 'multiple'
+				ids: readonly number[]
+				storeName: 'tracks'
+		  }
+
+	export interface Props {
+		open: DialogOpenAccessor<RemoveLibraryItemOptions>
+	}
+</script>
+
+<script lang="ts">
+	let { open }: Props = $props()
 
 	const removeSingle = createUIAction(
 		m.libraryItemRemovedFromLibrary(),
@@ -40,12 +60,7 @@
 </script>
 
 <CommonDialog
-	open={{
-		get: () => dialogs.removeFromLibraryOpen,
-		close: () => {
-			dialogs.removeFromLibraryOpen = null
-		},
-	}}
+	{open}
 	title={(data) => {
 		if (data.type === 'multiple') {
 			return m.libraryConfirmRemoveMultipleTitle({
@@ -67,7 +82,7 @@
 		},
 	]}
 	onsubmit={(_, data) => {
-		dialogs.removeFromLibraryOpen = null
+		open.close()
 
 		if (data.type === 'multiple') {
 			void removeMultiple(data.storeName, data.ids)

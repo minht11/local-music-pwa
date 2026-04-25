@@ -95,18 +95,18 @@
 			{
 				label: m.libraryAddToPlaylist(),
 				action: () => {
-					dialogs.addTrackToPlaylistDialogOpen = tracks.tracksIds
+					dialogs.openDialog('addToPlaylist', tracks.tracksIds)
 				},
 			},
 			{
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					dialogs.removeFromLibraryOpen = {
+					dialogs.openDialog('removeFromLibrary', {
 						type: 'single',
 						id: item.id,
 						name: item.name,
 						storeName: slug,
-					}
+					})
 				},
 			},
 		]
