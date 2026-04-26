@@ -3,12 +3,7 @@
 	import { createUIAction } from '$lib/helpers/ui-action'
 	import { truncate } from '$lib/helpers/utils/text.ts'
 	import { dbRemovePlaylist } from '$lib/library/playlists-actions.ts'
-	import {
-		dbRemoveAlbum,
-		dbRemoveArtist,
-		dbRemoveMultipleTracks,
-		dbRemoveTrack,
-	} from '$lib/library/remove.ts'
+	import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTracks } from '$lib/library/remove.ts'
 	import type { LibraryStoreName } from '$lib/library/types'
 	import type { DialogOpenAccessor } from '../dialog/Dialog.svelte'
 
@@ -40,7 +35,7 @@
 				case 'playlists':
 					return dbRemovePlaylist(id)
 				case 'tracks':
-					return dbRemoveTrack(id)
+					return dbRemoveTracks([id])
 				case 'albums':
 					return dbRemoveAlbum(id)
 				case 'artists':
@@ -54,7 +49,7 @@
 		(store: LibraryStoreName, ids: readonly number[]) => {
 			invariant(store === 'tracks', 'Only tracks can be removed in bulk')
 
-			return dbRemoveMultipleTracks(ids)
+			return dbRemoveTracks(ids)
 		},
 	)
 </script>

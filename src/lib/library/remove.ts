@@ -1,145 +1,198 @@
 import type { IDBPTransaction } from 'idb'
-import { type AppDB, type AppIndexNames, getDatabase } from '$lib/db/database.ts'
+import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
-import type { LibraryStoreName } from './types.ts'
+import type { Track } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<
 	AppDB,
-	('directories' | 'tracks' | 'albums' | 'artists' | 'playlistEntries' | 'playHistory')[],
+	('tracks' | 'albums' | 'artists' | 'playlistEntries' | 'playHistory')[],
 	'readwrite'
 >
 
-const dbRemoveTrackRelatedData = async <
-	Store extends Exclude<LibraryStoreName, 'playlists'>,
-	ItemIndexName extends AppIndexNames<Store>,
-	IndexName extends AppIndexNames<'tracks'>,
-	ItemValue extends AppDB[Store]['indexes'][ItemIndexName],
->(
-	tx: TrackOperationsTransaction,
-	trackIndex: IndexName,
-	relatedItemStoreName: Store,
-	relatedItemName?: ItemValue,
-) => {
-	if (!relatedItemName) {
-		return
+const dedupe = <T>(values: readonly T[]): readonly T[] => {
+	if (values.length < 2) {
+		return values
 	}
 
-	const relatedItemNameKey = IDBKeyRange.only(relatedItemName)
-
-	const tracksWithItemCount = await tx
-		.objectStore('tracks')
-		.index(trackIndex)
-		.count(relatedItemNameKey)
-
-	// We don't delete related item if it is still used by other tracks
-	if (tracksWithItemCount > 0) {
-		return
-	}
-
-	const relatedItemStore = tx.objectStore(relatedItemStoreName)
-	const relatedItem = await relatedItemStore.index('name').get(relatedItemNameKey)
-	if (!relatedItem) {
-		return
-	}
-
-	await relatedItemStore.delete(relatedItem.id)
-
-	const change: DatabaseChangeDetails = {
-		storeName: relatedItemStoreName,
-		key: relatedItem.id,
-		operation: 'delete',
-	}
-
-	return change
+	return [...new Set(values)]
 }
 
-const dbRemoveTrackFromPlayHistoryWithTx = async (
+const dbRemoveTracksFromPlayHistoryWithTx = async (
 	tx: TrackOperationsTransaction,
-	trackId: number,
+	trackIds: readonly number[],
 ): Promise<DatabaseChangeDetails | undefined> => {
 	const store = tx.objectStore('playHistory')
-	const historyIds = await store.index('trackId').getAllKeys(trackId)
-	if (historyIds.length === 0) {
-		return
+	const trackIdIndex = store.index('trackId')
+
+	let removedAny = false
+	for (const trackId of trackIds) {
+		const historyId = await trackIdIndex.getKey(trackId)
+		if (historyId === undefined) {
+			continue
+		}
+
+		await store.delete(historyId)
+		removedAny = true
 	}
 
-	await Promise.all(historyIds.map((id) => store.delete(id)))
+	if (!removedAny) {
+		return
+	}
 
 	return { storeName: 'playHistory' }
 }
 
-const dbRemoveTrackFromAllPlaylists = async (trackId: number) => {
-	const db = await getDatabase()
-	const tx = db.transaction(['playlists', 'playlistEntries'], 'readwrite')
-
+const dbRemoveTracksFromAllPlaylistsWithTx = async (
+	tx: TrackOperationsTransaction,
+	trackIds: readonly number[],
+) => {
 	const store = tx.objectStore('playlistEntries')
+	const trackIdIndex = store.index('trackId')
 
-	// Get all playlist entries for this track using the trackId index
-	const entries = await store.index('trackId').getAll(trackId)
+	const changes: DatabaseChangeDetails[] = []
+	for (const trackId of trackIds) {
+		const entries = await trackIdIndex.getAll(trackId)
+		await Promise.all(entries.map((entry) => store.delete(entry.id)))
 
-	// Delete each entry
-	await Promise.all(entries.map((entry) => store.delete(entry.id)))
-
-	await tx.done
-
-	const changes = entries.map(
-		(entry): DatabaseChangeDetails => ({
-			operation: 'delete',
-			storeName: 'playlistEntries',
-			key: entry.id,
-			value: entry,
-		}),
-	)
+		changes.push(
+			...entries.map(
+				(entry): DatabaseChangeDetails => ({
+					operation: 'delete',
+					storeName: 'playlistEntries',
+					key: entry.id,
+					value: entry,
+				}),
+			),
+		)
+	}
 
 	return changes
 }
 
-export const dbRemoveTrack = async (trackId: number): Promise<void> => {
+const dbRemoveUnusedAlbumsWithTx = async (
+	tx: TrackOperationsTransaction,
+	albumNames: readonly Track['album'][],
+) => {
+	const tracksByAlbum = tx.objectStore('tracks').index('album')
+	const albumsStore = tx.objectStore('albums')
+
+	const changes: DatabaseChangeDetails[] = []
+	for (const albumName of dedupe(albumNames)) {
+		const albumNameKey = IDBKeyRange.only(albumName)
+		const tracksWithAlbumCount = await tracksByAlbum.count(albumNameKey)
+		if (tracksWithAlbumCount > 0) {
+			continue
+		}
+
+		const album = await albumsStore.index('name').get(albumNameKey)
+		if (!album) {
+			continue
+		}
+
+		await albumsStore.delete(album.id)
+		changes.push({
+			storeName: 'albums',
+			key: album.id,
+			operation: 'delete',
+		})
+	}
+
+	return changes
+}
+
+const dbRemoveUnusedArtistsWithTx = async (
+	tx: TrackOperationsTransaction,
+	artistNames: readonly string[],
+) => {
+	const tracksByArtist = tx.objectStore('tracks').index('artists')
+	const artistsStore = tx.objectStore('artists')
+
+	const changes: DatabaseChangeDetails[] = []
+	for (const artistName of dedupe(artistNames)) {
+		const artistNameKey = IDBKeyRange.only(artistName)
+		const tracksWithArtistCount = await tracksByArtist.count(artistNameKey)
+		if (tracksWithArtistCount > 0) {
+			continue
+		}
+
+		const artist = await artistsStore.index('name').get(artistNameKey)
+		if (!artist) {
+			continue
+		}
+
+		await artistsStore.delete(artist.id)
+		changes.push({
+			storeName: 'artists',
+			key: artist.id,
+			operation: 'delete',
+		})
+	}
+
+	return changes
+}
+
+export const dbRemoveTracks = async (trackIds: readonly number[]): Promise<void> => {
+	if (trackIds.length === 0) {
+		return
+	}
+
 	const db = await getDatabase()
 	const tx = db.transaction(
 		['tracks', 'albums', 'artists', 'playlistEntries', 'playHistory'],
 		'readwrite',
 	)
 
-	const track = await tx.objectStore('tracks').get(trackId)
-	if (!track) {
+	const tracksStore = tx.objectStore('tracks')
+	const existingTracks = (
+		await Promise.all(dedupe(trackIds).map((trackId) => tracksStore.get(trackId)))
+	).filter((track) => track !== undefined)
+
+	if (existingTracks.length === 0) {
+		await tx.done
 		return
 	}
 
-	await tx.objectStore('tracks').delete(trackId)
+	const existingTrackIds = await Promise.all(
+		existingTracks.map((track) => tracksStore.delete(track.id).then(() => track.id)),
+	)
 
-	const [albumChange, playlistChanges, historyChange, ...artistsChanges] = await Promise.all([
-		dbRemoveTrackRelatedData(tx, 'album', 'albums', track.album),
-		dbRemoveTrackFromAllPlaylists(trackId),
-		dbRemoveTrackFromPlayHistoryWithTx(tx, trackId),
-		...track.artists.map((artist) =>
-			dbRemoveTrackRelatedData(tx, 'artists', 'artists', artist),
+	const [albumChanges, playlistChanges, historyChange, artistChanges] = await Promise.all([
+		dbRemoveUnusedAlbumsWithTx(
+			tx,
+			existingTracks.map((track) => track.album),
 		),
-		tx.done.then(() => undefined),
+		dbRemoveTracksFromAllPlaylistsWithTx(tx, existingTrackIds),
+		dbRemoveTracksFromPlayHistoryWithTx(tx, existingTrackIds),
+		dbRemoveUnusedArtistsWithTx(
+			tx,
+			existingTracks.flatMap((track) => track.artists),
+		),
 	])
 
-	dispatchDatabaseChangedEvent([
-		{
-			storeName: 'tracks',
-			operation: 'delete',
-			key: trackId,
-		},
-		albumChange,
+	const changes = [
+		...existingTrackIds.map(
+			(trackId): DatabaseChangeDetails => ({
+				storeName: 'tracks',
+				operation: 'delete',
+				key: trackId,
+			}),
+		),
 		historyChange,
-		...artistsChanges,
+		...albumChanges,
+		...artistChanges,
 		...playlistChanges,
-	])
-}
+	].filter((change) => change !== undefined)
 
-export const dbRemoveMultipleTracks = async (trackIds: readonly number[]): Promise<void> => {
-	for (const trackId of trackIds) {
-		await dbRemoveTrack(trackId)
+	await tx.done
+
+	if (changes.length > 0) {
+		dispatchDatabaseChangedEvent(changes)
 	}
 }
 
 export const dbRemoveAlbum = async (albumId: number): Promise<void> => {
 	const db = await getDatabase()
-	const tx = db.transaction(['albums', 'tracks'], 'readwrite')
+	const tx = db.transaction(['albums', 'tracks'], 'readonly')
 	const album = await tx.objectStore('albums').get(albumId)
 	if (!album) {
 		await tx.done
@@ -150,12 +203,12 @@ export const dbRemoveAlbum = async (albumId: number): Promise<void> => {
 	await tx.done
 
 	// If no tracks references it, it will be deleted automatically
-	await dbRemoveMultipleTracks(tracksIds)
+	await dbRemoveTracks(tracksIds)
 }
 
 export const dbRemoveArtist = async (artistId: number): Promise<void> => {
 	const db = await getDatabase()
-	const tx = db.transaction(['artists', 'tracks'], 'readwrite')
+	const tx = db.transaction(['artists', 'tracks'], 'readonly')
 	const artist = await tx.objectStore('artists').get(artistId)
 	if (!artist) {
 		await tx.done
@@ -171,5 +224,5 @@ export const dbRemoveArtist = async (artistId: number): Promise<void> => {
 	await tx.done
 
 	// If no tracks references it, it will be deleted automatically
-	await dbRemoveMultipleTracks(tracksIds)
+	await dbRemoveTracks(tracksIds)
 }

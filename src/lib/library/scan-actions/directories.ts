@@ -1,7 +1,7 @@
 import { getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { lockDatabase } from '$lib/db/lock-database.ts'
-import { dbRemoveTrack } from '$lib/library/remove.ts'
+import { dbRemoveTracks } from '$lib/library/remove.ts'
 import type { Directory } from '$lib/library/types.ts'
 import { scanTracks } from './scan-tracks.ts'
 
@@ -190,10 +190,7 @@ export const dbRemoveDirectory = async (directoryId: number): Promise<void> => {
 	const db = await getDatabase()
 
 	const tracksToBeRemoved = await db.getAllKeysFromIndex('tracks', 'directory', directoryId)
-
-	for (const trackId of tracksToBeRemoved) {
-		await dbRemoveTrack(trackId)
-	}
+	await dbRemoveTracks(tracksToBeRemoved)
 	await db.delete('directories', directoryId)
 
 	dispatchDatabaseChangedEvent({

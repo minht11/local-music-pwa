@@ -6,12 +6,13 @@ import {
 	dbGetAllAndExpectLength,
 	expectToBeDefined,
 } from '$lib/helpers/test-helpers.ts'
+import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { dbCreatePlaylist } from '$lib/library/playlists-actions.ts'
-import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTrack } from '$lib/library/remove.ts'
+import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTracks } from '$lib/library/remove.ts'
 import { dbImportTrack } from '$lib/library/scan-actions/scanner/import-track.ts'
 import type { PlaylistEntry, UnknownTrack } from '$lib/library/types.ts'
 
-const dbImportTestTrack = async (overrides: Partial<UnknownTrack> = {}): Promise<number> => {
+const dbImportTestTrack = (overrides: Partial<UnknownTrack> = {}): Promise<number> => {
 	const trackData: UnknownTrack = {
 		uuid: crypto.randomUUID(),
 		name: 'Test Track',
@@ -31,8 +32,11 @@ const dbImportTestTrack = async (overrides: Partial<UnknownTrack> = {}): Promise
 		...overrides,
 	}
 
-	return await dbImportTrack(trackData, undefined)
+	return dbImportTrack(trackData, undefined)
 }
+
+const createTestPlaylist = async (name = 'Test Playlist'): Promise<number> =>
+	dbCreatePlaylist(name, '')
 
 const addTrackToPlaylist = async (playlistId: number, trackId: number): Promise<void> => {
 	const db = await getDatabase()
@@ -44,12 +48,38 @@ const addTrackToPlaylist = async (playlistId: number, trackId: number): Promise<
 	await db.add('playlistEntries', playlistEntry as PlaylistEntry)
 }
 
+const addTracksToPlaylist = async (
+	playlistId: number,
+	trackIds: readonly number[],
+): Promise<void> => {
+	for (const trackId of trackIds) {
+		await addTrackToPlaylist(playlistId, trackId)
+	}
+}
+
+const addTracksToPlayHistory = async (trackIds: readonly number[]): Promise<void> => {
+	for (const trackId of trackIds) {
+		await dbAddToPlayHistory(trackId)
+	}
+}
+
+const expectOnlyTrackWithReferences = async (trackId: number): Promise<void> => {
+	const tracksAfter = await dbGetAllAndExpectLength('tracks', 1)
+	expect(tracksAfter[0]?.id).toBe(trackId)
+
+	const playlistEntriesAfter = await dbGetAllAndExpectLength('playlistEntries', 1)
+	expect(playlistEntriesAfter[0]?.trackId).toBe(trackId)
+
+	const playHistoryAfter = await dbGetAllAndExpectLength('playHistory', 1)
+	expect(playHistoryAfter[0]?.trackId).toBe(trackId)
+}
+
 describe('remove functions', () => {
 	beforeEach(async () => {
 		await clearDatabaseStores()
 	})
 
-	describe('dbRemoveTrack', () => {
+	describe('dbRemoveTracks', () => {
 		it('should remove a track and clean up unused album and artist', async () => {
 			const trackId = await dbImportTestTrack()
 
@@ -65,7 +95,7 @@ describe('remove functions', () => {
 			expect(artists[0]?.name).toBe('Test Artist')
 
 			// Remove the track
-			await dbRemoveTrack(trackId)
+			await dbRemoveTracks([trackId])
 
 			// Verify track is removed
 			const removedTrack = await db.get('tracks', trackId)
@@ -85,7 +115,7 @@ describe('remove functions', () => {
 			await dbGetAllAndExpectLength('albums', 1)
 			await dbGetAllAndExpectLength('artists', 1)
 
-			await dbRemoveTrack(track1Id)
+			await dbRemoveTracks([track1Id])
 
 			// Verify only one track is removed
 			const tracksAfter = await dbGetAllAndExpectLength('tracks', 1)
@@ -99,30 +129,107 @@ describe('remove functions', () => {
 		it('should remove track from all playlists when removing the track', async () => {
 			const trackId = await dbImportTestTrack()
 
-			// Create a playlist and add the track to it
-			await dbCreatePlaylist('Test Playlist', '')
-			const playlists = await dbGetAllAndExpectLength('playlists', 1)
-			const playlistId = playlists[0]?.id
-			expectToBeDefined(playlistId)
+			const playlistId1 = await createTestPlaylist('Test Playlist 1')
+			const playlistId2 = await createTestPlaylist('Test Playlist 2')
 
-			await addTrackToPlaylist(playlistId, trackId)
+			await dbGetAllAndExpectLength('playlists', 2)
+			await addTracksToPlaylist(playlistId1, [trackId])
+			await addTracksToPlaylist(playlistId2, [trackId])
 
-			// Verify playlist entry exists
-			const playlistEntries = await dbGetAllAndExpectLength('playlistEntries', 1)
-			expect(playlistEntries[0]?.trackId).toBe(trackId)
+			const playlistEntries = await dbGetAllAndExpectLength('playlistEntries', 2)
+			expect(playlistEntries.every((entry) => entry.trackId === trackId)).toBe(true)
 
-			// Remove the track
-			await dbRemoveTrack(trackId)
+			await dbRemoveTracks([trackId])
 
 			await dbGetAllAndExpectLength('playlistEntries', 0)
 
-			// Verify playlist still exists
-			await dbGetAllAndExpectLength('playlists', 1)
+			await dbGetAllAndExpectLength('playlists', 2)
+		})
+
+		it('should remove deleted tracks from play history and keep unrelated entries', async () => {
+			const track1Id = await dbImportTestTrack({ name: 'Track 1' })
+			const track2Id = await dbImportTestTrack({ name: 'Track 2', album: 'Album 2' })
+
+			await dbAddToPlayHistory(track1Id)
+			await dbAddToPlayHistory(track2Id)
+
+			await dbGetAllAndExpectLength('playHistory', 2)
+
+			await dbRemoveTracks([track1Id])
+
+			const historyEntries = await dbGetAllAndExpectLength('playHistory', 1)
+			expect(historyEntries[0]?.trackId).toBe(track2Id)
 		})
 
 		it('should handle removing non-existent track gracefully', async () => {
 			// Try to remove a track that doesn't exist
-			await expect(dbRemoveTrack(999)).resolves.toBeUndefined()
+			await expect(dbRemoveTracks([999])).resolves.toBeUndefined()
+		})
+
+		it('should ignore duplicate track ids in one removal request', async () => {
+			const trackId = await dbImportTestTrack()
+
+			const playlistId = await createTestPlaylist()
+
+			await addTracksToPlaylist(playlistId, [trackId, trackId])
+			await addTracksToPlayHistory([trackId])
+
+			await dbRemoveTracks([trackId, trackId])
+
+			await dbGetAllAndExpectLength('tracks', 0)
+			await dbGetAllAndExpectLength('albums', 0)
+			await dbGetAllAndExpectLength('artists', 0)
+			await dbGetAllAndExpectLength('playlistEntries', 0)
+			await dbGetAllAndExpectLength('playHistory', 0)
+		})
+
+		it('should remove existing tracks and ignore missing ids in the same request', async () => {
+			const track1Id = await dbImportTestTrack({ name: 'Track 1' })
+			const track2Id = await dbImportTestTrack({
+				name: 'Track 2',
+				album: 'Album 2',
+				artists: ['Artist 2'],
+			})
+
+			const playlistId = await createTestPlaylist()
+
+			await addTracksToPlaylist(playlistId, [track1Id, track2Id])
+			await addTracksToPlayHistory([track1Id, track2Id])
+
+			await dbRemoveTracks([track1Id, 999])
+
+			await expectOnlyTrackWithReferences(track2Id)
+
+			const albumsAfter = await dbGetAllAndExpectLength('albums', 1)
+			expect(albumsAfter[0]?.name).toBe('Album 2')
+
+			const artistsAfter = await dbGetAllAndExpectLength('artists', 1)
+			expect(artistsAfter[0]?.name).toBe('Artist 2')
+		})
+
+		it('should remove multiple tracks in one operation and clean up shared data once unused', async () => {
+			const track1Id = await dbImportTestTrack({ name: 'Track 1', artists: ['Artist 1'] })
+			const track2Id = await dbImportTestTrack({
+				name: 'Track 2',
+				album: 'Album 2',
+				artists: ['Artist 2'],
+			})
+
+			const playlistId = await createTestPlaylist()
+
+			await addTracksToPlaylist(playlistId, [track1Id, track2Id])
+
+			await dbRemoveTracks([track1Id, track2Id])
+
+			await dbGetAllAndExpectLength('tracks', 0)
+			await dbGetAllAndExpectLength('albums', 0)
+			await dbGetAllAndExpectLength('artists', 0)
+			await dbGetAllAndExpectLength('playlistEntries', 0)
+			await dbGetAllAndExpectLength('playlists', 1)
+		})
+
+		it('should return early for empty input', async () => {
+			await expect(dbRemoveTracks([])).resolves.toBeUndefined()
 		})
 	})
 
@@ -147,6 +254,30 @@ describe('remove functions', () => {
 		it('should handle removing non-existent album gracefully', async () => {
 			// Try to remove an album that doesn't exist
 			await expect(dbRemoveAlbum(999)).resolves.toBeUndefined()
+		})
+
+		it('should clear playlists and play history for removed album tracks only', async () => {
+			const albumTrack1Id = await dbImportTestTrack({ name: 'Track 1' })
+			const albumTrack2Id = await dbImportTestTrack({ name: 'Track 2' })
+			const survivorTrackId = await dbImportTestTrack({
+				name: 'Track 3',
+				album: 'Album 2',
+				artists: ['Artist 2'],
+			})
+
+			const playlistId = await createTestPlaylist()
+
+			await addTracksToPlaylist(playlistId, [albumTrack1Id, albumTrack2Id, survivorTrackId])
+
+			await addTracksToPlayHistory([albumTrack1Id, albumTrack2Id, survivorTrackId])
+
+			const albums = await dbGetAllAndExpectLength('albums', 2)
+			const albumId = albums.find((album) => album.name === 'Test Album')?.id
+			expectToBeDefined(albumId)
+
+			await dbRemoveAlbum(albumId)
+
+			await expectOnlyTrackWithReferences(survivorTrackId)
 		})
 	})
 
@@ -201,6 +332,38 @@ describe('remove functions', () => {
 
 			const artistsAfter = await dbGetAllAndExpectLength('artists', 1)
 			expect(artistsAfter[0]?.name, 'Expected Artist 2 to remain').toBe('Artist 2')
+		})
+
+		it('should clear playlists and play history for removed artist tracks only', async () => {
+			const artistTrack1Id = await dbImportTestTrack({
+				name: 'Track 1',
+				album: 'Album 1',
+				artists: ['Artist 1'],
+			})
+			const artistTrack2Id = await dbImportTestTrack({
+				name: 'Track 2',
+				album: 'Album 2',
+				artists: ['Artist 1'],
+			})
+			const survivorTrackId = await dbImportTestTrack({
+				name: 'Track 3',
+				album: 'Album 3',
+				artists: ['Artist 2'],
+			})
+
+			const playlistId = await createTestPlaylist()
+
+			await addTracksToPlaylist(playlistId, [artistTrack1Id, artistTrack2Id, survivorTrackId])
+
+			await addTracksToPlayHistory([artistTrack1Id, artistTrack2Id, survivorTrackId])
+
+			const artists = await dbGetAllAndExpectLength('artists', 2)
+			const artistId = artists.find((artist) => artist.name === 'Artist 1')?.id
+			expectToBeDefined(artistId)
+
+			await dbRemoveArtist(artistId)
+
+			await expectOnlyTrackWithReferences(survivorTrackId)
 		})
 	})
 })
