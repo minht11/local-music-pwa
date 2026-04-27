@@ -279,6 +279,42 @@ describe('remove functions', () => {
 
 			await expectOnlyTrackWithReferences(survivorTrackId)
 		})
+
+		it('should keep shared artists that are still referenced by survivor tracks from other albums', async () => {
+			await dbImportTestTrack({
+				name: 'Album Track 1',
+				album: 'Album 1',
+				artists: ['Shared Artist', 'Album 1 Artist'],
+			})
+			await dbImportTestTrack({
+				name: 'Album Track 2',
+				album: 'Album 1',
+				artists: ['Shared Artist'],
+			})
+			const survivorTrackId = await dbImportTestTrack({
+				name: 'Survivor Track',
+				album: 'Album 2',
+				artists: ['Shared Artist', 'Album 2 Artist'],
+			})
+
+			const albums = await dbGetAllAndExpectLength('albums', 2)
+			const albumId = albums.find((album) => album.name === 'Album 1')?.id
+			expectToBeDefined(albumId)
+
+			await dbRemoveAlbum(albumId)
+
+			const tracksAfter = await dbGetAllAndExpectLength('tracks', 1)
+			expect(tracksAfter[0]?.id).toBe(survivorTrackId)
+
+			const albumsAfter = await dbGetAllAndExpectLength('albums', 1)
+			expect(albumsAfter[0]?.name).toBe('Album 2')
+
+			const artistsAfter = await dbGetAllAndExpectLength('artists', 2)
+			expect(artistsAfter.map((artist) => artist.name).sort()).toEqual([
+				'Album 2 Artist',
+				'Shared Artist',
+			])
+		})
 	})
 
 	describe('dbRemoveArtist', () => {
@@ -364,6 +400,39 @@ describe('remove functions', () => {
 			await dbRemoveArtist(artistId)
 
 			await expectOnlyTrackWithReferences(survivorTrackId)
+		})
+
+		it('should keep shared albums that are still referenced by survivor tracks from other artists', async () => {
+			await dbImportTestTrack({
+				name: 'Artist 1 Track 1',
+				album: 'Shared Album',
+				artists: ['Artist 1'],
+			})
+			await dbImportTestTrack({
+				name: 'Artist 1 Track 2',
+				album: 'Artist 1 Album',
+				artists: ['Artist 1'],
+			})
+			const survivorTrackId = await dbImportTestTrack({
+				name: 'Artist 2 Survivor',
+				album: 'Shared Album',
+				artists: ['Artist 2'],
+			})
+
+			const artists = await dbGetAllAndExpectLength('artists', 2)
+			const artistId = artists.find((artist) => artist.name === 'Artist 1')?.id
+			expectToBeDefined(artistId)
+
+			await dbRemoveArtist(artistId)
+
+			const tracksAfter = await dbGetAllAndExpectLength('tracks', 1)
+			expect(tracksAfter[0]?.id).toBe(survivorTrackId)
+
+			const albumsAfter = await dbGetAllAndExpectLength('albums', 1)
+			expect(albumsAfter[0]?.name).toBe('Shared Album')
+
+			const artistsAfter = await dbGetAllAndExpectLength('artists', 1)
+			expect(artistsAfter[0]?.name).toBe('Artist 2')
 		})
 	})
 })
