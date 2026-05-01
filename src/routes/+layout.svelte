@@ -5,7 +5,7 @@
 	const { children } = $props()
 
 	const countPageView = (id: string | null | undefined) => {
-		if (import.meta.env.DEV) {
+		if (import.meta.env.DEV || import.meta.env.SSR) {
 			return
 		}
 
