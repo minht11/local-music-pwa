@@ -3,12 +3,6 @@ import { snackbarItems } from './store.svelte.ts'
 
 export type SnackbarOptions<T = unknown> = SnackbarData<T>
 
-export interface SnackbarFn<T> {
-	(newSnackbar: SnackbarOptions<T> | string): void
-	unexpectedError: (error: unknown) => void
-	dismiss: (id: string) => void
-}
-
 const showSnackbar = <const T>(newSnackbar: SnackbarOptions<T> | string): void => {
 	let newSnackbarNormalized: SnackbarData<T>
 	if (typeof newSnackbar === 'string') {

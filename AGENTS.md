@@ -536,7 +536,6 @@ pnpm run biome-fix    # Fix linting issues
 
 # Testing
 pnpm run test         # Run tests
-pnpm run coverage     # Test coverage
 ```
 
 ### Code Quality Rules

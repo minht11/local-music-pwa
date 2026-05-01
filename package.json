@@ -17,7 +17,8 @@
 		"prettier-fix": "prettier --write ./src",
 		"compile-i18n": "paraglide-js compile --project ./project.inlang",
 		"test": "vitest run",
-		"gen-color-theme": "node scripts/gen-color-theme.ts"
+		"gen-color-theme": "node scripts/gen-color-theme.ts",
+		"knip": "knip"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.13",
@@ -31,6 +32,7 @@
 		"fake-indexeddb": "^6.2.5",
 		"happy-dom": "^20.9.0",
 		"image-size": "^2.0.2",
+		"knip": "^6.9.0",
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^3.5.1",
 		"prettier-plugin-tailwindcss": "^0.8.0",

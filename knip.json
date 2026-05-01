@@ -1,0 +1,15 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"tags": ["-lintignore"],
+	"entry": [
+		"src/routes/**/*.{svelte,ts}",
+		"src/lib/stores/**/*",
+		".generated/types/auto-imports.d.ts"
+	],
+	"project": ["**/*", "!src/paraglide/**/*", "!static/supported-browser-check.js"],
+	"ignoreExportsUsedInFile": {
+		"interface": true,
+		"type": true
+	},
+	"ignoreUnresolved": ["^\\./\\$types\\.ts$"]
+}

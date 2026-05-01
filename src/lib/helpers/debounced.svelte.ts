@@ -1,6 +1,6 @@
 import { debounce } from './utils/debounce.ts'
 
-export type Getter<T> = () => T
+type Getter<T> = () => T
 
 export class Debounced<T> {
 	#current: T = $state() as T

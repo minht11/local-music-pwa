@@ -29,7 +29,7 @@ const preloadLibraryListValues = async <Store extends LibraryStoreName>(
 	await Promise.all(preload)
 }
 
-export const keysListDatabaseChangeHandler = <Store extends LibraryStoreName>(
+const keysListDatabaseChangeHandler = <Store extends LibraryStoreName>(
 	storeName: Store,
 	changes: DatabaseChangeDetailsList,
 	{ mutate, refetch }: DbChangeActions<number[]>,

@@ -256,8 +256,7 @@ const assertsValue = <T, AllowEmpty extends boolean = false>(
 	return value
 }
 
-/** @private */
-export const getCachedOrFetchValue = <Store extends LibraryStoreName>(
+const getCachedOrFetchValue = <Store extends LibraryStoreName>(
 	key: CacheKey<Store>,
 	fetchValue: () => Promise<GetLibraryValueResult<Store> | undefined>,
 ): LibraryValue<Store> | Promise<LibraryValue<Store> | undefined> => {

@@ -68,7 +68,7 @@ export const dbRemoveFromPlayHistory = async (trackId: number): Promise<void> =>
 	notifyPlayHistoryChange()
 }
 
-export const dbClearPlayHistory = async (): Promise<void> => {
+const dbClearPlayHistory = async (): Promise<void> => {
 	const db = await getDatabase()
 	await db.clear('playHistory')
 

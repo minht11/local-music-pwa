@@ -185,8 +185,7 @@ export const replaceDirectories = async (
 	}
 }
 
-/** @private */
-export const dbRemoveDirectory = async (directoryId: number): Promise<void> => {
+const dbRemoveDirectory = async (directoryId: number): Promise<void> => {
 	const db = await getDatabase()
 
 	const tracksToBeRemoved = await db.getAllKeysFromIndex('tracks', 'directory', directoryId)
@@ -210,8 +209,7 @@ export const removeDirectory = async (id: number): Promise<void> => {
 	}
 }
 
-/** @private */
-export const dbImportLegacyFiles = (files: File[]): Promise<void> =>
+const dbImportLegacyFiles = (files: File[]): Promise<void> =>
 	scanTracks({
 		action: 'legacy-files-add',
 		files,
