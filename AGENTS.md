@@ -38,7 +38,7 @@
 
 ### Development Tools
 
-- **pnpm** for package management (`packageManager: pnpm@10.32.1`, Node `24.12.0`)
+- **pnpm** for package management
 - **Biome** for linting (primary)
 - **Prettier** for Svelte formatting
 - **Vitest** for testing with `fake-indexeddb`

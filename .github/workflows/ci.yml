@@ -15,12 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6.0.2
-      - uses: pnpm/action-setup@v6.0.3
+      - uses: pnpm/action-setup@v6.0.4
         with:
           run_install: false
-      - uses: actions/setup-node@v6.3.0
+      - uses: actions/setup-node@v6.4.0
         with:
-          node-version: 24.12.0
+          node-version-file: "package.json"
           cache: "pnpm"
       - run: pnpm install
       - name: Build generated files
