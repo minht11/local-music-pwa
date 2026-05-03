@@ -214,14 +214,10 @@
 				"rules": {
 					"correctness": {
 						"noUnusedVariables": "off",
-						"noUnusedImports": "off",
 						"noUnusedFunctionParameters": "off"
 					},
 					"complexity": {
 						"noCommaOperator": "off"
-					},
-					"suspicious": {
-						"noAssignInExpressions": "off"
 					}
 				}
 			}
