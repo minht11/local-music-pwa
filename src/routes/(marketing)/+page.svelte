@@ -1,64 +1,79 @@
 <script lang="ts">
 	import { page } from '$app/state'
+	import { APP_DESCRIPTION_EN, APP_NAME_EN } from '$lib/app-metadata.ts'
 	import Button from '$lib/components/Button.svelte'
-	import Header from '$lib/components/Header.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
-	import Icon, { type IconType } from '$lib/components/icon/Icon.svelte'
+	import Icon from '$lib/components/icon/Icon.svelte'
 	import heroImg from './assets/hero.avif?as=metadata'
-	import secondaryImg from './assets/secondary.avif?as=metadata'
+	import FeaturesSection from './components/FeaturesSection.svelte'
+	import GettingStartedSection from './components/GettingStartedSection.svelte'
+	import HeroSection from './components/HeroSection.svelte'
+	import HowItWorksSection from './components/HowItWorksSection.svelte'
+	import SoundControlsSection from './components/SoundControlsSection.svelte'
 
-	interface Feature {
-		icon: IconType
-		title: string
-		description: string
-	}
-
-	const features: Feature[] = [
-		{
-			icon: 'palette',
-			title: 'Adaptive theming',
-			description:
-				'Beautiful interface that changes colors to match your music artwork and follows your system theme.',
-		},
-		{
-			icon: 'flash',
-			title: 'Lightning fast',
-			description:
-				'Opens instantly, plays seamlessly, with responsive controls built for modern browsers.',
-		},
-		{
-			icon: 'cellphone',
-			title: 'Use anywhere',
-			description:
-				'Works great on your phone, tablet, or computer. Just open it in your browser - no downloads needed.',
-		},
-		{
-			icon: 'lock',
-			title: 'Privacy-first design',
-			description:
-				'Your music never leaves your device. No accounts, minimal privacy-preserving analytics. Just you and your music.',
-		},
-	]
-
-	const benefits = [
-		'Browse and find songs with smart search and filters',
-		'Make custom playlists for every mood and moment',
-		'Control playback with keyboard shortcuts and media keys',
-		'Works completely offline - no internet needed',
-	]
+	const seoTitle = `${APP_NAME_EN} - Private offline local music player in your browser`
+	const seoDescription = APP_DESCRIPTION_EN
 </script>
 
 <svelte:head>
-	<title>{m.appName()} - Your music, your way</title>
+	<title>{seoTitle}</title>
+	<meta name="description" content={seoDescription} />
 	<meta
-		name="description"
-		content="Free online music player for your local music library. Play songs directly in your browser with no downloads, no sign-up, and complete privacy. Works offline on any device."
+		name="keywords"
+		content="local music player, offline music player, browser music player, play music from device, private music player, offline web app, equalizer, playback speed control"
 	/>
+	<meta name="robots" content="index,follow,max-image-preview:large" />
+	<meta name="application-name" content={APP_NAME_EN} />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content={seoTitle} />
+	<meta property="og:description" content={seoDescription} />
+	<meta property="og:url" content={page.url.href} />
+	<meta property="og:image" content={`${page.url.origin}${heroImg.src}`} />
+	<meta property="og:image:alt" content="Snae Player showing the library and player interface" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content={seoTitle} />
+	<meta name="twitter:description" content={seoDescription} />
+	<meta name="twitter:image" content={`${page.url.origin}${heroImg.src}`} />
 
-	<link rel="canonical" href={page.url.href} />
+	<link rel="canonical" href={`${page.url.origin}${page.url.pathname}`} />
+	<script type="application/ld+json">
+		{JSON.stringify([
+			{
+				'@context': 'https://schema.org',
+				'@type': 'WebApplication',
+				name: APP_NAME_EN,
+				applicationCategory: 'MultimediaApplication',
+				applicationSubCategory: 'Music Player',
+				operatingSystem: 'Any',
+				browserRequirements: 'Requires a modern web browser',
+				description: seoDescription,
+				url: page.url.href,
+				image: `${page.url.origin}${heroImg.src}`,
+				offers: {
+					'@type': 'Offer',
+					price: '0',
+					priceCurrency: 'USD',
+				},
+				sameAs: ['https://github.com/minht11/local-music-pwa'],
+				featureList: [
+					'Play music stored on your device',
+					'Works offline with no account or uploads',
+					'Organizes your library with playlists, queue, and favorites',
+					'Includes equalizer and playback speed controls',
+				],
+			},
+		])}]
+	</script>
 </svelte:head>
 
-<Header title={m.appName()} noBackButton>
+<header class="mktg-content-width flex-row justify-start gap-2 py-4">
+	<div
+		class="mr-auto flex items-center gap-2 text-title-sm font-medium text-onSurface xs:text-title-md"
+	>
+		<img src="/icons/responsive.svg" width="24" height="24" alt="" class="size-6" />
+		{m.appName()}
+	</div>
+
 	<IconButton
 		as="a"
 		href="https://github.com/minht11/local-music-pwa"
@@ -68,226 +83,102 @@
 	>
 		<Icon type="github" />
 	</IconButton>
-	<Button as="a" href="/library/tracks" kind="outlined">Launch Player</Button>
-</Header>
 
-<section
-	class="content-width-using-grid relative justify-items-center overflow-hidden px-6 pt-24 pb-0 lg:pt-32 lg:pb-24"
->
-	<div inert class="animated-gradient absolute -inset-x-32 -inset-y-16"></div>
+	<Button as="a" href="/library/tracks" kind="outlined" class="max-sm:hidden">Open Player</Button>
+</header>
 
-	<div class="relative z-0 mt-(--app-header-height) max-w-4xl text-center">
-		<h1 class="mb-6 text-headline-md leading-tight font-bold text-onSurface lg:text-headline-lg">
-			Your music, <span class="text-primary">your way</span>
-		</h1>
-		<p
-			class="mx-auto mb-8 max-w-2xl text-title-md leading-relaxed text-onSurfaceVariant sm:text-title-lg"
-		>
-			Enjoy all your favorite songs with a fast, privacy-focused music player that works right in
-			your browser.
-		</p>
+<!-- <div class="floating-cta">
+	<Button as="a" href="/library/tracks" kind="filled">Open Player</Button>
+</div> -->
 
-		<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
-			<Button as="a" href="/library/tracks" kind="filled" class="w-full sm:w-60">
-				Start Listening
-			</Button>
-			<div class="text-body-md text-onSurfaceVariant">Free • No sign-up • Fully offline</div>
-		</div>
-	</div>
+<main class="flex flex-col gap-14 select-text md:gap-32">
+	<HeroSection />
 
-	<img
-		class="hero-image-slide-in relative mt-16 flex aspect-7/5 h-100 w-auto max-w-full items-center justify-center rounded-2xl bg-surfaceContainerHighest object-cover object-left-bottom ring ring-outline/10 sm:h-120"
-		src={heroImg.src}
-		width={heroImg.width}
-		height={heroImg.height}
-		alt="App Screenshot"
-		loading="eager"
-		fetchpriority="high"
-	/>
-</section>
+	<HowItWorksSection />
 
-<section class="content-width py-20">
-	<div class="mb-16 text-center">
-		<h2 class="mb-4 text-headline-md font-bold text-onSurface sm:text-headline-md">
-			Made for people who love music
-		</h2>
-		<p class="mx-auto max-w-xl text-title-md text-onSurfaceVariant">
-			Simple features that make listening to your music collection a joy, without compromising your
-			privacy.
-		</p>
-	</div>
+	<FeaturesSection />
 
-	<div class="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2">
-		{#each features as feature}
-			<div
-				class="card group p-8 transition-shadow duration-300 hover:bg-inverseSurface hover:shadow-lg"
-			>
-				<div
-					class="mb-6 flex size-12 items-center justify-center rounded-full bg-tertiaryContainer"
-				>
-					<Icon type={feature.icon} class="text-primary" />
-				</div>
-				<h3
-					class="mb-3 text-title-lg font-semibold text-onSurface group-hover:text-inverseOnSurface"
-				>
-					{feature.title}
-				</h3>
-				<p
-					class="text-body-lg leading-relaxed text-onSurfaceVariant group-hover:text-inverseOnSurface"
-				>
-					{feature.description}
-				</p>
-			</div>
-		{/each}
-	</div>
-</section>
+	<SoundControlsSection />
 
-<section class="bg-surfaceContainer py-20">
-	<div class="content-width">
-		<div class="mx-auto grid max-w-6xl items-center gap-16 lg:grid-cols-2">
-			<div>
-				<h2 class="mb-6 text-headline-md font-bold text-onSurface sm:text-headline-md">
-					Everything you need to enjoy your music
-				</h2>
-				<ul class="space-y-4">
-					{#each benefits as benefit}
-						<li class="flex items-center gap-3">
-							<div class="rounded-full bg-surfaceContainerHighest p-1">
-								<Icon type="check" class="text-primary" />
-							</div>
-							<span class="text-body-lg text-onSurfaceVariant">{benefit}</span>
-						</li>
-					{/each}
-				</ul>
-			</div>
+	<GettingStartedSection />
+</main>
+
+<footer class="w-full border-t border-outlineVariant bg-shadow/7">
+	<div
+		class="mx-auto flex w-full max-w-300 flex-col items-center justify-between gap-4 py-8 sm:flex-row"
+	>
+		<div class="flex items-center gap-2 text-label-lg font-medium text-onSurfaceVariant">
 			<img
-				class="flex w-full items-center justify-center rounded-2xl bg-surfaceContainerHigh object-contain object-bottom ring ring-outline/10"
-				src={secondaryImg.src}
-				width={secondaryImg.width}
-				height={secondaryImg.height}
-				alt="Feature Illustration"
-				loading="lazy"
+				src="/icons/responsive.svg"
+				width="24"
+				height="24"
+				alt="Logo"
+				class="size-5 opacity-60"
 			/>
+			{m.appName()}
 		</div>
-	</div>
-</section>
 
-<section class="content-width py-20">
-	<div class="mx-auto max-w-xl text-center">
-		<h2 class="mb-6 text-headline-md font-bold text-onSurface sm:text-headline-md">
-			Ready to dive into your music?
-		</h2>
-		<p class="mb-8 text-title-md text-onSurfaceVariant">
-			Start exploring your music collection in a whole new way. It's free, private, and ready to use
-			right now.
-		</p>
-		<Button as="a" href="/library/tracks" kind="filled">
-			Open {m.appName()}
-		</Button>
-	</div>
-</section>
+		<div class="flex items-center gap-6 text-body-md">
+			<a
+				href="https://github.com/minht11/local-music-pwa"
+				rel="noopener noreferrer"
+				target="_blank"
+				class="flex items-center gap-1.5 text-onSurfaceVariant transition-colors duration-200 hover:text-onSurface"
+			>
+				<Icon type="github" class="h-4 w-4" />
+				{m.aboutSourceCode()}
+			</a>
 
-<footer class="content-width py-8">
-	<div class="w-full rounded-4xl bg-surfaceContainerHigh p-8 shadow-lg">
-		<div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
-			<div class="flex items-center gap-2 text-title-md font-medium text-onSurface">
-				<img src="/icons/responsive.svg" width="24" height="24" alt="Logo" class="size-6" />
-				{m.appName()}
-			</div>
-
-			<div class="flex items-center gap-6 text-body-md">
-				<a
-					href="https://github.com/minht11/local-music-pwa"
-					target="_blank"
-					class="link flex items-center gap-2 text-onSurfaceVariant transition-colors duration-200 hover:text-onSurface"
-				>
-					<Icon type="github" class="h-5 w-5" />
-					{m.aboutSourceCode()}
-				</a>
-
-				<a
-					href="https://github.com/minht11/local-music-pwa#privacy"
-					target="_blank"
-					class="link text-onSurfaceVariant transition-colors duration-200 hover:text-onSurface"
-				>
-					{m.aboutPrivacy()}
-				</a>
-			</div>
+			<a
+				href="https://github.com/minht11/local-music-pwa#privacy"
+				rel="noopener noreferrer"
+				target="_blank"
+				class="text-onSurfaceVariant transition-colors duration-200 hover:text-onSurface"
+			>
+				{m.aboutPrivacy()}
+			</a>
 		</div>
 	</div>
 </footer>
 
 <style>
-	.content-width {
-		width: 100%;
-		max-width: 1200px;
-		padding-left: 24px;
-		padding-right: 24px;
-		margin-left: auto;
-		margin-right: auto;
+	.floating-cta {
+		position: fixed;
+		top: 1rem;
+		right: 1.5rem;
+		z-index: 50;
+		pointer-events: auto;
+		visibility: visible;
+		opacity: 0;
+		transform: translateY(-0.5rem);
+		transition:
+			opacity 0.2s ease,
+			transform 0.2s ease;
 	}
 
-	.content-width-using-grid {
-		display: grid;
-		grid-template-columns: minmax(0, var(--content-max-width));
-		justify-content: center;
+	@media (prefers-reduced-motion: no-preference) {
+		@supports (animation-timeline: view(block)) {
+			.floating-cta {
+				visibility: hidden;
+				animation: floating-cta-enter both;
+				animation-timeline: --marketing-hero;
+				animation-range: exit 12% exit 48%;
+				transition: none;
+			}
+		}
 	}
 
-	.card {
-		transition: all 0.3s ease;
-	}
-
-	.card:hover {
-		transform: translateY(-2px);
-	}
-
-	.hero-image-slide-in {
-		animation: hero-image-slide-in 0.5s ease-out forwards;
-	}
-
-	@keyframes hero-image-slide-in {
-		0% {
-			transform: translateY(40px);
+	@keyframes floating-cta-enter {
+		from {
+			visibility: hidden;
 			opacity: 0;
+			transform: translateY(-0.75rem) scale(0.96);
 		}
-		100% {
-			transform: translateY(0);
+
+		to {
+			visibility: visible;
 			opacity: 1;
-		}
-	}
-
-	.animated-gradient {
-		background: radial-gradient(
-			ellipse 1400px 800px at 0% 30%,
-			--alpha(var(--color-tertiary) / 0.1),
-			--alpha(var(--color-tertiary) / 0.1),
-			--alpha(var(--color-tertiary) / 0.04),
-			transparent 60%
-		);
-		filter: blur(10px);
-		transform-origin: top;
-		animation: glow-pulse 20s ease-in-out infinite;
-	}
-
-	@keyframes glow-pulse {
-		0% {
-			transform: scale(0.95, 1);
-			opacity: 0.7;
-		}
-		50% {
-			transform: scale(1.4, 1);
-			opacity: 1;
-		}
-		100% {
-			transform: scale(0.95, 1);
-			opacity: 0.7;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.hero-image-slide-in,
-		.animated-gradient {
-			animation: none;
+			transform: translateY(0) scale(1);
 		}
 	}
 </style>

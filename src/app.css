@@ -368,6 +368,24 @@ source {
 		text-decoration: underline;
 	}
 
+	.mktg-content-width {
+		width: 100%;
+		max-width: var(--content-max-width);
+		padding-left: --spacing(6);
+		padding-right: --spacing(6);
+		margin-left: auto;
+		margin-right: auto;
+		align-items: center;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.mktg-content-width-using-grid {
+		display: grid;
+		grid-template-columns: minmax(0, var(--content-max-width));
+		justify-content: center;
+	}
+
 	.card {
 		background-color: var(--color-surfaceContainer);
 		display: flex;
