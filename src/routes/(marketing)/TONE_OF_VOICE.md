@@ -28,6 +28,7 @@ Use more warmth in:
 - section labels
 - short framing lines
 - feature names when they still map cleanly to real behavior
+- feature descriptions when they describe a real listening benefit in plain language
 
 Stay more literal in:
 
@@ -38,6 +39,8 @@ Stay more literal in:
 - any sentence that sounds like a promise or guarantee
 
 Simple rule: the closer a line is to a claim, instruction, or guarantee, the more exact it should be.
+
+Another simple rule: do not flatten every line into product-spec language. Benefit-led phrasing is fine when the feature behind it is obvious and defensible.
 
 ## Non-Negotiable Rules
 
@@ -55,6 +58,9 @@ Prefer:
 - "No sign-up, no cloud sync, and no download required"
 - "Built around your music"
 - "Colors that follow your music"
+- "Adjust the sound, set your pace"
+- "Listen at any speed"
+- "Build playlists for any mood"
 
 Avoid:
 
@@ -64,6 +70,8 @@ Avoid:
 - "Built for people who love music"
 
 If a sentence could apply to almost any music app, it is probably too vague.
+
+That does not mean every sentence needs to sound mechanical. A line can be broader or warmer if it still clearly belongs to this product and points to a real feature.
 
 ### Use Real Labels
 
@@ -176,6 +184,7 @@ Landing-page copy should scan quickly.
 - Prefer one strong sentence over two softer ones.
 - Explain what the user can do or what the app guarantees.
 - If a heading is slightly playful, let the description do the grounding.
+- Benefit-first phrasing is acceptable when the related feature is named nearby and the implication stays modest.
 
 ### CTA Copy
 
@@ -195,6 +204,7 @@ Landing-page copy should scan quickly.
 - Prefer "concrete and trustworthy" over "clever and branded".
 - Allow a small amount of playful or warm wording in headings and section framing.
 - Do not overcorrect into overly strict or sterile copy.
+- Do not rewrite solid existing copy just to make it sound more literal if it is already truthful, specific enough, and product-shaped.
 - Avoid cliche lines immediately if they feel generic.
 - Use fewer section descriptions when the section title and content already carry the idea.
 - Use browser-support language in a practical way, not as a technical brag.
@@ -211,6 +221,10 @@ Stronger:
 - "Built around your music."
 - "Colors that follow your music."
 - "Up and running in seconds."
+- "A clean player for your local music, with playlists, sound controls, and offline listening."
+- "Build playlists for any mood, star what you love, and line up what plays next."
+- "Adjust the sound, set your pace."
+- "Listen at any speed."
 
 Weaker:
 
