@@ -39,7 +39,7 @@
 	maxWidth="max-w-4xl"
 >
 	<div
-		class="how-it-works-slider grid w-full max-w-5xl snap-x snap-mandatory auto-cols-[minmax(18rem,22rem)] grid-flow-col gap-6 overflow-x-auto overscroll-x-contain pb-2 md:auto-cols-auto md:grid-flow-row md:grid-cols-3 md:overflow-visible md:pb-0"
+		class="how-it-works-slider grid w-full max-w-5xl snap-x snap-mandatory auto-cols-[minmax(18rem,22rem)] grid-flow-col gap-6 overflow-x-auto overscroll-x-contain pb-2 lg:auto-cols-auto lg:grid-flow-row lg:grid-cols-3 lg:overflow-visible lg:pb-0"
 	>
 		{#each detailCards as card}
 			<article class="marketing-scroll-enter-soft how-it-works-card snap-start p-7">
@@ -54,20 +54,6 @@
 			</article>
 		{/each}
 	</div>
-
-	<div
-		class="marketing-scroll-enter-soft mx-auto mt-8 max-w-4xl rounded-3xl border border-outlineVariant bg-surfaceContainerHighest/55 px-5 py-4 text-body-md text-onSurfaceVariant sm:px-6"
-	>
-		Works in all modern browsers, some file system features depend on
-		<a
-			href="https://caniuse.com/?search=showDirectoryPicker"
-			target="_blank"
-			rel="noopener noreferrer"
-			class="link inline"
-		>
-			browser support
-		</a>.
-	</div>
 </Section>
 
 <style>
@@ -81,7 +67,7 @@
 		scroll-padding-inline: --spacing(6);
 	}
 
-	@media (min-width: 768px) {
+	@media (width >= --theme(--breakpoint-lg)) {
 		.how-it-works-slider {
 			width: 100%;
 			max-width: 80rem;

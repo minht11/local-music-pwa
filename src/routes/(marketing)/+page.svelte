@@ -104,9 +104,7 @@
 </main>
 
 <footer class="w-full border-t border-outlineVariant bg-shadow/7">
-	<div
-		class="mx-auto flex w-full max-w-300 flex-col items-center justify-between gap-4 py-8 sm:flex-row"
-	>
+	<div class="mktg-content-width items-center justify-between gap-4 py-8 sm:flex-row">
 		<div class="flex items-center gap-2 text-label-lg font-medium text-onSurfaceVariant">
 			<img
 				src="/icons/responsive.svg"

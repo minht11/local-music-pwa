@@ -28,8 +28,8 @@
 		},
 		{
 			icon: 'lockCheck',
-			title: 'No account, no uploads',
-			description: 'No sign-up, no cloud sync, and no download required.',
+			title: 'Ready when you are offline',
+			description: 'Keep listening on flights, trains, or anywhere your connection drops.',
 		},
 	]
 </script>

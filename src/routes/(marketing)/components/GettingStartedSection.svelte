@@ -33,7 +33,7 @@
 					class="marketing-scroll-enter-soft flex flex-col rounded-3xl border border-outlineVariant p-7"
 				>
 					<div
-						class="flex size-6 items-center justify-center rounded-full bg-primaryContainer/60 text-body-lg text-primary"
+						class="flex size-8 items-center justify-center rounded-full bg-primaryContainer/60 text-body-lg text-primary"
 					>
 						{i + 1}
 					</div>
@@ -47,7 +47,7 @@
 
 		<div class="marketing-scroll-enter-soft mt-10 flex justify-center">
 			<Button as="a" href="/library/tracks" kind="filled" class="w-full sm:w-60">
-				Open {m.appName()}
+				Open Player
 			</Button>
 		</div>
 	</Section>

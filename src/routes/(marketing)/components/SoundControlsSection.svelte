@@ -14,7 +14,7 @@
 			<div class="max-w-xl">
 				<div class="mb-2 text-label-md text-tertiary">Built-in equalizer</div>
 				<h3 class="text-title-lg font-semibold text-onSurface">
-					Make it sound right on your setup
+					Tune it for your headphones or speakers
 				</h3>
 				<p class="mt-2 text-body-lg leading-relaxed text-onSurfaceVariant">
 					Start with a preset, then fine-tune the bands until your music hits the way you want
@@ -26,8 +26,8 @@
 				<div class="mb-2 text-label-md text-secondary">Playback speed</div>
 				<h3 class="text-title-lg font-semibold text-onSurface">Listen at any speed</h3>
 				<p class="mt-2 text-body-lg leading-relaxed text-onSurfaceVariant">
-					Slow things down for closer listening or speed them up when you want to move through long
-					mixes, podcasts, or audiobooks faster.
+					Slow things down for closer listening or speed albums and long mixes up when you want to
+					move faster.
 				</p>
 			</div>
 		</div>
@@ -47,6 +47,8 @@
 </Section>
 
 <style>
+	@reference '../../app.css';
+
 	.equalizer-stage {
 		position: relative;
 	}
@@ -98,7 +100,7 @@
 			0 0 0 1px --alpha(var(--color-outline) / 0.08);
 	}
 
-	@media (max-width: 639px) {
+	@media (width < --theme(--breakpoint-sm)) {
 		.equalizer-shot-wrap {
 			min-height: 15.5rem;
 		}

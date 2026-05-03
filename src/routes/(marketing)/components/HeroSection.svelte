@@ -21,7 +21,8 @@
 		<p
 			class="mx-auto mb-7 max-w-2xl text-title-md leading-relaxed text-onSurfaceVariant sm:text-title-lg lg:mx-0 lg:max-w-xl"
 		>
-			A clean player for your local music, with playlists, sound controls, and offline listening.
+			A clean player for your local music, with playlists, queue, sound controls, and offline
+			listening.
 		</p>
 		<div class="flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
 			<Button as="a" href="/library/tracks" kind="filled" class="w-full sm:w-60">
@@ -54,12 +55,14 @@
 		{@render floatingCard(
 			'hero-floating-card-bottom',
 			'Built-in controls',
-			'Equalizer, favorites, playlists, queue, and speed control.',
+			'Equalizer, favorites, playlists, queue, and playback speed.',
 		)}
 	</div>
 </section>
 
 <style>
+	@reference '../../app.css';
+
 	.hero-scroll-timeline {
 		view-timeline-name: --marketing-hero;
 		view-timeline-axis: block;
@@ -102,7 +105,7 @@
 		backdrop-filter: blur(10px);
 	}
 
-	@media (min-width: 1024px) {
+	@media (width >= --theme(--breakpoint-lg)) {
 		.hero-floating-card-top {
 			top: 0.9rem;
 			left: -1rem;
