@@ -590,3 +590,7 @@ pnpm run test         # Run tests
 - `src/app.html` - HTML template
 - `src/lib/stores/` - Global state management
 - `src/lib/db/database.ts` - IndexedDB setup
+
+## Marketing Copy
+
+For landing-page edits under `src/routes/(marketing)/`, follow the colocated guidance in `src/routes/(marketing)/AGENTS.md` and `src/routes/(marketing)/TONE_OF_VOICE.md`.
