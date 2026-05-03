@@ -14,11 +14,9 @@
 	import { setupOverlaySnippets } from '$lib/layout-bottom-bar.svelte'
 	import { DialogsStore } from '$lib/stores/dialogs/store.svelte.ts'
 	import { setDialogsStoreContext } from '$lib/stores/dialogs/use-store.ts'
-	import { MainStore } from '$lib/stores/main/store.svelte.ts'
-	import { setMainStoreContext } from '$lib/stores/main/use-store.ts'
 	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
 	import { setPlayerStoreContext } from '$lib/stores/player/use-store.ts'
-	import { onViewTransitionPrepare, setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
+	import { onViewTransitionPrepare } from '$lib/view-transitions.svelte.ts'
 	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
 	import {
 		type DirectoriesPermissionPromptSnackbarArg,
@@ -28,13 +26,11 @@
 
 	// These context are in different files from their implementation
 	// to allow better trees shaking and inlining
-	const mainStore = setMainStoreContext(new MainStore())
 	const player = setPlayerStoreContext(new PlayerStore())
 	const dialogs = setDialogsStoreContext(new DialogsStore())
 
 	setupTheme()
 	setupGlobalMenu()
-	setupAppViewTransitions(() => mainStore.isReducedMotion)
 	setupAppInstallPromptListeners()
 	const overlaySnippets = setupOverlaySnippets()
 
