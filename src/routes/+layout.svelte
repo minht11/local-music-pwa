@@ -10,19 +10,6 @@
 	const mainStore = setMainStoreContext(new MainStore())
 	setupAppViewTransitions(() => mainStore.isReducedMotion)
 
-	const countPageView = (id: string | null | undefined) => {
-		if (import.meta.env.DEV || import.meta.env.SSR) {
-			return
-		}
-
-		window.goatcounter?.count({
-			path: id ?? 'unknown',
-		})
-	}
-
-	// Initial page view
-	countPageView(page.route.id)
-
 	afterNavigate((nav) => {
 		let id = nav.to?.route?.id ?? 'unknown'
 		if (id === 'unknown' && nav.to?.url.pathname === '/') {
