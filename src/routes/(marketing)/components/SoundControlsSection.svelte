@@ -32,14 +32,14 @@
 			</div>
 		</div>
 
-		<div class="equalizer-stage marketing-scroll-enter-soft pt-1">
-			<div class="equalizer-shot-wrap">
+		<div class="equalizer-stage marketing-scroll-enter-soft relative pt-1">
+			<div class="equalizer-shot-wrap relative overflow-hidden rounded-[1.9rem]">
 				<img
 					src={equalizerPreview.src}
 					width={equalizerPreview.width}
 					height={equalizerPreview.height}
 					alt="Snae Player equalizer dialog in dark mode with Bass Boost enabled"
-					class="equalizer-shot"
+					class="equalizer-shot absolute top-5 left-[4%] block h-auto max-w-none rounded-[1.4rem] shadow-[0_28px_56px_--alpha(var(--color-shadow)/0.26),0_0_0_1px_--alpha(var(--color-outline)/0.08)]"
 				/>
 			</div>
 		</div>
@@ -49,15 +49,8 @@
 <style>
 	@reference '../../app.css';
 
-	.equalizer-stage {
-		position: relative;
-	}
-
 	.equalizer-shot-wrap {
-		position: relative;
 		min-height: 18.5rem;
-		overflow: hidden;
-		border-radius: 1.9rem;
 		background:
 			radial-gradient(circle at 18% 20%, --alpha(var(--color-tertiary) / 0.2), transparent 36%),
 			radial-gradient(circle at 80% 82%, --alpha(var(--color-primary) / 0.12), transparent 34%),
@@ -86,18 +79,8 @@
 	}
 
 	.equalizer-shot {
-		position: absolute;
-		left: 4%;
-		top: 1.25rem;
-		display: block;
 		width: 92%;
-		max-width: none;
-		height: auto;
-		border-radius: 1.4rem;
 		transform: rotate(-2.5deg);
-		box-shadow:
-			0 28px 56px --alpha(var(--color-shadow) / 0.26),
-			0 0 0 1px --alpha(var(--color-outline) / 0.08);
 	}
 
 	@media (width < --theme(--breakpoint-sm)) {
@@ -113,7 +96,7 @@
 		}
 
 		.equalizer-shot {
-			top: 0.9rem;
+			top: --spacing(3.5);
 			left: 1%;
 			width: 104%;
 			transform: rotate(-2deg);
