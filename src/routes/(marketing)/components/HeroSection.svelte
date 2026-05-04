@@ -1,6 +1,12 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte'
 	import heroImg from '../assets/hero.avif?as=metadata'
+
+	interface Props {
+		onOpenPlayerClick: (event: MouseEvent) => void
+	}
+
+	const { onOpenPlayerClick }: Props = $props()
 </script>
 
 <section
@@ -20,7 +26,15 @@
 		<div
 			class="mx-auto grid max-w-120 grid-cols-1 items-center justify-center gap-4 sm:grid-cols-2 lg:mx-0 lg:justify-start"
 		>
-			<Button as="a" href="/library/tracks" kind="filled" class="w-full">Open Player</Button>
+			<Button
+				as="a"
+				href="/library/tracks"
+				kind="filled"
+				class="w-full"
+				onclick={onOpenPlayerClick}
+			>
+				Open Player
+			</Button>
 			<Button as="a" href="#how-it-works" kind="outlined" class="w-full">How It Works</Button>
 		</div>
 		<div class="mt-4 text-body-md text-onSurfaceVariant">Free • No sign-up • Open source</div>
@@ -47,7 +61,7 @@
 	</div>
 </section>
 
-<style>
+<style lang="postcss">
 	@reference '../../app.css';
 
 	.hero-title {

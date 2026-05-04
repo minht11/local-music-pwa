@@ -13,6 +13,14 @@
 
 	const seoTitle = `${APP_NAME_EN} - Private offline local music player in your browser`
 	const seoDescription = APP_DESCRIPTION_EN
+
+	const trackOpenPlayerClick = (location: 'header' | 'hero' | 'getting-started') => {
+		window.goatcounter?.count({
+			path: `click-marketing-open-player-${location}`,
+			title: `Clicked marketing Open Player (${location})`,
+			event: true,
+		})
+	}
 </script>
 
 <svelte:head>
@@ -86,11 +94,19 @@
 		<Icon type="github" />
 	</IconButton>
 
-	<Button as="a" href="/library/tracks" kind="outlined" class="max-sm:hidden">Open Player</Button>
+	<Button
+		as="a"
+		href="/library/tracks"
+		kind="outlined"
+		class="max-sm:hidden"
+		onclick={() => trackOpenPlayerClick('header')}
+	>
+		Open Player
+	</Button>
 </header>
 
 <main class="flex flex-col gap-14 select-text md:gap-32">
-	<HeroSection />
+	<HeroSection onOpenPlayerClick={() => trackOpenPlayerClick('hero')} />
 
 	<HowItWorksSection />
 
@@ -98,7 +114,7 @@
 
 	<SoundControlsSection />
 
-	<GettingStartedSection />
+	<GettingStartedSection onOpenPlayerClick={() => trackOpenPlayerClick('getting-started')} />
 </main>
 
 <footer class="w-full border-t border-outlineVariant bg-shadow/7">

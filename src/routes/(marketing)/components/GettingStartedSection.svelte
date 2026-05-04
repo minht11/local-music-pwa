@@ -2,10 +2,16 @@
 	import Button from '$lib/components/Button.svelte'
 	import Section from './Section.svelte'
 
+	interface Props {
+		onOpenPlayerClick: (event: MouseEvent) => void
+	}
+
 	interface Step {
 		title: string
 		description: string
 	}
+
+	const { onOpenPlayerClick }: Props = $props()
 
 	const steps: Step[] = [
 		{
@@ -54,6 +60,7 @@
 			href="/library/tracks"
 			kind="filled"
 			class="marketing-scroll-enter-soft mt-10 w-full sm:w-60"
+			onclick={onOpenPlayerClick}
 		>
 			Open Player
 		</Button>
