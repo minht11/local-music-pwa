@@ -3,7 +3,7 @@ import { flushSync } from 'svelte'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
 import { clearDatabaseStores, expectToBeDefined } from '$lib/helpers/test-helpers.ts'
-import { dbRemoveTrack } from '$lib/library/remove'
+import { dbRemoveTracks } from '$lib/library/remove'
 import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/library/types.ts'
 import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
 
@@ -292,7 +292,7 @@ describe('PlayerStore', () => {
 			flushSync()
 			audioWithCurrentTime(90)
 
-			await dbRemoveTrack(7)
+			await dbRemoveTracks([7])
 			flushSync()
 
 			const entries = await getPlayHistoryEntries()

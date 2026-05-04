@@ -1,6 +1,6 @@
-<script lang="ts">
+<script lang="ts" module>
 	import Button from '$lib/components/Button.svelte'
-	import Dialog from '$lib/components/dialog/Dialog.svelte'
+	import Dialog, { type DialogOpenAccessor } from '$lib/components/dialog/Dialog.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 	import Switch from '$lib/components/Switch.svelte'
@@ -11,7 +11,14 @@
 		EQ_MIN_GAIN,
 	} from '$lib/stores/player/equalizer.svelte.ts'
 
-	const dialogs = useDialogsStore()
+	export interface EqualizerDialogProps {
+		open: DialogOpenAccessor<boolean>
+	}
+</script>
+
+<script lang="ts">
+	let { open }: EqualizerDialogProps = $props()
+
 	const player = usePlayer()
 	const eq = $derived(player.equalizer)
 
@@ -28,7 +35,7 @@
 	]
 </script>
 
-<Dialog bind:open={dialogs.equalizerDialogOpen} class="[--dialog-width:--spacing(160)]">
+<Dialog {open} class="[--dialog-width:--spacing(160)]">
 	{#snippet header()}
 		<header data-dialog-header class="flex items-center justify-between px-6 py-6">
 			<div class="text-headline-sm">{m.equalizerTitle()}</div>

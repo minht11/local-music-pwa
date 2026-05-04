@@ -7,9 +7,6 @@ export default mergeConfig(
 		test: {
 			environment: 'happy-dom',
 			exclude: [...defaultExclude, '.generated/**', 'build/**'],
-			coverage: {
-				include: ['src/'],
-			},
 		},
 	}),
 )

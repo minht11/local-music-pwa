@@ -1,17 +1,32 @@
-<script lang="ts">
+<script lang="ts" module>
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
 	import { createUIAction } from '$lib/helpers/ui-action'
 	import { truncate } from '$lib/helpers/utils/text.ts'
 	import { dbRemovePlaylist } from '$lib/library/playlists-actions.ts'
-	import {
-		dbRemoveAlbum,
-		dbRemoveArtist,
-		dbRemoveMultipleTracks,
-		dbRemoveTrack,
-	} from '$lib/library/remove.ts'
+	import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTracks } from '$lib/library/remove.ts'
 	import type { LibraryStoreName } from '$lib/library/types'
+	import type { DialogOpenAccessor } from '../dialog/Dialog.svelte'
 
-	const dialogs = useDialogsStore()
+	type RemoveLibraryItemOptions =
+		| {
+				type: 'single'
+				id: number
+				name: string
+				storeName: LibraryStoreName
+		  }
+		| {
+				type: 'multiple'
+				ids: readonly number[]
+				storeName: 'tracks'
+		  }
+
+	export interface RemoveFromLibraryDialogProps {
+		open: DialogOpenAccessor<RemoveLibraryItemOptions>
+	}
+</script>
+
+<script lang="ts">
+	let { open }: RemoveFromLibraryDialogProps = $props()
 
 	const removeSingle = createUIAction(
 		m.libraryItemRemovedFromLibrary(),
@@ -20,7 +35,7 @@
 				case 'playlists':
 					return dbRemovePlaylist(id)
 				case 'tracks':
-					return dbRemoveTrack(id)
+					return dbRemoveTracks([id])
 				case 'albums':
 					return dbRemoveAlbum(id)
 				case 'artists':
@@ -34,18 +49,13 @@
 		(store: LibraryStoreName, ids: readonly number[]) => {
 			invariant(store === 'tracks', 'Only tracks can be removed in bulk')
 
-			return dbRemoveMultipleTracks(ids)
+			return dbRemoveTracks(ids)
 		},
 	)
 </script>
 
 <CommonDialog
-	open={{
-		get: () => dialogs.removeFromLibraryOpen,
-		close: () => {
-			dialogs.removeFromLibraryOpen = null
-		},
-	}}
+	{open}
 	title={(data) => {
 		if (data.type === 'multiple') {
 			return m.libraryConfirmRemoveMultipleTitle({
@@ -67,7 +77,7 @@
 		},
 	]}
 	onsubmit={(_, data) => {
-		dialogs.removeFromLibraryOpen = null
+		open.close()
 
 		if (data.type === 'multiple') {
 			void removeMultiple(data.storeName, data.ids)

@@ -116,7 +116,7 @@
 					try {
 						const tracksIds = await dbGetAlbumOrArtistTrackIdsByName(item.name)
 
-						dialogs.addTrackToPlaylistDialogOpen = tracksIds
+						dialogs.openDialog('addToPlaylist', tracksIds)
 					} catch (error) {
 						snackbar.unexpectedError(error)
 					}
@@ -125,12 +125,12 @@
 			{
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
-					dialogs.removeFromLibraryOpen = {
+					dialogs.openDialog('removeFromLibrary', {
 						type: 'single',
 						id: item.id,
 						name: item.name,
 						storeName: type,
-					}
+					})
 				},
 			},
 		]

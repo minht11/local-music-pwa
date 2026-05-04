@@ -38,7 +38,7 @@
 
 ### Development Tools
 
-- **pnpm** for package management (`packageManager: pnpm@10.32.1`, Node `24.12.0`)
+- **pnpm** for package management
 - **Biome** for linting (primary)
 - **Prettier** for Svelte formatting
 - **Vitest** for testing with `fake-indexeddb`
@@ -99,6 +99,10 @@ tests/
 ### Design Tokens
 
 Use design tokens from `src/app.css` and `src/theme-colors.css` — **never arbitrary values**.
+
+Prefer theme breakpoint variables in media queries, for example `@media (width >= --theme(--breakpoint-sm))`.
+Use a custom breakpoint only when there is no matching theme breakpoint for the behavior you need.
+In Svelte component `<style>` blocks, add the appropriate `@reference` when using theme tokens such as `--theme(...)`.
 
 > **Critical**: Color token names use **camelCase**, not kebab-case.
 
@@ -536,7 +540,6 @@ pnpm run biome-fix    # Fix linting issues
 
 # Testing
 pnpm run test         # Run tests
-pnpm run coverage     # Test coverage
 ```
 
 ### Code Quality Rules
@@ -591,3 +594,7 @@ pnpm run coverage     # Test coverage
 - `src/app.html` - HTML template
 - `src/lib/stores/` - Global state management
 - `src/lib/db/database.ts` - IndexedDB setup
+
+## Marketing Copy
+
+For landing-page edits under `src/routes/(marketing)/`, follow the colocated guidance in `src/routes/(marketing)/AGENTS.md` and `src/routes/(marketing)/TONE_OF_VOICE.md`.

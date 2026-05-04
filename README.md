@@ -1,24 +1,38 @@
-# Snae player
-Lightweight on device music player right in your browser.
+# Snae Player
 
-Play your local audio files without a native app, using just your browser. Complete with Dark/Light theme support, artwork based UI coloring, animations and more.
+**[snaeplayer.com](https://snaeplayer.com)** - Local music player in the browser.
 
-## Limitations
-[File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API) is relatively new api which gives websites access to the files you choose. This app makes use of it when supported, for now that is only in Chromium based browsers. In other browsers legacy Files api is used which forces app to copy files inside IndexedDB, effectively duplicating used storage space, in oder to work correctly.
+Play audio files stored on your device. Includes playlists, queue, favorites, equalizer, playback speed, and artwork-based theming.
 
-## Works with
-With limitations in mind app works with every modern browser.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/minht11/local-music-pwa/main/src/routes/(marketing)/assets/hero.avif" height="400" alt="Snae Player showing the music library and playback controls" />
+</p>
+
+## Browser support
+
+Works in all modern browsers. When the [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API) is available, currently Chromium-based browsers, the app reads files directly from your chosen folder. In other browsers, files are copied into IndexedDB, which doubles the storage used.
 
 ## Privacy
-Minimal, privacy preserving analytics, provided by [GoatCounter](https://goatcounter.com/), are used to count page views.
+
+Your music files and library data stay on your device. The app does not collect or transmit them.
+
+Page views are counted using [GoatCounter](https://goatcounter.com/), a minimal privacy-preserving analytics tool.
+
+## Tech stack
+
+SvelteKit/Svelte 5 · TypeScript · Tailwind CSS 4
 
 ## Building locally
-Clone the repo, and:
+
+Clone the repo, then:
+
 ```
 pnpm install
 pnpm run build
 ```
-You can run the development server with:
+
+Or run the development server:
+
 ```
 pnpm run dev
 ```

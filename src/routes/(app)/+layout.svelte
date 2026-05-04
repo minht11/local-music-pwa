@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { browser } from '$app/environment'
 	import { navigating, page } from '$app/state'
-	import { APP_DIALOGS_COMPONENTS } from '$lib/components/app-dialogs/dialogs.ts'
 	import Button from '$lib/components/Button.svelte'
+	import {
+		APP_DIALOGS_COMPONENTS_MAP,
+		APP_DIALOGS_KEYS,
+	} from '$lib/components/global-dialogs/dialogs.ts'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
@@ -11,11 +14,9 @@
 	import { setupOverlaySnippets } from '$lib/layout-bottom-bar.svelte'
 	import { DialogsStore } from '$lib/stores/dialogs/store.svelte.ts'
 	import { setDialogsStoreContext } from '$lib/stores/dialogs/use-store.ts'
-	import { MainStore } from '$lib/stores/main/store.svelte.ts'
-	import { setMainStoreContext } from '$lib/stores/main/use-store.ts'
 	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
 	import { setPlayerStoreContext } from '$lib/stores/player/use-store.ts'
-	import { onViewTransitionPrepare, setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
+	import { onViewTransitionPrepare } from '$lib/view-transitions.svelte.ts'
 	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
 	import {
 		type DirectoriesPermissionPromptSnackbarArg,
@@ -25,13 +26,11 @@
 
 	// These context are in different files from their implementation
 	// to allow better trees shaking and inlining
-	const mainStore = setMainStoreContext(new MainStore())
 	const player = setPlayerStoreContext(new PlayerStore())
-	setDialogsStoreContext(new DialogsStore())
+	const dialogs = setDialogsStoreContext(new DialogsStore())
 
 	setupTheme()
 	setupGlobalMenu()
-	setupAppViewTransitions(() => mainStore.isReducedMotion)
 	setupAppInstallPromptListeners()
 	const overlaySnippets = setupOverlaySnippets()
 
@@ -146,8 +145,10 @@
 	<MenuRenderer />
 </div>
 
-{#each APP_DIALOGS_COMPONENTS as Dialog}
-	<Dialog />
+{#each APP_DIALOGS_KEYS as dialogKey}
+	{@const DialogComponent = APP_DIALOGS_COMPONENTS_MAP[dialogKey]}
+
+	<DialogComponent open={dialogs.getAccessor(dialogKey)} />
 {/each}
 
 <style lang="postcss">

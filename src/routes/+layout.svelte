@@ -1,16 +1,23 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation'
 	import { page } from '$app/state'
+	import { MainStore } from '$lib/stores/main/store.svelte.ts'
+	import { setMainStoreContext } from '$lib/stores/main/use-store.ts'
+	import { setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
 
 	const { children } = $props()
 
+	const mainStore = setMainStoreContext(new MainStore())
+	setupAppViewTransitions(() => mainStore.isReducedMotion)
+
 	afterNavigate((nav) => {
-		if (import.meta.env.DEV) {
-			return
+		let id = nav.to?.route?.id ?? 'unknown'
+		if (id === 'unknown' && nav.to?.url.pathname === '/') {
+			id = '/(marketing)'
 		}
 
 		window.goatcounter?.count({
-			path: nav.to?.route.id ?? 'unknown',
+			path: id,
 		})
 	})
 

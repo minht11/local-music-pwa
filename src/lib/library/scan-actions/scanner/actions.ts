@@ -1,7 +1,7 @@
 import { getDatabase } from '$lib/db/database.ts'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system.ts'
 import { SerialQueue } from '$lib/helpers/serial-queue.ts'
-import { dbRemoveTrack } from '$lib/library/remove.ts'
+import { dbRemoveTracks } from '$lib/library/remove.ts'
 import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/library/types.ts'
 import { dbImportTrack } from './import-track.ts'
 import { getArtworkRelatedData } from './parse/format-artwork.ts'
@@ -250,11 +250,13 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 	// After importing is done, we remove tracks that were not scanned
 	// meaning they do not exist in the actual FS anymore
 	const tracksIdsInDirectory = await db.getAllKeysFromIndex('tracks', 'directory', directoryId)
+	const tracksToRemove: number[] = []
 	for (const trackId of tracksIdsInDirectory) {
 		if (!scannedTracksIds.has(trackId)) {
-			await dbRemoveTrack(trackId).catch(console.warn)
+			tracksToRemove.push(trackId)
 		}
 	}
+	await dbRemoveTracks(tracksToRemove).catch(console.warn)
 
 	tracker.sendMsg(true)
 }

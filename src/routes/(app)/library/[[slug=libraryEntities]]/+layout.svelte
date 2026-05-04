@@ -140,7 +140,7 @@
 						<Button
 							kind="outlined"
 							onclick={() => {
-								dialogs.createNewPlaylistDialogOpen = true
+								dialogs.openDialog('newPlaylist')
 							}}
 						>
 							<Icon type="plus" />

@@ -1,17 +1,18 @@
+import { APP_DESCRIPTION_EN, APP_NAME_EN, APP_NAME_SHORT_EN } from '$lib/app-metadata.ts'
 import { THEME_PALLETTE_DARK } from '../../../server/theme-colors.ts'
 
 export const prerender = true
 
 const manifest = {
-	short_name: m.appNameShort(),
-	name: m.appName(),
+	short_name: APP_NAME_SHORT_EN,
+	name: APP_NAME_EN,
 	start_url: './library/tracks/',
 	scope: '../',
 	theme_color: THEME_PALLETTE_DARK.surface,
 	background_color: THEME_PALLETTE_DARK.surface,
 	display: 'standalone',
 	orientation: 'any',
-	description: 'Lightweight on device music player right in your browser.',
+	description: APP_DESCRIPTION_EN,
 	icons: [
 		{
 			src: '/icons/raster-192.png',

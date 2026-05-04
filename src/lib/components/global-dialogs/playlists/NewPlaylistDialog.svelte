@@ -1,23 +1,30 @@
-<script lang="ts">
+<script lang="ts" module>
 	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
+	import type { DialogOpenAccessor } from '$lib/components/dialog/Dialog.svelte'
 	import TextField from '$lib/components/TextField.svelte'
 	import { createPlaylist } from '$lib/library/playlists-actions.ts'
 
-	const dialogs = useDialogsStore()
+	export interface NewPlaylistDialogProps {
+		open: DialogOpenAccessor<boolean>
+	}
+</script>
+
+<script lang="ts">
+	let { open }: NewPlaylistDialogProps = $props()
 
 	const onSubmitHandler = async (event: SubmitEvent) => {
 		const formData = new FormData(event.target as HTMLFormElement)
-		const name = formData.get('name') as string
+		const name = formData.get('playlistName') as string
 		const description = formData.get('description') as string
 
 		await createPlaylist(name, description)
 
-		dialogs.createNewPlaylistDialogOpen = false
+		open.close()
 	}
 </script>
 
 <CommonDialog
-	bind:open={dialogs.createNewPlaylistDialogOpen}
+	{open}
 	icon="addPlaylist"
 	title={m.libraryCreateNewPlaylist()}
 	buttons={[
@@ -32,7 +39,7 @@
 	onsubmit={onSubmitHandler}
 >
 	<TextField
-		name="name"
+		name="playlistName"
 		placeholder={m.libraryPlaylistName()}
 		required
 		minLength={4}
