@@ -24,7 +24,14 @@
 	countPageView(page.route.id)
 
 	afterNavigate((nav) => {
-		countPageView(nav.to?.route?.id)
+		let id = nav.to?.route?.id ?? 'unknown'
+		if (id === 'unknown' && nav.to?.url.pathname === '/') {
+			id = '/(marketing)'
+		}
+
+		window.goatcounter?.count({
+			path: id,
+		})
 	})
 
 	$effect(() => {

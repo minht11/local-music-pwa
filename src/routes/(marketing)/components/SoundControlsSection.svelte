@@ -45,7 +45,7 @@
 </Section>
 
 <style>
-	@reference '../../app.css';
+	@reference '../../../app.css';
 
 	.equalizer-shot-wrap {
 		min-height: 18.5rem;

@@ -61,7 +61,7 @@
 </section>
 
 <style lang="postcss">
-	@reference '../../app.css';
+	@reference '../../../app.css';
 
 	.hero-title {
 		font-size: clamp(3rem, 8cqw, 6.25rem);

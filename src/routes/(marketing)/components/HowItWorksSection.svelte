@@ -56,7 +56,7 @@
 </Section>
 
 <style>
-	@reference '../../app.css';
+	@reference '../../../app.css';
 
 	.how-it-works-slider {
 		width: 100vw;
