@@ -21,6 +21,41 @@
 			event: true,
 		})
 	}
+
+	const schemaJson = $derived(
+		JSON.stringify(
+			[
+				{
+					'@context': 'https://schema.org',
+					'@type': 'WebApplication',
+					name: APP_NAME_EN,
+					applicationCategory: 'MultimediaApplication',
+					applicationSubCategory: 'Music Player',
+					operatingSystem: 'Any',
+					browserRequirements: 'Requires a modern web browser',
+					description: seoDescription,
+					url: page.url.href,
+					image: `${page.url.origin}${heroImg.src}`,
+					offers: {
+						'@type': 'Offer',
+						price: '0',
+						priceCurrency: 'USD',
+					},
+					sameAs: ['https://github.com/minht11/local-music-pwa'],
+					featureList: [
+						'Play music stored on your device',
+						'Works in modern browsers on Android and iOS, plus Chromebooks, Windows PCs, and Macs',
+						'Works offline with no account or uploads',
+						'Organizes tracks into albums, artists, playlists, and favorites',
+						'Includes queue, shuffle, repeat, history, equalizer, and playback speed controls',
+						'Artwork colors adapt to your music',
+					],
+				},
+			],
+			null,
+			0,
+		),
+	)
 </script>
 
 <svelte:head>
@@ -44,36 +79,8 @@
 	<meta name="twitter:image" content={`${page.url.origin}${heroImg.src}`} />
 
 	<link rel="canonical" href={`${page.url.origin}${page.url.pathname}`} />
-	<script type="application/ld+json">
-		{JSON.stringify([
-			{
-				'@context': 'https://schema.org',
-				'@type': 'WebApplication',
-				name: APP_NAME_EN,
-				applicationCategory: 'MultimediaApplication',
-				applicationSubCategory: 'Music Player',
-				operatingSystem: 'Any',
-				browserRequirements: 'Requires a modern web browser',
-				description: seoDescription,
-				url: page.url.href,
-				image: `${page.url.origin}${heroImg.src}`,
-				offers: {
-					'@type': 'Offer',
-					price: '0',
-					priceCurrency: 'USD',
-				},
-				sameAs: ['https://github.com/minht11/local-music-pwa'],
-				featureList: [
-					'Play music stored on your device',
-					'Works in modern browsers on Android and iOS, plus Chromebooks, Windows PCs, and Macs',
-					'Works offline with no account or uploads',
-					'Organizes tracks into albums, artists, playlists, and favorites',
-					'Includes queue, shuffle, repeat, history, equalizer, and playback speed controls',
-					'Artwork colors adapt to your music',
-				],
-			},
-		])}]
-	</script>
+
+	{@html `<script type="application/ld+json">${schemaJson}</script>`}
 </svelte:head>
 
 <header class="mktg-content-width flex-row justify-start gap-2 py-4">
