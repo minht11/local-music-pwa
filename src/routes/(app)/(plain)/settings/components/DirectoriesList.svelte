@@ -80,6 +80,7 @@
 				newDirHandle: directory,
 			}
 		} else {
+			window.goatcounter?.count({ path: 'action-import-directory', event: true })
 			void importNewDirectory(directory)
 		}
 	}
@@ -95,6 +96,7 @@
 			return
 		}
 
+		window.goatcounter?.count({ path: 'action-import-files', event: true })
 		await importLegacyFiles(files)
 	}
 </script>
@@ -146,6 +148,7 @@
 						icon="cached"
 						tooltip={m.settingsDirRescan()}
 						onclick={() => {
+							window.goatcounter?.count({ path: 'action-rescan-directory', event: true })
 							void rescanDirectory(dir.id, dir.handle)
 						}}
 					/>
