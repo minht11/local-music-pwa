@@ -31,8 +31,12 @@
 	]
 </script>
 
-<div class="bg-shadow/7 py-20">
-	<Section class="mktg-content-width" label="Getting started" title="From folder to first play">
+<div class="bg-shadow/7 py-14 md:py-20">
+	<Section
+		class="mktg-content-width"
+		label="Getting started"
+		title="Start listening in three steps"
+	>
 		<div class="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
 			{#each steps as step, i}
 				<div

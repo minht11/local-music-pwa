@@ -103,6 +103,7 @@ html {
 	scroll-padding-bottom: var(--bottom-overlay-height);
 	--app-header-height: --spacing(16);
 	--app-max-content-width: --spacing(400);
+	--mktg-content-max-width: --spacing(300);
 }
 
 html.dark {
@@ -370,7 +371,7 @@ source {
 
 	.mktg-content-width {
 		width: 100%;
-		max-width: var(--content-max-width);
+		max-width: var(--mktg-content-max-width);
 		padding-left: --spacing(6);
 		padding-right: --spacing(6);
 		margin-left: auto;
@@ -382,7 +383,7 @@ source {
 
 	.mktg-content-width-using-grid {
 		display: grid;
-		grid-template-columns: minmax(0, var(--content-max-width));
+		grid-template-columns: minmax(0, var(--mktg-content-max-width));
 		justify-content: center;
 	}
 

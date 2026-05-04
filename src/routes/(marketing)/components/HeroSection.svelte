@@ -10,7 +10,7 @@
 </script>
 
 <section
-	class="mktg-content-width relative mx-auto grid w-full items-center justify-items-center gap-10 overflow-hidden px-6 pt-20 pb-0 sm:px-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-14 lg:pt-24 lg:pb-24"
+	class="mktg-content-width @container relative mx-auto grid w-full items-center justify-items-center gap-10 overflow-hidden px-6 pt-20 pb-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-14 lg:py-24"
 >
 	<div class="relative text-center lg:text-left">
 		<h1 class="hero-title mb-6 font-bold text-onSurface">
@@ -20,8 +20,7 @@
 		<p
 			class="mx-auto mb-7 max-w-2xl text-title-md leading-relaxed text-onSurfaceVariant sm:text-title-lg lg:mx-0 lg:max-w-xl"
 		>
-			A clean player for your local music, with playlists, queue, sound controls, and offline
-			listening.
+			Playlists, queue, equalizer, and playback speed — no uploads or account needed.
 		</p>
 		<div
 			class="mx-auto grid max-w-120 grid-cols-1 items-center justify-center gap-4 sm:grid-cols-2 lg:mx-0 lg:justify-start"
@@ -35,9 +34,9 @@
 			>
 				Open Player
 			</Button>
-			<Button as="a" href="#how-it-works" kind="outlined" class="w-full">How It Works</Button>
+			<Button as="a" href="#how-it-works" kind="outlined" class="w-full">How it works</Button>
 		</div>
-		<div class="mt-4 text-body-md text-onSurfaceVariant">Free • No sign-up • Open source</div>
+		<div class="mt-4 text-body-md text-onSurfaceVariant">Free • Works offline • Open source</div>
 	</div>
 
 	<div class="relative grid gap-4 py-5">
@@ -65,7 +64,7 @@
 	@reference '../../app.css';
 
 	.hero-title {
-		font-size: clamp(3rem, 6.6vw, 6.25rem);
+		font-size: clamp(3rem, 8cqw, 6.25rem);
 		line-height: 0.92;
 		letter-spacing: -0.05em;
 		text-wrap: balance;

@@ -14,11 +14,10 @@
 			<div class="max-w-xl">
 				<div class="mb-2 text-label-md text-tertiary">Built-in equalizer</div>
 				<h3 class="text-title-lg font-semibold text-onSurface">
-					Tune it for your headphones or speakers
+					Tune the equalizer for your headphones or speakers
 				</h3>
 				<p class="mt-2 text-body-lg leading-relaxed text-onSurfaceVariant">
-					Start with a preset, then fine-tune the bands until your music hits the way you want
-					through your headphones or speakers.
+					Start with a preset, then fine-tune each band until the sound is right.
 				</p>
 			</div>
 
@@ -26,8 +25,7 @@
 				<div class="mb-2 text-label-md text-secondary">Playback speed</div>
 				<h3 class="text-title-lg font-semibold text-onSurface">Listen at any speed</h3>
 				<p class="mt-2 text-body-lg leading-relaxed text-onSurfaceVariant">
-					Slow things down for closer listening or speed albums and long mixes up when you want to
-					move faster.
+					Slow down for closer listening or move through albums and long mixes at your own pace.
 				</p>
 			</div>
 		</div>

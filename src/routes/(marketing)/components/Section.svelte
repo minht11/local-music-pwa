@@ -7,19 +7,16 @@
 		labelColor?: 'primary' | 'secondary' | 'tertiary'
 		title: string
 		description?: string
-		maxWidth?: string
 	}
 
 	const {
 		children,
 		id,
-		// TODO.
-		class: className = 'mktg-content-width',
+		class: className,
 		label,
 		labelColor = 'primary',
 		title,
 		description,
-		maxWidth = 'max-w-3xl',
 	}: Props = $props()
 
 	const labelColorClass = $derived(
@@ -32,7 +29,7 @@
 </script>
 
 <section {id} class={[className]}>
-	<div class={['marketing-scroll-enter mx-auto mb-12 text-center', maxWidth]}>
+	<div class={['marketing-scroll-enter mx-auto mb-12 text-center']}>
 		<div class={['mb-3 text-label-lg font-medium tracking-wide', labelColorClass]}>{label}</div>
 		<h2 class="text-headline-md font-bold text-onSurface">{title}</h2>
 		{#if description}

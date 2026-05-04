@@ -25,7 +25,7 @@
 			icon: 'cached',
 			title: 'Library data stays on this device',
 			description:
-				'Track details, playlists, and app data are saved in your browser on this device so the player can reopen quickly and keep working offline.',
+				'Track details, playlists, and app data are saved on this device so the player can reopen quickly and keep working offline.',
 		},
 	]
 </script>
@@ -36,10 +36,9 @@
 	label="How it works"
 	title="Private by design, simple to start"
 	description="Pick a folder, approve access in the browser, and Snae Player reads only the music you choose."
-	maxWidth="max-w-4xl"
 >
 	<div
-		class="how-it-works-slider grid w-full max-w-5xl snap-x snap-mandatory auto-cols-[minmax(18rem,22rem)] grid-flow-col gap-6 overflow-x-auto overscroll-x-contain pb-2 lg:auto-cols-auto lg:grid-flow-row lg:grid-cols-3 lg:overflow-visible lg:pb-0"
+		class="how-it-works-slider grid w-full snap-x snap-mandatory auto-cols-[minmax(18rem,22rem)] grid-flow-col gap-6 overflow-x-auto overscroll-x-contain pb-2 lg:auto-cols-auto lg:grid-flow-row lg:grid-cols-3 lg:overflow-visible lg:pb-0"
 	>
 		{#each detailCards as card}
 			<article class="marketing-scroll-enter-soft how-it-works-card snap-start p-7">
@@ -61,7 +60,6 @@
 
 	.how-it-works-slider {
 		width: 100vw;
-		max-width: none;
 		margin-inline: calc(50% - 50vw);
 		padding-inline: --spacing(6);
 		scroll-padding-inline: --spacing(6);
@@ -70,7 +68,6 @@
 	@media (width >= --theme(--breakpoint-lg)) {
 		.how-it-works-slider {
 			width: 100%;
-			max-width: 80rem;
 			margin-inline: auto;
 			padding-inline: 0;
 			scroll-padding-inline: 0;

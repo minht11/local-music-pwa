@@ -25,7 +25,7 @@
 			icon: 'playlistMusic',
 			title: 'Queue, favorites, and listening history',
 			description:
-				'Save favorites, revisit what you played, and stay in control of what comes next with queue, shuffle, and repeat close at hand.',
+				'Save favorites, revisit what you played, and control what comes next with queue, shuffle, and repeat.',
 		},
 		{
 			icon: 'palette',
@@ -40,8 +40,7 @@
 	id="features"
 	class="mktg-content-width"
 	label="What's inside"
-	title="Built around real listening"
-	maxWidth="max-w-xl"
+	title="Built around your music"
 >
 	<div class="grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
 		{#each features as feature}
