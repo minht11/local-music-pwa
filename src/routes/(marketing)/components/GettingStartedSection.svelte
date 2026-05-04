@@ -14,19 +14,19 @@
 				'In Settings, click Add directory and choose the music folder you want Snae Player to scan.',
 		},
 		{
-			title: 'Check your library',
+			title: 'Browse your library',
 			description:
 				'Tracks, albums, and artists are organized automatically from your file metadata.',
 		},
 		{
-			title: 'Press play',
-			description: 'Browse your collection, queue what is next, and start listening.',
+			title: 'Set up what plays next',
+			description: 'Build a playlist, queue a few tracks, mark favorites, and press play.',
 		},
 	]
 </script>
 
 <div class="bg-shadow/7 py-20">
-	<Section class="mktg-content-width" label="Getting started" title="Up and running in seconds">
+	<Section class="mktg-content-width" label="Getting started" title="From folder to first play">
 		<div class="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
 			{#each steps as step, i}
 				<div
@@ -45,10 +45,17 @@
 			{/each}
 		</div>
 
-		<div class="marketing-scroll-enter-soft mt-10 flex justify-center">
-			<Button as="a" href="/library/tracks" kind="filled" class="w-full sm:w-60">
-				Open Player
-			</Button>
-		</div>
+		<p class="marketing-scroll-enter-soft mt-4 text-center text-body-md text-onSurfaceVariant">
+			Works in modern browsers on Android and iOS, plus Chromebooks, Windows PCs, and Macs.
+		</p>
+
+		<Button
+			as="a"
+			href="/library/tracks"
+			kind="filled"
+			class="marketing-scroll-enter-soft mt-10 w-full sm:w-60"
+		>
+			Open Player
+		</Button>
 	</Section>
 </div>

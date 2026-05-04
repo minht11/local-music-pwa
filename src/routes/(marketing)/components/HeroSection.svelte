@@ -3,15 +3,8 @@
 	import heroImg from '../assets/hero.avif?as=metadata'
 </script>
 
-{#snippet floatingCard(className: string, label: string, title: string)}
-	<div class={`hero-floating-card ${className} lg:absolute lg:max-w-60`}>
-		<div class="text-label-sm text-onSurfaceVariant">{label}</div>
-		<div class="mt-1.5 text-title-sm font-semibold text-onSurface">{title}</div>
-	</div>
-{/snippet}
-
 <section
-	class="hero-scroll-timeline mktg-content-width relative mx-auto grid w-full max-w-6xl items-center justify-items-center gap-10 overflow-hidden px-6 pt-20 pb-0 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14 lg:pt-24 lg:pb-24"
+	class="mktg-content-width relative mx-auto grid w-full items-center justify-items-center gap-10 overflow-hidden px-6 pt-20 pb-0 sm:px-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-14 lg:pt-24 lg:pb-24"
 >
 	<div class="relative text-center lg:text-left">
 		<h1 class="hero-title mb-6 font-bold text-onSurface">
@@ -24,13 +17,11 @@
 			A clean player for your local music, with playlists, queue, sound controls, and offline
 			listening.
 		</p>
-		<div class="flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
-			<Button as="a" href="/library/tracks" kind="filled" class="w-full sm:w-60">
-				Open Player
-			</Button>
-			<Button as="a" href="#how-it-works" kind="outlined" class="w-full sm:w-60">
-				How It Works
-			</Button>
+		<div
+			class="mx-auto grid max-w-120 grid-cols-1 items-center justify-center gap-4 sm:grid-cols-2 lg:mx-0 lg:justify-start"
+		>
+			<Button as="a" href="/library/tracks" kind="filled" class="w-full">Open Player</Button>
+			<Button as="a" href="#how-it-works" kind="outlined" class="w-full">How It Works</Button>
 		</div>
 		<div class="mt-4 text-body-md text-onSurfaceVariant">Free • No sign-up • Open source</div>
 	</div>
@@ -47,29 +38,20 @@
 				fetchpriority="high"
 			/>
 		</div>
-		{@render floatingCard(
-			'hero-floating-card-top',
-			'Private by default',
-			'Your files stay on your device',
-		)}
-		{@render floatingCard(
-			'hero-floating-card-bottom',
-			'Built-in controls',
-			'Equalizer, favorites, playlists, queue, and playback speed.',
-		)}
+		<div class="hero-floating-card hero-floating-card-top lg:absolute lg:max-w-60">
+			<div class="text-label-sm text-onSurfaceVariant">Private by default</div>
+			<div class="mt-1.5 text-title-sm font-semibold text-onSurface">
+				Your files stay on your device
+			</div>
+		</div>
 	</div>
 </section>
 
 <style>
 	@reference '../../app.css';
 
-	.hero-scroll-timeline {
-		view-timeline-name: --marketing-hero;
-		view-timeline-axis: block;
-	}
-
 	.hero-title {
-		font-size: clamp(3rem, 8.8vw, 5.25rem);
+		font-size: clamp(3rem, 6.6vw, 6.25rem);
 		line-height: 0.92;
 		letter-spacing: -0.05em;
 		text-wrap: balance;
@@ -109,11 +91,6 @@
 		.hero-floating-card-top {
 			top: 0.9rem;
 			left: -1rem;
-		}
-
-		.hero-floating-card-bottom {
-			right: 0.75rem;
-			bottom: -0.75rem;
 		}
 	}
 </style>

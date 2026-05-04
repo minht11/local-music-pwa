@@ -20,7 +20,7 @@
 	<meta name="description" content={seoDescription} />
 	<meta
 		name="keywords"
-		content="local music player, offline music player, browser music player, play music from device, private music player, offline web app, equalizer, playback speed control"
+		content="local music player, offline music player, browser music player, android music player, ios music player, chromebook music player, windows music player, macos music player, play music from device, private music player, playlists, queue, favorites, equalizer, playback speed control"
 	/>
 	<meta name="robots" content="index,follow,max-image-preview:large" />
 	<meta name="application-name" content={APP_NAME_EN} />
@@ -57,9 +57,11 @@
 				sameAs: ['https://github.com/minht11/local-music-pwa'],
 				featureList: [
 					'Play music stored on your device',
+					'Works in modern browsers on Android and iOS, plus Chromebooks, Windows PCs, and Macs',
 					'Works offline with no account or uploads',
-					'Organizes your library with playlists, queue, and favorites',
-					'Includes equalizer and playback speed controls',
+					'Organizes tracks into albums, artists, playlists, and favorites',
+					'Includes queue, shuffle, repeat, history, equalizer, and playback speed controls',
+					'Artwork colors adapt to your music',
 				],
 			},
 		])}]
@@ -86,10 +88,6 @@
 
 	<Button as="a" href="/library/tracks" kind="outlined" class="max-sm:hidden">Open Player</Button>
 </header>
-
-<!-- <div class="floating-cta">
-	<Button as="a" href="/library/tracks" kind="filled">Open Player</Button>
-</div> -->
 
 <main class="flex flex-col gap-14 select-text md:gap-32">
 	<HeroSection />
@@ -138,45 +136,3 @@
 		</div>
 	</div>
 </footer>
-
-<style>
-	.floating-cta {
-		position: fixed;
-		top: 1rem;
-		right: 1.5rem;
-		z-index: 50;
-		pointer-events: auto;
-		visibility: visible;
-		opacity: 0;
-		transform: translateY(-0.5rem);
-		transition:
-			opacity 0.2s ease,
-			transform 0.2s ease;
-	}
-
-	@media (prefers-reduced-motion: no-preference) {
-		@supports (animation-timeline: view(block)) {
-			.floating-cta {
-				visibility: hidden;
-				animation: floating-cta-enter both;
-				animation-timeline: --marketing-hero;
-				animation-range: exit 12% exit 48%;
-				transition: none;
-			}
-		}
-	}
-
-	@keyframes floating-cta-enter {
-		from {
-			visibility: hidden;
-			opacity: 0;
-			transform: translateY(-0.75rem) scale(0.96);
-		}
-
-		to {
-			visibility: visible;
-			opacity: 1;
-			transform: translateY(0) scale(1);
-		}
-	}
-</style>

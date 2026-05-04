@@ -13,23 +13,25 @@
 			icon: 'folder',
 			title: 'Play music from your device',
 			description:
-				'Open a music folder or pick individual tracks, then start listening right away.',
+				'Open a music folder or pick tracks, then keep listening across phones, tablets, laptops, and desktops.',
+		},
+		{
+			icon: 'album',
+			title: 'Tracks, albums, and artists sorted for you',
+			description:
+				'Your library is organized from file metadata, so it is easy to browse by track, album, or artist.',
+		},
+		{
+			icon: 'playlistMusic',
+			title: 'Queue, favorites, and listening history',
+			description:
+				'Save favorites, revisit what you played, and stay in control of what comes next with queue, shuffle, and repeat close at hand.',
 		},
 		{
 			icon: 'palette',
 			title: 'Colors that follow your music',
 			description:
 				"The interface picks up colors from your album artwork and adapts to your system's light or dark theme.",
-		},
-		{
-			icon: 'playlistMusic',
-			title: 'Playlists, queue, and favorites',
-			description: 'Build playlists for any mood, star what you love, and line up what plays next.',
-		},
-		{
-			icon: 'lockCheck',
-			title: 'Ready when you are offline',
-			description: 'Keep listening on flights, trains, or anywhere your connection drops.',
 		},
 	]
 </script>
@@ -38,7 +40,7 @@
 	id="features"
 	class="mktg-content-width"
 	label="What's inside"
-	title="Built around your music"
+	title="Built around real listening"
 	maxWidth="max-w-xl"
 >
 	<div class="grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
