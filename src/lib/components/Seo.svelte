@@ -12,6 +12,7 @@
 	const seoTitle = `${APP_NAME_EN} - Private offline local music player in your browser`
 	const seoDescription = APP_DESCRIPTION_EN
 
+	const imageUrl = $derived(new URL(thumbnail.src, page.url.origin).href)
 	const canonicalUrl = $derived(new URL(page.url.pathname, page.url.origin).href)
 </script>
 
@@ -24,12 +25,12 @@
 	<meta property="og:title" content={seoTitle} />
 	<meta property="og:description" content={seoDescription} />
 	<meta property="og:url" content={canonicalUrl} />
-	<meta property="og:image" content={thumbnail.src} />
+	<meta property="og:image" content={imageUrl} />
 	<meta property="og:image:alt" content="Snae Player showing the library and player interface" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={seoTitle} />
 	<meta name="twitter:description" content={seoDescription} />
-	<meta name="twitter:image" content={thumbnail.src} />
+	<meta name="twitter:image" content={imageUrl} />
 
 	<meta
 		name="keywords"
