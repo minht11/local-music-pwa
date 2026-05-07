@@ -13,6 +13,11 @@ status = 200
 force = true
 
 [[redirects]]
+from = "/_app/*"
+to = "/200.html"
+status = 404
+
+[[redirects]]
 from = "/*"
 to = "/200.html"
 status = 200
@@ -32,3 +37,14 @@ Cross-Origin-Embedder-Policy = "require-corp"
 for = "/manifest.webmanifest"
 [headers.values]
 Content-Type = "application/manifest+json; charset=UTF-8"
+
+# Allow og:image to be loaded cross-origin by social media apps
+[[headers]]
+for = "/_app/immutable/assets/*"
+[headers.values]
+Cross-Origin-Resource-Policy = "cross-origin"
+
+[[headers]]
+for = "/icons/*"
+[headers.values]
+Cross-Origin-Resource-Policy = "cross-origin"

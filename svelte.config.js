@@ -24,6 +24,9 @@ const config = {
 		alias: {
 			$paraglide: './.generated/paraglide',
 		},
+		prerender: {
+			origin: 'https://snaeplayer.com',
+		},
 		csp: {
 			directives: {
 				'default-src': ['none'],

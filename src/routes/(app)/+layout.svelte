@@ -9,6 +9,7 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
+	import Seo from '$lib/components/Seo.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 	import { isElementTextInput } from '$lib/helpers/input.ts'
 	import { setupOverlaySnippets } from '$lib/layout-bottom-bar.svelte'
@@ -70,6 +71,8 @@
 		void setupDirectoriesPermissionPrompt(directoriesPermissionSnackbar)
 	}
 </script>
+
+<Seo />
 
 {#snippet directoriesPermissionSnackbar({ dirs, dismiss }: DirectoriesPermissionPromptSnackbarArg)}
 	<div class="flex w-full flex-col gap-1 pt-2 pb-1">
