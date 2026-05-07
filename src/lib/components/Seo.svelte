@@ -26,6 +26,7 @@
 	<meta property="og:url" content={canonicalUrl} />
 	<meta property="og:image" content={thumbnail.src} />
 	<meta property="og:image:alt" content="Snae Player showing the library and player interface" />
+	<meta property="og:logo" content="/icons/responsive.svg" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={seoTitle} />
 	<meta name="twitter:description" content={seoDescription} />
