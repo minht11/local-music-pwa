@@ -56,7 +56,7 @@
 	<div
 		class="mr-auto flex items-center gap-2 text-title-sm font-medium text-onSurface xs:text-title-md"
 	>
-		<img src="/icons/responsive.svg" width="24" height="24" alt="" class="size-6" />
+		<img src="/icons/responsive.svg" width="24" height="24" alt="Logo" class="size-6" />
 		{m.appName()}
 	</div>
 
