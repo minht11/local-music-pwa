@@ -26,7 +26,7 @@ jobs:
       - name: Build generated files
         run: pnpm run build
       - run: pnpm run biome-check
-      - run: pnpm run prettier-check
+      - run: pnpm run oxfmt-check
       - run: pnpm run type-check
       - run: pnpm test
       - run: pnpm run knip

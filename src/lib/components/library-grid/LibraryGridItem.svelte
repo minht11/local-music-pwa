@@ -222,7 +222,8 @@
 </div>
 
 <style>
-	.library-grid-item:has(.play-overlay-button:is(:hover, :focus-visible, :active)) .library-grid-link {
+	.library-grid-item:has(.play-overlay-button:is(:hover, :focus-visible, :active))
+		.library-grid-link {
 		--animation-scale: 1;
 		--overlay-bg: transparent;
 	}
