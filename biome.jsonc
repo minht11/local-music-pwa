@@ -187,11 +187,6 @@
 			"snackbar"
 		]
 	},
-	"json": {
-		"formatter": {
-			"indentWidth": 2
-		}
-	},
 	"css": {
 		"parser": {
 			"tailwindDirectives": true
