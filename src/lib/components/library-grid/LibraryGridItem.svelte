@@ -10,6 +10,7 @@
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
 	import { createAlbumQuery, createArtistQuery } from '$lib/library/get/value-queries'
 	import Artwork from '../Artwork.svelte'
+	import PlayPauseIcon from '../animated-icons/PlayPauseIcon.svelte'
 
 	export type LibraryGridItemType = 'albums' | 'artists'
 
@@ -135,15 +136,27 @@
 			},
 		]
 	}
+
+	const playItem = async () => {
+		try {
+			invariant(item)
+
+			const tracksIds = await dbGetAlbumOrArtistTrackIdsByName(item.name)
+			if (tracksIds.length === 0) {
+				return
+			}
+
+			player.playTrack(0, tracksIds)
+		} catch (error) {
+			snackbar.unexpectedError(error)
+		}
+	}
 </script>
 
-<a
-	{@attach ripple()}
+<div
 	{...props}
 	role="listitem"
-	class={[className, 'interactable flex flex-col rounded-lg bg-surfaceContainerHigh']}
-	href={linkProps?.href}
-	data-sveltekit-replacestate={linkProps?.shouldReplace}
+	class={[className, 'library-grid-item relative rounded-lg bg-surfaceContainerHigh']}
 	oncontextmenu={(e) => {
 		e.preventDefault()
 		menu.showFromEvent(e, menuItems(), {
@@ -152,22 +165,65 @@
 		})
 	}}
 >
-	<Artwork
-		src={artworkSrc()}
-		fallbackIcon={type === 'albums' ? 'album' : 'person'}
-		class="w-full rounded-[inherit]"
-	/>
+	<a
+		{@attach ripple()}
+		class="library-grid-link interactable flex flex-col rounded-[inherit]"
+		href={linkProps?.href}
+		data-sveltekit-replacestate={linkProps?.shouldReplace}
+	>
+		<div class="relative aspect-square w-full">
+			<Artwork
+				src={artworkSrc()}
+				fallbackIcon={type === 'albums' ? 'album' : 'person'}
+				class="absolute inset-0 w-full rounded-[inherit]"
+			/>
+		</div>
+
+		<div
+			class="flex h-18 w-full flex-col justify-center overflow-hidden px-2 text-center text-onSurfaceVariant"
+		>
+			{#if query.loading}
+				<div class="mb-2 h-2 rounded-xs bg-onSurface/10"></div>
+				<div class="h-1 w-1/8 rounded-xs bg-onSurface/20"></div>
+			{:else if query.error}
+				{m.errorUnexpected()}
+			{:else if item}
+				{@render children(item)}
+			{/if}
+		</div>
+	</a>
 
 	<div
-		class="flex h-18 w-full flex-col justify-center overflow-hidden px-2 text-center text-onSurfaceVariant"
+		{@attach ripple()}
+		role="button"
+		tabindex={0}
+		aria-label={m.playerPlay()}
+		class="play-overlay-button interactable absolute bottom-[4.5rem] left-2 z-1 flex size-10 items-center justify-center rounded-lg bg-surfaceContainerHigh text-onSurface"
+		onpointerdown={(e) => {
+			e.stopPropagation()
+		}}
+		onclick={async (e) => {
+			e.preventDefault()
+			e.stopPropagation()
+			await playItem()
+		}}
+		onkeydown={async (e) => {
+			if (e.key !== 'Enter' && e.key !== ' ') {
+				return
+			}
+
+			e.preventDefault()
+			e.stopPropagation()
+			await playItem()
+		}}
 	>
-		{#if query.loading}
-			<div class="mb-2 h-2 rounded-xs bg-onSurface/10"></div>
-			<div class="h-1 w-1/8 rounded-xs bg-onSurface/20"></div>
-		{:else if query.error}
-			{m.errorUnexpected()}
-		{:else if item}
-			{@render children(item)}
-		{/if}
+		<PlayPauseIcon playing={false} />
 	</div>
-</a>
+</div>
+
+<style>
+	.library-grid-item:has(.play-overlay-button:is(:hover, :focus-visible, :active)) .library-grid-link {
+		--animation-scale: 1;
+		--overlay-bg: transparent;
+	}
+</style>
