@@ -24,7 +24,7 @@
 		class: className,
 		ariaLabel,
 		tooltip = m.moreOptions(),
-		tabindex = 0,
+		tabindex,
 		menuItems,
 		alignment = { horizontal: 'right', vertical: 'top' },
 		width,

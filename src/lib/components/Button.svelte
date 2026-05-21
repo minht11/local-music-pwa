@@ -34,6 +34,7 @@
 		type = 'button',
 		children,
 		ariaLabel,
+		tabindex = 0,
 		tooltip: tooltipMessage,
 		...restProps
 	}: ButtonProps<As> = $props()
@@ -52,6 +53,7 @@
 	{@attach ripple({ stopPropagation: true })}
 	{@attach tooltip(tooltipMessage)}
 	{...restProps}
+	{tabindex}
 	{type}
 	aria-label={ariaLabel}
 	{href}

@@ -13,6 +13,7 @@
 	import { doesElementHasFocus, findFocusedElement } from '$lib/helpers/focus.ts'
 	import { createVirtualizerBase } from '$lib/helpers/virtualizer.svelte.ts'
 	import { useScrollTarget } from './ScrollContainer.svelte'
+	import { wait } from '$lib/helpers/utils/wait.ts'
 
 	interface Props {
 		count: number
@@ -139,7 +140,53 @@
 		return Number.isNaN(index) ? -1 : index
 	}
 
-	const keydownHandler = (e: KeyboardEvent) => {
+	const scrollToIndexIfNeeded = async (index: number) => {
+		if (!virtualizer.range) {
+			return
+		}
+
+		// Top/bottom elements cover the element, so we adjust bounds a bit
+		const startIndex = Math.max(virtualizer.range.startIndex - 1, 0)
+		const endIndex = Math.min(virtualizer.range.endIndex + 1, virtualizer.options.count - 1)
+
+		if (index >= startIndex && index <= endIndex) {
+			return
+		}
+
+		virtualizer.scrollToIndex(index, {
+			behavior: 'smooth',
+		})
+
+		const abortController = new AbortController()
+		const { promise: scrollEndPromise, resolve } = Promise.withResolvers<void>()
+
+		scrollTarget.current.addEventListener(
+			'scrollend',
+			() => {
+				resolve()
+			},
+			{ once: true, signal: abortController.signal },
+		)
+
+		await Promise.race([
+			scrollEndPromise,
+			// Guard in case scrollend never happens or scroll is very long
+			wait(2000),
+		])
+
+		abortController.abort()
+	}
+
+	const scrollToElementThenFocusIt = async (index: number) => {
+		await scrollToIndexIfNeeded(index)
+
+		queueMicrotask(() => {
+			console.log('FOCUS', findRow(0))
+			findRow(index)?.focus()
+		})
+	}
+
+	const keydownHandler = async (e: KeyboardEvent) => {
 		let directionDown: boolean | undefined
 		if (e.key === 'ArrowDown') {
 			directionDown = true
@@ -154,13 +201,7 @@
 		e.preventDefault()
 
 		if (container && doesElementHasFocus(container)) {
-			virtualizer.scrollToIndex(0, {
-				behavior: 'smooth',
-			})
-			// TODO. Should somehow await for scroll to finish.
-			queueMicrotask(() => {
-				findRow(0)?.focus()
-			})
+			await scrollToElementThenFocusIt(0)
 
 			return
 		}
@@ -170,13 +211,7 @@
 
 		const nextIndex = currentIndex + increment
 		if (nextIndex >= 0 && nextIndex < count) {
-			virtualizer.scrollToIndex(currentIndex, {
-				behavior: 'smooth',
-			})
-
-			queueMicrotask(() => {
-				findRow(nextIndex)?.focus()
-			})
+			await scrollToElementThenFocusIt(nextIndex)
 		}
 	}
 
