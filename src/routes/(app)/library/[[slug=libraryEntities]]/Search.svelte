@@ -61,7 +61,7 @@
 </script>
 
 <div
-	class="@container sticky top-2 z-1 mt-2 mb-4 ml-auto flex w-full max-w-125 items-center gap-1 rounded-lg border border-primary/10 bg-surfaceContainerHighest px-2 @sm:gap-2"
+	class="search-bar @container sticky top-2 z-1 mt-2 mb-4 ml-auto flex w-full max-w-125 items-center gap-1 rounded-lg border border-primary/10 bg-surfaceContainerHighest px-2 @sm:gap-2"
 >
 	<input
 		value={store.searchTerm}
@@ -96,3 +96,13 @@
 		width={200}
 	/>
 </div>
+
+<style>
+	/*
+		In Chrome when position sticky is focused it would scroll the page
+		https://stackoverflow.com/questions/72742581/scrolling-bug-when-focusing-element-inside-position-sticky-container
+	*/
+	:global(html):has(.search-bar:focus-within) {
+		scroll-padding-block-start: 0;
+	}
+</style>
