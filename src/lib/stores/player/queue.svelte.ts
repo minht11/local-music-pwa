@@ -100,6 +100,7 @@ export class QueueStore {
 
 	addToQueue = (trackId: number | readonly number[]): void => {
 		const ids: readonly number[] = Array.isArray(trackId) ? trackId : [trackId]
+		// Pushing to end of shuffled array is intentional, shuffle only applies when toggled
 		this.#itemsIdsShuffled?.push(...ids)
 		this.#itemsIdsOriginalOrder.push(...ids)
 

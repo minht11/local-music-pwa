@@ -86,6 +86,8 @@
 		return { dialogHeader, dialogBody, dialogFooter }
 	}
 
+	const wholeAnimationDuration = 400
+
 	const animateBackdrop = (dialog: HTMLDialogElement, isOut = false) => {
 		try {
 			dialog.animate(
@@ -124,7 +126,7 @@
 					clipPath: ['inset(0% 0% 100% 0% round 24px)', 'inset(0% 0% 0% 0% round 24px)'],
 				},
 				{
-					duration: 400,
+					duration: wholeAnimationDuration,
 				},
 			] satisfies AnimationSequence,
 			fade(dialogHeader),
@@ -162,14 +164,14 @@
 					clipPath: ['inset(0% 0% 0% 0% round 24px)', 'inset(0% 0% 100% 0% round 24px)'],
 				},
 				{
-					duration: 400,
+					duration: wholeAnimationDuration,
 				},
 			] satisfies AnimationSequence,
 			dialogFooter &&
 				([
 					dialogFooter,
 					{ transform: ['none', 'translateY(-60px)'] },
-					{ duration: 400, at: '<' },
+					{ duration: wholeAnimationDuration, at: '<' },
 				] satisfies AnimationSequence),
 			fade(dialogFooter),
 			fade(dialogBody),
@@ -194,7 +196,7 @@
 
 		// TODO. A hack until svelte supports non duration based animations
 		return {
-			duration: 400,
+			duration: wholeAnimationDuration,
 		}
 	}
 </script>

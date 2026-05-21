@@ -6,6 +6,7 @@
 		"source.organizeImports.biome": "explicit",
 		"source.fixAll.biome": "explicit"
 	},
+	"editor.defaultFormatter": "oxc.oxc-vscode",
 	"[jsonc]": {
 		"editor.defaultFormatter": "biomejs.biome"
 	},
