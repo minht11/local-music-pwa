@@ -1,5 +1,7 @@
 engineStrict: true
 
+dedupePeers: true
+
 allowBuilds:
   '@biomejs/biome': false
   '@tailwindcss/oxide': false
