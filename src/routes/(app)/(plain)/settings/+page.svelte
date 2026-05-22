@@ -285,6 +285,24 @@
 
 		<Switch bind:checked={player.preservePitch} />
 	</div>
+
+	<Separator />
+
+	<div class="flex items-center justify-between p-4">
+		<div class="flex items-center gap-2">
+			<div>{m.settingsGaplessPlayback()}</div>
+
+			<button
+				type="button"
+				class="interactable flex size-6 items-center justify-center rounded-full text-onSurfaceVariant"
+				{@attach tooltip(m.settingsGaplessPlaybackInfo())}
+			>
+				<Icon type="information" class="size-4" />
+			</button>
+		</div>
+
+		<Switch bind:checked={mainStore.gaplessPlaybackEnabled} />
+	</div>
 </section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">

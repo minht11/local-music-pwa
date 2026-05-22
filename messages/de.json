@@ -150,6 +150,8 @@
 	"settingsDirRemove": "Entfernen",
 	"settingsDirRescan": "Erneut scannen",
 	"settingsDisplayVolumeSlider": "Lautstärkeregler im Player anzeigen",
+	"settingsGaplessPlayback": "Lückenloses Abspielen (experimentell)",
+	"settingsGaplessPlaybackInfo": "Spielt aufeinanderfolgende FLAC-Titel ohne Pause ab. Erfordert Titel mit gleicher Abtastrate. Verwendet WebCodecs — nicht unterstützt in älteren Browsern.",
 	"settingsGrantDirectoryAccess": "Bitte erlauben Sie der App den Ordnerzugriff über die Browser-Berechtigungen, damit die Inhalte gescannt werden können",
 	"settingsImportTracks": "Titel importieren",
 	"settingsInstallAppDesktop": "Desktop",

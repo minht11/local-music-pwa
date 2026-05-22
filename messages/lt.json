@@ -150,6 +150,8 @@
 	"settingsDirRemove": "Pašalinti",
 	"settingsDirRescan": "Skenuoti iš naujo",
 	"settingsDisplayVolumeSlider": "Rodyti garso slankiklį grotuve",
+	"settingsGaplessPlayback": "Gapless atkūrimas (eksperimentinis)",
+	"settingsGaplessPlaybackInfo": "Groja gretimus FLAC takelius be pauzių tarp jų. Reikalinga vienoda takų dažnių atranka. Naudoja WebCodecs — nepalaikoma senesnėse naršyklėse.",
 	"settingsGrantDirectoryAccess": "Reikia suteikti programai prieigą prie katalogo per naršyklės leidimą, kad ji galėtų nuskaityti jo turinį",
 	"settingsImportTracks": "Importuoti kūrinius",
 	"settingsInstallAppDesktop": "kompiuterį",

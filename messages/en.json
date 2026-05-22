@@ -151,6 +151,8 @@
 	"settingsDirRemove": "Remove",
 	"settingsDirRescan": "Rescan",
 	"settingsDisplayVolumeSlider": "Display volume slider inside player",
+	"settingsGaplessPlayback": "Gapless playback (experimental)",
+	"settingsGaplessPlaybackInfo": "Plays consecutive FLAC tracks with no gap between them. Requires tracks at the same sample rate. Uses WebCodecs — not supported on older browsers.",
 	"settingsGrantDirectoryAccess": "You need to allow the app access to the directory, via browser permission so it can scan its contents",
 	"settingsImportTracks": "Import tracks",
 	"settingsInstallAppDesktop": "desktop",
