@@ -1,14 +1,17 @@
 import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
+import { canTrackUseGapless, isGaplessSupported } from '$lib/helpers/gapless/capability.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { formatArtists, truncate } from '$lib/helpers/utils/text.ts'
 import { throttle } from '$lib/helpers/utils/throttle.ts'
+import { getLibraryValue } from '$lib/library/get/value.ts'
 import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
 import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { AudioLoader } from './audio-loader.svelte.ts'
 import { EqualizerStore } from './equalizer.svelte.ts'
+import { GaplessLoader } from './gapless-loader.svelte.ts'
 import { type PlayTrackOptions, QueueStore } from './queue.svelte.ts'
 
 export type { PlayTrackOptions }
@@ -27,6 +30,14 @@ export class PlayerStore {
 	})
 	readonly #queue = new QueueStore()
 	readonly equalizer = new EqualizerStore(this.#audio)
+
+	#gaplessLoader = new GaplessLoader(this.equalizer)
+	#gaplessPrebufLoader = new GaplessLoader(this.equalizer)
+	#usingGapless: boolean = $state(false)
+	#gaplessTrackEndTime = 0
+	#preBufferingNext = false
+	#prebufferedTrackId: number | null = null
+	#rafId = 0
 
 	repeat: PlayerRepeat = $state('none')
 	playing: boolean = $state(false)
@@ -52,7 +63,7 @@ export class PlayerStore {
 		return this.#queue.isQueueEmpty
 	}
 
-	loading: boolean = $derived(this.#audioLoader.loading)
+	loading: boolean = $derived(this.#audioLoader.loading || this.#gaplessLoader.loading)
 
 	currentTime: number = $state(0)
 	duration: number = $state(0)
@@ -90,6 +101,12 @@ export class PlayerStore {
 		const scheduleAudioReset = debounce(() => {
 			if (!this.activeTrack) {
 				this.#audioLoader.reset()
+				this.#gaplessLoader.abort()
+				this.#gaplessPrebufLoader.abort()
+				this.#stopCurrentTimeLoop()
+				this.#usingGapless = false
+				this.#preBufferingNext = false
+				this.#prebufferedTrackId = null
 				this.currentTime = 0
 				this.duration = 0
 				this.playing = false
@@ -121,25 +138,80 @@ export class PlayerStore {
 			this.currentTime = 0
 			this.duration = 0
 
-			void this.#audioLoader.load(track.directory, track.file).then((result) => {
-				if (result.status === 'failed') {
-					const name = truncate(track.name, 30)
-					const errorMap = {
-						'not-found': m.playerAudioErrorNotFound,
-						'permission-denied': m.playerAudioErrorPermissionDenied,
-						error: m.playerAudioErrorLoadError,
-					}
+			// console.log(
+			// 	'Loading track',
+			// 	track.name,
+			// 	'with gapless support:',
+			// 	canTrackUseGapless(track),
+			// )
+			const useGapless =
+				this.#main.gaplessPlaybackEnabled &&
+				isGaplessSupported() &&
+				canTrackUseGapless(track)
 
-					snackbar({
-						message: errorMap[result.reason]({ name }),
-						id: 'failed-to-load-audio',
-						duration: 10_000,
-					})
+			this.#usingGapless = useGapless
 
-					prevTrackId = null
-					this.#queue.setTrack(-1)
+			if (useGapless) {
+				// If this track was already pre-buffered, swap loaders instead of reloading.
+				if (track.id === this.#prebufferedTrackId) {
+					;[this.#gaplessLoader, this.#gaplessPrebufLoader] = [
+						this.#gaplessPrebufLoader,
+						this.#gaplessLoader,
+					]
+					this.#gaplessPrebufLoader.abort()
+					this.#prebufferedTrackId = null
+					this.#preBufferingNext = false
+					this.duration = track.format?.duration ?? 0
+					this.#startCurrentTimeLoop()
+					return
 				}
-			})
+
+				this.#audio.src = ''
+				this.#audioLoader.reset()
+				this.#gaplessPrebufLoader.abort()
+				this.#prebufferedTrackId = null
+				this.#preBufferingNext = false
+				this.duration = track.format?.duration ?? 0
+				this.#startCurrentTimeLoop()
+
+				void this.#gaplessLoader
+					.load(track.directory, track.file, track)
+					.then((endTime) => {
+						this.#gaplessTrackEndTime = endTime
+					})
+					.catch(() => {
+						// Fall back to AudioLoader on any error
+						this.#usingGapless = false
+						this.#stopCurrentTimeLoop()
+						void this.#audioLoader.load(track.directory, track.file)
+					})
+			} else {
+				this.#gaplessLoader.abort()
+				this.#gaplessPrebufLoader.abort()
+				this.#stopCurrentTimeLoop()
+				this.#prebufferedTrackId = null
+				this.#preBufferingNext = false
+
+				void this.#audioLoader.load(track.directory, track.file).then((result) => {
+					if (result.status === 'failed') {
+						const name = truncate(track.name, 30)
+						const errorMap = {
+							'not-found': m.playerAudioErrorNotFound,
+							'permission-denied': m.playerAudioErrorPermissionDenied,
+							error: m.playerAudioErrorLoadError,
+						}
+
+						snackbar({
+							message: errorMap[result.reason]({ name }),
+							id: 'failed-to-load-audio',
+							duration: 10_000,
+						})
+
+						prevTrackId = null
+						this.#queue.setTrack(-1)
+					}
+				})
+			}
 		}
 
 		$effect(() => {
@@ -150,9 +222,9 @@ export class PlayerStore {
 			})
 		})
 
-		// Guarded by loading: prevents play() on an empty/stale src during file fetch.
+		// Guarded by loading and gapless mode: prevents play() on an empty/stale src.
 		$effect(() => {
-			if (this.#audioLoader.loading) {
+			if (this.#audioLoader.loading || this.#usingGapless) {
 				return
 			}
 
@@ -169,6 +241,21 @@ export class PlayerStore {
 			}
 		})
 
+		// Gapless pause/resume via AudioContext suspend/resume.
+		$effect(() => {
+			if (!this.#usingGapless) {
+				return
+			}
+
+			if (this.playing) {
+				void this.equalizer.resumeContext()
+				this.#startCurrentTimeLoop()
+			} else {
+				void this.equalizer.audioContext.suspend()
+				this.#stopCurrentTimeLoop()
+			}
+		})
+
 		const syncPlayingFromAudio = () => {
 			const audioPlaying = !audio.paused
 			if (audioPlaying !== this.playing) {
@@ -180,6 +267,7 @@ export class PlayerStore {
 		audio.onpause = syncPlayingFromAudio
 
 		audio.onended = () => {
+			console.log('Track ended')
 			if (this.repeat === 'one') {
 				this.seek(0)
 				this.togglePlay(true)
@@ -203,6 +291,7 @@ export class PlayerStore {
 		}
 
 		audio.ondurationchange = () => {
+			console.log('Duration changed:', audio.duration)
 			this.duration = audio.duration
 		}
 
@@ -272,17 +361,25 @@ export class PlayerStore {
 		setAction('previoustrack', this.playPrev)
 		setAction('nexttrack', this.playNext)
 		setAction('seekbackward', () => {
-			audio.currentTime = Math.max(audio.currentTime - 10, 0)
+			if (this.#usingGapless) {
+				this.seek(Math.max(this.currentTime - 10, 0))
+			} else {
+				audio.currentTime = Math.max(audio.currentTime - 10, 0)
+			}
 		})
 		setAction('seekforward', () => {
-			audio.currentTime = Math.min(audio.currentTime + 10, audio.duration)
+			if (this.#usingGapless) {
+				this.seek(Math.min(this.currentTime + 10, this.duration))
+			} else {
+				audio.currentTime = Math.min(audio.currentTime + 10, audio.duration)
+			}
 		})
 		// seekto is handled by AudioElement default behavior
 	}
 
 	#savePlayHistory = (trackId: number): void => {
-		const playedTime = this.#audio.currentTime
-		const totalDuration = this.#audio.duration
+		const playedTime = this.#usingGapless ? this.currentTime : this.#audio.currentTime
+		const totalDuration = this.#usingGapless ? this.duration : this.#audio.duration
 
 		const percentageThreshold = 0.5
 		const timeThreshold = 30
@@ -333,7 +430,14 @@ export class PlayerStore {
 
 	seek = (time: number): void => {
 		this.currentTime = time
-		this.#audio.currentTime = time
+		if (this.#usingGapless) {
+			this.#preBufferingNext = false
+			void this.#gaplessLoader.seek(time).then((endTime) => {
+				this.#gaplessTrackEndTime = endTime
+			})
+		} else {
+			this.#audio.currentTime = time
+		}
 	}
 
 	toggleRepeat = (): void => {
@@ -351,6 +455,161 @@ export class PlayerStore {
 	}
 
 	toggleShuffle = this.#queue.toggleShuffle
+
+	#startCurrentTimeLoop(): void {
+		this.#stopCurrentTimeLoop()
+		const tick = () => {
+			if (!this.#usingGapless) {
+				return
+			}
+			this.currentTime = this.#gaplessLoader.currentTime
+			if (this.repeat === 'one' && this.duration > 0 && this.currentTime >= this.duration) {
+				void this.seek(0)
+			} else {
+				void this.#checkPreBuffer()
+			}
+			this.#rafId = requestAnimationFrame(tick)
+		}
+		this.#rafId = requestAnimationFrame(tick)
+	}
+
+	#stopCurrentTimeLoop(): void {
+		if (this.#rafId !== 0) {
+			cancelAnimationFrame(this.#rafId)
+			this.#rafId = 0
+		}
+	}
+
+	readonly #PRE_BUFFER_SECONDS = 10
+
+	async #checkPreBuffer(): Promise<void> {
+		if (!this.#usingGapless) {
+			return
+		}
+		if (!this.#main.gaplessPlaybackEnabled) {
+			return
+		}
+		if (this.#preBufferingNext) {
+			return
+		}
+		if (this.duration <= 0 || this.duration - this.currentTime >= this.#PRE_BUFFER_SECONDS) {
+			return
+		}
+
+		console.log('Checking if we need to pre-buffer the next track', {
+			currentTime: this.currentTime,
+			duration: this.duration,
+			threshold: this.duration - this.currentTime,
+			condition: this.duration - this.currentTime >= this.#PRE_BUFFER_SECONDS,
+		})
+
+		const expectedCurrentTrackId = this.#queue.activeTrackId
+
+		// End of queue, no repeat: schedule stop at track end.
+		if (
+			this.repeat === 'none' &&
+			this.#queue.activeTrackIndex === this.#queue.itemsIds.length - 1
+		) {
+			this.#preBufferingNext = true
+			const delay = Math.max(
+				0,
+				(this.#gaplessTrackEndTime - this.equalizer.audioContext.currentTime) * 1000,
+			)
+			setTimeout(() => {
+				if (this.#queue.activeTrackId !== expectedCurrentTrackId) {
+					return
+				}
+				const trackId = this.#queue.activeTrackId
+				if (trackId !== null) {
+					this.#savePlayHistory(trackId)
+				}
+				this.togglePlay(false)
+				this.#preBufferingNext = false
+			}, delay)
+			return
+		}
+
+		const nextIndex = this.#queue.getNextIndex()
+		const nextId = this.#queue.itemsIds[nextIndex]
+		if (nextId == null) {
+			return
+		}
+
+		this.#preBufferingNext = true
+
+		const nextTrack = await Promise.resolve(getLibraryValue('tracks', nextId, true))
+
+		if (!nextTrack) {
+			this.#preBufferingNext = false
+			return
+		}
+		if (!this.#usingGapless) {
+			this.#preBufferingNext = false
+			return
+		}
+		if (this.#queue.activeTrackId !== expectedCurrentTrackId) {
+			this.#preBufferingNext = false
+			return
+		}
+
+		if (canTrackUseGapless(nextTrack)) {
+			this.#prebufferedTrackId = nextId
+			const savedEndTime = this.#gaplessTrackEndTime
+
+			void this.#runPrebufLoad(nextTrack, savedEndTime)
+
+			const delay = Math.max(
+				0,
+				(savedEndTime - this.equalizer.audioContext.currentTime) * 1000,
+			)
+			console.log('SSSS', {
+				savedEndTime,
+				currentTime: this.equalizer.audioContext.currentTime,
+				delay,
+			})
+			setTimeout(() => {
+				console.log('Pre-buffering done, switching to next track', {
+					expectedCurrentTrackId,
+					actualCurrentTrackId: this.#queue.activeTrackId,
+				})
+				if (this.#queue.activeTrackId !== expectedCurrentTrackId) {
+					return
+				}
+				// trackChanged will detect #prebufferedTrackId and swap loaders
+				this.#queue.setTrack(nextIndex)
+			}, delay)
+		} else {
+			// Next track can't use gapless — fall back to AudioLoader after current finishes.
+			const delay = Math.max(
+				0,
+				(this.#gaplessTrackEndTime - this.equalizer.audioContext.currentTime) * 1000,
+			)
+			setTimeout(() => {
+				this.#usingGapless = false
+				this.#preBufferingNext = false
+				this.#stopCurrentTimeLoop()
+				this.#queue.setTrack(nextIndex)
+				// The track loading $effect re-runs and picks the AudioLoader path.
+			}, delay)
+		}
+	}
+
+	async #runPrebufLoad(track: TrackData, scheduleAt: number): Promise<void> {
+		try {
+			const endTime = await this.#gaplessPrebufLoader.load(
+				track.directory,
+				track.file,
+				track,
+				scheduleAt,
+			)
+			console.log('Pre-buffering finished', { endTime })
+			this.#gaplessTrackEndTime = endTime
+		} catch (error) {
+			console.warn('Pre-buffering failed, falling back to normal loading', error)
+			this.#prebufferedTrackId = null
+			this.#preBufferingNext = false
+		}
+	}
 
 	addToQueue = this.#queue.addToQueue
 

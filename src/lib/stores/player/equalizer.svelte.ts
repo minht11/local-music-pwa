@@ -102,6 +102,18 @@ export class EqualizerStore {
 		return audioContext
 	}
 
+	get audioContext(): AudioContext {
+		return this.#ensureAudioGraph()
+	}
+
+	connectSource(node: AudioNode): void {
+		this.#ensureAudioGraph()
+		const firstFilter = this.#filters[0]
+		if (firstFilter) {
+			node.connect(firstFilter)
+		}
+	}
+
 	resumeContext = (): Promise<void> => {
 		const audioContext = this.#ensureAudioGraph()
 		if (audioContext.state === 'suspended') {
