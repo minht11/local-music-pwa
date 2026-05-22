@@ -1,3 +1,4 @@
+import type { IFormat } from 'music-metadata'
 import type { FileEntity } from '$lib/helpers/file-system.ts'
 
 export type LibraryStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
@@ -21,6 +22,13 @@ export const FAVORITE_PLAYLIST_UUID = 'favorites'
 export const UNKNOWN_ITEM = '~\0unknown'
 
 export type UnknownItem = typeof UNKNOWN_ITEM
+
+/**
+ * Version number for the metadata schema stored in the database.
+ * Increment this whenever need metadata fields are added so when rescanning tracks
+ * existing tracks can be updated.
+ */
+export const CURRENT_METADATA_VERSION = 1
 
 export type StringOrUnknownItem = (string & {}) | UnknownItem
 
@@ -47,6 +55,9 @@ export interface ParsedTrackData {
 		full: Blob
 	}
 	primaryColor?: number
+	/** See {@link CURRENT_METADATA_VERSION}. Absent on tracks scanned before this field existed (treat as 0). */
+	metadataVersion?: number
+	format?: IFormat
 }
 
 export interface UnknownTrack extends ParsedTrackData {
@@ -55,6 +66,8 @@ export interface UnknownTrack extends ParsedTrackData {
 	scannedAt: number
 	fileName: string
 	directory: number
+	metadataVersion?: number
+	format?: IFormat
 }
 
 export interface Track extends BaseMusicItem, UnknownTrack {}
