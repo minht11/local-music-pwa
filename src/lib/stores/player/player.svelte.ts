@@ -375,14 +375,14 @@ export class PlayerStore {
 		setAction('nexttrack', this.playNext)
 		setAction('seekbackward', () => {
 			if (this.#usingGapless) {
-				this.seek(Math.max(this.currentTime - 10, 0))
+				void this.seek(Math.max(this.currentTime - 10, 0))
 			} else {
 				audio.currentTime = Math.max(audio.currentTime - 10, 0)
 			}
 		})
 		setAction('seekforward', () => {
 			if (this.#usingGapless) {
-				this.seek(Math.min(this.currentTime + 10, this.duration))
+				void this.seek(Math.min(this.currentTime + 10, this.duration))
 			} else {
 				audio.currentTime = Math.min(audio.currentTime + 10, audio.duration)
 			}
@@ -432,7 +432,7 @@ export class PlayerStore {
 
 		if (isSameTrack) {
 			// Reset time to 0
-			this.seek(0)
+			void this.seek(0)
 		} else {
 			// Update ui time instantly, but keep audio.currentTime
 			// until play history is saved.
@@ -442,20 +442,20 @@ export class PlayerStore {
 		this.togglePlay(true)
 	}
 
-	seek = (time: number): void => {
+	async seek(time: number): Promise<void> {
 		this.currentTime = time
 		if (this.#usingGapless) {
 			this.#preBufferingNext = false
 			this.#cancelPrebufTimeout()
 			this.#requestId += 1
 			const gen = this.#requestId
-			void this.#gaplessLoader.seek(time).then((endTime) => {
-				if (gen !== this.#requestId) {
-					return
-				}
-				this.#gaplessTrackEndTime = endTime
-				this.#schedulePrebufCheck()
-			})
+
+			const endTime = await this.#gaplessLoader.seek(time)
+			if (gen !== this.#requestId) {
+				return
+			}
+			this.#gaplessTrackEndTime = endTime
+			this.#schedulePrebufCheck()
 		} else {
 			this.#audio.currentTime = time
 		}
