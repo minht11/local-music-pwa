@@ -156,23 +156,23 @@ These are globally available without imports (configured in `vite.config.ts`). *
 
 ```typescript
 // Internationalization (from @inlang/paraglide-js)
-m.tracks()          // m.albums(), m.settings(), etc.
+m.tracks() // m.albums(), m.settings(), etc.
 
 // Stores (context-based, call inside Svelte component tree)
-usePlayer()         // Audio player state (PlayerStore)
-useMainStore()      // App settings, theme (MainStore)
-useDialogsStore()   // Dialog state (DialogsStore)
-useMenu()           // Context menus (MenuAPI)
+usePlayer() // Audio player state (PlayerStore)
+useMainStore() // App settings, theme (MainStore)
+useDialogsStore() // Dialog state (DialogsStore)
+useMenu() // Context menus (MenuAPI)
 
 // Notifications
-snackbar('Message text')              // Show toast
+snackbar('Message text') // Show toast
 snackbar({ id: 'x', message: '...' }) // With options
-snackbar.unexpectedError(error)        // Error toast
-snackbar.dismiss('id')                 // Dismiss
+snackbar.unexpectedError(error) // Error toast
+snackbar.dismiss('id') // Dismiss
 
 // Utilities
-invariant(condition, 'message')  // Runtime assertions (tiny-invariant)
-untrack(() => value)             // Svelte untrack
+invariant(condition, 'message') // Runtime assertions (tiny-invariant)
+untrack(() => value) // Svelte untrack
 ```
 
 Note: `Snippet<T>` and `ClassValue` are **Svelte/TypeScript built-in types**, not auto-imports.
@@ -348,7 +348,7 @@ interface Track {
 	discNo: number
 	discOf: number
 	fileName: string
-	directory: number   // FK to Directory.id; -1 = legacy no-native-directory
+	directory: number // FK to Directory.id; -1 = legacy no-native-directory
 	scannedAt: number
 	file: FileEntity
 	image?: { optimized: boolean; small: Blob; full: Blob }
@@ -570,6 +570,7 @@ pnpm run test         # Run tests
 - Use `any` types except for complex generics
 - Skip error handling
 - Hardcode strings (use i18n messages)
+- Remove console.info, console.warn, console.error. console.log is handled by biome lint rule.
 
 ### File Naming Conventions
 

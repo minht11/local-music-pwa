@@ -16,7 +16,7 @@ export class GaplessLoader {
 
 	#aborted = false
 	#input: Input | null = null
-	#scheduledSources: ScheduledSource[] = []
+	#scheduledSources = new Set<ScheduledSource>()
 
 	#scheduleBase = 0
 	#scheduleSeekOffset = 0
@@ -57,9 +57,11 @@ export class GaplessLoader {
 		this.#scheduleBase = base
 		this.#scheduleSeekOffset = 0
 
-		const end = await this.#loadBufferAndPlayItAt(fileResult.file, 0, base)
-		this.loading = false
-		return end
+		try {
+			return await this.#streamBuffer(fileResult.file, 0, base)
+		} finally {
+			this.loading = false
+		}
 	}
 
 	abort(): void {
@@ -70,13 +72,14 @@ export class GaplessLoader {
 		const ctx = this.#equalizer.audioContext
 		const now = ctx.currentTime
 		for (const { source, startAt } of this.#scheduledSources) {
+			source.onended = null
 			if (startAt > now) {
 				source.stop()
 			} else {
 				source.stop(now)
 			}
 		}
-		this.#scheduledSources = []
+		this.#scheduledSources.clear()
 		this.loading = false
 	}
 
@@ -91,15 +94,14 @@ export class GaplessLoader {
 		this.#scheduleBase = base
 		this.#scheduleSeekOffset = seekTo
 
-		const end = await this.#loadBufferAndPlayItAt(this.#lastFile, seekTo, base)
-		return end
+		try {
+			return await this.#streamBuffer(this.#lastFile, seekTo, base)
+		} finally {
+			this.loading = false
+		}
 	}
 
-	async #loadBufferAndPlayItAt(
-		audioBlob: Blob,
-		seekTo: number,
-		scheduleAt?: number,
-	): Promise<number> {
+	async #streamBuffer(audioBlob: Blob, seekTo: number, scheduleAt?: number): Promise<number> {
 		this.#input = new Input({ formats: [FLAC], source: new BlobSource(audioBlob) })
 
 		const audioTrack = await this.#input.getPrimaryAudioTrack()
@@ -125,17 +127,19 @@ export class GaplessLoader {
 
 				const startAt = base + (timestamp - seekTo)
 
+				const entry: ScheduledSource = { source, startAt }
+				this.#scheduledSources.add(entry)
+				source.onended = () => {
+					this.#scheduledSources.delete(entry)
+				}
 				source.start(startAt)
-				this.#scheduledSources.push({ source, startAt })
 
 				lastScheduledEnd = startAt + buffer.duration
 			}
 		} catch (e) {
-			if (e instanceof InputDisposedError) {
-				console.info('GaplessLoader: Buffer loading/playback was aborted', e)
+			if (!(e instanceof InputDisposedError)) {
+				throw e
 			}
-
-			throw e
 		}
 		return lastScheduledEnd
 	}

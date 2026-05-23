@@ -47,10 +47,12 @@ vi.mock('$lib/stores/main/use-store.ts', () => ({
 
 vi.mock('$lib/stores/player/equalizer.svelte.ts', () => ({
 	EqualizerStore: class {
+		audioContext = { currentTime: 0 } as unknown as AudioContext
 		init() {}
 		resumeContext() {
 			return Promise.resolve()
 		}
+		connectSource() {}
 		setBand() {}
 		applyPreset() {}
 		reset() {}
