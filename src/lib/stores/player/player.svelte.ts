@@ -40,6 +40,7 @@ export class PlayerStore {
 	#prebufferedTrackId: number | null = null
 	#rafId = 0
 	#requestId = 0
+	#prebufTimeoutId: number | null = null
 
 	repeat: PlayerRepeat = $state('none')
 	playing: boolean = $state(false)
@@ -428,6 +429,7 @@ export class PlayerStore {
 		this.currentTime = time
 		if (this.#usingGapless) {
 			this.#preBufferingNext = false
+			this.#cancelPrebufTimeout()
 			this.#requestId += 1
 			const gen = this.#requestId
 			void this.#gaplessLoader.seek(time).then((endTime) => {
@@ -464,6 +466,14 @@ export class PlayerStore {
 		this.#usingGapless = false
 		this.#preBufferingNext = false
 		this.#prebufferedTrackId = null
+		this.#cancelPrebufTimeout()
+	}
+
+	#cancelPrebufTimeout(): void {
+		if (this.#prebufTimeoutId !== null) {
+			window.clearTimeout(this.#prebufTimeoutId)
+			this.#prebufTimeoutId = null
+		}
 	}
 
 	#delayFromAudioContext(targetTime: number): number {
@@ -525,7 +535,8 @@ export class PlayerStore {
 			this.#queue.activeTrackIndex === this.#queue.itemsIds.length - 1
 		) {
 			this.#preBufferingNext = true
-			setTimeout(() => {
+			this.#prebufTimeoutId = window.setTimeout(() => {
+				this.#prebufTimeoutId = null
 				if (this.#queue.activeTrackId !== expectedCurrentTrackId) {
 					return
 				}
@@ -572,7 +583,8 @@ export class PlayerStore {
 
 			void this.#runPrebufLoad(nextTrack, savedEndTime)
 
-			setTimeout(() => {
+			this.#prebufTimeoutId = window.setTimeout(() => {
+				this.#prebufTimeoutId = null
 				if (this.#queue.activeTrackId !== expectedCurrentTrackId) {
 					return
 				}
@@ -581,7 +593,8 @@ export class PlayerStore {
 			}, this.#delayFromAudioContext(savedEndTime))
 		} else {
 			// Next track can't use gapless — fall back to AudioLoader after current finishes.
-			setTimeout(() => {
+			this.#prebufTimeoutId = window.setTimeout(() => {
+				this.#prebufTimeoutId = null
 				if (this.#queue.activeTrackId !== expectedCurrentTrackId) {
 					return
 				}
