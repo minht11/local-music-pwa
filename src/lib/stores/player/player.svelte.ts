@@ -34,6 +34,12 @@ export class PlayerStore {
 
 	#gaplessLoader = new GaplessLoader(this.equalizer)
 	#gaplessPrebufLoader = new GaplessLoader(this.equalizer)
+
+	#handleGaplessEnded = (): void => {
+		if (this.repeat === 'one') {
+			this.seek(0)
+		}
+	}
 	#usingGapless: boolean = $state(false)
 	#gaplessTrackEndTime = 0
 	#preBufferingNext = false
@@ -71,6 +77,14 @@ export class PlayerStore {
 	currentTime: number = $state(0)
 	duration: number = $state(0)
 
+	get currentTimePrecise(): number {
+		if (this.#usingGapless) {
+			return this.#gaplessLoader.currentTime
+		}
+
+		return this.#audio.currentTime
+	}
+
 	get volume(): number {
 		return this.#main.volumeSliderEnabled ? this.#volume : 100
 	}
@@ -94,6 +108,9 @@ export class PlayerStore {
 		persist('player', this.#queue, ['shuffle'])
 
 		this.equalizer.init()
+
+		this.#gaplessLoader.onEnded = () => this.#handleGaplessEnded()
+		this.#gaplessPrebufLoader.onEnded = () => this.#handleGaplessEnded()
 
 		const audio = this.#audio
 
@@ -158,6 +175,7 @@ export class PlayerStore {
 					this.#preBufferingNext = false
 					this.duration = track.format?.duration ?? 0
 					this.#startCurrentTimeLoop()
+					this.#schedulePrebufCheck()
 					return
 				}
 
@@ -176,6 +194,7 @@ export class PlayerStore {
 							return
 						}
 						this.#gaplessTrackEndTime = endTime
+						this.#schedulePrebufCheck()
 					})
 					.catch(() => {
 						if (gen !== this.#requestId) {
@@ -263,7 +282,6 @@ export class PlayerStore {
 		audio.onpause = syncPlayingFromAudio
 
 		audio.onended = () => {
-			console.log('Track ended')
 			if (this.repeat === 'one') {
 				this.seek(0)
 				this.togglePlay(true)
@@ -287,7 +305,6 @@ export class PlayerStore {
 		}
 
 		audio.ondurationchange = () => {
-			console.log('Duration changed:', audio.duration)
 			this.duration = audio.duration
 		}
 
@@ -437,6 +454,7 @@ export class PlayerStore {
 					return
 				}
 				this.#gaplessTrackEndTime = endTime
+				this.#schedulePrebufCheck()
 			})
 		} else {
 			this.#audio.currentTime = time
@@ -480,6 +498,14 @@ export class PlayerStore {
 		return Math.max(0, (targetTime - this.equalizer.audioContext.currentTime) * 1000)
 	}
 
+	#schedulePrebufCheck(): void {
+		this.#cancelPrebufTimeout()
+		this.#prebufTimeoutId = window.setTimeout(
+			() => void this.#checkPreBuffer(),
+			this.#delayFromAudioContext(this.#gaplessTrackEndTime - this.#PRE_BUFFER_SECONDS),
+		)
+	}
+
 	#startCurrentTimeLoop(): void {
 		this.#stopCurrentTimeLoop()
 		const tick = () => {
@@ -487,11 +513,6 @@ export class PlayerStore {
 				return
 			}
 			this.currentTime = this.#gaplessLoader.currentTime
-			if (this.repeat === 'one' && this.duration > 0 && this.currentTime >= this.duration) {
-				void this.seek(0)
-			} else {
-				void this.#checkPreBuffer()
-			}
 			this.#rafId = requestAnimationFrame(tick)
 		}
 		this.#rafId = requestAnimationFrame(tick)
@@ -516,16 +537,10 @@ export class PlayerStore {
 		if (this.#preBufferingNext) {
 			return
 		}
-		if (this.duration <= 0 || this.duration - this.currentTime >= this.#PRE_BUFFER_SECONDS) {
+		const timeUntilEnd = this.#gaplessTrackEndTime - this.equalizer.audioContext.currentTime
+		if (this.duration <= 0 || timeUntilEnd > this.#PRE_BUFFER_SECONDS) {
 			return
 		}
-
-		console.log('Checking if we need to pre-buffer the next track', {
-			currentTime: this.currentTime,
-			duration: this.duration,
-			threshold: this.duration - this.currentTime,
-			condition: this.duration - this.currentTime >= this.#PRE_BUFFER_SECONDS,
-		})
 
 		const expectedCurrentTrackId = this.#queue.activeTrackId
 
@@ -609,14 +624,12 @@ export class PlayerStore {
 
 	async #runPrebufLoad(track: TrackData, scheduleAt: number): Promise<void> {
 		try {
-			const endTime = await this.#gaplessPrebufLoader.load(
+			this.#gaplessTrackEndTime = await this.#gaplessPrebufLoader.load(
 				track.directory,
 				track.file,
 				track,
 				scheduleAt,
 			)
-			console.log('Pre-buffering finished', { endTime })
-			this.#gaplessTrackEndTime = endTime
 		} catch (error) {
 			console.warn('Pre-buffering failed, falling back to normal loading', error)
 			this.#prebufferedTrackId = null

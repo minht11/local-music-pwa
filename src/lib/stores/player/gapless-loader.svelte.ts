@@ -24,6 +24,8 @@ export class GaplessLoader {
 	// Saved so seek() can re-open the same file
 	#lastFile: File | null = null
 
+	onEnded: (() => void) | null = null
+
 	constructor(equalizer: EqualizerStore) {
 		this.#equalizer = equalizer
 	}
@@ -112,6 +114,7 @@ export class GaplessLoader {
 		const base = scheduleAt ?? ctx.currentTime
 
 		let lastScheduledEnd = base
+		let lastEntry: ScheduledSource | null = null
 
 		const sink = new AudioBufferSink(audioTrack)
 
@@ -134,6 +137,7 @@ export class GaplessLoader {
 				}
 				source.start(startAt)
 
+				lastEntry = entry
 				lastScheduledEnd = startAt + buffer.duration
 			}
 		} catch (e) {
@@ -141,6 +145,14 @@ export class GaplessLoader {
 				throw e
 			}
 		}
+
+		if (lastEntry && !this.#aborted) {
+			lastEntry.source.onended = () => {
+				this.#scheduledSources.delete(lastEntry)
+				this.onEnded?.()
+			}
+		}
+
 		return lastScheduledEnd
 	}
 }
