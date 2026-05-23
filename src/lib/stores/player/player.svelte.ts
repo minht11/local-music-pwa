@@ -26,6 +26,7 @@ export class PlayerStore {
 
 	readonly #audio = new Audio()
 	readonly #audioLoader = new AudioLoader((src) => {
+		console.log('AudioLoader: Setting audio src', { src })
 		this.#audio.src = src ?? ''
 	})
 	readonly #queue = new QueueStore()

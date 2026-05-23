@@ -100,31 +100,42 @@ export class GaplessLoader {
 		seekTo: number,
 		scheduleAt?: number,
 	): Promise<number> {
-		this.#input?.dispose()
 		this.#input = new Input({ formats: [FLAC], source: new BlobSource(audioBlob) })
+
 		const audioTrack = await this.#input.getPrimaryAudioTrack()
 		if (!audioTrack) {
 			return scheduleAt ?? this.#equalizer.audioContext.currentTime
 		}
 		const ctx = this.#equalizer.audioContext
 		const base = scheduleAt ?? ctx.currentTime
+
 		let lastScheduledEnd = base
+
 		const sink = new AudioBufferSink(audioTrack)
+
 		try {
 			for await (const { buffer, timestamp } of sink.buffers(seekTo)) {
-				if (this.#aborted) break
+				if (this.#aborted) {
+					break
+				}
+
 				const source = ctx.createBufferSource()
 				source.buffer = buffer
 				this.#equalizer.connectSource(source)
+
 				const startAt = base + (timestamp - seekTo)
+
 				source.start(startAt)
 				this.#scheduledSources.push({ source, startAt })
+
 				lastScheduledEnd = startAt + buffer.duration
 			}
 		} catch (e) {
-			if (!(e instanceof InputDisposedError)) {
-				throw e
+			if (e instanceof InputDisposedError) {
+				console.info('GaplessLoader: Buffer loading/playback was aborted', e)
 			}
+
+			throw e
 		}
 		return lastScheduledEnd
 	}
