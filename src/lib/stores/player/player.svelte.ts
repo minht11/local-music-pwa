@@ -374,6 +374,7 @@ export class PlayerStore {
 				audio.currentTime = Math.min(audio.currentTime + 10, audio.duration)
 			}
 		})
+		// TODO. For gapless we will need to handle this manually
 		// seekto is handled by AudioElement default behavior
 	}
 

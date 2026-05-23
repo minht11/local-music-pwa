@@ -57,42 +57,9 @@ export class GaplessLoader {
 		this.#scheduleBase = base
 		this.#scheduleSeekOffset = 0
 
-		this.#input = new Input({ formats: [FLAC], source: new BlobSource(fileResult.file) })
-		const audioTrack = await this.#input.getPrimaryAudioTrack()
-
-		if (!audioTrack) {
-			this.loading = false
-			return base
-		}
-
-		const sink = new AudioBufferSink(audioTrack)
-
+		const end = await this.#loadBufferAndPlayItAt(fileResult.file, 0, base)
 		this.loading = false
-
-		let lastScheduledEnd = base
-
-		try {
-			for await (const { buffer, timestamp } of sink.buffers()) {
-				if (this.#aborted) {
-					break
-				}
-
-				const source = ctx.createBufferSource()
-				source.buffer = buffer
-				this.#equalizer.connectSource(source)
-				source.start(base + timestamp)
-				this.#scheduledSources.push({ source, startAt: base + timestamp })
-
-				lastScheduledEnd = base + timestamp + buffer.duration
-			}
-		} catch (e) {
-			if (!(e instanceof InputDisposedError)) {
-				throw e
-			}
-			// InputDisposedError means abort() was called — not an error
-		}
-
-		return lastScheduledEnd
+		return end
 	}
 
 	abort(): void {
@@ -118,44 +85,47 @@ export class GaplessLoader {
 		if (!this.#lastFile) {
 			return 0
 		}
-
 		this.#aborted = false
 		const ctx = this.#equalizer.audioContext
 		const base = ctx.currentTime
 		this.#scheduleBase = base
 		this.#scheduleSeekOffset = seekTo
 
-		this.#input = new Input({ formats: [FLAC], source: new BlobSource(this.#lastFile) })
+		const end = await this.#loadBufferAndPlayItAt(this.#lastFile, seekTo, base)
+		return end
+	}
+
+	async #loadBufferAndPlayItAt(
+		audioBlob: Blob,
+		seekTo: number,
+		scheduleAt?: number,
+	): Promise<number> {
+		this.#input?.dispose()
+		this.#input = new Input({ formats: [FLAC], source: new BlobSource(audioBlob) })
 		const audioTrack = await this.#input.getPrimaryAudioTrack()
 		if (!audioTrack) {
-			return base
+			return scheduleAt ?? this.#equalizer.audioContext.currentTime
 		}
-
+		const ctx = this.#equalizer.audioContext
+		const base = scheduleAt ?? ctx.currentTime
+		let lastScheduledEnd = base
 		const sink = new AudioBufferSink(audioTrack)
-		let lastScheduledEnd = base // ← track this
-
 		try {
 			for await (const { buffer, timestamp } of sink.buffers(seekTo)) {
-				if (this.#aborted) {
-					break
-				}
-
+				if (this.#aborted) break
 				const source = ctx.createBufferSource()
 				source.buffer = buffer
 				this.#equalizer.connectSource(source)
 				const startAt = base + (timestamp - seekTo)
 				source.start(startAt)
 				this.#scheduledSources.push({ source, startAt })
-				lastScheduledEnd = startAt + buffer.duration // ← update
+				lastScheduledEnd = startAt + buffer.duration
 			}
 		} catch (e) {
 			if (!(e instanceof InputDisposedError)) {
 				throw e
 			}
 		}
-
-		return lastScheduledEnd // ← return it
+		return lastScheduledEnd
 	}
-
-	// loadBufferAndPlayItAt(buffer: AudioBuffer, playAt: number): void {
 }
