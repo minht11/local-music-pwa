@@ -18,9 +18,10 @@ export class HTMLAudioEngine implements AudioEngine {
 	onEnded: (() => void) | null = null
 	onError: (() => void) | null = null
 
-	constructor(graph: AudioGraph, trackId: number) {
+	constructor(graph: AudioGraph, trackId: number, duration = 0) {
 		this.#graph = graph
 		this.trackId = trackId
+		this.duration = duration
 		this.#setupElement()
 	}
 

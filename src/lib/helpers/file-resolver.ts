@@ -17,10 +17,12 @@ const requestPermission = async (
 	console.log(`[file-resolver] Permission for ${handle.name}: ${mode}`, askPermission)
 	if (mode === 'prompt' && askPermission) {
 		try {
+			console.log('Prompting for permission...')
 			mode = await handle.requestPermission({ mode: 'read' })
-		} catch {
+		} catch (error) {
 			// requestPermission requires a user activation.
 			// Swallow and treat as denial.
+			console.error('[file-resolver] requestPermission error:', error)
 		}
 	}
 

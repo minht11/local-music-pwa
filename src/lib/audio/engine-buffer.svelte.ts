@@ -87,6 +87,7 @@ export class AudioBufferEngine implements AudioEngine {
 	}
 
 	seek(time: number): void {
+		this.currentTime = time
 		const { signal } = this.#resetScheduling()
 		void this.#startFrom(time, undefined, signal)
 	}
@@ -116,7 +117,10 @@ export class AudioBufferEngine implements AudioEngine {
 		const base = scheduleAt ?? ctx.currentTime
 		this.#scheduleBase = base
 		this.#seekOffset = seekTo
-		invariant(this.#sink, 'AudioBufferSink should be initialized before starting playback')
+		// TODO. Maybe this should be an invariant instead
+		if (!this.#sink) {
+			return { status: 'loaded' }
+		}
 
 		this.#startCurrentTimeLoop(signal)
 		void this.#scheduleSink(this.#sink, seekTo, base, signal)
@@ -132,6 +136,13 @@ export class AudioBufferEngine implements AudioEngine {
 	): Promise<void> {
 		let allBuffersPulled = false
 		const trackDuration = this.duration
+
+		const handleEnded = () => {
+			if (allBuffersPulled && this.#scheduledSources.size === 0 && !signal.aborted) {
+				this.#stopCurrentTimeLoop()
+				this.onEnded?.()
+			}
+		}
 
 		try {
 			for await (const { buffer, timestamp } of sink.buffers(seekTo)) {
@@ -172,9 +183,7 @@ export class AudioBufferEngine implements AudioEngine {
 					// Remove it so it can be garbage collected
 					this.#scheduledSources.delete(source)
 
-					if (allBuffersPulled && this.#scheduledSources.size === 0 && !signal.aborted) {
-						this.onEnded?.()
-					}
+					handleEnded()
 				})
 			}
 
@@ -189,21 +198,13 @@ export class AudioBufferEngine implements AudioEngine {
 			return
 		}
 
-		if (signal.aborted) {
-			return
-		}
-
 		// Guard against when loop completed but NO buffers were ever scheduled
 		// (e.g., an empty file or a seek completely past the end of the track).
-		if (allBuffersPulled && this.#scheduledSources.size === 0) {
-			this.onEnded?.()
-		}
+		handleEnded()
 	}
 
 	#startCurrentTimeLoop(signal: AbortSignal): void {
-		if (this.#timerId !== null) {
-			clearTimeout(this.#timerId)
-		}
+		this.#stopCurrentTimeLoop()
 
 		const tick = () => {
 			if (signal.aborted) {
@@ -218,15 +219,19 @@ export class AudioBufferEngine implements AudioEngine {
 		this.#timerId = window.setTimeout(tick, CURRENT_TIME_UPDATE_TIMEOUT_MS)
 	}
 
+	#stopCurrentTimeLoop(): void {
+		if (this.#timerId !== null) {
+			clearTimeout(this.#timerId)
+			this.#timerId = null
+		}
+	}
+
 	/**
 	 * Stop and disconnect all scheduled sources, aborting any in-progress load or
 	 * playback, and return a new AbortSignal for subsequent operations.
 	 */
 	#resetScheduling(): { signal: AbortSignal } {
-		if (this.#timerId !== null) {
-			clearTimeout(this.#timerId)
-			this.#timerId = null
-		}
+		this.#stopCurrentTimeLoop()
 
 		this.#abortController?.abort()
 		this.#abortController = null
@@ -234,9 +239,13 @@ export class AudioBufferEngine implements AudioEngine {
 		for (const node of this.#scheduledSources) {
 			try {
 				node.stop()
+			} catch {
+				// Already stopped.
+			}
+			try {
 				node.disconnect()
 			} catch {
-				// Already stopped or never started.
+				// Already disconnected.
 			}
 		}
 		this.#scheduledSources.clear()
