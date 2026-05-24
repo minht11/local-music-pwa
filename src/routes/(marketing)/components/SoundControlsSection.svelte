@@ -44,7 +44,7 @@
 	</div>
 </Section>
 
-<style>
+<style lang="postcss">
 	@reference '../../../app.css';
 
 	.equalizer-shot-wrap {

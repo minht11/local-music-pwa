@@ -55,7 +55,7 @@
 	</div>
 </Section>
 
-<style>
+<style lang="postcss">
 	@reference '../../../app.css';
 
 	.how-it-works-slider {
