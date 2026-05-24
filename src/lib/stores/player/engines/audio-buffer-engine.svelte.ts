@@ -28,8 +28,7 @@ export class AudioBufferEngine implements AudioEngine {
 	readonly trackId: number
 
 	#input: Input | null = null
-
-	#blob: Blob | null = null
+	#sink: AudioBufferSink | null = null
 
 	#scheduledSources: ScheduledSource[] = []
 
@@ -62,51 +61,14 @@ export class AudioBufferEngine implements AudioEngine {
 		this.#gainNode.connect(graph.inputNode)
 	}
 
-	load(blob: Blob, scheduleAt?: number): Promise<LoadResult> {
-		this.#stopPlayback()
-		this.#blob = blob
+	async load(blob: Blob, scheduleAt?: number): Promise<LoadResult> {
+		this.#cancelScheduling()
 
-		return this.#loadFrom(blob, 0, scheduleAt)
-	}
-
-	seek(time: number): void {
-		if (!this.#blob) {
-			return
-		}
-		this.#stopPlayback()
-		this.currentTime = time
-		// Fire and forget — seek result isn't awaited by the caller.
-		void this.#loadFrom(this.#blob, time, undefined)
-	}
-
-	play(): Promise<void> {
-		return this.#graph.resume()
-	}
-
-	pause(): void {
-		void this.#graph.suspend()
-	}
-
-	abort(): void {
-		this.#stopPlayback()
-	}
-
-	dispose(): void {
-		this.abort()
-		this.#gainNode.disconnect()
-	}
-
-	async #loadFrom(blob: Blob, seekTo: number, scheduleAt?: number): Promise<LoadResult> {
 		const controller = new AbortController()
 		this.#abortController = controller
 		const { signal } = controller
 
 		this.loading = true
-		this.#seekOffset = seekTo
-
-		const ctx = this.#graph.context
-		const base = scheduleAt ?? ctx.currentTime
-		this.#scheduleBase = base
 
 		try {
 			const input = new Input({ formats: [FLAC], source: new BlobSource(blob) })
@@ -118,22 +80,11 @@ export class AudioBufferEngine implements AudioEngine {
 				return { status: 'failed', reason: 'error' }
 			}
 
-			if (signal.aborted) {
-				input.dispose()
-				return { status: 'failed', reason: 'superseded' }
-			}
+			this.#sink = new AudioBufferSink(audioTrack)
 
 			this.loading = false
 
-			if (signal.aborted) {
-				input.dispose()
-				return { status: 'failed', reason: 'superseded' }
-			}
-
-			this.#startCurrentTimeLoop(signal)
-			void this.#scheduleSink(audioTrack, seekTo, base, signal)
-
-			return { status: 'loaded' }
+			return this.#startFrom(0, scheduleAt, signal)
 		} catch {
 			this.loading = false
 			if (!signal.aborted) {
@@ -145,14 +96,52 @@ export class AudioBufferEngine implements AudioEngine {
 		}
 	}
 
+	seek(time: number): void {
+		this.#cancelScheduling()
+		const controller = new AbortController()
+		this.#abortController = controller
+		void this.#startFrom(time, undefined, controller.signal)
+	}
+
+	play(): Promise<void> {
+		return this.#graph.resume()
+	}
+
+	pause(): void {
+		void this.#graph.suspend()
+	}
+
+	abort(): void {
+		this.#cancelScheduling()
+	}
+
+	dispose(): void {
+		this.abort()
+		this.#input?.dispose()
+		this.#input = null
+		this.#sink = null
+		this.#gainNode.disconnect()
+	}
+
+	#startFrom(seekTo: number, scheduleAt: number | undefined, signal: AbortSignal): LoadResult {
+		const ctx = this.#graph.context
+		const base = scheduleAt ?? ctx.currentTime
+		this.#scheduleBase = base
+		this.#seekOffset = seekTo
+		invariant(this.#sink, 'AudioBufferSink should be initialized before starting playback')
+
+		this.#startCurrentTimeLoop(signal)
+		void this.#scheduleSink(this.#sink, seekTo, base, signal)
+
+		return { status: 'loaded' }
+	}
+
 	async #scheduleSink(
-		audioTrack: InputAudioTrack,
+		sink: AudioBufferSink,
 		seekTo: number,
 		base: number,
 		signal: AbortSignal,
 	): Promise<void> {
-		const sink = new AudioBufferSink(audioTrack)
-
 		try {
 			for await (const { buffer, timestamp } of sink.buffers(seekTo)) {
 				if (signal.aborted) {
@@ -237,7 +226,7 @@ export class AudioBufferEngine implements AudioEngine {
 		this.#timerId = window.setTimeout(tick, 250)
 	}
 
-	#stopPlayback(): void {
+	#cancelScheduling(): void {
 		if (this.#timerId !== null) {
 			clearTimeout(this.#timerId)
 			this.#timerId = null
@@ -245,11 +234,6 @@ export class AudioBufferEngine implements AudioEngine {
 
 		this.#abortController?.abort()
 		this.#abortController = null
-
-		// Disposing the Input causes the for-await sink loop to throw,
-		// cleanly stopping the scheduling goroutine.
-		this.#input?.dispose()
-		this.#input = null
 
 		for (const { node } of this.#scheduledSources) {
 			try {
