@@ -7,7 +7,7 @@ import { HTMLAudioEngine } from './engine-html.svelte.ts'
 
 export type LoaderResult =
 	| { status: 'loaded'; file: File; track: TrackData }
-	| { status: Exclude<LoadFailReason, 'superseded'> }
+	| { status: LoadFailReason }
 
 export type TrackLoader = () => Promise<LoaderResult>
 
@@ -16,16 +16,14 @@ type SharedState =
 	| { status: 'loading'; trackId: number; controller: AbortController }
 	| { status: 'ready'; trackId: number; engine: AudioEngine }
 
-type CurrentState =
-	| SharedState
-	| { status: 'failed'; trackId: number; reason: Exclude<LoadFailReason, 'superseded'> }
+type CurrentState = SharedState | { status: 'failed'; trackId: number; reason: LoadFailReason }
 
 type NextState = SharedState | { status: 'unavailable'; trackId: number }
 
 type EngineLoadOutcome =
 	| { status: 'ok' }
 	| { status: 'aborted' }
-	| { status: 'failed'; reason: Exclude<LoadFailReason, 'superseded'> }
+	| { status: 'failed'; reason: LoadFailReason }
 
 const runLoader = async (
 	loader: TrackLoader,
@@ -50,17 +48,11 @@ const loadEngine = async (
 		return { status: 'aborted' }
 	}
 
-	if (loaded.status === 'failed') {
-		engine.dispose()
-
-		if (loaded.reason === 'superseded') {
-			return { status: 'aborted' }
-		}
-
-		return { status: 'failed', reason: loaded.reason }
+	if (loaded.status === 'loaded') {
+		return { status: 'ok' }
 	}
 
-	return { status: 'ok' }
+	return loaded
 }
 
 interface EngineCoordinatorOptions {

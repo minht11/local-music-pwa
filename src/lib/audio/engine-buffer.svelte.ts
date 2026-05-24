@@ -82,7 +82,7 @@ export class AudioBufferEngine implements AudioEngine {
 				return { status: 'failed', reason: 'error' }
 			}
 
-			return { status: 'failed', reason: 'superseded' }
+			return { status: 'aborted' }
 		}
 	}
 

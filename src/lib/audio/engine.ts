@@ -1,7 +1,10 @@
 /** @public */
-export type LoadFailReason = 'permission-denied' | 'not-found' | 'superseded' | 'error'
+export type LoadFailReason = 'permission-denied' | 'not-found' | 'error'
 
-export type LoadResult = { status: 'loaded' } | { status: 'failed'; reason: LoadFailReason }
+export type LoadResult =
+	| { status: 'loaded' }
+	| { status: 'aborted' }
+	| { status: 'failed'; reason: LoadFailReason }
 
 export const CURRENT_TIME_UPDATE_TIMEOUT_MS = 250
 
