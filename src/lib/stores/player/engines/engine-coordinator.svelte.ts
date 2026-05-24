@@ -33,10 +33,6 @@ export class EngineCoordinator {
 		return this.#current?.trackId ?? null
 	}
 
-	// The AudioContext time at which the current track ends.
-	// Passed as scheduleAt when preloading the next track.
-	#currentEndTime = 0
-
 	// Delegated reactive state — updates whenever the current engine changes.
 	loading: boolean = $derived(this.#current?.loading ?? false)
 	currentTime: number = $derived(this.#current?.currentTime ?? 0)
@@ -56,7 +52,7 @@ export class EngineCoordinator {
 	 * Load a new track as the current track.
 	 * Aborts any existing current and next engines.
 	 */
-	async loadCurrent(track: TrackData, blob: Blob): Promise<LoadResult> {
+	loadCurrent(track: TrackData, blob: Blob): Promise<LoadResult> {
 		// If a next engine was pre-buffered, discard it.
 		this.#disposeNext()
 
@@ -65,11 +61,7 @@ export class EngineCoordinator {
 		this.#current?.dispose()
 		this.#current = engine
 
-		const result = await engine.load(blob)
-		if (result.status === 'loaded') {
-			this.#currentEndTime = result.endTime
-		}
-		return result
+		return engine.load(blob)
 	}
 
 	/**
@@ -78,7 +70,7 @@ export class EngineCoordinator {
 	 * track at exactly the current track's end time (true gapless).
 	 * For any other combination, loads immediately without scheduling.
 	 */
-	async preloadNext(track: TrackData, blob: Blob): Promise<LoadResult> {
+	preloadNext(track: TrackData, blob: Blob): Promise<LoadResult> {
 		this.#disposeNext()
 
 		const currentIsBuffer = this.#current instanceof AudioBufferEngine
@@ -87,15 +79,12 @@ export class EngineCoordinator {
 
 		const scheduleAt =
 			currentIsBuffer && nextEngine instanceof AudioBufferEngine
-				? this.#currentEndTime
+				? this.#current instanceof AudioBufferEngine
+					? this.#current?.endTime
+					: undefined
 				: undefined
 
-		const result = await nextEngine.load(blob, scheduleAt)
-		if (result.status === 'loaded') {
-			// Store next track's endTime so the engine-after-next can chain.
-			nextEngine['_endTime'] = result.endTime
-		}
-		return result
+		return nextEngine.load(blob, scheduleAt)
 	}
 
 	async play(): Promise<void> {
@@ -113,14 +102,12 @@ export class EngineCoordinator {
 	seek(time: number): void {
 		this.#disposeNext()
 		this.#current?.seek(time)
-		this.#currentEndTime = this.#graph.context.currentTime + (this.duration - time)
 	}
 
 	abort(): void {
 		this.#disposeNext()
 		this.#current?.dispose()
 		this.#current = null
-		this.#currentEndTime = 0
 	}
 
 	#createEngine(track: TrackData): AudioEngine {
@@ -152,13 +139,8 @@ export class EngineCoordinator {
 			this.#current = next
 			this.#next = null
 
-			// Carry over the next engine's stored endTime (set during preloadNext).
-			this.#currentEndTime = (next as any)['_endTime'] ?? 0
-
 			// Wire onEnded for the (now current) next engine's eventual end.
 			next.onEnded = () => this.#handleCurrentEnded()
-
-			void next.play()
 		}
 
 		// In both gapless and non-gapless cases, tell PlayerStore the track changed.

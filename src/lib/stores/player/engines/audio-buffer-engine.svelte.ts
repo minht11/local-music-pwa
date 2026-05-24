@@ -48,6 +48,10 @@ export class AudioBufferEngine implements AudioEngine {
 	currentTime: number = $state(0)
 	duration: number = $state(0)
 
+	get endTime(): number {
+		return this.#scheduleBase + (this.duration - this.#seekOffset)
+	}
+
 	onEnded: (() => void) | null = null
 	onError: (() => void) | null = null
 
@@ -148,8 +152,7 @@ export class AudioBufferEngine implements AudioEngine {
 				audioTrack,
 			)
 
-			// endTime is sample-accurate for gapless scheduling.
-			return { status: 'loaded', endTime: base + (this.duration - seekTo) }
+			return { status: 'loaded' }
 		} catch {
 			this.loading = false
 			if (this.#generation === gen) {

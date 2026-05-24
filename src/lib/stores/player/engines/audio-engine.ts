@@ -1,9 +1,7 @@
 /** @public */
 export type LoadFailReason = 'permission-denied' | 'not-found' | 'superseded' | 'error'
 
-export type LoadResult =
-	| { status: 'loaded'; endTime: number }
-	| { status: 'failed'; reason: LoadFailReason }
+export type LoadResult = { status: 'loaded' } | { status: 'failed'; reason: LoadFailReason }
 
 /**
  * Common interface for all playback engines.
@@ -15,9 +13,6 @@ export type LoadResult =
  * Engines receive an already-resolved Blob — file permissions and
  * platform workarounds are handled upstream by resolveTrackFile.
  *
- * `endTime` in LoadResult is the AudioContext time at which this
- * track's audio ends. For HTMLAudioEngine it is approximate;
- * for AudioBufferEngine it is sample-accurate.
  */
 export interface AudioEngine {
 	readonly trackId: number
