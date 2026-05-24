@@ -105,10 +105,9 @@ export class PlayerStore {
 			// Gapless transition already advanced the coordinator to this track.
 			// Don't reload — just update the pre-buffer state.
 			if (coordinatorTrackId === activeTrack.id) {
-				untrack(() => {
-					this.#preBufferForTrackId = null
-					this.#updateMediaSessionPositionState()
-				})
+				this.#preBufferForTrackId = null
+				this.#updateMediaSessionPositionState()
+
 				return
 			}
 
