@@ -62,11 +62,7 @@ export class AudioBufferEngine implements AudioEngine {
 	}
 
 	async load(blob: Blob, scheduleAt?: number): Promise<LoadResult> {
-		this.#cancelScheduling()
-
-		const controller = new AbortController()
-		this.#abortController = controller
-		const { signal } = controller
+		const { signal } = this.#resetScheduling()
 
 		this.loading = true
 
@@ -97,10 +93,8 @@ export class AudioBufferEngine implements AudioEngine {
 	}
 
 	seek(time: number): void {
-		this.#cancelScheduling()
-		const controller = new AbortController()
-		this.#abortController = controller
-		void this.#startFrom(time, undefined, controller.signal)
+		const { signal } = this.#resetScheduling()
+		void this.#startFrom(time, undefined, signal)
 	}
 
 	play(): Promise<void> {
@@ -112,7 +106,7 @@ export class AudioBufferEngine implements AudioEngine {
 	}
 
 	abort(): void {
-		this.#cancelScheduling()
+		this.#resetScheduling()
 	}
 
 	dispose(): void {
@@ -226,7 +220,11 @@ export class AudioBufferEngine implements AudioEngine {
 		this.#timerId = window.setTimeout(tick, 250)
 	}
 
-	#cancelScheduling(): void {
+	/**
+	 * Stop and disconnect all scheduled sources, aborting any in-progress load or
+	 * playback, and return a new AbortSignal for subsequent operations.
+	 */
+	#resetScheduling(): { signal: AbortSignal } {
 		if (this.#timerId !== null) {
 			clearTimeout(this.#timerId)
 			this.#timerId = null
@@ -245,5 +243,10 @@ export class AudioBufferEngine implements AudioEngine {
 		}
 		this.#scheduledSources = []
 		this.loading = false
+
+		const controller = new AbortController()
+		this.#abortController = controller
+
+		return { signal: controller.signal }
 	}
 }
