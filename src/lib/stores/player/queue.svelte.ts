@@ -71,6 +71,12 @@ export class QueueStore {
 		return next >= this.itemsIds.length ? 0 : next
 	}
 
+	getNextTrackId = (): number | null => {
+		const nextIndex = this.getNextIndex()
+
+		return this.itemsIds[nextIndex] ?? null
+	}
+
 	getPrevIndex = (): number => {
 		const prev = this.#activeTrackIndex - 1
 		return prev < 0 ? this.itemsIds.length - 1 : prev

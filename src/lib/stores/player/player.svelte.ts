@@ -1,10 +1,3 @@
-/**
- * PlayerStore — refactored core, showing the changed sections.
- *
- * Sections marked "UNCHANGED" retain their original implementation.
- * The key change: #audio + #audioLoader replaced by #graph + #coordinator.
- */
-
 import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { persist } from '$lib/helpers/persist.svelte.ts'
@@ -13,7 +6,7 @@ import { formatArtists, truncate } from '$lib/helpers/utils/text.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
 import type { TrackData } from '$lib/library/get/value-queries.ts'
 import { createTrackQuery } from '$lib/library/get/value-queries.ts'
-// import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
+import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
 import { AudioGraph } from './audio-graph.ts'
 import type { LoadFailReason } from './engines/audio-engine.ts'
@@ -31,8 +24,6 @@ export const PLAYER_PLAYBACK_RATE_MIN = 0.5
 export const PLAYER_PLAYBACK_RATE_MAX = 2
 
 export class PlayerStore {
-	// ─── Infrastructure ───────────────────────────────────────────────────────
-
 	readonly #graph = new AudioGraph()
 	readonly #coordinator = new EngineCoordinator(this.#graph, {
 		onTrackEnded: () => this.#handleTrackEnded(),
@@ -41,8 +32,6 @@ export class PlayerStore {
 	})
 	readonly #queue = new QueueStore()
 	readonly equalizer = new EqualizerStore(this.#graph)
-
-	// ─── UNCHANGED: preference state ──────────────────────────────────────────
 
 	repeat: PlayerRepeat = $state('none')
 	playing: boolean = $state(false)
@@ -86,7 +75,6 @@ export class PlayerStore {
 		this.#volume = clamp(value, 0, 100)
 	}
 
-	#isPreBuffering = false
 	#preBufferForTrackId: number | null = null
 
 	constructor() {
@@ -100,13 +88,6 @@ export class PlayerStore {
 		this.#setupMediaSession()
 	}
 
-	// ─── Track loading ────────────────────────────────────────────────────────
-
-	/**
-	 * Watches activeTrack. When it changes, resolves the file and loads
-	 * the coordinator — unless the coordinator already loaded this track
-	 * via a gapless transition.
-	 */
 	#setupTrackLoadEffect(): void {
 		$effect(() => {
 			const track = this.activeTrack
@@ -116,22 +97,15 @@ export class PlayerStore {
 				this.playing = false
 				return
 			}
-			console.log('[PlayerStore] effect', {
-				trackId: track.id,
-				coordinatorId: this.#coordinator.currentTrackId,
-				willSkip: this.#coordinator.currentTrackId === track.id,
-			})
 
 			// Gapless transition already advanced the coordinator to this track.
 			// Don't reload — just update the pre-buffer state.
 			if (this.#coordinator.currentTrackId === track.id) {
-				this.#isPreBuffering = false
 				this.#preBufferForTrackId = null
 				return
 			}
 
 			// Reset pre-buffer state for the new track.
-			this.#isPreBuffering = false
 			this.#preBufferForTrackId = null
 
 			void this.#loadTrack(track)
@@ -140,8 +114,6 @@ export class PlayerStore {
 
 	async #loadTrack(track: TrackData): Promise<void> {
 		const trackId = track.id
-
-		console.log(`Loaded track ${track.name} (id ${track.id})`, this.playing)
 
 		const resolved = await resolveTrackFile(track.directory, track.file)
 
@@ -182,54 +154,43 @@ export class PlayerStore {
 			const current = this.currentTime
 			const remaining = duration - current
 
-			if (duration <= 0 || remaining > PRE_BUFFER_THRESHOLD_SECONDS || this.#isPreBuffering) {
+			if (duration <= 0 || remaining > PRE_BUFFER_THRESHOLD_SECONDS) {
 				return
 			}
 
-			const nextIndex = this.#queue.getNextIndex()
-			if (nextIndex === -1) {
-				return
-			}
-
-			const nextId = this.#queue.itemsIds[nextIndex]
+			const nextId = this.#queue.getNextTrackId()
 			if (nextId == null) {
+				this.#preBufferForTrackId = null
 				return
 			}
 
-			// Don't start a second pre-buffer for the same track.
 			if (this.#preBufferForTrackId === nextId) {
 				return
 			}
 
-			this.#isPreBuffering = true
 			this.#preBufferForTrackId = nextId
 
-			void this.#preBufferNext(nextId, nextIndex)
+			void this.#preBufferNext(nextId)
 		})
 	}
 
-	async #preBufferNext(trackId: number, trackIndex: number): Promise<void> {
+	async #preBufferNext(trackId: number): Promise<void> {
 		const track = await getLibraryValue('tracks', trackId)
-
 		if (!track) {
-			this.#isPreBuffering = false
 			return
 		}
 
 		// Confirm the track we're pre-buffering is still the right next track.
-		if (this.#queue.getNextIndex() !== trackIndex) {
-			this.#isPreBuffering = false
+		if (this.#queue.getNextTrackId() !== trackId) {
 			return
 		}
 
 		const resolved = await resolveTrackFile(track.directory, track.file)
 		if (resolved.status !== 'loaded') {
-			this.#isPreBuffering = false
 			return
 		}
 
 		await this.#coordinator.preloadNext(track, resolved.file)
-		this.#isPreBuffering = false
 	}
 
 	#handleTrackEnded(): void {
@@ -255,18 +216,19 @@ export class PlayerStore {
 
 		this.playing = true
 		await this.#coordinator.play()
+		this.#updateMediaSessionPositionState()
 	}
 
 	pause = (): void => {
 		this.playing = false
 		this.#coordinator.pause()
+		this.#updateMediaSessionPositionState()
 	}
 
 	seek = (time: number): void => {
-		// Discard pre-buffered next engine — its scheduleAt was for the old endTime.
-		this.#isPreBuffering = false
 		this.#preBufferForTrackId = null
 		this.#coordinator.seek(time)
+		this.#updateMediaSessionPositionState()
 	}
 
 	playNext = (): void => {
@@ -341,6 +303,7 @@ export class PlayerStore {
 	#setupMediaSession(): void {
 		const ms = navigator.mediaSession
 		const setAction = ms.setActionHandler.bind(ms)
+		ms.setPositionState
 
 		setAction('play', () => void this.play())
 		setAction('pause', () => this.pause())
@@ -380,11 +343,32 @@ export class PlayerStore {
 		})
 	}
 
-	// ─── Play history ─────────────────────────────────────────────────────────
+	#updateMediaSessionPositionState(): void {
+		if (!this.activeTrack) {
+			return
+		}
+
+		try {
+			navigator.mediaSession.setPositionState({
+				duration: this.duration,
+				playbackRate: this.playbackRate,
+				position: Math.min(this.currentTime, this.duration),
+			})
+		} catch {
+			// do nothing
+		}
+	}
 
 	async #savePlayHistoryWhenReady(track: TrackData): Promise<void> {
-		// // UNCHANGED: existing threshold-based logic using this.currentTime / this.duration.
-		// // No changes needed — reads the same reactive fields.
-		// void dbAddToPlayHistory(track.id)
+		const playedTime = this.currentTime
+		const totalDuration = this.duration
+
+		const percentageThreshold = 0.5
+		const timeThreshold = 30
+
+		const threshold = Math.min(timeThreshold, totalDuration * percentageThreshold)
+		if (totalDuration > 0 && playedTime >= threshold) {
+			await dbAddToPlayHistory(track.id)
+		}
 	}
 }
