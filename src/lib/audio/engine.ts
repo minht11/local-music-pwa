@@ -9,10 +9,6 @@ export type LoadResult = { status: 'loaded' } | { status: 'failed'; reason: Load
  * Each engine instance is responsible for exactly one track.
  * The coordinator owns two instances (current + next) and manages
  * transitions between them.
- *
- * Engines receive an already-resolved Blob — file permissions and
- * platform workarounds are handled upstream by resolveTrackFile.
- *
  */
 export interface AudioEngine {
 	readonly trackId: number

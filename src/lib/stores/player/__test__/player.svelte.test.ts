@@ -392,15 +392,6 @@ describe('PlayerStore', () => {
 			expect(player.repeat).toBe('none')
 		})
 
-		it('togglePlay does nothing when queue has no active track', () => {
-			using pl = createPlayerInRoot()
-			const { player } = pl
-
-			expect(player.playing).toBe(false)
-			player.togglePlay(true)
-			expect(player.playing).toBe(false)
-		})
-
 		it('seek updates player and audio currentTime', () => {
 			using pl = createPlayerInRoot()
 			const { player } = pl

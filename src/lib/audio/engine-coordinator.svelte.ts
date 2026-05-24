@@ -1,9 +1,9 @@
 import { canTrackUseGapless } from '$lib/helpers/gapless/capability.ts'
 import type { TrackData } from '$lib/library/get/value-queries.ts'
-import type { AudioGraph } from '../audio-graph.ts'
-import { AudioBufferEngine } from './audio-buffer-engine.svelte.ts'
-import type { AudioEngine, LoadResult } from './audio-engine.ts'
-import { HTMLAudioEngine } from './html-audio-engine.svelte.ts'
+import type { AudioGraph } from './audio-graph.ts'
+import type { AudioEngine, LoadResult } from './engine.ts'
+import { AudioBufferEngine } from './engine-buffer.ts'
+import { HTMLAudioEngine } from './engine-html.svelte.ts'
 
 interface EngineCoordinatorOptions {
 	onTrackEnded: () => void
@@ -11,23 +11,7 @@ interface EngineCoordinatorOptions {
 	isGaplessEnabled: () => boolean
 }
 
-/**
- * Manages two AudioEngine instances: `#current` (playing now) and `#next`
- * (pre-buffered for gapless transition or crossfade).
- *
- * Responsibilities:
- * - Creates the right engine type per track (HTMLAudio vs AudioBuffer).
- * - Wires onEnded/onError callbacks and drives transitions.
- * - Exposes unified loading/currentTime/duration state to PlayerStore.
- * - Tracks currentTrackId so PlayerStore can skip redundant loads after
- *   a gapless transition has already advanced the engine.
- *
- * NOT responsible for:
- * - Queue management (PlayerStore's job).
- * - Pre-buffer timing (PlayerStore watches currentTime and calls preloadNext).
- * - File resolution (PlayerStore calls resolveTrackFile and passes Blob).
- * @public
- */
+/** @public */
 export class EngineCoordinator {
 	readonly #graph: AudioGraph
 	readonly #options: EngineCoordinatorOptions
@@ -65,9 +49,6 @@ export class EngineCoordinator {
 
 	/**
 	 * Pre-buffer the next track so it can start immediately after the current one.
-	 * For AudioBufferEngine → AudioBufferEngine transitions, schedules the next
-	 * track at exactly the current track's end time (true gapless).
-	 * For any other combination, loads immediately without scheduling.
 	 */
 	async preloadNext(track: TrackData, blob: Blob): Promise<LoadResult> {
 		this.#disposeNext()

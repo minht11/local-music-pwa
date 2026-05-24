@@ -1,9 +1,5 @@
+import type { AudioGraph } from '$lib/audio/audio-graph.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
-import type { AudioGraph } from './audio-graph.ts'
-import { EQ_BANDS } from './eq-bands.ts'
-
-// Re-export for components that import EQ_BANDS from here.
-export { EQ_BANDS }
 
 export type BuiltinEqPresetKey =
 	| 'flat'
@@ -27,9 +23,6 @@ const EQ_PRESET_GAINS: Record<BuiltinEqPresetKey, readonly number[]> = {
 	electronic: [5, 4, 2, 0, 1, 2, 1, 3, 4, 4],
 	acoustic: [2, 1, 0, 1, 2, 2, 1, 2, 2, 1],
 }
-
-export const EQ_MIN_GAIN = -12
-export const EQ_MAX_GAIN = 12
 
 /**
  * Manages the EQ band gain values and syncs them to AudioGraph's filter nodes.

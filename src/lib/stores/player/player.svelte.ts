@@ -1,5 +1,9 @@
+import { AudioGraph } from '$lib/audio/audio-graph.ts'
+import type { LoadFailReason } from '$lib/audio/engine.ts'
+import { EngineCoordinator } from '$lib/audio/engine-coordinator.svelte.ts'
 import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
+import { resolveTrackFile } from '$lib/helpers/file-resolver.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
 import { formatArtists, truncate } from '$lib/helpers/utils/text.ts'
@@ -8,10 +12,6 @@ import type { TrackData } from '$lib/library/get/value-queries.ts'
 import { createTrackQuery } from '$lib/library/get/value-queries.ts'
 import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
-import { AudioGraph } from './audio-graph.ts'
-import type { LoadFailReason } from './engines/audio-engine.ts'
-import { EngineCoordinator } from './engines/engine-coordinator.svelte.ts'
-import { resolveTrackFile } from './file-resolver.ts'
 import { type PlayTrackOptions, QueueStore } from './queue.svelte.ts'
 
 export type { PlayTrackOptions }
@@ -244,16 +244,26 @@ export class PlayerStore {
 		this.playTrack(this.#queue.getPrevIndex())
 	}
 
-	playTrack = (trackIndex: number, queue?: number[], options?: PlayTrackOptions): void => {
+	playTrack = (
+		trackIndex: number,
+		queue?: readonly number[],
+		options: PlayTrackOptions = {},
+	): void => {
 		const currentTrackId = this.#queue.activeTrackId
 		this.#queue.setTrack(trackIndex, queue, options)
+
 		const isSameTrack = currentTrackId !== null && this.#queue.activeTrackId === currentTrackId
 
 		if (isSameTrack) {
-			this.seek(0)
+			// Reset time to 0
+			void this.seek(0)
 		} else {
-			this.playing = true
+			// Update ui time instantly, but keep audio.currentTime
+			// until play history is saved.
+			this.currentTime = 0
 		}
+
+		this.playing = true
 	}
 
 	togglePlay = (): void => {
@@ -262,6 +272,20 @@ export class PlayerStore {
 		} else {
 			void this.play()
 		}
+	}
+
+	toggleRepeat = (): void => {
+		let { repeat } = this
+
+		if (repeat === 'none') {
+			repeat = 'all'
+		} else if (repeat === 'all') {
+			repeat = 'one'
+		} else {
+			repeat = 'none'
+		}
+
+		this.repeat = repeat
 	}
 
 	toggleShuffle = this.#queue.toggleShuffle

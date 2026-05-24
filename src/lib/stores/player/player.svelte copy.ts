@@ -1,3 +1,8 @@
+// @ts-nocheck
+// biome-ignore-all lint: a
+// PREVIOUS IMPLEMENTATION. LEFT BROKEN FOR REFERENCE DURING GAPLESS REWORK.
+// TODO. Remove this file.
+
 import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { canTrackUseGapless, isGaplessSupported } from '$lib/helpers/gapless/capability.ts'

@@ -1,15 +1,11 @@
 <script lang="ts" module>
+	import { EQ_BANDS, EQ_MAX_GAIN, EQ_MIN_GAIN } from '$lib/audio/eq-bands'
 	import Button from '$lib/components/Button.svelte'
 	import Dialog, { type DialogOpenAccessor } from '$lib/components/dialog/Dialog.svelte'
 	import Separator from '$lib/components/Separator.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 	import Switch from '$lib/components/Switch.svelte'
-	import {
-		type BuiltinEqPresetKey,
-		EQ_BANDS,
-		EQ_MAX_GAIN,
-		EQ_MIN_GAIN,
-	} from '$lib/stores/player/equalizer.svelte.ts'
+	import type { BuiltinEqPresetKey } from '$lib/stores/player/equalizer.svelte.ts'
 
 	export interface EqualizerDialogProps {
 		open: DialogOpenAccessor<boolean>

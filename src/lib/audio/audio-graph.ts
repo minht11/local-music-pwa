@@ -3,7 +3,6 @@ import { EQ_BANDS } from './eq-bands.ts'
 /**
  * Owns the AudioContext and the EQ filter chain.
  * Multiple engines connect their GainNodes to `inputNode`.
- * The Web Audio API sums all inputs automatically.
  *
  *   engineA.gainNode ─┐
  *                      ├─→ inputNode → filter[0] → … → filter[9] → destination
@@ -22,10 +21,6 @@ export class AudioGraph {
 		return this.#ensureGraph()
 	}
 
-	/**
-	 * The entry point of the filter chain.
-	 * Engines connect their output GainNode here.
-	 */
 	get inputNode(): GainNode {
 		this.#ensureGraph()
 		invariant(this.#inputNode, 'AudioGraph input node should be initialized')
@@ -40,10 +35,6 @@ export class AudioGraph {
 	get filters(): readonly BiquadFilterNode[] {
 		this.#ensureGraph()
 		return this.#filters
-	}
-
-	get initialized(): boolean {
-		return this.#context !== null
 	}
 
 	#ensureGraph(): AudioContext {
@@ -84,6 +75,7 @@ export class AudioGraph {
 		if (!this.#context || this.#context.state !== 'suspended') {
 			return Promise.resolve()
 		}
+
 		return this.#context.resume()
 	}
 
@@ -91,6 +83,7 @@ export class AudioGraph {
 		if (!this.#context || this.#context.state !== 'running') {
 			return Promise.resolve()
 		}
+
 		return this.#context.suspend()
 	}
 }

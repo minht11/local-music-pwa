@@ -12,3 +12,6 @@ export const EQ_BANDS = [
 ] as const
 
 export type EqBand = (typeof EQ_BANDS)[number]
+
+export const EQ_MIN_GAIN = -12
+export const EQ_MAX_GAIN = 12

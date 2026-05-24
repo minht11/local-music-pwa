@@ -2,9 +2,11 @@ import { getDatabase } from '$lib/db/database'
 import type { FileEntity } from '$lib/helpers/file-system'
 import { isAndroid, isChromiumBased } from '$lib/helpers/utils/ua'
 
-export type ResolveResult =
-	| { status: 'loaded'; file: File }
-	| { status: 'permission-denied' | 'not-found' | 'error' }
+/** @public */
+export type FileLoadFailReason = 'permission-denied' | 'not-found' | 'error'
+
+/** @public */
+export type ResolveResult = { status: 'loaded'; file: File } | { status: FileLoadFailReason }
 
 const requestPermission = async (handle: FileSystemHandle): Promise<'granted' | 'denied'> => {
 	let mode = await handle.queryPermission({ mode: 'read' })
@@ -57,7 +59,8 @@ const resolveAndroidWorkaround = async (
 
 /**
  * Resolves a FileEntity (FileSystemFileHandle, legacy File, etc.) to a File.
- * Handles permission prompts and the Android Chromium regression.
+ * Handles permission prompts and so on.
+ * @public
  */
 export const resolveTrackFile = async (
 	directoryId: number,

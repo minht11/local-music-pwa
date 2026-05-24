@@ -1,6 +1,6 @@
 import { AudioBufferSink, BlobSource, FLAC, Input } from 'mediabunny'
-import type { AudioGraph } from '../audio-graph.ts'
-import type { AudioEngine, LoadResult } from './audio-engine.ts'
+import type { AudioGraph } from './audio-graph.ts'
+import type { AudioEngine, LoadResult } from './engine.ts'
 
 /**
  * Plays audio by streaming and decoding via Mediabunny, scheduling decoded
@@ -11,10 +11,6 @@ import type { AudioEngine, LoadResult } from './audio-engine.ts'
  *   sample at exactly the requested AudioContext time, enabling true gapless.
  * - Streaming decode: the file is never fully loaded into memory at once.
  *   Mediabunny reads and decodes lazily as the for-await loop iterates.
- *
- * Memory note: scheduled AudioBufferSourceNodes hold references to their
- * AudioBuffers. Each node's onended removes it from #scheduledSources so
- * played buffers can be GC'd as playback progresses.
  */
 export class AudioBufferEngine implements AudioEngine {
 	readonly #graph: AudioGraph

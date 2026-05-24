@@ -1,17 +1,7 @@
 import { throttle } from '$lib/helpers/utils/throttle'
-import type { AudioGraph } from '../audio-graph.ts'
-import type { AudioEngine, LoadResult } from './audio-engine.ts'
+import type { AudioGraph } from './audio-graph.ts'
+import type { AudioEngine, LoadResult } from './engine.ts'
 
-/**
- * Plays audio via HTMLAudioElement routed through the shared AudioGraph.
- *
- * MediaElementAudioSourceNode is created once per engine instance on the
- * first load() call (requires user gesture / AudioContext to exist).
- * Subsequent load() calls just swap the blob URL on the same element.
- *
- * The engine's GainNode stays connected to audioGraph.inputNode for the
- * lifetime of the instance. Call dispose() to disconnect it.
- */
 export class HTMLAudioEngine implements AudioEngine {
 	readonly #audio = new Audio()
 	readonly #graph: AudioGraph
@@ -20,10 +10,6 @@ export class HTMLAudioEngine implements AudioEngine {
 	#gainNode: GainNode | null = null
 	#sourceNode: MediaElementAudioSourceNode | null = null
 	#currentSrc: string | null = null
-
-	// Generation counter for stale-load detection.
-	// Incremented on every load() and abort().
-	#generation = 0
 
 	loading: boolean = $state(false)
 	currentTime: number = $state(0)
@@ -73,19 +59,12 @@ export class HTMLAudioEngine implements AudioEngine {
 	}
 
 	load(blob: Blob, _scheduleAt?: number): LoadResult {
-		this.#generation += 1
-		const gen = this.#generation
-
 		this.loading = true
 		this.#clearSrc()
 		this.#ensureGraphConnection()
 
 		this.#currentSrc = URL.createObjectURL(blob)
 		this.#audio.src = this.#currentSrc
-
-		if (this.#generation !== gen) {
-			return { status: 'failed', reason: 'superseded' }
-		}
 
 		this.loading = false
 
@@ -110,7 +89,6 @@ export class HTMLAudioEngine implements AudioEngine {
 	}
 
 	abort(): void {
-		this.#generation += 1
 		this.loading = false
 		this.#clearSrc()
 	}
