@@ -39,7 +39,7 @@ export class EngineCoordinator {
 	loadCurrent(track: TrackData, blob: Blob): Promise<LoadResult> {
 		this.#disposeNext()
 
-		const engine = this.#createEngine(track)
+		const engine = this.#createEngine(track, this.#canUseGaplessForTrack(track))
 		this.#current?.dispose()
 		this.#current = engine
 		this.#wireCurrent(engine)
@@ -49,19 +49,27 @@ export class EngineCoordinator {
 
 	/**
 	 * Pre-buffer the next track so it can start immediately after the current one.
+	 * Only effective if the current and next tracks are both gapless-capable. Noop otherwise.
 	 */
-	preloadNext(track: TrackData, blob: Blob): Promise<LoadResult> {
+	async preloadNext(track: TrackData, blob: Blob): Promise<void> {
 		this.#disposeNext()
 
-		const nextEngine = this.#createEngine(track)
+		if (!(this.#current instanceof AudioBufferEngine)) {
+			return
+		}
+
+		const nextTrackCanUseGapless = this.#canUseGaplessForTrack(track)
+		if (!nextTrackCanUseGapless) {
+			return
+		}
+
+		const nextEngine = this.#createEngine(track, nextTrackCanUseGapless)
 		this.#next = nextEngine
 
-		const scheduleAt =
-			this.#current instanceof AudioBufferEngine && nextEngine instanceof AudioBufferEngine
-				? this.#current.endTime
-				: undefined
+		// Pick up from current engine's end time so next track plays seamlessly
+		const scheduleAt = this.#current.endTime
 
-		return nextEngine.load(blob, scheduleAt)
+		await nextEngine.load(blob, scheduleAt)
 	}
 
 	async play(): Promise<void> {
@@ -87,8 +95,12 @@ export class EngineCoordinator {
 		this.#current = null
 	}
 
-	#createEngine(track: TrackData): AudioEngine {
-		if (this.#options.isGaplessEnabled() && canTrackUseGapless(track)) {
+	#canUseGaplessForTrack(track: TrackData): boolean {
+		return this.#options.isGaplessEnabled() && canTrackUseGapless(track)
+	}
+
+	#createEngine(track: TrackData, gapless: boolean): AudioEngine {
+		if (gapless) {
 			return new AudioBufferEngine(this.#graph, track.id, track.duration)
 		}
 
