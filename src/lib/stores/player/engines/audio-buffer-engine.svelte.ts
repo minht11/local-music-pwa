@@ -1,4 +1,4 @@
-import { AudioBufferSink, BlobSource, FLAC, Input } from 'mediabunny'
+import { AudioBufferSink, BlobSource, FLAC, Input, type InputAudioTrack } from 'mediabunny'
 import type { AudioGraph } from '../audio-graph.ts'
 import type { AudioEngine, LoadResult } from './audio-engine.ts'
 
@@ -38,9 +38,7 @@ export class AudioBufferEngine implements AudioEngine {
 	// File time we started from (non-zero after seek).
 	#seekOffset = 0
 
-	// Generation counter: incremented on abort/seek to invalidate
-	// in-progress scheduling loops and stale onended callbacks.
-	#generation = 0
+	#abortController: AbortController | null = null
 
 	#timerId: number | null = null
 
@@ -65,10 +63,8 @@ export class AudioBufferEngine implements AudioEngine {
 	}
 
 	load(blob: Blob, scheduleAt?: number): Promise<LoadResult> {
-		console.log('Load', blob)
 		this.#stopPlayback()
 		this.#blob = blob
-		this.#aborted = false
 
 		return this.#loadFrom(blob, 0, scheduleAt)
 	}
@@ -78,7 +74,6 @@ export class AudioBufferEngine implements AudioEngine {
 			return
 		}
 		this.#stopPlayback()
-		this.#aborted = false
 		this.currentTime = time
 		// Fire and forget — seek result isn't awaited by the caller.
 		void this.#loadFrom(this.#blob, time, undefined)
@@ -93,7 +88,6 @@ export class AudioBufferEngine implements AudioEngine {
 	}
 
 	abort(): void {
-		this.#aborted = true
 		this.#stopPlayback()
 	}
 
@@ -102,15 +96,10 @@ export class AudioBufferEngine implements AudioEngine {
 		this.#gainNode.disconnect()
 	}
 
-	// ─── Private ──────────────────────────────────────────────────────────────
-
-	// Tracks whether the latest operation has been aborted.
-	// Separate from #generation so we can distinguish abort vs supersede.
-	#aborted = false
-
 	async #loadFrom(blob: Blob, seekTo: number, scheduleAt?: number): Promise<LoadResult> {
-		this.#generation += 1
-		const gen = this.#generation
+		const controller = new AbortController()
+		this.#abortController = controller
+		const { signal } = controller
 
 		this.loading = true
 		this.#seekOffset = seekTo
@@ -129,51 +118,44 @@ export class AudioBufferEngine implements AudioEngine {
 				return { status: 'failed', reason: 'error' }
 			}
 
-			if (this.#generation !== gen) {
+			if (signal.aborted) {
 				input.dispose()
 				return { status: 'failed', reason: 'superseded' }
 			}
 
-			// getDurationFromMetadata() reads only file headers — fast.
-			// FLAC STREAMINFO always contains totalSamples so this never falls back
-			// to the expensive computeDuration() scan in practice.
 			this.loading = false
 
-			if (this.#generation !== gen) {
+			if (signal.aborted) {
 				input.dispose()
 				return { status: 'failed', reason: 'superseded' }
 			}
 
-			// Start the rAF loop and scheduling in the background.
-			this.#startCurrentTimeLoop(gen)
-			void this.#scheduleSink(audioTrack, seekTo, base, gen)
-			console.log(
-				`Scheduled AudioBufferEngine with seekTo=${seekTo}, scheduleAt=${scheduleAt}`,
-				audioTrack,
-			)
+			this.#startCurrentTimeLoop(signal)
+			void this.#scheduleSink(audioTrack, seekTo, base, signal)
 
 			return { status: 'loaded' }
 		} catch {
 			this.loading = false
-			if (this.#generation === gen) {
+			if (!signal.aborted) {
 				this.onError?.()
 				return { status: 'failed', reason: 'error' }
 			}
+
 			return { status: 'failed', reason: 'superseded' }
 		}
 	}
 
 	async #scheduleSink(
-		audioTrack: Awaited<ReturnType<Input['getPrimaryAudioTrack']>>,
+		audioTrack: InputAudioTrack,
 		seekTo: number,
 		base: number,
-		gen: number,
+		signal: AbortSignal,
 	): Promise<void> {
-		const sink = new AudioBufferSink(audioTrack!)
+		const sink = new AudioBufferSink(audioTrack)
 
 		try {
 			for await (const { buffer, timestamp } of sink.buffers(seekTo)) {
-				if (this.#generation !== gen) {
+				if (signal.aborted) {
 					break
 				}
 
@@ -203,14 +185,14 @@ export class AudioBufferEngine implements AudioEngine {
 		} catch {
 			// Thrown by input.dispose() (abort) or a genuine decode error.
 			// If generation changed, it was an abort — not an error.
-			if (this.#generation === gen) {
+			if (!signal.aborted) {
 				this.onError?.()
 			}
 			return
 		}
 
 		// Scheduling complete. Wire onEnded to the last scheduled node.
-		if (this.#generation !== gen) {
+		if (signal.aborted) {
 			return
 		}
 
@@ -225,25 +207,25 @@ export class AudioBufferEngine implements AudioEngine {
 		// we reached this point (e.g. seeking to 1 second before the end).
 		const now = this.#graph.context.currentTime
 		if (now >= last.endAt) {
-			if (this.#generation === gen) {
+			if (!signal.aborted) {
 				this.onEnded?.()
 			}
 		} else {
 			last.node.addEventListener('ended', () => {
-				if (this.#generation === gen) {
+				if (!signal.aborted) {
 					this.onEnded?.()
 				}
 			})
 		}
 	}
 
-	#startCurrentTimeLoop(gen: number): void {
+	#startCurrentTimeLoop(signal: AbortSignal): void {
 		if (this.#timerId !== null) {
 			clearTimeout(this.#timerId)
 		}
 
 		const tick = () => {
-			if (this.#generation !== gen) {
+			if (signal.aborted) {
 				return
 			}
 
@@ -261,7 +243,8 @@ export class AudioBufferEngine implements AudioEngine {
 			this.#timerId = null
 		}
 
-		this.#generation += 1
+		this.#abortController?.abort()
+		this.#abortController = null
 
 		// Disposing the Input causes the for-await sink loop to throw,
 		// cleanly stopping the scheduling goroutine.

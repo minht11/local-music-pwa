@@ -52,7 +52,7 @@ export class EngineCoordinator {
 	 * Load a new track as the current track.
 	 * Aborts any existing current and next engines.
 	 */
-	loadCurrent(track: TrackData, blob: Blob): Promise<LoadResult> {
+	loadCurrent(track: TrackData, blob: Blob): Promise<LoadResult> | LoadResult {
 		this.#disposeNext()
 
 		const engine = this.#createEngine(track)
