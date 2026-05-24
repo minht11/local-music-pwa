@@ -1,14 +1,12 @@
 import { AudioGraph } from '$lib/audio/audio-graph.ts'
 import type { LoadFailReason } from '$lib/audio/engine.ts'
 import { EngineCoordinator } from '$lib/audio/engine-coordinator.svelte.ts'
-import type { QueryResult } from '$lib/db/query/query.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { resolveTrackFile } from '$lib/helpers/file-resolver.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
 import { formatArtists, formatNameOrUnknown, truncate } from '$lib/helpers/utils/text.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
-import type { TrackData } from '$lib/library/get/value-queries.ts'
 import { createTrackQuery } from '$lib/library/get/value-queries.ts'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
 import type { MainStore } from '../main/store.svelte.ts'
@@ -34,12 +32,12 @@ export class PlayerStore {
 	readonly #queue = new QueueStore()
 	readonly equalizer = new EqualizerStore(this.#graph)
 
-	repeat: PlayerRepeat = $state('none')
-	muted: boolean = $state(false)
-	#volume: number = $state(100)
-	playbackRate: number = $state(1)
-	preservePitch: boolean = $state(true)
-	#loadRetry: number = $state(0)
+	repeat = $state<PlayerRepeat>('none')
+	muted = $state(false)
+	#volume = $state(100)
+	playbackRate = $state(1)
+	preservePitch = $state(true)
+	#loadRetry = $state(0)
 
 	readonly #main: MainStore
 
@@ -64,11 +62,11 @@ export class PlayerStore {
 		return this.#queue.isQueueEmpty
 	}
 
-	#activeTrackQuery: QueryResult<TrackData | undefined> = createTrackQuery(
+	#activeTrackQuery = createTrackQuery(
 		() => this.#queue.itemsIds[this.#queue.activeTrackIndex] ?? -1,
 		{ allowEmpty: true },
 	)
-	activeTrack: TrackData | undefined = $derived(this.#activeTrackQuery.value)
+	activeTrack = $derived(this.#activeTrackQuery.value)
 
 	#artwork = createManagedArtwork(() => this.activeTrack?.image?.full)
 	artworkSrc: string | undefined = $derived.by(this.#artwork)
@@ -91,6 +89,7 @@ export class PlayerStore {
 		this.#setupTrackLoadEffect()
 		this.#setupPreBufferEffect()
 		this.#setupMediaSession()
+		// TODO. Add volume, playbackRate, preservePitch and playHistory.
 	}
 
 	#setupTrackLoadEffect(): void {
