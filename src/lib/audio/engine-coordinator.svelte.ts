@@ -6,7 +6,7 @@ import { AudioBufferEngine } from './engine-buffer.svelte.ts'
 import { HTMLAudioEngine } from './engine-html.svelte.ts'
 
 interface EngineCoordinatorOptions {
-	onTrackEnded: () => void
+	onTrackEnded: (wasGaplessPromotion: boolean) => void
 	onError: () => void
 	isGaplessEnabled: () => boolean
 }
@@ -101,23 +101,24 @@ export class EngineCoordinator {
 	}
 
 	#handleCurrentEnded(): void {
-		if (this.#next) {
+		const nextEngine = this.#next
+		const wasGaplessPromotion = nextEngine !== null
+
+		if (nextEngine) {
 			// Promote the pre-buffered next engine to current.
 			// AudioBufferEngine: buffers are already scheduled on the AudioContext
 			// timeline and play automatically. HTMLAudioEngine: loaded but idle,
 			// play() is what actually starts the element.
-			const newCurrent = this.#next
-
 			this.#current?.dispose()
 			this.#next = null
 
-			this.#current = newCurrent
-			this.#wireCurrent(newCurrent)
+			this.#current = nextEngine
+			this.#wireCurrent(nextEngine)
 
-			void newCurrent.play()
+			void nextEngine.play()
 		}
 
-		this.#options.onTrackEnded()
+		this.#options.onTrackEnded(wasGaplessPromotion)
 	}
 
 	#disposeNext(): void {

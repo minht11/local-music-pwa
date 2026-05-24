@@ -26,7 +26,7 @@ export const PLAYER_PLAYBACK_RATE_MAX = 2
 export class PlayerStore {
 	readonly #graph = new AudioGraph()
 	readonly #coordinator = new EngineCoordinator(this.#graph, {
-		onTrackEnded: () => this.#handleTrackEnded(),
+		onTrackEnded: (wasGaplessPromotion) => this.#handleTrackEnded(wasGaplessPromotion),
 		onError: () => this.#handleEngineError(),
 		isGaplessEnabled: () => this.#main.gaplessPlaybackEnabled,
 	})
@@ -202,9 +202,16 @@ export class PlayerStore {
 		await this.#coordinator.preloadNext(track, resolved.file)
 	}
 
-	#handleTrackEnded(): void {
+	#handleTrackEnded(wasGaplessPromotion: boolean): void {
 		if (this.repeat === 'one') {
-			this.seek(0)
+			if (wasGaplessPromotion) {
+				// The coordinator promoted the next track before we could intercept.
+				// Abort it so the track-load effect sees currentTrackId change and
+				// reloads the correct (repeat-one) track from the start.
+				this.#coordinator.abort()
+			} else {
+				this.seek(0)
+			}
 			return
 		}
 

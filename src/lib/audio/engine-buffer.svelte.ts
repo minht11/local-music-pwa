@@ -130,6 +130,7 @@ export class AudioBufferEngine implements AudioEngine {
 		signal: AbortSignal,
 	): Promise<void> {
 		try {
+			// TODO. Do we need backpressure here? So we don't decode whole file upfront.
 			for await (const { buffer, timestamp } of sink.buffers(seekTo)) {
 				if (signal.aborted) {
 					break
