@@ -24,7 +24,7 @@ export interface AudioEngine {
 	 * @param scheduleAt AudioContext time at which playback should begin.
 	 *                   Omit to start as soon as possible.
 	 */
-	load: (blob: Blob, scheduleAt?: number) => Promise<LoadResult> | LoadResult
+	load: (blob: Blob, scheduleAt?: number) => Promise<LoadResult>
 
 	play: () => Promise<void>
 	pause: () => void

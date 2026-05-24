@@ -50,7 +50,7 @@ export class EngineCoordinator {
 	/**
 	 * Pre-buffer the next track so it can start immediately after the current one.
 	 */
-	async preloadNext(track: TrackData, blob: Blob): Promise<LoadResult> {
+	preloadNext(track: TrackData, blob: Blob): Promise<LoadResult> {
 		this.#disposeNext()
 
 		const nextEngine = this.#createEngine(track)
@@ -58,10 +58,10 @@ export class EngineCoordinator {
 
 		const scheduleAt =
 			this.#current instanceof AudioBufferEngine && nextEngine instanceof AudioBufferEngine
-				? this.#current?.endTime
+				? this.#current.endTime
 				: undefined
 
-		return await nextEngine.load(blob, scheduleAt)
+		return nextEngine.load(blob, scheduleAt)
 	}
 
 	async play(): Promise<void> {

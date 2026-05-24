@@ -58,7 +58,7 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#gainNode.connect(this.#graph.inputNode)
 	}
 
-	load(blob: Blob, _scheduleAt?: number): LoadResult {
+	load(blob: Blob, _scheduleAt?: number): Promise<LoadResult> {
 		this.loading = true
 		this.#clearSrc()
 		this.#ensureGraphConnection()
@@ -71,7 +71,7 @@ export class HTMLAudioEngine implements AudioEngine {
 		const duration = Number.isFinite(this.#audio.duration) ? this.#audio.duration : 0
 		this.duration = duration
 
-		return { status: 'loaded' }
+		return Promise.resolve({ status: 'loaded' })
 	}
 
 	async play(): Promise<void> {
