@@ -49,9 +49,7 @@ export class EqualizerStore {
 			const bands = this.bands
 			const filters = this.#graph.filters
 
-			// filters is empty until the AudioContext is first created.
-			// The effect re-runs when the graph is initialized.
-			if (filters.length === 0) {
+			if (!this.#graph.initialized) {
 				return
 			}
 

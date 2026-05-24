@@ -21,6 +21,10 @@ export class AudioGraph {
 		return this.#ensureGraph()
 	}
 
+	get initialized(): boolean {
+		return this.#context !== null
+	}
+
 	get inputNode(): GainNode {
 		this.#ensureGraph()
 		invariant(this.#inputNode, 'AudioGraph input node should be initialized')

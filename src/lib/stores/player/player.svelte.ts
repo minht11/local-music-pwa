@@ -102,6 +102,7 @@ export class PlayerStore {
 			// Don't reload — just update the pre-buffer state.
 			if (this.#coordinator.currentTrackId === track.id) {
 				this.#preBufferForTrackId = null
+				this.#updateMediaSessionPositionState()
 				return
 			}
 
@@ -229,6 +230,8 @@ export class PlayerStore {
 	seek = (time: number): void => {
 		this.#preBufferForTrackId = null
 		this.#coordinator.seek(time)
+		// Update ui time instantly
+		this.currentTime = time
 		this.#updateMediaSessionPositionState()
 	}
 
@@ -259,8 +262,7 @@ export class PlayerStore {
 			// Reset time to 0
 			void this.seek(0)
 		} else {
-			// Update ui time instantly, but keep audio.currentTime
-			// until play history is saved.
+			// Update ui time instantly
 			this.currentTime = 0
 		}
 
