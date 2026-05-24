@@ -42,7 +42,7 @@ export class AudioBufferEngine implements AudioEngine {
 	// in-progress scheduling loops and stale onended callbacks.
 	#generation = 0
 
-	#rafId = 0
+	#timerId: number | null = null
 
 	loading: boolean = $state(false)
 	currentTime: number = $state(0)
@@ -235,36 +235,29 @@ export class AudioBufferEngine implements AudioEngine {
 	}
 
 	#startCurrentTimeLoop(gen: number): void {
-		cancelAnimationFrame(this.#rafId)
+		if (this.#timerId !== null) {
+			clearTimeout(this.#timerId)
+		}
 
-		let _tick = 0
 		const tick = () => {
 			if (this.#generation !== gen) {
 				return
 			}
 
-			if (++_tick % 200 === 0) {
-				console.log('[AudioBufferEngine] rAF', {
-					gen,
-					currentGen: this.#generation,
-					ctxTime: this.#graph.context.currentTime,
-					base: this.#scheduleBase,
-					currentTime: this.currentTime,
-					ctxState: this.#graph.context.state,
-				})
-			}
-
 			const elapsed = this.#graph.context.currentTime - this.#scheduleBase
 			this.currentTime = this.#seekOffset + Math.max(0, elapsed)
-
-			this.#rafId = requestAnimationFrame(tick)
+			this.#timerId = window.setTimeout(tick, 250)
 		}
 
-		this.#rafId = requestAnimationFrame(tick)
+		this.#timerId = window.setTimeout(tick, 250)
 	}
 
 	#stopPlayback(): void {
-		cancelAnimationFrame(this.#rafId)
+		if (this.#timerId !== null) {
+			clearTimeout(this.#timerId)
+			this.#timerId = null
+		}
+
 		this.#generation += 1
 
 		// Disposing the Input causes the for-await sink loop to throw,
