@@ -140,6 +140,7 @@ export class PlayerStore {
 			void this.#coordinator.play()
 		}
 
+		// TODO. Saves on load instead after implementing play history buffering.
 		// Start play history timer.
 		void this.#savePlayHistoryWhenReady(track)
 	}
