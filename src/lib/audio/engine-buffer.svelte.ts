@@ -1,8 +1,10 @@
-import { AudioBufferSink, BlobSource, FLAC, Input } from 'mediabunny'
+import { AudioBufferSink, BlobSource, FLAC, Input, InputDisposedError } from 'mediabunny'
+import { wait } from '$lib/helpers/utils/wait.ts'
 import type { AudioGraph } from './audio-graph.ts'
-import type { AudioEngine, LoadResult } from './engine.ts'
+import { type AudioEngine, CURRENT_TIME_UPDATE_TIMEOUT_MS, type LoadResult } from './engine.ts'
 
 const FORMATS = [FLAC]
+const LOOK_AHEAD_TIME_SECONDS = 2.0
 
 /**
  * Plays audio by streaming and decoding via Mediabunny, scheduling decoded
@@ -23,7 +25,6 @@ export class AudioBufferEngine implements AudioEngine {
 	#sink: AudioBufferSink | null = null
 
 	#scheduledSources = new Set<AudioBufferSourceNode>()
-	#lastSource: AudioBufferSourceNode | null = null
 
 	#scheduleBase = 0
 
@@ -129,35 +130,62 @@ export class AudioBufferEngine implements AudioEngine {
 		base: number,
 		signal: AbortSignal,
 	): Promise<void> {
+		let allBuffersPulled = false
+		const trackDuration = this.duration
+
 		try {
-			// TODO. Do we need backpressure here? So we don't decode whole file upfront.
 			for await (const { buffer, timestamp } of sink.buffers(seekTo)) {
 				if (signal.aborted) {
 					break
 				}
 
 				const ctx = this.#graph.context
+				const startAt = base + (timestamp - seekTo)
+
+				// Prevent memory bloat and decode only a few seconds ahead of the current play time.
+				while (startAt > ctx.currentTime + LOOK_AHEAD_TIME_SECONDS) {
+					if (signal.aborted) {
+						break
+					}
+
+					// If we are within the final LOOK_AHEAD_TIME_SECONDS window of the track,
+					// stop throttling and just let the last few buffers schedule.
+					if (trackDuration - timestamp <= LOOK_AHEAD_TIME_SECONDS) {
+						break
+					}
+
+					await wait(100)
+				}
+
+				if (signal.aborted) {
+					break
+				}
+
 				const source = ctx.createBufferSource()
 				source.buffer = buffer
 				source.connect(this.#gainNode)
-
-				const startAt = base + (timestamp - seekTo)
 				source.start(startAt)
 
 				this.#scheduledSources.add(source)
-				this.#lastSource = source
 
-				// Remove from array when played so the AudioBuffer can be GC'd.
 				source.addEventListener('ended', () => {
+					// Remove it so it can be garbage collected
 					this.#scheduledSources.delete(source)
+
+					if (allBuffersPulled && this.#scheduledSources.size === 0 && !signal.aborted) {
+						this.onEnded?.()
+					}
 				})
 			}
-		} catch {
-			// Thrown by input.dispose() (abort) or a genuine decode error.
-			// If generation changed, it was an abort — not an error.
-			if (!signal.aborted) {
+
+			allBuffersPulled = true
+		} catch (error) {
+			if (signal.aborted || error instanceof InputDisposedError) {
+				// Do nothing
+			} else {
 				this.onError?.()
 			}
+
 			return
 		}
 
@@ -165,19 +193,11 @@ export class AudioBufferEngine implements AudioEngine {
 			return
 		}
 
-		const last = this.#lastSource
-		if (!(last && this.#scheduledSources.has(last))) {
-			// No buffers were scheduled (empty or fully-past-end seek).
+		// Guard against when loop completed but NO buffers were ever scheduled
+		// (e.g., an empty file or a seek completely past the end of the track).
+		if (allBuffersPulled && this.#scheduledSources.size === 0) {
 			this.onEnded?.()
-			return
 		}
-
-		// The last node may have already ended during the scheduling loop.
-		last.addEventListener('ended', () => {
-			if (!signal.aborted) {
-				this.onEnded?.()
-			}
-		})
 	}
 
 	#startCurrentTimeLoop(signal: AbortSignal): void {
@@ -192,10 +212,10 @@ export class AudioBufferEngine implements AudioEngine {
 
 			const elapsed = this.#graph.context.currentTime - this.#scheduleBase
 			this.currentTime = this.#seekOffset + Math.max(0, elapsed)
-			this.#timerId = window.setTimeout(tick, 250)
+			this.#timerId = window.setTimeout(tick, CURRENT_TIME_UPDATE_TIMEOUT_MS)
 		}
 
-		this.#timerId = window.setTimeout(tick, 250)
+		this.#timerId = window.setTimeout(tick, CURRENT_TIME_UPDATE_TIMEOUT_MS)
 	}
 
 	/**
@@ -210,7 +230,6 @@ export class AudioBufferEngine implements AudioEngine {
 
 		this.#abortController?.abort()
 		this.#abortController = null
-		this.#lastSource = null
 
 		for (const node of this.#scheduledSources) {
 			try {

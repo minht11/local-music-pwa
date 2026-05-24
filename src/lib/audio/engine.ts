@@ -3,6 +3,8 @@ export type LoadFailReason = 'permission-denied' | 'not-found' | 'superseded' | 
 
 export type LoadResult = { status: 'loaded' } | { status: 'failed'; reason: LoadFailReason }
 
+export const CURRENT_TIME_UPDATE_TIMEOUT_MS = 250
+
 /**
  * Common interface for all playback engines.
  *

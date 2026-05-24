@@ -1,6 +1,6 @@
 import { throttle } from '$lib/helpers/utils/throttle'
 import type { AudioGraph } from './audio-graph.ts'
-import type { AudioEngine, LoadResult } from './engine.ts'
+import { type AudioEngine, CURRENT_TIME_UPDATE_TIMEOUT_MS, type LoadResult } from './engine.ts'
 
 export class HTMLAudioEngine implements AudioEngine {
 	readonly #audio = new Audio()
@@ -33,7 +33,7 @@ export class HTMLAudioEngine implements AudioEngine {
 
 		audio.ontimeupdate = throttle(() => {
 			this.currentTime = audio.currentTime
-		}, 250)
+		}, CURRENT_TIME_UPDATE_TIMEOUT_MS)
 
 		audio.ondurationchange = () => {
 			const d = audio.duration
