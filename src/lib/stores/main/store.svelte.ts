@@ -13,6 +13,7 @@ export type AppMotionOption = AppMotion | 'auto'
 export const getPersistedLibrarySplitLayoutEnabled = (): boolean =>
 	getPersistedValue('main', 'librarySplitLayoutEnabled', true)
 
+/** @public */
 export class MainStore {
 	theme: AppThemeOption = $state('auto')
 

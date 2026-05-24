@@ -12,6 +12,7 @@ import type { TrackData } from '$lib/library/get/value-queries.ts'
 import { createTrackQuery } from '$lib/library/get/value-queries.ts'
 import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
+import type { MainStore } from '../main/store.svelte.ts'
 import { type PlayTrackOptions, QueueStore } from './queue.svelte.ts'
 
 export type { PlayTrackOptions }
@@ -40,7 +41,7 @@ export class PlayerStore {
 	playbackRate: number = $state(1)
 	preservePitch: boolean = $state(true)
 
-	readonly #main = useMainStore()
+	readonly #main: MainStore
 
 	loading: boolean = $derived(this.#coordinator.loading)
 	currentTime: number = $derived(this.#coordinator.currentTime)
@@ -77,7 +78,9 @@ export class PlayerStore {
 
 	#preBufferForTrackId: number | null = null
 
-	constructor() {
+	constructor(main: MainStore) {
+		this.#main = main
+
 		persist('player', this, ['volume', 'repeat', 'muted', 'playbackRate', 'preservePitch'])
 		persist('player', this.#queue, ['shuffle'])
 
@@ -92,10 +95,8 @@ export class PlayerStore {
 	}
 
 	#setupTrackLoadEffect(): void {
-		$effect(() => {
-			const track = this.activeTrack
-
-			if (!track) {
+		const setup = (activeTrack: TrackData | undefined, coordinatorTrackId: number | null) => {
+			if (!activeTrack) {
 				this.#coordinator.abort()
 				this.playing = false
 				return
@@ -103,23 +104,38 @@ export class PlayerStore {
 
 			// Gapless transition already advanced the coordinator to this track.
 			// Don't reload — just update the pre-buffer state.
-			if (this.#coordinator.currentTrackId === track.id) {
-				this.#preBufferForTrackId = null
-				this.#updateMediaSessionPositionState()
+			if (coordinatorTrackId === activeTrack.id) {
+				untrack(() => {
+					this.#preBufferForTrackId = null
+					this.#updateMediaSessionPositionState()
+				})
 				return
 			}
 
 			// Reset pre-buffer state for the new track.
 			this.#preBufferForTrackId = null
 
-			void this.#loadTrack(track)
+			void this.#loadTrack(activeTrack)
+		}
+
+		$effect(() => {
+			const track = this.activeTrack
+			const coordinatorTrackId = this.#coordinator.currentTrackId
+
+			untrack(() => {
+				setup(track, coordinatorTrackId)
+			})
 		})
 	}
 
 	async #loadTrack(track: TrackData): Promise<void> {
 		const trackId = track.id
 
-		const resolved = await resolveTrackFile(track.directory, track.file)
+		const resolved = await resolveTrackFile({
+			directoryId: track.directory,
+			entity: track.file,
+			askPermission: true,
+		})
 
 		if (resolved.status !== 'loaded') {
 			this.#showLoadError(resolved.status, track.name)
@@ -179,7 +195,9 @@ export class PlayerStore {
 
 			this.#preBufferForTrackId = nextId
 
-			void this.#preBufferNext(nextId)
+			untrack(() => {
+				void this.#preBufferNext(nextId)
+			})
 		})
 	}
 
@@ -194,7 +212,15 @@ export class PlayerStore {
 			return
 		}
 
-		const resolved = await resolveTrackFile(track.directory, track.file)
+		console.log(`[PlayerStore] Pre-buffering track ${track.name} (id: ${track.id})`)
+
+		const resolved = await resolveTrackFile({
+			directoryId: track.directory,
+			entity: track.file,
+			// Preloading should stay silent
+			askPermission: false,
+		})
+
 		if (resolved.status !== 'loaded') {
 			return
 		}

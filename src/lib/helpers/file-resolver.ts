@@ -8,10 +8,14 @@ export type FileLoadFailReason = 'permission-denied' | 'not-found' | 'error'
 /** @public */
 export type ResolveResult = { status: 'loaded'; file: File } | { status: FileLoadFailReason }
 
-const requestPermission = async (handle: FileSystemHandle): Promise<'granted' | 'denied'> => {
+const requestPermission = async (
+	handle: FileSystemHandle,
+	askPermission: boolean,
+): Promise<'granted' | 'denied'> => {
 	let mode = await handle.queryPermission({ mode: 'read' })
 
-	if (mode === 'prompt') {
+	console.log(`[file-resolver] Permission for ${handle.name}: ${mode}`, askPermission)
+	if (mode === 'prompt' && askPermission) {
 		try {
 			mode = await handle.requestPermission({ mode: 'read' })
 		} catch {
@@ -23,8 +27,11 @@ const requestPermission = async (handle: FileSystemHandle): Promise<'granted' | 
 	return mode === 'granted' ? 'granted' : 'denied'
 }
 
-const resolveRegular = async (entity: FileSystemFileHandle): Promise<File | null> => {
-	const permission = await requestPermission(entity)
+const resolveRegular = async (
+	entity: FileSystemFileHandle,
+	askPermission: boolean,
+): Promise<File | null> => {
+	const permission = await requestPermission(entity, askPermission)
 	if (permission === 'denied') {
 		return null
 	}
@@ -41,6 +48,7 @@ const resolveRegular = async (entity: FileSystemFileHandle): Promise<File | null
 const resolveAndroidWorkaround = async (
 	directoryId: number,
 	fileName: string,
+	askPermission: boolean,
 ): Promise<File | null> => {
 	const db = await getDatabase()
 	const dir = await db.get('directories', directoryId)
@@ -48,7 +56,7 @@ const resolveAndroidWorkaround = async (
 		return null
 	}
 
-	const permission = await requestPermission(dir.handle)
+	const permission = await requestPermission(dir.handle, askPermission)
 	if (permission === 'denied') {
 		return null
 	}
@@ -57,24 +65,30 @@ const resolveAndroidWorkaround = async (
 	return fileHandle.getFile()
 }
 
+interface ResolveTrackFileOptions {
+	directoryId: number
+	entity: FileEntity
+	askPermission: boolean
+}
+
 /**
  * Resolves a FileEntity (FileSystemFileHandle, legacy File, etc.) to a File.
  * Handles permission prompts and so on.
  * @public
  */
 export const resolveTrackFile = async (
-	directoryId: number,
-	entity: FileEntity,
+	options: ResolveTrackFileOptions,
 ): Promise<ResolveResult> => {
+	const { directoryId, entity, askPermission } = options
 	try {
 		let file: File | null = null
 
 		if (entity instanceof File) {
 			file = entity
 		} else if (isAndroid() && isChromiumBased()) {
-			file = await resolveAndroidWorkaround(directoryId, entity.name)
+			file = await resolveAndroidWorkaround(directoryId, entity.name, askPermission)
 		} else {
-			file = await resolveRegular(entity)
+			file = await resolveRegular(entity, askPermission)
 		}
 
 		if (file) {
