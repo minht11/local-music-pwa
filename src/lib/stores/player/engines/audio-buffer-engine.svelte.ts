@@ -1,12 +1,6 @@
-import { AudioBufferSink, BlobSource, FLAC, Input, type InputAudioTrack } from 'mediabunny'
+import { AudioBufferSink, BlobSource, FLAC, Input } from 'mediabunny'
 import type { AudioGraph } from '../audio-graph.ts'
 import type { AudioEngine, LoadResult } from './audio-engine.ts'
-
-interface ScheduledSource {
-	node: AudioBufferSourceNode
-	startAt: number
-	endAt: number
-}
 
 /**
  * Plays audio by streaming and decoding via Mediabunny, scheduling decoded
@@ -30,7 +24,8 @@ export class AudioBufferEngine implements AudioEngine {
 	#input: Input | null = null
 	#sink: AudioBufferSink | null = null
 
-	#scheduledSources: ScheduledSource[] = []
+	#scheduledSources = new Set<AudioBufferSourceNode>()
+	#lastSource: AudioBufferSourceNode | null = null
 
 	#scheduleBase = 0
 
@@ -150,19 +145,12 @@ export class AudioBufferEngine implements AudioEngine {
 				const startAt = base + (timestamp - seekTo)
 				source.start(startAt)
 
-				const entry: ScheduledSource = {
-					node: source,
-					startAt,
-					endAt: startAt + buffer.duration,
-				}
-				this.#scheduledSources.push(entry)
+				this.#scheduledSources.add(source)
+				this.#lastSource = source
 
 				// Remove from array when played so the AudioBuffer can be GC'd.
 				source.addEventListener('ended', () => {
-					const idx = this.#scheduledSources.indexOf(entry)
-					if (idx !== -1) {
-						this.#scheduledSources.splice(idx, 1)
-					}
+					this.#scheduledSources.delete(source)
 				})
 			}
 		} catch {
@@ -174,32 +162,23 @@ export class AudioBufferEngine implements AudioEngine {
 			return
 		}
 
-		// Scheduling complete. Wire onEnded to the last scheduled node.
 		if (signal.aborted) {
 			return
 		}
 
-		const last = this.#scheduledSources.at(-1)
-		if (!last) {
+		const last = this.#lastSource
+		if (!(last && this.#scheduledSources.has(last))) {
 			// No buffers were scheduled (empty or fully-past-end seek).
 			this.onEnded?.()
 			return
 		}
 
-		// Guard against the race where the last node finished playing before
-		// we reached this point (e.g. seeking to 1 second before the end).
-		const now = this.#graph.context.currentTime
-		if (now >= last.endAt) {
+		// The last node may have already ended during the scheduling loop.
+		last.addEventListener('ended', () => {
 			if (!signal.aborted) {
 				this.onEnded?.()
 			}
-		} else {
-			last.node.addEventListener('ended', () => {
-				if (!signal.aborted) {
-					this.onEnded?.()
-				}
-			})
-		}
+		})
 	}
 
 	#startCurrentTimeLoop(signal: AbortSignal): void {
@@ -233,7 +212,7 @@ export class AudioBufferEngine implements AudioEngine {
 		this.#abortController?.abort()
 		this.#abortController = null
 
-		for (const { node } of this.#scheduledSources) {
+		for (const node of this.#scheduledSources) {
 			try {
 				node.stop()
 				node.disconnect()
@@ -241,7 +220,7 @@ export class AudioBufferEngine implements AudioEngine {
 				// Already stopped or never started.
 			}
 		}
-		this.#scheduledSources = []
+		this.#scheduledSources.clear()
 		this.loading = false
 
 		const controller = new AbortController()
