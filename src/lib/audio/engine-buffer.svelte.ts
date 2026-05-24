@@ -207,6 +207,7 @@ export class AudioBufferEngine implements AudioEngine {
 
 		this.#abortController?.abort()
 		this.#abortController = null
+		this.#lastSource = null
 
 		for (const node of this.#scheduledSources) {
 			try {

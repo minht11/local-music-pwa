@@ -2,7 +2,7 @@ import { canTrackUseGapless } from '$lib/helpers/gapless/capability.ts'
 import type { TrackData } from '$lib/library/get/value-queries.ts'
 import type { AudioGraph } from './audio-graph.ts'
 import type { AudioEngine, LoadResult } from './engine.ts'
-import { AudioBufferEngine } from './engine-buffer.ts'
+import { AudioBufferEngine } from './engine-buffer.svelte.ts'
 import { HTMLAudioEngine } from './engine-html.svelte.ts'
 
 interface EngineCoordinatorOptions {
@@ -102,7 +102,10 @@ export class EngineCoordinator {
 
 	#handleCurrentEnded(): void {
 		if (this.#next) {
-			// Next engine is already playing, promote it to current
+			// Promote the pre-buffered next engine to current.
+			// AudioBufferEngine: buffers are already scheduled on the AudioContext
+			// timeline and play automatically. HTMLAudioEngine: loaded but idle,
+			// play() is what actually starts the element.
 			const newCurrent = this.#next
 
 			this.#current?.dispose()
@@ -111,7 +114,7 @@ export class EngineCoordinator {
 
 			this.#wireCurrent(newCurrent)
 
-			newCurrent.play()
+			void newCurrent.play()
 		}
 
 		this.#options.onTrackEnded()

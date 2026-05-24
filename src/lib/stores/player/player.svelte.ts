@@ -28,7 +28,7 @@ export class PlayerStore {
 	readonly #coordinator = new EngineCoordinator(this.#graph, {
 		onTrackEnded: () => this.#handleTrackEnded(),
 		onError: () => this.#handleEngineError(),
-		isGaplessEnabled: () => this.equalizer.enabled,
+		isGaplessEnabled: () => this.#main.gaplessPlaybackEnabled,
 	})
 	readonly #queue = new QueueStore()
 	readonly equalizer = new EqualizerStore(this.#graph)
@@ -327,7 +327,6 @@ export class PlayerStore {
 	#setupMediaSession(): void {
 		const ms = navigator.mediaSession
 		const setAction = ms.setActionHandler.bind(ms)
-		ms.setPositionState
 
 		setAction('play', () => void this.play())
 		setAction('pause', () => this.pause())

@@ -13,6 +13,7 @@
 	import { supportsChangingAudioVolume } from '$lib/helpers/audio.ts'
 	import { Debounced } from '$lib/helpers/debounced.svelte.ts'
 	import { isFileSystemAccessSupported } from '$lib/helpers/file-system.ts'
+	import { isGaplessSupported } from '$lib/helpers/gapless/capability.js'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
 	import {
@@ -288,21 +289,23 @@
 
 	<Separator />
 
-	<div class="flex items-center justify-between p-4">
-		<div class="flex items-center gap-2">
-			<div>{m.settingsGaplessPlayback()}</div>
+	{#if isGaplessSupported()}
+		<div class="flex items-center justify-between p-4">
+			<div class="flex items-center gap-2">
+				<div>{m.settingsGaplessPlayback()}</div>
 
-			<button
-				type="button"
-				class="interactable flex size-6 items-center justify-center rounded-full text-onSurfaceVariant"
-				{@attach tooltip(m.settingsGaplessPlaybackInfo())}
-			>
-				<Icon type="information" class="size-4" />
-			</button>
+				<button
+					type="button"
+					class="interactable flex size-6 items-center justify-center rounded-full text-onSurfaceVariant"
+					{@attach tooltip(m.settingsGaplessPlaybackInfo())}
+				>
+					<Icon type="information" class="size-4" />
+				</button>
+			</div>
+
+			<Switch bind:checked={mainStore.gaplessPlaybackEnabled} />
 		</div>
-
-		<Switch bind:checked={mainStore.gaplessPlaybackEnabled} />
-	</div>
+	{/if}
 </section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
