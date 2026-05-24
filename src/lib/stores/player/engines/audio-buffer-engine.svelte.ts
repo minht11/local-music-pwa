@@ -51,11 +51,11 @@ export class AudioBufferEngine implements AudioEngine {
 	onEnded: (() => void) | null = null
 	onError: (() => void) | null = null
 
-	constructor(graph: AudioGraph, trackId: number) {
+	constructor(graph: AudioGraph, trackId: number, duration: number) {
 		this.#graph = graph
 		this.trackId = trackId
-		// GainNode created once; stays connected for engine lifetime.
-		// dispose() disconnects it.
+		this.duration = duration
+
 		this.#gainNode = graph.context.createGain()
 		this.#gainNode.connect(graph.inputNode)
 	}
@@ -133,10 +133,6 @@ export class AudioBufferEngine implements AudioEngine {
 			// getDurationFromMetadata() reads only file headers — fast.
 			// FLAC STREAMINFO always contains totalSamples so this never falls back
 			// to the expensive computeDuration() scan in practice.
-			const duration =
-				(await audioTrack.getDurationFromMetadata()) ?? (await audioTrack.computeDuration())
-
-			this.duration = duration
 			this.loading = false
 
 			if (this.#generation !== gen) {
@@ -148,12 +144,12 @@ export class AudioBufferEngine implements AudioEngine {
 			this.#startCurrentTimeLoop(gen)
 			void this.#scheduleSink(audioTrack, seekTo, base, gen)
 			console.log(
-				`Scheduled AudioBufferEngine with seekTo=${seekTo}, scheduleAt=${scheduleAt}, duration=${duration}`,
+				`Scheduled AudioBufferEngine with seekTo=${seekTo}, scheduleAt=${scheduleAt}`,
 				audioTrack,
 			)
 
 			// endTime is sample-accurate for gapless scheduling.
-			return { status: 'loaded', endTime: base + (duration - seekTo) }
+			return { status: 'loaded', endTime: base + (this.duration - seekTo) }
 		} catch {
 			this.loading = false
 			if (this.#generation === gen) {

@@ -42,10 +42,6 @@ export class EngineCoordinator {
 	currentTime: number = $derived(this.#current?.currentTime ?? 0)
 	duration: number = $derived(this.#current?.duration ?? 0)
 
-	/**
-	 * Fired after every natural track end, whether gapless or not.
-	 * PlayerStore uses this to advance the queue index.
-	 */
 	onTrackEnded: (() => void) | null = null
 
 	/** Fired when an unrecoverable error occurs on the current engine. */
@@ -129,7 +125,7 @@ export class EngineCoordinator {
 
 	#createEngine(track: TrackData): AudioEngine {
 		if (this.#gaplessEnabled() && canTrackUseGapless(track)) {
-			return new AudioBufferEngine(this.#graph, track.id)
+			return new AudioBufferEngine(this.#graph, track.id, track.duration)
 		}
 
 		return new HTMLAudioEngine(this.#graph, track.id)
