@@ -437,7 +437,7 @@ export class PlayerStore {
 
 		if (isSameTrack) {
 			// Reset time to 0
-			void this.seek(0)
+			this.seek(0)
 		} else {
 			// Update ui time instantly, but keep audio.currentTime
 			// until play history is saved.

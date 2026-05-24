@@ -6,7 +6,7 @@ import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte
 import { resolveTrackFile } from '$lib/helpers/file-resolver.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
-import { formatArtists, truncate } from '$lib/helpers/utils/text.ts'
+import { formatArtists, formatNameOrUnknown, truncate } from '$lib/helpers/utils/text.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
 import type { TrackData } from '$lib/library/get/value-queries.ts'
 import { createTrackQuery } from '$lib/library/get/value-queries.ts'
@@ -159,7 +159,11 @@ export class PlayerStore {
 			const current = this.currentTime
 			const remaining = duration - current
 
-			if (duration <= 0 || remaining > PRE_BUFFER_THRESHOLD_SECONDS) {
+			if (
+				duration <= 0 ||
+				remaining > PRE_BUFFER_THRESHOLD_SECONDS ||
+				this.repeat === 'one'
+			) {
 				return
 			}
 
@@ -263,7 +267,7 @@ export class PlayerStore {
 
 		if (isSameTrack) {
 			// Reset time to 0
-			void this.seek(0)
+			this.seek(0)
 		} else {
 			// Update ui time instantly
 			this.currentTime = 0
@@ -361,11 +365,10 @@ export class PlayerStore {
 			ms.metadata = new MediaMetadata({
 				title: track.name,
 				artist: formatArtists(track.artists),
-				album: track.album,
+				album: formatNameOrUnknown(track.album),
 				artwork: [
 					{
 						src: this.artworkSrc ?? fallbackArtworkSrc,
-						sizes: '512x512',
 					},
 				],
 			})

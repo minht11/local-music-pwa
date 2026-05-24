@@ -2,6 +2,8 @@ import { AudioBufferSink, BlobSource, FLAC, Input } from 'mediabunny'
 import type { AudioGraph } from './audio-graph.ts'
 import type { AudioEngine, LoadResult } from './engine.ts'
 
+const FORMATS = [FLAC]
+
 /**
  * Plays audio by streaming and decoding via Mediabunny, scheduling decoded
  * AudioBuffers directly on the Web Audio API timeline.
@@ -58,7 +60,7 @@ export class AudioBufferEngine implements AudioEngine {
 		this.loading = true
 
 		try {
-			const input = new Input({ formats: [FLAC], source: new BlobSource(blob) })
+			const input = new Input({ formats: FORMATS, source: new BlobSource(blob) })
 			this.#input = input
 
 			const audioTrack = await input.getPrimaryAudioTrack()

@@ -103,7 +103,6 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#audio.ontimeupdate = null
 		this.#audio.ondurationchange = null
 		this.#audio.onerror = null
-		this.#audio.onloadedmetadata = null
 	}
 
 	#clearSrc(): void {
