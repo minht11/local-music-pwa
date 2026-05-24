@@ -86,6 +86,9 @@ export class PlayerStore {
 		this.#setupTrackLoadEffect()
 		this.#setupPreBufferEffect()
 		this.#setupMediaSession()
+
+		// TODO. Handle volume, playbackRate, and preservePitch options.
+		// TODO. Should skip showing error when prebuffered track fails to load.
 	}
 
 	#setupTrackLoadEffect(): void {
