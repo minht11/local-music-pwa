@@ -251,7 +251,6 @@ export class AudioBufferEngine implements AudioEngine {
 		this.#input?.dispose()
 		this.#input = null
 
-		// const now = this.#graph.initialized ? this.#graph.context.currentTime : 0
 		for (const { node } of this.#scheduledSources) {
 			try {
 				node.stop()

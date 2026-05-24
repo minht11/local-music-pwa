@@ -83,12 +83,6 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#currentSrc = URL.createObjectURL(blob)
 		this.#audio.src = this.#currentSrc
 
-		// Restore permanent error handler.
-		this.#audio.onerror = () => {
-			this.loading = false
-			this.onError?.()
-		}
-
 		if (this.#generation !== gen) {
 			return { status: 'failed', reason: 'superseded' }
 		}

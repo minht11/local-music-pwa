@@ -72,15 +72,12 @@ export class EngineCoordinator {
 	async preloadNext(track: TrackData, blob: Blob): Promise<LoadResult> {
 		this.#disposeNext()
 
-		const currentIsBuffer = this.#current instanceof AudioBufferEngine
 		const nextEngine = this.#createEngine(track)
 		this.#next = nextEngine
 
 		const scheduleAt =
-			currentIsBuffer && nextEngine instanceof AudioBufferEngine
-				? this.#current instanceof AudioBufferEngine
-					? this.#current?.endTime
-					: undefined
+			this.#current instanceof AudioBufferEngine && nextEngine instanceof AudioBufferEngine
+				? this.#current?.endTime
 				: undefined
 
 		return await nextEngine.load(blob, scheduleAt)
