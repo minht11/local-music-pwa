@@ -5,6 +5,12 @@ import { AudioBufferEngine } from './audio-buffer-engine.svelte.ts'
 import type { AudioEngine, LoadResult } from './audio-engine.ts'
 import { HTMLAudioEngine } from './html-audio-engine.svelte.ts'
 
+interface EngineCoordinatorOptions {
+	onTrackEnded: () => void
+	onError: () => void
+	isGaplessEnabled: () => boolean
+}
+
 /**
  * Manages two AudioEngine instances: `#current` (playing now) and `#next`
  * (pre-buffered for gapless transition or crossfade).
@@ -24,7 +30,7 @@ import { HTMLAudioEngine } from './html-audio-engine.svelte.ts'
  */
 export class EngineCoordinator {
 	readonly #graph: AudioGraph
-	readonly #gaplessEnabled: () => boolean
+	readonly #options: EngineCoordinatorOptions
 
 	#current: AudioEngine | null = $state(null)
 	#next: AudioEngine | null = $state(null)
@@ -33,19 +39,13 @@ export class EngineCoordinator {
 		return this.#current?.trackId ?? null
 	}
 
-	// Delegated reactive state — updates whenever the current engine changes.
-	loading: boolean = $derived(this.#current?.loading ?? false)
-	currentTime: number = $derived(this.#current?.currentTime ?? 0)
-	duration: number = $derived(this.#current?.duration ?? 0)
+	readonly loading: boolean = $derived(this.#current?.loading ?? false)
+	readonly currentTime: number = $derived(this.#current?.currentTime ?? 0)
+	readonly duration: number = $derived(this.#current?.duration ?? 0)
 
-	onTrackEnded: (() => void) | null = null
-
-	/** Fired when an unrecoverable error occurs on the current engine. */
-	onError: (() => void) | null = null
-
-	constructor(graph: AudioGraph, gaplessEnabled: () => boolean) {
+	constructor(graph: AudioGraph, options: EngineCoordinatorOptions) {
 		this.#graph = graph
-		this.#gaplessEnabled = gaplessEnabled
+		this.#options = options
 	}
 
 	/**
@@ -53,7 +53,6 @@ export class EngineCoordinator {
 	 * Aborts any existing current and next engines.
 	 */
 	loadCurrent(track: TrackData, blob: Blob): Promise<LoadResult> {
-		// If a next engine was pre-buffered, discard it.
 		this.#disposeNext()
 
 		const engine = this.#createEngine(track)
@@ -70,7 +69,7 @@ export class EngineCoordinator {
 	 * track at exactly the current track's end time (true gapless).
 	 * For any other combination, loads immediately without scheduling.
 	 */
-	preloadNext(track: TrackData, blob: Blob): Promise<LoadResult> {
+	async preloadNext(track: TrackData, blob: Blob): Promise<LoadResult> {
 		this.#disposeNext()
 
 		const currentIsBuffer = this.#current instanceof AudioBufferEngine
@@ -84,7 +83,7 @@ export class EngineCoordinator {
 					: undefined
 				: undefined
 
-		return nextEngine.load(blob, scheduleAt)
+		return await nextEngine.load(blob, scheduleAt)
 	}
 
 	async play(): Promise<void> {
@@ -111,7 +110,7 @@ export class EngineCoordinator {
 	}
 
 	#createEngine(track: TrackData): AudioEngine {
-		if (this.#gaplessEnabled() && canTrackUseGapless(track)) {
+		if (this.#options.isGaplessEnabled() && canTrackUseGapless(track)) {
 			return new AudioBufferEngine(this.#graph, track.id, track.duration)
 		}
 
@@ -120,31 +119,24 @@ export class EngineCoordinator {
 
 	#wireCurrent(engine: AudioEngine): void {
 		engine.onEnded = () => this.#handleCurrentEnded()
-		engine.onError = () => this.onError?.()
+		engine.onError = () => this.#options.onError()
 	}
 
 	#handleCurrentEnded(): void {
-		console.log('[Coordinator] handleCurrentEnded', {
-			hasNext: !!this.#next,
-			currentTrackId: this.currentTrackId,
-		})
-
 		if (this.#next) {
-			// Gapless: next engine is already playing.
-			// Promote it to current and fire onTrackEnded so PlayerStore
-			// advances the queue index.
-			const next = this.#next
+			// Next engine is already playing, promote it to current
+			const newCurrent = this.#next
 
 			this.#current?.dispose()
-			this.#current = next
+			this.#current = newCurrent
 			this.#next = null
 
-			// Wire onEnded for the (now current) next engine's eventual end.
-			next.onEnded = () => this.#handleCurrentEnded()
+			this.#wireCurrent(newCurrent)
+
+			newCurrent.play()
 		}
 
-		// In both gapless and non-gapless cases, tell PlayerStore the track changed.
-		this.onTrackEnded?.()
+		this.#options.onTrackEnded()
 	}
 
 	#disposeNext(): void {

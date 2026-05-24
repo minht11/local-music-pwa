@@ -34,10 +34,11 @@ export class PlayerStore {
 	// ─── Infrastructure ───────────────────────────────────────────────────────
 
 	readonly #graph = new AudioGraph()
-	readonly #coordinator = new EngineCoordinator(
-		this.#graph,
-		() => this.#main.gaplessPlaybackEnabled,
-	)
+	readonly #coordinator = new EngineCoordinator(this.#graph, {
+		onTrackEnded: () => this.#handleTrackEnded(),
+		onError: () => this.#handleEngineError(),
+		isGaplessEnabled: () => this.equalizer.enabled,
+	})
 	readonly #queue = new QueueStore()
 	readonly equalizer = new EqualizerStore(this.#graph)
 
@@ -93,9 +94,6 @@ export class PlayerStore {
 		persist('player', this.#queue, ['shuffle'])
 
 		this.equalizer.init()
-
-		this.#coordinator.onTrackEnded = () => this.#handleTrackEnded()
-		this.#coordinator.onError = () => this.#handleEngineError()
 
 		this.#setupTrackLoadEffect()
 		this.#setupPreBufferEffect()

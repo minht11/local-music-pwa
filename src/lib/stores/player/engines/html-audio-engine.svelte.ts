@@ -60,10 +60,6 @@ export class HTMLAudioEngine implements AudioEngine {
 		}
 	}
 
-	/**
-	 * Creates the Web Audio graph connection on first call.
-	 * Safe to call multiple times — idempotent.
-	 */
 	#ensureGraphConnection(): void {
 		if (this.#gainNode) {
 			return
@@ -76,7 +72,7 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#gainNode.connect(this.#graph.inputNode)
 	}
 
-	async load(blob: Blob, _scheduleAt?: number): Promise<LoadResult> {
+	load(blob: Blob, _scheduleAt?: number): LoadResult {
 		this.#generation += 1
 		const gen = this.#generation
 
@@ -84,14 +80,8 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#clearSrc()
 		this.#ensureGraphConnection()
 
-		// Wait for metadata so we can return a meaningful endTime.
-		const metadataResult = await new Promise<'loaded' | 'error'>((resolve) => {
-			this.#audio.onloadedmetadata = () => resolve('loaded')
-			// Override onerror temporarily to capture load errors.
-			this.#audio.onerror = () => resolve('error')
-			this.#currentSrc = URL.createObjectURL(blob)
-			this.#audio.src = this.#currentSrc
-		})
+		this.#currentSrc = URL.createObjectURL(blob)
+		this.#audio.src = this.#currentSrc
 
 		// Restore permanent error handler.
 		this.#audio.onerror = () => {
@@ -105,16 +95,10 @@ export class HTMLAudioEngine implements AudioEngine {
 
 		this.loading = false
 
-		if (metadataResult === 'error') {
-			return { status: 'failed', reason: 'error' }
-		}
-
 		const duration = Number.isFinite(this.#audio.duration) ? this.#audio.duration : 0
 		this.duration = duration
 
-		// endTime is approximate for HTMLAudioEngine — not used for gapless scheduling.
-		const endTime = this.#graph.context.currentTime + duration
-		return { status: 'loaded', endTime }
+		return { status: 'loaded' }
 	}
 
 	async play(): Promise<void> {
