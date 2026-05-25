@@ -1,11 +1,19 @@
 import { throttle } from '$lib/helpers/utils/throttle'
 import type { AudioGraph } from './audio-graph.ts'
-import { type AudioEngine, CURRENT_TIME_UPDATE_TIMEOUT_MS, type LoadResult } from './engine.ts'
+import {
+	type AudioEngine,
+	type AudioEngineOptions,
+	CURRENT_TIME_UPDATE_TIMEOUT_MS,
+	type LoadResult,
+} from './engine.ts'
 
 export class HTMLAudioEngine implements AudioEngine {
 	readonly #audio = new Audio()
 	readonly #graph: AudioGraph
 	readonly trackId: number
+
+	readonly #signal: AbortSignal
+	readonly #blob: Blob
 
 	#gainNode: GainNode | null = null
 	#sourceNode: MediaElementAudioSourceNode | null = null
@@ -18,11 +26,22 @@ export class HTMLAudioEngine implements AudioEngine {
 	onEnded: (() => void) | null = null
 	onError: (() => void) | null = null
 
-	constructor(graph: AudioGraph, trackId: number, duration = 0) {
-		this.#graph = graph
-		this.trackId = trackId
-		this.duration = duration
+	constructor(options: AudioEngineOptions) {
+		this.#graph = options.audioGraph
+		this.trackId = options.trackId
+		this.duration = options.duration
+		this.#signal = options.signal
+		this.#blob = options.blob
 		this.#setupElement()
+
+		this.#signal.addEventListener(
+			'abort',
+			() => {
+				// TODO. Should this just be loading=false and clearSrc instead of dispose()?
+				this.dispose()
+			},
+			{ once: true },
+		)
 	}
 
 	#setupElement(): void {
@@ -59,18 +78,15 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#gainNode.connect(this.#graph.inputNode)
 	}
 
-	load(blob: Blob, _scheduleAt?: number): Promise<LoadResult> {
+	load(_scheduledAt?: number): Promise<LoadResult> {
 		this.loading = true
 		this.#clearSrc()
 		this.#ensureGraphConnection()
 
-		this.#currentSrc = URL.createObjectURL(blob)
+		this.#currentSrc = URL.createObjectURL(this.#blob)
 		this.#audio.src = this.#currentSrc
 
 		this.loading = false
-
-		const duration = Number.isFinite(this.#audio.duration) ? this.#audio.duration : 0
-		this.duration = duration
 
 		return Promise.resolve({ status: 'loaded' })
 	}
@@ -89,13 +105,9 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#audio.currentTime = time
 	}
 
-	abort(): void {
+	dispose(): void {
 		this.loading = false
 		this.#clearSrc()
-	}
-
-	dispose(): void {
-		this.abort()
 		this.#gainNode?.disconnect()
 		this.#sourceNode?.disconnect()
 		this.#gainNode = null

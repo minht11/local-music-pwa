@@ -1,3 +1,5 @@
+import type { AudioGraph } from './audio-graph.ts'
+
 /** @public */
 export type LoadFailReason = 'permission-denied' | 'not-found' | 'error'
 
@@ -7,6 +9,14 @@ export type LoadResult =
 	| { status: 'failed'; reason: LoadFailReason }
 
 export const CURRENT_TIME_UPDATE_TIMEOUT_MS = 250
+
+export interface AudioEngineOptions {
+	audioGraph: AudioGraph
+	trackId: number
+	duration: number
+	blob: Blob
+	signal: AbortSignal
+}
 
 /**
  * Common interface for all playback engines.
@@ -23,13 +33,9 @@ export interface AudioEngine {
 	readonly duration: number
 
 	/**
-	 * Load and begin scheduling the provided blob.
-	 *
-	 * @param blob       The audio file as a Blob (from resolveTrackFile).
-	 * @param scheduleAt AudioContext time at which playback should begin.
-	 *                   Omit to start as soon as possible.
+	 * Load the track's audio data and schedule it for playback at the specified time.
 	 */
-	load: (blob: Blob, scheduleAt?: number) => Promise<LoadResult>
+	load: (scheduledAt?: number) => Promise<LoadResult>
 
 	play: () => Promise<void>
 	pause: () => void
@@ -39,12 +45,6 @@ export interface AudioEngine {
 	 * Aborts any pre-scheduled buffers and re-schedules from the new time.
 	 */
 	seek: (time: number) => void
-
-	/**
-	 * Cancel any in-progress load and stop all scheduled audio.
-	 * Does not disconnect from the audio graph (call dispose for that).
-	 */
-	abort: () => void
 
 	/**
 	 * abort() + disconnect from the audio graph.

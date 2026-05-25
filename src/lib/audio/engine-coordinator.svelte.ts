@@ -1,7 +1,7 @@
 import { canTrackUseGapless } from '$lib/helpers/gapless/capability.ts'
 import type { TrackData } from '$lib/library/get/value-queries.ts'
 import type { AudioGraph } from './audio-graph.ts'
-import type { AudioEngine, LoadFailReason } from './engine.ts'
+import type { AudioEngine, AudioEngineOptions, LoadFailReason } from './engine.ts'
 import { AudioBufferEngine } from './engine-buffer.svelte.ts'
 import { HTMLAudioEngine } from './engine-html.svelte.ts'
 
@@ -11,54 +11,16 @@ export type LoaderResult =
 
 export type TrackLoader = () => Promise<LoaderResult>
 
-type SharedState =
+type EngineState =
 	| { status: 'idle' }
 	| { status: 'loading'; trackId: number; controller: AbortController }
-	| { status: 'ready'; trackId: number; engine: AudioEngine }
-
-type CurrentState = SharedState | { status: 'failed'; trackId: number; reason: LoadFailReason }
-
-type NextState = SharedState | { status: 'unavailable'; trackId: number }
-
-type EngineLoadOutcome =
-	| { status: 'ok' }
-	| { status: 'aborted' }
-	| { status: 'failed'; reason: LoadFailReason }
-
-const runLoader = async (
-	loader: TrackLoader,
-	signal: AbortSignal,
-): Promise<LoaderResult | null> => {
-	const data = await loader().catch(() => ({ status: 'error' }) as const)
-
-	return signal.aborted ? null : data
-}
-
-const loadEngine = async (
-	engine: AudioEngine,
-	file: File,
-	signal: AbortSignal,
-	scheduleAt?: number,
-): Promise<EngineLoadOutcome> => {
-	const loaded = await engine.load(file, scheduleAt)
-
-	if (signal.aborted) {
-		engine.dispose()
-
-		return { status: 'aborted' }
-	}
-
-	if (loaded.status === 'loaded') {
-		return { status: 'ok' }
-	}
-
-	return loaded
-}
+	| { status: 'ready'; trackId: number; engine: AudioEngine; controller: AbortController }
+	| { status: 'failed'; trackId: number; reason: LoadFailReason | 'unavailable' }
 
 interface EngineCoordinatorOptions {
-	onTrackEnd: () => 'advance' | 'repeat'
-	onTrackEnded: (wasGaplessPromotion: boolean) => void
-	onError: (reason: Exclude<LoadFailReason, 'superseded'>) => void
+	trackEndPolicy: () => 'advance' | 'repeat'
+	onTrackEnded: () => void
+	onError: (reason: LoadFailReason) => void
 	isGaplessEnabled: () => boolean
 }
 
@@ -67,8 +29,8 @@ export class EngineCoordinator {
 	readonly #graph: AudioGraph
 	readonly #options: EngineCoordinatorOptions
 
-	#current: CurrentState = $state({ status: 'idle' })
-	#next: NextState = $state({ status: 'idle' })
+	#current: Readonly<EngineState> = $state.raw({ status: 'idle' })
+	#next: Readonly<EngineState> = $state.raw({ status: 'idle' })
 
 	playing: boolean = $state(false)
 	duration: number = $state(0)
@@ -93,6 +55,10 @@ export class EngineCoordinator {
 	constructor(graph: AudioGraph, options: EngineCoordinatorOptions) {
 		this.#graph = graph
 		this.#options = options
+
+		if (import.meta.hot) {
+			this.abort()
+		}
 	}
 
 	/**
@@ -118,36 +84,19 @@ export class EngineCoordinator {
 		const controller = new AbortController()
 		this.#current = { status: 'loading', trackId, controller }
 
-		const data = await runLoader(loader, controller.signal)
-		if (data === null) {
+		const result = await this.#createAndLoadEngine(loader, controller.signal)
+		if (result.status === 'aborted') {
 			return
 		}
 
-		if (data.status !== 'loaded') {
+		if (result.status === 'failed') {
 			this.playing = false
-			this.#current = { status: 'failed', trackId, reason: data.status }
-			this.#options.onError(data.status)
+			this.#current = { status: 'failed', trackId, reason: result.reason }
+			this.#options.onError(result.reason)
 			return
 		}
 
-		const engine = this.#createEngine(data.track)
-		const outcome = await loadEngine(engine, data.file, controller.signal)
-		if (outcome.status === 'aborted') {
-			return
-		}
-
-		if (outcome.status === 'failed') {
-			this.playing = false
-			this.#current = { status: 'failed', trackId, reason: outcome.reason }
-			this.#options.onError(outcome.reason)
-
-			return
-		}
-
-		this.#readyCurrentWith(engine, trackId)
-		if (this.playing) {
-			void engine.play()
-		}
+		this.#readyCurrent(result.engine, trackId, controller)
 	}
 
 	/**
@@ -161,55 +110,48 @@ export class EngineCoordinator {
 			return
 		}
 
-		const current = this.#current
-		const gaplessPossible =
-			current.status === 'ready' &&
-			current.engine instanceof AudioBufferEngine &&
-			this.#options.isGaplessEnabled()
-
 		this.#teardownAndIdleNext()
 
+		const current = this.#current
+		const currentEngine = current.status === 'ready' ? current.engine : null
+
+		const gaplessPossible =
+			currentEngine instanceof AudioBufferEngine && this.#options.isGaplessEnabled()
+
 		if (!gaplessPossible) {
-			this.#next = { status: 'unavailable', trackId }
+			this.#next = { status: 'failed', trackId, reason: 'unavailable' }
 			return
 		}
 
 		const controller = new AbortController()
 		this.#next = { status: 'loading', trackId, controller }
 
-		const data = await runLoader(loader, controller.signal)
-		if (data === null) {
+		const wrappedLoader: TrackLoader = async () => {
+			const data = await loader()
+
+			if (data.status === 'loaded' && !this.#canUseGaplessForTrack(data.track)) {
+				return { status: 'error' }
+			}
+
+			return data
+		}
+
+		const result = await this.#createAndLoadEngine(
+			wrappedLoader,
+			controller.signal,
+			currentEngine.endTime,
+		)
+
+		if (result.status === 'aborted') {
 			return
 		}
 
-		if (data.status !== 'loaded') {
-			this.#next = { status: 'unavailable', trackId }
+		if (result.status === 'failed') {
+			this.#next = { status: 'failed', trackId, reason: 'unavailable' }
 			return
 		}
 
-		if (!this.#canUseGaplessForTrack(data.track)) {
-			this.#next = { status: 'unavailable', trackId }
-			return
-		}
-
-		// current.engine captured before the awaits above. If #current changed during
-		// the load, load() would have called #teardownAndIdleNext(), aborting our
-		// signal — the check above covers that race.
-		const currentEngine = current.engine as AudioBufferEngine
-		const engine = new AudioBufferEngine(this.#graph, trackId, data.track.duration)
-		const scheduleAt = currentEngine.endTime
-		const outcome = await loadEngine(engine, data.file, controller.signal, scheduleAt)
-
-		if (outcome.status === 'aborted') {
-			return
-		}
-
-		if (outcome.status === 'failed') {
-			this.#next = { status: 'unavailable', trackId }
-			return
-		}
-
-		this.#next = { status: 'ready', trackId, engine }
+		this.#next = { status: 'ready', trackId, engine: result.engine, controller }
 	}
 
 	play(): void {
@@ -246,7 +188,7 @@ export class EngineCoordinator {
 
 	#handleCurrentEnded(): void {
 		const next = this.#next
-		const policy = this.#options.onTrackEnd()
+		const policy = this.#options.trackEndPolicy()
 		const canPromote = next.status === 'ready' && policy === 'advance'
 
 		this.#teardownCurrent()
@@ -254,55 +196,79 @@ export class EngineCoordinator {
 
 		if (canPromote) {
 			this.#next = { status: 'idle' }
-			this.#readyCurrentWith(next.engine, next.trackId)
-			if (this.playing) {
-				void next.engine.play()
-			}
-			this.#options.onTrackEnded(true)
+			this.#readyCurrent(next.engine, next.trackId, next.controller)
 		} else {
 			this.#teardownAndIdleNext()
-			this.#options.onTrackEnded(false)
 		}
+
+		this.#options.onTrackEnded()
 	}
 
 	#canUseGaplessForTrack(track: TrackData): boolean {
 		return this.#options.isGaplessEnabled() && canTrackUseGapless(track)
 	}
 
-	#createEngine(track: TrackData): AudioEngine {
-		if (this.#canUseGaplessForTrack(track)) {
-			return new AudioBufferEngine(this.#graph, track.id, track.duration)
+	async #createAndLoadEngine(loader: TrackLoader, signal: AbortSignal, scheduleAt?: number) {
+		const data = await loader().catch(() => ({ status: 'error' }) as const)
+
+		if (signal.aborted) {
+			return { status: 'aborted' } as const
 		}
-		return new HTMLAudioEngine(this.#graph, track.id, track.duration)
+
+		if (data.status !== 'loaded') {
+			return { status: 'failed', reason: data.status } as const
+		}
+
+		const engine = this.#createEngine(data.track, data.file, signal)
+		const loadOutcome = await engine.load(scheduleAt)
+
+		if (loadOutcome.status === 'loaded') {
+			return { status: 'loaded', engine } as const
+		}
+
+		return loadOutcome
 	}
 
-	#readyCurrentWith(engine: AudioEngine, trackId: number): void {
+	#createEngine(track: TrackData, blob: Blob, signal: AbortSignal): AudioEngine {
+		const options: AudioEngineOptions = {
+			audioGraph: this.#graph,
+			trackId: track.id,
+			duration: track.duration,
+			blob,
+			signal,
+		}
+
+		if (this.#canUseGaplessForTrack(track)) {
+			return new AudioBufferEngine(options)
+		}
+
+		return new HTMLAudioEngine(options)
+	}
+
+	#readyCurrent(engine: AudioEngine, trackId: number, controller: AbortController): void {
 		engine.onEnded = () => this.#handleCurrentEnded()
 		engine.onError = () => this.#options.onError('error')
-		this.#current = { status: 'ready', trackId, engine }
+		this.#current = { status: 'ready', trackId, engine, controller }
 		this.duration = engine.duration
+
+		if (this.playing) {
+			void engine.play()
+		}
 	}
 
-	#teardown(slot: SharedState): void {
-		if (slot.status === 'loading') {
-			slot.controller.abort()
-		} else if (slot.status === 'ready') {
-			slot.engine.dispose()
+	#teardown(engineState: EngineState): void {
+		if (engineState.status === 'loading' || engineState.status === 'ready') {
+			engineState.controller.abort()
 		}
 	}
 
 	#teardownCurrent(): void {
-		const current = this.#current
-		if (current.status === 'loading' || current.status === 'ready') {
-			this.#teardown(current)
-		}
+		this.#teardown(this.#current)
 	}
 
 	#teardownAndIdleNext(): void {
-		const next = this.#next
-		if (next.status === 'loading' || next.status === 'ready') {
-			this.#teardown(next)
-		}
+		this.#teardown(this.#next)
+
 		this.#next = { status: 'idle' }
 	}
 }

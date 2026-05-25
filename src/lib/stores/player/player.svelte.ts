@@ -24,8 +24,8 @@ export const PLAYER_PLAYBACK_RATE_MAX = 2
 export class PlayerStore {
 	readonly #graph = new AudioGraph()
 	readonly #coordinator = new EngineCoordinator(this.#graph, {
-		onTrackEnd: () => (this.repeat === 'one' ? 'repeat' : 'advance'),
-		onTrackEnded: (wasGaplessPromotion) => this.#handleTrackEnded(wasGaplessPromotion),
+		trackEndPolicy: () => (this.repeat === 'one' ? 'repeat' : 'advance'),
+		onTrackEnded: () => this.#handleTrackEnded(),
 		onError: (reason) => this.#handleError(reason),
 		isGaplessEnabled: () => this.#main.gaplessPlaybackEnabled,
 	})
@@ -184,11 +184,10 @@ export class PlayerStore {
 		})
 	}
 
-	#handleTrackEnded(_wasGaplessPromotion: boolean): void {
+	#handleTrackEnded(): void {
 		if (this.repeat === 'one') {
 			// Coordinator is now idle (track ended, repeat policy discarded promotion).
-			// Reset position eagerly and reload — coordinator.playing is still true so auto-plays.
-			this.currentTime = 0
+			// coordinator.playing is still true so the reload will auto-play.
 			this.#loadRetry += 1
 			return
 		}
@@ -287,7 +286,7 @@ export class PlayerStore {
 	moveQueueItem = this.#queue.moveQueueItem
 	clearQueue = this.#queue.clearQueue
 
-	#handleError(reason: Exclude<LoadFailReason, 'superseded'>): void {
+	#handleError(reason: LoadFailReason): void {
 		const name = truncate(this.activeTrack?.name ?? 'Unknown', 30)
 		const errorMap = {
 			'not-found': m.playerAudioErrorNotFound,

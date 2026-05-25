@@ -1,7 +1,12 @@
 import { AudioBufferSink, BlobSource, FLAC, Input, InputDisposedError } from 'mediabunny'
 import { wait } from '$lib/helpers/utils/wait.ts'
 import type { AudioGraph } from './audio-graph.ts'
-import { type AudioEngine, CURRENT_TIME_UPDATE_TIMEOUT_MS, type LoadResult } from './engine.ts'
+import {
+	type AudioEngine,
+	type AudioEngineOptions,
+	CURRENT_TIME_UPDATE_TIMEOUT_MS,
+	type LoadResult,
+} from './engine.ts'
 
 const FORMATS = [FLAC]
 const LOOK_AHEAD_TIME_SECONDS = 2.0
@@ -31,13 +36,16 @@ export class AudioBufferEngine implements AudioEngine {
 	// File time we started from (non-zero after seek).
 	#seekOffset = 0
 
-	#abortController: AbortController | null = null
+	#schedulingController: AbortController | null = null
 
 	#timerId: number | null = null
 
 	loading: boolean = $state(false)
 	currentTime: number = $state(0)
 	duration: number = $state(0)
+
+	readonly #signal: AbortSignal
+	readonly #blob: Blob
 
 	get endTime(): number {
 		return this.#scheduleBase + (this.duration - this.#seekOffset)
@@ -46,22 +54,28 @@ export class AudioBufferEngine implements AudioEngine {
 	onEnded: (() => void) | null = null
 	onError: (() => void) | null = null
 
-	constructor(graph: AudioGraph, trackId: number, duration: number) {
-		this.#graph = graph
-		this.trackId = trackId
-		this.duration = duration
+	constructor(options: AudioEngineOptions) {
+		const { audioGraph } = options
 
-		this.#gainNode = graph.context.createGain()
-		this.#gainNode.connect(graph.inputNode)
+		this.#graph = audioGraph
+		this.trackId = options.trackId
+		this.duration = options.duration
+		this.#signal = options.signal
+		this.#blob = options.blob
+
+		this.#gainNode = audioGraph.context.createGain()
+		this.#gainNode.connect(audioGraph.inputNode)
+
+		this.#signal.addEventListener('abort', () => this.dispose(), { once: true })
 	}
 
-	async load(blob: Blob, scheduleAt?: number): Promise<LoadResult> {
-		const { signal } = this.#resetScheduling()
+	async load(scheduleAt?: number): Promise<LoadResult> {
+		const { schedulingSignal } = this.#resetScheduling()
 
 		this.loading = true
 
 		try {
-			const input = new Input({ formats: FORMATS, source: new BlobSource(blob) })
+			const input = new Input({ formats: FORMATS, source: new BlobSource(this.#blob) })
 			this.#input = input
 
 			const audioTrack = await input.getPrimaryAudioTrack()
@@ -74,10 +88,10 @@ export class AudioBufferEngine implements AudioEngine {
 
 			this.loading = false
 
-			return this.#startFrom(0, scheduleAt, signal)
+			return this.#startFrom(0, scheduleAt, schedulingSignal)
 		} catch {
 			this.loading = false
-			if (!signal.aborted) {
+			if (!schedulingSignal.aborted) {
 				this.onError?.()
 				return { status: 'failed', reason: 'error' }
 			}
@@ -88,8 +102,8 @@ export class AudioBufferEngine implements AudioEngine {
 
 	seek(time: number): void {
 		this.currentTime = time
-		const { signal } = this.#resetScheduling()
-		void this.#startFrom(time, undefined, signal)
+		const { schedulingSignal } = this.#resetScheduling()
+		void this.#startFrom(time, undefined, schedulingSignal)
 	}
 
 	play(): Promise<void> {
@@ -100,19 +114,21 @@ export class AudioBufferEngine implements AudioEngine {
 		void this.#graph.suspend()
 	}
 
-	abort(): void {
-		this.#resetScheduling()
-	}
-
 	dispose(): void {
-		this.abort()
+		this.#resetScheduling()
 		this.#input?.dispose()
 		this.#input = null
 		this.#sink = null
 		this.#gainNode.disconnect()
 	}
 
-	#startFrom(seekTo: number, scheduleAt: number | undefined, signal: AbortSignal): LoadResult {
+	#startFrom(
+		seekTo: number,
+		scheduleAt: number | undefined,
+		schedulingSignal: AbortSignal,
+	): LoadResult {
+		const signal = AbortSignal.any([schedulingSignal, this.#signal])
+
 		const ctx = this.#graph.context
 		const base = scheduleAt ?? ctx.currentTime
 		this.#scheduleBase = base
@@ -230,11 +246,11 @@ export class AudioBufferEngine implements AudioEngine {
 	 * Stop and disconnect all scheduled sources, aborting any in-progress load or
 	 * playback, and return a new AbortSignal for subsequent operations.
 	 */
-	#resetScheduling(): { signal: AbortSignal } {
+	#resetScheduling(): { schedulingSignal: AbortSignal } {
 		this.#stopCurrentTimeLoop()
 
-		this.#abortController?.abort()
-		this.#abortController = null
+		this.#schedulingController?.abort()
+		this.#schedulingController = null
 
 		for (const node of this.#scheduledSources) {
 			try {
@@ -252,8 +268,8 @@ export class AudioBufferEngine implements AudioEngine {
 		this.loading = false
 
 		const controller = new AbortController()
-		this.#abortController = controller
+		this.#schedulingController = controller
 
-		return { signal: controller.signal }
+		return { schedulingSignal: controller.signal }
 	}
 }
