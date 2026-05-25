@@ -1,4 +1,11 @@
-import { AudioBufferSink, BlobSource, FLAC, Input, InputDisposedError } from 'mediabunny'
+import {
+	AudioBufferSink,
+	BlobSource,
+	FLAC,
+	Input,
+	type InputAudioTrack,
+	InputDisposedError,
+} from 'mediabunny'
 import { wait } from '$lib/helpers/utils/wait.ts'
 import type { AudioGraph } from './audio-graph.ts'
 import {
@@ -26,7 +33,7 @@ export class AudioBufferEngine implements AudioEngine {
 	readonly trackId: number
 
 	#input: Input | null = null
-	#sink: AudioBufferSink | null = null
+	#audioTrack: InputAudioTrack | null = null
 
 	#scheduledSources = new Set<AudioBufferSourceNode>()
 
@@ -36,6 +43,7 @@ export class AudioBufferEngine implements AudioEngine {
 	#seekOffset = 0
 
 	#schedulingController: AbortController | null = null
+	#playbackRate = 1
 
 	#timerId: number | null = null
 
@@ -47,7 +55,7 @@ export class AudioBufferEngine implements AudioEngine {
 	readonly #blob: Blob
 
 	get endTime(): number {
-		return this.#scheduleBase + (this.duration - this.#seekOffset)
+		return this.#scheduleBase + (this.duration - this.#seekOffset) / this.#playbackRate
 	}
 
 	onEnded: (() => void) | null = null
@@ -83,7 +91,7 @@ export class AudioBufferEngine implements AudioEngine {
 				throw new Error('No audio track found')
 			}
 
-			this.#sink = new AudioBufferSink(audioTrack)
+			this.#audioTrack = audioTrack
 
 			this.loading = false
 
@@ -102,6 +110,14 @@ export class AudioBufferEngine implements AudioEngine {
 		void this.#startFrom(time, undefined, schedulingSignal)
 	}
 
+	setPlaybackRate(rate: number, _preservePitch: boolean): void {
+		const elapsed = this.#graph.context.currentTime - this.#scheduleBase
+		const currentPosition = this.#seekOffset + Math.max(0, elapsed * this.#playbackRate)
+		this.#playbackRate = rate
+		const { schedulingSignal } = this.#resetScheduling()
+		void this.#startFrom(currentPosition, undefined, schedulingSignal)
+	}
+
 	play(): Promise<void> {
 		return this.#graph.resume()
 	}
@@ -114,21 +130,25 @@ export class AudioBufferEngine implements AudioEngine {
 		this.#resetScheduling()
 		this.#input?.dispose()
 		this.#input = null
-		this.#sink = null
+		this.#audioTrack = null
 		this.#gainNode.disconnect()
 	}
 
 	#startFrom(seekTo: number, scheduleAt: number | undefined, schedulingSignal: AbortSignal) {
 		const signal = AbortSignal.any([schedulingSignal, this.#signal])
+		invariant(this.#audioTrack, 'Audio track should be loaded before starting playback')
+
+		// Recreating sink on every schedule, so rapid seek/rate-change
+		// calls don't corrupt Mediabunny's internal state
+		const sink = new AudioBufferSink(this.#audioTrack)
 
 		const ctx = this.#graph.context
 		const base = scheduleAt ?? ctx.currentTime
 		this.#scheduleBase = base
 		this.#seekOffset = seekTo
-		invariant(this.#sink, 'Sink should be initialized before starting playback')
 
 		this.#startCurrentTimeLoop(signal)
-		void this.#scheduleSink(this.#sink, seekTo, base, signal)
+		void this.#scheduleSink(sink, seekTo, base, signal)
 	}
 
 	async #scheduleSink(
@@ -147,6 +167,9 @@ export class AudioBufferEngine implements AudioEngine {
 			}
 		}
 
+		const { promise: signalPromise, resolve } = Promise.withResolvers<void>()
+		signal.addEventListener('abort', () => resolve(), { once: true })
+
 		try {
 			for await (const { buffer, timestamp } of sink.buffers(seekTo)) {
 				if (signal.aborted) {
@@ -154,7 +177,7 @@ export class AudioBufferEngine implements AudioEngine {
 				}
 
 				const ctx = this.#graph.context
-				const startAt = base + (timestamp - seekTo)
+				const startAt = base + (timestamp - seekTo) / this.#playbackRate
 
 				// Prevent memory bloat and decode only a few seconds ahead of the current play time.
 				while (startAt > ctx.currentTime + LOOK_AHEAD_TIME_SECONDS) {
@@ -168,7 +191,7 @@ export class AudioBufferEngine implements AudioEngine {
 						break
 					}
 
-					await wait(100)
+					await Promise.race([wait(100), signalPromise])
 				}
 
 				if (signal.aborted) {
@@ -177,6 +200,7 @@ export class AudioBufferEngine implements AudioEngine {
 
 				const source = ctx.createBufferSource()
 				source.buffer = buffer
+				source.playbackRate.value = this.#playbackRate
 				source.connect(this.#gainNode)
 				source.start(startAt)
 
@@ -215,7 +239,7 @@ export class AudioBufferEngine implements AudioEngine {
 			}
 
 			const elapsed = this.#graph.context.currentTime - this.#scheduleBase
-			this.currentTime = this.#seekOffset + Math.max(0, elapsed)
+			this.currentTime = this.#seekOffset + Math.max(0, elapsed * this.#playbackRate)
 			this.#timerId = window.setTimeout(tick, CURRENT_TIME_UPDATE_TIMEOUT_MS)
 		}
 

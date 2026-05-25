@@ -22,6 +22,9 @@ export class HTMLAudioEngine implements AudioEngine {
 	currentTime: number = $state(0)
 	duration: number = $state(0)
 
+	#playbackRate = 1
+	#preservePitch = true
+
 	onEnded: (() => void) | null = null
 	onError: (() => void) | null = null
 
@@ -52,6 +55,15 @@ export class HTMLAudioEngine implements AudioEngine {
 			this.duration = Number.isFinite(d) ? d : 0
 		}
 
+		const setPlaybackRate = () => {
+			audio.playbackRate = this.#playbackRate
+		}
+
+		audio.onloadedmetadata = () => {
+			// Audio change resets playbackRate
+			setPlaybackRate()
+		}
+
 		audio.onerror = () => {
 			this.loading = false
 			this.onError?.()
@@ -78,9 +90,24 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#currentSrc = URL.createObjectURL(this.#blob)
 		this.#audio.src = this.#currentSrc
 
+		const { promise, resolve } = Promise.withResolvers<void>()
+
+		this.#audio.onloadedmetadata = () => {
+			this.#updateAudioRate()
+			this.#audio.onloadedmetadata = null
+			resolve()
+		}
+
 		this.loading = false
 
-		return Promise.resolve()
+		return promise
+	}
+
+	setPlaybackRate(rate: number, preservePitch: boolean): void {
+		this.#playbackRate = rate
+		this.#preservePitch = preservePitch
+
+		this.#updateAudioRate()
 	}
 
 	async play(): Promise<void> {
@@ -108,6 +135,11 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#audio.ontimeupdate = null
 		this.#audio.ondurationchange = null
 		this.#audio.onerror = null
+	}
+
+	#updateAudioRate(): void {
+		this.#audio.playbackRate = this.#playbackRate
+		this.#audio.preservesPitch = this.#preservePitch
 	}
 
 	#clearSrc(): void {

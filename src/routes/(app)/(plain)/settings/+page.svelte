@@ -10,7 +10,6 @@
 	import Switch from '$lib/components/Switch.svelte'
 	import { isDatabaseOperationPending } from '$lib/db/lock-database.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
-	import { supportsChangingAudioVolume } from '$lib/helpers/audio.ts'
 	import { Debounced } from '$lib/helpers/debounced.svelte.ts'
 	import { isFileSystemAccessSupported } from '$lib/helpers/file-system.ts'
 	import { isGaplessSupported } from '$lib/helpers/gapless/capability.js'
@@ -205,15 +204,13 @@
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
 	{@render heading(m.player())}
 
-	{#if supportsChangingAudioVolume()}
-		<div class="flex items-center justify-between p-4">
-			<div>{m.settingsDisplayVolumeSlider()}</div>
+	<div class="flex items-center justify-between p-4">
+		<div>{m.settingsDisplayVolumeSlider()}</div>
 
-			<Switch bind:checked={mainStore.volumeSliderEnabled} />
-		</div>
+		<Switch bind:checked={mainStore.volumeSliderEnabled} />
+	</div>
 
-		<Separator />
-	{/if}
+	<Separator />
 
 	<div class="flex flex-col justify-between gap-y-4 p-4 sm:flex-row sm:items-center">
 		<div class="flex items-center gap-2">
@@ -271,25 +268,27 @@
 
 	<Separator />
 
-	<div class="flex items-center justify-between p-4">
-		<div class="flex items-center gap-2">
-			<div>{m.settingsPreservePitch()}</div>
+	{#if !mainStore.gaplessPlaybackEnabled}
+		<div class="flex items-center justify-between p-4">
+			<div class="flex items-center gap-2">
+				<div>{m.settingsPreservePitch()}</div>
 
-			<button
-				type="button"
-				class="interactable flex size-6 items-center justify-center rounded-full text-onSurfaceVariant"
-				{@attach tooltip(m.settingsPreservePitchInfo())}
-			>
-				<Icon type="information" class="size-4" />
-			</button>
+				<button
+					type="button"
+					class="interactable flex size-6 items-center justify-center rounded-full text-onSurfaceVariant"
+					{@attach tooltip(m.settingsPreservePitchInfo())}
+				>
+					<Icon type="information" class="size-4" />
+				</button>
+			</div>
+
+			<Switch bind:checked={player.preservePitch} />
 		</div>
-
-		<Switch bind:checked={player.preservePitch} />
-	</div>
-
-	<Separator />
+	{/if}
 
 	{#if isGaplessSupported()}
+		<Separator />
+
 		<div class="flex items-center justify-between p-4">
 			<div class="flex items-center gap-2">
 				<div>{m.settingsGaplessPlayback()}</div>

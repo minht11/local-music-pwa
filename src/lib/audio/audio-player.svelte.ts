@@ -38,6 +38,9 @@ export class AudioPlayer {
 	#current: Readonly<EngineState> = $state.raw({ status: 'idle' })
 	#next: Readonly<EngineState> = $state.raw({ status: 'idle' })
 
+	#playbackRate = 1
+	#preservePitch = true
+
 	playing: boolean = $state(false)
 	duration: number = $state(0)
 
@@ -253,9 +256,19 @@ export class AudioPlayer {
 		return new HTMLAudioEngine(options)
 	}
 
+	setPlaybackRate(rate: number, preservePitch: boolean): void {
+		this.#playbackRate = rate
+		this.#preservePitch = preservePitch
+		this.#teardownAndIdleNext()
+		if (this.#current.status === 'ready') {
+			this.#current.engine.setPlaybackRate(rate, preservePitch)
+		}
+	}
+
 	#readyCurrent(engine: AudioEngine, trackId: number, controller: AbortController): void {
 		engine.onEnded = () => this.#handleCurrentEnded()
 		engine.onError = () => this.#options.onError('error')
+		engine.setPlaybackRate(this.#playbackRate, this.#preservePitch)
 		this.#current = { status: 'ready', trackId, engine, controller }
 		this.duration = engine.duration
 

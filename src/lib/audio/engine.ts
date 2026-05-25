@@ -37,6 +37,7 @@ export interface AudioEngine {
 	 * Aborts any pre-scheduled buffers and re-schedules from the new time.
 	 */
 	seek: (time: number) => void
+	setPlaybackRate: (rate: number, preservePitch: boolean) => void
 
 	/**
 	 * abort() + disconnect from the audio graph.

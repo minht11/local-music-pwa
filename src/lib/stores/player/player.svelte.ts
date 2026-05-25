@@ -4,6 +4,7 @@ import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte
 import { type FileLoadFailReason, resolveTrackFile } from '$lib/helpers/file-resolver.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
+import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { formatArtists, formatNameOrUnknown, truncate } from '$lib/helpers/utils/text.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
 import { createTrackQuery } from '$lib/library/get/value-queries.ts'
@@ -89,12 +90,33 @@ export class PlayerStore {
 		this.#setupPreBufferEffect()
 		this.#setupMediaSession()
 		this.#setupVolumeEffect()
-		// TODO. Add playbackRate, preservePitch and playHistory.
+		this.#setupPlaybackRateEffect()
+		// TODO. Add playHistory.
 	}
 
 	#setupVolumeEffect(): void {
 		$effect(() => {
-			this.#graph.setVolume(this.muted ? 0 : this.volume / 100)
+			const volume = this.volume
+			const muted = this.muted
+
+			untrack(() => {
+				this.#graph.setVolume(muted ? 0 : volume / 100)
+			})
+		})
+	}
+
+	#setupPlaybackRateEffect(): void {
+		const updatePlaybackRate = debounce((rate: number, preservePitch: boolean) => {
+			this.#player.setPlaybackRate(rate, preservePitch)
+		}, 200)
+
+		$effect(() => {
+			const rate = this.playbackRate
+			const preservePitch = this.preservePitch && !this.#main.gaplessPlaybackEnabled
+
+			untrack(() => {
+				updatePlaybackRate(rate, preservePitch)
+			})
 		})
 	}
 
