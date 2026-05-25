@@ -94,6 +94,7 @@ export class AudioPlayer {
 		this.#current = { status: 'loading', trackId, controller }
 
 		const result = await this.#tryLoadingEngine(loader, controller.signal)
+		console.log('Load result:', result)
 		if (result.status === 'aborted') {
 			return
 		}
@@ -232,6 +233,7 @@ export class AudioPlayer {
 
 			return { status: 'loaded', engine }
 		} catch (error) {
+			console.error('Error loading track:', error)
 			if (error instanceof DOMException && error.name === 'AbortError') {
 				return { status: 'aborted' }
 			}

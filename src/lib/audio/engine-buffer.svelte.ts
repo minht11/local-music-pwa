@@ -219,6 +219,7 @@ export class AudioBufferEngine implements AudioEngine {
 			if (signal.aborted || error instanceof InputDisposedError) {
 				// Do nothing
 			} else {
+				console.error('Error during audio playback:', error)
 				this.onError?.()
 			}
 

@@ -1,7 +1,26 @@
+import { canDecodeAudio } from 'mediabunny'
 import type { TrackData } from '$lib/library/get/value-queries.ts'
 
-// Mediabunny's AudioBufferSink requires WebCodecs AudioDecoder internally.
-export const isGaplessSupported = (): boolean => 'AudioDecoder' in globalThis
+let _flacDecodable: boolean | null = null
+
+if (typeof AudioDecoder !== 'undefined') {
+	canDecodeAudio('flac')
+		.then((ok) => {
+			_flacDecodable = ok
+		})
+		.catch(() => {
+			_flacDecodable = false
+		}).finally(() => {
+			console.log('FLAC decodability check result:', _flacDecodable)
+		})
+}
+
+export const isGaplessSupported = (): boolean => {
+	if (_flacDecodable !== null) {
+		return _flacDecodable
+	}
+	return 'AudioDecoder' in globalThis
+}
 
 const SUPPORTED_CODECS = new Set(['FLAC'])
 
