@@ -11,6 +11,7 @@ import { EQ_BANDS } from './eq-bands.ts'
 export class AudioGraph {
 	#context: AudioContext | null = null
 	#inputNode: GainNode | null = null
+	#volumeNode: GainNode | null = null
 	#filters: BiquadFilterNode[] = []
 
 	/**
@@ -66,13 +67,22 @@ export class AudioGraph {
 			node.connect(filter)
 			node = filter
 		}
-		node.connect(ctx.destination)
+		const volumeNode = ctx.createGain()
+		node.connect(volumeNode)
+		volumeNode.connect(ctx.destination)
 
 		this.#context = ctx
 		this.#inputNode = inputNode
+		this.#volumeNode = volumeNode
 		this.#filters = filters
 
 		return ctx
+	}
+
+	setVolume(normalized: number): void {
+		if (this.#volumeNode) {
+			this.#volumeNode.gain.value = normalized
+		}
 	}
 
 	resume(): Promise<void> {

@@ -88,7 +88,14 @@ export class PlayerStore {
 		this.#setupTrackLoadEffect()
 		this.#setupPreBufferEffect()
 		this.#setupMediaSession()
-		// TODO. Add volume, playbackRate, preservePitch and playHistory.
+		this.#setupVolumeEffect()
+		// TODO. Add playbackRate, preservePitch and playHistory.
+	}
+
+	#setupVolumeEffect(): void {
+		$effect(() => {
+			this.#graph.setVolume(this.muted ? 0 : this.volume / 100)
+		})
 	}
 
 	#setupTrackLoadEffect(): void {
