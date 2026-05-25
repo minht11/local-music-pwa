@@ -5,7 +5,6 @@ import {
 	type AudioEngine,
 	type AudioEngineOptions,
 	CURRENT_TIME_UPDATE_TIMEOUT_MS,
-	type LoadResult,
 } from './engine.ts'
 
 const FORMATS = [FLAC]
@@ -69,7 +68,7 @@ export class AudioBufferEngine implements AudioEngine {
 		this.#signal.addEventListener('abort', () => this.dispose(), { once: true })
 	}
 
-	async load(scheduleAt?: number): Promise<LoadResult> {
+	async load(scheduleAt?: number): Promise<void> {
 		const { schedulingSignal } = this.#resetScheduling()
 
 		this.loading = true
@@ -81,22 +80,19 @@ export class AudioBufferEngine implements AudioEngine {
 			const audioTrack = await input.getPrimaryAudioTrack()
 			if (!audioTrack) {
 				this.loading = false
-				return { status: 'failed', reason: 'error' }
+				throw new Error('No audio track found')
 			}
 
 			this.#sink = new AudioBufferSink(audioTrack)
 
 			this.loading = false
 
-			return this.#startFrom(0, scheduleAt, schedulingSignal)
-		} catch {
+			await this.#startFrom(0, scheduleAt, schedulingSignal)
+		} catch (error) {
 			this.loading = false
 			if (!schedulingSignal.aborted) {
-				this.onError?.()
-				return { status: 'failed', reason: 'error' }
+				throw error
 			}
-
-			return { status: 'aborted' }
 		}
 	}
 
@@ -122,26 +118,17 @@ export class AudioBufferEngine implements AudioEngine {
 		this.#gainNode.disconnect()
 	}
 
-	#startFrom(
-		seekTo: number,
-		scheduleAt: number | undefined,
-		schedulingSignal: AbortSignal,
-	): LoadResult {
+	#startFrom(seekTo: number, scheduleAt: number | undefined, schedulingSignal: AbortSignal) {
 		const signal = AbortSignal.any([schedulingSignal, this.#signal])
 
 		const ctx = this.#graph.context
 		const base = scheduleAt ?? ctx.currentTime
 		this.#scheduleBase = base
 		this.#seekOffset = seekTo
-		// TODO. Maybe this should be an invariant instead
-		if (!this.#sink) {
-			return { status: 'loaded' }
-		}
+		invariant(this.#sink, 'Sink should be initialized before starting playback')
 
 		this.#startCurrentTimeLoop(signal)
 		void this.#scheduleSink(this.#sink, seekTo, base, signal)
-
-		return { status: 'loaded' }
 	}
 
 	async #scheduleSink(

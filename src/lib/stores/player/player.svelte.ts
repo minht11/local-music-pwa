@@ -1,8 +1,7 @@
 import { AudioGraph } from '$lib/audio/audio-graph.ts'
-import type { LoadFailReason } from '$lib/audio/engine.ts'
-import { EngineCoordinator } from '$lib/audio/engine-coordinator.svelte.ts'
+import { AudioPlayer } from '$lib/audio/audio-player.svelte.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
-import { resolveTrackFile } from '$lib/helpers/file-resolver.ts'
+import { type FileLoadFailReason, resolveTrackFile } from '$lib/helpers/file-resolver.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
 import { formatArtists, formatNameOrUnknown, truncate } from '$lib/helpers/utils/text.ts'
@@ -23,7 +22,7 @@ export const PLAYER_PLAYBACK_RATE_MAX = 2
 
 export class PlayerStore {
 	readonly #graph = new AudioGraph()
-	readonly #coordinator = new EngineCoordinator(this.#graph, {
+	readonly #player = new AudioPlayer(this.#graph, {
 		trackEndPolicy: () => (this.repeat === 'one' ? 'repeat' : 'advance'),
 		onTrackEnded: () => this.#handleTrackEnded(),
 		onError: (reason) => this.#handleError(reason),
@@ -42,12 +41,12 @@ export class PlayerStore {
 	readonly #main: MainStore
 
 	get playing(): boolean {
-		return this.#coordinator.playing
+		return this.#player.playing
 	}
 
-	loading: boolean = $derived(this.#coordinator.loading)
-	currentTime: number = $derived(this.#coordinator.currentTime)
-	duration: number = $derived(this.#coordinator.duration)
+	loading: boolean = $derived(this.#player.loading)
+	currentTime: number = $derived(this.#player.currentTime)
+	duration: number = $derived(this.#player.duration)
 
 	get shuffle(): boolean {
 		return this.#queue.shuffle
@@ -99,11 +98,11 @@ export class PlayerStore {
 
 			untrack(() => {
 				if (!track) {
-					this.#coordinator.abort()
+					this.#player.abort()
 					return
 				}
 
-				const { currentStatus, currentTrackId } = this.#coordinator
+				const { currentStatus, currentTrackId } = this.#player
 
 				// Gapless promotion already moved the coordinator to this track,
 				// or it's already loading/ready — don't reload.
@@ -119,7 +118,7 @@ export class PlayerStore {
 					})
 					return { ...result, track }
 				}
-				this.#coordinator.load(track.id, loader, track.duration)
+				this.#player.load(track.id, loader, track.duration)
 			})
 		})
 	}
@@ -154,7 +153,7 @@ export class PlayerStore {
 			}
 
 			// Already scheduled (or determined unavailable) for this track — skip.
-			if (this.#coordinator.nextTrackId === nextId) {
+			if (this.#player.nextScheduledTrackId === nextId) {
 				return
 			}
 
@@ -165,7 +164,7 @@ export class PlayerStore {
 	}
 
 	async #preBufferNext(trackId: number): Promise<void> {
-		await this.#coordinator.scheduleNext(trackId, async () => {
+		await this.#player.scheduleNext(trackId, async () => {
 			const track = await getLibraryValue('tracks', trackId)
 			if (!track) {
 				return { status: 'error' }
@@ -194,7 +193,7 @@ export class PlayerStore {
 
 		const isLastTrack = this.#queue.activeTrackIndex === this.#queue.itemsIds.length - 1
 		if (this.repeat === 'none' && isLastTrack) {
-			this.#coordinator.abort()
+			this.#player.abort()
 			return
 		}
 
@@ -206,7 +205,7 @@ export class PlayerStore {
 			return
 		}
 
-		const { currentStatus, currentTrackId } = this.#coordinator
+		const { currentStatus, currentTrackId } = this.#player
 		const wrongTrack = currentTrackId !== this.activeTrack.id
 
 		// Trigger the load effect when the coordinator can't play by itself:
@@ -215,15 +214,15 @@ export class PlayerStore {
 			this.#loadRetry += 1
 		}
 
-		this.#coordinator.play()
+		this.#player.play()
 	}
 
 	pause = (): void => {
-		this.#coordinator.pause()
+		this.#player.pause()
 	}
 
 	seek = (time: number): void => {
-		this.#coordinator.seek(time)
+		this.#player.seek(time)
 	}
 
 	playNext = (): void => {
@@ -286,7 +285,7 @@ export class PlayerStore {
 	moveQueueItem = this.#queue.moveQueueItem
 	clearQueue = this.#queue.clearQueue
 
-	#handleError(reason: LoadFailReason): void {
+	#handleError(reason: FileLoadFailReason): void {
 		const name = truncate(this.activeTrack?.name ?? 'Unknown', 30)
 		const errorMap = {
 			'not-found': m.playerAudioErrorNotFound,

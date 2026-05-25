@@ -4,7 +4,6 @@ import {
 	type AudioEngine,
 	type AudioEngineOptions,
 	CURRENT_TIME_UPDATE_TIMEOUT_MS,
-	type LoadResult,
 } from './engine.ts'
 
 export class HTMLAudioEngine implements AudioEngine {
@@ -78,7 +77,7 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#gainNode.connect(this.#graph.inputNode)
 	}
 
-	load(_scheduledAt?: number): Promise<LoadResult> {
+	load(_scheduledAt?: number): Promise<void> {
 		this.loading = true
 		this.#clearSrc()
 		this.#ensureGraphConnection()
@@ -88,7 +87,7 @@ export class HTMLAudioEngine implements AudioEngine {
 
 		this.loading = false
 
-		return Promise.resolve({ status: 'loaded' })
+		return Promise.resolve()
 	}
 
 	async play(): Promise<void> {

@@ -1,13 +1,5 @@
 import type { AudioGraph } from './audio-graph.ts'
 
-/** @public */
-export type LoadFailReason = 'permission-denied' | 'not-found' | 'error'
-
-export type LoadResult =
-	| { status: 'loaded' }
-	| { status: 'aborted' }
-	| { status: 'failed'; reason: LoadFailReason }
-
 export const CURRENT_TIME_UPDATE_TIMEOUT_MS = 250
 
 export interface AudioEngineOptions {
@@ -35,7 +27,7 @@ export interface AudioEngine {
 	/**
 	 * Load the track's audio data and schedule it for playback at the specified time.
 	 */
-	load: (scheduledAt?: number) => Promise<LoadResult>
+	load: (scheduledAt?: number) => Promise<void>
 
 	play: () => Promise<void>
 	pause: () => void

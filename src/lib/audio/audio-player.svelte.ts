@@ -1,33 +1,39 @@
+import type { FileLoadFailReason } from '$lib/helpers/file-resolver.ts'
 import { canTrackUseGapless } from '$lib/helpers/gapless/capability.ts'
 import type { TrackData } from '$lib/library/get/value-queries.ts'
 import type { AudioGraph } from './audio-graph.ts'
-import type { AudioEngine, AudioEngineOptions, LoadFailReason } from './engine.ts'
+import type { AudioEngine, AudioEngineOptions } from './engine.ts'
 import { AudioBufferEngine } from './engine-buffer.svelte.ts'
 import { HTMLAudioEngine } from './engine-html.svelte.ts'
 
-export type LoaderResult =
+export type TrackLoaderResult =
 	| { status: 'loaded'; file: File; track: TrackData }
-	| { status: LoadFailReason }
+	| { status: FileLoadFailReason }
 
-export type TrackLoader = () => Promise<LoaderResult>
+export type TrackLoader = () => Promise<TrackLoaderResult>
 
 type EngineState =
 	| { status: 'idle' }
 	| { status: 'loading'; trackId: number; controller: AbortController }
 	| { status: 'ready'; trackId: number; engine: AudioEngine; controller: AbortController }
-	| { status: 'failed'; trackId: number; reason: LoadFailReason | 'unavailable' }
+	| { status: 'failed'; trackId: number; reason: FileLoadFailReason | 'unavailable' }
 
-interface EngineCoordinatorOptions {
+type EngineLoadResult =
+	| { status: 'loaded'; engine: AudioEngine }
+	| { status: 'aborted' }
+	| { status: 'failed'; reason: FileLoadFailReason }
+
+interface AudioPlayerOptions {
 	trackEndPolicy: () => 'advance' | 'repeat'
 	onTrackEnded: () => void
-	onError: (reason: LoadFailReason) => void
+	onError: (reason: FileLoadFailReason) => void
 	isGaplessEnabled: () => boolean
 }
 
 /** @public */
-export class EngineCoordinator {
+export class AudioPlayer {
 	readonly #graph: AudioGraph
-	readonly #options: EngineCoordinatorOptions
+	readonly #options: AudioPlayerOptions
 
 	#current: Readonly<EngineState> = $state.raw({ status: 'idle' })
 	#next: Readonly<EngineState> = $state.raw({ status: 'idle' })
@@ -44,7 +50,7 @@ export class EngineCoordinator {
 		return this.#current.status
 	}
 
-	get nextTrackId(): number | null {
+	get nextScheduledTrackId(): number | null {
 		const s = this.#next
 		return s.status === 'idle' ? null : s.trackId
 	}
@@ -52,7 +58,7 @@ export class EngineCoordinator {
 	readonly loading = $derived(this.#current.status === 'loading')
 	currentTime = $derived(this.#current.status === 'ready' ? this.#current.engine.currentTime : 0)
 
-	constructor(graph: AudioGraph, options: EngineCoordinatorOptions) {
+	constructor(graph: AudioGraph, options: AudioPlayerOptions) {
 		this.#graph = graph
 		this.#options = options
 
@@ -84,7 +90,7 @@ export class EngineCoordinator {
 		const controller = new AbortController()
 		this.#current = { status: 'loading', trackId, controller }
 
-		const result = await this.#createAndLoadEngine(loader, controller.signal)
+		const result = await this.#tryLoadingEngine(loader, controller.signal)
 		if (result.status === 'aborted') {
 			return
 		}
@@ -126,20 +132,11 @@ export class EngineCoordinator {
 		const controller = new AbortController()
 		this.#next = { status: 'loading', trackId, controller }
 
-		const wrappedLoader: TrackLoader = async () => {
-			const data = await loader()
-
-			if (data.status === 'loaded' && !this.#canUseGaplessForTrack(data.track)) {
-				return { status: 'error' }
-			}
-
-			return data
-		}
-
-		const result = await this.#createAndLoadEngine(
-			wrappedLoader,
+		const result = await this.#tryLoadingEngine(
+			loader,
 			controller.signal,
 			currentEngine.endTime,
+			(track) => this.#canUseGaplessForTrack(track),
 		)
 
 		if (result.status === 'aborted') {
@@ -208,25 +205,36 @@ export class EngineCoordinator {
 		return this.#options.isGaplessEnabled() && canTrackUseGapless(track)
 	}
 
-	async #createAndLoadEngine(loader: TrackLoader, signal: AbortSignal, scheduleAt?: number) {
-		const data = await loader().catch(() => ({ status: 'error' }) as const)
+	async #tryLoadingEngine(
+		loader: TrackLoader,
+		signal: AbortSignal,
+		scheduleAt: number | undefined = undefined,
+		filter: ((track: TrackData) => boolean) | undefined = undefined,
+	): Promise<EngineLoadResult> {
+		try {
+			const data = await loader()
+			signal.throwIfAborted()
 
-		if (signal.aborted) {
-			return { status: 'aborted' } as const
+			if (data.status !== 'loaded') {
+				return { status: 'failed', reason: data.status }
+			}
+
+			if (filter && !filter(data.track)) {
+				return { status: 'failed', reason: 'error' }
+			}
+
+			const engine = this.#createEngine(data.track, data.file, signal)
+			await engine.load(scheduleAt)
+			signal.throwIfAborted()
+
+			return { status: 'loaded', engine }
+		} catch (error) {
+			if (error instanceof DOMException && error.name === 'AbortError') {
+				return { status: 'aborted' }
+			}
+
+			return { status: 'failed', reason: 'error' }
 		}
-
-		if (data.status !== 'loaded') {
-			return { status: 'failed', reason: data.status } as const
-		}
-
-		const engine = this.#createEngine(data.track, data.file, signal)
-		const loadOutcome = await engine.load(scheduleAt)
-
-		if (loadOutcome.status === 'loaded') {
-			return { status: 'loaded', engine } as const
-		}
-
-		return loadOutcome
 	}
 
 	#createEngine(track: TrackData, blob: Blob, signal: AbortSignal): AudioEngine {
