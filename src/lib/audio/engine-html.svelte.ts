@@ -33,14 +33,7 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#blob = options.blob
 		this.#setupElement()
 
-		this.#signal.addEventListener(
-			'abort',
-			() => {
-				// TODO. Should this just be loading=false and clearSrc instead of dispose()?
-				this.dispose()
-			},
-			{ once: true },
-		)
+		this.#signal.addEventListener('abort', () => this.dispose(), { once: true })
 	}
 
 	#setupElement(): void {
