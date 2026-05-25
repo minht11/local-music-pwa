@@ -268,7 +268,7 @@
 
 	<Separator />
 
-	{#if !mainStore.gaplessPlaybackEnabled}
+	{#if !player.gaplessPlaybackEnabled}
 		<div class="flex items-center justify-between p-4">
 			<div class="flex items-center gap-2">
 				<div>{m.settingsPreservePitch()}</div>
@@ -302,7 +302,7 @@
 				</button>
 			</div>
 
-			<Switch bind:checked={mainStore.gaplessPlaybackEnabled} />
+			<Switch bind:checked={player.gaplessPlaybackEnabled} />
 		</div>
 	{/if}
 </section>

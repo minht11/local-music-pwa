@@ -49,8 +49,6 @@ export class MainStore {
 
 	librarySplitLayoutEnabled: boolean = $state(true)
 
-	gaplessPlaybackEnabled: boolean = $state(false)
-
 	constructor() {
 		persist('main', this, [
 			'theme',
@@ -59,7 +57,6 @@ export class MainStore {
 			'customThemePaletteHex',
 			'volumeSliderEnabled',
 			'librarySplitLayoutEnabled',
-			'gaplessPlaybackEnabled',
 		])
 	}
 }

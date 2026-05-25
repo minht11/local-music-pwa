@@ -27,7 +27,7 @@ export class PlayerStore {
 		trackEndPolicy: () => (this.repeat === 'one' ? 'repeat' : 'advance'),
 		onTrackEnded: () => this.#handleTrackEnded(),
 		onError: (reason) => this.#handleError(reason),
-		isGaplessEnabled: () => this.#main.gaplessPlaybackEnabled,
+		isGaplessEnabled: () => this.gaplessPlaybackEnabled,
 	})
 	readonly #queue = new QueueStore()
 	readonly equalizer = new EqualizerStore(this.#graph)
@@ -37,6 +37,7 @@ export class PlayerStore {
 	#volume = $state(100)
 	playbackRate = $state(1)
 	preservePitch = $state(true)
+	gaplessPlaybackEnabled: boolean = $state(false)
 	#loadRetry = $state(0)
 
 	readonly #main: MainStore
@@ -81,7 +82,14 @@ export class PlayerStore {
 	constructor(main: MainStore) {
 		this.#main = main
 
-		persist('player', this, ['volume', 'repeat', 'muted', 'playbackRate', 'preservePitch'])
+		persist('player', this, [
+			'volume',
+			'repeat',
+			'muted',
+			'playbackRate',
+			'preservePitch',
+			'gaplessPlaybackEnabled',
+		])
 		persist('player', this.#queue, ['shuffle'])
 
 		this.equalizer.init()
@@ -112,7 +120,7 @@ export class PlayerStore {
 
 		$effect(() => {
 			const rate = this.playbackRate
-			const preservePitch = this.preservePitch && !this.#main.gaplessPlaybackEnabled
+			const preservePitch = this.preservePitch && !this.gaplessPlaybackEnabled
 
 			untrack(() => {
 				updatePlaybackRate(rate, preservePitch)
