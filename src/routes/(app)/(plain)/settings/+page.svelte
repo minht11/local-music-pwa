@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment'
 	import { tooltip } from '$lib/attachments/tooltip.ts'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
@@ -12,7 +13,6 @@
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { Debounced } from '$lib/helpers/debounced.svelte.ts'
 	import { isFileSystemAccessSupported } from '$lib/helpers/file-system.ts'
-	import { isGaplessSupported } from '$lib/helpers/gapless/capability.js'
 	import { debounce } from '$lib/helpers/utils/debounce.ts'
 	import type { AppMotionOption, AppThemeOption } from '$lib/stores/main/store.svelte.ts'
 	import {
@@ -81,6 +81,8 @@
 	// This prevents UI from flickering
 	const isDatabasePendingGetter = new Debounced(() => isDatabaseOperationPending(), 200)
 	const isDatabasePending = $derived(isDatabasePendingGetter.current)
+
+	const isGaplessPlaybackSupported = browser && 'AudioDecoder' in globalThis
 </script>
 
 {#snippet heading(text: string)}
@@ -286,20 +288,25 @@
 		</div>
 	{/if}
 
-	{#if isGaplessSupported()}
+	{#if isGaplessPlaybackSupported}
 		<Separator />
 
 		<div class="flex items-center justify-between p-4">
-			<div class="flex items-center gap-2">
-				<div>{m.settingsGaplessPlayback()}</div>
+			<div class="flex flex-col gap-1">
+				<div class="flex items-center gap-2">
+					<div>{m.settingsGaplessPlayback()}</div>
 
-				<button
-					type="button"
-					class="interactable flex size-6 items-center justify-center rounded-full text-onSurfaceVariant"
-					{@attach tooltip(m.settingsGaplessPlaybackInfo())}
-				>
-					<Icon type="information" class="size-4" />
-				</button>
+					<button
+						type="button"
+						class="interactable flex size-6 items-center justify-center rounded-full text-onSurfaceVariant"
+						{@attach tooltip(m.settingsGaplessPlaybackInfo())}
+					>
+						<Icon type="information" class="size-4" />
+					</button>
+				</div>
+				<div class="max-w-160 text-body-sm text-onSurfaceVariant">
+					{m.settingsGaplessPlaybackSubtitle()}
+				</div>
 			</div>
 
 			<Switch bind:checked={player.gaplessPlaybackEnabled} />

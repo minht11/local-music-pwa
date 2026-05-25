@@ -1,11 +1,15 @@
 import {
 	AudioBufferSink,
 	BlobSource,
+	canDecodeAudio,
 	FLAC,
 	Input,
 	type InputAudioTrack,
 	InputDisposedError,
+	PCM_AUDIO_CODECS,
 } from 'mediabunny'
+import { browser } from '$app/environment'
+import { isSafari } from '$lib/helpers/utils/ua.ts'
 import { wait } from '$lib/helpers/utils/wait.ts'
 import type { AudioGraph } from './audio-graph.ts'
 import {
@@ -16,6 +20,30 @@ import {
 
 const FORMATS = [FLAC]
 const LOOK_AHEAD_TIME_SECONDS = 2.0
+
+const isAudioCodecSupported = browser && 'AudioDecoder' in globalThis
+
+export const supportsBufferEngine = (codec: string): boolean | Promise<boolean> => {
+	const normalizedCodec = codec.toLowerCase()
+	if (!isAudioCodecSupported) {
+		return false
+	}
+
+	if (PCM_AUDIO_CODECS.includes(codec as 'pcm-s16')) {
+		return true
+	}
+
+	if (normalizedCodec !== 'flac') {
+		return false
+	}
+
+	// As of Safari 26.5, it fails to decode FLAC files with error "InternalAudioDecoderCocoa decoding"
+	if (isSafari()) {
+		return false
+	}
+
+	return canDecodeAudio(normalizedCodec as 'flac')
+}
 
 /**
  * Plays audio by streaming and decoding via Mediabunny, scheduling decoded
@@ -86,6 +114,7 @@ export class AudioBufferEngine implements AudioEngine {
 			this.#input = input
 
 			const audioTrack = await input.getPrimaryAudioTrack()
+
 			if (!audioTrack) {
 				this.loading = false
 				throw new Error('No audio track found')
