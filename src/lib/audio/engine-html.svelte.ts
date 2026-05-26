@@ -1,12 +1,12 @@
 import { throttle } from '$lib/helpers/utils/throttle'
 import type { AudioGraph } from './audio-graph.svelte.ts'
 import {
-	type AudioEngine,
+	type AudioEngineImpl,
 	type AudioEngineOptions,
 	CURRENT_TIME_UPDATE_TIMEOUT_MS,
 } from './engine.ts'
 
-export class HTMLAudioEngine implements AudioEngine {
+export class HTMLAudioEngine implements AudioEngineImpl {
 	readonly #audio = new Audio()
 	readonly #graph: AudioGraph
 	readonly trackId: number

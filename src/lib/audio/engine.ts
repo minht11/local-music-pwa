@@ -19,7 +19,7 @@ export interface AudioEngineOptions {
  * The coordinator owns two instances (current + next) and manages
  * transitions between them.
  */
-export interface AudioEngine {
+export interface AudioEngineImpl {
 	readonly trackId: number
 
 	readonly currentTime: number

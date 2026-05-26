@@ -13,7 +13,7 @@ import { isSafari } from '$lib/helpers/utils/ua.ts'
 import { wait } from '$lib/helpers/utils/wait.ts'
 import type { AudioGraph } from './audio-graph.svelte.ts'
 import {
-	type AudioEngine,
+	type AudioEngineImpl,
 	type AudioEngineOptions,
 	CURRENT_TIME_UPDATE_TIMEOUT_MS,
 } from './engine.ts'
@@ -55,7 +55,7 @@ export const supportsBufferEngine = (codec: string): boolean | Promise<boolean> 
  * - Streaming decode: the file is never fully loaded into memory at once.
  *   Mediabunny reads and decodes lazily as the for-await loop iterates.
  */
-export class AudioBufferEngine implements AudioEngine {
+export class AudioBufferEngine implements AudioEngineImpl {
 	readonly #graph: AudioGraph
 	readonly #gainNode: GainNode
 	readonly trackId: number
