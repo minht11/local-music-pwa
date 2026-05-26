@@ -264,10 +264,11 @@ export class AudioPlayer {
 
 			return { status: 'loaded', engine }
 		} catch (error) {
-			console.error('[engine error]:', error)
 			if (error instanceof DOMException && error.name === 'AbortError') {
 				return { status: 'aborted' }
 			}
+
+			console.error('[engine error]:', error)
 
 			return { status: 'failed', reason: 'error' }
 		}

@@ -31,6 +31,7 @@ export class PlayerStore {
 	})
 	readonly #queue = new QueueStore()
 	readonly equalizer = new EqualizerStore(this.#graph)
+	readonly #main: MainStore
 
 	repeat = $state<PlayerRepeat>('none')
 	muted = $state(false)
@@ -40,26 +41,29 @@ export class PlayerStore {
 	gaplessPlaybackEnabled: boolean = $state(false)
 	#loadRetry = $state(0)
 
-	readonly #main: MainStore
-
-	get playing(): boolean {
+	get playing() {
 		return this.#player.playing
 	}
+	get currentTime() {
+		return this.#player.currentTime
+	}
+	get duration() {
+		return this.#player.duration
+	}
+	get loading() {
+		return this.#player.loading
+	}
 
-	loading: boolean = $derived(this.#player.loading)
-	currentTime: number = $derived(this.#player.currentTime)
-	duration: number = $derived(this.#player.duration)
-
-	get shuffle(): boolean {
+	get shuffle() {
 		return this.#queue.shuffle
 	}
-	get itemsIds(): readonly number[] {
+	get itemsIds() {
 		return this.#queue.itemsIds
 	}
-	get activeTrackIndex(): number {
+	get activeTrackIndex() {
 		return this.#queue.activeTrackIndex
 	}
-	get isQueueEmpty(): boolean {
+	get isQueueEmpty() {
 		return this.#queue.isQueueEmpty
 	}
 
@@ -70,12 +74,13 @@ export class PlayerStore {
 	activeTrack = $derived(this.#activeTrackQuery.value)
 
 	#artwork = createManagedArtwork(() => this.activeTrack?.image?.full)
-	artworkSrc: string | undefined = $derived.by(this.#artwork)
+	artworkSrc = $derived.by(this.#artwork)
 
-	get volume(): number {
+	get volume() {
 		return this.#main.volumeSliderEnabled ? this.#volume : 100
 	}
-	set volume(value: number) {
+
+	set volume(value) {
 		this.#volume = clamp(value, 0, 100)
 	}
 
@@ -142,7 +147,7 @@ export class PlayerStore {
 
 				const { currentStatus, currentTrackId } = this.#player
 
-				// Gapless promotion already moved the coordinator to this track,
+				// Gapless promotion already moved the player to this track,
 				// or it's already loading/ready — don't reload.
 				if (currentTrackId === track.id && currentStatus !== 'failed') {
 					return
@@ -163,7 +168,7 @@ export class PlayerStore {
 
 	/**
 	 * Watches currentTime. When close to the end of the current track,
-	 * asks the coordinator to pre-buffer the next track for gapless playback.
+	 * asks the player to pre-buffer the next track for gapless playback.
 	 */
 	#setupPreBufferEffect(): void {
 		$effect(() => {
@@ -214,10 +219,7 @@ export class PlayerStore {
 				askPermission: false,
 			})
 
-			return {
-				...result,
-				track,
-			}
+			return { ...result, track }
 		})
 	}
 
@@ -285,11 +287,8 @@ export class PlayerStore {
 		this.#queue.setTrack(trackIndex, queue, options)
 
 		const isSameTrack = currentTrackId !== null && this.#queue.activeTrackId === currentTrackId
-
 		if (isSameTrack) {
 			this.seek(0)
-		} else {
-			this.currentTime = 0
 		}
 
 		this.play()

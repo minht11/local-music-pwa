@@ -1,128 +1,57 @@
-// @ts-nocheck
-// TODO. Fix this later.
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
 
 vi.mock('$lib/helpers/persist.svelte.ts', () => ({
 	persist: vi.fn(),
 }))
 
-interface MockFilter {
-	connect: ReturnType<typeof vi.fn>
-	type: BiquadFilterType
-	frequency: { value: number }
-	Q: { value: number }
-	gain: { value: number }
-}
-
-interface MockAudioContext {
-	state: AudioContextState
-	destination: { connect: ReturnType<typeof vi.fn> }
-	resume: ReturnType<typeof vi.fn>
-	createBiquadFilter: ReturnType<typeof vi.fn>
-	createMediaElementSource: ReturnType<typeof vi.fn>
-}
-
-const setupAudioContextMock = (state: AudioContextState = 'suspended') => {
-	const instances: MockAudioContext[] = []
-	const filters: MockFilter[] = []
-	const makeSource = () => ({
-		connect: vi.fn(),
-	})
-
-	class AudioContextMock implements MockAudioContext {
-		state: AudioContextState = state
-		destination = { connect: vi.fn() }
-
-		resume = vi.fn().mockImplementation(() => {
-			this.state = 'running'
-
-			return Promise.resolve()
-		})
-
-		createBiquadFilter = vi.fn(() => {
-			const filter: MockFilter = {
-				connect: vi.fn(),
-				type: 'peaking',
-				frequency: { value: 0 },
-				Q: { value: 0 },
-				gain: { value: 0 },
-			}
-			filters.push(filter)
-			return filter
-		})
-
-		createMediaElementSource = vi.fn(() => makeSource())
-
-		constructor() {
-			instances.push(this)
-		}
-	}
-
-	vi.stubGlobal('AudioContext', AudioContextMock)
-
+const makeGraph = (opts: { initialized?: boolean } = {}) => {
+	const filters = Array.from({ length: 10 }, () => ({ gain: { value: 0 } }))
 	return {
-		AudioContextMock,
-		instances,
+		initialized: opts.initialized ?? false,
 		filters,
 	}
 }
 
+afterEach(() => vi.clearAllMocks())
+
 describe('EqualizerStore', () => {
-	it('does not create AudioContext in constructor and initializes lazily in resumeContext', async () => {
-		const { instances, filters } = setupAudioContextMock('suspended')
+	describe('setBand', () => {
+		it('updates the target band value', () => {
+			const store = new EqualizerStore(makeGraph() as never)
+			store.setBand(3, 6)
+			expect(store.bands[3]).toBe(6)
+		})
 
-		const store = new EqualizerStore({} as HTMLAudioElement)
-		expect(instances).toHaveLength(0)
-
-		await store.resumeContext()
-
-		expect(instances).toHaveLength(1)
-		expect(instances[0]?.resume).toHaveBeenCalledTimes(1)
-		expect(filters).toHaveLength(10)
+		it('clears selectedPreset', () => {
+			const store = new EqualizerStore(makeGraph() as never)
+			store.applyPreset('rock')
+			store.setBand(0, 9)
+			expect(store.selectedPreset).toBeNull()
+		})
 	})
 
-	it('reuses the same AudioContext and does not resume again once running', async () => {
-		const { instances } = setupAudioContextMock('suspended')
-		const store = new EqualizerStore({} as HTMLAudioElement)
+	describe('applyPreset', () => {
+		it('sets bands to the preset gains', () => {
+			const store = new EqualizerStore(makeGraph() as never)
+			store.applyPreset('trebleBoost')
+			expect(store.bands).toEqual([0, 0, 0, 0, 0, 0, 2, 4, 5, 6])
+		})
 
-		await store.resumeContext()
-		await store.resumeContext()
-
-		expect(instances).toHaveLength(1)
-		expect(instances[0]?.resume).toHaveBeenCalledTimes(1)
+		it('sets selectedPreset to the preset name', () => {
+			const store = new EqualizerStore(makeGraph() as never)
+			store.applyPreset('rock')
+			expect(store.selectedPreset).toBe('rock')
+		})
 	})
 
-	it('does not call resume when context is already running', async () => {
-		const { instances } = setupAudioContextMock('running')
-		const store = new EqualizerStore({} as HTMLAudioElement)
-
-		await store.resumeContext()
-
-		expect(instances[0]?.resume).not.toHaveBeenCalled()
-	})
-
-	it('setBand updates one band and clears selectedPreset', () => {
-		setupAudioContextMock('running')
-		const store = new EqualizerStore({} as HTMLAudioElement)
-
-		store.applyPreset('bassBoost')
-		store.setBand(0, 7)
-
-		expect(store.bands[0]).toBe(7)
-		expect(store.selectedPreset).toBeNull()
-	})
-
-	it('applyPreset and reset update bands and selectedPreset', () => {
-		setupAudioContextMock('running')
-		const store = new EqualizerStore({} as HTMLAudioElement)
-
-		store.applyPreset('trebleBoost')
-		expect(store.selectedPreset).toBe('trebleBoost')
-		expect(store.bands).toEqual([0, 0, 0, 0, 0, 0, 2, 4, 5, 6])
-
-		store.reset()
-		expect(store.selectedPreset).toBe('flat')
-		expect(store.bands).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+	describe('reset', () => {
+		it('applies the flat preset with all zeros', () => {
+			const store = new EqualizerStore(makeGraph() as never)
+			store.applyPreset('rock')
+			store.reset()
+			expect(store.bands).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+			expect(store.selectedPreset).toBe('flat')
+		})
 	})
 })
