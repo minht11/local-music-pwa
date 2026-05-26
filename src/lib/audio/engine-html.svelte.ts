@@ -55,15 +55,6 @@ export class HTMLAudioEngine implements AudioEngine {
 			this.duration = Number.isFinite(d) ? d : 0
 		}
 
-		const setPlaybackRate = () => {
-			audio.playbackRate = this.#playbackRate
-		}
-
-		audio.onloadedmetadata = () => {
-			// Audio change resets playbackRate
-			setPlaybackRate()
-		}
-
 		audio.onerror = () => {
 			this.loading = false
 			this.onError?.()
@@ -82,7 +73,7 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.#gainNode.connect(this.#graph.inputNode)
 	}
 
-	load(_scheduledAt?: number): Promise<void> {
+	async load(_scheduledAt?: number): Promise<void> {
 		this.loading = true
 		this.#clearSrc()
 		this.#ensureGraphConnection()
@@ -98,9 +89,9 @@ export class HTMLAudioEngine implements AudioEngine {
 			resolve()
 		}
 
-		this.loading = false
+		await promise
 
-		return promise
+		this.loading = false
 	}
 
 	setPlaybackRate(rate: number, preservePitch: boolean): void {
