@@ -1,4 +1,4 @@
-import type { AudioGraph } from './audio-graph.ts'
+import type { AudioGraph } from './audio-graph.svelte.ts'
 
 export const CURRENT_TIME_UPDATE_TIMEOUT_MS = 250
 

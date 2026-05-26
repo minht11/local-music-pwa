@@ -9,7 +9,7 @@ import { EQ_BANDS } from './eq-bands.ts'
  *   engineB.gainNode ─┘
  */
 export class AudioGraph {
-	#context: AudioContext | null = null
+	#context: AudioContext | null = $state(null)
 	#inputNode: GainNode | null = null
 	#volumeNode: GainNode | null = null
 	#filters: BiquadFilterNode[] = []

@@ -1,4 +1,4 @@
-import { AudioGraph } from '$lib/audio/audio-graph.ts'
+import { AudioGraph } from '$lib/audio/audio-graph.svelte.ts'
 import { AudioPlayer } from '$lib/audio/audio-player.svelte.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { type FileLoadFailReason, resolveTrackFile } from '$lib/helpers/file-resolver.ts'

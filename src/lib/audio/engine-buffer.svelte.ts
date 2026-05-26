@@ -11,7 +11,7 @@ import {
 import { browser } from '$app/environment'
 import { isSafari } from '$lib/helpers/utils/ua.ts'
 import { wait } from '$lib/helpers/utils/wait.ts'
-import type { AudioGraph } from './audio-graph.ts'
+import type { AudioGraph } from './audio-graph.svelte.ts'
 import {
 	type AudioEngine,
 	type AudioEngineOptions,

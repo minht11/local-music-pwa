@@ -1,6 +1,6 @@
 import type { FileLoadFailReason } from '$lib/helpers/file-resolver.ts'
 import type { TrackData } from '$lib/library/get/value-queries.ts'
-import type { AudioGraph } from './audio-graph.ts'
+import type { AudioGraph } from './audio-graph.svelte.ts'
 import type { AudioEngine, AudioEngineOptions } from './engine.ts'
 import { AudioBufferEngine, supportsBufferEngine } from './engine-buffer.svelte.ts'
 import { HTMLAudioEngine } from './engine-html.svelte.ts'

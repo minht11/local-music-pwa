@@ -1,5 +1,5 @@
 import { throttle } from '$lib/helpers/utils/throttle'
-import type { AudioGraph } from './audio-graph.ts'
+import type { AudioGraph } from './audio-graph.svelte.ts'
 import {
 	type AudioEngine,
 	type AudioEngineOptions,
