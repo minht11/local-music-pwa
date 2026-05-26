@@ -149,7 +149,7 @@ export class AudioPlayer {
 		const result = await this.#tryLoadingEngine(loader, {
 			signal: controller.signal,
 			mustBeGapless: true,
-			scheduleAt: currentEngine?.currentTime,
+			scheduleAt: currentEngine.endTime,
 		})
 
 		if (result.status === 'aborted') {
