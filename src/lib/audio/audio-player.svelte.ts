@@ -73,6 +73,8 @@ export class AudioPlayer {
 		if (import.meta.hot) {
 			this.abort()
 		}
+
+		$inspect(this.playing)
 	}
 
 	/**
@@ -81,6 +83,7 @@ export class AudioPlayer {
 	 * Resets currentTime eagerly and shows provisionalDuration while the engine loads.
 	 */
 	async load(trackId: number, loader: TrackLoader, provisionalDuration = 0): Promise<void> {
+		this.playing = true
 		const current = this.#current
 		if (
 			(current.status === 'loading' || current.status === 'ready') &&
