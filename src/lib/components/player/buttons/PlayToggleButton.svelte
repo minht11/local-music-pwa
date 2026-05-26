@@ -10,5 +10,5 @@
 	disabled={!player.activeTrack}
 	onclick={() => player.togglePlay()}
 >
-	<PlayPauseIcon playing={player.playing} />
+	<PlayPauseIcon playing={player.playing} loading={player.loading} />
 </IconButton>
