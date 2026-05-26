@@ -11,16 +11,58 @@ type TrackLoaderResult =
 
 export type TrackLoader = () => Promise<TrackLoaderResult>
 
-type EngineState =
-	| { status: 'idle' }
-	| { status: 'loading'; trackId: number; controller: AbortController }
-	| { status: 'ready'; trackId: number; engine: AudioEngine; controller: AbortController }
-	| { status: 'failed'; trackId: number; reason: FileLoadFailReason | 'unavailable' }
-
 type EngineLoadResult =
 	| { status: 'loaded'; engine: AudioEngine }
 	| { status: 'aborted' }
 	| { status: 'failed'; reason: FileLoadFailReason }
+
+interface EngineStateIdle {
+	status: 'idle'
+}
+interface EngineStateLoading {
+	status: 'loading'
+	trackId: number
+	controller: AbortController
+}
+interface EngineStateReady {
+	status: 'ready'
+	trackId: number
+	engine: AudioEngine
+	controller: AbortController
+}
+interface EngineStateFailed {
+	status: 'failed'
+	trackId: number
+	reason: FileLoadFailReason | 'unavailable'
+}
+
+type EngineState = EngineStateIdle | EngineStateLoading | EngineStateReady | EngineStateFailed
+
+const idle = (): EngineStateIdle => ({ status: 'idle' })
+
+const failed = (
+	trackId: number,
+	reason: FileLoadFailReason | 'unavailable',
+): EngineStateFailed => ({
+	status: 'failed',
+	trackId,
+	reason,
+})
+
+const createStateTransition = (trackId: number) => {
+	const controller = new AbortController()
+
+	return {
+		loading: (): EngineStateLoading => ({ status: 'loading', trackId, controller }),
+		ready: (engine: AudioEngine): EngineStateReady => ({
+			status: 'ready',
+			trackId,
+			engine,
+			controller,
+		}),
+		failed: (reason: EngineStateFailed['reason']): EngineStateFailed => failed(trackId, reason),
+	}
+}
 
 interface AudioPlayerOptions {
 	trackEndPolicy: () => 'advance' | 'repeat'
@@ -41,21 +83,21 @@ export class AudioPlayer {
 	readonly #graph: AudioGraph
 	readonly #options: AudioPlayerOptions
 
-	#current: Readonly<EngineState> = $state.raw({ status: 'idle' })
-	#next: Readonly<EngineState> = $state.raw({ status: 'idle' })
+	#current: Readonly<EngineState> = $state.raw(idle())
+	#next: Readonly<EngineState> = $state.raw(idle())
 
 	#playbackRate = 1
 	#preservePitch = true
 
-	playing: boolean = $state(false)
-	duration: number = $state(0)
+	playing = $state(false)
+	duration = $state(0)
 
-	get currentTrackId(): number | null {
+	get currentTrackId() {
 		const s = this.#current
 		return s.status === 'idle' ? null : s.trackId
 	}
 
-	get currentStatus(): 'idle' | 'loading' | 'ready' | 'failed' {
+	get currentStatus() {
 		return this.#current.status
 	}
 
@@ -79,7 +121,6 @@ export class AudioPlayer {
 	/**
 	 * Load a track into the current slot. Idempotent: calling with the same track while
 	 * already loading or ready is a no-op. Calling with a failed track retries the load.
-	 * Resets currentTime eagerly and shows provisionalDuration while the engine loads.
 	 */
 	async load(trackId: number, loader: TrackLoader, provisionalDuration = 0): Promise<void> {
 		this.playing = true
@@ -94,14 +135,13 @@ export class AudioPlayer {
 		this.#teardownCurrent()
 		this.#teardownAndIdleNext()
 
-		this.currentTime = 0
 		this.duration = provisionalDuration
 
-		const controller = new AbortController()
-		this.#current = { status: 'loading', trackId, controller }
+		const transition = createStateTransition(trackId)
+		this.#current = transition.loading()
 
 		const result = await this.#tryLoadingEngine(loader, {
-			signal: controller.signal,
+			signal: this.#current.controller.signal,
 		})
 
 		if (result.status === 'aborted') {
@@ -110,12 +150,12 @@ export class AudioPlayer {
 
 		if (result.status === 'failed') {
 			this.playing = false
-			this.#current = { status: 'failed', trackId, reason: result.reason }
+			this.#current = transition.failed(result.reason)
 			this.#options.onError(result.reason)
 			return
 		}
 
-		this.#readyCurrent(result.engine, trackId, controller)
+		this.#promoteToCurrent(transition.ready(result.engine))
 	}
 
 	/**
@@ -138,15 +178,15 @@ export class AudioPlayer {
 			currentEngine instanceof AudioBufferEngine && this.#options.isGaplessEnabled()
 
 		if (!canTryGapless) {
-			this.#next = { status: 'failed', trackId, reason: 'unavailable' }
+			this.#next = failed(trackId, 'unavailable')
 			return
 		}
 
-		const controller = new AbortController()
-		this.#next = { status: 'loading', trackId, controller }
+		const transition = createStateTransition(trackId)
+		this.#next = transition.loading()
 
 		const result = await this.#tryLoadingEngine(loader, {
-			signal: controller.signal,
+			signal: this.#next.controller.signal,
 			mustBeGapless: true,
 			scheduleAt: () => currentEngine.endTime,
 		})
@@ -156,11 +196,11 @@ export class AudioPlayer {
 		}
 
 		if (result.status === 'failed') {
-			this.#next = { status: 'failed', trackId, reason: 'unavailable' }
+			this.#next = transition.failed('unavailable')
 			return
 		}
 
-		this.#next = { status: 'ready', trackId, engine: result.engine, controller }
+		this.#next = transition.ready(result.engine)
 	}
 
 	play(): void {
@@ -190,7 +230,7 @@ export class AudioPlayer {
 		this.duration = 0
 		if (this.#current.status !== 'idle') {
 			this.#teardownCurrent()
-			this.#current = { status: 'idle' }
+			this.#current = idle()
 		}
 		this.#teardownAndIdleNext()
 	}
@@ -201,12 +241,12 @@ export class AudioPlayer {
 		const canPromote = next.status === 'ready' && policy === 'advance'
 
 		this.#teardownCurrent()
-		this.#current = { status: 'idle' }
 
 		if (canPromote) {
-			this.#next = { status: 'idle' }
-			this.#readyCurrent(next.engine, next.trackId, next.controller)
+			this.#next = idle()
+			this.#promoteToCurrent(next)
 		} else {
+			this.#current = idle()
 			this.#teardownAndIdleNext()
 		}
 
@@ -283,10 +323,11 @@ export class AudioPlayer {
 		}
 	}
 
-	#readyCurrent(engine: AudioEngine, trackId: number, controller: AbortController): void {
+	#promoteToCurrent(readyState: EngineStateReady): void {
+		const { engine } = readyState
 		engine.onEnded = () => this.#handleCurrentEnded()
 		engine.onError = () => this.#options.onError('error')
-		this.#current = { status: 'ready', trackId, engine, controller }
+		this.#current = readyState
 		this.duration = engine.duration
 
 		if (this.playing) {
@@ -294,19 +335,18 @@ export class AudioPlayer {
 		}
 	}
 
-	#teardown(engineState: EngineState): void {
-		if (engineState.status === 'loading' || engineState.status === 'ready') {
-			engineState.controller.abort()
+	#teardown(transition: Readonly<EngineState>) {
+		if (transition.status === 'loading' || transition.status === 'ready') {
+			transition.controller.abort()
 		}
 	}
 
-	#teardownCurrent(): void {
+	#teardownCurrent() {
 		this.#teardown(this.#current)
 	}
 
-	#teardownAndIdleNext(): void {
+	#teardownAndIdleNext() {
 		this.#teardown(this.#next)
-
-		this.#next = { status: 'idle' }
+		this.#next = idle()
 	}
 }
