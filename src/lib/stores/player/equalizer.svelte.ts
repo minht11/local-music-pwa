@@ -45,13 +45,13 @@ export class EqualizerStore {
 		persist('equalizer', this, ['enabled', 'bands', 'selectedPreset'])
 
 		$effect(() => {
-			const enabled = this.enabled
-			const bands = this.bands
-			const filters = this.#graph.filters
-
 			if (!this.#graph.initialized) {
 				return
 			}
+
+			const enabled = this.enabled
+			const bands = this.bands
+			const filters = this.#graph.filters
 
 			invariant(filters.length === bands.length)
 

@@ -75,7 +75,6 @@ export class AudioBufferEngine implements AudioEngine {
 
 	#timerId: number | null = null
 
-	loading: boolean = $state(false)
 	currentTime: number = $state(0)
 	duration: number = $state(0)
 
@@ -97,6 +96,7 @@ export class AudioBufferEngine implements AudioEngine {
 		this.duration = options.duration
 		this.#signal = options.signal
 		this.#blob = options.blob
+		this.#playbackRate = options.playbackRate
 
 		this.#gainNode = audioGraph.context.createGain()
 		this.#gainNode.connect(audioGraph.inputNode)
@@ -107,26 +107,19 @@ export class AudioBufferEngine implements AudioEngine {
 	async load(scheduleAt?: number): Promise<void> {
 		const { schedulingSignal } = this.#resetScheduling()
 
-		this.loading = true
-
 		try {
 			const input = new Input({ formats: FORMATS, source: new BlobSource(this.#blob) })
 			this.#input = input
 
 			const audioTrack = await input.getPrimaryAudioTrack()
-
 			if (!audioTrack) {
-				this.loading = false
 				throw new Error('No audio track found')
 			}
 
 			this.#audioTrack = audioTrack
 
-			this.loading = false
-
-			await this.#startFrom(0, scheduleAt, schedulingSignal)
+			this.#startFrom(0, scheduleAt, schedulingSignal)
 		} catch (error) {
-			this.loading = false
 			if (!schedulingSignal.aborted) {
 				throw error
 			}
@@ -136,7 +129,7 @@ export class AudioBufferEngine implements AudioEngine {
 	seek(time: number): void {
 		this.currentTime = time
 		const { schedulingSignal } = this.#resetScheduling()
-		void this.#startFrom(time, undefined, schedulingSignal)
+		this.#startFrom(time, undefined, schedulingSignal)
 	}
 
 	setPlaybackRate(rate: number, _preservePitch: boolean): void {
@@ -144,7 +137,7 @@ export class AudioBufferEngine implements AudioEngine {
 		const currentPosition = this.#seekOffset + Math.max(0, elapsed * this.#playbackRate)
 		this.#playbackRate = rate
 		const { schedulingSignal } = this.#resetScheduling()
-		void this.#startFrom(currentPosition, undefined, schedulingSignal)
+		this.#startFrom(currentPosition, undefined, schedulingSignal)
 	}
 
 	play(): Promise<void> {
@@ -196,9 +189,6 @@ export class AudioBufferEngine implements AudioEngine {
 			}
 		}
 
-		const { promise: signalPromise, resolve } = Promise.withResolvers<void>()
-		signal.addEventListener('abort', () => resolve(), { once: true })
-
 		try {
 			for await (const { buffer, timestamp } of sink.buffers(seekTo)) {
 				if (signal.aborted) {
@@ -220,7 +210,7 @@ export class AudioBufferEngine implements AudioEngine {
 						break
 					}
 
-					await Promise.race([wait(100), signalPromise])
+					await wait(100)
 				}
 
 				if (signal.aborted) {
@@ -306,7 +296,6 @@ export class AudioBufferEngine implements AudioEngine {
 			}
 		}
 		this.#scheduledSources.clear()
-		this.loading = false
 
 		const controller = new AbortController()
 		this.#schedulingController = controller

@@ -31,7 +31,8 @@ interface AudioPlayerOptions {
 
 interface TryLoadEngineOptions {
 	signal: AbortSignal
-	scheduleAt?: number
+	// Using getter so that we can get latest value, only when we actually start loading the audio
+	scheduleAt?: () => number
 	mustBeGapless?: boolean
 }
 
@@ -73,8 +74,6 @@ export class AudioPlayer {
 		if (import.meta.hot) {
 			this.abort()
 		}
-
-		$inspect(this.playing)
 	}
 
 	/**
@@ -149,7 +148,7 @@ export class AudioPlayer {
 		const result = await this.#tryLoadingEngine(loader, {
 			signal: controller.signal,
 			mustBeGapless: true,
-			scheduleAt: currentEngine.endTime,
+			scheduleAt: () => currentEngine.endTime,
 		})
 
 		if (result.status === 'aborted') {
@@ -247,6 +246,8 @@ export class AudioPlayer {
 				duration: track.duration,
 				blob: trackData.file,
 				signal,
+				playbackRate: this.#playbackRate,
+				preservePitch: this.#preservePitch,
 			}
 
 			let engine: AudioEngine
@@ -258,7 +259,7 @@ export class AudioPlayer {
 				engine = new HTMLAudioEngine(engineOptions)
 			}
 
-			await engine.load(scheduleAt)
+			await engine.load(scheduleAt?.())
 			signal.throwIfAborted()
 
 			return { status: 'loaded', engine }
@@ -284,7 +285,6 @@ export class AudioPlayer {
 	#readyCurrent(engine: AudioEngine, trackId: number, controller: AbortController): void {
 		engine.onEnded = () => this.#handleCurrentEnded()
 		engine.onError = () => this.#options.onError('error')
-		engine.setPlaybackRate(this.#playbackRate, this.#preservePitch)
 		this.#current = { status: 'ready', trackId, engine, controller }
 		this.duration = engine.duration
 

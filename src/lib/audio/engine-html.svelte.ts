@@ -18,9 +18,8 @@ export class HTMLAudioEngine implements AudioEngine {
 	#sourceNode: MediaElementAudioSourceNode | null = null
 	#currentSrc: string | null = null
 
-	loading: boolean = $state(false)
-	currentTime: number = $state(0)
-	duration: number = $state(0)
+	currentTime = $state(0)
+	duration = $state(0)
 
 	#playbackRate = 1
 	#preservePitch = true
@@ -34,6 +33,8 @@ export class HTMLAudioEngine implements AudioEngine {
 		this.duration = options.duration
 		this.#signal = options.signal
 		this.#blob = options.blob
+		this.#playbackRate = options.playbackRate
+		this.#preservePitch = options.preservePitch
 		this.#setupElement()
 
 		this.#signal.addEventListener('abort', () => this.dispose(), { once: true })
@@ -54,11 +55,6 @@ export class HTMLAudioEngine implements AudioEngine {
 			const d = audio.duration
 			this.duration = Number.isFinite(d) ? d : 0
 		}
-
-		audio.onerror = () => {
-			this.loading = false
-			this.onError?.()
-		}
 	}
 
 	#ensureGraphConnection(): void {
@@ -74,24 +70,36 @@ export class HTMLAudioEngine implements AudioEngine {
 	}
 
 	async load(_scheduledAt?: number): Promise<void> {
-		this.loading = true
+		const audio = this.#audio
+
 		this.#clearSrc()
 		this.#ensureGraphConnection()
 
 		this.#currentSrc = URL.createObjectURL(this.#blob)
-		this.#audio.src = this.#currentSrc
+		audio.src = this.#currentSrc
 
-		const { promise, resolve } = Promise.withResolvers<void>()
+		const { promise, resolve, reject } = Promise.withResolvers<void>()
 
-		this.#audio.onloadedmetadata = () => {
+		audio.onloadedmetadata = () => {
 			this.#updateAudioRate()
-			this.#audio.onloadedmetadata = null
+			audio.onloadedmetadata = null
+
+			// Restore regular handler
+			audio.onerror = () => {
+				this.onError?.()
+			}
+
 			resolve()
 		}
 
-		await promise
+		audio.onerror = () => {
+			audio.onloadedmetadata = null
+			audio.onerror = null
 
-		this.loading = false
+			reject(new Error('Audio element error'))
+		}
+
+		await promise
 	}
 
 	setPlaybackRate(rate: number, preservePitch: boolean): void {
@@ -116,16 +124,16 @@ export class HTMLAudioEngine implements AudioEngine {
 	}
 
 	dispose(): void {
-		this.loading = false
+		this.#audio.onended = null
+		this.#audio.ontimeupdate = null
+		this.#audio.ondurationchange = null
+		this.#audio.onerror = null
+
 		this.#clearSrc()
 		this.#gainNode?.disconnect()
 		this.#sourceNode?.disconnect()
 		this.#gainNode = null
 		this.#sourceNode = null
-		this.#audio.onended = null
-		this.#audio.ontimeupdate = null
-		this.#audio.ondurationchange = null
-		this.#audio.onerror = null
 	}
 
 	#updateAudioRate(): void {
@@ -137,8 +145,7 @@ export class HTMLAudioEngine implements AudioEngine {
 		if (this.#currentSrc) {
 			URL.revokeObjectURL(this.#currentSrc)
 			this.#currentSrc = null
+			this.#audio.src = ''
 		}
-		this.#audio.removeAttribute('src')
-		this.#audio.load()
 	}
 }

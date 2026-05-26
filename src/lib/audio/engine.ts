@@ -8,6 +8,8 @@ export interface AudioEngineOptions {
 	duration: number
 	blob: Blob
 	signal: AbortSignal
+	playbackRate: number
+	preservePitch: boolean
 }
 
 /**
@@ -20,7 +22,6 @@ export interface AudioEngineOptions {
 export interface AudioEngine {
 	readonly trackId: number
 
-	readonly loading: boolean
 	readonly currentTime: number
 	readonly duration: number
 

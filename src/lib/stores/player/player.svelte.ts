@@ -120,6 +120,7 @@ export class PlayerStore {
 
 		$effect(() => {
 			const rate = this.playbackRate
+			// With gapless playback enabled we don't support pitch option.
 			const preservePitch = this.preservePitch && !this.gaplessPlaybackEnabled
 
 			untrack(() => {
@@ -357,11 +358,17 @@ export class PlayerStore {
 		})
 
 		$effect(() => {
+			const { duration } = this
+			// setPositionState throws otherwise
+			if (duration <= 0) {
+				return
+			}
+
 			ms.setPositionState({
-				duration: this.duration,
+				duration,
 				playbackRate: this.playbackRate,
 				// Position does not need to be updated on every tick, browser will interpolate it
-				position: untrack(() => Math.min(this.currentTime, this.duration)),
+				position: untrack(() => Math.min(this.currentTime)),
 			})
 		})
 
