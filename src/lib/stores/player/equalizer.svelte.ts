@@ -1,4 +1,4 @@
-import type { AudioGraph } from '$lib/audio/audio-graph.ts'
+import type { AudioGraph } from '$lib/audio/audio-graph.svelte.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 
 export type BuiltinEqPresetKey =
