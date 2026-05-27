@@ -109,11 +109,15 @@ export class PlayerStore {
 
 	#setupVolumeEffect(): void {
 		$effect(() => {
-			const volume = this.volume
 			const muted = this.muted
 
+			// Humans perceive volume logarithmically
+			// so we adjust the volume to match that perception
+			const k = 0.5
+			const volume = (this.volume / 100) ** k
+
 			untrack(() => {
-				this.#graph.setVolume(muted ? 0 : volume / 100)
+				this.#graph.setVolume(muted ? 0 : volume)
 			})
 		})
 	}
