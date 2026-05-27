@@ -271,9 +271,9 @@ export class AudioPlayer {
 		this.#options.onTrackEnded()
 	}
 
-	#canUseBufferEngine(track: TrackData): Promise<boolean> | boolean {
+	async #canUseBufferEngine(track: TrackData): Promise<boolean> {
 		if (this.#options.isGaplessEnabled()) {
-			return supportsBufferEngine(track.format?.codec ?? '')
+			return await supportsBufferEngine(track.format?.codec ?? '')
 		}
 
 		return false

@@ -80,8 +80,8 @@ export class AudioGraph {
 	}
 
 	setVolume(normalized: number): void {
-		if (this.#volumeNode) {
-			this.#volumeNode.gain.value = normalized
+		if (this.#volumeNode && this.#context) {
+			this.#volumeNode.gain.setTargetAtTime(normalized, this.#context.currentTime, 0.015)
 		}
 	}
 
