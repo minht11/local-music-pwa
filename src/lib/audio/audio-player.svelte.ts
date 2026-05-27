@@ -108,7 +108,19 @@ export class AudioPlayer {
 		return s.status === 'idle' ? null : s.trackId
 	}
 
-	readonly loading = $derived(this.#current.status === 'loading')
+	readonly loading = $derived.by(() => {
+		const current = this.#current
+
+		if (current.status === 'loading') {
+			return true
+		}
+
+		if (current.status === 'ready') {
+			return current.engine.buffering
+		}
+
+		return false
+	})
 	currentTime = $derived(this.#current.status === 'ready' ? this.#current.engine.currentTime : 0)
 
 	constructor(graph: AudioGraph, options: AudioPlayerOptions) {

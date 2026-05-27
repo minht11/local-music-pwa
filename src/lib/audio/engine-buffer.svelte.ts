@@ -20,6 +20,7 @@ import {
 
 const FORMATS = [FLAC]
 const LOOK_AHEAD_TIME_SECONDS = 2.0
+const BUFFER_RESUME_SECONDS = 1.5
 
 const isAudioCodecSupported = browser && 'AudioDecoder' in globalThis
 
@@ -75,8 +76,14 @@ export class AudioBufferEngine implements AudioEngineImpl {
 
 	#timerId: number | null = null
 
+	// AudioContext time at which the last scheduled buffer ends.
+	#lastScheduledEndTime = 0
+	// Whether the user intends to play (not paused by user action).
+	#wantsToPlay = false
+
 	currentTime: number = $state(0)
 	duration: number = $state(0)
+	buffering: boolean = $state(false)
 
 	readonly #signal: AbortSignal
 	readonly #blob: Blob
@@ -118,7 +125,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 
 			this.#audioTrack = audioTrack
 
-			this.#startFrom(0, scheduleAt, schedulingSignal)
+			this.#startFrom(0, scheduleAt)
 		} catch (error) {
 			if (!schedulingSignal.aborted) {
 				throw error
@@ -128,23 +135,34 @@ export class AudioBufferEngine implements AudioEngineImpl {
 
 	seek(time: number): void {
 		this.currentTime = time
-		const { schedulingSignal } = this.#resetScheduling()
-		this.#startFrom(time, undefined, schedulingSignal)
+		this.#resetScheduling()
+		this.#startFrom(time)
 	}
 
 	setPlaybackRate(rate: number, _preservePitch: boolean): void {
 		const elapsed = this.#graph.context.currentTime - this.#scheduleBase
 		const currentPosition = this.#seekOffset + Math.max(0, elapsed * this.#playbackRate)
 		this.#playbackRate = rate
-		const { schedulingSignal } = this.#resetScheduling()
-		this.#startFrom(currentPosition, undefined, schedulingSignal)
+		this.#resetScheduling()
+		this.#startFrom(currentPosition)
 	}
 
 	play(): Promise<void> {
+		this.#wantsToPlay = true
+		if (this.buffering) {
+			return Promise.resolve()
+		}
+		if (this.#schedulingController) {
+			this.#startCurrentTimeLoop(
+				AbortSignal.any([this.#schedulingController.signal, this.#signal]),
+			)
+		}
 		return this.#graph.resume()
 	}
 
 	pause(): void {
+		this.#wantsToPlay = false
+		this.#stopCurrentTimeLoop()
 		void this.#graph.suspend()
 	}
 
@@ -156,9 +174,10 @@ export class AudioBufferEngine implements AudioEngineImpl {
 		this.#gainNode.disconnect()
 	}
 
-	#startFrom(seekTo: number, scheduleAt: number | undefined, schedulingSignal: AbortSignal) {
-		const signal = AbortSignal.any([schedulingSignal, this.#signal])
+	#startFrom(seekTo: number, scheduleAt?: number) {
+		invariant(this.#schedulingController, 'Scheduling controller must exist before starting')
 		invariant(this.#audioTrack, 'Audio track should be loaded before starting playback')
+		const signal = AbortSignal.any([this.#schedulingController.signal, this.#signal])
 
 		// Recreating sink on every schedule, so rapid seek/rate-change
 		// calls don't corrupt Mediabunny's internal state
@@ -168,8 +187,18 @@ export class AudioBufferEngine implements AudioEngineImpl {
 		const base = scheduleAt ?? ctx.currentTime
 		this.#scheduleBase = base
 		this.#seekOffset = seekTo
+		this.#lastScheduledEndTime = base
 
-		this.#startCurrentTimeLoop(signal)
+		// Suspend the graph for non-gapless starts so we don't play silence
+		// while waiting for the first decoded buffers to be scheduled.
+		if (scheduleAt === undefined) {
+			this.buffering = true
+			void this.#graph.suspend()
+		} else if (this.#wantsToPlay) {
+			// Gapless pre-load: start time loop only if the user is already playing.
+			this.#startCurrentTimeLoop(signal)
+		}
+
 		void this.#scheduleSink(sink, seekTo, base, signal)
 	}
 
@@ -186,6 +215,14 @@ export class AudioBufferEngine implements AudioEngineImpl {
 			if (allBuffersPulled && this.#scheduledSources.size === 0 && !signal.aborted) {
 				this.#stopCurrentTimeLoop()
 				this.onEnded?.()
+			}
+		}
+
+		const resumeAfterBuffering = () => {
+			this.buffering = false
+			if (this.#wantsToPlay) {
+				this.#startCurrentTimeLoop(signal)
+				void this.#graph.resume()
 			}
 		}
 
@@ -223,6 +260,15 @@ export class AudioBufferEngine implements AudioEngineImpl {
 				source.connect(this.#gainNode)
 				source.start(startAt)
 
+				this.#lastScheduledEndTime = startAt + buffer.duration / this.#playbackRate
+
+				if (
+					this.buffering &&
+					this.#lastScheduledEndTime >= ctx.currentTime + BUFFER_RESUME_SECONDS
+				) {
+					resumeAfterBuffering()
+				}
+
 				this.#scheduledSources.add(source)
 
 				source.addEventListener('ended', () => {
@@ -234,6 +280,11 @@ export class AudioBufferEngine implements AudioEngineImpl {
 			}
 
 			allBuffersPulled = true
+
+			// Short track: decode finished before reaching BUFFER_RESUME_SECONDS.
+			if (this.buffering && !signal.aborted) {
+				resumeAfterBuffering()
+			}
 		} catch (error) {
 			if (signal.aborted || error instanceof InputDisposedError) {
 				// Do nothing
@@ -279,6 +330,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	 */
 	#resetScheduling(): { schedulingSignal: AbortSignal } {
 		this.#stopCurrentTimeLoop()
+		this.buffering = false
 
 		this.#schedulingController?.abort()
 		this.#schedulingController = null

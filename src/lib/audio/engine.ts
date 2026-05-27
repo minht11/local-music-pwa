@@ -46,6 +46,12 @@ export interface AudioEngineImpl {
 	 */
 	dispose: () => void
 
+	/**
+	 * True while waiting for enough decoded audio to start/resume playback.
+	 * Always false for HTML engine.
+	 */
+	readonly buffering: boolean
+
 	/** Fires when the track finishes playing naturally. */
 	onEnded: (() => void) | null
 

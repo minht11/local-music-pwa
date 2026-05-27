@@ -14,6 +14,8 @@ export class HTMLAudioEngine implements AudioEngineImpl {
 	readonly #signal: AbortSignal
 	readonly #blob: Blob
 
+	readonly buffering = false
+
 	#gainNode: GainNode | null = null
 	#sourceNode: MediaElementAudioSourceNode | null = null
 	#currentSrc: string | null = null
