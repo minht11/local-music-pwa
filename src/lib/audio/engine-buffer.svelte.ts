@@ -46,6 +46,17 @@ export const supportsBufferEngine = (codec: string): boolean | Promise<boolean> 
 	return canDecodeAudio(normalizedCodec as 'flac')
 }
 
+interface AudioBufferEngineOptions {
+	audioGraph: AudioGraph
+	duration: number
+	input: Input
+	audioTrack: InputAudioTrack
+	signal: AbortSignal
+	scheduleAt?: number
+	preservePitch: boolean
+	playbackRate: number
+}
+
 /**
  * Plays audio by streaming and decoding via Mediabunny, scheduling decoded
  * AudioBuffers directly on the Web Audio API timeline.
@@ -59,10 +70,9 @@ export const supportsBufferEngine = (codec: string): boolean | Promise<boolean> 
 export class AudioBufferEngine implements AudioEngineImpl {
 	readonly #graph: AudioGraph
 	readonly #gainNode: GainNode
-	readonly trackId: number
 
-	#input: Input | null = null
-	#audioTrack: InputAudioTrack | null = null
+	#input: Input
+	#audioTrack: InputAudioTrack
 
 	#scheduledSources = new Set<AudioBufferSourceNode>()
 
@@ -71,7 +81,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	// File time we started from (non-zero after seek).
 	#seekOffset = 0
 
-	#schedulingController: AbortController | null = null
+	#schedulingController: AbortController
 	#playbackRate = 1
 
 	#timerId: number | null = null
@@ -81,12 +91,11 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	// Whether the user intends to play (not paused by user action).
 	#wantsToPlay = false
 
-	currentTime: number = $state(0)
-	duration: number = $state(0)
-	buffering: boolean = $state(false)
+	currentTime = $state(0)
+	readonly duration: number
+	buffering = $state(false)
 
 	readonly #signal: AbortSignal
-	readonly #blob: Blob
 
 	get endTime(): number {
 		return this.#scheduleBase + (this.duration - this.#seekOffset) / this.#playbackRate
@@ -95,42 +104,22 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	onEnded: (() => void) | null = null
 	onError: (() => void) | null = null
 
-	constructor(options: AudioEngineOptions) {
+	constructor(options: AudioBufferEngineOptions) {
 		const { audioGraph } = options
 
 		this.#graph = audioGraph
-		this.trackId = options.trackId
 		this.duration = options.duration
 		this.#signal = options.signal
-		this.#blob = options.blob
-		this.#playbackRate = options.playbackRate
+		this.#input = options.input
+		this.#audioTrack = options.audioTrack
 
 		this.#gainNode = audioGraph.context.createGain()
 		this.#gainNode.connect(audioGraph.inputNode)
+		this.#schedulingController = new AbortController()
 
-		this.#signal.addEventListener('abort', () => this.dispose(), { once: true })
-	}
+		this.#signal.addEventListener('abort', () => this.#dispose())
 
-	async load(scheduleAt?: number): Promise<void> {
-		const { schedulingSignal } = this.#resetScheduling()
-
-		try {
-			const input = new Input({ formats: FORMATS, source: new BlobSource(this.#blob) })
-			this.#input = input
-
-			const audioTrack = await input.getPrimaryAudioTrack()
-			if (!audioTrack) {
-				throw new Error('No audio track found')
-			}
-
-			this.#audioTrack = audioTrack
-
-			this.#startFrom(0, scheduleAt)
-		} catch (error) {
-			if (!schedulingSignal.aborted) {
-				throw error
-			}
-		}
+		this.#startFrom(0, options.scheduleAt)
 	}
 
 	seek(time: number): void {
@@ -152,11 +141,8 @@ export class AudioBufferEngine implements AudioEngineImpl {
 		if (this.buffering) {
 			return Promise.resolve()
 		}
-		if (this.#schedulingController) {
-			this.#startCurrentTimeLoop(
-				AbortSignal.any([this.#schedulingController.signal, this.#signal]),
-			)
-		}
+
+		this.#startCurrentTimeLoop(this.#schedulingController.signal)
 		return this.#graph.resume()
 	}
 
@@ -166,17 +152,13 @@ export class AudioBufferEngine implements AudioEngineImpl {
 		void this.#graph.suspend()
 	}
 
-	dispose(): void {
+	#dispose(): void {
 		this.#resetScheduling()
-		this.#input?.dispose()
-		this.#input = null
-		this.#audioTrack = null
+		this.#input.dispose()
 		this.#gainNode.disconnect()
 	}
 
 	#startFrom(seekTo: number, scheduleAt?: number) {
-		invariant(this.#schedulingController, 'Scheduling controller must exist before starting')
-		invariant(this.#audioTrack, 'Audio track should be loaded before starting playback')
 		const signal = AbortSignal.any([this.#schedulingController.signal, this.#signal])
 
 		// Recreating sink on every schedule, so rapid seek/rate-change
@@ -325,15 +307,14 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	}
 
 	/**
-	 * Stop and disconnect all scheduled sources, aborting any in-progress load or
-	 * playback, and return a new AbortSignal for subsequent operations.
+	 * Stop and disconnect all scheduled sources,
+	 * aborting any in-progress load or playback
 	 */
 	#resetScheduling(): { schedulingSignal: AbortSignal } {
 		this.#stopCurrentTimeLoop()
 		this.buffering = false
 
-		this.#schedulingController?.abort()
-		this.#schedulingController = null
+		this.#schedulingController.abort()
 
 		for (const node of this.#scheduledSources) {
 			try {
@@ -354,4 +335,27 @@ export class AudioBufferEngine implements AudioEngineImpl {
 
 		return { schedulingSignal: controller.signal }
 	}
+}
+
+export const createAudioBufferEngine = async (options: AudioEngineOptions) => {
+	const { signal } = options
+	const input = new Input({ formats: FORMATS, source: new BlobSource(options.blob) })
+
+	const audioTrack = await input.getPrimaryAudioTrack()
+	if (!audioTrack) {
+		throw new Error('No audio track found')
+	}
+
+	signal.throwIfAborted()
+
+	return new AudioBufferEngine({
+		audioGraph: options.audioGraph,
+		duration: options.duration,
+		input,
+		audioTrack,
+		signal,
+		scheduleAt: options.scheduleAt,
+		preservePitch: options.preservePitch,
+		playbackRate: options.playbackRate,
+	})
 }

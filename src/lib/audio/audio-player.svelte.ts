@@ -2,8 +2,12 @@ import type { FileLoadFailReason } from '$lib/helpers/file-resolver.ts'
 import type { TrackData } from '$lib/library/get/value-queries.ts'
 import type { AudioGraph } from './audio-graph.svelte.ts'
 import type { AudioEngineOptions } from './engine.ts'
-import { AudioBufferEngine, supportsBufferEngine } from './engine-buffer.svelte.ts'
-import { HTMLAudioEngine } from './engine-html.svelte.ts'
+import {
+	AudioBufferEngine,
+	createAudioBufferEngine,
+	supportsBufferEngine,
+} from './engine-buffer.svelte.ts'
+import { createHTMLAudioEngine, type HTMLAudioEngine } from './engine-html.svelte.ts'
 
 type AudioEngine = AudioBufferEngine | HTMLAudioEngine
 
@@ -296,24 +300,23 @@ export class AudioPlayer {
 
 			const engineOptions: AudioEngineOptions = {
 				audioGraph: this.#graph,
-				trackId: track.id,
-				duration: track.duration,
 				blob: trackData.file,
 				signal,
 				playbackRate: this.#playbackRate,
 				preservePitch: this.#preservePitch,
+				duration: track.duration,
+				scheduleAt: scheduleAt?.(),
 			}
 
 			let engine: AudioEngine
 			if (canUseBufferEngine) {
-				engine = new AudioBufferEngine(engineOptions)
+				engine = await createAudioBufferEngine(engineOptions)
 			} else if (mustBeGapless) {
 				return { status: 'failed', reason: 'error' }
 			} else {
-				engine = new HTMLAudioEngine(engineOptions)
+				engine = await createHTMLAudioEngine(engineOptions)
 			}
 
-			await engine.load(scheduleAt?.())
 			signal.throwIfAborted()
 
 			return { status: 'loaded', engine }

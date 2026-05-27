@@ -4,10 +4,10 @@ export const CURRENT_TIME_UPDATE_TIMEOUT_MS = 250
 
 export interface AudioEngineOptions {
 	audioGraph: AudioGraph
-	trackId: number
-	duration: number
 	blob: Blob
 	signal: AbortSignal
+	scheduleAt?: number
+	duration: number
 	playbackRate: number
 	preservePitch: boolean
 }
@@ -20,15 +20,9 @@ export interface AudioEngineOptions {
  * transitions between them.
  */
 export interface AudioEngineImpl {
-	readonly trackId: number
-
 	readonly currentTime: number
-	readonly duration: number
 
-	/**
-	 * Load the track's audio data and schedule it for playback at the specified time.
-	 */
-	load: (scheduledAt?: number) => Promise<void>
+	readonly duration: number
 
 	play: () => Promise<void>
 	pause: () => void
@@ -39,12 +33,6 @@ export interface AudioEngineImpl {
 	 */
 	seek: (time: number) => void
 	setPlaybackRate: (rate: number, preservePitch: boolean) => void
-
-	/**
-	 * abort() + disconnect from the audio graph.
-	 * Call when the engine will never be used again.
-	 */
-	dispose: () => void
 
 	/**
 	 * True while waiting for enough decoded audio to start/resume playback.

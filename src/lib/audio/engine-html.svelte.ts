@@ -6,22 +6,28 @@ import {
 	CURRENT_TIME_UPDATE_TIMEOUT_MS,
 } from './engine.ts'
 
+interface HTMLAudioEngineOptions {
+	audioGraph: AudioGraph
+	audio: HTMLAudioElement
+	signal: AbortSignal
+	preservePitch: boolean
+	playbackRate: number
+}
+
 export class HTMLAudioEngine implements AudioEngineImpl {
-	readonly #audio = new Audio()
+	readonly #audio: HTMLAudioElement
 	readonly #graph: AudioGraph
-	readonly trackId: number
 
 	readonly #signal: AbortSignal
-	readonly #blob: Blob
+
+	readonly duration: number
 
 	readonly buffering = false
 
 	#gainNode: GainNode | null = null
 	#sourceNode: MediaElementAudioSourceNode | null = null
-	#currentSrc: string | null = null
 
 	currentTime = $state(0)
-	duration = $state(0)
 
 	#playbackRate = 1
 	#preservePitch = true
@@ -29,79 +35,52 @@ export class HTMLAudioEngine implements AudioEngineImpl {
 	onEnded: (() => void) | null = null
 	onError: (() => void) | null = null
 
-	constructor(options: AudioEngineOptions) {
+	constructor(options: HTMLAudioEngineOptions) {
 		this.#graph = options.audioGraph
-		this.trackId = options.trackId
-		this.duration = options.duration
 		this.#signal = options.signal
-		this.#blob = options.blob
+		this.#audio = options.audio
 		this.#playbackRate = options.playbackRate
 		this.#preservePitch = options.preservePitch
+		this.duration = options.audio.duration
 		this.#setupElement()
+		this.#setupGraphConnection()
 
-		this.#signal.addEventListener('abort', () => this.dispose(), { once: true })
+		this.#signal.addEventListener('abort', () => this.#dispose())
 	}
 
 	#setupElement(): void {
 		const audio = this.#audio
+		const signal = this.#signal
 
-		audio.onended = () => {
-			this.onEnded?.()
-		}
+		audio.addEventListener(
+			'error',
+			() => {
+				this.onError?.()
+			},
+			{ signal },
+		)
 
-		audio.ontimeupdate = throttle(() => {
+		audio.addEventListener(
+			'ended',
+			() => {
+				this.onEnded?.()
+			},
+			{ signal },
+		)
+
+		const handleTimeUpdate = throttle(() => {
 			this.currentTime = audio.currentTime
 		}, CURRENT_TIME_UPDATE_TIMEOUT_MS)
 
-		audio.ondurationchange = () => {
-			const d = audio.duration
-			this.duration = Number.isFinite(d) ? d : 0
-		}
+		audio.addEventListener('timeupdate', handleTimeUpdate, { signal })
 	}
 
-	#ensureGraphConnection(): void {
-		if (this.#gainNode) {
-			return
-		}
-
+	#setupGraphConnection(): void {
 		const ctx = this.#graph.context
 		this.#gainNode = ctx.createGain()
 		this.#sourceNode = ctx.createMediaElementSource(this.#audio)
 		this.#sourceNode.connect(this.#gainNode)
 		this.#gainNode.connect(this.#graph.inputNode)
-	}
-
-	async load(_scheduledAt?: number): Promise<void> {
-		const audio = this.#audio
-
-		this.#clearSrc()
-		this.#ensureGraphConnection()
-
-		this.#currentSrc = URL.createObjectURL(this.#blob)
-		audio.src = this.#currentSrc
-
-		const { promise, resolve, reject } = Promise.withResolvers<void>()
-
-		audio.onloadedmetadata = () => {
-			this.#updateAudioRate()
-			audio.onloadedmetadata = null
-
-			// Restore regular handler
-			audio.onerror = () => {
-				this.onError?.()
-			}
-
-			resolve()
-		}
-
-		audio.onerror = () => {
-			audio.onloadedmetadata = null
-			audio.onerror = null
-
-			reject(new Error('Audio element error'))
-		}
-
-		await promise
 	}
 
 	setPlaybackRate(rate: number, preservePitch: boolean): void {
@@ -125,13 +104,8 @@ export class HTMLAudioEngine implements AudioEngineImpl {
 		this.#audio.currentTime = time
 	}
 
-	dispose(): void {
-		this.#audio.onended = null
-		this.#audio.ontimeupdate = null
-		this.#audio.ondurationchange = null
-		this.#audio.onerror = null
-
-		this.#clearSrc()
+	#dispose(): void {
+		cleanupAudioElement(this.#audio)
 		this.#gainNode?.disconnect()
 		this.#sourceNode?.disconnect()
 		this.#gainNode = null
@@ -142,12 +116,69 @@ export class HTMLAudioEngine implements AudioEngineImpl {
 		this.#audio.playbackRate = this.#playbackRate
 		this.#audio.preservesPitch = this.#preservePitch
 	}
+}
 
-	#clearSrc(): void {
-		if (this.#currentSrc) {
-			URL.revokeObjectURL(this.#currentSrc)
-			this.#currentSrc = null
-			this.#audio.src = ''
-		}
+const cleanupAudioElement = (audio: HTMLAudioElement) => {
+	audio.pause()
+	const { src } = audio
+	if (src) {
+		URL.revokeObjectURL(src)
 	}
+
+	audio.src = ''
+}
+
+const loadAudio = (audio: HTMLAudioElement, signal: AbortSignal) => {
+	const { promise, resolve, reject } = Promise.withResolvers<void>()
+
+	const cleanup = () => {
+		audio.onloadedmetadata = null
+		audio.onerror = null
+		signal.removeEventListener('abort', signalHandler)
+	}
+
+	const signalHandler = () => {
+		cleanup()
+		reject(new DOMException('Aborted', 'AbortError'))
+	}
+
+	signal.addEventListener('abort', signalHandler, { once: true })
+
+	audio.onloadedmetadata = () => {
+		cleanup()
+		resolve()
+	}
+
+	audio.onerror = () => {
+		cleanup()
+
+		reject(new Error('Audio element error'))
+	}
+
+	return promise
+}
+
+export const createHTMLAudioEngine = async (options: AudioEngineOptions) => {
+	const { signal } = options
+	const audio = new Audio()
+
+	const src = URL.createObjectURL(options.blob)
+	audio.src = src
+	audio.playbackRate = options.playbackRate
+	audio.preservesPitch = options.preservePitch
+
+	try {
+		await loadAudio(audio, signal)
+	} catch (error) {
+		cleanupAudioElement(audio)
+		throw error
+	}
+
+	return new HTMLAudioEngine({
+		audioGraph: options.audioGraph,
+		signal,
+		audio,
+		playbackRate: options.playbackRate,
+		preservePitch: options.preservePitch,
+	})
 }
