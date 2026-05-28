@@ -1,4 +1,5 @@
 import type { FileLoadFailReason } from '$lib/helpers/file-resolver.ts'
+import { isAbortError } from '$lib/helpers/utils/errors.ts'
 import type { TrackData } from '$lib/library/get/value-queries.ts'
 import type { AudioGraph } from './audio-graph.svelte.ts'
 import type { AudioEngineOptions } from './engine.ts'
@@ -321,7 +322,7 @@ export class PlaybackController {
 
 			return { status: 'loaded', engine }
 		} catch (error) {
-			if (error instanceof DOMException && error.name === 'AbortError') {
+			if (isAbortError(error)) {
 				return { status: 'aborted' }
 			}
 

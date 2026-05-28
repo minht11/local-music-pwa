@@ -1,8 +1,10 @@
+import { createAbortError } from './errors.ts'
+
 const waitWithSignal = (duration: number, signal: AbortSignal): Promise<void> => {
 	const { promise, resolve, reject } = Promise.withResolvers<void>()
 	const signalHandler = () => {
 		clearTimeout(timeoutId)
-		reject(new DOMException('Aborted', 'AbortError'))
+		reject(createAbortError())
 	}
 
 	signal.addEventListener('abort', signalHandler, { once: true })

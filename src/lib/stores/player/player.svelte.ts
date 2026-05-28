@@ -97,8 +97,6 @@ export class PlayerStore {
 		])
 		persist('player', this.#queue, ['shuffle'])
 
-		this.equalizer.init()
-
 		this.#setupTrackLoadEffect()
 		this.#setupPreBufferEffect()
 		this.#setupMediaSession()

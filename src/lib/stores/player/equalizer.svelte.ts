@@ -39,9 +39,11 @@ export class EqualizerStore {
 
 	constructor(graph: AudioGraph) {
 		this.#graph = graph
+
+		this.#setupFiltersEffect()
 	}
 
-	init(): void {
+	#setupFiltersEffect(): void {
 		persist('equalizer', this, ['enabled', 'bands', 'selectedPreset'])
 
 		$effect(() => {

@@ -1,3 +1,4 @@
+import { createAbortError } from '$lib/helpers/utils/errors.ts'
 import { throttle } from '$lib/helpers/utils/throttle'
 import type { AudioGraph } from './audio-graph.svelte.ts'
 import {
@@ -139,7 +140,7 @@ const loadAudio = (audio: HTMLAudioElement, signal: AbortSignal) => {
 
 	const signalHandler = () => {
 		cleanup()
-		reject(new DOMException('Aborted', 'AbortError'))
+		reject(createAbortError())
 	}
 
 	signal.addEventListener('abort', signalHandler, { once: true })
