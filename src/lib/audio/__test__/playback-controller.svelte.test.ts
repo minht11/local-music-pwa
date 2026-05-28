@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { FileLoadFailReason } from '$lib/helpers/file-resolver.ts'
-import { AudioPlayer } from '../audio-player.svelte.ts'
+import { PlaybackController } from '../playback-controller.svelte.ts'
 
 const { MockEngine, createdEngines, mockSupportsBufferEngine } = vi.hoisted(() => {
 	class MockEngine {
@@ -83,8 +83,8 @@ const makeSlowLoader = (id: number, codec = 'flac') => {
 	return { loader, resolveLoader: () => resolveLoader() }
 }
 
-const makePlayer = (overrides: Partial<ConstructorParameters<typeof AudioPlayer>[1]> = {}) =>
-	new AudioPlayer(mockGraph, {
+const makePlayer = (overrides: Partial<ConstructorParameters<typeof PlaybackController>[1]> = {}) =>
+	new PlaybackController(mockGraph, {
 		trackEndPolicy: () => 'advance' as const,
 		onTrackEnded: vi.fn(),
 		onError: vi.fn(),
@@ -99,7 +99,7 @@ const getEngine = (index: number) => {
 	return engine
 }
 
-describe('AudioPlayer', () => {
+describe('PlaybackController', () => {
 	beforeEach(() => {
 		createdEngines.length = 0
 		mockSupportsBufferEngine.mockReturnValue(true)

@@ -85,7 +85,7 @@ interface TryLoadEngineOptions {
 }
 
 /** @public */
-export class AudioPlayer {
+export class PlaybackController {
 	readonly #graph: AudioGraph
 	readonly #options: AudioPlayerOptions
 

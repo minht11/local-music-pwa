@@ -9,6 +9,7 @@ import {
 	PCM_AUDIO_CODECS,
 } from 'mediabunny'
 import { browser } from '$app/environment'
+import { isAbortError } from '$lib/helpers/utils/errors.ts'
 import { isSafari } from '$lib/helpers/utils/ua.ts'
 import { wait } from '$lib/helpers/utils/wait.ts'
 import type { AudioGraph } from './audio-graph.svelte.ts'
@@ -82,6 +83,10 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	#seekOffset = 0
 
 	#schedulingController: AbortController
+	readonly #externalSignal: AbortSignal
+	/** Combined internal and external abort signals */
+	#signal: AbortSignal
+
 	#playbackRate = 1
 
 	#timerId: number | null = null
@@ -95,8 +100,6 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	readonly duration: number
 	buffering = $state(false)
 
-	readonly #signal: AbortSignal
-
 	get endTime(): number {
 		return this.#scheduleBase + (this.duration - this.#seekOffset) / this.#playbackRate
 	}
@@ -109,7 +112,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 
 		this.#graph = audioGraph
 		this.duration = options.duration
-		this.#signal = options.signal
+		this.#externalSignal = options.signal
 		this.#input = options.input
 		this.#audioTrack = options.audioTrack
 
@@ -117,7 +120,8 @@ export class AudioBufferEngine implements AudioEngineImpl {
 		this.#gainNode.connect(audioGraph.inputNode)
 		this.#schedulingController = new AbortController()
 
-		this.#signal.addEventListener('abort', () => this.#dispose())
+		this.#externalSignal.addEventListener('abort', () => this.#dispose())
+		this.#signal = AbortSignal.any([this.#schedulingController.signal, this.#externalSignal])
 
 		this.#startFrom(0, options.scheduleAt)
 	}
@@ -159,7 +163,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	}
 
 	#startFrom(seekTo: number, scheduleAt?: number) {
-		const signal = AbortSignal.any([this.#schedulingController.signal, this.#signal])
+		const signal = this.#signal
 
 		// Recreating sink on every schedule, so rapid seek/rate-change
 		// calls don't corrupt Mediabunny's internal state
@@ -229,7 +233,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 						break
 					}
 
-					await wait(100)
+					await wait(100, signal)
 				}
 
 				if (signal.aborted) {
@@ -268,7 +272,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 				resumeAfterBuffering()
 			}
 		} catch (error) {
-			if (signal.aborted || error instanceof InputDisposedError) {
+			if (signal.aborted || error instanceof InputDisposedError || isAbortError(error)) {
 				// Do nothing
 			} else {
 				console.error('Error during audio playback:', error)
@@ -310,7 +314,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	 * Stop and disconnect all scheduled sources,
 	 * aborting any in-progress load or playback
 	 */
-	#resetScheduling(): { schedulingSignal: AbortSignal } {
+	#resetScheduling() {
 		this.#stopCurrentTimeLoop()
 		this.buffering = false
 
@@ -332,8 +336,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 
 		const controller = new AbortController()
 		this.#schedulingController = controller
-
-		return { schedulingSignal: controller.signal }
+		this.#signal = AbortSignal.any([this.#schedulingController.signal, controller.signal])
 	}
 }
 
