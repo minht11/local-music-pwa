@@ -101,6 +101,10 @@ export class PlayerStore {
 		this.#setupMediaSession()
 		this.#setupVolumeEffect()
 		this.#setupPlaybackRateEffect()
+
+		if (import.meta.hot) {
+			this.#controller.abort()
+		}
 	}
 
 	#createPlaybackController() {
