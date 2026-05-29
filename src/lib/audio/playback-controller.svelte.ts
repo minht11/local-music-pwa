@@ -1,6 +1,5 @@
 import type { FileLoadFailReason } from '$lib/helpers/file-resolver.ts'
 import { isAbortError } from '$lib/helpers/utils/errors.ts'
-import type { TrackData } from '$lib/library/get/value-queries.ts'
 import type { AudioGraph } from './audio-graph.svelte.ts'
 import type { AudioEngineOptions } from './engine.ts'
 import {
@@ -13,10 +12,12 @@ import { createHTMLAudioEngine, type HTMLAudioEngine } from './engine-html.svelt
 type AudioEngine = AudioBufferEngine | HTMLAudioEngine
 
 type TrackLoaderResult =
-	| { status: 'loaded'; file: File; track: TrackData }
+	| { status: 'loaded'; file: File; codec: string; duration: number }
 	| { status: FileLoadFailReason }
 
-export type TrackLoader = () => Promise<TrackLoaderResult>
+type TrackLoadReason = 'load' | 'schedule'
+
+export type TrackLoader = (trackId: number, reason: TrackLoadReason) => Promise<TrackLoaderResult>
 
 type EngineLoadResult =
 	| { status: 'loaded'; engine: AudioEngine }
@@ -40,17 +41,14 @@ interface EngineStateReady {
 interface EngineStateFailed {
 	status: 'failed'
 	trackId: number
-	reason: FileLoadFailReason | 'unavailable'
+	reason: FileLoadFailReason | 'gapless-unavailable'
 }
 
 type EngineState = EngineStateIdle | EngineStateLoading | EngineStateReady | EngineStateFailed
 
 const idle = (): EngineStateIdle => ({ status: 'idle' })
 
-const failed = (
-	trackId: number,
-	reason: FileLoadFailReason | 'unavailable',
-): EngineStateFailed => ({
+const failed = (trackId: number, reason: EngineStateFailed['reason']): EngineStateFailed => ({
 	status: 'failed',
 	trackId,
 	reason,
@@ -72,6 +70,7 @@ const createStateTransition = (trackId: number) => {
 }
 
 interface AudioPlayerOptions {
+	trackLoader: TrackLoader
 	trackEndPolicy: () => 'advance' | 'repeat'
 	onTrackEnded: () => void
 	onError: (reason: FileLoadFailReason) => void
@@ -83,6 +82,7 @@ interface TryLoadEngineOptions {
 	// Using getter so that we can get latest value, only when we actually start loading the audio
 	scheduleAt?: () => number
 	mustBeGapless?: boolean
+	reason: TrackLoadReason
 }
 
 /** @public */
@@ -138,28 +138,29 @@ export class PlaybackController {
 	}
 
 	/**
-	 * Load a track into the current slot. Idempotent: calling with the same track while
-	 * already loading or ready is a no-op. Calling with a failed track retries the load.
+	 * Load and play a track into the current slot.
+	 * Idempotent: calling with the same trackId while already loading or ready will play same track without reloading.
 	 */
-	async load(trackId: number, loader: TrackLoader, provisionalDuration = 0): Promise<void> {
+	async switchToAndPlay(trackId: number): Promise<void> {
 		this.playing = true
 		const current = this.#current
-		if (
-			(current.status === 'loading' || current.status === 'ready') &&
-			current.trackId === trackId
-		) {
+		if (current.status === 'ready' && current.trackId === trackId) {
+			this.play()
+			return
+		}
+
+		if (current.status === 'loading' && current.trackId === trackId) {
 			return
 		}
 
 		this.#teardownCurrent()
 		this.#teardownAndIdleNext()
 
-		this.duration = provisionalDuration
-
 		const transition = createStateTransition(trackId)
 		this.#current = transition.loading()
 
-		const result = await this.#tryLoadingEngine(loader, {
+		const result = await this.#tryLoadingEngine(trackId, {
+			reason: 'load',
 			signal: this.#current.controller.signal,
 		})
 
@@ -182,7 +183,7 @@ export class PlaybackController {
 	 * in a non-idle state → no-op. Marks unavailable immediately if gapless is not
 	 * possible, avoiding an unnecessary file load.
 	 */
-	async scheduleNext(trackId: number, loader: TrackLoader): Promise<void> {
+	async scheduleNext(trackId: number): Promise<void> {
 		const next = this.#next
 		if (next.status !== 'idle' && next.trackId === trackId) {
 			return
@@ -197,14 +198,15 @@ export class PlaybackController {
 			currentEngine instanceof AudioBufferEngine && this.#options.isGaplessEnabled()
 
 		if (!canTryGapless) {
-			this.#next = failed(trackId, 'unavailable')
+			this.#next = failed(trackId, 'gapless-unavailable')
 			return
 		}
 
 		const transition = createStateTransition(trackId)
 		this.#next = transition.loading()
 
-		const result = await this.#tryLoadingEngine(loader, {
+		const result = await this.#tryLoadingEngine(trackId, {
+			reason: 'schedule',
 			signal: this.#next.controller.signal,
 			mustBeGapless: true,
 			scheduleAt: () => currentEngine.endTime,
@@ -215,7 +217,7 @@ export class PlaybackController {
 		}
 
 		if (result.status === 'failed') {
-			this.#next = transition.failed('unavailable')
+			this.#next = transition.failed('gapless-unavailable')
 			return
 		}
 
@@ -272,40 +274,38 @@ export class PlaybackController {
 		this.#options.onTrackEnded()
 	}
 
-	async #canUseBufferEngine(track: TrackData): Promise<boolean> {
+	async #canUseBufferEngine(codec: string): Promise<boolean> {
 		if (this.#options.isGaplessEnabled()) {
-			return await supportsBufferEngine(track.format?.codec ?? '')
+			return await supportsBufferEngine(codec)
 		}
 
 		return false
 	}
 
 	async #tryLoadingEngine(
-		loader: TrackLoader,
+		trackId: number,
 		options: TryLoadEngineOptions,
 	): Promise<EngineLoadResult> {
 		const { scheduleAt, mustBeGapless, signal } = options
 
 		try {
-			const trackData = await loader()
+			const result = await this.#options.trackLoader(trackId, options.reason)
 			signal.throwIfAborted()
 
-			if (trackData.status !== 'loaded') {
-				return { status: 'failed', reason: trackData.status }
+			if (result.status !== 'loaded') {
+				return { status: 'failed', reason: result.status }
 			}
 
-			const { track } = trackData
-
-			const canUseBufferEngine = await this.#canUseBufferEngine(track)
+			const canUseBufferEngine = await this.#canUseBufferEngine(result.codec)
 			signal.throwIfAborted()
 
 			const engineOptions: AudioEngineOptions = {
 				audioGraph: this.#graph,
-				blob: trackData.file,
+				blob: result.file,
 				signal,
 				playbackRate: this.#playbackRate,
 				preservePitch: this.#preservePitch,
-				duration: track.duration,
+				duration: result.duration,
 				scheduleAt: scheduleAt?.(),
 			}
 

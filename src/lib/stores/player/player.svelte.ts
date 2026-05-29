@@ -1,5 +1,5 @@
 import { AudioGraph } from '$lib/audio/audio-graph.svelte.ts'
-import { PlaybackController } from '$lib/audio/playback-controller.svelte.ts'
+import { PlaybackController, type TrackLoader } from '$lib/audio/playback-controller.svelte.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
 import { type FileLoadFailReason, resolveTrackFile } from '$lib/helpers/file-resolver.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
@@ -23,15 +23,11 @@ export const PLAYER_PLAYBACK_RATE_MAX = 2
 
 export class PlayerStore {
 	readonly #graph = new AudioGraph()
-	readonly #playbackController = new PlaybackController(this.#graph, {
-		trackEndPolicy: () => (this.repeat === 'one' ? 'repeat' : 'advance'),
-		onTrackEnded: () => this.#handleTrackEnded(),
-		onError: (reason) => this.#handleError(reason),
-		isGaplessEnabled: () => this.gaplessPlaybackEnabled,
-	})
 	readonly #queue = new QueueStore()
 	readonly equalizer = new EqualizerStore(this.#graph)
 	readonly #main: MainStore
+
+	readonly #playbackController: PlaybackController
 
 	repeat = $state<PlayerRepeat>('none')
 	muted = $state(false)
@@ -39,7 +35,6 @@ export class PlayerStore {
 	playbackRate = $state(1)
 	preservePitch = $state(true)
 	gaplessPlaybackEnabled: boolean = $state(false)
-	#loadRetry = $state(0)
 
 	get playing() {
 		return this.#playbackController.playing
@@ -67,14 +62,13 @@ export class PlayerStore {
 		return this.#queue.isQueueEmpty
 	}
 
-	#activeTrackQuery = createTrackQuery(
-		() => this.#queue.itemsIds[this.#queue.activeTrackIndex] ?? -1,
-		{ allowEmpty: true },
-	)
-	activeTrack = $derived(this.#activeTrackQuery.value)
+	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.activeTrackId ?? -1, {
+		allowEmpty: true,
+	})
+	readonly activeTrack = $derived(this.#activeTrackQuery.value)
 
-	#artwork = createManagedArtwork(() => this.activeTrack?.image?.full)
-	artworkSrc = $derived.by(this.#artwork)
+	readonly #artwork = createManagedArtwork(() => this.activeTrack?.image?.full)
+	readonly artworkSrc = $derived.by(this.#artwork)
 
 	get volume() {
 		return this.#main.volumeSliderEnabled ? this.#volume : 100
@@ -97,12 +91,37 @@ export class PlayerStore {
 		])
 		persist('player', this.#queue, ['shuffle'])
 
+		this.#playbackController = this.#createPlaybackController()
+
 		this.#setupTrackLoadEffect()
 		this.#setupPreBufferEffect()
 		this.#setupMediaSession()
 		this.#setupVolumeEffect()
 		this.#setupPlaybackRateEffect()
 		// TODO. Add playHistory.
+	}
+
+	#createPlaybackController() {
+		const trackLoader: TrackLoader = async (trackId, reason) => {
+			const track = await getLibraryValue('tracks', trackId)
+
+			const result = await resolveTrackFile({
+				directoryId: track.directory,
+				entity: track.file,
+				// On schedule we want to be silent
+				askPermission: reason === 'load',
+			})
+
+			return { ...result, duration: track.duration, codec: track.format?.codec ?? '' }
+		}
+
+		return new PlaybackController(this.#graph, {
+			trackLoader,
+			trackEndPolicy: () => (this.repeat === 'one' ? 'repeat' : 'advance'),
+			onTrackEnded: () => this.#handleTrackEnded(),
+			onError: (reason) => this.#handleError(reason),
+			isGaplessEnabled: () => this.gaplessPlaybackEnabled,
+		})
 	}
 
 	#setupVolumeEffect(): void {
@@ -139,31 +158,11 @@ export class PlayerStore {
 	#setupTrackLoadEffect(): void {
 		$effect(() => {
 			const track = this.activeTrack
-			void this.#loadRetry
 
 			untrack(() => {
 				if (!track) {
 					this.#playbackController.abort()
-					return
 				}
-
-				const { currentStatus, currentTrackId } = this.#playbackController
-
-				// Gapless promotion already moved the player to this track,
-				// or it's already loading/ready — don't reload.
-				if (currentTrackId === track.id && currentStatus !== 'failed') {
-					return
-				}
-
-				const loader = async () => {
-					const result = await resolveTrackFile({
-						directoryId: track.directory,
-						entity: track.file,
-						askPermission: true,
-					})
-					return { ...result, track }
-				}
-				this.#playbackController.load(track.id, loader, track.duration)
 			})
 		})
 	}
@@ -197,49 +196,25 @@ export class PlayerStore {
 				return
 			}
 
-			// Already scheduled (or determined unavailable) for this track — skip.
-			if (this.#playbackController.nextScheduledTrackId === nextId) {
-				return
-			}
-
 			untrack(() => {
-				void this.#preBufferNext(nextId)
+				void this.#playbackController.scheduleNext(nextId)
 			})
-		})
-	}
-
-	async #preBufferNext(trackId: number): Promise<void> {
-		await this.#playbackController.scheduleNext(trackId, async () => {
-			const track = await getLibraryValue('tracks', trackId)
-			if (!track) {
-				return { status: 'error' }
-			}
-
-			const result = await resolveTrackFile({
-				directoryId: track.directory,
-				entity: track.file,
-				askPermission: false,
-			})
-
-			return { ...result, track }
 		})
 	}
 
 	#handleTrackEnded(): void {
 		if (this.repeat === 'one') {
-			// Coordinator is now idle (track ended, repeat policy discarded promotion).
-			// coordinator.playing is still true so the reload will auto-play.
-			this.#loadRetry += 1
+			this.seek(0)
 			return
 		}
 
 		const isLastTrack = this.#queue.activeTrackIndex === this.#queue.itemsIds.length - 1
 		if (this.repeat === 'none' && isLastTrack) {
-			this.#playbackController.abort()
+			this.pause()
 			return
 		}
 
-		this.#queue.setTrack(this.#queue.getNextIndex())
+		this.playNext()
 	}
 
 	play = (): void => {
@@ -247,16 +222,7 @@ export class PlayerStore {
 			return
 		}
 
-		const { currentStatus, currentTrackId } = this.#playbackController
-		const wrongTrack = currentTrackId !== this.activeTrack.id
-
-		// Trigger the load effect when the coordinator can't play by itself:
-		// idle (no engine), failed (needs retry), or loaded the wrong track.
-		if (currentStatus === 'idle' || currentStatus === 'failed' || wrongTrack) {
-			this.#loadRetry += 1
-		}
-
-		this.#playbackController.play()
+		this.#playbackController.switchToAndPlay(this.activeTrack.id)
 	}
 
 	pause = (): void => {
@@ -289,11 +255,14 @@ export class PlayerStore {
 		this.#queue.setTrack(trackIndex, queue, options)
 
 		const isSameTrack = currentTrackId !== null && this.#queue.activeTrackId === currentTrackId
-		if (isSameTrack) {
+		if (isSameTrack && this.#playbackController.currentStatus === 'ready') {
 			this.seek(0)
+			return
 		}
 
-		this.play()
+		if (this.#queue.activeTrackId) {
+			this.#playbackController.switchToAndPlay(this.#queue.activeTrackId)
+		}
 	}
 
 	togglePlay = (): void => {
@@ -342,8 +311,8 @@ export class PlayerStore {
 		const ms = navigator.mediaSession
 		const setAction = ms.setActionHandler.bind(ms)
 
-		setAction('play', () => this.play())
-		setAction('pause', () => this.pause())
+		setAction('play', this.play)
+		setAction('pause', this.pause)
 		setAction('nexttrack', this.playNext)
 		setAction('previoustrack', this.playPrev)
 		setAction('seekbackward', () => this.seek(Math.max(this.currentTime - 10, 0)))
