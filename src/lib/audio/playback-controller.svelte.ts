@@ -71,7 +71,6 @@ const createStateTransition = (trackId: number) => {
 
 interface AudioPlayerOptions {
 	trackLoader: TrackLoader
-	trackEndPolicy: () => 'advance' | 'repeat'
 	onTrackEnded: () => void
 	onError: (reason: FileLoadFailReason) => void
 	isGaplessEnabled: () => boolean
@@ -154,6 +153,12 @@ export class PlaybackController {
 		}
 
 		this.#teardownCurrent()
+
+		if (this.#next.status === 'ready' && this.#next.trackId === trackId) {
+			this.#promoteToCurrent(this.#next)
+			return
+		}
+
 		this.#teardownAndIdleNext()
 
 		const transition = createStateTransition(trackId)
@@ -179,11 +184,11 @@ export class PlaybackController {
 	}
 
 	/**
-	 * Queue the next track for gapless pre-buffering. Idempotent: same track already
+	 * Preload track for gapless pre-buffering. Idempotent: same track already
 	 * in a non-idle state → no-op. Marks unavailable immediately if gapless is not
 	 * possible, avoiding an unnecessary file load.
 	 */
-	async scheduleNext(trackId: number): Promise<void> {
+	async preloadNext(trackId: number): Promise<void> {
 		const next = this.#next
 		if (next.status !== 'idle' && next.trackId === trackId) {
 			return
@@ -224,6 +229,10 @@ export class PlaybackController {
 		this.#next = transition.ready(result.engine)
 	}
 
+	abortNext(): void {
+		this.#teardownAndIdleNext()
+	}
+
 	play(): void {
 		this.playing = true
 		if (this.#current.status === 'ready') {
@@ -249,29 +258,11 @@ export class PlaybackController {
 	abort(): void {
 		this.playing = false
 		this.duration = 0
-		if (this.#current.status !== 'idle') {
-			this.#teardownCurrent()
-			this.#current = idle()
-		}
-		this.#teardownAndIdleNext()
-	}
-
-	#handleCurrentEnded(): void {
-		const next = this.#next
-		const policy = this.#options.trackEndPolicy()
-		const canPromote = next.status === 'ready' && policy === 'advance'
 
 		this.#teardownCurrent()
+		this.#current = idle()
 
-		if (canPromote) {
-			this.#next = idle()
-			this.#promoteToCurrent(next)
-		} else {
-			this.#current = idle()
-			this.#teardownAndIdleNext()
-		}
-
-		this.#options.onTrackEnded()
+		this.#teardownAndIdleNext()
 	}
 
 	async #canUseBufferEngine(codec: string): Promise<boolean> {
@@ -343,7 +334,7 @@ export class PlaybackController {
 
 	#promoteToCurrent(readyState: EngineStateReady): void {
 		const { engine } = readyState
-		engine.onEnded = () => this.#handleCurrentEnded()
+		engine.onEnded = () => this.#options.onTrackEnded()
 		engine.onError = () => this.#options.onError('error')
 		this.#current = readyState
 		this.duration = engine.duration

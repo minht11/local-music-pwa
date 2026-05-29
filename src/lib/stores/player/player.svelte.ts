@@ -64,6 +64,19 @@ export class PlayerStore {
 		return this.#queue.isQueueEmpty
 	}
 
+	readonly #nextTrackId = $derived.by(() => {
+		if (this.repeat === 'one') {
+			return null
+		}
+
+		const isLast = this.#queue.activeTrackIndex >= this.#queue.itemsIds.length - 1
+		if (this.repeat === 'none' && (isLast || this.pauseAfterTrackWhenRepeatIsOff)) {
+			return null
+		}
+
+		return this.#queue.getNextTrackId()
+	})
+
 	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.activeTrackId ?? -1, {
 		allowEmpty: true,
 	})
@@ -118,14 +131,17 @@ export class PlayerStore {
 				askPermission: reason === 'load',
 			})
 
-			return { ...result, duration: track.duration, codec: track.format?.codec ?? '' }
+			return {
+				...result,
+				duration: track.duration,
+				codec: track.format?.codec ?? '',
+			}
 		}
 
 		return new PlaybackController(this.#graph, {
 			trackLoader,
-			trackEndPolicy: () => (this.repeat === 'one' ? 'repeat' : 'advance'),
-			onTrackEnded: () => this.#handleTrackEnded(),
-			onError: (reason) => this.#handleError(reason),
+			onTrackEnded: this.#handleTrackEnded,
+			onError: this.#handleError,
 			isGaplessEnabled: () => this.gaplessPlaybackEnabled,
 		})
 	}
@@ -191,28 +207,19 @@ export class PlayerStore {
 				return
 			}
 
-			const isLastTrack = this.#queue.activeTrackIndex === this.#queue.itemsIds.length - 1
-			if (this.repeat === 'none' && (isLastTrack || this.pauseAfterTrackWhenRepeatIsOff)) {
-				return
-			}
-
-			const nextId = this.#queue.getNextTrackId()
-			if (nextId == null) {
-				return
-			}
-
-			// Already scheduled (or determined unavailable) for this track .
-			if (this.#controller.nextScheduledTrackId === nextId) {
-				return
-			}
+			const nextTrackId = this.#nextTrackId
 
 			untrack(() => {
-				void this.#controller.scheduleNext(nextId)
+				if (nextTrackId) {
+					void this.#controller.preloadNext(nextTrackId)
+				} else {
+					this.#controller.abortNext()
+				}
 			})
 		})
 	}
 
-	#handleTrackEnded(): void {
+	#handleTrackEnded = () => {
 		if (this.repeat === 'one') {
 			this.seek(0)
 			return
@@ -241,6 +248,7 @@ export class PlayerStore {
 
 	seek = (time: number): void => {
 		this.#controller.seek(time)
+		this.#updateMediaSessionPosition(time)
 	}
 
 	playNext = (): void => {
@@ -320,13 +328,14 @@ export class PlayerStore {
 		}
 	}
 
-	#handleError(reason: FileLoadFailReason): void {
+	#handleError = (reason: FileLoadFailReason): void => {
 		const name = truncate(this.activeTrack?.name ?? 'Unknown', 30)
 		const errorMap = {
 			'not-found': m.playerAudioErrorNotFound,
 			'permission-denied': m.playerAudioErrorPermissionDenied,
 			error: m.playerAudioErrorLoadError,
 		} as const
+
 		snackbar({
 			id: 'failed-to-load-audio',
 			message: errorMap[reason]({ name }),
@@ -361,11 +370,8 @@ export class PlayerStore {
 				return
 			}
 
-			ms.setPositionState({
-				duration,
-				playbackRate: this.playbackRate,
-				position: Math.min(this.currentTime, duration),
-			})
+			// We only want to update on every tick, to allow scrubbing, browser interpolates position itself.
+			this.#updateMediaSessionPosition(untrack(() => this.currentTime))
 		})
 
 		$effect(() => {
@@ -386,6 +392,20 @@ export class PlayerStore {
 					},
 				],
 			})
+		})
+	}
+
+	#updateMediaSessionPosition(currentTime: number): void {
+		const { duration } = this
+		// setPositionState throws otherwise
+		if (duration <= 0) {
+			return
+		}
+
+		navigator.mediaSession.setPositionState({
+			duration,
+			playbackRate: this.playbackRate,
+			position: Math.min(currentTime, duration),
 		})
 	}
 }
