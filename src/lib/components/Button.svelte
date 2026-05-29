@@ -96,9 +96,12 @@
 	}
 
 	.base-button[disabled] {
-		cursor: default;
 		background-color: --alpha(var(--color-onSurface) / 12%);
 		border-color: --alpha(var(--color-onSurface) / 38%);
 		color: --alpha(var(--color-onSurface) / 38%);
+	}
+
+	button[disabled] {
+		cursor: default;
 	}
 </style>

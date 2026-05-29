@@ -1,14 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment'
-	import { tooltip } from '$lib/attachments/tooltip.ts'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
-	import Select from '$lib/components/Select.svelte'
-	import Separator from '$lib/components/Separator.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 	import Spinner from '$lib/components/Spinner.svelte'
-	import Switch from '$lib/components/Switch.svelte'
 	import { isDatabaseOperationPending } from '$lib/db/lock-database.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { Debounced } from '$lib/helpers/debounced.svelte.ts'
@@ -23,6 +19,9 @@
 	import DirectoriesList from './components/DirectoriesList.svelte'
 	import InstallAppBanner from './components/InstallAppBanner.svelte'
 	import MissingFsApiBanner from './components/MissingFsApiBanner.svelte'
+	import SettingsListItem from './components/SettingsListItem.svelte'
+	import SettingsSelectListItem from './components/SettingsSelectListItem.svelte'
+	import SettingsSwitchListItem from './components/SettingsSwitchListItem.svelte'
 
 	const { data } = $props()
 
@@ -118,54 +117,40 @@
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
 	{@render heading(m.settingsAppearance())}
+	<SettingsSelectListItem
+		title={m.settingsApplicationTheme()}
+		bind:selected={mainStore.theme}
+		items={themeOptions}
+	/>
 
-	<div class="flex items-center justify-between p-4">
-		<div>{m.settingsApplicationTheme()}</div>
+	<SettingsSwitchListItem
+		title={m.settingPickColorFromArtwork()}
+		bind:checked={mainStore.pickColorFromArtwork}
+	/>
 
-		<Select
-			bind:selected={mainStore.theme}
-			items={themeOptions}
-			key="value"
-			labelKey="name"
-			class="w-40"
-		/>
-	</div>
-
-	<div class="flex items-center justify-between p-4">
-		<div>{m.settingPickColorFromArtwork()}</div>
-
-		<Switch bind:checked={mainStore.pickColorFromArtwork} />
-	</div>
-
-	<div class="flex flex-col items-center gap-x-2 gap-y-4 p-4 sm:flex-row">
-		<div class="mr-auto flex items-center gap-2">
-			{m.settingsPrimaryColor()}
-
+	<SettingsListItem title={m.settingsPrimaryColor()} columnInCompactLayout bottomDivider>
+		{#snippet afterTitle()}
 			{#if mainStore.customThemePaletteHex}
 				<div
 					class="pointer-events-none size-6 shrink-0 items-center justify-center rounded-md ring ring-outline/40"
 					style:background={mainStore.customThemePaletteHex}
 				></div>
 			{/if}
-		</div>
+		{/snippet}
 
-		<div class="flex items-center gap-2 max-sm:w-full">
-			{#if mainStore.customThemePaletteHex}
-				<Button
-					kind="outlined"
-					class="max-sm:w-full"
-					disabled={!mainStore.customThemePaletteHex}
-					onclick={() => {
-						mainStore.customThemePaletteHex = null
-					}}
-				>
-					{m.settingsColorReset()}
-				</Button>
-			{/if}
+		<div class="flex items-center gap-2">
+			<IconButton
+				icon="restore"
+				tooltip={m.settingsColorReset()}
+				disabled={!mainStore.customThemePaletteHex}
+				onclick={() => {
+					mainStore.customThemePaletteHex = null
+				}}
+			/>
 
 			<Button
 				kind="toned"
-				class="max-sm:w-full"
+				class="w-full sm:w-40"
 				onclick={() => {
 					const colorPicker = document.getElementById('color-picker') as HTMLInputElement
 					colorPicker.click()
@@ -186,38 +171,20 @@
 				/>
 			</Button>
 		</div>
-	</div>
+	</SettingsListItem>
 
-	<Separator />
-
-	<div class="flex items-center justify-between p-4">
-		<div>{m.settingsMotion()}</div>
-
-		<Select
-			bind:selected={mainStore.motion}
-			items={motionOptions}
-			key="value"
-			labelKey="name"
-			class="w-40"
-		/>
-	</div>
+	<SettingsSelectListItem
+		title={m.settingsMotion()}
+		bind:selected={mainStore.motion}
+		items={motionOptions}
+	/>
 </section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
 	{@render heading(m.player())}
 
-	<div class="flex items-center justify-between p-4">
-		<div>{m.settingsDisplayVolumeSlider()}</div>
-
-		<Switch bind:checked={mainStore.volumeSliderEnabled} />
-	</div>
-
-	<Separator />
-
-	<div class="flex flex-col justify-between gap-y-4 p-4 sm:flex-row sm:items-center">
-		<div class="flex items-center gap-2">
-			<div>{m.equalizerTitle()}</div>
-
+	<SettingsListItem title={m.equalizerTitle()} columnInCompactLayout bottomDivider>
+		{#snippet afterTitle()}
 			{#if player.equalizer.enabled}
 				<div
 					class="rounded-full bg-primaryContainer px-2 py-0.5 text-label-sm text-onPrimaryContainer"
@@ -225,115 +192,91 @@
 					{m.equalizerStatusEnabled()}
 				</div>
 			{/if}
-		</div>
+		{/snippet}
 
 		<Button
 			kind="toned"
+			class="w-full sm:w-40"
 			onclick={() => {
 				dialogs.openDialog('equalizer')
 			}}
 		>
 			{m.equalizerOpenEqualizer()}
 		</Button>
-	</div>
-
-	<Separator />
-
-	<div class="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center">
-		<div>{m.settingsPlaybackSpeed()}</div>
-
-		<div class="flex w-full items-center gap-3 sm:w-56">
-			<div class="w-12 text-center text-label-lg tabular-nums sm:text-right">
-				{player.playbackRate}x
-			</div>
-
-			<Slider
-				min={PLAYER_PLAYBACK_RATE_MIN}
-				max={PLAYER_PLAYBACK_RATE_MAX}
-				step={0.05}
-				bind:value={player.playbackRate}
-			/>
-		</div>
-	</div>
-
-	<div class="flex justify-end px-4 pb-4">
-		<Button
-			kind="outlined"
-			disabled={player.playbackRate === 1}
-			onclick={() => {
-				player.playbackRate = 1
-			}}
-		>
-			{m.settingsPlaybackSpeedReset()}
-		</Button>
-	</div>
-
-	<Separator />
-
-	{#if !player.gaplessPlaybackEnabled}
-		<div class="flex items-center justify-between p-4">
-			<div class="flex items-center gap-2">
-				<div>{m.settingsPreservePitch()}</div>
-
-				<button
-					type="button"
-					class="interactable flex size-6 items-center justify-center rounded-full text-onSurfaceVariant"
-					{@attach tooltip(m.settingsPreservePitchInfo())}
-				>
-					<Icon type="information" class="size-4" />
-				</button>
-			</div>
-
-			<Switch bind:checked={player.preservePitch} />
-		</div>
-	{/if}
+	</SettingsListItem>
 
 	{#if isGaplessPlaybackSupported}
-		<Separator />
-
-		<div class="flex items-center justify-between p-4">
-			<div class="flex flex-col gap-1">
-				<div class="flex items-center gap-2">
-					<div>{m.settingsGaplessPlayback()}</div>
-
-					<button
-						type="button"
-						class="interactable flex size-6 items-center justify-center rounded-full text-onSurfaceVariant"
-						{@attach tooltip(m.settingsGaplessPlaybackInfo())}
-					>
-						<Icon type="information" class="size-4" />
-					</button>
-				</div>
-				<div class="max-w-160 text-body-sm text-onSurfaceVariant">
-					{m.settingsGaplessPlaybackSubtitle()}
-				</div>
-			</div>
-
-			<Switch bind:checked={player.gaplessPlaybackEnabled} />
-		</div>
-	{/if}
-</section>
-
-<section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
-	<div class="flex items-center justify-between p-4">
-		<div>{m.settingsLanguage()}</div>
-
-		<Select
-			bind:selected={() => getLocale(), setLocale}
-			items={languageOptions}
-			key="value"
-			labelKey="name"
-			class="w-40"
+		<SettingsSwitchListItem
+			title={m.settingsGaplessPlayback()}
+			description={m.settingsGaplessPlaybackDescription()}
+			tooltip={m.settingsGaplessPlaybackInfo()}
+			bind:checked={player.gaplessPlaybackEnabled}
+			bottomDivider
 		/>
-	</div>
+	{/if}
+
+	<SettingsListItem title={`${m.settingsPlaybackSpeed()}`} columnInCompactLayout>
+		{#snippet afterTitle()}
+			<span class="text-onSurfaceVariant">
+				{player.playbackRate}x
+			</span>
+		{/snippet}
+		<div class="flex items-center gap-2">
+			<IconButton
+				icon="restore"
+				tooltip={m.settingsPlaybackSpeedReset()}
+				disabled={player.playbackRate === 1}
+				onclick={() => {
+					player.playbackRate = 1
+				}}
+			/>
+			<div class="w-full sm:w-40">
+				<Slider
+					min={PLAYER_PLAYBACK_RATE_MIN}
+					max={PLAYER_PLAYBACK_RATE_MAX}
+					step={0.05}
+					bind:value={player.playbackRate}
+				/>
+			</div>
+		</div>
+	</SettingsListItem>
+
+	<SettingsSwitchListItem
+		title={m.settingsPreservePitch()}
+		description={player.gaplessPlaybackEnabled
+			? m.settingsPreservePitchGaplessDescription()
+			: m.settingsPreservePitchDescription()}
+		disabled={player.gaplessPlaybackEnabled}
+		bind:checked={player.preservePitch}
+		bottomDivider
+	/>
+
+	<SettingsSwitchListItem
+		title={m.settingsDisplayVolumeSlider()}
+		bind:checked={mainStore.volumeSliderEnabled}
+		bottomDivider
+	/>
+
+	<SettingsSwitchListItem
+		title={m.settingsPauseAfterEachTrack()}
+		description={m.settingsPauseAfterEachTrackDescription()}
+		// TODO. Implement this setting
+		checked={false}
+	/>
 </section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
-	<div class="flex items-center justify-between p-4">
-		<div>{m.about()}</div>
+	<SettingsSelectListItem
+		title={m.settingsLanguage()}
+		bind:selected={() => getLocale(), setLocale}
+		items={languageOptions}
+	/>
+</section>
 
+<section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
+	<SettingsListItem title={m.settingsAbout()}>
 		<IconButton as="a" href="/about" tooltip={m.about()} icon="chevronRight" />
-	</div>
+	</SettingsListItem>
 </section>
 
 <style lang="postcss">
