@@ -154,8 +154,10 @@ export class PlaybackController {
 
 		this.#teardownCurrent()
 
-		if (this.#next.status === 'ready' && this.#next.trackId === trackId) {
-			this.#promoteToCurrent(this.#next)
+		const next = this.#next
+		if (next.status === 'ready' && next.trackId === trackId) {
+			this.#next = idle()
+			this.#promoteToCurrent(next)
 			return
 		}
 

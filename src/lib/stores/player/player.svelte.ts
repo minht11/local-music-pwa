@@ -221,7 +221,7 @@ export class PlayerStore {
 
 	#handleTrackEnded = () => {
 		if (this.repeat === 'one') {
-			this.seek(0)
+			this.#restartAndPlay()
 			return
 		}
 
@@ -257,7 +257,7 @@ export class PlayerStore {
 
 	playPrev = (): void => {
 		if (this.currentTime > 3) {
-			this.seek(0)
+			this.#restartAndPlay()
 			return
 		}
 
@@ -274,7 +274,7 @@ export class PlayerStore {
 
 		const isSameTrack = previousTrackId !== null && newTrackId === previousTrackId
 		if (isSameTrack && this.#controller.currentStatus === 'ready') {
-			this.seek(0)
+			this.#restartAndPlay()
 			return
 		}
 
@@ -285,6 +285,11 @@ export class PlayerStore {
 		if (newTrackId) {
 			this.#controller.switchToAndPlay(newTrackId)
 		}
+	}
+
+	#restartAndPlay = (): void => {
+		this.seek(0)
+		this.play()
 	}
 
 	togglePlay = (): void => {
