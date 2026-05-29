@@ -8,6 +8,7 @@ import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { formatArtists, formatNameOrUnknown, truncate } from '$lib/helpers/utils/text.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
 import { createTrackQuery } from '$lib/library/get/value-queries.ts'
+import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
 import type { MainStore } from '../main/store.svelte.ts'
 import { type PlayTrackOptions, QueueStore } from './queue.svelte.ts'
@@ -27,26 +28,26 @@ export class PlayerStore {
 	readonly equalizer = new EqualizerStore(this.#graph)
 	readonly #main: MainStore
 
-	readonly #playbackController: PlaybackController
+	readonly #controller: PlaybackController
 
-	repeat = $state<PlayerRepeat>('none')
+	repeat: PlayerRepeat = $state('none')
 	muted = $state(false)
 	#volume = $state(100)
 	playbackRate = $state(1)
 	preservePitch = $state(true)
-	gaplessPlaybackEnabled: boolean = $state(false)
+	gaplessPlaybackEnabled = $state(false)
 
 	get playing() {
-		return this.#playbackController.playing
+		return this.#controller.playing
 	}
 	get currentTime() {
-		return this.#playbackController.currentTime
+		return this.#controller.currentTime
 	}
 	get duration() {
-		return this.#playbackController.duration
+		return this.#controller.duration
 	}
 	get loading() {
-		return this.#playbackController.loading
+		return this.#controller.loading
 	}
 
 	get shuffle() {
@@ -91,14 +92,13 @@ export class PlayerStore {
 		])
 		persist('player', this.#queue, ['shuffle'])
 
-		this.#playbackController = this.#createPlaybackController()
+		this.#controller = this.#createPlaybackController()
 
-		this.#setupTrackLoadEffect()
+		this.#setupTrackChangeEffect()
 		this.#setupPreBufferEffect()
 		this.#setupMediaSession()
 		this.#setupVolumeEffect()
 		this.#setupPlaybackRateEffect()
-		// TODO. Add playHistory.
 	}
 
 	#createPlaybackController() {
@@ -141,7 +141,7 @@ export class PlayerStore {
 
 	#setupPlaybackRateEffect(): void {
 		const updatePlaybackRate = debounce((rate: number, preservePitch: boolean) => {
-			this.#playbackController.setPlaybackRate(rate, preservePitch)
+			this.#controller.setPlaybackRate(rate, preservePitch)
 		}, 200)
 
 		$effect(() => {
@@ -155,13 +155,13 @@ export class PlayerStore {
 		})
 	}
 
-	#setupTrackLoadEffect(): void {
+	#setupTrackChangeEffect(): void {
 		$effect(() => {
 			const track = this.activeTrack
 
 			untrack(() => {
 				if (!track) {
-					this.#playbackController.abort()
+					this.#controller.abort()
 				}
 			})
 		})
@@ -196,8 +196,13 @@ export class PlayerStore {
 				return
 			}
 
+			// Already scheduled (or determined unavailable) for this track .
+			if (this.#controller.nextScheduledTrackId === nextId) {
+				return
+			}
+
 			untrack(() => {
-				void this.#playbackController.scheduleNext(nextId)
+				void this.#controller.scheduleNext(nextId)
 			})
 		})
 	}
@@ -222,15 +227,15 @@ export class PlayerStore {
 			return
 		}
 
-		this.#playbackController.switchToAndPlay(this.activeTrack.id)
+		this.#controller.switchToAndPlay(this.activeTrack.id)
 	}
 
 	pause = (): void => {
-		this.#playbackController.pause()
+		this.#controller.pause()
 	}
 
 	seek = (time: number): void => {
-		this.#playbackController.seek(time)
+		this.#controller.seek(time)
 	}
 
 	playNext = (): void => {
@@ -251,17 +256,21 @@ export class PlayerStore {
 		queue?: readonly number[],
 		options: PlayTrackOptions = {},
 	): void => {
-		const currentTrackId = this.#queue.activeTrackId
-		this.#queue.setTrack(trackIndex, queue, options)
+		const previousTrackId = this.#queue.activeTrackId
+		const newTrackId = this.#queue.setTrack(trackIndex, queue, options)
 
-		const isSameTrack = currentTrackId !== null && this.#queue.activeTrackId === currentTrackId
-		if (isSameTrack && this.#playbackController.currentStatus === 'ready') {
+		const isSameTrack = previousTrackId !== null && newTrackId === previousTrackId
+		if (isSameTrack && this.#controller.currentStatus === 'ready') {
 			this.seek(0)
 			return
 		}
 
-		if (this.#queue.activeTrackId) {
-			this.#playbackController.switchToAndPlay(this.#queue.activeTrackId)
+		if (previousTrackId) {
+			this.#possiblySaveToPlayHistory(previousTrackId)
+		}
+
+		if (newTrackId) {
+			this.#controller.switchToAndPlay(newTrackId)
 		}
 	}
 
@@ -292,6 +301,19 @@ export class PlayerStore {
 	removeFromQueue = this.#queue.removeFromQueue
 	moveQueueItem = this.#queue.moveQueueItem
 	clearQueue = this.#queue.clearQueue
+
+	#possiblySaveToPlayHistory = (trackId: number): void => {
+		const playedTime = this.currentTime
+		const totalDuration = this.duration
+
+		const percentageThreshold = 0.5
+		const timeThreshold = 30
+
+		const threshold = Math.min(timeThreshold, totalDuration * percentageThreshold)
+		if (totalDuration > 0 && playedTime >= threshold) {
+			void dbAddToPlayHistory(trackId)
+		}
+	}
 
 	#handleError(reason: FileLoadFailReason): void {
 		const name = truncate(this.activeTrack?.name ?? 'Unknown', 30)
