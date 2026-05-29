@@ -146,7 +146,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 			return Promise.resolve()
 		}
 
-		this.#startCurrentTimeLoop(this.#schedulingController.signal)
+		this.#startCurrentTimeLoop(this.#signal)
 		return this.#graph.resume()
 	}
 
@@ -336,7 +336,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 
 		const controller = new AbortController()
 		this.#schedulingController = controller
-		this.#signal = AbortSignal.any([this.#schedulingController.signal, controller.signal])
+		this.#signal = AbortSignal.any([this.#externalSignal, controller.signal])
 	}
 }
 
