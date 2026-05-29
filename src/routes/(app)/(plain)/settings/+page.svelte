@@ -260,8 +260,7 @@
 	<SettingsSwitchListItem
 		title={m.settingsPauseAfterEachTrack()}
 		description={m.settingsPauseAfterEachTrackDescription()}
-		// TODO. Implement this setting
-		checked={false}
+		bind:checked={player.pauseAfterEachTrack}
 	/>
 </section>
 
