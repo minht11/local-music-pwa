@@ -36,7 +36,7 @@ export class PlayerStore {
 	playbackRate = $state(1)
 	preservePitch = $state(true)
 	gaplessPlaybackEnabled = $state(false)
-	pauseAfterEachTrack = $state(false)
+	pauseAfterTrackWhenRepeatIsOff = $state(false)
 
 	get playing() {
 		return this.#controller.playing
@@ -90,7 +90,7 @@ export class PlayerStore {
 			'playbackRate',
 			'preservePitch',
 			'gaplessPlaybackEnabled',
-			'pauseAfterEachTrack',
+			'pauseAfterTrackWhenRepeatIsOff',
 		])
 		persist('player', this.#queue, ['shuffle'])
 
@@ -187,8 +187,8 @@ export class PlayerStore {
 				return
 			}
 
-			const isLastTrack = this.#queue.activeTrackIndex >= this.#queue.itemsIds.length - 1
-			if (this.repeat === 'none' && (isLastTrack || this.pauseAfterEachTrack)) {
+			const isLastTrack = this.#queue.activeTrackIndex === this.#queue.itemsIds.length - 1
+			if (this.repeat === 'none' && (isLastTrack || this.pauseAfterTrackWhenRepeatIsOff)) {
 				return
 			}
 
@@ -215,7 +215,7 @@ export class PlayerStore {
 		}
 
 		const isLastTrack = this.#queue.activeTrackIndex === this.#queue.itemsIds.length - 1
-		if (this.repeat === 'none' && (isLastTrack || this.pauseAfterEachTrack)) {
+		if (this.repeat === 'none' && (isLastTrack || this.pauseAfterTrackWhenRepeatIsOff)) {
 			this.pause()
 			return
 		}
