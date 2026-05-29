@@ -364,8 +364,7 @@ export class PlayerStore {
 			ms.setPositionState({
 				duration,
 				playbackRate: this.playbackRate,
-				// Position does not need to be updated on every tick, browser will interpolate it
-				position: untrack(() => Math.min(this.currentTime, duration)),
+				position: Math.min(this.currentTime, duration),
 			})
 		})
 
