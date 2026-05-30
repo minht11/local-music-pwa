@@ -8,7 +8,6 @@ import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { formatArtists, formatNameOrUnknown, truncate } from '$lib/helpers/utils/text.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
 import { createTrackQuery } from '$lib/library/get/value-queries.ts'
-import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
 import type { MainStore } from '../main/store.svelte.ts'
 import { PlayHistoryTracker } from './play-history-tracker.ts'
@@ -345,19 +344,6 @@ export class PlayerStore {
 	removeFromQueue = this.#queue.removeFromQueue
 	moveQueueItem = this.#queue.moveQueueItem
 	clearQueue = this.#queue.clearQueue
-
-	#possiblySaveToPlayHistory = (trackId: number, force = false): void => {
-		const playedTime = this.currentTime
-		const totalDuration = this.duration
-
-		const percentageThreshold = 0.5
-		const timeThreshold = 30
-
-		const threshold = Math.min(timeThreshold, totalDuration * percentageThreshold)
-		if (totalDuration > 0 && (playedTime >= threshold || force)) {
-			void dbAddToPlayHistory(trackId)
-		}
-	}
 
 	#handleError = (reason: FileLoadFailReason): void => {
 		const name = truncate(this.activeTrack?.name ?? 'Unknown', 30)
