@@ -102,7 +102,7 @@ Use design tokens from `src/app.css` and `src/theme-colors.css` — **never arbi
 
 Prefer theme breakpoint variables in media queries, for example `@media (width >= --theme(--breakpoint-sm))`.
 Use a custom breakpoint only when there is no matching theme breakpoint for the behavior you need.
-In Svelte component `<style>` blocks, add the appropriate `@reference` when using theme tokens such as `--theme(...)`.
+In Svelte component `<style>` blocks, add the appropriate `@reference` when using theme tokens such as '--theme/(...)'.
 
 > **Critical**: Color token names use **camelCase**, not kebab-case.
 
