@@ -520,6 +520,8 @@ if ('showDirectoryPicker' in window) {
 }
 ```
 
+Note feature detection is not required if it is guarded by our browser support or explicitly polyfilled.
+
 ## Development Workflow
 
 ### Commands

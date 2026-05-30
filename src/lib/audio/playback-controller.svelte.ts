@@ -130,10 +130,6 @@ export class PlaybackController {
 	constructor(graph: AudioGraph, options: AudioPlayerOptions) {
 		this.#graph = graph
 		this.#options = options
-
-		if (import.meta.hot) {
-			this.abort()
-		}
 	}
 
 	/**
@@ -258,6 +254,7 @@ export class PlaybackController {
 	}
 
 	seek(time: number): void {
+		// Optimistically update currentTime so UI has no tear
 		this.currentTime = time
 		this.#teardownAndIdleNext()
 		if (this.#current.status === 'ready') {
@@ -365,6 +362,10 @@ export class PlaybackController {
 	}
 
 	#teardownAndIdleNext() {
+		if (this.#next.status === 'idle') {
+			return
+		}
+
 		this.#teardown(this.#next)
 		this.#next = idle()
 	}

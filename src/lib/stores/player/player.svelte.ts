@@ -64,17 +64,22 @@ export class PlayerStore {
 		return this.#queue.isQueueEmpty
 	}
 
-	readonly #nextTrackId = $derived.by(() => {
+	readonly #nextTrackAction = $derived.by(() => {
 		if (this.repeat === 'one') {
-			return null
+			return { type: 'repeat-current' } as const
 		}
 
 		const isLast = this.#queue.activeTrackIndex >= this.#queue.itemsIds.length - 1
 		if (this.repeat === 'none' && (isLast || this.pauseAfterTrackWhenRepeatIsOff)) {
-			return null
+			return { type: 'pause' } as const
 		}
 
-		return this.#queue.getNextTrackId()
+		const nextTrackId = this.#queue.getNextTrackId()
+		if (nextTrackId === null) {
+			return { type: 'pause' } as const
+		}
+
+		return { type: 'play-next', nextTrackId } as const
 	})
 
 	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.activeTrackId ?? -1, {
@@ -116,7 +121,9 @@ export class PlayerStore {
 		this.#setupMediaSession()
 
 		if (import.meta.hot) {
-			this.#controller.abort()
+			import.meta.hot.dispose(() => {
+				this.#controller.abort()
+			})
 		}
 	}
 
@@ -148,6 +155,10 @@ export class PlayerStore {
 
 	#setupVolumeEffect(): void {
 		$effect(() => {
+			if (!this.#graph.initialized) {
+				return
+			}
+
 			const muted = this.muted
 
 			// Humans perceive volume logarithmically
@@ -207,11 +218,11 @@ export class PlayerStore {
 				return
 			}
 
-			const nextTrackId = this.#nextTrackId
+			const nextAction = this.#nextTrackAction
 
 			untrack(() => {
-				if (nextTrackId) {
-					void this.#controller.preloadNext(nextTrackId)
+				if (nextAction.type === 'play-next') {
+					void this.#controller.preloadNext(nextAction.nextTrackId)
 				} else {
 					this.#controller.abortNext()
 				}
@@ -220,21 +231,25 @@ export class PlayerStore {
 	}
 
 	#handleTrackEnded = () => {
-		if (this.repeat === 'one') {
+		const action = this.#nextTrackAction
+
+		if (action.type === 'play-next') {
+			this.playNext()
+			return
+		}
+
+		if (action.type === 'repeat-current') {
 			this.#restartAndPlay()
 			return
 		}
 
-		const isLastTrack = this.#queue.activeTrackIndex === this.#queue.itemsIds.length - 1
-		if (this.repeat === 'none' && (isLastTrack || this.pauseAfterTrackWhenRepeatIsOff)) {
+		if (action.type === 'pause') {
 			this.pause()
+
 			if (this.#queue.activeTrackId) {
 				this.#possiblySaveToPlayHistory(this.#queue.activeTrackId, true)
 			}
-			return
 		}
-
-		this.playNext()
 	}
 
 	play = (): void => {
