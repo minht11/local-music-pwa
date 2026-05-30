@@ -11,6 +11,7 @@ import { createTrackQuery } from '$lib/library/get/value-queries.ts'
 import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
 import type { MainStore } from '../main/store.svelte.ts'
+import { PlayHistoryTracker } from './play-history-tracker.ts'
 import { type PlayTrackOptions, QueueStore } from './queue.svelte.ts'
 
 export type { PlayTrackOptions }
@@ -25,6 +26,7 @@ export const PLAYER_PLAYBACK_RATE_MAX = 2
 export class PlayerStore {
 	readonly #graph = new AudioGraph()
 	readonly #queue = new QueueStore()
+	readonly #history = new PlayHistoryTracker()
 	readonly equalizer = new EqualizerStore(this.#graph)
 	readonly #main: MainStore
 
@@ -123,6 +125,7 @@ export class PlayerStore {
 		this.#setupVolumeEffect()
 		this.#setupPlaybackRateEffect()
 		this.#setupMediaSession()
+		this.#setupPlayHistoryEffect()
 
 		if (import.meta.hot) {
 			import.meta.hot.dispose(() => {
@@ -236,6 +239,8 @@ export class PlayerStore {
 	}
 
 	#handleTrackEnded = () => {
+		this.#history.complete()
+
 		const action = this.#nextTrackAction
 
 		if (action.type === 'play-next') {
@@ -256,10 +261,6 @@ export class PlayerStore {
 
 		if (action.type === 'pause') {
 			this.pause()
-
-			if (this.#queue.activeTrackId) {
-				this.#possiblySaveToPlayHistory(this.#queue.activeTrackId, true)
-			}
 		}
 	}
 
@@ -305,10 +306,6 @@ export class PlayerStore {
 		if (isSameTrack && this.#controller.currentStatus === 'ready') {
 			this.#restartAndPlay()
 			return
-		}
-
-		if (previousTrackId) {
-			this.#possiblySaveToPlayHistory(previousTrackId)
 		}
 
 		if (newTrackId) {
@@ -374,6 +371,19 @@ export class PlayerStore {
 			id: 'failed-to-load-audio',
 			message: errorMap[reason]({ name }),
 			duration: 10_000,
+		})
+	}
+
+	#setupPlayHistoryEffect(): void {
+		$effect(() => {
+			const trackId = this.#queue.activeTrackId
+			untrack(() => this.#history.begin(trackId))
+		})
+
+		$effect(() => {
+			const currentTime = this.currentTime
+			const duration = this.duration
+			untrack(() => this.#history.update(currentTime, duration))
 		})
 	}
 
