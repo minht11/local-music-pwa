@@ -228,6 +228,9 @@ export class PlayerStore {
 		const isLastTrack = this.#queue.activeTrackIndex === this.#queue.itemsIds.length - 1
 		if (this.repeat === 'none' && (isLastTrack || this.pauseAfterTrackWhenRepeatIsOff)) {
 			this.pause()
+			if (this.#queue.activeTrackId) {
+				this.#possiblySaveToPlayHistory(this.#queue.activeTrackId, true)
+			}
 			return
 		}
 
@@ -320,7 +323,7 @@ export class PlayerStore {
 	moveQueueItem = this.#queue.moveQueueItem
 	clearQueue = this.#queue.clearQueue
 
-	#possiblySaveToPlayHistory = (trackId: number): void => {
+	#possiblySaveToPlayHistory = (trackId: number, force = false): void => {
 		const playedTime = this.currentTime
 		const totalDuration = this.duration
 
@@ -328,7 +331,7 @@ export class PlayerStore {
 		const timeThreshold = 30
 
 		const threshold = Math.min(timeThreshold, totalDuration * percentageThreshold)
-		if (totalDuration > 0 && playedTime >= threshold) {
+		if (totalDuration > 0 && (playedTime >= threshold || force)) {
 			void dbAddToPlayHistory(trackId)
 		}
 	}
