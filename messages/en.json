@@ -153,7 +153,7 @@
 	"settingsDisplayVolumeSlider": "Display volume slider inside player",
 	"settingsGaplessPlayback": "Gapless playback (experimental)",
 	"settingsGaplessPlaybackDescription": "Requires your browser and audio file to support it, fallbacks to normal playback otherwise",
-	"settingsGaplessPlaybackInfo": "This uses bit more memory and CPU resources, if you experience any issues try disabling it. If you used previous version of the app rescan or reimport your library for this to work.",
+	"settingsGaplessPlaybackInfo": "This uses a bit more memory and CPU resources, if you experience any issues try disabling it. If you used a previous version of the app rescan or reimport your library for this to work.",
 	"settingsGrantDirectoryAccess": "You need to allow the app access to the directory, via browser permission so it can scan its contents",
 	"settingsImportTracks": "Import tracks",
 	"settingsInstallAppDesktop": "desktop",

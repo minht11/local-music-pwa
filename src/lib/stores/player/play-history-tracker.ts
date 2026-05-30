@@ -31,6 +31,8 @@ export class PlayHistoryTracker {
 		this.#maybeRecord()
 		this.#maxPlayedTime = 0
 		this.#recorded = false
+		this.#trackId = null
+		this.#duration = 0
 	}
 
 	#maybeRecord(): void {

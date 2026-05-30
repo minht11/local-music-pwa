@@ -61,7 +61,9 @@ export const parseTrackMetadata = async (
 		duration: tags.format.duration ?? 0,
 		language: common.language?.trim(),
 		metadataVersion: CURRENT_METADATA_VERSION,
-		format: tags.format,
+		format: {
+			codec: tags.format.codec ?? '',
+		},
 	}
 
 	return {

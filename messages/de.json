@@ -177,7 +177,6 @@
 	"settingsPreservePitch": "Tonhöhe beibehalten",
 	"settingsPreservePitchDescription": "Hält Stimmen und Instrumente in ihrer ursprünglichen Tonlage, während sich die Wiedergabegeschwindigkeit ändert",
 	"settingsPreservePitchGaplessDescription": "Die Option 'Tonhöhe beibehalten' ist nicht verfügbar, während die nahtlose Wiedergabe aktiviert ist",
-	"settingsPreservePitchInfo": "Hält Stimmen und Instrumente in ihrer ursprünglichen Tonlage, während sich die Wiedergabegeschwindigkeit ändert.",
 	"settingsPrimaryColor": "Primärfarbe der App",
 	"settingsScanInProgress": "Titel werden gescannt. {current} von {total}",
 	"settingsScanNewOrUpdatedTracks": "{newTracks} neue oder aktualisierte Titel gefunden",

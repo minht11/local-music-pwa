@@ -25,7 +25,7 @@ export type UnknownItem = typeof UNKNOWN_ITEM
 
 /**
  * Version number for the metadata schema stored in the database.
- * Increment this whenever need metadata fields are added so when rescanning tracks
+ * Increment this whenever new metadata fields are added so when rescanning tracks
  * existing tracks can be updated.
  */
 export const CURRENT_METADATA_VERSION = 1
@@ -57,7 +57,9 @@ export interface ParsedTrackData {
 	primaryColor?: number
 	/** See {@link CURRENT_METADATA_VERSION}. Absent on tracks scanned before this field existed (treat as 0). */
 	metadataVersion?: number
-	format?: IFormat
+	format?: {
+		codec: string
+	}
 }
 
 export interface UnknownTrack extends ParsedTrackData {
@@ -67,7 +69,6 @@ export interface UnknownTrack extends ParsedTrackData {
 	fileName: string
 	directory: number
 	metadataVersion?: number
-	format?: IFormat
 }
 
 export interface Track extends BaseMusicItem, UnknownTrack {}

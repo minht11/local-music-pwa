@@ -177,7 +177,6 @@
 	"settingsPreservePitch": "Išlaikyti toną",
 	"settingsPreservePitchDescription": "Keičiant atkūrimo greitį, balsų ir instrumentų tonas išlieka originalus",
 	"settingsPreservePitchGaplessDescription": "Tono išlaikymo parinktis neprieinama, kai įjungtas nepertraukiamas atkūrimas",
-	"settingsPreservePitchInfo": "Keičiant atkūrimo greitį, balsų ir instrumentų tonas išlieka originalus.",
 	"settingsPrimaryColor": "Pagrindinė programos spalva",
 	"settingsScanInProgress": "Skenuojami kūriniai. {current} iš {total}",
 	"settingsScanNewOrUpdatedTracks": "Rasta {newTracks} naujų arba atnaujintų kūrinių",

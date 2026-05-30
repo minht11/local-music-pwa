@@ -32,10 +32,15 @@ export class MediaSessionController {
 		setAction('pause', () => player.pause())
 		setAction('nexttrack', () => player.playNext())
 		setAction('previoustrack', () => player.playPrev())
-		setAction('seekbackward', () => player.seek(Math.max(player.currentTime - 10, 0)))
-		setAction('seekforward', () =>
-			player.seek(Math.min(player.currentTime + 10, player.duration)),
-		)
+		setAction('seekbackward', (s) => {
+			const offset = s.seekOffset ?? 10
+			player.seek(Math.max(player.currentTime - offset, 0))
+		})
+		setAction('seekforward', (s) => {
+			const offset = s.seekOffset ?? 10
+
+			player.seek(Math.min(player.currentTime + offset, player.duration))
+		})
 		setAction('seekto', ({ seekTime }) => {
 			if (seekTime != null) {
 				player.seek(seekTime)

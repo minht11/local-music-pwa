@@ -164,7 +164,6 @@
 	"settingsPreservePitch": "Conserver la hauteur",
 	"settingsPreservePitchDescription": "Conserve la tonalité d'origine des voix et des instruments lorsque la vitesse de lecture change",
 	"settingsPreservePitchGaplessDescription": "L'option de conservation de la hauteur n'est pas disponible lorsque la lecture sans interruption est activée",
-	"settingsPreservePitchInfo": "Conserve la tonalité d'origine des voix et des instruments lorsque la vitesse de lecture change.",
 	"settingsPrimaryColor": "Couleur principale de l’application",
 	"settingsScanInProgress": "Analyse des pistes. {current} sur {total}",
 	"settingsScanNewOrUpdatedTracks": "{newTracks} nouvelles pistes ou pistes mises à jour trouvées",
