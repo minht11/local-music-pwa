@@ -208,9 +208,6 @@
 					"correctness": {
 						"noUnusedVariables": "off",
 						"noUnusedFunctionParameters": "off"
-					},
-					"complexity": {
-						"noCommaOperator": "off"
 					}
 				}
 			}
