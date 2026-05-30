@@ -67,7 +67,7 @@ export class PlayerStore {
 	}
 
 	/** Returns the next track to play based on the current repeat mode and queue state. */
-	readonly #nextTrackToPlay = $derived.by(() => {
+	readonly #upNext = $derived.by(() => {
 		if (this.repeat === 'none' && this.pauseAfterTrackWhenRepeatIsOff) {
 			return null
 		}
@@ -212,11 +212,11 @@ export class PlayerStore {
 				return
 			}
 
-			const nextTrack = this.#nextTrackToPlay
+			const upNext = this.#upNext
 
 			untrack(() => {
-				if (nextTrack) {
-					void this.#controller.preloadNext(nextTrack.id)
+				if (upNext) {
+					void this.#controller.preloadNext(upNext.id)
 				} else {
 					this.#controller.abortNext()
 				}
@@ -227,15 +227,14 @@ export class PlayerStore {
 	#handleTrackEnded = () => {
 		this.#history.complete()
 
-		const nextTrack = this.#nextTrackToPlay
-		if (!nextTrack) {
+		const upNext = this.#upNext
+		if (!upNext) {
 			this.pause()
 			return
 		}
 
-		this.#queue.setTrack(nextTrack.index)
-
-		this.#controller.play(nextTrack.id, {
+		this.#queue.setTrack(upNext.index)
+		this.#controller.play(upNext.id, {
 			gapless: true,
 			fromBeginning: true,
 		})
