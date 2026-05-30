@@ -64,12 +64,6 @@ interface AudioBufferEngineOptions {
 /**
  * Plays audio by streaming and decoding via Mediabunny, scheduling decoded
  * AudioBuffers directly on the Web Audio API timeline.
- *
- * Advantages over HTMLAudioEngine:
- * - Sample-accurate scheduling: load(blob, scheduleAt) places the first
- *   sample at exactly the requested AudioContext time, enabling true gapless.
- * - Streaming decode: the file is never fully loaded into memory at once.
- *   Mediabunny reads and decodes lazily as the for-await loop iterates.
  */
 export class AudioBufferEngine implements AudioEngineImpl {
 	readonly #graph: AudioGraph
@@ -123,6 +117,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 		this.#externalSignal = options.signal
 		this.#input = options.input
 		this.#audioTrack = options.audioTrack
+		this.#playbackRate = options.playbackRate
 
 		this.#gainNode = audioGraph.context.createGain()
 		this.#gainNode.connect(audioGraph.inputNode)
