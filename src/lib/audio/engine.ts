@@ -21,6 +21,10 @@ export interface AudioEngineImpl {
 
 	readonly duration: number
 
+	readonly buffering: boolean
+
+	readonly ended: boolean
+
 	play: () => Promise<void>
 	pause: () => void
 
@@ -30,10 +34,6 @@ export interface AudioEngineImpl {
 	 */
 	seek: (time: number) => void
 	setPlaybackRate: (rate: number, preservePitch: boolean) => void
-
-	readonly buffering: boolean
-
-	readonly ended: boolean
 
 	onEnded: (() => void) | null
 
