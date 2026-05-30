@@ -237,9 +237,18 @@ export class PlaybackController {
 
 	play(): void {
 		this.playing = true
-		if (this.#current.status === 'ready') {
-			void this.#current.engine.play()
+		if (this.#current.status !== 'ready') {
+			return
 		}
+
+		const { engine } = this.#current
+		// A finished engine has nothing scheduled to resume; re-arm it from the
+		// start so play() works whether the track is mid-way or already ended.
+		if (engine.ended) {
+			engine.seek(0)
+		}
+
+		void engine.play()
 	}
 
 	pause(): void {

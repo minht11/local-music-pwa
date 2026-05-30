@@ -26,9 +26,6 @@ const EQ_PRESET_GAINS: Record<BuiltinEqPresetKey, readonly number[]> = {
 
 /**
  * Manages the EQ band gain values and syncs them to AudioGraph's filter nodes.
- *
- * The AudioGraph owns the BiquadFilterNodes. EqualizerStore only controls
- * their gain values — it has no knowledge of engines or connections.
  */
 export class EqualizerStore {
 	readonly #graph: AudioGraph

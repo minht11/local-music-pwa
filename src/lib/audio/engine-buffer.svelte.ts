@@ -100,6 +100,11 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	readonly duration: number
 	buffering = $state(false)
 
+	#ended = false
+	get ended(): boolean {
+		return this.#ended
+	}
+
 	get endTime(): number {
 		return this.#scheduleBase + (this.duration - this.#seekOffset) / this.#playbackRate
 	}
@@ -165,6 +170,9 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	#startFrom(seekTo: number, scheduleAt?: number) {
 		const signal = this.#signal
 
+		// (Re)starting playback, so the track is no longer at its natural end.
+		this.#ended = false
+
 		// Recreating sink on every schedule, so rapid seek/rate-change
 		// calls don't corrupt Mediabunny's internal state
 		const sink = new AudioBufferSink(this.#audioTrack)
@@ -199,6 +207,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 
 		const handleEnded = () => {
 			if (allBuffersPulled && this.#scheduledSources.size === 0 && !signal.aborted) {
+				this.#ended = true
 				this.#stopCurrentTimeLoop()
 				this.onEnded?.()
 			}

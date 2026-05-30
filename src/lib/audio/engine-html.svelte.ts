@@ -25,6 +25,10 @@ export class HTMLAudioEngine implements AudioEngineImpl {
 
 	readonly buffering = false
 
+	get ended(): boolean {
+		return this.#audio.ended
+	}
+
 	#gainNode: GainNode | null = null
 	#sourceNode: MediaElementAudioSourceNode | null = null
 

@@ -110,10 +110,10 @@ export class PlayerStore {
 		this.#controller = this.#createPlaybackController()
 
 		this.#setupTrackChangeEffect()
-		this.#setupPreBufferEffect()
-		this.#setupMediaSession()
+		this.#setupPreloadEffect()
 		this.#setupVolumeEffect()
 		this.#setupPlaybackRateEffect()
+		this.#setupMediaSession()
 
 		if (import.meta.hot) {
 			this.#controller.abort()
@@ -191,9 +191,9 @@ export class PlayerStore {
 
 	/**
 	 * Watches currentTime. When close to the end of the current track,
-	 * asks the player to pre-buffer the next track for gapless playback.
+	 * asks the player to preload the next track for gapless playback.
 	 */
-	#setupPreBufferEffect(): void {
+	#setupPreloadEffect(): void {
 		$effect(() => {
 			const duration = this.duration
 			const current = this.currentTime

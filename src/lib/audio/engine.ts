@@ -14,10 +14,7 @@ export interface AudioEngineOptions {
 
 /**
  * Common interface for all playback engines.
- *
  * Each engine instance is responsible for exactly one track.
- * The coordinator owns two instances (current + next) and manages
- * transitions between them.
  */
 export interface AudioEngineImpl {
 	readonly currentTime: number
@@ -34,13 +31,10 @@ export interface AudioEngineImpl {
 	seek: (time: number) => void
 	setPlaybackRate: (rate: number, preservePitch: boolean) => void
 
-	/**
-	 * True while waiting for enough decoded audio to start/resume playback.
-	 * Always false for HTML engine.
-	 */
 	readonly buffering: boolean
 
-	/** Fires when the track finishes playing naturally. */
+	readonly ended: boolean
+
 	onEnded: (() => void) | null
 
 	/** Fires on an unrecoverable playback error. */
