@@ -22,6 +22,9 @@ import {
 const FORMATS = [FLAC]
 const LOOK_AHEAD_TIME_SECONDS = 2.0
 const BUFFER_RESUME_SECONDS = 1.5
+// Seeks this close to the end count as "at the end", absorbing the metadata-vs-
+// decoded duration mismatch so no residual sliver plays.
+const SEEK_END_THRESHOLD_SECONDS = 0.5
 
 const isAudioCodecSupported = browser && 'AudioDecoder' in globalThis
 
@@ -134,6 +137,14 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	seek(time: number): void {
 		this.currentTime = time
 		this.#resetScheduling()
+
+		// Seek to the end while paused: mark ended so the next play() restarts
+		// from the start (like the HTML element).
+		if (!this.#wantsToPlay && time >= this.duration - SEEK_END_THRESHOLD_SECONDS) {
+			this.#ended = true
+			return
+		}
+
 		this.#startFrom(time)
 	}
 
@@ -170,7 +181,7 @@ export class AudioBufferEngine implements AudioEngineImpl {
 	#startFrom(seekTo: number, scheduleAt?: number) {
 		const signal = this.#signal
 
-		// (Re)starting playback, so the track is no longer at its natural end.
+		// (Re)start clears the ended state.
 		this.#ended = false
 
 		// Recreating sink on every schedule, so rapid seek/rate-change

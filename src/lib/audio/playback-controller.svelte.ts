@@ -242,8 +242,7 @@ export class PlaybackController {
 		}
 
 		const { engine } = this.#current
-		// A finished engine has nothing scheduled to resume; re-arm it from the
-		// start so play() works whether the track is mid-way or already ended.
+		// Re-arm a finished engine from the start before resuming.
 		if (engine.ended) {
 			engine.seek(0)
 		}
