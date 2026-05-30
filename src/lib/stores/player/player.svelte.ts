@@ -368,6 +368,10 @@ export class PlayerStore {
 
 	#setupMediaSession(): void {
 		const ms = navigator.mediaSession
+		if (!ms) {
+			return
+		}
+
 		const setAction = ms.setActionHandler.bind(ms)
 
 		setAction('play', this.play)
@@ -419,6 +423,10 @@ export class PlayerStore {
 	}
 
 	#updateMediaSessionPosition(currentTime: number): void {
+		if (!navigator.mediaSession) {
+			return
+		}
+
 		const { duration } = this
 		// setPositionState throws otherwise
 		if (duration <= 0) {
