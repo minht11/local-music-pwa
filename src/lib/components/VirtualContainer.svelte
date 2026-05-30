@@ -11,9 +11,9 @@
 		windowScroll,
 	} from '@tanstack/virtual-core'
 	import { doesElementHasFocus, findFocusedElement } from '$lib/helpers/focus.ts'
+	import { wait } from '$lib/helpers/utils/wait.ts'
 	import { createVirtualizerBase } from '$lib/helpers/virtualizer.svelte.ts'
 	import { useScrollTarget } from './ScrollContainer.svelte'
-	import { wait } from '$lib/helpers/utils/wait.ts'
 
 	interface Props {
 		count: number
@@ -181,7 +181,6 @@
 		await scrollToIndexIfNeeded(index)
 
 		queueMicrotask(() => {
-			console.log('FOCUS', findRow(0))
 			findRow(index)?.focus()
 		})
 	}

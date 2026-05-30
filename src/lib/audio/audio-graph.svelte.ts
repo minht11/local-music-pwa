@@ -86,7 +86,7 @@ export class AudioGraph {
 	}
 
 	resume(): Promise<void> {
-		if (!this.#context || this.#context.state !== 'suspended') {
+		if (this.#context?.state !== 'suspended') {
 			return Promise.resolve()
 		}
 
@@ -94,7 +94,7 @@ export class AudioGraph {
 	}
 
 	suspend(): Promise<void> {
-		if (!this.#context || this.#context.state !== 'running') {
+		if (this.#context?.state !== 'running') {
 			return Promise.resolve()
 		}
 
