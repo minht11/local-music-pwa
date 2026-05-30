@@ -51,8 +51,7 @@ self.addEventListener('fetch', (event) => {
 
 	const isNavigationRequest = request.mode === 'navigate'
 
-	// biome-ignore lint/complexity/useSimplifiedLogicExpression: for clarity
-	if (!ASSETS.includes(url.pathname) && !isNavigationRequest) {
+	if (!(ASSETS.includes(url.pathname) || isNavigationRequest)) {
 		return
 	}
 

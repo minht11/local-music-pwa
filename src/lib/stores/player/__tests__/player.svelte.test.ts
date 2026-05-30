@@ -3,8 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MainStore } from '$lib/stores/main/store.svelte.ts'
 import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
 
-// biome-ignore lint/style/useConsistentTypeDefinitions: interface breaks biome's .svelte.ts parser
-type MockOptions = {
+interface MockOptions {
 	onTrackEnded: () => void
 	onError: (reason: string) => void
 	isGaplessEnabled: () => boolean

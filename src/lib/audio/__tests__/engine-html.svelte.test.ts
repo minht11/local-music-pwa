@@ -2,8 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createHTMLAudioEngine, HTMLAudioEngine } from '../engine-html.svelte.ts'
 import { makeGraph } from './test-utils.ts'
 
-// biome-ignore lint/style/useConsistentTypeDefinitions: interface breaks biome's .svelte.ts parser
-type MockNode = { mock: { results: Array<{ value: { disconnect: ReturnType<typeof vi.fn> } }> } }
+interface MockNode {
+	mock: { results: Array<{ value: { disconnect: ReturnType<typeof vi.fn> } }> }
+}
 
 class MockAudio extends EventTarget {
 	src = ''

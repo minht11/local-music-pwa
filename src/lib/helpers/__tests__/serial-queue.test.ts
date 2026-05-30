@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/suspicious/useAwait: test code */
 import { describe, expect, it, vi } from 'vitest'
 import { SerialQueue } from '../serial-queue.ts'
 import { wait } from '../utils/wait.ts'
@@ -18,12 +17,15 @@ describe('SerialQueue', () => {
 		const order: number[] = []
 
 		void queue.enqueue(async () => {
+			await wait(20)
 			order.push(1)
 		})
 		void queue.enqueue(async () => {
+			await wait(10)
 			order.push(2)
 		})
 		void queue.enqueue(async () => {
+			await wait(10)
 			order.push(3)
 		})
 
@@ -58,10 +60,11 @@ describe('SerialQueue', () => {
 		const completed: number[] = []
 
 		void queue.enqueue(async () => {
-			await new Promise<void>((r) => setTimeout(r, 20))
+			await wait(20)
 			completed.push(1)
 		})
 		void queue.enqueue(async () => {
+			await wait(10)
 			completed.push(2)
 		})
 
@@ -80,11 +83,13 @@ describe('SerialQueue', () => {
 		const order: string[] = []
 
 		const failing = queue.enqueue(async () => {
+			await wait(10)
 			order.push('failing')
 			throw new Error('oops')
 		})
 
 		void queue.enqueue(async () => {
+			await wait(5)
 			order.push('after-failure')
 		})
 
@@ -97,7 +102,7 @@ describe('SerialQueue', () => {
 	it('enqueue() returns the promise from the task function', async () => {
 		const queue = new SerialQueue()
 		const result = queue.enqueue(async () => {
-			await Promise.resolve()
+			await wait(0)
 		})
 
 		await expect(result).resolves.toBeUndefined()
@@ -107,6 +112,7 @@ describe('SerialQueue', () => {
 		const queue = new SerialQueue()
 
 		const result = queue.enqueue(async () => {
+			await wait(10)
 			throw new Error('task error')
 		})
 
