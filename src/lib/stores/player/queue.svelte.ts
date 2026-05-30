@@ -68,6 +68,7 @@ export class QueueStore {
 		if (this.itemsIds.length === 0) {
 			this.#activeIndex = -1
 		} else {
+			// TODO. This is inconstant add separate method to play shuffled queue.
 			this.#activeIndex = options.shuffle ? 0 : trackIndex
 		}
 

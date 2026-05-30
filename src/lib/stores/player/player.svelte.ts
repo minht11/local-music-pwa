@@ -68,8 +68,14 @@ export class PlayerStore {
 	}
 
 	readonly #nextTrackAction = $derived.by(() => {
+		const currentTrackId = this.#queue.activeTrackId
+
 		if (this.repeat === 'one') {
-			return { type: 'repeat-current' } as const
+			if (currentTrackId === null) {
+				return { type: 'pause' } as const
+			}
+
+			return { type: 'repeat-current', trackId: currentTrackId } as const
 		}
 
 		const isLast = this.#queue.activeTrackIndex >= this.#queue.itemsIds.length - 1
@@ -84,8 +90,8 @@ export class PlayerStore {
 
 		return {
 			type: 'play-next',
-			nextTrackId: nextTrack.id,
-			nextTrackIndex: nextTrack.index,
+			trackId: nextTrack.id,
+			trackIndex: nextTrack.index,
 		} as const
 	})
 
@@ -142,7 +148,7 @@ export class PlayerStore {
 			const result = await resolveTrackFile({
 				directoryId: track.directory,
 				entity: track.file,
-				// On schedule we want to be silent
+				// Preload should stay silent
 				askPermission: reason === 'load',
 			})
 
@@ -230,7 +236,7 @@ export class PlayerStore {
 
 			untrack(() => {
 				if (nextAction.type === 'play-next') {
-					void this.#controller.preloadNext(nextAction.nextTrackId)
+					void this.#controller.preloadNext(nextAction.trackId)
 				} else {
 					this.#controller.abortNext()
 				}
@@ -242,29 +248,19 @@ export class PlayerStore {
 		this.#history.complete()
 
 		const action = this.#nextTrackAction
-
-		if (action.type === 'play-next') {
-			const previousTrackId = this.#queue.activeTrackId
-			this.#queue.setTrack(action.nextTrackIndex)
-
-			const isSameTrack = previousTrackId === action.nextTrackId
-
-			if (isSameTrack && this.#controller.currentStatus === 'ready') {
-				this.#restartAndPlay()
-			} else {
-				this.#controller.switchToAndPlay(action.nextTrackId, true)
-			}
-			return
-		}
-
-		if (action.type === 'repeat-current') {
-			this.#restartAndPlay()
-			return
-		}
-
 		if (action.type === 'pause') {
 			this.pause()
+			return
 		}
+
+		if (action.type === 'play-next') {
+			this.#queue.setTrack(action.trackIndex)
+		}
+
+		this.#controller.play(action.trackId, {
+			gapless: true,
+			fromBeginning: true,
+		})
 	}
 
 	play = (): void => {
@@ -272,7 +268,7 @@ export class PlayerStore {
 			return
 		}
 
-		this.#controller.switchToAndPlay(this.activeTrack.id)
+		this.#controller.play(this.activeTrack.id)
 	}
 
 	pause = (): void => {
@@ -290,7 +286,9 @@ export class PlayerStore {
 
 	playPrev = (): void => {
 		if (this.currentTime > 3) {
-			this.#restartAndPlay()
+			this.seek(0)
+			this.play()
+
 			return
 		}
 
@@ -302,23 +300,13 @@ export class PlayerStore {
 		queue?: readonly number[],
 		options: PlayTrackOptions = {},
 	): void => {
-		const previousTrackId = this.#queue.activeTrackId
 		const newTrackId = this.#queue.setTrack(trackIndex, queue, options)
 
-		const isSameTrack = previousTrackId !== null && newTrackId === previousTrackId
-		if (isSameTrack && this.#controller.currentStatus === 'ready') {
-			this.#restartAndPlay()
-			return
-		}
-
 		if (newTrackId) {
-			this.#controller.switchToAndPlay(newTrackId)
+			this.#controller.play(newTrackId, {
+				fromBeginning: true,
+			})
 		}
-	}
-
-	#restartAndPlay = (): void => {
-		this.seek(0)
-		this.play()
 	}
 
 	togglePlay = (): void => {

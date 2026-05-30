@@ -15,7 +15,7 @@ type TrackLoaderResult =
 	| { status: 'loaded'; file: File; codec: string; duration: number }
 	| { status: FileLoadFailReason }
 
-type TrackLoadReason = 'load' | 'schedule'
+type TrackLoadReason = 'load' | 'preload'
 
 export type TrackLoader = (trackId: number, reason: TrackLoadReason) => Promise<TrackLoaderResult>
 
@@ -84,6 +84,11 @@ interface TryLoadEngineOptions {
 	reason: TrackLoadReason
 }
 
+interface SwitchAndPlayOptions {
+	gapless?: boolean
+	fromBeginning?: boolean
+}
+
 /** @public */
 export class PlaybackController {
 	readonly #graph: AudioGraph
@@ -131,11 +136,16 @@ export class PlaybackController {
 	 * Load and play a track into the current slot.
 	 * Idempotent: calling with the same trackId while already loading or ready will play same track without reloading.
 	 */
-	async switchToAndPlay(trackId: number, gapless = false): Promise<void> {
+	async play(trackId: number, options: SwitchAndPlayOptions = {}): Promise<void> {
 		this.playing = true
 		const current = this.#current
 		if (current.status === 'ready' && current.trackId === trackId) {
-			this.play()
+			if (options.fromBeginning || current.engine.ended) {
+				this.seek(0)
+			}
+
+			current.engine.play()
+
 			return
 		}
 
@@ -146,7 +156,7 @@ export class PlaybackController {
 		this.#teardownCurrent()
 
 		const next = this.#next
-		if (gapless && next.status === 'ready' && next.trackId === trackId) {
+		if (options.gapless && next.status === 'ready' && next.trackId === trackId) {
 			this.#next = idle()
 			this.#promoteToCurrent(next)
 			return
@@ -204,7 +214,7 @@ export class PlaybackController {
 		this.#next = transition.loading()
 
 		const result = await this.#tryLoadingEngine(trackId, {
-			reason: 'schedule',
+			reason: 'preload',
 			signal: this.#next.controller.signal,
 			mustBeGapless: true,
 			scheduleAt: () => currentEngine.endTime,
@@ -224,21 +234,6 @@ export class PlaybackController {
 
 	abortNext(): void {
 		this.#teardownAndIdleNext()
-	}
-
-	play(): void {
-		this.playing = true
-		if (this.#current.status !== 'ready') {
-			return
-		}
-
-		const { engine } = this.#current
-		// Re-arm a finished engine from the start before resuming.
-		if (engine.ended) {
-			engine.seek(0)
-		}
-
-		void engine.play()
 	}
 
 	pause(): void {
