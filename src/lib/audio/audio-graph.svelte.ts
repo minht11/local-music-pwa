@@ -105,5 +105,9 @@ export class AudioGraph {
 		if (this.#context) {
 			this.#context.close()
 		}
+		this.#context = null
+		this.#inputNode = null
+		this.#volumeNode = null
+		this.#filters = []
 	}
 }
