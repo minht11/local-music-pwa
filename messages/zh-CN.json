@@ -150,8 +150,6 @@
 	"settingsDirRemove": "移除",
 	"settingsDirRescan": "重新扫描",
 	"settingsDisplayVolumeSlider": "在播放器内显示音量滑块",
-	"settingsGaplessPlayback": "无缝播放（实验性）",
-	"settingsGaplessPlaybackInfo": "连续播放 FLAC 曲目之间无间隙。要求曲目采样率相同。使用 WebCodecs——旧版浏览器不支持。",
 	"settingsGrantDirectoryAccess": "您需要允许应用访问该目录，通过浏览器权限，以便它可以扫描其内容",
 	"settingsImportTracks": "导入曲目",
 	"settingsInstallAppDesktop": "桌面版",

@@ -137,8 +137,6 @@
 	"settingsDirRemove": "Supprimer",
 	"settingsDirRescan": "Réanalyser",
 	"settingsDisplayVolumeSlider": "Afficher le curseur de volume dans le lecteur",
-	"settingsGaplessPlayback": "Lecture sans coupure (expérimental)",
-	"settingsGaplessPlaybackInfo": "Enchaîne les pistes FLAC sans silence entre elles. Nécessite des pistes à la même fréquence d'échantillonnage. Utilise WebCodecs — non pris en charge sur les anciens navigateurs.",
 	"settingsGrantDirectoryAccess": "Vous devez autoriser l’appli à accéder au dossier via une permission du navigateur afin qu’elle puisse analyser son contenu",
 	"settingsImportTracks": "Importer des pistes",
 	"settingsInstallAppDesktop": "bureau",
