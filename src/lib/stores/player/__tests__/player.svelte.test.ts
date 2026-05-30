@@ -10,8 +10,6 @@ type MockOptions = {
 	isGaplessEnabled: () => boolean
 }
 
-// ---- Hoisted mock factories ----
-
 const { MockPlaybackController, mockHistory, controllerRef } = vi.hoisted(() => {
 	// No type declarations inside vi.hoisted (Oxc parser issue in .svelte.ts files)
 	const controllerRef: { instance: unknown; options: unknown } = {
@@ -57,8 +55,6 @@ const { MockPlaybackController, mockHistory, controllerRef } = vi.hoisted(() => 
 
 	return { MockPlaybackController, mockHistory, controllerRef }
 })
-
-// ---- Module mocks ----
 
 vi.mock('$lib/audio/playback-controller.svelte.ts', () => ({
 	PlaybackController: MockPlaybackController,
@@ -145,8 +141,6 @@ vi.mock('$lib/library/get/value.ts', () => ({
 		}),
 	),
 }))
-
-// ---- Test helpers ----
 
 const seedTrack = (id: number) => {
 	queryTracks.set(id, { id, name: `Track ${id}`, duration: 180 })

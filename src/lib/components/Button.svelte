@@ -29,7 +29,6 @@
 		as = 'button' as As,
 		kind = 'filled',
 		disabled = false,
-		// svelte-ignore state_referenced_locally possible false positive?
 		href = (as === 'a' ? '' : undefined) as ButtonHref<As>,
 		type = 'button',
 		children,

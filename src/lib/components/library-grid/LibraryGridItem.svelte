@@ -4,11 +4,10 @@
 	import { page } from '$app/state'
 	import type { RouteId } from '$app/types'
 	import { ripple } from '$lib/attachments/ripple.ts'
-	import type { QueryResult } from '$lib/db/query/query.ts'
 	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte.ts'
 	import { dbGetAlbumTracksIdsByName, dbGetArtistTracksIdsByName } from '$lib/library/get/ids'
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
-	import { createAlbumQuery, createArtistQuery } from '$lib/library/get/value-queries'
+	import { createLibraryValueQuery } from '$lib/library/get/value-queries'
 	import Artwork from '../Artwork.svelte'
 	import PlayPauseIcon from '../animated-icons/PlayPauseIcon.svelte'
 
@@ -41,14 +40,11 @@
 	const dialogs = useDialogsStore()
 	const player = usePlayer()
 
-	type Value = LibraryGridItemValue<Type>
+	const query = createLibraryValueQuery(
+		() => type,
+		() => itemId,
+	)
 
-	const query =
-		// prettier-ignore
-		(
-			// svelte-ignore state_referenced_locally only initialized once
-			type === 'albums' ? createAlbumQuery(() => itemId) : createArtistQuery(() => itemId)
-		) as QueryResult<Value>
 	const { value: item } = $derived(query)
 
 	const artworkSrc = createManagedArtwork(() => {
