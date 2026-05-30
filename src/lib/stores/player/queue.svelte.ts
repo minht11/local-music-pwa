@@ -36,8 +36,13 @@ export class QueueStore {
 					continue
 				}
 
-				const index = this.itemsIds.indexOf(change.key)
-				if (index !== -1) {
+				// biome-ignore lint/nursery/noUnnecessaryConditions: loop will break conditional itself
+				while (true) {
+					const index = this.itemsIds.indexOf(change.key)
+					if (index === -1) {
+						break
+					}
+
 					this.#removeByIndex(index, change.key)
 				}
 			}
@@ -74,10 +79,15 @@ export class QueueStore {
 		return next >= this.itemsIds.length ? 0 : next
 	}
 
-	getNextTrackId = (): number | null => {
+	getNextTrack = () => {
 		const nextIndex = this.getNextIndex()
+		const nextTrackId = this.itemsIds[nextIndex]
 
-		return this.itemsIds[nextIndex] ?? null
+		if (nextTrackId === undefined) {
+			return null
+		}
+
+		return { id: nextTrackId, index: nextIndex }
 	}
 
 	getPrevIndex = (): number => {

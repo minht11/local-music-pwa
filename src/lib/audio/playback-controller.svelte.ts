@@ -136,7 +136,7 @@ export class PlaybackController {
 	 * Load and play a track into the current slot.
 	 * Idempotent: calling with the same trackId while already loading or ready will play same track without reloading.
 	 */
-	async switchToAndPlay(trackId: number): Promise<void> {
+	async switchToAndPlay(trackId: number, gapless = false): Promise<void> {
 		this.playing = true
 		const current = this.#current
 		if (current.status === 'ready' && current.trackId === trackId) {
@@ -151,7 +151,7 @@ export class PlaybackController {
 		this.#teardownCurrent()
 
 		const next = this.#next
-		if (next.status === 'ready' && next.trackId === trackId) {
+		if (gapless && next.status === 'ready' && next.trackId === trackId) {
 			this.#next = idle()
 			this.#promoteToCurrent(next)
 			return

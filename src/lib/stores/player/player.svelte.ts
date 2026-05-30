@@ -74,12 +74,16 @@ export class PlayerStore {
 			return { type: 'pause' } as const
 		}
 
-		const nextTrackId = this.#queue.getNextTrackId()
-		if (nextTrackId === null) {
+		const nextTrack = this.#queue.getNextTrack()
+		if (nextTrack === null) {
 			return { type: 'pause' } as const
 		}
 
-		return { type: 'play-next', nextTrackId } as const
+		return {
+			type: 'play-next',
+			nextTrackId: nextTrack.id,
+			nextTrackIndex: nextTrack.index,
+		} as const
 	})
 
 	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.activeTrackId ?? -1, {
@@ -123,6 +127,7 @@ export class PlayerStore {
 		if (import.meta.hot) {
 			import.meta.hot.dispose(() => {
 				this.#controller.abort()
+				this.#graph.dispose()
 			})
 		}
 	}
@@ -234,7 +239,13 @@ export class PlayerStore {
 		const action = this.#nextTrackAction
 
 		if (action.type === 'play-next') {
-			this.playNext()
+			this.#queue.setTrack(action.nextTrackIndex)
+			const isSameTrack = this.activeTrack?.id === action.nextTrackId
+			if (isSameTrack && this.#controller.currentStatus === 'ready') {
+				this.#restartAndPlay()
+			} else {
+				this.#controller.switchToAndPlay(action.nextTrackId, true)
+			}
 			return
 		}
 

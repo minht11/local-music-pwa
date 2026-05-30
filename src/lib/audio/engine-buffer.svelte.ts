@@ -34,8 +34,8 @@ export const supportsBufferEngine = (codec: string): boolean | Promise<boolean> 
 		return false
 	}
 
-	if (PCM_AUDIO_CODECS.includes(codec as 'pcm-s16')) {
-		return true
+	if (PCM_AUDIO_CODECS.includes(normalizedCodec as 'pcm-s16')) {
+		return canDecodeAudio(normalizedCodec as 'pcm-s16')
 	}
 
 	if (normalizedCodec !== 'flac') {

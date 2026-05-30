@@ -55,7 +55,8 @@ export class EqualizerStore {
 			invariant(filters.length === bands.length)
 
 			for (const [i, filter] of filters.entries()) {
-				filter.gain.value = enabled ? (bands[i] ?? 0) : 0
+				const targetGain = enabled ? (bands[i] ?? 0) : 0
+				filter.gain.setTargetAtTime(targetGain, this.#graph.context.currentTime, 0.015)
 			}
 		})
 	}

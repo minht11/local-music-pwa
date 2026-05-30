@@ -100,4 +100,10 @@ export class AudioGraph {
 
 		return this.#context.suspend()
 	}
+
+	dispose(): void {
+		if (this.#context) {
+			this.#context.close()
+		}
+	}
 }
