@@ -28,10 +28,10 @@ export class MediaSessionController {
 
 		const setAction = ms.setActionHandler.bind(ms)
 
-		setAction('play', player.play)
-		setAction('pause', player.pause)
-		setAction('nexttrack', player.playNext)
-		setAction('previoustrack', player.playPrev)
+		setAction('play', () => player.play())
+		setAction('pause', () => player.pause())
+		setAction('nexttrack', () => player.playNext())
+		setAction('previoustrack', () => player.playPrev())
 		setAction('seekbackward', () => player.seek(Math.max(player.currentTime - 10, 0)))
 		setAction('seekforward', () =>
 			player.seek(Math.min(player.currentTime + 10, player.duration)),

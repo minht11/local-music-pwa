@@ -103,15 +103,6 @@ export class PlaybackController {
 	playing = $state(false)
 	duration = $state(0)
 
-	get currentTrackId() {
-		const s = this.#current
-		return s.status === 'idle' ? null : s.trackId
-	}
-
-	get currentStatus() {
-		return this.#current.status
-	}
-
 	readonly loading = $derived.by(() => {
 		const current = this.#current
 
@@ -144,7 +135,7 @@ export class PlaybackController {
 				this.seek(0)
 			}
 
-			current.engine.play()
+			void current.engine.play()
 
 			return
 		}

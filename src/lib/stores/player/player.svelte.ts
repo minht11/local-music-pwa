@@ -286,8 +286,9 @@ export class PlayerStore {
 
 	playPrev = (): void => {
 		if (this.currentTime > 3) {
-			this.seek(0)
-			this.play()
+			if (this.activeTrack) {
+				this.#controller.play(this.activeTrack.id, { fromBeginning: true })
+			}
 
 			return
 		}
