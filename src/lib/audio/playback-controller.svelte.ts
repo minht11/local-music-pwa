@@ -107,11 +107,6 @@ export class PlaybackController {
 		return this.#current.status
 	}
 
-	get nextScheduledTrackId(): number | null {
-		const s = this.#next
-		return s.status === 'idle' ? null : s.trackId
-	}
-
 	readonly loading = $derived.by(() => {
 		const current = this.#current
 

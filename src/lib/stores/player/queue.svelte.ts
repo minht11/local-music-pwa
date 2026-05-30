@@ -10,8 +10,8 @@ export class QueueStore {
 
 	#activeIndex = $state(-1)
 
-	#itemsIdsOriginalOrder = $state<number[]>([])
-	#itemsIdsShuffled = $state<number[] | null>(null)
+	#itemsIdsOriginalOrder: number[] = $state([])
+	#itemsIdsShuffled: number[] | null = $state(null)
 
 	itemsIds: readonly number[] = $derived(
 		this.#itemsIdsShuffled ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,

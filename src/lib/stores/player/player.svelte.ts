@@ -5,11 +5,12 @@ import { type FileLoadFailReason, resolveTrackFile } from '$lib/helpers/file-res
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
-import { formatArtists, formatNameOrUnknown, truncate } from '$lib/helpers/utils/text.ts'
+import { truncate } from '$lib/helpers/utils/text.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
 import { createTrackQuery } from '$lib/library/get/value-queries.ts'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
 import type { MainStore } from '../main/store.svelte.ts'
+import { MediaSessionController } from './media-session.svelte.ts'
 import { PlayHistoryTracker } from './play-history-tracker.ts'
 import { type PlayTrackOptions, QueueStore } from './queue.svelte.ts'
 
@@ -26,6 +27,7 @@ export class PlayerStore {
 	readonly #graph = new AudioGraph()
 	readonly #queue = new QueueStore()
 	readonly #history = new PlayHistoryTracker()
+	readonly #ms = new MediaSessionController(this)
 	readonly equalizer = new EqualizerStore(this.#graph)
 	readonly #main: MainStore
 
@@ -123,7 +125,6 @@ export class PlayerStore {
 		this.#setupPreloadEffect()
 		this.#setupVolumeEffect()
 		this.#setupPlaybackRateEffect()
-		this.#setupMediaSession()
 		this.#setupPlayHistoryEffect()
 
 		if (import.meta.hot) {
@@ -243,8 +244,11 @@ export class PlayerStore {
 		const action = this.#nextTrackAction
 
 		if (action.type === 'play-next') {
+			const previousTrackId = this.#queue.activeTrackId
 			this.#queue.setTrack(action.nextTrackIndex)
-			const isSameTrack = this.activeTrack?.id === action.nextTrackId
+
+			const isSameTrack = previousTrackId === action.nextTrackId
+
 			if (isSameTrack && this.#controller.currentStatus === 'ready') {
 				this.#restartAndPlay()
 			} else {
@@ -277,7 +281,7 @@ export class PlayerStore {
 
 	seek = (time: number): void => {
 		this.#controller.seek(time)
-		this.#updateMediaSessionPosition(time)
+		this.#ms.updatePosition(time)
 	}
 
 	playNext = (): void => {
@@ -370,80 +374,6 @@ export class PlayerStore {
 			const currentTime = this.currentTime
 			const duration = this.duration
 			untrack(() => this.#history.update(currentTime, duration))
-		})
-	}
-
-	#setupMediaSession(): void {
-		const ms = navigator.mediaSession
-		if (!ms) {
-			return
-		}
-
-		const setAction = ms.setActionHandler.bind(ms)
-
-		setAction('play', this.play)
-		setAction('pause', this.pause)
-		setAction('nexttrack', this.playNext)
-		setAction('previoustrack', this.playPrev)
-		setAction('seekbackward', () => this.seek(Math.max(this.currentTime - 10, 0)))
-		setAction('seekforward', () => this.seek(Math.min(this.currentTime + 10, this.duration)))
-		setAction('seekto', ({ seekTime }) => {
-			if (seekTime != null) {
-				this.seek(seekTime)
-			}
-		})
-
-		$effect(() => {
-			ms.playbackState = this.playing ? 'playing' : 'paused'
-		})
-
-		$effect(() => {
-			const { duration } = this
-			// setPositionState throws otherwise
-			if (duration <= 0) {
-				return
-			}
-
-			// We only want to update on every tick, to allow scrubbing, browser interpolates position itself.
-			this.#updateMediaSessionPosition(untrack(() => this.currentTime))
-		})
-
-		$effect(() => {
-			const track = this.activeTrack
-			if (!track) {
-				ms.metadata = null
-				return
-			}
-
-			const fallbackArtworkSrc = new URL('/artwork.svg', location.origin).toString()
-			ms.metadata = new MediaMetadata({
-				title: track.name,
-				artist: formatArtists(track.artists),
-				album: formatNameOrUnknown(track.album),
-				artwork: [
-					{
-						src: this.artworkSrc ?? fallbackArtworkSrc,
-					},
-				],
-			})
-		})
-	}
-
-	#updateMediaSessionPosition(currentTime: number): void {
-		if (!navigator.mediaSession) {
-			return
-		}
-
-		const { duration } = this
-		// setPositionState throws otherwise
-		if (duration <= 0) {
-			return
-		}
-
-		navigator.mediaSession.setPositionState({
-			duration,
-			playbackRate: this.playbackRate,
-			position: Math.min(currentTime, duration),
 		})
 	}
 }
