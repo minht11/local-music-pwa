@@ -11,7 +11,5 @@ export const EQ_BANDS = [
 	{ frequency: 16_000, label: '16 kHz' },
 ] as const
 
-export type EqBand = (typeof EQ_BANDS)[number]
-
 export const EQ_MIN_GAIN = -12
 export const EQ_MAX_GAIN = 12
