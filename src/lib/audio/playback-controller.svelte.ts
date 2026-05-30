@@ -188,9 +188,16 @@ export class PlaybackController {
 			return
 		}
 
+		const current = this.#current
+
+		// Never pre-schedule the currently-playing track as the gapless "next".
+		// play() will reuse existing engine if same track is requested
+		if (current.status === 'ready' && current.trackId === trackId) {
+			return
+		}
+
 		this.#teardownAndIdleNext()
 
-		const current = this.#current
 		const currentEngine = current.status === 'ready' ? current.engine : null
 
 		const canTryGapless =

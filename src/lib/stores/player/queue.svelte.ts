@@ -8,7 +8,7 @@ export interface PlayTrackOptions {
 export class QueueStore {
 	shuffle: boolean = $state(false)
 
-	#activeIndex = $state(-1)
+	#currentIndex = $state(-1)
 
 	#itemsIdsOriginalOrder: number[] = $state([])
 	#itemsIdsShuffled: number[] | null = $state(null)
@@ -17,13 +17,20 @@ export class QueueStore {
 		this.#itemsIdsShuffled ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
 	)
 
-	get activeTrackIndex(): number {
-		return this.#activeIndex
-	}
+	readonly current = $derived.by(() => {
+		const index = this.#currentIndex
+		const currentTrackId = this.itemsIds[index]
 
-	get activeTrackId(): number | null {
-		return this.itemsIds[this.#activeIndex] ?? null
-	}
+		if (currentTrackId === undefined) {
+			return null
+		}
+
+		return {
+			id: currentTrackId,
+			index,
+			isLast: index === this.itemsIds.length - 1,
+		}
+	})
 
 	get isQueueEmpty(): boolean {
 		return this.itemsIds.length === 0
@@ -66,17 +73,17 @@ export class QueueStore {
 		}
 
 		if (this.itemsIds.length === 0) {
-			this.#activeIndex = -1
+			this.#currentIndex = -1
 		} else {
 			// TODO. This is inconstant add separate method to play shuffled queue.
-			this.#activeIndex = options.shuffle ? 0 : trackIndex
+			this.#currentIndex = options.shuffle ? 0 : trackIndex
 		}
 
-		return this.activeTrackId
+		return this.current?.id ?? null
 	}
 
 	getNextIndex = (): number => {
-		const next = this.#activeIndex + 1
+		const next = this.#currentIndex + 1
 		return next >= this.itemsIds.length ? 0 : next
 	}
 
@@ -92,12 +99,12 @@ export class QueueStore {
 	}
 
 	getPrevIndex = (): number => {
-		const prev = this.#activeIndex - 1
+		const prev = this.#currentIndex - 1
 		return prev < 0 ? this.itemsIds.length - 1 : prev
 	}
 
 	toggleShuffle = (): void => {
-		const activeTrackId = this.itemsIds[this.#activeIndex] ?? -1
+		const activeTrackId = this.itemsIds[this.#currentIndex] ?? -1
 		this.shuffle = !this.shuffle
 
 		if (this.shuffle) {
@@ -105,16 +112,16 @@ export class QueueStore {
 
 			const newIndex = this.#itemsIdsShuffled.indexOf(activeTrackId)
 			if (newIndex === -1) {
-				this.#activeIndex = -1
+				this.#currentIndex = -1
 			} else {
 				const displaced = this.#itemsIdsShuffled[0] as number
 				this.#itemsIdsShuffled[0] = activeTrackId
 				this.#itemsIdsShuffled[newIndex] = displaced
-				this.#activeIndex = 0
+				this.#currentIndex = 0
 			}
 		} else {
 			this.#itemsIdsShuffled = null
-			this.#activeIndex = this.#itemsIdsOriginalOrder.indexOf(activeTrackId)
+			this.#currentIndex = this.#itemsIdsOriginalOrder.indexOf(activeTrackId)
 		}
 	}
 
@@ -124,8 +131,8 @@ export class QueueStore {
 		this.#itemsIdsShuffled?.push(...ids)
 		this.#itemsIdsOriginalOrder.push(...ids)
 
-		if (this.#activeIndex === -1) {
-			this.#activeIndex = 0
+		if (this.#currentIndex === -1) {
+			this.#currentIndex = 0
 		}
 	}
 
@@ -142,7 +149,7 @@ export class QueueStore {
 	clearQueue = (): void => {
 		this.#itemsIdsOriginalOrder = []
 		this.#itemsIdsShuffled = null
-		this.#activeIndex = -1
+		this.#currentIndex = -1
 	}
 
 	moveQueueItem = (fromIndex: number, toIndex: number): void => {
@@ -171,18 +178,18 @@ export class QueueStore {
 		this.#itemsIdsOriginalOrder.splice(fromIndex, 1)
 		this.#itemsIdsOriginalOrder.splice(toIndex, 0, movedTrackId)
 
-		if (this.#activeIndex === fromIndex) {
-			this.#activeIndex = toIndex
+		if (this.#currentIndex === fromIndex) {
+			this.#currentIndex = toIndex
 			return
 		}
 
-		if (fromIndex < this.#activeIndex && toIndex >= this.#activeIndex) {
-			this.#activeIndex -= 1
+		if (fromIndex < this.#currentIndex && toIndex >= this.#currentIndex) {
+			this.#currentIndex -= 1
 			return
 		}
 
-		if (fromIndex > this.#activeIndex && toIndex <= this.#activeIndex) {
-			this.#activeIndex += 1
+		if (fromIndex > this.#currentIndex && toIndex <= this.#currentIndex) {
+			this.#currentIndex += 1
 		}
 	}
 
@@ -197,10 +204,10 @@ export class QueueStore {
 			this.#itemsIdsOriginalOrder.splice(index, 1)
 		}
 
-		if (index < this.#activeIndex) {
-			this.#activeIndex -= 1
-		} else if (index === this.#activeIndex) {
-			this.#activeIndex = -1
+		if (index < this.#currentIndex) {
+			this.#currentIndex -= 1
+		} else if (index === this.#currentIndex) {
+			this.#currentIndex = -1
 		}
 	}
 }

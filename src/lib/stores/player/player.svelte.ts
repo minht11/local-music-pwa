@@ -61,25 +61,22 @@ export class PlayerStore {
 		return this.#queue.itemsIds
 	}
 	get activeTrackIndex() {
-		return this.#queue.activeTrackIndex
+		return this.#queue.current?.index ?? -1
 	}
 	get isQueueEmpty() {
 		return this.#queue.isQueueEmpty
 	}
 
 	readonly #nextTrackAction = $derived.by(() => {
-		const currentTrackId = this.#queue.activeTrackId
+		const current = this.#queue.current
 
 		if (this.repeat === 'one') {
-			if (currentTrackId === null) {
-				return { type: 'pause' } as const
-			}
-
-			return { type: 'repeat-current', trackId: currentTrackId } as const
+			return current
+				? ({ type: 'play', trackId: current.id, trackIndex: current.index } as const)
+				: ({ type: 'pause' } as const)
 		}
 
-		const isLast = this.#queue.activeTrackIndex >= this.#queue.itemsIds.length - 1
-		if (this.repeat === 'none' && (isLast || this.pauseAfterTrackWhenRepeatIsOff)) {
+		if (this.repeat === 'none' && (current?.isLast || this.pauseAfterTrackWhenRepeatIsOff)) {
 			return { type: 'pause' } as const
 		}
 
@@ -88,14 +85,10 @@ export class PlayerStore {
 			return { type: 'pause' } as const
 		}
 
-		return {
-			type: 'play-next',
-			trackId: nextTrack.id,
-			trackIndex: nextTrack.index,
-		} as const
+		return { type: 'play-next', trackId: nextTrack.id, trackIndex: nextTrack.index } as const
 	})
 
-	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.activeTrackId ?? -1, {
+	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.current?.id ?? -1, {
 		allowEmpty: true,
 	})
 	readonly activeTrack = $derived(this.#activeTrackQuery.value)
@@ -224,11 +217,7 @@ export class PlayerStore {
 			const current = this.currentTime
 			const remaining = duration - current
 
-			if (
-				duration <= 0 ||
-				remaining > PRE_BUFFER_THRESHOLD_SECONDS ||
-				this.repeat === 'one'
-			) {
+			if (duration <= 0 || remaining > PRE_BUFFER_THRESHOLD_SECONDS) {
 				return
 			}
 
@@ -355,7 +344,11 @@ export class PlayerStore {
 
 	#setupPlayHistoryEffect(): void {
 		$effect(() => {
-			const trackId = this.#queue.activeTrackId
+			const trackId = this.#queue.current?.id
+			if (trackId == null) {
+				return
+			}
+
 			untrack(() => this.#history.begin(trackId))
 		})
 
