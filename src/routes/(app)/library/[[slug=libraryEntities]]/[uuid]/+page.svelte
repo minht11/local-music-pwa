@@ -187,9 +187,7 @@
 					class="my-1 mr-auto"
 					disabled={tracks.tracksIds.length === 0}
 					onclick={() => {
-						player.playTrack(0, tracks.tracksIds, {
-							shuffle: true,
-						})
+						player.playTrack('shuffle', tracks.tracksIds)
 					}}
 				>
 					{m.shuffle()}

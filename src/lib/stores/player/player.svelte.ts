@@ -12,9 +12,8 @@ import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
 import type { MainStore } from '../main/store.svelte.ts'
 import { MediaSessionController } from './media-session.svelte.ts'
 import { PlayHistoryTracker } from './play-history-tracker.ts'
-import { type PlayTrackOptions, QueueStore } from './queue.svelte.ts'
+import { QueueStore } from './queue.svelte.ts'
 
-export type { PlayTrackOptions }
 export type PlayerRepeat = 'none' | 'one' | 'all'
 
 // How many seconds before track end to begin pre-buffering the next track.
@@ -67,25 +66,17 @@ export class PlayerStore {
 		return this.#queue.isQueueEmpty
 	}
 
-	readonly #nextTrackAction = $derived.by(() => {
-		const current = this.#queue.current
+	/** Returns the next track to play based on the current repeat mode and queue state. */
+	readonly #nextTrackToPlay = $derived.by(() => {
+		if (this.repeat === 'none' && this.pauseAfterTrackWhenRepeatIsOff) {
+			return null
+		}
 
 		if (this.repeat === 'one') {
-			return current
-				? ({ type: 'play', trackId: current.id, trackIndex: current.index } as const)
-				: ({ type: 'pause' } as const)
+			return this.#queue.current
 		}
 
-		if (this.repeat === 'none' && (current?.isLast || this.pauseAfterTrackWhenRepeatIsOff)) {
-			return { type: 'pause' } as const
-		}
-
-		const nextTrack = this.#queue.getNextTrack()
-		if (nextTrack === null) {
-			return { type: 'pause' } as const
-		}
-
-		return { type: 'play-next', trackId: nextTrack.id, trackIndex: nextTrack.index } as const
+		return this.#queue.peekNext(this.repeat === 'all')
 	})
 
 	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.current?.id ?? -1, {
@@ -221,11 +212,11 @@ export class PlayerStore {
 				return
 			}
 
-			const nextAction = this.#nextTrackAction
+			const nextTrack = this.#nextTrackToPlay
 
 			untrack(() => {
-				if (nextAction.type === 'play-next') {
-					void this.#controller.preloadNext(nextAction.trackId)
+				if (nextTrack) {
+					void this.#controller.preloadNext(nextTrack.id)
 				} else {
 					this.#controller.abortNext()
 				}
@@ -236,17 +227,15 @@ export class PlayerStore {
 	#handleTrackEnded = () => {
 		this.#history.complete()
 
-		const action = this.#nextTrackAction
-		if (action.type === 'pause') {
+		const nextTrack = this.#nextTrackToPlay
+		if (!nextTrack) {
 			this.pause()
 			return
 		}
 
-		if (action.type === 'play-next') {
-			this.#queue.setTrack(action.trackIndex)
-		}
+		this.#queue.setTrack(nextTrack.index)
 
-		this.#controller.play(action.trackId, {
+		this.#controller.play(nextTrack.id, {
 			gapless: true,
 			fromBeginning: true,
 		})
@@ -270,7 +259,11 @@ export class PlayerStore {
 	}
 
 	playNext = (): void => {
-		this.playTrack(this.#queue.getNextIndex())
+		const next = this.#queue.peekNext(true)
+
+		if (next !== null) {
+			this.playTrack(next.index)
+		}
 	}
 
 	playPrev = (): void => {
@@ -282,15 +275,15 @@ export class PlayerStore {
 			return
 		}
 
-		this.playTrack(this.#queue.getPrevIndex())
+		const prev = this.#queue.peekPrev(true)
+
+		if (prev !== null) {
+			this.playTrack(prev.index)
+		}
 	}
 
-	playTrack = (
-		trackIndex: number,
-		queue?: readonly number[],
-		options: PlayTrackOptions = {},
-	): void => {
-		const newTrackId = this.#queue.setTrack(trackIndex, queue, options)
+	playTrack = (trackIndex: number | 'shuffle', queue?: readonly number[]): void => {
+		const newTrackId = this.#queue.setTrack(trackIndex, queue)
 
 		if (newTrackId) {
 			this.#controller.play(newTrackId, {

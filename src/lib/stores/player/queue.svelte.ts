@@ -1,8 +1,9 @@
 import { onDatabaseChange } from '$lib/db/events.ts'
 import { toShuffledArray } from '$lib/helpers/utils/array.ts'
 
-export interface PlayTrackOptions {
-	shuffle?: boolean
+export interface QueueEntry {
+	id: number
+	index: number
 }
 
 export class QueueStore {
@@ -17,20 +18,7 @@ export class QueueStore {
 		this.#itemsIdsShuffled ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
 	)
 
-	readonly current = $derived.by(() => {
-		const index = this.#currentIndex
-		const currentTrackId = this.itemsIds[index]
-
-		if (currentTrackId === undefined) {
-			return null
-		}
-
-		return {
-			id: currentTrackId,
-			index,
-			isLast: index === this.itemsIds.length - 1,
-		}
-	})
+	readonly current = $derived(this.#atIndex(this.#currentIndex))
 
 	get isQueueEmpty(): boolean {
 		return this.itemsIds.length === 0
@@ -56,14 +44,16 @@ export class QueueStore {
 		})
 	}
 
-	setTrack = (
-		trackIndex: number,
-		newQueue?: readonly number[],
-		options: PlayTrackOptions = {},
-	): number | null => {
+	#atIndex(index: number): QueueEntry | null {
+		const id = this.itemsIds[index]
+
+		return id === undefined ? null : { id, index }
+	}
+
+	setTrack = (trackIndex: number | 'shuffle', newQueue?: readonly number[]): number | null => {
 		if (newQueue) {
 			this.#itemsIdsOriginalOrder = [...newQueue]
-			this.shuffle = options.shuffle ?? false
+			this.shuffle = trackIndex === 'shuffle'
 
 			if (this.shuffle) {
 				this.#itemsIdsShuffled = toShuffledArray(this.#itemsIdsOriginalOrder)
@@ -75,32 +65,28 @@ export class QueueStore {
 		if (this.itemsIds.length === 0) {
 			this.#currentIndex = -1
 		} else {
-			// TODO. This is inconstant add separate method to play shuffled queue.
-			this.#currentIndex = options.shuffle ? 0 : trackIndex
+			this.#currentIndex = trackIndex === 'shuffle' ? 0 : trackIndex
 		}
 
 		return this.current?.id ?? null
 	}
 
-	getNextIndex = (): number => {
-		const next = this.#currentIndex + 1
-		return next >= this.itemsIds.length ? 0 : next
-	}
-
-	getNextTrack = () => {
-		const nextIndex = this.getNextIndex()
-		const nextTrackId = this.itemsIds[nextIndex]
-
-		if (nextTrackId === undefined) {
-			return null
+	peekNext = (loop = false) => {
+		let nextIndex = this.#currentIndex + 1
+		if (nextIndex >= this.itemsIds.length && loop) {
+			nextIndex = 0
 		}
 
-		return { id: nextTrackId, index: nextIndex }
+		return this.#atIndex(nextIndex)
 	}
 
-	getPrevIndex = (): number => {
-		const prev = this.#currentIndex - 1
-		return prev < 0 ? this.itemsIds.length - 1 : prev
+	peekPrev = (loop = false) => {
+		let prevIndex = this.#currentIndex - 1
+		if (prevIndex < 0 && loop) {
+			prevIndex = this.itemsIds.length - 1
+		}
+
+		return this.#atIndex(prevIndex)
 	}
 
 	toggleShuffle = (): void => {
