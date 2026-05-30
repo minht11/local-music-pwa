@@ -188,6 +188,7 @@ export class PlaybackController {
 			return
 		}
 
+		this.#teardownAndIdleNext()
 		const current = this.#current
 
 		// Never pre-schedule the currently-playing track as the gapless "next".
@@ -195,8 +196,6 @@ export class PlaybackController {
 		if (current.status === 'ready' && current.trackId === trackId) {
 			return
 		}
-
-		this.#teardownAndIdleNext()
 
 		const currentEngine = current.status === 'ready' ? current.engine : null
 
