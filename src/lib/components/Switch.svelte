@@ -42,6 +42,7 @@
 	tabindex="0"
 	role="switch"
 	aria-checked={checked}
+	aria-disabled={disabled}
 	onclick={toggle}
 	onkeydown={(e) => {
 		if (e.key === 'Enter' || e.key === ' ') {

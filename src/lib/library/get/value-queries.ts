@@ -13,8 +13,8 @@ export const createLibraryValueQuery = <Store extends Exclude<LibraryStoreName, 
 	idGetter: () => number,
 ): QueryResult<GetLibraryValueResult<Store, false>> =>
 	createQuery({
-		key: idGetter,
-		fetcher: (id) => getLibraryValue(storeName(), id),
+		key: () => [storeName(), idGetter()] as const,
+		fetcher: () => getLibraryValue(storeName(), idGetter()),
 		onDatabaseChange: (changes, { refetch }) => {
 			if (shouldRefetchLibraryValue(storeName(), idGetter(), changes)) {
 				void refetch()

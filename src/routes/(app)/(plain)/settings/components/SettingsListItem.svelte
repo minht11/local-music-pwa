@@ -49,9 +49,11 @@
 
 			{@render afterTitle?.()}
 		</div>
-		<div class="max-w-160 text-body-sm text-onSurfaceVariant">
-			{description}
-		</div>
+		{#if description}
+			<div class="max-w-160 text-body-sm text-onSurfaceVariant">
+				{description}
+			</div>
+		{/if}
 	</div>
 
 	{@render children?.()}
