@@ -29,7 +29,6 @@
 		as = 'button' as As,
 		kind = 'filled',
 		disabled = false,
-		// svelte-ignore state_referenced_locally possible false positive?
 		href = (as === 'a' ? '' : undefined) as ButtonHref<As>,
 		type = 'button',
 		children,
@@ -96,9 +95,12 @@
 	}
 
 	.base-button[disabled] {
-		cursor: default;
 		background-color: --alpha(var(--color-onSurface) / 12%);
 		border-color: --alpha(var(--color-onSurface) / 38%);
 		color: --alpha(var(--color-onSurface) / 38%);
+	}
+
+	button[disabled] {
+		cursor: default;
 	}
 </style>

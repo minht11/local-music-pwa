@@ -1,339 +1,295 @@
-import type { QueryResult } from '$lib/db/query/query.ts'
+import { AudioGraph } from '$lib/audio/audio-graph.svelte.ts'
+import { PlaybackController, type TrackLoader } from '$lib/audio/playback-controller.svelte.ts'
 import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
+import { type FileLoadFailReason, resolveTrackFile } from '$lib/helpers/file-resolver.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
-import { formatArtists, truncate } from '$lib/helpers/utils/text.ts'
-import { throttle } from '$lib/helpers/utils/throttle.ts'
-import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
-import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
-import { AudioLoader } from './audio-loader.svelte.ts'
-import { EqualizerStore } from './equalizer.svelte.ts'
-import { type PlayTrackOptions, QueueStore } from './queue.svelte.ts'
-
-export type { PlayTrackOptions }
+import { truncate } from '$lib/helpers/utils/text.ts'
+import { getLibraryValue } from '$lib/library/get/value.ts'
+import { createTrackQuery } from '$lib/library/get/value-queries.ts'
+import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
+import type { MainStore } from '../main/store.svelte.ts'
+import { MediaSessionController } from './media-session.svelte.ts'
+import { PlayHistoryTracker } from './play-history-tracker.ts'
+import { QueueStore } from './queue.svelte.ts'
 
 export type PlayerRepeat = 'none' | 'one' | 'all'
+
+// How many seconds before track end to begin pre-buffering the next track.
+const PRE_BUFFER_THRESHOLD_SECONDS = 10
 
 export const PLAYER_PLAYBACK_RATE_MIN = 0.5
 export const PLAYER_PLAYBACK_RATE_MAX = 2
 
 export class PlayerStore {
-	readonly #main = useMainStore()
-
-	readonly #audio = new Audio()
-	readonly #audioLoader = new AudioLoader((src) => {
-		this.#audio.src = src ?? ''
-	})
+	readonly #graph = new AudioGraph()
 	readonly #queue = new QueueStore()
-	readonly equalizer = new EqualizerStore(this.#audio)
+	readonly #history = new PlayHistoryTracker()
+	readonly #ms = new MediaSessionController(this)
+	readonly equalizer = new EqualizerStore(this.#graph)
+	readonly #main: MainStore
+
+	readonly #controller: PlaybackController
 
 	repeat: PlayerRepeat = $state('none')
-	playing: boolean = $state(false)
-	muted: boolean = $state(false)
-	#volume: number = $state(100)
+	muted = $state(false)
+	#volume = $state(100)
+	playbackRate = $state(1)
+	preservePitch = $state(true)
+	gaplessPlaybackEnabled = $state(false)
+	pauseAfterTrackWhenRepeatIsOff = $state(false)
 
-	playbackRate: number = $state(1)
-	preservePitch: boolean = $state(true)
+	get playing() {
+		return this.#controller.playing
+	}
+	get currentTime() {
+		return this.#controller.currentTime
+	}
+	get duration() {
+		return this.#controller.duration
+	}
+	get loading() {
+		return this.#controller.loading
+	}
 
-	get shuffle(): boolean {
+	get shuffle() {
 		return this.#queue.shuffle
 	}
-
-	get itemsIds(): readonly number[] {
+	get itemsIds() {
 		return this.#queue.itemsIds
 	}
-
-	get activeTrackIndex(): number {
-		return this.#queue.activeTrackIndex
+	get activeTrackIndex() {
+		return this.#queue.current?.index ?? -1
 	}
-
-	get isQueueEmpty(): boolean {
+	get isQueueEmpty() {
 		return this.#queue.isQueueEmpty
 	}
 
-	loading: boolean = $derived(this.#audioLoader.loading)
+	/** Returns the next track to play based on the current repeat mode and queue state. */
+	readonly #upNext = $derived.by(() => {
+		if (this.repeat === 'none' && this.pauseAfterTrackWhenRepeatIsOff) {
+			return null
+		}
 
-	currentTime: number = $state(0)
-	duration: number = $state(0)
+		if (this.repeat === 'one') {
+			return this.#queue.current
+		}
 
-	get volume(): number {
+		return this.#queue.peekNext(this.repeat === 'all')
+	})
+
+	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.current?.id ?? -1, {
+		allowEmpty: true,
+	})
+	readonly activeTrack = $derived(this.#activeTrackQuery.value)
+
+	readonly #artwork = createManagedArtwork(() => this.activeTrack?.image?.full)
+	readonly artworkSrc = $derived.by(this.#artwork)
+
+	get volume() {
 		return this.#main.volumeSliderEnabled ? this.#volume : 100
 	}
 
-	set volume(value: number) {
+	set volume(value) {
 		this.#volume = clamp(value, 0, 100)
 	}
 
-	#activeTrackQuery: QueryResult<TrackData | undefined> = createTrackQuery(
-		() => this.#queue.itemsIds[this.#queue.activeTrackIndex] ?? -1,
-		{ allowEmpty: true },
-	)
+	constructor(main: MainStore) {
+		this.#main = main
 
-	activeTrack: TrackData | undefined = $derived(this.#activeTrackQuery.value)
-
-	#artwork = createManagedArtwork(() => this.activeTrack?.image?.full)
-	artworkSrc: string | undefined = $derived.by(this.#artwork)
-
-	constructor() {
-		persist('player', this, ['volume', 'repeat', 'muted', 'playbackRate', 'preservePitch'])
+		persist('player', this, [
+			'volume',
+			'repeat',
+			'muted',
+			'playbackRate',
+			'preservePitch',
+			'gaplessPlaybackEnabled',
+			'pauseAfterTrackWhenRepeatIsOff',
+		])
 		persist('player', this.#queue, ['shuffle'])
 
-		this.equalizer.init()
+		this.#controller = this.#createPlaybackController()
 
-		const audio = this.#audio
+		this.#setupTrackChangeEffect()
+		this.#setupPreloadEffect()
+		this.#setupVolumeEffect()
+		this.#setupPlaybackRateEffect()
+		this.#setupPlayHistoryEffect()
+	}
 
-		// Plain (non-$state) so reads inside the effect don't create subscriptions.
-		let prevTrackId: number | null = null
+	#createPlaybackController() {
+		const trackLoader: TrackLoader = async (trackId, reason) => {
+			const track = await getLibraryValue('tracks', trackId)
 
-		// Debounced to recover from transient undefined during a DB refresh.
-		const scheduleAudioReset = debounce(() => {
-			if (!this.activeTrack) {
-				this.#audioLoader.reset()
-				this.currentTime = 0
-				this.duration = 0
-				this.playing = false
-			}
-		}, 100)
-
-		const trackChanged = (track: TrackData | undefined) => {
-			if (!track) {
-				if (prevTrackId !== null) {
-					this.#savePlayHistory(prevTrackId)
-
-					prevTrackId = null
-				}
-				scheduleAudioReset()
-				return
-			}
-
-			if (track.id === prevTrackId) {
-				return
-			}
-
-			scheduleAudioReset.cancel()
-
-			if (prevTrackId !== null) {
-				this.#savePlayHistory(prevTrackId)
-			}
-
-			prevTrackId = track.id
-			this.currentTime = 0
-			this.duration = 0
-
-			void this.#audioLoader.load(track.directory, track.file).then((result) => {
-				if (result.status === 'failed') {
-					const name = truncate(track.name, 30)
-					const errorMap = {
-						'not-found': m.playerAudioErrorNotFound,
-						'permission-denied': m.playerAudioErrorPermissionDenied,
-						error: m.playerAudioErrorLoadError,
-					}
-
-					snackbar({
-						message: errorMap[result.reason]({ name }),
-						id: 'failed-to-load-audio',
-						duration: 10_000,
-					})
-
-					prevTrackId = null
-					this.#queue.setTrack(-1)
-				}
+			const result = await resolveTrackFile({
+				directoryId: track.directory,
+				entity: track.file,
+				// Preload should stay silent
+				askPermission: reason === 'load',
 			})
+
+			return {
+				...result,
+				duration: track.duration,
+				codec: track.format?.codec ?? '',
+			}
 		}
 
+		return new PlaybackController(this.#graph, {
+			trackLoader,
+			onTrackEnded: this.#handleTrackEnded,
+			onError: this.#handleError,
+			isGaplessEnabled: () => this.gaplessPlaybackEnabled,
+		})
+	}
+
+	#setupVolumeEffect(): void {
+		$effect(() => {
+			if (!this.#graph.initialized) {
+				return
+			}
+
+			const muted = this.muted
+
+			// Humans perceive volume logarithmically
+			// so we adjust the volume to match that perception
+			const k = 0.5
+			const volume = (this.volume / 100) ** k
+
+			untrack(() => {
+				this.#graph.setVolume(muted ? 0 : volume)
+			})
+		})
+	}
+
+	#setupPlaybackRateEffect(): void {
+		const updatePlaybackRate = debounce((rate: number, preservePitch: boolean) => {
+			this.#controller.setPlaybackRate(rate, preservePitch)
+		}, 200)
+
+		$effect(() => {
+			const rate = this.playbackRate
+			// With gapless playback enabled we don't support pitch option.
+			const preservePitch = this.preservePitch && !this.gaplessPlaybackEnabled
+
+			untrack(() => {
+				updatePlaybackRate(rate, preservePitch)
+			})
+		})
+	}
+
+	#setupTrackChangeEffect(): void {
 		$effect(() => {
 			const track = this.activeTrack
 
 			untrack(() => {
-				trackChanged(track)
-			})
-		})
-
-		// Guarded by loading: prevents play() on an empty/stale src during file fetch.
-		$effect(() => {
-			if (this.#audioLoader.loading) {
-				return
-			}
-
-			const shouldPlay = this.playing
-
-			if (audio.paused === !shouldPlay) {
-				return
-			}
-
-			if (shouldPlay) {
-				void this.equalizer.resumeContext().then(() => audio.play())
-			} else {
-				void audio.pause()
-			}
-		})
-
-		const syncPlayingFromAudio = () => {
-			const audioPlaying = !audio.paused
-			if (audioPlaying !== this.playing) {
-				this.playing = audioPlaying
-			}
-		}
-
-		audio.onplay = syncPlayingFromAudio
-		audio.onpause = syncPlayingFromAudio
-
-		audio.onended = () => {
-			if (this.repeat === 'one') {
-				this.seek(0)
-				this.togglePlay(true)
-				return
-			}
-
-			if (
-				this.repeat === 'none' &&
-				this.#queue.activeTrackIndex === this.#queue.itemsIds.length - 1
-			) {
-				const trackId = this.#queue.activeTrackId
-				if (trackId !== null) {
-					this.#savePlayHistory(trackId)
+				if (!track) {
+					this.#controller.abort()
 				}
-
-				this.togglePlay(false)
-				return
-			}
-
-			this.playNext()
-		}
-
-		audio.ondurationchange = () => {
-			this.duration = audio.duration
-		}
-
-		audio.ontimeupdate = throttle(() => {
-			this.currentTime = audio.currentTime
-		}, 250)
-
-		const setPlaybackRate = () => {
-			audio.playbackRate = clamp(
-				this.playbackRate,
-				PLAYER_PLAYBACK_RATE_MIN,
-				PLAYER_PLAYBACK_RATE_MAX,
-			)
-		}
-
-		audio.onloadedmetadata = () => {
-			// Audio change resets playbackRate
-			setPlaybackRate()
-		}
-
-		$effect(() => {
-			setPlaybackRate()
-		})
-
-		$effect(() => {
-			audio.preservesPitch = this.preservePitch
-		})
-
-		$effect(() => {
-			// Humans perceive volume logarithmically
-			// so we adjust the volume to match that perception
-			const k = 0.5
-			audio.volume = (this.volume / 100) ** k
-		})
-
-		$effect(() => {
-			audio.muted = this.muted
-		})
-
-		const ms = window.navigator.mediaSession
-
-		$effect(() => {
-			const track = this.activeTrack
-			if (!track) {
-				ms.metadata = null
-				return
-			}
-
-			const fallbackArtworkSrc = new URL('/artwork.svg', location.origin).toString()
-			ms.metadata = new MediaMetadata({
-				title: track.name,
-				artist: formatArtists(track.artists),
-				album: track.album,
-				artwork: [
-					{
-						src: this.artworkSrc ?? fallbackArtworkSrc,
-						sizes: '512x512',
-					},
-				],
 			})
 		})
-
-		// Done for minification purposes.
-		const setAction = ms.setActionHandler.bind(ms)
-		setAction('play', () => this.togglePlay(true))
-		setAction('pause', () => this.togglePlay(false))
-		setAction('previoustrack', this.playPrev)
-		setAction('nexttrack', this.playNext)
-		setAction('seekbackward', () => {
-			audio.currentTime = Math.max(audio.currentTime - 10, 0)
-		})
-		setAction('seekforward', () => {
-			audio.currentTime = Math.min(audio.currentTime + 10, audio.duration)
-		})
-		// seekto is handled by AudioElement default behavior
 	}
 
-	#savePlayHistory = (trackId: number): void => {
-		const playedTime = this.#audio.currentTime
-		const totalDuration = this.#audio.duration
+	/**
+	 * Watches currentTime. When close to the end of the current track,
+	 * asks the player to preload the next track for gapless playback.
+	 */
+	#setupPreloadEffect(): void {
+		$effect(() => {
+			const duration = this.duration
+			const current = this.currentTime
+			const remaining = duration - current
 
-		const percentageThreshold = 0.5
-		const timeThreshold = 30
+			if (duration <= 0 || remaining > PRE_BUFFER_THRESHOLD_SECONDS) {
+				return
+			}
 
-		const threshold = Math.min(timeThreshold, totalDuration * percentageThreshold)
-		if (totalDuration > 0 && playedTime >= threshold) {
-			void dbAddToPlayHistory(trackId)
-		}
+			const upNext = this.#upNext
+
+			untrack(() => {
+				if (upNext) {
+					void this.#controller.preloadNext(upNext.id)
+				} else {
+					this.#controller.abortNext()
+				}
+			})
+		})
 	}
 
-	togglePlay = (force?: boolean): void => {
-		if (this.#queue.activeTrackIndex === -1) {
+	#handleTrackEnded = () => {
+		this.#history.complete()
+
+		const upNext = this.#upNext
+		if (!upNext) {
+			this.pause()
 			return
 		}
 
-		this.playing = force ?? !this.playing
+		this.#queue.setTrack(upNext.index)
+		this.#controller.play(upNext.id, {
+			gapless: true,
+			fromBeginning: true,
+		})
 	}
 
-	playNext = (): void => {
-		this.playTrack(this.#queue.getNextIndex())
-	}
-
-	playPrev = (): void => {
-		this.playTrack(this.#queue.getPrevIndex())
-	}
-
-	playTrack = (
-		trackIndex: number,
-		queue?: readonly number[],
-		options: PlayTrackOptions = {},
-	): void => {
-		const currentTrackId = this.#queue.activeTrackId
-		this.#queue.setTrack(trackIndex, queue, options)
-
-		const isSameTrack = currentTrackId !== null && this.#queue.activeTrackId === currentTrackId
-
-		if (isSameTrack) {
-			// Reset time to 0
-			this.seek(0)
-		} else {
-			// Update ui time instantly, but keep audio.currentTime
-			// until play history is saved.
-			this.currentTime = 0
+	play = (): void => {
+		if (!this.activeTrack) {
+			return
 		}
 
-		this.togglePlay(true)
+		this.#controller.play(this.activeTrack.id)
+	}
+
+	pause = (): void => {
+		this.#controller.pause()
 	}
 
 	seek = (time: number): void => {
-		this.currentTime = time
-		this.#audio.currentTime = time
+		this.#controller.seek(time)
+		this.#ms.updatePosition(time)
+	}
+
+	playNext = (): void => {
+		const next = this.#queue.peekNext(true)
+
+		if (next !== null) {
+			this.playTrack(next.index)
+		}
+	}
+
+	playPrev = (): void => {
+		if (this.currentTime > 3) {
+			if (this.activeTrack) {
+				this.#controller.play(this.activeTrack.id, { fromBeginning: true })
+			}
+
+			return
+		}
+
+		const prev = this.#queue.peekPrev(true)
+
+		if (prev !== null) {
+			this.playTrack(prev.index)
+		}
+	}
+
+	playTrack = (trackIndex: number | 'shuffle', queue?: readonly number[]): void => {
+		const newTrackId = this.#queue.setTrack(trackIndex, queue)
+
+		if (newTrackId) {
+			this.#controller.play(newTrackId, {
+				fromBeginning: true,
+			})
+		}
+	}
+
+	togglePlay = (): void => {
+		if (this.playing) {
+			this.pause()
+		} else {
+			this.play()
+		}
 	}
 
 	toggleRepeat = (): void => {
@@ -351,12 +307,45 @@ export class PlayerStore {
 	}
 
 	toggleShuffle = this.#queue.toggleShuffle
-
 	addToQueue = this.#queue.addToQueue
-
 	removeFromQueue = this.#queue.removeFromQueue
-
 	moveQueueItem = this.#queue.moveQueueItem
-
 	clearQueue = this.#queue.clearQueue
+
+	#handleError = (reason: FileLoadFailReason): void => {
+		const name = truncate(this.activeTrack?.name ?? 'Unknown', 30)
+		const errorMap = {
+			'not-found': m.playerAudioErrorNotFound,
+			'permission-denied': m.playerAudioErrorPermissionDenied,
+			error: m.playerAudioErrorLoadError,
+		} as const
+
+		snackbar({
+			id: 'failed-to-load-audio',
+			message: errorMap[reason]({ name }),
+			duration: 10_000,
+		})
+	}
+
+	#setupPlayHistoryEffect(): void {
+		$effect(() => {
+			const trackId = this.#queue.current?.id
+			if (trackId == null) {
+				return
+			}
+
+			untrack(() => this.#history.begin(trackId))
+		})
+
+		$effect(() => {
+			const currentTime = this.currentTime
+			const duration = this.duration
+			untrack(() => this.#history.update(currentTime, duration))
+		})
+	}
+
+	hmrDispose(): void {
+		this.#controller.abort()
+		this.#graph.dispose()
+	}
 }

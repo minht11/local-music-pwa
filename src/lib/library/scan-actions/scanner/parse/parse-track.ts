@@ -1,5 +1,5 @@
 import { parseBuffer } from 'music-metadata'
-import { type ParsedTrackData, UNKNOWN_ITEM } from '$lib/library/types.ts'
+import { CURRENT_METADATA_VERSION, type ParsedTrackData, UNKNOWN_ITEM } from '$lib/library/types.ts'
 
 // This limit is a bit arbitrary.
 const FILE_SIZE_LIMIT_300MB = 300 * 1024 * 1024
@@ -60,6 +60,10 @@ export const parseTrackMetadata = async (
 		year: common.year?.toString() ?? UNKNOWN_ITEM,
 		duration: tags.format.duration ?? 0,
 		language: common.language?.trim(),
+		metadataVersion: CURRENT_METADATA_VERSION,
+		format: {
+			codec: tags.format.codec ?? '',
+		},
 	}
 
 	return {

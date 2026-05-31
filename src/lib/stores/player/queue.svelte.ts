@@ -1,28 +1,24 @@
 import { onDatabaseChange } from '$lib/db/events.ts'
 import { toShuffledArray } from '$lib/helpers/utils/array.ts'
 
-export interface PlayTrackOptions {
-	shuffle?: boolean
+export interface QueueEntry {
+	id: number
+	index: number
 }
 
 export class QueueStore {
 	shuffle: boolean = $state(false)
 
-	#activeTrackIndex = $state(-1)
-	#itemsIdsOriginalOrder = $state<number[]>([])
-	#itemsIdsShuffled = $state<number[] | null>(null)
+	#currentIndex = $state(-1)
+
+	#itemsIdsOriginalOrder: number[] = $state([])
+	#itemsIdsShuffled: number[] | null = $state(null)
 
 	itemsIds: readonly number[] = $derived(
 		this.#itemsIdsShuffled ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
 	)
 
-	get activeTrackIndex(): number {
-		return this.#activeTrackIndex
-	}
-
-	get activeTrackId(): number | null {
-		return this.itemsIds[this.#activeTrackIndex] ?? null
-	}
+	readonly current = $derived(this.#atIndex(this.#currentIndex))
 
 	get isQueueEmpty(): boolean {
 		return this.itemsIds.length === 0
@@ -35,22 +31,29 @@ export class QueueStore {
 					continue
 				}
 
-				const index = this.itemsIds.indexOf(change.key)
-				if (index !== -1) {
+				// biome-ignore lint/nursery/noUnnecessaryConditions: loop will break conditional itself
+				while (true) {
+					const index = this.itemsIds.indexOf(change.key)
+					if (index === -1) {
+						break
+					}
+
 					this.#removeByIndex(index, change.key)
 				}
 			}
 		})
 	}
 
-	setTrack = (
-		trackIndex: number,
-		newQueue?: readonly number[],
-		options: PlayTrackOptions = {},
-	): void => {
+	#atIndex(index: number): QueueEntry | null {
+		const id = this.itemsIds[index]
+
+		return id === undefined ? null : { id, index }
+	}
+
+	setTrack = (trackIndex: number | 'shuffle', newQueue?: readonly number[]): number | null => {
 		if (newQueue) {
 			this.#itemsIdsOriginalOrder = [...newQueue]
-			this.shuffle = options.shuffle ?? false
+			this.shuffle = trackIndex === 'shuffle'
 
 			if (this.shuffle) {
 				this.#itemsIdsShuffled = toShuffledArray(this.#itemsIdsOriginalOrder)
@@ -60,24 +63,34 @@ export class QueueStore {
 		}
 
 		if (this.itemsIds.length === 0) {
-			this.#activeTrackIndex = -1
+			this.#currentIndex = -1
 		} else {
-			this.#activeTrackIndex = options.shuffle ? 0 : trackIndex
+			this.#currentIndex = trackIndex === 'shuffle' ? 0 : trackIndex
 		}
+
+		return this.current?.id ?? null
 	}
 
-	getNextIndex = (): number => {
-		const next = this.#activeTrackIndex + 1
-		return next >= this.itemsIds.length ? 0 : next
+	peekNext = (loop = false) => {
+		let nextIndex = this.#currentIndex + 1
+		if (nextIndex >= this.itemsIds.length && loop) {
+			nextIndex = 0
+		}
+
+		return this.#atIndex(nextIndex)
 	}
 
-	getPrevIndex = (): number => {
-		const prev = this.#activeTrackIndex - 1
-		return prev < 0 ? this.itemsIds.length - 1 : prev
+	peekPrev = (loop = false) => {
+		let prevIndex = this.#currentIndex - 1
+		if (prevIndex < 0 && loop) {
+			prevIndex = this.itemsIds.length - 1
+		}
+
+		return this.#atIndex(prevIndex)
 	}
 
 	toggleShuffle = (): void => {
-		const activeTrackId = this.itemsIds[this.#activeTrackIndex] ?? -1
+		const activeTrackId = this.itemsIds[this.#currentIndex] ?? -1
 		this.shuffle = !this.shuffle
 
 		if (this.shuffle) {
@@ -85,16 +98,16 @@ export class QueueStore {
 
 			const newIndex = this.#itemsIdsShuffled.indexOf(activeTrackId)
 			if (newIndex === -1) {
-				this.#activeTrackIndex = -1
+				this.#currentIndex = -1
 			} else {
 				const displaced = this.#itemsIdsShuffled[0] as number
 				this.#itemsIdsShuffled[0] = activeTrackId
 				this.#itemsIdsShuffled[newIndex] = displaced
-				this.#activeTrackIndex = 0
+				this.#currentIndex = 0
 			}
 		} else {
 			this.#itemsIdsShuffled = null
-			this.#activeTrackIndex = this.#itemsIdsOriginalOrder.indexOf(activeTrackId)
+			this.#currentIndex = this.#itemsIdsOriginalOrder.indexOf(activeTrackId)
 		}
 	}
 
@@ -104,8 +117,8 @@ export class QueueStore {
 		this.#itemsIdsShuffled?.push(...ids)
 		this.#itemsIdsOriginalOrder.push(...ids)
 
-		if (this.#activeTrackIndex === -1) {
-			this.#activeTrackIndex = 0
+		if (this.#currentIndex === -1) {
+			this.#currentIndex = 0
 		}
 	}
 
@@ -122,7 +135,7 @@ export class QueueStore {
 	clearQueue = (): void => {
 		this.#itemsIdsOriginalOrder = []
 		this.#itemsIdsShuffled = null
-		this.#activeTrackIndex = -1
+		this.#currentIndex = -1
 	}
 
 	moveQueueItem = (fromIndex: number, toIndex: number): void => {
@@ -151,18 +164,18 @@ export class QueueStore {
 		this.#itemsIdsOriginalOrder.splice(fromIndex, 1)
 		this.#itemsIdsOriginalOrder.splice(toIndex, 0, movedTrackId)
 
-		if (this.#activeTrackIndex === fromIndex) {
-			this.#activeTrackIndex = toIndex
+		if (this.#currentIndex === fromIndex) {
+			this.#currentIndex = toIndex
 			return
 		}
 
-		if (fromIndex < this.#activeTrackIndex && toIndex >= this.#activeTrackIndex) {
-			this.#activeTrackIndex -= 1
+		if (fromIndex < this.#currentIndex && toIndex >= this.#currentIndex) {
+			this.#currentIndex -= 1
 			return
 		}
 
-		if (fromIndex > this.#activeTrackIndex && toIndex <= this.#activeTrackIndex) {
-			this.#activeTrackIndex += 1
+		if (fromIndex > this.#currentIndex && toIndex <= this.#currentIndex) {
+			this.#currentIndex += 1
 		}
 	}
 
@@ -177,10 +190,10 @@ export class QueueStore {
 			this.#itemsIdsOriginalOrder.splice(index, 1)
 		}
 
-		if (index < this.#activeTrackIndex) {
-			this.#activeTrackIndex -= 1
-		} else if (index === this.#activeTrackIndex) {
-			this.#activeTrackIndex = -1
+		if (index < this.#currentIndex) {
+			this.#currentIndex -= 1
+		} else if (index === this.#currentIndex) {
+			this.#currentIndex = -1
 		}
 	}
 }

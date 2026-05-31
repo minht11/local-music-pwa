@@ -60,18 +60,24 @@
 
 <IconButton tooltip={tooltipMap[player.repeat]} class={className} onclick={player.toggleRepeat}>
 	<svg {@attach action} class="size-6 fill-current" viewBox="0 0 24 24">
-		<path
-			data-arrows
-			class="origin-center"
-			d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"
-		/>
-		<path
-			class={[
-				'origin-center transition-transform',
-				player.repeat === 'one' ? 'scale-100' : 'scale-0',
-			]}
-			d="M 13,15 V 9.0000002 H 12 L 10,10 v 1 h 1.5 v 4 z"
-		/>
+		{#if player.repeat === 'none' && player.pauseAfterTrackWhenRepeatIsOff}
+			<path
+				d="M2 5.27 3.28 4 20 20.72 18.73 22l-3-3H7v3l-4-4 4-4v3h6.73L7 10.27V11H5V8.27zM17 13h2v4.18l-2-2zm0-8V2l4 4-4 4V7H8.82l-2-2z"
+			/>
+		{:else}
+			<path
+				data-arrows
+				class="origin-center"
+				d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"
+			/>
+			<path
+				class={[
+					'origin-center transition-transform',
+					player.repeat === 'one' ? 'scale-100' : 'scale-0',
+				]}
+				d="M 13,15 V 9.0000002 H 12 L 10,10 v 1 h 1.5 v 4 z"
+			/>
+		{/if}
 	</svg>
 
 	<ActiveIndicator active={player.repeat !== 'none'} />

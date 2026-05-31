@@ -1,10 +1,21 @@
 <script lang="ts">
+	import { Debounced } from '$lib/helpers/debounced.svelte'
+	import Spinner from '../Spinner.svelte'
+
 	interface Props {
 		playing?: boolean
+		loading?: boolean
 	}
 
-	const { playing = false }: Props = $props()
+	const { playing = false, loading = false }: Props = $props()
+
+	// Debounce short amount so state doesn't flicker
+	const isLoadingAndPlaying = new Debounced(() => loading && playing, 200)
 </script>
+
+{#if isLoadingAndPlaying.current}
+	<Spinner class="absolute size-8 text-current" />
+{/if}
 
 <div class={['play-icon relative z-1 size-6', playing && 'playing rotate-90']}>
 	<div class="play-bar"></div>

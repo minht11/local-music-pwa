@@ -29,13 +29,7 @@
 		}
 	},
 	"files": {
-		"includes": [
-			"**",
-			"!**/.generated",
-			// Biome parser incorrectly errors on TS syntax.
-			"!src/lib/components/VirtualContainer.svelte",
-			"!static/supported-browser-check.js"
-		]
+		"includes": ["**", "!**/.generated", "!static/supported-browser-check.js"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -101,6 +95,7 @@
 				"useConsistentTypeDefinitions": "error",
 				"useExplicitLengthCheck": "error",
 				"noShoutyConstants": "error",
+				"useUnifiedTypeSignatures": "error",
 				"noRestrictedImports": {
 					"level": "error",
 					"options": {
@@ -135,7 +130,10 @@
 				"noIncrementDecrement": "error",
 				"noUnnecessaryConditions": "error",
 				"noUselessReturn": "error",
-				"useConsistentMethodSignatures": "error"
+				"useConsistentMethodSignatures": "error",
+				"noConditionalExpect": "error",
+				"useTestHooksInOrder": "error",
+				"noIdenticalTestTitle": "error"
 			},
 			"complexity": {
 				"useSimplifiedLogicExpression": "error",
@@ -199,7 +197,8 @@
 	"html": {
 		"experimentalFullSupportEnabled": true,
 		"formatter": {
-			"enabled": true
+			"enabled": true,
+			"indentScriptAndStyle": true
 		}
 	},
 	"overrides": [
@@ -210,9 +209,6 @@
 					"correctness": {
 						"noUnusedVariables": "off",
 						"noUnusedFunctionParameters": "off"
-					},
-					"complexity": {
-						"noCommaOperator": "off"
 					}
 				}
 			}

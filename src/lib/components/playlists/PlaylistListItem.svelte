@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import { createPlaylistQuery } from '$lib/library/get/value-queries.ts'
+	import { createLibraryValueQuery } from '$lib/library/get/value-queries.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions'
 	import type { Playlist } from '$lib/library/types.ts'
 	import type { IconType } from '../icon/Icon.svelte'
@@ -40,8 +40,11 @@
 		menuItems,
 	}: Props = $props()
 
-	const data = createPlaylistQuery(() => playlistId)
-	const playlist = $derived(data.value)
+	const query = createLibraryValueQuery(
+		() => 'playlists',
+		() => playlistId,
+	)
+	const playlist = $derived(query.value)
 
 	const menuItemsWithItem = $derived.by(() => {
 		if (!(playlist && menuItems)) {
@@ -80,12 +83,12 @@
 			</div>
 		{/if}
 
-		{#if data.loading}
+		{#if query.loading}
 			<div>
 				<div class="h-2 rounded-xs bg-onSurface/10"></div>
 			</div>
-		{:else if data.error}
-			Error loading track
+		{:else if query.error}
+			Error loading playlist
 		{:else if playlist}
 			<div class="flex flex-col truncate">
 				{playlist.name}

@@ -1,17 +1,5 @@
+import type { AudioGraph } from '$lib/audio/audio-graph.svelte.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
-
-export const EQ_BANDS = [
-	{ frequency: 32, label: '32 Hz' },
-	{ frequency: 64, label: '64 Hz' },
-	{ frequency: 125, label: '125 Hz' },
-	{ frequency: 250, label: '250 Hz' },
-	{ frequency: 500, label: '500 Hz' },
-	{ frequency: 1000, label: '1 kHz' },
-	{ frequency: 2000, label: '2 kHz' },
-	{ frequency: 4000, label: '4 kHz' },
-	{ frequency: 8000, label: '8 kHz' },
-	{ frequency: 16_000, label: '16 kHz' },
-] as const
 
 export type BuiltinEqPresetKey =
 	| 'flat'
@@ -36,92 +24,53 @@ const EQ_PRESET_GAINS: Record<BuiltinEqPresetKey, readonly number[]> = {
 	acoustic: [2, 1, 0, 1, 2, 2, 1, 2, 2, 1],
 }
 
-export const EQ_MIN_GAIN = -12
-export const EQ_MAX_GAIN = 12
-
+/**
+ * Manages the EQ band gain values and syncs them to AudioGraph's filter nodes.
+ */
 export class EqualizerStore {
+	readonly #graph: AudioGraph
+
 	enabled: boolean = $state(false)
 	bands: number[] = $state([...EQ_PRESET_GAINS.flat])
 	selectedPreset: BuiltinEqPresetKey | null = $state('flat')
 
-	readonly #audio: HTMLAudioElement
-	#audioContext: AudioContext | null = null
-	#filters: BiquadFilterNode[] = []
-
-	constructor(audio: HTMLAudioElement) {
-		this.#audio = audio
-	}
-
-	init = (): void => {
+	constructor(graph: AudioGraph) {
+		this.#graph = graph
 		persist('equalizer', this, ['enabled', 'bands', 'selectedPreset'])
 
+		this.#setupFiltersEffect()
+	}
+
+	#setupFiltersEffect(): void {
 		$effect(() => {
-			const enabled = this.enabled
-			const bands = this.bands
-			if (this.#filters.length === 0) {
+			if (!this.#graph.initialized) {
 				return
 			}
 
-			invariant(this.#filters.length === bands.length)
+			const enabled = this.enabled
+			const bands = this.bands
+			const filters = this.#graph.filters
 
-			for (const [index, filter] of this.#filters.entries()) {
-				filter.gain.value = enabled ? (bands[index] ?? 0) : 0
+			invariant(filters.length === bands.length)
+
+			for (const [i, filter] of filters.entries()) {
+				const targetGain = enabled ? (bands[i] ?? 0) : 0
+				filter.gain.setTargetAtTime(targetGain, this.#graph.context.currentTime, 0.015)
 			}
 		})
 	}
 
-	#ensureAudioGraph = (): AudioContext => {
-		if (this.#audioContext !== null) {
-			return this.#audioContext
-		}
-
-		const audioContext = new AudioContext()
-		const filters = EQ_BANDS.map(({ frequency }) => {
-			const filter = audioContext.createBiquadFilter()
-			filter.type = 'peaking'
-			filter.frequency.value = frequency
-			filter.Q.value = 1.41
-			filter.gain.value = 0
-
-			return filter
-		})
-
-		const source = audioContext.createMediaElementSource(this.#audio)
-
-		// Chain filters
-		let node: AudioNode = source
-		for (const filter of filters) {
-			node.connect(filter)
-			node = filter
-		}
-		node.connect(audioContext.destination)
-
-		this.#audioContext = audioContext
-		this.#filters = filters
-
-		return audioContext
-	}
-
-	resumeContext = (): Promise<void> => {
-		const audioContext = this.#ensureAudioGraph()
-		if (audioContext.state === 'suspended') {
-			return audioContext.resume()
-		}
-
-		return Promise.resolve()
-	}
-
-	setBand = (index: number, gain: number): void => {
+	setBand(index: number, gain: number): void {
 		this.bands[index] = gain
 		this.selectedPreset = null
 	}
 
-	applyPreset = (name: BuiltinEqPresetKey): void => {
+	applyPreset(name: BuiltinEqPresetKey): void {
 		this.bands = [...EQ_PRESET_GAINS[name]]
 		this.selectedPreset = name
 	}
 
-	reset = (): void => {
+	reset(): void {
 		this.applyPreset('flat')
 	}
 }

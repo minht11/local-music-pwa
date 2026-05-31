@@ -25,10 +25,18 @@
 	} from './layout/setup-directories-permission-prompt.svelte.ts'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'
 
+	const main = useMainStore()
+
 	// These context are in different files from their implementation
 	// to allow better trees shaking and inlining
-	const player = setPlayerStoreContext(new PlayerStore())
+	const player = setPlayerStoreContext(new PlayerStore(main))
 	const dialogs = setDialogsStoreContext(new DialogsStore())
+
+	if (import.meta.hot) {
+		import.meta.hot.dispose(() => {
+			player.hmrDispose()
+		})
+	}
 
 	setupTheme()
 	setupGlobalMenu()

@@ -2,7 +2,11 @@ import { getDatabase } from '$lib/db/database.ts'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system.ts'
 import { SerialQueue } from '$lib/helpers/serial-queue.ts'
 import { dbRemoveTracks } from '$lib/library/remove.ts'
-import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/library/types.ts'
+import {
+	CURRENT_METADATA_VERSION,
+	LEGACY_NO_NATIVE_DIRECTORY,
+	type Track,
+} from '$lib/library/types.ts'
 import { dbImportTrack } from './import-track.ts'
 import { getArtworkRelatedData } from './parse/format-artwork.ts'
 import { parseTrackMetadata } from './parse/parse-track.ts'
@@ -219,7 +223,11 @@ const scanExistingDirectory = async (handles: FileEntity[], directoryId: number)
 			const unwrappedFile = handle instanceof File ? handle : await handle.getFile()
 
 			// File was not modified since last scan
-			if (existingTrack && unwrappedFile.lastModified <= existingTrack.scannedAt) {
+			if (
+				existingTrack &&
+				unwrappedFile.lastModified <= existingTrack.scannedAt &&
+				existingTrack.metadataVersion === CURRENT_METADATA_VERSION
+			) {
 				scannedTracksIds.add(existingTrack.id)
 				tracker.sendMsg(false)
 

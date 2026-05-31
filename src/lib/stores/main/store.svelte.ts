@@ -1,6 +1,5 @@
 import { prefersReducedMotion } from 'svelte/motion'
 import { MediaQuery } from 'svelte/reactivity'
-import { supportsChangingAudioVolume } from '$lib/helpers/audio.ts'
 import { getPersistedValue, persist } from '$lib/helpers/persist.svelte.ts'
 import { isMobile } from '$lib/helpers/utils/ua.ts'
 
@@ -13,6 +12,7 @@ export type AppMotionOption = AppMotion | 'auto'
 export const getPersistedLibrarySplitLayoutEnabled = (): boolean =>
 	getPersistedValue('main', 'librarySplitLayoutEnabled', true)
 
+/** @public */
 export class MainStore {
 	theme: AppThemeOption = $state('auto')
 
@@ -43,7 +43,7 @@ export class MainStore {
 	 * The initial value is false for mobile devices and true for desktop.
 	 * User can change this setting.
 	 */
-	volumeSliderEnabled: boolean = $state(supportsChangingAudioVolume() ? !isMobile() : false)
+	volumeSliderEnabled: boolean = $state(!isMobile())
 
 	appInstallPromptEvent: BeforeInstallPromptEvent | null = $state(null)
 
