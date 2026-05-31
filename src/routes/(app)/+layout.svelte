@@ -32,6 +32,12 @@
 	const player = setPlayerStoreContext(new PlayerStore(main))
 	const dialogs = setDialogsStoreContext(new DialogsStore())
 
+	if (import.meta.hot) {
+		import.meta.hot.dispose(() => {
+			player.hmrDispose()
+		})
+	}
+
 	setupTheme()
 	setupGlobalMenu()
 	setupAppInstallPromptListeners()

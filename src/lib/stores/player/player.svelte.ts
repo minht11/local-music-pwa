@@ -116,13 +116,6 @@ export class PlayerStore {
 		this.#setupVolumeEffect()
 		this.#setupPlaybackRateEffect()
 		this.#setupPlayHistoryEffect()
-
-		if (import.meta.hot) {
-			import.meta.hot.dispose(() => {
-				this.#controller.abort()
-				this.#graph.dispose()
-			})
-		}
 	}
 
 	#createPlaybackController() {
@@ -349,5 +342,10 @@ export class PlayerStore {
 			const duration = this.duration
 			untrack(() => this.#history.update(currentTime, duration))
 		})
+	}
+
+	hmrDispose(): void {
+		this.#controller.abort()
+		this.#graph.dispose()
 	}
 }
