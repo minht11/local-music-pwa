@@ -676,4 +676,111 @@ describe('PlaybackController', () => {
 			expect(mockSupportsBufferEngine).toHaveBeenCalledWith('flac')
 		})
 	})
+
+	describe('concurrency', () => {
+		it('aborts a superseded load before it builds an engine', async () => {
+			using s = setup()
+			const liveEngine = makeHTMLEngine()
+			mockCreateHTMLAudioEngine.mockResolvedValue(liveEngine)
+
+			// First load hangs; second load resolves immediately and supersedes it.
+			let resolveStale!: (v: TrackLoaderResult) => void
+			s.trackLoader
+				.mockReturnValueOnce(new Promise((r) => (resolveStale = r)))
+				.mockResolvedValueOnce(makeLoadedResult(2))
+
+			const stalePlay = s.controller.play(1)
+			const livePlay = s.controller.play(2)
+			await livePlay
+
+			// Release the superseded load only after the newer one has taken over.
+			resolveStale(makeLoadedResult(1))
+			await stalePlay
+
+			expect(liveEngine.play).toHaveBeenCalled()
+			expect(s.controller.duration).toBe(liveEngine.duration)
+			// The superseded load aborts right after the loader resolves, before
+			// ever constructing an engine — so only the live load builds one.
+			expect(mockCreateHTMLAudioEngine).toHaveBeenCalledTimes(1)
+			expect(s.onError).not.toHaveBeenCalled()
+		})
+
+		it('does not auto-play a track that finished loading after the user paused', async () => {
+			using s = setup()
+			const engine = makeHTMLEngine()
+			mockCreateHTMLAudioEngine.mockResolvedValue(engine)
+
+			let resolveLoad!: (v: TrackLoaderResult) => void
+			s.trackLoader.mockReturnValue(new Promise((r) => (resolveLoad = r)))
+
+			const playPromise = s.controller.play(1)
+			s.controller.pause() // user pauses while the track is still loading
+			resolveLoad(makeLoadedResult(1))
+			await playPromise
+
+			expect(s.controller.playing).toBe(false)
+			expect(engine.play).not.toHaveBeenCalled()
+		})
+
+		it('seek() during an in-flight preload prevents it from becoming the next track', async () => {
+			using s = setup({ gaplessEnabled: true })
+			mockSupportsBufferEngine.mockReturnValue(true)
+
+			const currentEngine = makeBufferEngine()
+			mockCreateAudioBufferEngine.mockResolvedValueOnce(currentEngine)
+			s.seedTrack(1, 'flac')
+			await s.controller.play(1)
+
+			// Preload track 2 with a loader we control, then seek before it resolves.
+			let resolvePreload!: (v: TrackLoaderResult) => void
+			s.trackLoader.mockReturnValueOnce(new Promise((r) => (resolvePreload = r)))
+			const preloadPromise = s.controller.preloadNext(2)
+
+			s.controller.seek(10) // aborts the in-flight preload
+
+			resolvePreload(makeLoadedResult(2, 'flac'))
+			await preloadPromise
+
+			// A later gapless play(2) must perform a fresh load rather than reuse
+			// the aborted preload, which never finished building an engine.
+			s.seedTrack(2, 'flac')
+			const freshEngine = makeBufferEngine()
+			mockCreateAudioBufferEngine.mockResolvedValueOnce(freshEngine)
+			await s.controller.play(2, { gapless: true })
+
+			expect(freshEngine.play).toHaveBeenCalled()
+			// current(1) + fresh(2); the aborted preload built nothing.
+			expect(mockCreateAudioBufferEngine).toHaveBeenCalledTimes(2)
+		})
+
+		it('play(gapless) while a preload is still in-flight performs a fresh load', async () => {
+			using s = setup({ gaplessEnabled: true })
+			mockSupportsBufferEngine.mockReturnValue(true)
+
+			const currentEngine = makeBufferEngine()
+			const freshEngine = makeBufferEngine()
+			mockCreateAudioBufferEngine
+				.mockResolvedValueOnce(currentEngine)
+				.mockResolvedValueOnce(freshEngine)
+
+			s.seedTrack(1, 'flac')
+			await s.controller.play(1)
+
+			// Start a preload that never resolves before we supersede it.
+			let resolvePreload!: (v: TrackLoaderResult) => void
+			s.trackLoader.mockReturnValueOnce(new Promise((r) => (resolvePreload = r)))
+			const preloadPromise = s.controller.preloadNext(2)
+
+			// Direct gapless play of the same track while the preload is mid-flight.
+			s.seedTrack(2, 'flac')
+			await s.controller.play(2, { gapless: true })
+
+			// Let the now-stale preload settle; it must not become next.
+			resolvePreload(makeLoadedResult(2, 'flac'))
+			await preloadPromise
+
+			expect(freshEngine.play).toHaveBeenCalled()
+			expect(mockCreateAudioBufferEngine).toHaveBeenCalledTimes(2)
+		})
+	})
 })
