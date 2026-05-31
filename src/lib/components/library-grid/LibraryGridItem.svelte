@@ -194,7 +194,7 @@
 		role="button"
 		tabindex={0}
 		aria-label={m.playerPlay()}
-		class="play-overlay-button interactable absolute bottom-[4.5rem] left-2 z-1 flex size-10 items-center justify-center rounded-lg bg-surfaceContainerHigh text-onSurface"
+		class="play-overlay-button interactable pointer-events-auto absolute top-2 right-2 z-1 flex size-10 items-center justify-center rounded-lg bg-surfaceContainerHigh text-onSurface"
 		onpointerdown={(e) => {
 			e.stopPropagation()
 		}}
