@@ -83,7 +83,11 @@ export const dbImportTrack = async (
 	const db = await getDatabase()
 	const tx = db.transaction(['tracks', 'albums', 'artists', 'playlistEntries'], 'readwrite')
 
-	const trackId = await tx.objectStore('tracks').put(metadata as Track, existingTrackId)
+	const record =
+		existingTrackId === undefined
+			? metadata
+			: ({ ...metadata, id: existingTrackId } satisfies Track)
+	const trackId = await tx.objectStore('tracks').put(record as Track)
 	const track: Track = {
 		...metadata,
 		id: trackId,
