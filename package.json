@@ -22,7 +22,6 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.16",
-		"@inlang/paraglide-js": "2.18.1",
 		"@resvg/resvg-js": "^2.6.2",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.61.1",
