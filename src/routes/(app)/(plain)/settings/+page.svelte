@@ -1,5 +1,5 @@
 <script lang="ts">
-	// import type { Locale } from 'i18n:runtime'
+	import { getLocale, type Locale, setLocale } from 'i18n:runtime'
 	import { browser } from '$app/environment'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
@@ -63,14 +63,14 @@
 		},
 	]
 
-	// const languageOptions: { name: string; value: Locale }[] = [
-	// 	{ name: 'English (EN)', value: 'en' },
-	// 	{ name: 'Lietuvių (LT)', value: 'lt' },
-	// 	{ name: 'Deutsch (DE)', value: 'de' },
-	// 	{ name: 'Français (FR)', value: 'fr' },
-	// 	{ name: '简体中文', value: 'zh-CN' },
-	// 	{ name: '繁體中文', value: 'zh-TW' },
-	// ]
+	const languageOptions: { name: string; value: Locale }[] = [
+		{ name: 'English (EN)', value: 'en' },
+		{ name: 'Lietuvių (LT)', value: 'lt' },
+		{ name: 'Deutsch (DE)', value: 'de' },
+		{ name: 'Français (FR)', value: 'fr' },
+		{ name: '简体中文', value: 'zh-CN' },
+		{ name: '繁體中文', value: 'zh-TW' },
+	]
 
 	const updateMainColor = debounce((value: string | null) => {
 		mainStore.customThemePaletteHex = value
@@ -265,11 +265,11 @@
 </section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">
-	<!-- <SettingsSelectListItem
+	<SettingsSelectListItem
 		title={m.settingsLanguage()}
 		bind:selected={() => getLocale(), setLocale}
 		items={languageOptions}
-	/> -->
+	/>
 </section>
 
 <section class="card settings-max-width mx-auto mt-6 w-full text-body-lg">

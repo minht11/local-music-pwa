@@ -1,4 +1,5 @@
 import type { Handle } from '@sveltejs/kit'
+import { IMPORT_MAP_LOADER_SCRIPT } from 'i18n:runtime'
 import { APP_DESCRIPTION_EN } from '$lib/app-metadata.ts'
 import { ICON_PATHS } from '$lib/components/icon/icon-paths.server.ts'
 import { PUBLIC_FALLBACK_PAGE, PUBLIC_GOAT_COUNTER_URL } from '$env/static/public'
@@ -43,6 +44,7 @@ const replaceGoatCounterUrl = (html: string) =>
 const replaceDescription = (html: string) => html.replace('%snae.description%', APP_DESCRIPTION_EN)
 
 const transformPageChunk = ({ html }: { html: string }) => {
+	html = html.replace('%snae.import-map%', `<script>${IMPORT_MAP_LOADER_SCRIPT}</script>`)
 	html = replaceSvgIconPaths(html)
 	html = replaceThemeColorMeta(html)
 	html = replaceGoatCounterUrl(html)

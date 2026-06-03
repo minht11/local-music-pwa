@@ -72,6 +72,7 @@ export default defineConfig({
 			outputDir: './.generated/i18n',
 			baseLocale: 'en',
 			locales: ['en', 'lt', 'de', 'fr', 'zh-CN', 'zh-TW'],
+			localStorageKey: 'snae-locale',
 		}),
 		imageMetadataPlugin(),
 		tailwindcss(),
