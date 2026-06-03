@@ -15,6 +15,15 @@ export interface ImportMapLoaderScriptResult {
 	cspHash: string
 }
 
+/**
+ * Shared, lazily-populated handle to the compiled loader script. The compiler
+ * plugin produces it; the CSP plugin reads its `cspHash`.
+ * @public
+ */
+export interface LoaderScriptRef {
+	current: ImportMapLoaderScriptResult | null
+}
+
 /** @public */
 export const generateImportMapLoaderScript = async (
 	options: GenerateImportMapLoaderScriptOptions,

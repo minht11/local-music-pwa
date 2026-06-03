@@ -15,7 +15,7 @@ import {
 } from '../generate-runtime-module.ts'
 import {
 	generateImportMapLoaderScript,
-	type ImportMapLoaderScriptResult,
+	type LoaderScriptRef,
 } from '../import-map-loader/generate-script.ts'
 import { MessageCompiler } from '../message-compiler.ts'
 
@@ -28,14 +28,15 @@ export interface I18nPluginOptions {
 	localStorageKey: string
 }
 
-const SCRIPT_SRC_RE = /(script-src\s[^;'"]*)/
-
 // SvelteKit serves everything under _app/immutable/ with immutable cache headers.
 // (_app is kit.appDir's default — make this an option if you customize appDir.)
 const CHUNK_DIR = '_app/immutable/chunks'
 
 /** @public */
-export const i18nCompilerPlugin = (options: I18nPluginOptions): Plugin => {
+export const i18nCompilerPlugin = (
+	options: I18nPluginOptions,
+	loaderScriptRef: LoaderScriptRef,
+): Plugin => {
 	const { inputDir, outputDir, locales, baseLocale } = options
 
 	const compiler = new MessageCompiler({ inputDir, outputDir, baseLocale })
@@ -56,10 +57,10 @@ export const i18nCompilerPlugin = (options: I18nPluginOptions): Plugin => {
 		return `${CHUNK_DIR}/i18n-${locale}.${hash}.js`
 	}
 
-	let importMapLoaderScript: ImportMapLoaderScriptResult | null = null
+	// Populated once and shared with the CSP plugin, which reads its `cspHash`.
 	const getLoaderScript = async () => {
-		if (importMapLoaderScript) {
-			return importMapLoaderScript
+		if (loaderScriptRef.current) {
+			return loaderScriptRef.current
 		}
 
 		const scriptResult = await generateImportMapLoaderScript({
@@ -76,7 +77,7 @@ export const i18nCompilerPlugin = (options: I18nPluginOptions): Plugin => {
 			localStorageKey: options.localStorageKey,
 		})
 
-		importMapLoaderScript = scriptResult
+		loaderScriptRef.current = scriptResult
 		return scriptResult
 	}
 
@@ -166,30 +167,6 @@ export const i18nCompilerPlugin = (options: I18nPluginOptions): Plugin => {
 
 			const locale = path.basename(id, '.json')
 			await compiler.emit(locale, true)
-		},
-		generateBundle(_outputOptions, bundle) {
-			if (resolvedConfig.build.ssr || isDev) {
-				return
-			}
-
-			const script = importMapLoaderScript
-			if (!script) {
-				return
-			}
-
-			const { cspHash } = script
-
-			for (const asset of Object.values(bundle)) {
-				if (asset.type !== 'asset' || !asset.fileName.endsWith('.html')) {
-					continue
-				}
-
-				if (typeof asset.source !== 'string') {
-					continue
-				}
-
-				asset.source = asset.source.replace(SCRIPT_SRC_RE, `$1 ${cspHash}`)
-			}
 		},
 	}
 }
