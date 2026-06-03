@@ -7,6 +7,8 @@ declare const LOCAL_STORAGE_KEY: string
 	const saved = localStorage.getItem(LOCAL_STORAGE_KEY)
 	const locale = saved && LOCALES.includes(saved) ? saved : BASE_LOCALE
 
+	document.documentElement.lang = locale
+
 	const script = document.createElement('script')
 	script.type = 'importmap'
 	script.textContent = JSON.stringify({

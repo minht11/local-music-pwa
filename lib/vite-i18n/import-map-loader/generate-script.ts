@@ -27,7 +27,6 @@ export const generateImportMapLoaderScript = async (
 				input: './script.ts',
 				output: {
 					entryFileNames: 'script.js',
-					inlineDynamicImports: true,
 				},
 			},
 		},
