@@ -105,8 +105,10 @@ export class MessageCompiler {
 
 				let paramsString = ''
 				if (params.length > 0) {
-					const paramsTypes = params
-						.map(([name]) => `${name}: string | number`)
+					const uniqueParams = Array.from(new Set(params.map((match) => match[0])))
+
+					const paramsTypes = uniqueParams
+						.map((name) => `${name}: string | number`)
 						.join('; ')
 					paramsString = `p: { ${paramsTypes} }`
 				}

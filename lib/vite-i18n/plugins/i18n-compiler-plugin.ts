@@ -128,15 +128,6 @@ export const i18nCompilerPlugin = (options: I18nPluginOptions): Plugin => {
 			async handler(_id) {
 				const { scriptContent } = await getLoaderScript()
 
-				if (isDev) {
-					return generateRuntimeModule({
-						baseLocale,
-						locales,
-						importMapLoaderScript: scriptContent,
-						localStorageKey: options.localStorageKey,
-					})
-				}
-
 				return generateRuntimeModule({
 					baseLocale,
 					locales,

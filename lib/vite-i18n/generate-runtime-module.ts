@@ -31,8 +31,17 @@ export const generateRuntimeModule = (options: GenerateGenerateContentsOptions) 
 		`export const LOCALES = [${options.locales.map((locale) => `'${locale}'`).join(', ')}];`,
 		`export const IMPORT_MAP_LOADER_SCRIPT = ${JSON.stringify(options.importMapLoaderScript)}`,
 		`const LOCAL_STORAGE_KEY = '${options.localStorageKey}';`,
-		'export const setLocale = (locale) => { LOCALES.includes(locale) && localStorage.setItem(LOCAL_STORAGE_KEY, locale); window.location.reload(); };',
-		'export const getLocale = () => localStorage.getItem(LOCAL_STORAGE_KEY) || BASE_LOCALE;',
+		'const isLocale = (locale) => LOCALES.includes(locale);',
+		`export const setLocale = (locale) => {
+			if (isLocale(locale)) {
+				localStorage.setItem(LOCAL_STORAGE_KEY, locale);
+				window.location.reload();
+			}
+		};`,
+		`export const getLocale = () => {
+			const locale = localStorage.getItem(LOCAL_STORAGE_KEY);
+			return isLocale(locale) ? locale : BASE_LOCALE;
+		}`,
 	]
 
 	return lines.join('\n')
