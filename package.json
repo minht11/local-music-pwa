@@ -15,7 +15,6 @@
 		"biome-fix": "biome check . --write",
 		"oxfmt-check": "oxfmt --check ./src",
 		"oxfmt-fix": "oxfmt --write ./src",
-		"compile-i18n": "paraglide-js compile --project ./project.inlang",
 		"test": "vitest run",
 		"gen-color-theme": "node scripts/gen-color-theme.ts",
 		"knip": "knip"

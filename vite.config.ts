@@ -67,15 +67,15 @@ export default defineConfig({
 		plugins: () => [getAutoImportPlugin()],
 	},
 	plugins: [
-		imageMetadataPlugin(),
-		tailwindcss(),
-		sveltekit(),
 		i18nPlugin({
 			inputDir: 'messages',
 			outputDir: './.generated/i18n',
 			baseLocale: 'en',
 			locales: ['en', 'lt', 'de', 'fr', 'zh-CN', 'zh-TW'],
 		}),
+		imageMetadataPlugin(),
+		tailwindcss(),
+		sveltekit(),
 		getAutoImportPlugin('./.generated/types/auto-imports.d.ts'),
 		logChunkSizePlugin(),
 		{

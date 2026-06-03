@@ -21,16 +21,19 @@ const config = {
 			// When changing this, also update env variable
 			fallback: '200.html',
 		}),
-		alias: {
-			$paraglide: './.generated/paraglide',
-		},
 		prerender: {
 			origin: 'https://snaeplayer.com',
 		},
 		csp: {
+			mode: 'hash',
 			directives: {
 				'default-src': ['none'],
-				'script-src': ['self', 'https://gc.zgo.at/'],
+				'script-src': [
+					'self',
+					'https://gc.zgo.at/',
+					// import map script hash is injected only during build, so we relax csp during dev.
+					process.env.NODE_ENV === 'development' ? 'unsafe-inline' : '',
+				],
 				'style-src': ['self', 'unsafe-inline'],
 				'img-src': [
 					'self',
@@ -48,7 +51,6 @@ const config = {
 		typescript: {
 			config: (tsConfig) => {
 				tsConfig.extends = '../../tsconfig.base.json'
-				tsConfig.include.push('../paraglide/**/*')
 
 				return tsConfig
 			},
