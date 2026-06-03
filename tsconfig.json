@@ -1,7 +1,12 @@
 {
 	"extends": "./.generated/svelte-kit/tsconfig.json",
 	"compilerOptions": {
-		"types": ["@types/wicg-file-system-access", "./.generated/types/auto-imports.d.ts"]
+		"types": [
+			"@types/wicg-file-system-access",
+			"./.generated/types/auto-imports.d.ts",
+			"./.generated/i18n/messages.d.ts",
+			"./.generated/i18n/runtime.d.ts"
+		]
 	},
 	"references": [
 		{
