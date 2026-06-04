@@ -8,3 +8,7 @@ allowBuilds:
 
 patchedDependencies:
   '@material/material-color-utilities': 'patches/@material__material-color-utilities.patch'
+
+# TODO. Remove this after a day
+minimumReleaseAgeExclude:
+  - '@sveltejs/kit@2.63.0'

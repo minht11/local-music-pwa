@@ -23,7 +23,7 @@
 		"@biomejs/biome": "2.4.16",
 		"@resvg/resvg-js": "^2.6.2",
 		"@sveltejs/adapter-static": "^3.0.10",
-		"@sveltejs/kit": "^2.62.0",
+		"@sveltejs/kit": "^2.63.0",
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/node": "^25.9.1",
 		"@types/wicg-file-system-access": "^2023.10.7",
