@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import fs from 'node:fs/promises'
 import * as path from 'node:path'
 import invariant from 'tiny-invariant'
-import type { Plugin, ResolvedConfig } from 'vite'
+import type { Plugin } from 'vite'
 import { LOCALE_MODULE_ID, MESSAGES_MODULE_ID } from '../constants.ts'
 import { generateRuntimeModule } from '../generate-runtime-module.ts'
 import {
@@ -24,6 +24,17 @@ export interface I18nPluginOptions {
 // (_app is kit.appDir's default — make this an option if you customize appDir.)
 const CHUNK_DIR = '_app/immutable/chunks'
 
+const localeModuleId = (locale: string) => `${LOCALE_MODULE_ID}?locale=${locale}`
+
+const localeFromId = (id: string): string | null =>
+	new URLSearchParams(id.slice(LOCALE_MODULE_ID.length)).get('locale')
+
+const computeStableFileName = (locale: string, content: string) => {
+	const hash = createHash('sha256').update(content).digest('hex').slice(0, 8)
+
+	return `${CHUNK_DIR}/i18n-${locale}.${hash}.js`
+}
+
 /** @public */
 export const i18nCompilerPlugin = (
 	options: I18nPluginOptions,
@@ -34,22 +45,9 @@ export const i18nCompilerPlugin = (
 	const compiler = new MessageCompiler({ inputDir, outputDir, baseLocale })
 
 	let absInputDir = inputDir
-	let resolvedConfig!: ResolvedConfig
 	const buildEmittedLocaleFilesMap = new Map<string, string>()
-	// locale -> compiled JS, served from memory by resolveId/load (never written to disk)
+
 	const compiledContentMap = new Map<string, string>()
-
-	const localeModuleId = (locale: string) => `${LOCALE_MODULE_ID}?locale=${locale}`
-
-	const localeFromId = (id: string): string | null =>
-		new URLSearchParams(id.slice(LOCALE_MODULE_ID.length)).get('locale')
-
-	// Deterministic filename — identical in client and server builds
-	const computeStableFileName = (locale: string, content: string) => {
-		const hash = createHash('sha256').update(content).digest('hex').slice(0, 8)
-
-		return `${CHUNK_DIR}/i18n-${locale}.${hash}.js`
-	}
 
 	// Populated once and shared with the CSP plugin, which reads its `cspHash`.
 	const getLoaderScript = async (isDev: boolean) => {
@@ -77,7 +75,6 @@ export const i18nCompilerPlugin = (
 		name: 'vite-plugin-i18n',
 		enforce: 'pre',
 		configResolved(config) {
-			resolvedConfig = config
 			absInputDir = path.resolve(config.root, inputDir)
 		},
 		resolveId: {
@@ -90,13 +87,11 @@ export const i18nCompilerPlugin = (
 				},
 			},
 			handler(id, _importer, opts) {
-				// SSR/prerender doesn't switch locales at runtime — bundle the base locale.
+				// SSR/prerender doesn't switch locales at runtime
 				if (id === MESSAGES_MODULE_ID && opts?.ssr) {
 					return localeModuleId(baseLocale)
 				}
 
-				// Claim the locale module id. Covers all three callers: the dev import-map
-				// fetch, the SSR resolve above, and the build chunks emitted via `emitFile`.
 				if (id.startsWith(LOCALE_MODULE_ID)) {
 					const locale = localeFromId(id)
 					invariant(locale, 'Missing locale query param in locale module id')
@@ -127,7 +122,8 @@ export const i18nCompilerPlugin = (
 		},
 		async buildStart() {
 			await fs.mkdir(outputDir, { recursive: true })
-			const isSsr = !!resolvedConfig.build.ssr
+
+			const isSsr = !!this.environment.config.build.ssr
 
 			for (const locale of locales) {
 				const { inputFilePath, content } = await compiler.emit(locale)

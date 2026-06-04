@@ -111,8 +111,6 @@ export class MessageCompiler {
 			typesContent += '}\n'
 		}
 
-		// The compiled JS is served from memory by the plugin; only type declarations
-		// are written to disk (TypeScript reads them from there).
 		if (typesContent) {
 			await fs.writeFile(path.join(this.#outputDir, 'messages.d.ts'), typesContent)
 		}
