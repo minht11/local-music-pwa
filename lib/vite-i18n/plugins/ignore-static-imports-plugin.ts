@@ -5,10 +5,9 @@ export const ignoreStaticImportsPlugin = (importKey: string): Plugin => ({
 	name: 'vite-plugin-i18n:ignore-dev-imports',
 	enforce: 'pre',
 	config(config) {
-		config.optimizeDeps = {
-			...(config.optimizeDeps ?? {}),
-			exclude: [...(config.optimizeDeps?.exclude ?? []), importKey],
-		}
+		config.optimizeDeps ??= {}
+		config.optimizeDeps.exclude ??= []
+		config.optimizeDeps.exclude.push(importKey)
 	},
 	configResolved(resolvedConfig) {
 		const VALID_ID_PREFIX = '/@id/'
@@ -18,7 +17,14 @@ export const ignoreStaticImportsPlugin = (importKey: string): Plugin => ({
 
 		plugins.push({
 			name: 'vite-plugin-i18n:ignore-dev-imports-replace-id-prefix',
-			transform: (code) => (reg.test(code) ? code.replace(reg, (_m, s1) => s1) : code),
+			transform: {
+				filter: {
+					code: reg,
+				},
+				handler(code) {
+					return code.replace(reg, (_m, s1) => s1)
+				},
+			},
 		})
 	},
 	resolveId: (id) => {
