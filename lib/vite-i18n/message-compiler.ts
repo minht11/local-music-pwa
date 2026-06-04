@@ -44,12 +44,20 @@ export class MessageCompiler {
 	}
 
 	#compileTranslationValue(input: string) {
-		// {placeholder} -> ${p.placeholder}
-		// biome-ignore lint/suspicious/noTemplateCurlyInString: building a template literal
-		const template = input.replace(PLACEHOLDER_REGEX, '${p.$1}')
-		const params = template === input ? '' : 'p'
+		// Escape the two characters that would otherwise break the generated template
+		// literal: a backslash, and a backtick. (`{` is reserved for placeholders, so a
+		// literal `$` before one just stays a `$` and the placeholder interpolates.)
+		// Backslash must be escaped first so we don't double-escape the ones we add.
+		const escaped = input.replace(/\\/g, '\\\\').replace(/`/g, '\\`')
 
-		return `(${params}) => \`${template}\``
+		let hasParams = false
+		// {placeholder} -> ${p.placeholder}
+		const template = escaped.replace(PLACEHOLDER_REGEX, (_match, name) => {
+			hasParams = true
+			return `\${p.${name}}`
+		})
+
+		return `(${hasParams ? 'p' : ''}) => \`${template}\``
 	}
 
 	async emit(locale: string, force = false): Promise<EmitResult> {
