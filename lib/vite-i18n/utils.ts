@@ -21,7 +21,7 @@ export const readJsonFile = async <CrashIfNotFound extends boolean = true>(
 		if (
 			!options.crashIfNotFound &&
 			error instanceof Error &&
-			error.message.includes('ENOENT')
+			(error as NodeJS.ErrnoException).code === 'ENOENT'
 		) {
 			return null as JsonFileResult<CrashIfNotFound>
 		}

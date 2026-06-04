@@ -4,7 +4,6 @@ import { CONTENT_BANNER, MESSAGES_MODULE_ID } from './constants.ts'
 import { assertValidTranslation, readJsonFile } from './utils.ts'
 
 const PLACEHOLDER_REGEX = /\{(.*?)\}/g
-const TYPES_PLACEHOLDER_REGEX = /(?<=\{)(.*?)(?=\})/g
 
 interface MessageCompilerOptions {
 	baseLocale: string
@@ -44,28 +43,13 @@ export class MessageCompiler {
 		return this.#baseLocaleJson
 	}
 
-	#compileTranslationValueTemplate(input: string, hasPlaceholders: boolean): string {
-		if (hasPlaceholders) {
-			// Replace {placeholder} with ${p.placeholder}
-			// biome-ignore lint/suspicious/noTemplateCurlyInString: template string
-			const template = input.replace(PLACEHOLDER_REGEX, '${p.$1}')
-
-			return `\`${template}\``
-		}
-
-		return `\`${input}\``
-	}
-
 	#compileTranslationValue(input: string) {
-		const hasPlaceholders = PLACEHOLDER_REGEX.test(input)
+		// {placeholder} -> ${p.placeholder}
+		// biome-ignore lint/suspicious/noTemplateCurlyInString: building a template literal
+		const template = input.replace(PLACEHOLDER_REGEX, '${p.$1}')
+		const params = template === input ? '' : 'p'
 
-		if (hasPlaceholders) {
-			const template = this.#compileTranslationValueTemplate(input, true)
-
-			return `(p) => ${template}`
-		}
-
-		return `() => \`${input}\``
+		return `(${params}) => \`${template}\``
 	}
 
 	async emit(locale: string, force = false): Promise<EmitResult> {
@@ -99,12 +83,12 @@ export class MessageCompiler {
 			content += `export const ${key} = ${this.#compileTranslationValue(value)}\n`
 
 			if (typesContent) {
-				const params = [...value.matchAll(TYPES_PLACEHOLDER_REGEX)]
+				const uniqueParams = [
+					...new Set([...value.matchAll(PLACEHOLDER_REGEX)].map((match) => match[1])),
+				]
 
 				let paramsString = ''
-				if (params.length > 0) {
-					const uniqueParams = Array.from(new Set(params.map((match) => match[0])))
-
+				if (uniqueParams.length > 0) {
 					const paramsTypes = uniqueParams
 						.map((name) => `${name}: string | number`)
 						.join('; ')
