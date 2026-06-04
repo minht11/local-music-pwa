@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import * as path from 'node:path'
 import invariant from 'tiny-invariant'
 import { minifySync, transformWithOxc } from 'vite'
+import { MESSAGES_MODULE_ID } from '../constants.ts'
 
 const SCRIPT_PATH = path.join(import.meta.dirname, 'script.ts')
 
@@ -41,6 +42,7 @@ export const generateImportMapLoaderScript = async (
 			LOCALES: JSON.stringify(options.locales),
 			LOCALES_MAP: JSON.stringify(options.localesMap),
 			LOCAL_STORAGE_KEY: JSON.stringify(options.localStorageKey),
+			MESSAGES_MODULE_ID: JSON.stringify(MESSAGES_MODULE_ID),
 		},
 	})
 
