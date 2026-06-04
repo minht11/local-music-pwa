@@ -2,14 +2,25 @@
 	"$schema": "https://unpkg.com/knip@6/schema.json",
 	"tags": ["-lintignore"],
 	"entry": [
+		"svelte.config.ts",
+		"src/env.ts",
+		"src/hooks.server.ts",
+		"src/service-worker.ts",
+		"src/params/**/*",
 		"src/routes/**/*.{svelte,ts}",
 		"src/lib/stores/**/*",
+		".generated/svelte-kit/env.d.ts",
 		".generated/types/auto-imports.d.ts"
 	],
-	"project": ["**/*", "!static/supported-browser-check.js"],
+	"project": [
+		"**/*",
+		"!static/supported-browser-check.js",
+		"!lib/vite-i18n/import-map-loader/script.ts"
+	],
 	"ignoreExportsUsedInFile": {
 		"interface": true,
 		"type": true
 	},
-	"ignoreUnresolved": ["^\\./\\$types\\.ts$"]
+	"ignoreUnresolved": ["^\\./\\$types\\.ts$", "^\\$app/", "^\\$service-worker"],
+	"ignoreDependencies": ["i18n"]
 }
