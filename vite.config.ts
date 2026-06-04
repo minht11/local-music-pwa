@@ -53,9 +53,9 @@ export default defineConfig({
 							priority: 100,
 						},
 						{
-							// Merge smaller chunks than together
+							// Merge smaller chunks together
 							name: 'small-chunks',
-							maxModuleSize: 1 * 1024,
+							maxModuleSize: 2 * 1024,
 						},
 					],
 				},
