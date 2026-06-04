@@ -1,6 +1,10 @@
 import { createHash } from 'node:crypto'
+import { readFile } from 'node:fs/promises'
+import * as path from 'node:path'
 import invariant from 'tiny-invariant'
-import { build } from 'vite'
+import { minifySync, transformWithOxc } from 'vite'
+
+const SCRIPT_PATH = path.join(import.meta.dirname, 'script.ts')
 
 interface GenerateImportMapLoaderScriptOptions {
 	baseLocale: string
@@ -28,17 +32,10 @@ export interface LoaderScriptRef {
 export const generateImportMapLoaderScript = async (
 	options: GenerateImportMapLoaderScriptOptions,
 ): Promise<ImportMapLoaderScriptResult> => {
-	const result = await build({
-		root: import.meta.dirname,
-		build: {
-			write: false,
-			rollupOptions: {
-				input: './script.ts',
-				output: {
-					entryFileNames: 'script.js',
-				},
-			},
-		},
+	const source = await readFile(SCRIPT_PATH, 'utf8')
+
+	const transpiled = await transformWithOxc(source, SCRIPT_PATH, {
+		lang: 'ts',
 		define: {
 			BASE_LOCALE: JSON.stringify(options.baseLocale),
 			LOCALES: JSON.stringify(options.locales),
@@ -47,10 +44,11 @@ export const generateImportMapLoaderScript = async (
 		},
 	})
 
-	invariant('output' in result, 'Expected output property in the build result')
-
-	const code = result.output[0].code
-	invariant(typeof code === 'string', 'Expected code to be a string')
+	const { code, errors } = minifySync('script.js', transpiled.code)
+	invariant(
+		errors.length === 0,
+		`Failed to minify import map loader script: ${errors.join(', ')}`,
+	)
 
 	const cspHash = `'sha256-${createHash('sha256').update(code).digest('base64')}'`
 

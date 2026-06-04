@@ -33,13 +33,13 @@ const config = {
 					'https://gc.zgo.at/',
 					// import map script hash is injected only during build, so we relax csp during dev.
 					process.env.NODE_ENV === 'development' ? 'unsafe-inline' : '',
-				],
+				].filter(Boolean),
 				'style-src': ['self', 'unsafe-inline'],
 				'img-src': [
 					'self',
 					'blob:',
 					env.PUBLIC_GOAT_COUNTER_URL ? `${env.PUBLIC_GOAT_COUNTER_URL}/count` : '',
-				],
+				].filter(Boolean),
 				'media-src': ['self', 'blob:'],
 				'font-src': ['self'],
 				'connect-src': ['self', env.PUBLIC_GOAT_COUNTER_URL ?? ''],
