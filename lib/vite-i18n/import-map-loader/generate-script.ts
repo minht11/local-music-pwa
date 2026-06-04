@@ -1,11 +1,9 @@
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
-import * as path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import invariant from 'tiny-invariant'
 import { minifySync, transformWithOxc } from 'vite'
 import { MESSAGES_MODULE_ID } from '../constants.ts'
-
-const SCRIPT_PATH = path.join(import.meta.dirname, 'script.ts')
 
 interface GenerateImportMapLoaderScriptOptions {
 	baseLocale: string
@@ -33,9 +31,10 @@ export interface LoaderScriptRef {
 export const generateImportMapLoaderScript = async (
 	options: GenerateImportMapLoaderScriptOptions,
 ): Promise<ImportMapLoaderScriptResult> => {
-	const source = await readFile(SCRIPT_PATH, 'utf8')
+	const scriptUrl = fileURLToPath(import.meta.resolve('./script.ts'))
+	const source = await readFile(scriptUrl, 'utf8')
 
-	const transpiled = await transformWithOxc(source, SCRIPT_PATH, {
+	const transpiled = await transformWithOxc(source, 'script.ts', {
 		lang: 'ts',
 		define: {
 			BASE_LOCALE: JSON.stringify(options.baseLocale),
