@@ -1,11 +1,15 @@
-/** @import { Config } from '@sveltejs/kit' */
 import adapter from '@sveltejs/adapter-static'
+import type { Config } from '@sveltejs/kit'
 import { loadEnv } from 'vite'
 
 const env = loadEnv('production', process.cwd(), 'PUBLIC_')
 
-/** @type {Config} */
-const config = {
+const goatCounterUrl = env.PUBLIC_GOAT_COUNTER_URL as `https://${string}.${string}` | undefined
+
+type FalsyValue = false | 0 | '' | null | undefined
+const filterFalsy = <const T>(arr: T[]) => arr.filter((x) => x) as Exclude<T, FalsyValue>[]
+
+const config: Config = {
 	compilerOptions: {
 		runes: true,
 		experimental: {
@@ -13,6 +17,9 @@ const config = {
 		},
 	},
 	kit: {
+		experimental: {
+			explicitEnvironmentVariables: true,
+		},
 		paths: {
 			relative: false,
 		},
@@ -28,21 +35,21 @@ const config = {
 			mode: 'hash',
 			directives: {
 				'default-src': ['none'],
-				'script-src': [
+				'script-src': filterFalsy([
 					'self',
 					'https://gc.zgo.at/',
 					// import map script hash is injected only during build, so we relax csp during dev.
-					process.env.NODE_ENV === 'development' ? 'unsafe-inline' : '',
-				].filter(Boolean),
+					process.env.NODE_ENV === 'development' && 'unsafe-inline',
+				]),
 				'style-src': ['self', 'unsafe-inline'],
-				'img-src': [
+				'img-src': filterFalsy([
 					'self',
 					'blob:',
-					env.PUBLIC_GOAT_COUNTER_URL ? `${env.PUBLIC_GOAT_COUNTER_URL}/count` : '',
-				].filter(Boolean),
+					goatCounterUrl && `${goatCounterUrl}/count`,
+				]),
 				'media-src': ['self', 'blob:'],
 				'font-src': ['self'],
-				'connect-src': ['self', env.PUBLIC_GOAT_COUNTER_URL ?? ''],
+				'connect-src': filterFalsy(['self', goatCounterUrl]),
 				'form-action': ['none'],
 				'manifest-src': ['self'],
 				'base-uri': ['none'],

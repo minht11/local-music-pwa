@@ -1,5 +1,5 @@
 import type { AfterNavigate, OnNavigate } from '@sveltejs/kit'
-import { browser } from '$app/environment'
+import { browser } from '$app/env'
 import { onNavigate } from '$app/navigation'
 import type { RouteId } from '$app/types'
 import { getActiveRipplesCount } from './attachments/ripple.ts'

@@ -1,6 +1,6 @@
 import type { Attachment } from 'svelte/attachments'
 import { on } from 'svelte/events'
-import { browser } from '$app/environment'
+import { browser } from '$app/env'
 
 let tooltipTemplate: HTMLDivElement | null = null
 const cloneTooltipTemplate = () => {

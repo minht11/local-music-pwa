@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getLocale, type Locale, setLocale } from 'i18n:runtime'
-	import { browser } from '$app/environment'
+	import { browser } from '$app/env'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'

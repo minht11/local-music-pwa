@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { browser } from '$app/environment'
+	import { browser } from '$app/env'
 	import { navigating, page } from '$app/state'
 	import Button from '$lib/components/Button.svelte'
 	import {

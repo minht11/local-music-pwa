@@ -1,5 +1,5 @@
 import '../app.css'
-import { browser } from '$app/environment'
+import { browser } from '$app/env'
 import { registerServiceWorker } from '$lib/helpers/register-sw'
 
 export const ssr = false
