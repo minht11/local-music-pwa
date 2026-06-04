@@ -14,7 +14,6 @@ interface MessageCompilerOptions {
 
 interface EmitResult {
 	inputFilePath: string
-	outputFilePath: string
 	content: string
 }
 
@@ -71,7 +70,6 @@ export class MessageCompiler {
 
 	async emit(locale: string, force = false): Promise<EmitResult> {
 		const inputFilePath = this.#resolveInputPath(locale)
-		const outputFilePath = path.resolve(this.#outputDir, `${locale}.js`)
 
 		const isCompilingBaseLocale = locale === this.#baseLocale
 
@@ -121,11 +119,12 @@ export class MessageCompiler {
 			typesContent += '}\n'
 		}
 
-		await Promise.all([
-			fs.writeFile(outputFilePath, content),
-			typesContent && fs.writeFile(path.join(this.#outputDir, 'messages.d.ts'), typesContent),
-		])
+		// The compiled JS is served from memory by the plugin; only type declarations
+		// are written to disk (TypeScript reads them from there).
+		if (typesContent) {
+			await fs.writeFile(path.join(this.#outputDir, 'messages.d.ts'), typesContent)
+		}
 
-		return { inputFilePath, outputFilePath, content }
+		return { inputFilePath, content }
 	}
 }

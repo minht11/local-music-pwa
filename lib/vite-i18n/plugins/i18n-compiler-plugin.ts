@@ -4,7 +4,7 @@ import * as path from 'node:path'
 import invariant from 'tiny-invariant'
 import type { Plugin, ResolvedConfig } from 'vite'
 import {
-	DEV_LOCALE_MODULE_ID,
+	LOCALE_MODULE_ID,
 	MESSAGES_MODULE_ID,
 	RUNTIME_MODULE_ID,
 	VIRTUAL_RUNTIME_MODULE_ID,
@@ -45,10 +45,13 @@ export const i18nCompilerPlugin = (
 	let absOutputDir = outputDir
 	let resolvedConfig!: ResolvedConfig
 	const buildEmittedLocaleFilesMap = new Map<string, string>()
-	let isDev = false
+	// locale -> compiled JS, served from memory by resolveId/load (never written to disk)
+	const compiledContentMap = new Map<string, string>()
 
-	const resolveOutputtedLocalePath = (locale: string) =>
-		path.resolve(absOutputDir, `${locale}.js`)
+	const localeModuleId = (locale: string) => `${LOCALE_MODULE_ID}?locale=${locale}`
+
+	const localeFromId = (id: string): string | null =>
+		new URLSearchParams(id.slice(LOCALE_MODULE_ID.length)).get('locale')
 
 	// Deterministic filename — identical in client and server builds
 	const computeStableFileName = (locale: string, content: string) => {
@@ -58,7 +61,7 @@ export const i18nCompilerPlugin = (
 	}
 
 	// Populated once and shared with the CSP plugin, which reads its `cspHash`.
-	const getLoaderScript = async () => {
+	const getLoaderScript = async (isDev: boolean) => {
 		if (loaderScriptRef.current) {
 			return loaderScriptRef.current
 		}
@@ -69,9 +72,7 @@ export const i18nCompilerPlugin = (
 			localesMap: Object.fromEntries(
 				locales.map((locale) => [
 					locale,
-					isDev
-						? `${DEV_LOCALE_MODULE_ID}?locale=${locale}`
-						: `/${buildEmittedLocaleFilesMap.get(locale)}`,
+					isDev ? localeModuleId(locale) : `/${buildEmittedLocaleFilesMap.get(locale)}`,
 				]),
 			),
 			localStorageKey: options.localStorageKey,
@@ -85,7 +86,6 @@ export const i18nCompilerPlugin = (
 		name: 'vite-plugin-i18n',
 		enforce: 'pre',
 		configResolved(config) {
-			isDev = config.command === 'serve'
 			resolvedConfig = config
 			absInputDir = path.resolve(config.root, inputDir)
 			absOutputDir = path.resolve(config.root, outputDir)
@@ -96,7 +96,7 @@ export const i18nCompilerPlugin = (
 					include: [
 						new RegExp(`^${RUNTIME_MODULE_ID}$`),
 						new RegExp(`^${MESSAGES_MODULE_ID}$`),
-						new RegExp(`^${DEV_LOCALE_MODULE_ID}`),
+						new RegExp(`^${LOCALE_MODULE_ID}`),
 					],
 				},
 			},
@@ -105,19 +105,19 @@ export const i18nCompilerPlugin = (
 					return VIRTUAL_RUNTIME_MODULE_ID
 				}
 
-				// On SSR we return base locale, app doesn't care about i18n during prerendering
+				// SSR/prerender doesn't switch locales at runtime — bundle the base locale.
 				if (id === MESSAGES_MODULE_ID && opts?.ssr) {
-					return resolveOutputtedLocalePath(baseLocale)
+					return localeModuleId(baseLocale)
 				}
 
-				if (id.startsWith(DEV_LOCALE_MODULE_ID)) {
-					const locale = new URLSearchParams(id.slice(DEV_LOCALE_MODULE_ID.length)).get(
-						'locale',
-					)
-					invariant(locale, 'Missing locale query param in dev locale import')
+				// Claim the locale module id. Covers all three callers: the dev import-map
+				// fetch, the SSR resolve above, and the build chunks emitted via `emitFile`.
+				if (id.startsWith(LOCALE_MODULE_ID)) {
+					const locale = localeFromId(id)
+					invariant(locale, 'Missing locale query param in locale module id')
 
 					if (locales.includes(locale)) {
-						return resolveOutputtedLocalePath(locale)
+						return id
 					}
 				}
 
@@ -125,16 +125,33 @@ export const i18nCompilerPlugin = (
 			},
 		},
 		load: {
-			filter: { id: { include: [new RegExp(`^${VIRTUAL_RUNTIME_MODULE_ID}$`)] } },
-			async handler(_id) {
-				const { scriptContent } = await getLoaderScript()
+			filter: {
+				id: {
+					include: [
+						new RegExp(`^${VIRTUAL_RUNTIME_MODULE_ID}$`),
+						new RegExp(`^${LOCALE_MODULE_ID}`),
+					],
+				},
+			},
+			async handler(id) {
+				if (id === VIRTUAL_RUNTIME_MODULE_ID) {
+					const { scriptContent } = await getLoaderScript(this.environment.mode === 'dev')
 
-				return generateRuntimeModule({
-					baseLocale,
-					locales,
-					importMapLoaderScript: scriptContent,
-					localStorageKey: options.localStorageKey,
-				})
+					return generateRuntimeModule({
+						baseLocale,
+						locales,
+						importMapLoaderScript: scriptContent,
+						localStorageKey: options.localStorageKey,
+					})
+				}
+
+				const locale = localeFromId(id)
+				invariant(
+					locale && compiledContentMap.has(locale),
+					`No compiled messages for locale id "${id}"`,
+				)
+
+				return compiledContentMap.get(locale)
 			},
 		},
 		async buildStart() {
@@ -142,16 +159,17 @@ export const i18nCompilerPlugin = (
 			const isSsr = !!resolvedConfig.build.ssr
 
 			for (const locale of locales) {
-				const compiledResult = await compiler.emit(locale)
-				this.addWatchFile(compiledResult.inputFilePath)
+				const { inputFilePath, content } = await compiler.emit(locale)
+				this.addWatchFile(inputFilePath)
+				compiledContentMap.set(locale, content)
 
-				const stableFileName = await computeStableFileName(locale, compiledResult.content)
+				const stableFileName = computeStableFileName(locale, content)
 				buildEmittedLocaleFilesMap.set(locale, stableFileName)
 
-				if (!(isSsr || isDev)) {
+				if (!(isSsr || this.environment.mode === 'dev')) {
 					this.emitFile({
 						type: 'chunk',
-						id: compiledResult.outputFilePath,
+						id: localeModuleId(locale),
 						fileName: stableFileName,
 					})
 				}
@@ -161,12 +179,27 @@ export const i18nCompilerPlugin = (
 			await fs.writeFile(path.join(absOutputDir, 'runtime.d.ts'), runtimeDeclaration)
 		},
 		async watchChange(id) {
+			if (this.environment.mode !== 'dev') {
+				return
+			}
+
 			if (!(id.startsWith(absInputDir) && id.endsWith('.json'))) {
 				return
 			}
 
 			const locale = path.basename(id, '.json')
-			await compiler.emit(locale, true)
+			if (!locales.includes(locale)) {
+				return
+			}
+
+			const { content } = await compiler.emit(locale, true)
+			compiledContentMap.set(locale, content)
+
+			const mod = this.environment.moduleGraph.getModuleById(localeModuleId(locale))
+			if (mod) {
+				this.environment.moduleGraph.invalidateModule(mod)
+				this.environment.hot.send({ type: 'full-reload' })
+			}
 		},
 	}
 }
