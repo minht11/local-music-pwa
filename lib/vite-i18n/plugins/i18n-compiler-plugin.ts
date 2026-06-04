@@ -21,7 +21,6 @@ export interface I18nPluginOptions {
 }
 
 // SvelteKit serves everything under _app/immutable/ with immutable cache headers.
-// (_app is kit.appDir's default — make this an option if you customize appDir.)
 const CHUNK_DIR = '_app/immutable/chunks'
 
 const localeModuleId = (locale: string) => `${LOCALE_MODULE_ID}?locale=${locale}`
