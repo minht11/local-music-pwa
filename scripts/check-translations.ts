@@ -1,5 +1,4 @@
-const baseLocale = 'en'
-const locales = ['en', 'lt', 'de', 'fr', 'zh-CN', 'zh-TW']
+import { BASE_LOCALE, LOCALES } from '../.generated/i18n/runtime.ts'
 
 type Messages = Record<string, string>
 
@@ -103,7 +102,7 @@ const printReport = (reports: LocaleReport[]) => {
 	}
 }
 
-const baseMessages = await getMessages(baseLocale)
+const baseMessages = await getMessages(BASE_LOCALE)
 const baseMessagesMap = new Map<string, BaseMessageWithParams>()
 
 for (const [key, value] of Object.entries(baseMessages)) {
@@ -115,8 +114,8 @@ for (const [key, value] of Object.entries(baseMessages)) {
 
 const reports: LocaleReport[] = []
 
-for (const locale of locales) {
-	if (locale !== baseLocale) {
+for (const locale of LOCALES) {
+	if (locale !== BASE_LOCALE) {
 		const report = await checkLocale(locale, baseMessagesMap)
 		reports.push(report)
 	}

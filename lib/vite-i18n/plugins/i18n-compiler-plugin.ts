@@ -3,16 +3,8 @@ import fs from 'node:fs/promises'
 import * as path from 'node:path'
 import invariant from 'tiny-invariant'
 import type { Plugin, ResolvedConfig } from 'vite'
-import {
-	LOCALE_MODULE_ID,
-	MESSAGES_MODULE_ID,
-	RUNTIME_MODULE_ID,
-	VIRTUAL_RUNTIME_MODULE_ID,
-} from '../constants.ts'
-import {
-	generateRuntimeModule,
-	generateRuntimeModuleDeclaration,
-} from '../generate-runtime-module.ts'
+import { LOCALE_MODULE_ID, MESSAGES_MODULE_ID } from '../constants.ts'
+import { generateRuntimeModule } from '../generate-runtime-module.ts'
 import {
 	generateImportMapLoaderScript,
 	type LoaderScriptRef,
@@ -42,7 +34,6 @@ export const i18nCompilerPlugin = (
 	const compiler = new MessageCompiler({ inputDir, outputDir, baseLocale })
 
 	let absInputDir = inputDir
-	let absOutputDir = outputDir
 	let resolvedConfig!: ResolvedConfig
 	const buildEmittedLocaleFilesMap = new Map<string, string>()
 	// locale -> compiled JS, served from memory by resolveId/load (never written to disk)
@@ -88,23 +79,17 @@ export const i18nCompilerPlugin = (
 		configResolved(config) {
 			resolvedConfig = config
 			absInputDir = path.resolve(config.root, inputDir)
-			absOutputDir = path.resolve(config.root, outputDir)
 		},
 		resolveId: {
 			filter: {
 				id: {
 					include: [
-						new RegExp(`^${RUNTIME_MODULE_ID}$`),
 						new RegExp(`^${MESSAGES_MODULE_ID}$`),
 						new RegExp(`^${LOCALE_MODULE_ID}`),
 					],
 				},
 			},
 			handler(id, _importer, opts) {
-				if (id === RUNTIME_MODULE_ID) {
-					return VIRTUAL_RUNTIME_MODULE_ID
-				}
-
 				// SSR/prerender doesn't switch locales at runtime — bundle the base locale.
 				if (id === MESSAGES_MODULE_ID && opts?.ssr) {
 					return localeModuleId(baseLocale)
@@ -127,24 +112,10 @@ export const i18nCompilerPlugin = (
 		load: {
 			filter: {
 				id: {
-					include: [
-						new RegExp(`^${VIRTUAL_RUNTIME_MODULE_ID}$`),
-						new RegExp(`^${LOCALE_MODULE_ID}`),
-					],
+					include: [new RegExp(`^${LOCALE_MODULE_ID}`)],
 				},
 			},
-			async handler(id) {
-				if (id === VIRTUAL_RUNTIME_MODULE_ID) {
-					const { scriptContent } = await getLoaderScript(this.environment.mode === 'dev')
-
-					return generateRuntimeModule({
-						baseLocale,
-						locales,
-						importMapLoaderScript: scriptContent,
-						localStorageKey: options.localStorageKey,
-					})
-				}
-
+			handler(id) {
 				const locale = localeFromId(id)
 				invariant(
 					locale && compiledContentMap.has(locale),
@@ -155,7 +126,7 @@ export const i18nCompilerPlugin = (
 			},
 		},
 		async buildStart() {
-			await fs.mkdir(absOutputDir, { recursive: true })
+			await fs.mkdir(outputDir, { recursive: true })
 			const isSsr = !!resolvedConfig.build.ssr
 
 			for (const locale of locales) {
@@ -175,8 +146,17 @@ export const i18nCompilerPlugin = (
 				}
 			}
 
-			const runtimeDeclaration = generateRuntimeModuleDeclaration(baseLocale, locales)
-			await fs.writeFile(path.join(absOutputDir, 'runtime.d.ts'), runtimeDeclaration)
+			const { scriptContent } = await getLoaderScript(this.environment.mode === 'dev')
+			if (!isSsr) {
+				const runtimeModule = generateRuntimeModule({
+					baseLocale,
+					locales,
+					importMapLoaderScript: scriptContent,
+					localStorageKey: options.localStorageKey,
+				})
+
+				await fs.writeFile(path.join(outputDir, 'runtime.ts'), runtimeModule)
+			}
 		},
 		async watchChange(id) {
 			if (this.environment.mode !== 'dev') {

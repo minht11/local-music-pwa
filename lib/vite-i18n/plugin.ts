@@ -19,6 +19,6 @@ export const i18nPlugin = (options: I18nPluginOptions): Plugin[] => {
 	return [
 		i18nCompilerPlugin(options, loaderScriptRef),
 		cspHashPlugin(loaderScriptRef),
-		ignoreStaticImportsPlugin([MESSAGES_MODULE_ID]),
+		ignoreStaticImportsPlugin(MESSAGES_MODULE_ID),
 	]
 }

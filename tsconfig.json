@@ -4,8 +4,7 @@
 		"types": [
 			"@types/wicg-file-system-access",
 			"./.generated/types/auto-imports.d.ts",
-			"./.generated/i18n/messages.d.ts",
-			"./.generated/i18n/runtime.d.ts"
+			"./.generated/i18n/messages.d.ts"
 		]
 	},
 	"references": [

@@ -23,6 +23,9 @@ const config: Config = {
 		paths: {
 			relative: false,
 		},
+		alias: {
+			'i18n:runtime': '.generated/i18n/runtime.ts',
+		},
 		outDir: './.generated/svelte-kit',
 		adapter: adapter({
 			// When changing this, also update env variable
