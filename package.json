@@ -22,6 +22,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.4.16",
 		"@resvg/resvg-js": "^2.6.2",
+		"@rolldown/pluginutils": "^1.0.1",
 		"@sveltejs/adapter-static": "3.0.10",
 		"@sveltejs/kit": "2.63.0",
 		"@tailwindcss/vite": "4.3.0",

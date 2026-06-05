@@ -1,4 +1,5 @@
 import * as path from 'node:path'
+import { exactRegex, prefixRegex } from '@rolldown/pluginutils'
 import invariant from 'tiny-invariant'
 import type { Plugin } from 'vite'
 import { LOCALE_MODULE_ID, MESSAGES_MODULE_ID } from '../constants.ts'
@@ -32,15 +33,14 @@ export const i18nCompilerPlugin = (ctx: I18nCompilerContext): Plugin => {
 		resolveId: {
 			filter: {
 				id: {
-					include: [
-						new RegExp(`^${MESSAGES_MODULE_ID}$`),
-						new RegExp(`^${LOCALE_MODULE_ID}`),
-					],
+					include: [exactRegex(MESSAGES_MODULE_ID), prefixRegex(LOCALE_MODULE_ID)],
 				},
 			},
-			handler(id, _importer, opts) {
+			handler(id) {
+				const isSSR = this.environment.config.consumer === 'server'
+
 				// SSR/prerender doesn't switch locales at runtime
-				if (id === MESSAGES_MODULE_ID && opts?.ssr) {
+				if (id === MESSAGES_MODULE_ID && isSSR) {
 					return localeModuleId(baseLocale)
 				}
 
@@ -59,7 +59,7 @@ export const i18nCompilerPlugin = (ctx: I18nCompilerContext): Plugin => {
 		load: {
 			filter: {
 				id: {
-					include: [new RegExp(`^${LOCALE_MODULE_ID}`)],
+					include: prefixRegex(LOCALE_MODULE_ID),
 				},
 			},
 			handler(id) {
@@ -73,12 +73,12 @@ export const i18nCompilerPlugin = (ctx: I18nCompilerContext): Plugin => {
 			},
 		},
 		buildStart() {
-			const isSsr = !!this.environment.config.build.ssr
+			const isClient = this.environment.config.consumer === 'client'
 
 			for (const locale of locales) {
 				this.addWatchFile(path.resolve(absInputDir, `${locale}.json`))
 
-				if (!(isSsr || this.environment.mode === 'dev')) {
+				if (isClient && this.environment.mode !== 'dev') {
 					const fileName = emittedFileNames.get(locale)
 					invariant(fileName, `Missing emitted file name for locale "${locale}"`)
 

@@ -1,3 +1,4 @@
+import { exactRegex } from '@rolldown/pluginutils'
 import type { Plugin } from 'vite'
 
 /** @public */
@@ -27,20 +28,26 @@ export const ignoreStaticImportsPlugin = (importKey: string): Plugin => ({
 			},
 		})
 	},
-	resolveId: (id) => {
-		if (importKey === id) {
+	resolveId: {
+		filter: {
+			id: {
+				include: exactRegex(importKey),
+			},
+		},
+		handler(id) {
 			return { id, external: true }
-		}
-
-		return null
+		},
 	},
 	// Return a stub so Vite's pre-transform warmup doesn't emit "does the file exist?" warnings.
 	// The browser never loads this directly — the import map intercepts the bare specifier first.
-	load: (id) => {
-		if (importKey === id) {
+	load: {
+		filter: {
+			id: {
+				include: exactRegex(importKey),
+			},
+		},
+		handler() {
 			return ''
-		}
-
-		return null
+		},
 	},
 })
