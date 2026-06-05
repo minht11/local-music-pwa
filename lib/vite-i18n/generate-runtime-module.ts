@@ -3,7 +3,6 @@ import { CONTENT_BANNER } from './constants.ts'
 interface GenerateGenerateContentsOptions {
 	baseLocale: string
 	locales: string[]
-	importMapLoaderScript: string
 	localStorageKey: string
 }
 
@@ -16,7 +15,6 @@ export const generateRuntimeModule = (options: GenerateGenerateContentsOptions) 
 		`/** @public */ export type BaseLocale = '${baseLocale}';`,
 		`/** @public */ export const BASE_LOCALE: BaseLocale = '${baseLocale}';`,
 		`/** @public */ export const LOCALES: Locale[] = [${locales.map((locale) => `'${locale}'`).join(', ')}];`,
-		`/** @public */ export const IMPORT_MAP_LOADER_SCRIPT = ${JSON.stringify(options.importMapLoaderScript)}`,
 		`/** @public */ const LOCAL_STORAGE_KEY = '${options.localStorageKey}';`,
 		'/** @public */ const isLocale = (locale: unknown): locale is Locale => LOCALES.includes(locale as Locale);',
 		`/** @public */ export const setLocale = (locale: Locale) => {

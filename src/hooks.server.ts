@@ -1,9 +1,10 @@
 import type { Handle } from '@sveltejs/kit'
-import { IMPORT_MAP_LOADER_SCRIPT } from 'i18n:runtime'
 import { PUBLIC_FALLBACK_PAGE, PUBLIC_GOAT_COUNTER_URL } from '$app/env/public'
 import { APP_DESCRIPTION_EN } from '$lib/app-metadata.ts'
 import { ICON_PATHS } from '$lib/components/icon/icon-paths.server.ts'
 import { THEME_PALLETTE_DARK, THEME_PALLETTE_LIGHT } from './server/theme-colors.ts'
+
+declare const __IMPORT_MAP_LOADER_SCRIPT__: string
 
 const getThemeColorMeta = (color: string | undefined, theme: 'dark' | 'light') =>
 	`<meta name="theme-color" content="${color}" media="(prefers-color-scheme: ${theme})" />`
@@ -44,7 +45,7 @@ const replaceGoatCounterUrl = (html: string) =>
 const replaceDescription = (html: string) => html.replace('%snae.description%', APP_DESCRIPTION_EN)
 
 const transformPageChunk = ({ html }: { html: string }) => {
-	html = html.replace('%snae.import-map%', `<script>${IMPORT_MAP_LOADER_SCRIPT}</script>`)
+	html = html.replace('%snae.import-map%', `<script>${__IMPORT_MAP_LOADER_SCRIPT__}</script>`)
 	html = replaceSvgIconPaths(html)
 	html = replaceThemeColorMeta(html)
 	html = replaceGoatCounterUrl(html)

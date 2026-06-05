@@ -15,16 +15,13 @@ interface GenerateImportMapLoaderScriptOptions {
 /** @public */
 export interface ImportMapLoaderScriptResult {
 	scriptContent: string
-	cspHash: string
+	cspHashes: `sha256-${string}`[]
 }
 
-/**
- * Shared, lazily-populated handle to the compiled loader script. The compiler
- * plugin produces it; the CSP plugin reads its `cspHash`.
- * @public
- */
-export interface LoaderScriptRef {
-	current: ImportMapLoaderScriptResult | null
+const createHashForContent = (content: string) => {
+	const hash = createHash('sha256').update(content).digest('base64')
+
+	return `sha256-${hash}` as const
 }
 
 /** @public */
@@ -51,10 +48,19 @@ export const generateImportMapLoaderScript = async (
 		`Failed to minify import map loader script: ${errors.join(', ')}`,
 	)
 
-	const cspHash = `'sha256-${createHash('sha256').update(code).digest('base64')}'`
+	const loaderScriptCspHash = createHashForContent(code)
+
+	// Must mirror exactly the import map that import-map-loader/script.ts injects at runtime.
+	const importMapCspHashes = options.locales.map((locale) => {
+		const importMap = JSON.stringify({
+			imports: { [MESSAGES_MODULE_ID]: options.localesMap[locale] },
+		})
+
+		return createHashForContent(importMap)
+	})
 
 	return {
 		scriptContent: code,
-		cspHash,
+		cspHashes: [loaderScriptCspHash, ...importMapCspHashes],
 	}
 }

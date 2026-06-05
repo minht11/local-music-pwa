@@ -1,74 +1,27 @@
-import { createHash } from 'node:crypto'
-import fs from 'node:fs/promises'
 import * as path from 'node:path'
 import invariant from 'tiny-invariant'
 import type { Plugin } from 'vite'
 import { LOCALE_MODULE_ID, MESSAGES_MODULE_ID } from '../constants.ts'
-import { generateRuntimeModule } from '../generate-runtime-module.ts'
-import {
-	generateImportMapLoaderScript,
-	type LoaderScriptRef,
-} from '../import-map-loader/generate-script.ts'
-import { MessageCompiler } from '../message-compiler.ts'
+import { localeFromId, localeModuleId } from '../locale-modules.ts'
+import type { MessageCompiler } from '../message-compiler.ts'
 
 /** @public */
-export interface I18nPluginOptions {
+export interface I18nCompilerContext {
 	inputDir: string
-	outputDir: string
 	baseLocale: string
 	locales: string[]
-	localStorageKey: string
-}
-
-// SvelteKit serves everything under _app/immutable/ with immutable cache headers.
-const CHUNK_DIR = '_app/immutable/chunks'
-
-const localeModuleId = (locale: string) => `${LOCALE_MODULE_ID}?locale=${locale}`
-
-const localeFromId = (id: string): string | null =>
-	new URLSearchParams(id.slice(LOCALE_MODULE_ID.length)).get('locale')
-
-const computeStableFileName = (locale: string, content: string) => {
-	const hash = createHash('sha256').update(content).digest('hex').slice(0, 8)
-
-	return `${CHUNK_DIR}/i18n-${locale}.${hash}.js`
+	compiler: MessageCompiler
+	/** Compiled message module per locale. Mutated in place on dev recompiles. */
+	compiledContentMap: Map<string, string>
+	/** Stable, content-hashed chunk file name per locale (build only). */
+	emittedFileNames: Map<string, string>
 }
 
 /** @public */
-export const i18nCompilerPlugin = (
-	options: I18nPluginOptions,
-	loaderScriptRef: LoaderScriptRef,
-): Plugin => {
-	const { inputDir, outputDir, locales, baseLocale } = options
-
-	const compiler = new MessageCompiler({ inputDir, outputDir, baseLocale })
+export const i18nCompilerPlugin = (ctx: I18nCompilerContext): Plugin => {
+	const { inputDir, baseLocale, locales, compiler, compiledContentMap, emittedFileNames } = ctx
 
 	let absInputDir = inputDir
-	const buildEmittedLocaleFilesMap = new Map<string, string>()
-
-	const compiledContentMap = new Map<string, string>()
-
-	// Populated once and shared with the CSP plugin, which reads its `cspHash`.
-	const getLoaderScript = async (isDev: boolean) => {
-		if (loaderScriptRef.current) {
-			return loaderScriptRef.current
-		}
-
-		const scriptResult = await generateImportMapLoaderScript({
-			baseLocale,
-			locales,
-			localesMap: Object.fromEntries(
-				locales.map((locale) => [
-					locale,
-					isDev ? localeModuleId(locale) : `/${buildEmittedLocaleFilesMap.get(locale)}`,
-				]),
-			),
-			localStorageKey: options.localStorageKey,
-		})
-
-		loaderScriptRef.current = scriptResult
-		return scriptResult
-	}
 
 	return {
 		name: 'vite-plugin-i18n',
@@ -119,38 +72,22 @@ export const i18nCompilerPlugin = (
 				return compiledContentMap.get(locale)
 			},
 		},
-		async buildStart() {
-			await fs.mkdir(outputDir, { recursive: true })
-
+		buildStart() {
 			const isSsr = !!this.environment.config.build.ssr
 
 			for (const locale of locales) {
-				const { inputFilePath, content } = await compiler.emit(locale)
-				this.addWatchFile(inputFilePath)
-				compiledContentMap.set(locale, content)
-
-				const stableFileName = computeStableFileName(locale, content)
-				buildEmittedLocaleFilesMap.set(locale, stableFileName)
+				this.addWatchFile(path.resolve(absInputDir, `${locale}.json`))
 
 				if (!(isSsr || this.environment.mode === 'dev')) {
+					const fileName = emittedFileNames.get(locale)
+					invariant(fileName, `Missing emitted file name for locale "${locale}"`)
+
 					this.emitFile({
 						type: 'chunk',
 						id: localeModuleId(locale),
-						fileName: stableFileName,
+						fileName,
 					})
 				}
-			}
-
-			const { scriptContent } = await getLoaderScript(this.environment.mode === 'dev')
-			if (!isSsr) {
-				const runtimeModule = generateRuntimeModule({
-					baseLocale,
-					locales,
-					importMapLoaderScript: scriptContent,
-					localStorageKey: options.localStorageKey,
-				})
-
-				await fs.writeFile(path.join(outputDir, 'runtime.ts'), runtimeModule)
 			}
 		},
 		async watchChange(id) {
