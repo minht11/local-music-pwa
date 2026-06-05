@@ -1,5 +1,4 @@
 import { defineEnvVars } from '@sveltejs/kit/hooks'
-import type { Input } from 'mediabunny'
 
 const schemaValidator = <Input, Output = Input>(
 	validator: (value: unknown) => { value: Output } | { issues: { message: string }[] },
