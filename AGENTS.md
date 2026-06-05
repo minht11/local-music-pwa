@@ -587,7 +587,6 @@ pnpm run test         # Run tests
 ### Configuration
 
 - `vite.config.ts` - Build and auto-import configuration
-- `svelte.config.js` - SvelteKit configuration
 - `biome.jsonc` - Code quality rules
 
 ### Core Application

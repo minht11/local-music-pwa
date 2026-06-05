@@ -1,10 +1,18 @@
+import adapter from '@sveltejs/adapter-static'
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import { i18nPlugin } from './lib/vite-i18n/plugin.ts'
 import { imageMetadataPlugin } from './lib/vite-image-metadata.ts'
 import { logChunkSizePlugin } from './lib/vite-log-chunk-size.ts'
+
+const env = loadEnv('production', process.cwd(), 'PUBLIC_')
+
+const goatCounterUrl = env.PUBLIC_GOAT_COUNTER_URL as `https://${string}.${string}` | undefined
+
+type FalsyValue = false | 0 | '' | null | undefined
+const filterFalsy = <const T>(arr: T[]) => arr.filter((x) => x) as Exclude<T, FalsyValue>[]
 
 const getAutoImportPlugin = (dts: string | false = false) =>
 	AutoImport({
@@ -76,7 +84,64 @@ export default defineConfig({
 		}),
 		imageMetadataPlugin(),
 		tailwindcss(),
-		sveltekit(),
+		sveltekit({
+			compilerOptions: {
+				runes: true,
+				experimental: {
+					async: true,
+				},
+			},
+			experimental: {
+				explicitEnvironmentVariables: true,
+			},
+			paths: {
+				relative: false,
+			},
+			alias: {
+				'i18n:runtime': '.generated/i18n/runtime.ts',
+			},
+			outDir: './.generated/svelte-kit',
+			adapter: adapter({
+				fallback: env.PUBLIC_FALLBACK_PAGE,
+			}),
+			prerender: {
+				origin: 'https://snaeplayer.com',
+			},
+			csp: {
+				mode: 'hash',
+				directives: {
+					'default-src': ['none'],
+					'script-src': filterFalsy([
+						'self',
+						'https://gc.zgo.at/',
+						// import map script hash is injected only during build, so we relax csp during dev.
+						process.env.NODE_ENV === 'development' && 'unsafe-inline',
+					]),
+					'style-src': ['self', 'unsafe-inline'],
+					'img-src': filterFalsy([
+						'self',
+						'blob:',
+						goatCounterUrl && `${goatCounterUrl}/count`,
+					]),
+					'media-src': ['self', 'blob:'],
+					'font-src': ['self'],
+					'connect-src': filterFalsy(['self', goatCounterUrl]),
+					'form-action': ['none'],
+					'manifest-src': ['self'],
+					'base-uri': ['none'],
+				},
+			},
+			typescript: {
+				config: (tsConfig) => {
+					tsConfig.extends = '../../tsconfig.base.json'
+
+					return tsConfig
+				},
+			},
+			serviceWorker: {
+				register: false,
+			},
+		}),
 		getAutoImportPlugin('./.generated/types/auto-imports.d.ts'),
 		logChunkSizePlugin(),
 		{

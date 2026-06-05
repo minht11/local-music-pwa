@@ -2,7 +2,6 @@
 	"$schema": "https://unpkg.com/knip@6/schema.json",
 	"tags": ["-lintignore"],
 	"entry": [
-		"svelte.config.ts",
 		"src/env.ts",
 		"src/hooks.server.ts",
 		"src/service-worker.ts",
