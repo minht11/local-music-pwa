@@ -44,10 +44,8 @@ export class MessageCompiler {
 	}
 
 	#compileTranslationValue(input: string) {
-		// Escape the two characters that would otherwise break the generated template
-		// literal: a backslash, and a backtick. (`{` is reserved for placeholders, so a
-		// literal `$` before one just stays a `$` and the placeholder interpolates.)
-		// Backslash must be escaped first so we don't double-escape the ones we add.
+		// Escape backslash and backtick so they don't break the generated template
+		// literal. Backslash first, so we don't double-escape the ones we add.
 		const escaped = input.replace(/\\/g, '\\\\').replace(/`/g, '\\`')
 
 		let hasParams = false
