@@ -11,11 +11,7 @@
 		".generated/svelte-kit/env.d.ts",
 		".generated/types/auto-imports.d.ts"
 	],
-	"project": [
-		"**/*",
-		"!static/supported-browser-check.js",
-		"!lib/vite-i18n/import-map-loader/script.ts"
-	],
+	"project": ["**/*", "!static/supported-browser-check.js"],
 	"ignoreExportsUsedInFile": {
 		"interface": true,
 		"type": true
