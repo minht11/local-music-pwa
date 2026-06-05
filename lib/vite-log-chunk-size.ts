@@ -8,7 +8,7 @@ export const logChunkSizePlugin = (): Plugin => ({
 	apply: 'build',
 	enforce: 'post',
 	writeBundle() {
-		if (this.environment.name === 'ssr') {
+		if (this.environment.name !== 'client') {
 			return
 		}
 
