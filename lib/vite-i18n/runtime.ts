@@ -1,12 +1,15 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import { CONTENT_BANNER } from './constants.ts'
 
-interface GenerateGenerateContentsOptions {
+interface EmitRuntimeModuleOptions {
+	outputDir: string
 	baseLocale: string
 	locales: string[]
 	localStorageKey: string
 }
 
-export const generateRuntimeModule = (options: GenerateGenerateContentsOptions) => {
+export const emitRuntimeModule = async (options: EmitRuntimeModuleOptions) => {
 	const { baseLocale, locales } = options
 
 	const lines = [
@@ -29,5 +32,5 @@ export const generateRuntimeModule = (options: GenerateGenerateContentsOptions) 
 		}`,
 	]
 
-	return lines.join('\n')
+	await fs.writeFile(path.resolve(options.outputDir, 'runtime.ts'), lines.join('\n'))
 }

@@ -1,6 +1,8 @@
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
+import invariant from 'tiny-invariant'
 import { CONTENT_BANNER, MESSAGES_MODULE_ID } from './constants.ts'
+import { computeStableFileName } from './locale-modules.ts'
 import { assertValidTranslation, readJsonFile } from './utils.ts'
 
 const PLACEHOLDER_REGEX = /\{(.*?)\}/g
@@ -9,24 +11,31 @@ interface MessageCompilerOptions {
 	baseLocale: string
 	inputDir: string
 	outputDir: string
+	locales: string[]
 }
 
-interface EmitResult {
-	inputFilePath: string
+interface CompiledLocale {
+	/** Compiled message module source. */
 	content: string
+	/** Stable, content-hashed chunk file name. */
+	fileName: string
 }
 
 export class MessageCompiler {
 	#baseLocale: string
 	#inputDir: string
 	#outputDir: string
+	#locales: string[]
 
 	#baseLocaleJson: Record<string, string> | null = null
+	/** Compiled artifact per locale. The compiler is the sole writer. */
+	#compiled = new Map<string, CompiledLocale>()
 
 	constructor(options: MessageCompilerOptions) {
 		this.#baseLocale = options.baseLocale
 		this.#inputDir = options.inputDir
 		this.#outputDir = options.outputDir
+		this.#locales = options.locales
 	}
 
 	#resolveInputPath(locale: string): string {
@@ -58,16 +67,13 @@ export class MessageCompiler {
 		return `(${hasParams ? 'p' : ''}) => \`${template}\``
 	}
 
-	async emit(locale: string, force = false): Promise<EmitResult> {
+	async generate(locale: string, force = false): Promise<CompiledLocale> {
 		const inputFilePath = this.#resolveInputPath(locale)
-
-		const isCompilingBaseLocale = locale === this.#baseLocale
+		const isGenBaseLocale = locale === this.#baseLocale
 
 		const [baseLocaleJson, json] = await Promise.all([
-			this.#getBaseLocaleJson(isCompilingBaseLocale && force),
-			locale === this.#baseLocale
-				? null
-				: readJsonFile(inputFilePath, { crashIfNotFound: false }),
+			this.#getBaseLocaleJson(isGenBaseLocale && force),
+			isGenBaseLocale ? null : readJsonFile(inputFilePath, { crashIfNotFound: false }),
 		])
 
 		const mergedJson = json
@@ -78,41 +84,63 @@ export class MessageCompiler {
 			: baseLocaleJson
 
 		let content = CONTENT_BANNER
-		let typesContent = isCompilingBaseLocale
-			? `${CONTENT_BANNER}declare module ${JSON.stringify(MESSAGES_MODULE_ID)} {\n`
-			: null
-
-		const indentation = '\t'
 		for (const [key, value] of Object.entries(mergedJson)) {
-			assertValidTranslation(key, value, this.#resolveInputPath(locale))
+			assertValidTranslation(key, value, inputFilePath)
 
 			content += `export const ${key} = ${this.#compileTranslationValue(value)}\n`
+		}
 
-			if (typesContent) {
-				const uniqueParams = [
-					...new Set([...value.matchAll(PLACEHOLDER_REGEX)].map((match) => match[1])),
-				]
+		const compiled: CompiledLocale = {
+			content,
+			fileName: computeStableFileName(locale, content),
+		}
+		this.#compiled.set(locale, compiled)
 
-				let paramsString = ''
-				if (uniqueParams.length > 0) {
-					const paramsTypes = uniqueParams
-						.map((name) => `${name}: string | number`)
-						.join('; ')
-					paramsString = `p: { ${paramsTypes} }`
-				}
+		return compiled
+	}
 
-				typesContent += `${indentation}/** ${value} @public */\n${indentation}export const ${key}: (${paramsString}) => string\n`
+	async emitTypes() {
+		const json = await this.#getBaseLocaleJson()
+
+		let content = `${CONTENT_BANNER}declare module ${JSON.stringify(MESSAGES_MODULE_ID)} {\n`
+
+		const indentation = '\t'
+		for (const [key, value] of Object.entries(json)) {
+			const uniqueParams = [
+				...new Set([...value.matchAll(PLACEHOLDER_REGEX)].map((match) => match[1])),
+			]
+
+			let paramsString = ''
+			if (uniqueParams.length > 0) {
+				const paramsTypes = uniqueParams
+					.map((name) => `${name}: string | number`)
+					.join('; ')
+				paramsString = `p: { ${paramsTypes} }`
 			}
+
+			content += `${indentation}/** ${value} @public */\n`
+			content += `${indentation}export const ${key}: (${paramsString}) => string\n`
 		}
 
-		if (typesContent) {
-			typesContent += '}\n'
-		}
+		content += '}\n'
 
-		if (typesContent) {
-			await fs.writeFile(path.join(this.#outputDir, 'messages.d.ts'), typesContent)
-		}
+		await fs.writeFile(path.join(this.#outputDir, 'messages.d.ts'), content)
+	}
 
-		return { inputFilePath, content }
+	async prepare(): Promise<void> {
+		for (const locale of this.#locales) {
+			await this.generate(locale)
+		}
+	}
+
+	getContent(locale: string): string | undefined {
+		return this.#compiled.get(locale)?.content
+	}
+
+	getFileName(locale: string): string {
+		const compiled = this.#compiled.get(locale)
+		invariant(compiled, `Locale "${locale}" has not been compiled`)
+
+		return compiled.fileName
 	}
 }

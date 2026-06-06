@@ -1,14 +1,11 @@
 import fs from 'node:fs/promises'
-import * as path from 'node:path'
-import invariant from 'tiny-invariant'
 import type { Plugin } from 'vite'
 import { MESSAGES_MODULE_ID } from './constants.ts'
-import { generateRuntimeModule } from './generate-runtime-module.ts'
 import {
 	generateImportMapLoaderScript,
 	type ImportMapLoaderScriptResult,
 } from './import-map-loader/generate-script.ts'
-import { computeStableFileName, localeModuleId } from './locale-modules.ts'
+import { localeModuleId } from './locale-modules.ts'
 import { MessageCompiler } from './message-compiler.ts'
 import { i18nCompilerPlugin } from './plugins/i18n-compiler-plugin.ts'
 import { ignoreStaticImportsPlugin } from './plugins/ignore-static-imports-plugin.ts'
@@ -50,24 +47,14 @@ export const createI18n = async (options: CreateI18nOptions): Promise<I18nInstan
 
 	await fs.mkdir(outputDir, { recursive: true })
 
-	const compiler = new MessageCompiler({ inputDir, outputDir, baseLocale })
-
-	const compiledContentMap = new Map<string, string>()
-	const emittedFileNames = new Map<string, string>()
-
-	for (const locale of locales) {
-		const { content } = await compiler.emit(locale)
-		compiledContentMap.set(locale, content)
-		emittedFileNames.set(locale, computeStableFileName(locale, content))
-	}
+	const compiler = new MessageCompiler({ inputDir, outputDir, baseLocale, locales })
+	await compiler.prepare()
 
 	const localesMap = Object.fromEntries(
-		locales.map((locale) => {
-			const fileName = emittedFileNames.get(locale)
-			invariant(fileName, `Missing emitted file name for locale "${locale}"`)
-
-			return [locale, isDev ? localeModuleId(locale) : `/${fileName}`]
-		}),
+		locales.map((locale) => [
+			locale,
+			isDev ? localeModuleId(locale) : `/${compiler.getFileName(locale)}`,
+		]),
 	)
 
 	const importMapLoader = await generateImportMapLoaderScript({
@@ -77,19 +64,14 @@ export const createI18n = async (options: CreateI18nOptions): Promise<I18nInstan
 		localStorageKey,
 	})
 
-	await fs.writeFile(
-		path.join(outputDir, 'runtime.ts'),
-		generateRuntimeModule({ baseLocale, locales, localStorageKey }),
-	)
-
 	const vitePlugin: Plugin[] = [
 		i18nCompilerPlugin({
 			inputDir,
+			outputDir,
+			localStorageKey,
 			baseLocale,
 			locales,
 			compiler,
-			compiledContentMap,
-			emittedFileNames,
 		}),
 		ignoreStaticImportsPlugin(MESSAGES_MODULE_ID),
 	]
