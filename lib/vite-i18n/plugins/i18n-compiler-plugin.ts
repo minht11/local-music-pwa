@@ -32,16 +32,14 @@ export const i18nCompilerPlugin = (ctx: I18nCompilerContext): Plugin => {
 		async buildStart() {
 			const isClient = this.environment.config.consumer === 'client'
 
-			if (isClient) {
-				await emitRuntimeModule({
-					baseLocale,
-					locales,
-					localStorageKey: ctx.localStorageKey,
-					outputDir: ctx.outputDir,
-				})
+			await emitRuntimeModule({
+				baseLocale,
+				locales,
+				localStorageKey: ctx.localStorageKey,
+				outputDir: ctx.outputDir,
+			})
 
-				await compiler.emitTypes()
-			}
+			await compiler.emitTypes()
 
 			for (const locale of locales) {
 				this.addWatchFile(path.resolve(absInputDir, `${locale}.json`))
