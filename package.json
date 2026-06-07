@@ -26,14 +26,14 @@
 		"@sveltejs/adapter-static": "3.0.10",
 		"@sveltejs/kit": "2.63.0",
 		"@tailwindcss/vite": "4.3.0",
-		"@types/node": "^25.9.1",
+		"@types/node": "^25.9.2",
 		"@types/wicg-file-system-access": "^2023.10.7",
 		"fake-indexeddb": "^6.2.5",
-		"happy-dom": "^20.10.1",
+		"happy-dom": "^20.10.2",
 		"image-size": "^2.0.2",
-		"knip": "^6.15.0",
+		"knip": "^6.16.1",
 		"oxfmt": "^0.53.0",
-		"svelte": "5.56.1",
+		"svelte": "5.56.2",
 		"svelte-check": "4.6.0",
 		"tailwindcss": "^4.3.0",
 		"typescript": "6.0.3",
@@ -53,5 +53,5 @@
 	"engines": {
 		"node": "26.2.0"
 	},
-	"packageManager": "pnpm@11.2.2"
+	"packageManager": "pnpm@11.5.2"
 }
