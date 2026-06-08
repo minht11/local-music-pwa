@@ -63,7 +63,10 @@ export const i18nCompilerPlugin = (ctx: I18nCompilerContext): Plugin => {
 				const isSSR = this.environment.config.consumer === 'server'
 
 				// SSR/prerender doesn't switch locales at runtime
-				if (id === MESSAGES_MODULE_ID && isSSR) {
+				if (
+					(id === MESSAGES_MODULE_ID && isSSR) ||
+					this.environment.config.mode === 'test'
+				) {
 					return localeModuleId(baseLocale)
 				}
 
