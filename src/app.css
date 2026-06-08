@@ -11,8 +11,9 @@
 	font-display: swap;
 	src: url('/fonts/Heebo.latin.woff2') format('woff2');
 	unicode-range:
-		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074,
-		U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+		U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF,
+		U+FFFD;
 }
 /* latin-ext */
 @font-face {
@@ -76,14 +77,28 @@
 	--breakpoint-xs: 24rem;
 	--breakpoint-xss: 20rem;
 
-	--ease-*: initial;
-	--ease-standard: cubic-bezier(0.2, 0, 0, 1);
-	--ease-outgoing40: cubic-bezier(0.4, 0, 1, 1);
-	--ease-incoming80: cubic-bezier(0, 0, 0.2, 1);
-	--ease-incoming80outgoing40: cubic-bezier(0.4, 0, 0.2, 1);
-
 	--font-sans: 'Heebo', 'App CJK Fallback', system-ui, 'Noto Color Emoji', sans-serif;
 	--text-*: initial;
+}
+
+:root {
+	/* Need these always available, so JS can access them */
+	--e-standard: cubic-bezier(0.2, 0, 0, 1);
+	--e-outgoing40: cubic-bezier(0.4, 0, 1, 1);
+	--e-incoming80: cubic-bezier(0, 0, 0.2, 1);
+	--e-incoming80outgoing40: cubic-bezier(0.4, 0, 0.2, 1);
+	--e-standardDecelerate: cubic-bezier(0, 0, 0, 1);
+	--e-standardAccelerate: cubic-bezier(0.3, 0, 1, 1);
+}
+
+@theme inline {
+	--ease-*: initial;
+	--ease-standard: var(--e-standard);
+	--ease-outgoing40: var(--e-outgoing40);
+	--ease-incoming80: var(--e-incoming80);
+	--ease-incoming80outgoing40: var(--e-incoming80outgoing40);
+	--ease-standardDecelerate: var(--e-standardDecelerate);
+	--ease-standardAccelerate: var(--e-standardAccelerate);
 }
 
 html {

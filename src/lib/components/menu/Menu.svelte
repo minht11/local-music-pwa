@@ -1,105 +1,68 @@
 <script lang="ts">
-	import { untrack } from 'svelte'
-	import { ripple } from '$lib/attachments/ripple.ts'
-	import type { MenuItem } from './types.ts'
-
-	type Handler = (el: HTMLDialogElement) => void
+	import { getEasing, timeline } from '$lib/helpers/animations.ts'
+	import BaseMenu from './BaseMenu.svelte'
+	import { getMeasurementsFromAnchor, positionMenu } from './positioning.ts'
+	import type { MenuInternalData, MenuPosition } from './types.ts'
 
 	interface Props {
-		items: readonly MenuItem[]
-		onopen: Handler
-		onclose: Handler
+		data: MenuInternalData
+		onclose: () => void
 	}
 
-	const { items, onopen, onclose }: Props = $props()
+	const { data, onclose }: Props = $props()
 
-	let menuEl = $state<HTMLDialogElement>()
+	const openAnimation = (menuEl: HTMLDialogElement) => {
+		const { options } = data
 
-	const passHandler = (handler: Handler) => {
-		invariant(menuEl, 'menu container is undefined')
+		if (options?.width) {
+			menuEl.style.width = `${options.width}px`
+		}
+		if (options?.height) {
+			menuEl.style.height = `${options.height}px`
+		}
 
-		handler(menuEl)
+		const baseRect = menuEl.getBoundingClientRect()
+		const rect = {
+			...baseRect,
+			width: options?.width ?? baseRect.width,
+			height: options?.height ?? baseRect.height,
+		}
+
+		const position: MenuPosition = options?.anchor
+			? getMeasurementsFromAnchor(rect, data.targetElement, options.preferredAlignment)
+			: (options?.position ?? { top: 0, left: 0 })
+
+		positionMenu(menuEl, { ...rect, ...position })
+
+		void timeline([
+			[menuEl, { opacity: [0, 1] }, { duration: 45, easing: 'linear' }],
+			[
+				menuEl,
+				{ transform: ['scale(.8)', 'none'] },
+				{ duration: 150, easing: getEasing('incoming80'), at: '<' },
+			],
+		])
 	}
 
-	const close = () => passHandler(onclose)
+	const closeAnimation = (menuEl: HTMLDialogElement) =>
+		menuEl.animate({ opacity: [1, 0] }, { duration: 100, easing: 'linear' }).finished
 
-	$effect(() => {
-		untrack(() => {
-			passHandler(onopen)
-			menuEl?.querySelector('button')?.focus()
-		})
-	})
-
-	const keydownHandler = (e: KeyboardEvent) => {
-		if (e.key === 'Escape') {
-			close()
-			// We don't want dialog to exit top level
-			// and instead remain until the animation is complete
-			// and then remove from the DOM
-			e.preventDefault()
-
-			return
-		}
-
-		if (e.key === 'ArrowDown') {
-			e.preventDefault()
-			const next = menuEl?.querySelector('button:focus')
-				?.nextElementSibling as HTMLButtonElement | null
-
-			next?.focus()
-		}
-
-		if (e.key === 'ArrowUp') {
-			e.preventDefault()
-			const prev = menuEl?.querySelector('button:focus')
-				?.previousElementSibling as HTMLButtonElement | null
-
-			prev?.focus()
-		}
-
+	const onKeydown = (e: KeyboardEvent, close: () => void) => {
+		// Arrow navigation is handled in BaseMenu; only Tab is menu-specific.
 		if (e.key === 'Tab') {
 			e.preventDefault()
 			close()
 		}
 	}
-
-	const pointerDownHandler = (e: PointerEvent) => {
-		if (e.target === menuEl) {
-			close()
-		}
-	}
 </script>
 
-<!-- svelte-ignore a11y_no_interactive_element_to_noninteractive_role -->
-<dialog
-	bind:this={menuEl}
-	role="application"
-	tabindex="-1"
-	class="pointer-events-auto fixed overscroll-contain rounded-sm bg-surfaceContainerHigh shadow-2xl backdrop:bg-transparent"
-	onpointerdown={pointerDownHandler}
-	onkeydown={keydownHandler}
-	onclose={() => {
-		// There is no way to prevent dialog close event
-		close()
-	}}
->
-	<div role="menu" class="flex flex-col py-2">
-		{#each items as item}
-			<button
-				{@attach ripple()}
-				role="menuitem"
-				type="button"
-				class={[
-					'interactable relative flex min-h-10 grow items-center px-4 py-2 text-left text-body-md -outline-offset-2 select-none',
-					item.selected && 'bg-surfaceVariant text-primary',
-				]}
-				onclick={() => {
-					item.action()
-					close()
-				}}
-			>
-				{item.label}
-			</button>
-		{/each}
-	</div>
-</dialog>
+<BaseMenu
+	items={data.items}
+	type="menu"
+	textSize="md"
+	class="rounded-sm bg-surfaceContainerHigh shadow-2xl backdrop:bg-transparent"
+	{openAnimation}
+	{closeAnimation}
+	{onKeydown}
+	{onclose}
+/>

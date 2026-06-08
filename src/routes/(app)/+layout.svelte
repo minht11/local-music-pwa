@@ -32,9 +32,14 @@
 	const player = setPlayerStoreContext(new PlayerStore(main))
 	const dialogs = setDialogsStoreContext(new DialogsStore())
 
+	$effect(() => () => {
+		// Cleanup
+		player.dispose()
+	})
+
 	if (import.meta.hot) {
 		import.meta.hot.dispose(() => {
-			player.hmrDispose()
+			player.dispose()
 		})
 	}
 

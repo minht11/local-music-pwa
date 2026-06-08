@@ -18,6 +18,7 @@
 		width?: number
 		icon?: IconType
 		menuItems?: (() => MenuItem[]) | MenuItem[]
+		bottomSheet?: boolean
 	}
 
 	const {
@@ -29,6 +30,7 @@
 		alignment = { horizontal: 'right', vertical: 'top' },
 		width,
 		icon = 'moreVertical',
+		bottomSheet,
 	}: Props = $props()
 
 	const menu = useMenu()
@@ -48,6 +50,7 @@
 				anchor: true,
 				width,
 				preferredAlignment: alignment,
+				bottomSheet,
 			})
 		}}
 	/>

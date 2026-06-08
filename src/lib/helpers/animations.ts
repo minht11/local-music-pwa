@@ -47,3 +47,66 @@ export const timeline = async (
 
 	return Promise.all(promises)
 }
+
+const easings = [
+	'standard',
+	'outgoing40',
+	'incoming80',
+	'incoming80outgoing40',
+	'standardDecelerate',
+	'standardAccelerate',
+] as const
+type EasingName = (typeof easings)[number]
+let cachedEasings: Record<EasingName, string> | null = null
+
+/** @public */
+export const getEasing = (easing: EasingName) => {
+	if (cachedEasings) {
+		return cachedEasings[easing]
+	}
+
+	const styles = window.getComputedStyle(document.documentElement)
+
+	cachedEasings = {} as Record<EasingName, string>
+	for (const easing of easings) {
+		const value = styles.getPropertyValue(`--e-${easing}`).trim()
+		invariant(value, `Easing ${easing} not found in CSS variables`)
+
+		cachedEasings[easing] = value
+	}
+
+	return cachedEasings[easing]
+}
+
+interface AnimateBackdropOptions {
+	isOut?: boolean
+	duration?: number
+	easing?: string
+}
+
+/** @public */
+export const animateBackdrop = (
+	dialog: HTMLDialogElement,
+	options: AnimateBackdropOptions = {},
+) => {
+	const { isOut = false, duration = 300, easing = 'linear' } = options
+	try {
+		dialog.animate(
+			{
+				opacity: isOut ? [1, 0] : [0, 1],
+			},
+			{
+				pseudoElement: '::backdrop',
+				duration,
+				easing,
+				fill: isOut ? 'forwards' : undefined,
+			},
+		)
+	} catch (err) {
+		// Firefox does not support pseudo-element animations
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=1770591
+		if (import.meta.env.DEV) {
+			console.warn(err)
+		}
+	}
+}

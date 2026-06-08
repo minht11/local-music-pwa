@@ -1,5 +1,5 @@
+import { browser } from '$app/env'
 import type { TracksScanMessage, TracksScanOptions, TracksScanResult } from './types.ts'
-import TracksWorker from './worker.ts?worker'
 
 export type {
 	/** @public */
@@ -16,9 +16,14 @@ export const startTrackScannerWorker = (
 	options: TracksScanOptions,
 	progress: (data: TracksScanResult) => void,
 ): Promise<TracksScanResult> => {
+	if (!browser) {
+		// Prevent SSR build processing worker code
+		throw new Error('startTrackScannerWorker is only available in the browser')
+	}
+
 	const { promise, reject, resolve } = Promise.withResolvers<TracksScanResult>()
 
-	const worker = new TracksWorker()
+	const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' })
 
 	worker.addEventListener('error', reject)
 	worker.addEventListener('message', ({ data }: MessageEvent<TracksScanMessage>) => {

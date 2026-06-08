@@ -149,17 +149,6 @@ export default defineConfig(async ({ command, isPreview }): Promise<UserConfig> 
 			}),
 			getAutoImportPlugin('./.generated/types/auto-imports.d.ts'),
 			logChunkSizePlugin(),
-			{
-				name: 'ssr-config',
-				config(config) {
-					const isSsr = config?.build?.ssr
-
-					// Since this is mostly SPA, server logs are mostly noise.
-					config.logLevel = isSsr ? 'warn' : 'info'
-
-					return config
-				},
-			},
 		],
 	}
 })

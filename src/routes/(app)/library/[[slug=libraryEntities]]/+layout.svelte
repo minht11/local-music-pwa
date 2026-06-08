@@ -98,7 +98,7 @@
 {#snippet layoutBottom()}
 	{#if isHandHeldDevice}
 		<div
-			class="pointer-events-auto grid h-16 w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer sm:hidden active-view-regular:view-name-[bottom-bar]"
+			class="pointer-events-auto grid h-[calc(--spacing(16)+env(safe-area-inset-bottom))] w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer pb-[env(safe-area-inset-bottom)] sm:hidden active-view-regular:view-name-[bottom-bar]"
 		>
 			{@render navItemsSnippet('h-full')}
 		</div>

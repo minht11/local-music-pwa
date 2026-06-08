@@ -53,7 +53,6 @@ const createDirectoriesPageQuery = () =>
 
 interface LoadResult {
 	directoriesQuery: PageQueryResult<DirectoryWithCount[]>
-	title: string
 }
 
 export const load = async (): Promise<LoadResult> => {
@@ -61,6 +60,5 @@ export const load = async (): Promise<LoadResult> => {
 
 	return {
 		directoriesQuery: directories,
-		title: m.settings(),
 	}
 }
