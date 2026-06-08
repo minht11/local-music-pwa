@@ -22,11 +22,12 @@ Page views are counted using [GoatCounter](https://goatcounter.com/), a minimal 
 
 SvelteKit/Svelte 5 · TypeScript · Tailwind CSS 4
 
-## Building locally
+## Running locally
 
-Clone the repo, then:
+Clone the repo, then copy `.env.example` to `.env`:
 
 ```
+cp .env.example .env
 pnpm install
 pnpm run build
 ```
@@ -36,3 +37,5 @@ Or run the development server:
 ```
 pnpm run dev
 ```
+
+On first run, `pnpm run dev` or `pnpm run build` generates types for SvelteKit, auto-imports, and i18n, so run one of them before type checking.

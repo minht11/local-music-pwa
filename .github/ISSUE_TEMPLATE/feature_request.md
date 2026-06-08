@@ -6,25 +6,16 @@ labels: enhancement
 assignees: ''
 ---
 
-## ⚠️ Before creating this issue
+- [ ] I've searched the [existing issues](https://github.com/minht11/local-music-pwa/issues) and didn't find this one.
 
-**Please check if a similar feature has already been requested:**
-- [ ] I have searched the [existing issues](https://github.com/minht11/local-music-pwa/issues) and this feature has not been requested before
+## What would you like to see?
 
-## 💡 What feature would you like to see?
+Describe the feature you have in mind.
 
-A clear description of the feature you'd like to see implemented.
+## Why would it help?
 
-## 🎯 Why do you need this feature?
+What you're trying to do, or the problem it would solve for you.
 
-What problem would this solve or what would this help you do?
+## Anything else?
 
-## 🎨 Screenshots/Examples (Optional)
-
-If you have examples from other apps or mockups, add them here.
-
-<!-- You can drag and drop images directly into this text area -->
-
-## 📋 Additional Context
-
-Any other details that might be helpful.
+Mockups, examples from other apps, or anything else that helps paint the picture (optional).
