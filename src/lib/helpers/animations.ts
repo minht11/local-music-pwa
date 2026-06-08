@@ -47,3 +47,25 @@ export const timeline = async (
 
 	return Promise.all(promises)
 }
+
+const easings = ['standard', 'outgoing40', 'incoming80', 'incoming80outgoing40']
+type EasingName = (typeof easings)[number]
+let cachedEasings: Record<EasingName, string> | null = null
+
+export const getEasing = (easing: EasingName) => {
+	if (cachedEasings) {
+		return cachedEasings[easing]
+	}
+
+	const styles = window.getComputedStyle(document.documentElement)
+
+	cachedEasings = {} as Record<EasingName, string>
+	for (const easing of easings) {
+		const value = styles.getPropertyValue(`--ease-${easing}`).trim()
+		invariant(value, `Easing ${easing} not found in CSS variables`)
+
+		cachedEasings[easing] = value
+	}
+
+	return cachedEasings[easing]
+}
