@@ -344,7 +344,7 @@ export class PlayerStore {
 		})
 	}
 
-	hmrDispose(): void {
+	dispose(): void {
 		this.#controller.abort()
 		this.#graph.dispose()
 	}
