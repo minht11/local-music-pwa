@@ -10,16 +10,16 @@
 
 	const { items, onclose }: Props = $props()
 
-	const emphasizedDecelerate = getEasing('emphasizedDecelerate')
+	const standardDecelerate = getEasing('standardDecelerate')
 
 	const openAnimation = (sheetEl: HTMLDialogElement) => {
 		sheetEl.animate(
 			{ transform: ['translateY(100%)', 'translateY(0)'] },
-			{ duration: 350, easing: emphasizedDecelerate },
+			{ duration: 250, easing: standardDecelerate },
 		)
 		animateBackdrop(sheetEl, {
-			duration: 350,
-			easing: emphasizedDecelerate,
+			duration: 200,
+			easing: standardDecelerate,
 		})
 	}
 
@@ -29,8 +29,8 @@
 		sheetEl.style.transform = ''
 
 		const sheetHeight = sheetEl.offsetHeight
-		const duration = Math.max(150, 280 * (1 - fromY / sheetHeight))
-		const easing = getEasing('outgoing40')
+		const duration = Math.max(100, 200 * (1 - fromY / sheetHeight))
+		const easing = getEasing('standardAccelerate')
 
 		animateBackdrop(sheetEl, {
 			isOut: true,
@@ -89,7 +89,7 @@
 		sheetEl.style.transform = ''
 		sheetEl.animate(
 			{ transform: [`translateY(${y}px)`, 'translateY(0)'] },
-			{ duration: 200, easing: emphasizedDecelerate },
+			{ duration: 150, easing: standardDecelerate },
 		)
 	}
 </script>
