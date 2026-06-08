@@ -234,7 +234,7 @@ Note: `Snippet<T>` and `ClassValue` are **Svelte/TypeScript built-in types**, no
 Browse `src/lib/components/` for the full set (buttons, inputs, icons, dialogs, etc. — names are self-describing). The non-obvious conventions worth knowing:
 
 - Render long lists with `VirtualContainer.svelte` or the entity `*ListContainer.svelte` wrappers (`TracksListContainer`, `AlbumsListContainer`, `ArtistListContainer`, `PlaylistListContainer`) — never a plain `{#each}` over the whole library.
-- Use `ListDetailsLayout.svelte` for master-detail views (gated by `mainStore.librarySplitLayoutEnabled`).
+- Use `ListDetailsLayout.svelte` for master-detail views (library + player); the library toggles split vs stacked via `mainStore.librarySplitLayoutEnabled`.
 - `Artwork.svelte` handles album/track artwork (optimized blobs + fallback); `PlayerOverlay.svelte` is the mini player.
 
 ## State Management
@@ -307,7 +307,7 @@ Entity interfaces (`Track`, `Album`, `Artist`, `Playlist`, `PlaylistEntry`, `Pla
 
 - `Track.directory` — FK to `Directory.id`; `-1` means a legacy track with no native directory handle.
 - `Track.artists` / `album` / `year` use `StringOrUnknownItem` (may be the `UNKNOWN_ITEM` sentinel, not a plain string).
-- `Track.image` is `{ optimized, small, full }` blobs; `Track.primaryColor` is a packed ARGB number for theming.
+- `Track.image` is `{ optimized, small, full }` blobs; `Track.primaryColor` is an integer color extracted from artwork (material-color-utilities ARGB) used for theming.
 
 Stores: `tracks`, `albums`, `artists`, `playlists`, `playlistEntries`, `directories`, `playHistory`
 
