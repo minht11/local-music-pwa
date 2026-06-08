@@ -20,30 +20,30 @@
 - **TypeScript** strict mode with no `any` types
 - **Tailwind CSS 4** with custom design system in `src/app.css`
 - **Vite 8** with Rolldown bundler
+- **Client-only SPA** — `adapter-static` with `ssr = false` and `prerender = false` (`src/routes/+layout.ts`); nothing renders on a server
+- The scanner runs in a **Web Worker** (`src/lib/library/scan-actions/scanner/start.ts`); `.generated/` is build output (i18n runtime, auto-import types) — never hand-edit it
 
 ### Core Dependencies
 
-```json
-{
-	"dependencies": {
-		"@material/material-color-utilities": "^0.4.0",
-		"@tanstack/virtual-core": "^3.13.23",
-		"idb": "^8.0.3",
-		"music-metadata": "^11.12.3",
-		"tiny-invariant": "^1.3.3",
-		"weak-lru-cache": "^1.2.2"
-	}
-}
-```
+See `package.json` for versions. Key runtime libraries and their roles:
+
+- `@material/material-color-utilities` — dynamic theme color extraction from artwork
+- `@tanstack/virtual-core` — virtual scrolling for large lists
+- `idb` — IndexedDB wrapper
+- `mediabunny` — Web Audio playback engine (`src/lib/audio/`, gapless/buffer + HTML engines)
+- `music-metadata` — audio tag parsing during scans
+- `tiny-invariant` — runtime assertions (auto-imported as `invariant`)
+- `weak-lru-cache` — bounded cache for library entity values fetched from the DB (`src/lib/library/get/`)
 
 ### Development Tools
 
 - **pnpm** for package management
 - **Biome** for linting (primary)
-- **Prettier** for Svelte formatting
+- **oxfmt** for formatting (`pnpm run oxfmt-fix`)
 - **Vitest** for testing with `fake-indexeddb`
 - **unplugin-auto-import** for global utilities
-- **@inlang/paraglide-js** for i18n (compiled to `.generated/paraglide/`)
+- **knip** for detecting unused files/exports/dependencies
+- Custom **i18n Vite plugin** (`lib/vite-i18n/`), compiled to `.generated/i18n/`; messages live in `messages/*.json`
 
 ## File Organization
 
@@ -51,14 +51,13 @@
 src/
 ├── routes/
 │   ├── (app)/                     # Main application routes (with bottom bar)
-│   │   ├── library/               # Music library with slug-based entity views
+│   │   ├── library/               # Music library ([[slug]]/[uuid] entity views)
 │   │   ├── player/                # Full-screen audio player (queue, history)
-│   │   ├── layout/                # Layout-level setup (install prompt, theme)
-│   │   └── (plain)/               # Routes without bottom nav bar
-│   │       ├── settings/          # App settings
-│   │       └── about/             # About page
+│   │   ├── settings/              # App settings
+│   │   ├── about/                 # About page
+│   │   └── layout/                # Layout-level setup helpers (install prompt, theme)
 │   ├── (marketing)/               # Landing page
-│   └── (assets)/                  # Dynamic asset routes
+│   └── (assets)/                  # Dynamic asset routes (manifest, icons, artwork)
 ├── lib/
 │   ├── components/                # Reusable UI components
 │   │   ├── icon/                  # SVG icon system
@@ -71,6 +70,7 @@ src/
 │   │   ├── app-dialogs/           # App-level dialogs
 │   │   ├── library-grid/          # Library grid layout
 │   │   └── animated-icons/        # Animated icon components
+│   ├── audio/                     # Web Audio playback engine (mediabunny, gapless, EQ graph)
 │   ├── stores/                    # Global state management
 │   │   ├── main/                  # App settings, theme (MainStore)
 │   │   ├── player/                # Audio playback state (PlayerStore)
@@ -155,7 +155,7 @@ Available as CSS utility classes (defined in `src/app.css`):
 These are globally available without imports (configured in `vite.config.ts`). **Never import them manually.**
 
 ```typescript
-// Internationalization (from @inlang/paraglide-js)
+// Internationalization (namespace `m` from the `i18n:messages` virtual module)
 m.tracks() // m.albums(), m.settings(), etc.
 
 // Stores (context-based, call inside Svelte component tree)
@@ -231,40 +231,11 @@ Note: `Snippet<T>` and `ClassValue` are **Svelte/TypeScript built-in types**, no
 
 ### Key Component Library
 
-Available in `src/lib/components/`:
+Browse `src/lib/components/` for the full set (buttons, inputs, icons, dialogs, etc. — names are self-describing). The non-obvious conventions worth knowing:
 
-**Basic UI:**
-
-- `Button.svelte` - Primary/secondary buttons
-- `IconButton.svelte` - Icon-only buttons
-- `MenuButton.svelte` - Button that opens a context menu
-- `Icon.svelte` - SVG icon system
-- `TextField.svelte` - Text input fields
-- `Select.svelte` - Dropdown selects
-- `Switch.svelte` - Toggle switches
-- `Slider.svelte` - Range slider
-- `Tabs.svelte` - Tab navigation
-- `Spinner.svelte` - Loading indicator
-- `FavoriteButton.svelte` - Toggle favorite state
-
-**Layout:**
-
-- `Header.svelte` - Page headers
-- `BackButton.svelte` - Navigation back button
-- `Separator.svelte` - Visual dividers
-- `ScrollContainer.svelte` - Scrollable container
-- `VirtualContainer.svelte` - Virtual scrolling for large lists
-- `ListDetailsLayout.svelte` - Master-detail layout
-- `ListItem.svelte` - Generic list item
-
-**Music-specific:**
-
-- `Artwork.svelte` - Album/track artwork
-- `PlayerOverlay.svelte` - Mini player overlay
-- `TracksListContainer.svelte` - Virtual track lists (`src/lib/components/tracks/`)
-- `PlaylistListContainer.svelte` - Playlist list (`src/lib/components/playlists/`)
-- `AlbumsListContainer.svelte` - Albums grid/list
-- `ArtistListContainer.svelte` - Artists list
+- Render long lists with `VirtualContainer.svelte` or the entity `*ListContainer.svelte` wrappers (`TracksListContainer`, `AlbumsListContainer`, `ArtistListContainer`, `PlaylistListContainer`) — never a plain `{#each}` over the whole library.
+- Use `ListDetailsLayout.svelte` for master-detail views (gated by `mainStore.librarySplitLayoutEnabled`).
+- `Artwork.svelte` handles album/track artwork (optimized blobs + fallback); `PlayerOverlay.svelte` is the mini player.
 
 ## State Management
 
@@ -332,70 +303,11 @@ persist('storeName', this, ['fieldA', 'fieldB'])
 
 ### Database Schema
 
-```typescript
-// From $lib/library/types.ts
-interface Track {
-	id: number
-	uuid: string
-	name: string
-	artists: StringOrUnknownItem[]
-	album: StringOrUnknownItem
-	year: StringOrUnknownItem
-	duration: number
-	genre: string[]
-	trackNo: number
-	trackOf: number
-	discNo: number
-	discOf: number
-	fileName: string
-	directory: number // FK to Directory.id; -1 = legacy no-native-directory
-	scannedAt: number
-	file: FileEntity
-	image?: { optimized: boolean; small: Blob; full: Blob }
-	primaryColor?: number
-}
+Entity interfaces (`Track`, `Album`, `Artist`, `Playlist`, `PlaylistEntry`, `PlayHistoryEntry`, `Directory`) live in `$lib/library/types.ts` — read them there. A few non-obvious fields:
 
-interface Album {
-	id: number
-	uuid: string
-	name: string
-	artists: string[]
-	year?: string
-	image?: Blob
-}
-
-interface Artist {
-	id: number
-	uuid: string
-	name: string
-}
-
-interface Playlist {
-	id: number
-	uuid: string
-	name: string
-	description: string
-	createdAt: number
-}
-
-interface PlaylistEntry {
-	id: number
-	playlistId: number
-	trackId: number
-	addedAt: number
-}
-
-interface PlayHistoryEntry {
-	id: number
-	trackId: number
-	playedAt: number
-}
-
-interface Directory {
-	id: number
-	handle: FileSystemDirectoryHandle
-}
-```
+- `Track.directory` — FK to `Directory.id`; `-1` means a legacy track with no native directory handle.
+- `Track.artists` / `album` / `year` use `StringOrUnknownItem` (may be the `UNKNOWN_ITEM` sentinel, not a plain string).
+- `Track.image` is `{ optimized, small, full }` blobs; `Track.primaryColor` is a packed ARGB number for theming.
 
 Stores: `tracks`, `albums`, `artists`, `playlists`, `playlistEntries`, `directories`, `playHistory`
 
@@ -539,6 +451,9 @@ pnpm run i18n-check   # Validate translations in messages/*.json
 pnpm run type-check   # Type checking
 pnpm run biome-check  # Linting
 pnpm run biome-fix    # Fix linting issues
+pnpm run oxfmt-check  # Check formatting
+pnpm run oxfmt-fix    # Apply formatting
+pnpm run knip         # Find unused files/exports/deps
 
 # Testing
 pnpm run test         # Run tests
