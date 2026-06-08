@@ -63,6 +63,11 @@ const filterReason = (): string | undefined => {
 	} catch {
 		// Accessing localStorage can throw in restricted contexts; ignore.
 	}
+
+	if (location.origin.endsWith('netlify.app')) {
+		return 'preview'
+	}
+
 	return undefined
 }
 
@@ -98,8 +103,15 @@ const buildUrl = ({ path, title, event }: CountOptions): string | undefined => {
 	return `${ENDPOINT}?${params}`
 }
 
+let warningLogged = false
+
 const count = (options: CountOptions): void => {
-	if (filterReason()) {
+	const reason = filterReason()
+	if (reason) {
+		if (!warningLogged) {
+			console.warn('[ANALYTICS] not tracking because:', reason)
+			warningLogged = true
+		}
 		return
 	}
 
