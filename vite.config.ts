@@ -100,9 +100,10 @@ export default defineConfig(async ({ command, isPreview }): Promise<UserConfig> 
 						async: true,
 					},
 				},
-				experimental: {
-					explicitEnvironmentVariables: true,
-				},
+				// TODO. Reenable this once https://github.com/sveltejs/kit/issues/15985 is fixed.
+				// experimental: {
+				// 	explicitEnvironmentVariables: true,
+				// },
 				paths: {
 					relative: false,
 				},

@@ -1,8 +1,8 @@
 /// <reference lib='WebWorker' />
 /// <reference types="@sveltejs/kit" />
-/// <reference types="../.generated/svelte-kit/env.d.ts" />
+/// <reference types="../.generated/svelte-kit/ambient.d.ts" />
 
-import { PUBLIC_FALLBACK_PAGE } from '$app/env/public'
+import { PUBLIC_FALLBACK_PAGE } from '$env/static/public'
 import { build, files, prerendered, version } from '$service-worker'
 
 declare const self: ServiceWorkerGlobalScope
