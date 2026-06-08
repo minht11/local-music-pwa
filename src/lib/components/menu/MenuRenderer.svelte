@@ -62,13 +62,14 @@
 	const context = getMenuContext()
 	const data = $derived(context.value)
 
-	// Runs once the active menu's exit animation has finished: tear it down and
-	// return focus to the element that opened it. The double-close guard lives
-	// in BaseMenu, so each menu can only invoke this once.
 	const handleClose = () => {
 		const target = data?.targetElement
 		context.value = undefined
-		setTimeout(() => target?.focus({ preventScroll: true }), 0)
+
+		setTimeout(() => {
+			// Return focus to the target element
+			target?.focus({ preventScroll: true })
+		}, 0)
 	}
 
 	const globalContextMenuHandler = (e: MouseEvent) => {

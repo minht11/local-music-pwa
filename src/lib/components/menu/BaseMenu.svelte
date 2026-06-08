@@ -3,24 +3,18 @@
 	import { ripple } from '$lib/attachments/ripple.ts'
 	import type { MenuItem } from './types.ts'
 
-	/** Positions/animates the dialog. The close variant resolves when finished. */
 	type AnimationFn = (dialog: HTMLDialogElement) => unknown
 
 	interface Props {
 		items: readonly MenuItem[]
 		type: 'menu' | 'listbox'
 		textSize: 'md' | 'lg'
-		/** Extra dialog classes (positioning, surface) owned by the variant. */
 		class?: ClassValue
-		/** Runs once the dialog is shown; positions and animates it in. */
 		openAnimation: AnimationFn
-		/** Runs on close; animates the dialog out before teardown. */
 		closeAnimation: AnimationFn
-		/** Called once the close animation finishes (focus restore / teardown). */
+		/** Called once the close animation finishes */
 		onclose?: () => void
-		/** Extra key handling beyond the built-in Escape-to-close. */
 		onKeydown?: (e: KeyboardEvent, close: () => void) => void
-		/** Optional chrome rendered above the list, e.g. a drag handle. */
 		header?: Snippet<[{ close: () => void }]>
 	}
 

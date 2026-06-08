@@ -89,7 +89,7 @@
 		sheetEl.style.transform = ''
 		sheetEl.animate(
 			{ transform: [`translateY(${y}px)`, 'translateY(0)'] },
-			{ duration: 150, easing: standardDecelerate },
+			{ duration: 200, easing: standardDecelerate },
 		)
 	}
 </script>
