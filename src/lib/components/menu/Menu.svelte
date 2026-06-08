@@ -48,20 +48,10 @@
 		menuEl.animate({ opacity: [1, 0] }, { duration: 100, easing: 'linear' }).finished
 
 	const onKeydown = (e: KeyboardEvent, close: () => void) => {
+		// Arrow navigation is handled in BaseMenu; only Tab is menu-specific.
 		if (e.key === 'Tab') {
 			e.preventDefault()
 			close()
-
-			return
-		}
-
-		if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-			e.preventDefault()
-			const focused = (e.currentTarget as HTMLElement).querySelector('button:focus')
-			const next =
-				e.key === 'ArrowDown' ? focused?.nextElementSibling : focused?.previousElementSibling
-
-			;(next as HTMLButtonElement | null)?.focus()
 		}
 	}
 </script>
