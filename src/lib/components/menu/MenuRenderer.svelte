@@ -24,9 +24,11 @@
 		showFromEvent: (e: MouseEvent, items: MenuItem[], options: MenuOptions) => void
 	}
 
+	const mobileMenuBreakpoint = 640
+
 	const shouldUseBottomSheet = (e: MouseEvent) => {
 		if (e instanceof PointerEvent && (e.pointerType === 'touch' || e.pointerType === 'pen')) {
-			return window.matchMedia('(max-width: 639px)').matches
+			return window.matchMedia(`(max-width: ${mobileMenuBreakpoint}px)`).matches
 		}
 
 		return false

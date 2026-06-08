@@ -55,7 +55,7 @@ const easings = [
 	'incoming80outgoing40',
 	'standardDecelerate',
 	'standardAccelerate',
-]
+] as const
 type EasingName = (typeof easings)[number]
 let cachedEasings: Record<EasingName, string> | null = null
 

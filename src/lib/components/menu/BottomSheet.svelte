@@ -96,7 +96,7 @@
 
 <BaseMenu
 	{items}
-	type="listbox"
+	type="menu"
 	textSize="lg"
 	class="inset-x-0 top-auto bottom-0 m-0 max-h-[80dvh] w-full max-w-full rounded-t-2xl bg-surfaceContainerHigh pb-[env(safe-area-inset-bottom)] shadow-2xl backdrop:bg-scrim/40"
 	{openAnimation}
