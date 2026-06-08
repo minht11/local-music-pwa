@@ -23,19 +23,13 @@ export interface CreateI18nOptions {
 
 /** @public */
 export interface I18nInstance {
-	/** Vite plugins that compile and serve the locale modules. Spread into `plugins`. */
 	vitePlugin: Plugin[]
-	/**
-	 * The inline bootstrap script and its CSP hash. The consumer injects the script
-	 * into the document and adds the hash to its `script-src` directive.
-	 */
 	importMapLoader: ImportMapLoaderScriptResult
 }
 
 /**
  * Compiles the message catalogs up front and returns the Vite plugins plus the
- * import-map loader script + CSP hash. Filenames are content-hashed, so they are
- * stable and knowable here, before the build runs.
+ * import-map loader script.
  * @public
  */
 export const createI18n = async (options: CreateI18nOptions): Promise<I18nInstance> => {

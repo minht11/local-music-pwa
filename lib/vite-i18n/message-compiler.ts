@@ -28,7 +28,7 @@ export class MessageCompiler {
 	#locales: string[]
 
 	#baseLocaleJson: Record<string, string> | null = null
-	/** Compiled artifact per locale. The compiler is the sole writer. */
+
 	#compiled = new Map<string, CompiledLocale>()
 
 	constructor(options: MessageCompilerOptions) {
