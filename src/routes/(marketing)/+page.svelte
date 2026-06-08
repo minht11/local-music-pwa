@@ -5,6 +5,7 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import Seo from '$lib/components/Seo.svelte'
+	import { trackEvent } from '$lib/helpers/analytics.ts'
 	import heroImg from './assets/hero.avif?as=metadata'
 	import FeaturesSection from './components/FeaturesSection.svelte'
 	import GettingStartedSection from './components/GettingStartedSection.svelte'
@@ -13,11 +14,7 @@
 	import SoundControlsSection from './components/SoundControlsSection.svelte'
 
 	const trackOpenPlayerClick = (location: 'header' | 'hero' | 'getting-started') => {
-		window.goatcounter?.count({
-			path: `click-marketing-open-player-${location}`,
-			title: `Clicked marketing Open Player (${location})`,
-			event: true,
-		})
+		trackEvent(`click-marketing-open-player-${location}`)
 	}
 
 	const schema = $derived([

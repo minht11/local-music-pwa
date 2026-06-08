@@ -5,6 +5,7 @@
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
+	import { trackEvent } from '$lib/helpers/analytics.ts'
 	import {
 		getFilesFromLegacyDirectory,
 		isFileSystemAccessSupported,
@@ -80,7 +81,7 @@
 				newDirHandle: directory,
 			}
 		} else {
-			window.goatcounter?.count({ path: 'action-import-directory', event: true })
+			trackEvent('action-import-directory')
 			void importNewDirectory(directory)
 		}
 	}
@@ -96,7 +97,7 @@
 			return
 		}
 
-		window.goatcounter?.count({ path: 'action-import-files', event: true })
+		trackEvent('action-import-files')
 		await importLegacyFiles(files)
 	}
 </script>
@@ -148,7 +149,7 @@
 						icon="cached"
 						tooltip={m.settingsDirRescan()}
 						onclick={() => {
-							window.goatcounter?.count({ path: 'action-rescan-directory', event: true })
+							trackEvent('action-rescan-directory')
 							void rescanDirectory(dir.id, dir.handle)
 						}}
 					/>
