@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { browser } from '$app/environment'
+	import { getLocale, type Locale, setLocale } from 'i18n:runtime'
+	import { browser } from '$app/env'
 	import Button from '$lib/components/Button.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
@@ -15,7 +16,6 @@
 		PLAYER_PLAYBACK_RATE_MAX,
 		PLAYER_PLAYBACK_RATE_MIN,
 	} from '$lib/stores/player/player.svelte.ts'
-	import { getLocale, type Locale, setLocale } from '$paraglide/runtime.js'
 	import DirectoriesList from './components/DirectoriesList.svelte'
 	import InstallAppBanner from './components/InstallAppBanner.svelte'
 	import MissingFsApiBanner from './components/MissingFsApiBanner.svelte'

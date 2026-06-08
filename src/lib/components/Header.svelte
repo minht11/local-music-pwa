@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import { browser } from '$app/environment'
+	import { browser } from '$app/env'
 	export interface HeaderProps {
 		children?: Snippet
 		title?: string

@@ -548,6 +548,7 @@ pnpm run test         # Run tests
 
 #### Always Do ✅
 
+- **Ignore IDE/editor Biome diagnostics** — they are frequently stale due to the Biome language server caching. Always verify linting by running `pnpm run biome-check` (check) or `pnpm run biome-fix` (auto-fix) in the terminal instead.
 - Use pnpm when running commands
 - Leverage auto-imports for common utilities
 - Use design system tokens, never arbitrary values
@@ -586,7 +587,6 @@ pnpm run test         # Run tests
 ### Configuration
 
 - `vite.config.ts` - Build and auto-import configuration
-- `svelte.config.js` - SvelteKit configuration
 - `biome.jsonc` - Code quality rules
 
 ### Core Application

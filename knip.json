@@ -2,14 +2,19 @@
 	"$schema": "https://unpkg.com/knip@6/schema.json",
 	"tags": ["-lintignore"],
 	"entry": [
+		"src/env.ts",
+		"src/hooks.server.ts",
+		"src/service-worker.ts",
+		"src/params/**/*",
 		"src/routes/**/*.{svelte,ts}",
 		"src/lib/stores/**/*",
 		".generated/types/auto-imports.d.ts"
 	],
-	"project": ["**/*", "!src/paraglide/**/*", "!static/supported-browser-check.js"],
+	"project": ["**/*", "!static/supported-browser-check.js"],
 	"ignoreExportsUsedInFile": {
 		"interface": true,
 		"type": true
 	},
-	"ignoreUnresolved": ["^\\./\\$types\\.ts$"]
+	"ignoreUnresolved": ["^\\./\\$types\\.ts$", "^\\$app/", "^\\$env/", "^\\$service-worker"],
+	"ignoreDependencies": ["i18n"]
 }

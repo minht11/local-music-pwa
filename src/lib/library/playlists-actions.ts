@@ -84,7 +84,7 @@ export const updatePlaylist = async (options: UpdatePlaylistOptions): Promise<bo
 
 		snackbar({
 			id: `playlist-updated-${options.id}`,
-			message: m.libraryPlaylistUpdated(truncate(options.name, 20)),
+			message: m.libraryPlaylistUpdated(),
 		})
 
 		return true

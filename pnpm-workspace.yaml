@@ -2,9 +2,14 @@ engineStrict: true
 
 dedupePeers: true
 
+blockExoticSubdeps: true
+
 allowBuilds:
   '@biomejs/biome': false
   '@tailwindcss/oxide': false
 
 patchedDependencies:
   '@material/material-color-utilities': 'patches/@material__material-color-utilities.patch'
+
+minimumReleaseAgeExclude:
+  - '@sveltejs/kit@2.63.1'
