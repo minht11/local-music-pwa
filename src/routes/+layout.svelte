@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation'
 	import { page } from '$app/state'
+	import { trackPageView } from '$lib/helpers/analytics.ts'
 	import { MainStore } from '$lib/stores/main/store.svelte.ts'
 	import { setMainStoreContext } from '$lib/stores/main/use-store.ts'
 	import { setupAppViewTransitions } from '$lib/view-transitions.svelte.ts'
@@ -16,9 +17,7 @@
 			id = '/(marketing)'
 		}
 
-		window.goatcounter?.count({
-			path: id,
-		})
+		trackPageView(id)
 	})
 
 	$effect(() => {

@@ -61,15 +61,6 @@ declare global {
 		beforeinstallprompt: BeforeInstallPromptEvent
 	}
 
-	interface GoatCounter {
-		count: (data: { path: string; title?: string; event?: boolean }) => void
-	}
-
-	interface Window {
-		/** Analytics. If ad blocker blocks it this will be undefined */
-		goatcounter?: GoatCounter
-	}
-
 	// All modern browsers use PointerEvent instead of MouseEvent for
 	// click, dblclick, and contextmenu. Since we can't change global
 	// type easily we just add missing properties to MouseEvent to make it compatible with PointerEvent.
