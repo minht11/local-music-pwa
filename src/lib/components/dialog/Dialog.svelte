@@ -1,6 +1,6 @@
 <script module lang="ts">
 	import type { AnimationConfig } from 'svelte/animate'
-	import { type AnimationSequence, timeline } from '$lib/helpers/animations.ts'
+	import { type AnimationSequence, animateBackdrop, timeline } from '$lib/helpers/animations.ts'
 	import Icon, { type IconType } from '../icon/Icon.svelte'
 
 	export interface DialogOpenAccessor<S> {
@@ -88,35 +88,16 @@
 
 	const wholeAnimationDuration = 400
 
-	const animateBackdrop = (dialog: HTMLDialogElement, isOut = false) => {
-		try {
-			dialog.animate(
-				{
-					opacity: isOut ? [1, 0] : [0, 1],
-				},
-				{
-					pseudoElement: '::backdrop',
-					duration: 300,
-					easing: 'linear',
-					fill: isOut ? 'forwards' : undefined,
-				},
-			)
-		} catch (err) {
-			// Firefox does not support pseudo-element animations
-			// https://bugzilla.mozilla.org/show_bug.cgi?id=1770591
-			if (import.meta.env.DEV) {
-				console.warn(err)
-			}
-		}
-	}
-
 	const animateIn = (dialog: HTMLDialogElement) => {
 		const { dialogHeader, dialogBody, dialogFooter } = getParts(dialog)
 
 		const fade = (el: HTMLElement | null): AnimationSequence | null =>
 			el ? [el, { opacity: [0, 1] }, { duration: 300, at: '<' }] : null
 
-		animateBackdrop(dialog)
+		animateBackdrop(dialog, {
+			duration: 300,
+			easing: 'linear',
+		})
 
 		const frames: readonly AnimationSequence[] = [
 			[
@@ -154,7 +135,11 @@
 		const fade = (el: HTMLElement | null): AnimationSequence | null =>
 			el ? [el, { opacity: [1, 0] }, { duration: 300, at: '<' }] : null
 
-		animateBackdrop(dialog, true)
+		animateBackdrop(dialog, {
+			isOut: true,
+			duration: 300,
+			easing: 'linear',
+		})
 
 		const frames: readonly AnimationSequence[] = [
 			[

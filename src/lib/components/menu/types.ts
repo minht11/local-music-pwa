@@ -23,12 +23,24 @@ interface MenuSize {
 	height?: number
 }
 
+interface MenuSheetOptions {
+	/** Set to false to always use a popup menu instead of a bottom sheet on mobile. Leave undefined for auto behavior. */
+	bottomSheet?: boolean
+}
+
 /** @public */
-export type MenuOptions = (MenuAnchorOptions | MenuPositionOptions) & MenuSize
+export type MenuOptions = (MenuAnchorOptions | MenuPositionOptions) & MenuSize & MenuSheetOptions
 
 /** @public */
 export interface MenuItem {
 	label: string
 	selected?: boolean
 	action: () => void
+}
+
+export interface MenuInternalData {
+	items: MenuItem[]
+	targetElement: HTMLElement
+	options?: MenuOptions
+	bottomSheet: boolean
 }
