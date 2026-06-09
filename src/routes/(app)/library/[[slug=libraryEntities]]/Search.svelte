@@ -89,12 +89,7 @@
 
 	<Separator vertical class="my-auto hidden h-6 @sm:flex" />
 
-	<MenuButton
-		ariaLabel={m.libraryToggleSortOrder()}
-		tooltip={m.libraryOpenApplicationMenu()}
-		menuItems={generalMenuItems}
-		width={200}
-	/>
+	<MenuButton tooltip={m.libraryOpenApplicationMenu()} menuItems={generalMenuItems} width={200} />
 </div>
 
 <style>

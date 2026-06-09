@@ -98,7 +98,7 @@
 		</Button>
 
 		<IconButton
-			tooltip={m.libraryAddToPlaylist()}
+			tooltip={m.cancel()}
 			icon="close"
 			onclick={() => {
 				selection.cancelSelection()
