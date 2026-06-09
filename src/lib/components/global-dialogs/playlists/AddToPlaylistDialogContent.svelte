@@ -7,6 +7,7 @@
 	import TextField from '$lib/components/TextField.svelte'
 	import { getDatabase } from '$lib/db/database.ts'
 	import { createInlineQuery } from '$lib/db/query/inline-query.svelte'
+	import { foldForSearch } from '$lib/helpers/utils/text.ts'
 	import { getLibraryItemIds } from '$lib/library/get/ids'
 	import { dbBatchModifyPlaylistsSelection } from '$lib/library/playlists-actions'
 
@@ -25,8 +26,8 @@
 			getLibraryItemIds('playlists', {
 				sort: 'createdAt',
 				order: 'desc',
-				searchTerm: searchTerm.trim().toLowerCase(),
-				searchFn: (p, term) => p.name.trim().toLowerCase().includes(term),
+				searchTerm: foldForSearch(searchTerm.trim()),
+				searchFn: (p, term) => foldForSearch(p.name).includes(term),
 			}),
 		onDatabaseChange: (changes) => {
 			for (const change of changes) {

@@ -1,6 +1,7 @@
 import type { DbValue } from '$lib/db/database.ts'
+import { foldForSearch } from '$lib/helpers/utils/text.ts'
 import type { LibraryItemSortKey } from '$lib/library/get/ids.ts'
-import type { LibraryStoreName } from '$lib/library/types'
+import { type LibraryStoreName, UNKNOWN_ITEM } from '$lib/library/types'
 
 export type LibrarySearchFn<Value> = (value: Value, searchTerm: string) => boolean
 
@@ -17,8 +18,13 @@ export interface LibraryRouteConfig<Slug extends LibraryStoreName> {
 	sortOptions: () => SortOption<Slug>[]
 }
 
-const includesTerm = (target: string | undefined | null, term: string) =>
-	target?.toLowerCase().includes(term)
+const includesTerm = (target: string | undefined | null, term: string): boolean => {
+	if (!target || target === UNKNOWN_ITEM) {
+		return false
+	}
+
+	return foldForSearch(target).includes(term)
+}
 
 const artistsIncludesTerm = (item: { artists: string[] | undefined }, term: string) =>
 	item.artists?.some((artist) => includesTerm(artist, term)) ?? false
