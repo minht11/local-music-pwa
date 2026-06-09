@@ -7,7 +7,6 @@
 	import TextField from '$lib/components/TextField.svelte'
 	import { getDatabase } from '$lib/db/database.ts'
 	import { createInlineQuery } from '$lib/db/query/inline-query.svelte'
-	import { createQuery } from '$lib/db/query/query.ts'
 	import { getLibraryItemIds } from '$lib/library/get/ids'
 	import { dbBatchModifyPlaylistsSelection } from '$lib/library/playlists-actions'
 
@@ -40,37 +39,28 @@
 		},
 	})
 
-	const playlistsIds = $derived(await getPlaylists())
+	const getInitialTrackPlaylists = async () => {
+		const selectionMap = new SvelteMap</* playlist id */ number, SelectionStatus>()
 
-	const initialTrackPlaylists = createQuery({
-		// We only care about initial values
-		key: [],
-		fetcher: async () => {
-			const firstTrackId = trackIds.at(0)
-			// In case there are multiple track ids, we treat as if there are no items added in the playlist
-			if (trackIds.length > 1 || !firstTrackId) {
-				return null
-			}
+		const firstTrackId = trackIds.at(0)
+		// In case there are multiple track ids, we treat as if there are no items added in the playlist
+		if (trackIds.length > 1 || !firstTrackId) {
+			return selectionMap
+		}
 
-			const db = await getDatabase()
-			const items = await db.getAllFromIndex('playlistEntries', 'trackId', firstTrackId)
+		const db = await getDatabase()
+		const items = await db.getAllFromIndex('playlistEntries', 'trackId', firstTrackId)
 
-			return items
-		},
-	})
+		for (const playlistEntry of items) {
+			selectionMap.set(playlistEntry.playlistId, 'added-already')
+		}
+
+		return selectionMap
+	}
+
+	const selection = await getInitialTrackPlaylists()
 
 	type SelectionStatus = 'added-already' | 'add' | 'remove'
-	const selection = new SvelteMap</* playlist id */ number, SelectionStatus>()
-
-	$effect(() => {
-		if (initialTrackPlaylists.status === 'loaded') {
-			untrack(() => {
-				for (const playlistEntry of initialTrackPlaylists.value ?? []) {
-					selection.set(playlistEntry.playlistId, 'added-already')
-				}
-			})
-		}
-	})
 
 	const isTrackInPlaylist = (playlistId: number) => {
 		const selectionState = selection.get(playlistId)
@@ -129,7 +119,7 @@
 <Separator />
 <ScrollContainer class="max-h-100 grow overflow-auto px-2 py-4">
 	<PlaylistListContainer
-		items={playlistsIds}
+		items={await getPlaylists()}
 		onItemClick={(item) => {
 			toggleSelection(item.playlist.id)
 		}}
