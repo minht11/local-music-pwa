@@ -214,9 +214,13 @@
 			"includes": ["**/*.svelte", "!**/*.svelte.ts"],
 			"linter": {
 				"rules": {
+					// Disabled because of false positives
 					"correctness": {
 						"noUnusedVariables": "off",
 						"noUnusedFunctionParameters": "off"
+					},
+					"style": {
+						"noRestrictedGlobals": "off"
 					}
 				}
 			}

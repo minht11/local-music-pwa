@@ -267,12 +267,19 @@ const getCachedOrFetchValue = <Store extends LibraryStoreName>(
 
 	const promise = fetchValue()
 		.then((value) => {
-			valueCache.set(key, value)
+			// A database change may have invalidated this entry while the fetch
+			// was in flight, so the resolved value can already be stale. Only
+			// cache it if this fetch is still the current entry.
+			if (valueCache.get(key) === promise) {
+				valueCache.set(key, value)
+			}
 
 			return value
 		})
 		.catch((error) => {
-			valueCache.delete(key)
+			if (valueCache.get(key) === promise) {
+				valueCache.delete(key)
+			}
 			throw error
 		})
 
