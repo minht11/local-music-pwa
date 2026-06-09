@@ -60,6 +60,14 @@
 						"filenameCases": ["kebab-case", "export", "PascalCase"]
 					}
 				},
+				"noRestrictedGlobals": {
+					"level": "error",
+					"options": {
+						"deniedGlobals": {
+							"IDBKeyRange": "Use $lib/db/key-range.ts instead which provides proper types."
+						}
+					}
+				},
 				"useThrowNewError": "error",
 				"useThrowOnlyError": "error",
 				"useConsistentBuiltinInstantiation": "error",

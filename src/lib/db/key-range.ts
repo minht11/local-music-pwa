@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noRestrictedGlobals: implementation of typed IDBKeyRange */
 import type { AppDB, AppIndexNames, AppStoreNames } from './database.ts'
 
 type IndexKey<
