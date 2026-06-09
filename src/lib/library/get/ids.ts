@@ -1,5 +1,6 @@
 import type { IDBPIndex } from 'idb'
 import { type AppDB, type AppIndexNames, getDatabase } from '$lib/db/database.ts'
+import { keyRangeOnly, keyRangePrefix } from '$lib/db/key-range.ts'
 import type { LibraryStoreName } from '../types.ts'
 
 export type SortOrder = 'asc' | 'desc'
@@ -78,7 +79,7 @@ export const dbGetAlbumTracksIdsByName = async (albumName: string): Promise<numb
 	const tracksIds = await db.getAllKeysFromIndex(
 		'tracks',
 		'byAlbumSorted',
-		IDBKeyRange.bound([albumName], [albumName, '\uffff']),
+		keyRangePrefix<'tracks', 'byAlbumSorted'>([albumName]),
 	)
 
 	return tracksIds
@@ -89,7 +90,7 @@ export const dbGetArtistTracksIdsByName = async (artistName: string): Promise<nu
 	const tracksIds = await db.getAllKeysFromIndex(
 		'tracks',
 		'artists',
-		IDBKeyRange.only(artistName),
+		keyRangeOnly<'tracks', 'artists'>(artistName),
 	)
 
 	return tracksIds

@@ -1,6 +1,7 @@
 import { error, redirect } from '@sveltejs/kit'
 import { goto } from '$app/navigation'
 import { type DbValue, getDatabase } from '$lib/db/database.ts'
+import { keyRangeOnly } from '$lib/db/key-range.ts'
 import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
 import { dbGetAlbumTracksIdsByName } from '$lib/library/get/ids.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
@@ -57,7 +58,11 @@ const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 			if (storeName === 'albums') {
 				keys = await dbGetAlbumTracksIdsByName(name)
 			} else {
-				keys = await db.getAllKeysFromIndex('tracks', 'artists', IDBKeyRange.only(name))
+				keys = await db.getAllKeysFromIndex(
+					'tracks',
+					'artists',
+					keyRangeOnly<'tracks', 'artists'>(name),
+				)
 			}
 
 			return { tracksIds: keys, playlistIdMap: null }

@@ -28,7 +28,7 @@ export interface AppDB extends DBSchema {
 			| 'scannedAt'
 		> & {
 			path: [directoryId: number, fileName: string]
-			byAlbumSorted: [album: string, name: string, trackNo: number, discNo: number]
+			byAlbumSorted: [album: string, discNo: number, trackNo: number, name: string]
 		}
 		meta: {
 			operations: DbStandardChange<'tracks'>

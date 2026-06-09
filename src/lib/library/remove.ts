@@ -1,6 +1,7 @@
 import type { IDBPTransaction } from 'idb'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
+import { keyRangeOnly } from '$lib/db/key-range.ts'
 import type { Track } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<
@@ -78,7 +79,7 @@ const dbRemoveUnusedAlbumsWithTx = async (
 
 	const changes: DatabaseChangeDetails[] = []
 	for (const albumName of dedupe(albumNames)) {
-		const albumNameKey = IDBKeyRange.only(albumName)
+		const albumNameKey = keyRangeOnly<'tracks', 'album'>(albumName)
 		const tracksWithAlbumCount = await tracksByAlbum.count(albumNameKey)
 		if (tracksWithAlbumCount > 0) {
 			continue
@@ -109,7 +110,7 @@ const dbRemoveUnusedArtistsWithTx = async (
 
 	const changes: DatabaseChangeDetails[] = []
 	for (const artistName of dedupe(artistNames)) {
-		const artistNameKey = IDBKeyRange.only(artistName)
+		const artistNameKey = keyRangeOnly<'tracks', 'artists'>(artistName)
 		const tracksWithArtistCount = await tracksByArtist.count(artistNameKey)
 		if (tracksWithArtistCount > 0) {
 			continue
@@ -219,7 +220,7 @@ export const dbRemoveArtist = async (artistId: number): Promise<void> => {
 	const tracksIds = await tx
 		.objectStore('tracks')
 		.index('artists')
-		.getAllKeys(IDBKeyRange.only(artist.name))
+		.getAllKeys(keyRangeOnly<'tracks', 'artists'>(artist.name))
 
 	await tx.done
 

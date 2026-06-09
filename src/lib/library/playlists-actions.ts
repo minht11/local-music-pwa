@@ -1,6 +1,7 @@
 import type { IDBPObjectStore } from 'idb'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
+import { keyRangePrefix } from '$lib/db/key-range.ts'
 import { createUIAction } from '$lib/helpers/ui-action.ts'
 import { truncate } from '$lib/helpers/utils/text.ts'
 import type { Playlist, PlaylistEntry } from '$lib/library/types.ts'
@@ -102,7 +103,7 @@ export const dbRemovePlaylist = async (playlistId: number): Promise<void> => {
 
 	const entriesIds = await entriesStore
 		.index('playlistTrack')
-		.getAllKeys(IDBKeyRange.bound([playlistId], [playlistId + 1], false, true))
+		.getAllKeys(keyRangePrefix<'playlistEntries', 'playlistTrack'>([playlistId]))
 
 	await Promise.all([
 		...entriesIds.map((id) => entriesStore.delete(id)),
