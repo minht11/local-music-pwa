@@ -1,4 +1,5 @@
 import { isSafari as isSafariCheck } from '$lib/helpers/utils/ua.ts'
+import type { ImageRecord } from '$lib/library/types.ts'
 import { getPrimaryColor } from './image-primary-color.ts'
 
 const getSmallImageDimensions = (
@@ -22,19 +23,15 @@ const getSmallImageDimensions = (
 	return [Math.floor(smallerTarget * ratio), smallerTarget]
 }
 
-export interface ArtworkRelatedData {
-	image: {
-		optimized: boolean
-		full: Blob
-		small: Blob
-	}
-	primaryColor: number | undefined
-}
-
 const isSafari = isSafariCheck()
 
-/** @public */
-export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRelatedData> => {
+/**
+ * Builds a content-addressed {@link ImageRecord} from the original artwork
+ * bytes. `id` must be the SHA-256 hex of `imageBlob` (see `sha256Hex`); the
+ * output is deterministic per content
+ * @public
+ */
+export const createImageRecord = async (imageBlob: Blob, id: string): Promise<ImageRecord> => {
 	let bitmap: ImageBitmap | undefined
 	try {
 		bitmap = await createImageBitmap(imageBlob)
@@ -52,25 +49,23 @@ export const getArtworkRelatedData = async (imageBlob: Blob): Promise<ArtworkRel
 		const primaryColor = getPrimaryColor(data, tw, th)
 
 		return {
-			image: {
-				optimized: true,
-				full: imageBlob,
-				small: await canvas.convertToBlob({
-					type: isSafari ? 'image/png' : 'image/webp',
-					quality: 0.7,
-				}),
-			},
+			id,
+			optimized: true,
+			full: imageBlob,
+			small: await canvas.convertToBlob({
+				type: isSafari ? 'image/png' : 'image/webp',
+				quality: 0.7,
+			}),
 			primaryColor,
 		}
 	} catch (err) {
 		console.error('Failed to optimize artwork', err)
 
 		return {
-			image: {
-				optimized: false,
-				full: imageBlob,
-				small: imageBlob,
-			},
+			id,
+			optimized: false,
+			full: imageBlob,
+			small: imageBlob,
 			primaryColor: undefined,
 		}
 	} finally {

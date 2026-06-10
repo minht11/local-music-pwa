@@ -2,11 +2,12 @@ import type { IDBPTransaction } from 'idb'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { keyRangeOnly } from '$lib/db/key-range.ts'
+import { dbDeleteOrphanedImagesWithTx } from './image-gc.ts'
 import type { Track } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<
 	AppDB,
-	('tracks' | 'albums' | 'artists' | 'playlistEntries' | 'playHistory')[],
+	('tracks' | 'albums' | 'artists' | 'playlistEntries' | 'playHistory' | 'images')[],
 	'readwrite'
 >
 
@@ -78,6 +79,7 @@ const dbRemoveUnusedAlbumsWithTx = async (
 	const albumsStore = tx.objectStore('albums')
 
 	const changes: DatabaseChangeDetails[] = []
+	const imageIds: (string | undefined)[] = []
 	for (const albumName of dedupe(albumNames)) {
 		const albumNameKey = keyRangeOnly<'tracks', 'album'>(albumName)
 		const tracksWithAlbumCount = await tracksByAlbum.count(albumNameKey)
@@ -91,6 +93,7 @@ const dbRemoveUnusedAlbumsWithTx = async (
 		}
 
 		await albumsStore.delete(album.id)
+		imageIds.push(album.imageId)
 		changes.push({
 			storeName: 'albums',
 			key: album.id,
@@ -98,7 +101,7 @@ const dbRemoveUnusedAlbumsWithTx = async (
 		})
 	}
 
-	return changes
+	return { changes, imageIds }
 }
 
 const dbRemoveUnusedArtistsWithTx = async (
@@ -139,7 +142,7 @@ export const dbRemoveTracks = async (trackIds: readonly number[]): Promise<void>
 
 	const db = await getDatabase()
 	const tx = db.transaction(
-		['tracks', 'albums', 'artists', 'playlistEntries', 'playHistory'],
+		['tracks', 'albums', 'artists', 'playlistEntries', 'playHistory', 'images'],
 		'readwrite',
 	)
 
@@ -157,7 +160,7 @@ export const dbRemoveTracks = async (trackIds: readonly number[]): Promise<void>
 		existingTracks.map((track) => tracksStore.delete(track.id).then(() => track.id)),
 	)
 
-	const [albumChanges, playlistChanges, historyChange, artistChanges] = await Promise.all([
+	const [albumResult, playlistChanges, historyChange, artistChanges] = await Promise.all([
 		dbRemoveUnusedAlbumsWithTx(
 			tx,
 			existingTracks.map((track) => track.album),
@@ -170,6 +173,15 @@ export const dbRemoveTracks = async (trackIds: readonly number[]): Promise<void>
 		),
 	])
 
+	const imageGcChanges = await dbDeleteOrphanedImagesWithTx(
+		{
+			tracksByImage: tx.objectStore('tracks').index('imageId'),
+			albumsByImage: tx.objectStore('albums').index('imageId'),
+			imagesStore: tx.objectStore('images'),
+		},
+		[...existingTracks.map((track) => track.imageId), ...albumResult.imageIds],
+	)
+
 	const changes = [
 		...existingTrackIds.map(
 			(trackId): DatabaseChangeDetails => ({
@@ -179,9 +191,10 @@ export const dbRemoveTracks = async (trackIds: readonly number[]): Promise<void>
 			}),
 		),
 		historyChange,
-		...albumChanges,
+		...albumResult.changes,
 		...artistChanges,
 		...playlistChanges,
+		...imageGcChanges,
 	].filter((change) => change !== undefined)
 
 	await tx.done

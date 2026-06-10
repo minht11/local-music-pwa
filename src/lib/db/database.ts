@@ -4,6 +4,7 @@ import type {
 	Album,
 	Artist,
 	Directory,
+	ImageRecord,
 	PlayHistoryEntry,
 	Playlist,
 	PlaylistEntry,
@@ -26,6 +27,7 @@ export interface AppDB extends DBSchema {
 			| 'directory'
 			| 'fileName'
 			| 'scannedAt'
+			| 'imageId'
 		> & {
 			path: [directoryId: number, fileName: string]
 			byAlbumSorted: [album: string, discNo: number, trackNo: number, name: string]
@@ -37,9 +39,17 @@ export interface AppDB extends DBSchema {
 	albums: {
 		key: number
 		value: Album
-		indexes: Pick<Album, 'uuid' | 'name' | 'artists' | 'year'>
+		indexes: Pick<Album, 'uuid' | 'name' | 'artists' | 'year' | 'imageId'>
 		meta: {
 			operations: DbStandardChange<'albums'>
+		}
+	}
+	images: {
+		key: string
+		value: ImageRecord
+		indexes: Record<string, never>
+		meta: {
+			operations: DbStandardChange<'images'>
 		}
 	}
 	artists: {
@@ -113,7 +123,7 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 	})
 
 const openAppDatabase = () =>
-	openDB<AppDB>('snae-app-data', 3, {
+	openDB<AppDB>('snae-app-data', 4, {
 		async upgrade(db, oldVersion, _newVersion, tx) {
 			const { objectStoreNames } = db
 
@@ -153,6 +163,12 @@ const openAppDatabase = () =>
 				)
 			}
 
+			// v4: content-addressed artwork dedup. The index is sparse, so legacy
+			// tracks without `imageId` simply don't appear (correct for GC counting).
+			if (!tracksStore.indexNames.contains('imageId')) {
+				tracksStore.createIndex('imageId', 'imageId', { unique: false })
+			}
+
 			if (oldVersion === 1) {
 				// Previous versions didn't have discNo and trackNo fields
 				for await (const cursor of tracksStore) {
@@ -179,6 +195,17 @@ const openAppDatabase = () =>
 					unique: false,
 					multiEntry: true,
 				})
+			}
+
+			// v4: content-addressed artwork dedup (see tracks `imageId` index above).
+			const albumsStore = tx.objectStore('albums')
+			if (!albumsStore.indexNames.contains('imageId')) {
+				albumsStore.createIndex('imageId', 'imageId', { unique: false })
+			}
+
+			if (!objectStoreNames.contains('images')) {
+				// Keyed by the SHA-256 hex digest of the original artwork bytes.
+				db.createObjectStore('images', { keyPath: 'id' })
 			}
 
 			if (!objectStoreNames.contains('artists')) {

@@ -26,8 +26,13 @@ export type UnknownItem = typeof UNKNOWN_ITEM
  * Version number for the metadata schema stored in the database.
  * Increment this whenever new metadata fields are added so when rescanning tracks
  * existing tracks can be updated.
+ *
+ * v1: added format.codec
+ *
+ * v2: artwork moved out of tracks/albums into the content-addressed `images`
+ * store referenced by `imageId`.
  */
-export const CURRENT_METADATA_VERSION = 1
+export const CURRENT_METADATA_VERSION = 2
 
 export type StringOrUnknownItem = (string & {}) | UnknownItem
 
@@ -48,6 +53,10 @@ export interface ParsedTrackData {
 	discNo: number
 	discOf: number
 	language?: string
+	imageId?: string
+	/**
+	 * @deprecated Legacy inline artwork blobs. Present only on tracks scanned before metadata v2;
+	 */
 	image?: {
 		optimized: boolean
 		small: Blob
@@ -76,7 +85,23 @@ export interface Album extends BaseMusicItem {
 	uuid: string
 	artists: string[]
 	year?: string
+	/** Reference into the content-addressed `images` store. */
+	imageId?: string
+	/**
+	 * @deprecated Legacy inline artwork blob. Present only on albums created
+	 * before metadata v2; new albums use {@link Album.imageId}. Read paths still
+	 * fall back to this for unmigrated records.
+	 */
 	image?: Blob
+}
+
+export interface ImageRecord {
+	/** SHA-256 hex digest of the original embedded picture bytes */
+	id: string
+	optimized: boolean
+	full: Blob
+	small: Blob
+	primaryColor?: number
 }
 
 export interface Artist extends BaseMusicItem {

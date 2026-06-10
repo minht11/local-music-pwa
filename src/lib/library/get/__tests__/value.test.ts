@@ -118,6 +118,77 @@ describe('getLibraryValue', () => {
 			expect(result).toBeUndefined()
 		})
 
+		it('should join artwork from the images store via imageId', async () => {
+			const db = await getDatabase()
+
+			const full = new Blob(['full'], { type: 'image/jpeg' })
+			const small = new Blob(['small'], { type: 'image/webp' })
+			await db.add('images', {
+				id: 'img-1',
+				optimized: true,
+				full,
+				small,
+				primaryColor: 0xff_00_00_00,
+			})
+
+			await db.add('tracks', {
+				id: 1,
+				name: 'Test Track',
+				album: 'Test Album',
+				artists: ['Test Artist'],
+				uuid: 'track-uuid-1',
+				year: '2023',
+				duration: 180,
+				genre: ['Rock'],
+				trackNo: 1,
+				trackOf: 10,
+				discNo: 1,
+				discOf: 1,
+				file: {} as File,
+				scannedAt: 1_234_567_890,
+				fileName: 'test-track.mp3',
+				directory: 1,
+				imageId: 'img-1',
+			})
+
+			const result = await getLibraryValue('tracks', 1)
+
+			// The track has no inline image, so a populated `image` proves the
+			// images-store join (rather than a legacy passthrough) happened.
+			expect(result.image?.optimized).toBe(true)
+			expect(result.image?.full).toBeDefined()
+			expect(result.image?.small).toBeDefined()
+		})
+
+		it('should fall back to legacy inline image when no imageId is set', async () => {
+			const db = await getDatabase()
+
+			const legacyImage = { optimized: false, small: {} as Blob, full: {} as Blob }
+			await db.add('tracks', {
+				id: 1,
+				name: 'Test Track',
+				album: 'Test Album',
+				artists: ['Test Artist'],
+				uuid: 'track-uuid-1',
+				year: '2023',
+				duration: 180,
+				genre: ['Rock'],
+				trackNo: 1,
+				trackOf: 10,
+				discNo: 1,
+				discOf: 1,
+				file: {} as File,
+				scannedAt: 1_234_567_890,
+				fileName: 'test-track.mp3',
+				directory: 1,
+				image: legacyImage,
+			})
+
+			const result = await getLibraryValue('tracks', 1)
+
+			expect(result.image).toEqual(legacyImage)
+		})
+
 		it('should return cached value on subsequent calls', async () => {
 			const db = await getDatabase()
 
@@ -173,6 +244,32 @@ describe('getLibraryValue', () => {
 				...albumData,
 				type: 'album',
 			})
+		})
+
+		it('should join artwork from the images store via imageId', async () => {
+			const db = await getDatabase()
+
+			const full = new Blob(['full'], { type: 'image/jpeg' })
+			await db.add('images', {
+				id: 'album-img',
+				optimized: true,
+				full,
+				small: new Blob(['small'], { type: 'image/webp' }),
+			})
+
+			await db.add('albums', {
+				id: 1,
+				name: 'Test Album',
+				uuid: 'album-uuid-1',
+				artists: ['Test Artist'],
+				year: '2023',
+				imageId: 'album-img',
+			})
+
+			const result = await getLibraryValue('albums', 1)
+
+			// No inline image on the album, so a populated `image` proves the join.
+			expect(result.image).toBeDefined()
 		})
 
 		it('should throw LibraryValueNotFoundError for non-existent album', async () => {

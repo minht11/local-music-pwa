@@ -10,9 +10,12 @@ import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { dbCreatePlaylist } from '$lib/library/playlists-actions.ts'
 import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTracks } from '$lib/library/remove.ts'
 import { dbImportTrack } from '$lib/library/scan-actions/scanner/import-track.ts'
-import type { PlaylistEntry, UnknownTrack } from '$lib/library/types.ts'
+import type { ImageRecord, PlaylistEntry, UnknownTrack } from '$lib/library/types.ts'
 
-const dbImportTestTrack = (overrides: Partial<UnknownTrack> = {}): Promise<number> => {
+const dbImportTestTrack = (
+	overrides: Partial<UnknownTrack> = {},
+	imageRecord?: ImageRecord,
+): Promise<number> => {
 	const trackData: UnknownTrack = {
 		uuid: crypto.randomUUID(),
 		name: 'Test Track',
@@ -29,11 +32,20 @@ const dbImportTestTrack = (overrides: Partial<UnknownTrack> = {}): Promise<numbe
 		scannedAt: Date.now(),
 		fileName: 'test.mp3',
 		directory: 1,
+		imageId: imageRecord?.id,
 		...overrides,
 	}
 
-	return dbImportTrack(trackData, undefined)
+	return dbImportTrack(trackData, undefined, imageRecord)
 }
+
+const makeImageRecord = (id: string): ImageRecord => ({
+	id,
+	optimized: true,
+	full: new Blob([id], { type: 'image/jpeg' }),
+	small: new Blob([`${id}-small`], { type: 'image/webp' }),
+	primaryColor: 0xff_11_22_33,
+})
 
 const createTestPlaylist = async (name = 'Test Playlist'): Promise<number> =>
 	dbCreatePlaylist(name, '')
@@ -230,6 +242,83 @@ describe('remove functions', () => {
 
 		it('should return early for empty input', async () => {
 			await expect(dbRemoveTracks([])).resolves.toBeUndefined()
+		})
+	})
+
+	describe('artwork dedup garbage collection', () => {
+		it('should keep a shared image while any track or album still references it', async () => {
+			const image = makeImageRecord('shared-image')
+			const track1Id = await dbImportTestTrack({ name: 'Track 1' }, image)
+			await dbImportTestTrack({ name: 'Track 2' }, image)
+
+			await dbGetAllAndExpectLength('images', 1)
+
+			await dbRemoveTracks([track1Id])
+
+			// Track 2 and the album still reference it.
+			await dbGetAllAndExpectLength('images', 1)
+		})
+
+		it('should keep an image referenced only by an album when its art-bearing track is removed', async () => {
+			const image = makeImageRecord('album-image')
+			// Only the first track carries artwork; the album adopts its imageId.
+			const artTrackId = await dbImportTestTrack({ name: 'Track 1' }, image)
+			await dbImportTestTrack({ name: 'Track 2' })
+
+			const albums = await dbGetAllAndExpectLength('albums', 1)
+			expect(albums[0]?.imageId).toBe('album-image')
+
+			await dbRemoveTracks([artTrackId])
+
+			// No track references it anymore, but the surviving album still does.
+			await dbGetAllAndExpectLength('images', 1)
+		})
+
+		it('should delete an image once its last track and album references are gone', async () => {
+			const image = makeImageRecord('lonely-image')
+			const track1Id = await dbImportTestTrack({ name: 'Track 1' }, image)
+			const track2Id = await dbImportTestTrack({ name: 'Track 2' }, image)
+
+			await dbRemoveTracks([track1Id, track2Id])
+
+			// Album is also cleaned up, so nothing references the image.
+			await dbGetAllAndExpectLength('albums', 0)
+			await dbGetAllAndExpectLength('images', 0)
+		})
+
+		it('should delete the image when removing the album cascades track removal', async () => {
+			const image = makeImageRecord('cascade-image')
+			await dbImportTestTrack({ name: 'Track 1' }, image)
+			await dbImportTestTrack({ name: 'Track 2' }, image)
+
+			const albums = await dbGetAllAndExpectLength('albums', 1)
+			const albumId = albums[0]?.id
+			expectToBeDefined(albumId)
+
+			await dbRemoveAlbum(albumId)
+
+			await dbGetAllAndExpectLength('tracks', 0)
+			await dbGetAllAndExpectLength('images', 0)
+		})
+
+		it('should keep distinct images and only collect the orphaned one', async () => {
+			const imageA = makeImageRecord('image-a')
+			const imageB = makeImageRecord('image-b')
+			const trackAId = await dbImportTestTrack(
+				{ name: 'Track A', album: 'Album A', artists: ['Artist A'] },
+				imageA,
+			)
+			await dbImportTestTrack(
+				{ name: 'Track B', album: 'Album B', artists: ['Artist B'] },
+				imageB,
+			)
+
+			await dbGetAllAndExpectLength('images', 2)
+
+			await dbRemoveTracks([trackAId])
+
+			const remaining = await dbGetAllAndExpectLength('images', 1)
+			expect(remaining[0]?.id).toBe('image-b')
 		})
 	})
 

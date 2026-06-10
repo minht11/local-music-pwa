@@ -61,8 +61,19 @@ const trackConfig: QueryConfig<TrackData> = {
 			return undefined
 		}
 
+		// Join the content-addressed artwork (immutable, so a separate read is
+		// fine), falling back to any legacy inline blob on unmigrated tracks.
+		let image = item.image
+		if (item.imageId) {
+			const record = await db.get('images', item.imageId)
+			image = record
+				? { optimized: record.optimized, small: record.small, full: record.full }
+				: undefined
+		}
+
 		return {
 			...item,
+			image,
 			type: 'track',
 			favorite: !!favorite,
 		} as TrackData
@@ -111,7 +122,23 @@ export interface AlbumData extends Album {
 }
 
 const albumConfig: QueryConfig<AlbumData> = {
-	fetch: (id) => dbGetValue('albums', 'album', id),
+	fetch: async (id) => {
+		const db = await getDatabase()
+		const album = await db.get('albums', id)
+		if (!album) {
+			return undefined
+		}
+
+		// Join artwork from the content-addressed store, falling back to any
+		// legacy inline blob on unmigrated albums.
+		const image = album.imageId ? (await db.get('images', album.imageId))?.full : album.image
+
+		return {
+			...album,
+			image,
+			type: 'album',
+		}
+	},
 	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'albums'),
 }
 export interface ArtistData extends Artist {
