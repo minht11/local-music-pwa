@@ -28,9 +28,8 @@
 <script lang="ts">
 	let { open }: RemoveFromLibraryDialogProps = $props()
 
-	const removeSingle = createUIAction(
-		m.libraryItemRemovedFromLibrary(),
-		(store: LibraryStoreName, id: number) => {
+	const removeSingle = createUIAction({
+		action: (store: LibraryStoreName, id: number) => {
 			switch (store) {
 				case 'playlists':
 					return dbRemovePlaylist(id)
@@ -42,16 +41,13 @@
 					return dbRemoveArtist(id)
 			}
 		},
-	)
+		successMessage: m.libraryItemRemovedFromLibrary(),
+	})
 
-	const removeMultiple = createUIAction(
-		m.libraryItemsRemovedFromLibrary(),
-		(store: LibraryStoreName, ids: readonly number[]) => {
-			invariant(store === 'tracks', 'Only tracks can be removed in bulk')
-
-			return dbRemoveTracks(ids)
-		},
-	)
+	const removeMultipleTracks = createUIAction({
+		action: dbRemoveTracks,
+		successMessage: m.libraryItemsRemovedFromLibrary(),
+	})
 </script>
 
 <CommonDialog
@@ -80,7 +76,7 @@
 		open.close()
 
 		if (data.type === 'multiple') {
-			void removeMultiple(data.storeName, data.ids)
+			void removeMultipleTracks(data.ids)
 			return
 		}
 

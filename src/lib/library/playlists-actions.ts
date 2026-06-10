@@ -252,10 +252,10 @@ const dbRemoveTrackEntryFromPlaylist = async (playlistEntryId: number): Promise<
 	})
 }
 
-export const removeTrackEntryFromPlaylist = createUIAction(
-	m.libraryTrackRemovedFromPlaylist(),
-	(playlistEntryId: number) => dbRemoveTrackEntryFromPlaylist(playlistEntryId),
-)
+export const removeTrackEntryFromPlaylist = createUIAction({
+	action: dbRemoveTrackEntryFromPlaylist,
+	successMessage: m.libraryTrackRemovedFromPlaylist(),
+})
 
 const dbAddTrackToFavorites = async (trackId: number): Promise<void> => {
 	const db = await getDatabase()
