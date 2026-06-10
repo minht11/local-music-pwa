@@ -1,8 +1,8 @@
 import type { Handle } from '@sveltejs/kit'
 import { APP_DESCRIPTION_EN } from '$lib/app-metadata.ts'
 import { ICON_PATHS } from '$lib/components/icon/icon-paths.server.ts'
+import { THEME_PALLETTE_DARK, THEME_PALLETTE_LIGHT } from '$lib/server/theme-colors.ts'
 import { PUBLIC_FALLBACK_PAGE } from '$env/static/public'
-import { THEME_PALLETTE_DARK, THEME_PALLETTE_LIGHT } from './server/theme-colors.ts'
 
 declare const __IMPORT_MAP_LOADER_SCRIPT__: string
 

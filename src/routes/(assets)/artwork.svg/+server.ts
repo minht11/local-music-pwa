@@ -1,5 +1,5 @@
 import { ICON_PATHS } from '$lib/components/icon/icon-paths.server.ts'
-import { THEME_PALLETTE_DARK } from '../../../server/theme-colors.ts'
+import { THEME_PALLETTE_DARK } from '$lib/server/theme-colors.ts'
 
 const artwork = `
 <svg
