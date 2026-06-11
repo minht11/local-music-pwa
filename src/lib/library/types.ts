@@ -54,9 +54,7 @@ export interface ParsedTrackData {
 	discOf: number
 	language?: string
 	imageId?: string
-	/**
-	 * @deprecated Legacy inline artwork blobs. Present only on tracks scanned before metadata v2;
-	 */
+	/** @legacy Legacy inline artwork blobs. Present only on tracks scanned before metadata v2. */
 	image?: {
 		optimized: boolean
 		small: Blob
@@ -87,11 +85,7 @@ export interface Album extends BaseMusicItem {
 	year?: string
 	/** Reference into the content-addressed `images` store. */
 	imageId?: string
-	/**
-	 * @deprecated Legacy inline artwork blob. Present only on albums created
-	 * before metadata v2; new albums use {@link Album.imageId}. Read paths still
-	 * fall back to this for unmigrated records.
-	 */
+	/** @legacy Legacy inline artwork blob. Present only on tracks scanned before metadata v2. */
 	image?: Blob
 }
 

@@ -1,6 +1,7 @@
 import { WeakLRUCache } from 'weak-lru-cache'
 import { type DbKey, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, onDatabaseChange } from '$lib/db/events.ts'
+import { getCachedOrFetch } from '$lib/helpers/cached-fetch.ts'
 import type { Album, Artist, Playlist, Track } from '$lib/library/types.ts'
 import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryStoreName } from '../types.ts'
 
@@ -61,19 +62,8 @@ const trackConfig: QueryConfig<TrackData> = {
 			return undefined
 		}
 
-		// Join the content-addressed artwork (immutable, so a separate read is
-		// fine), falling back to any legacy inline blob on unmigrated tracks.
-		let image = item.image
-		if (item.imageId) {
-			const record = await db.get('images', item.imageId)
-			image = record
-				? { optimized: record.optimized, small: record.small, full: record.full }
-				: undefined
-		}
-
 		return {
 			...item,
-			image,
 			type: 'track',
 			favorite: !!favorite,
 		} as TrackData
@@ -129,13 +119,8 @@ const albumConfig: QueryConfig<AlbumData> = {
 			return undefined
 		}
 
-		// Join artwork from the content-addressed store, falling back to any
-		// legacy inline blob on unmigrated albums.
-		const image = album.imageId ? (await db.get('images', album.imageId))?.full : album.image
-
 		return {
 			...album,
-			image,
 			type: 'album',
 		}
 	},
@@ -283,38 +268,6 @@ const assertsValue = <T, AllowEmpty extends boolean = false>(
 	return value
 }
 
-const getCachedOrFetchValue = <Store extends LibraryStoreName>(
-	key: CacheKey<Store>,
-	fetchValue: () => Promise<GetLibraryValueResult<Store> | undefined>,
-): LibraryValue<Store> | Promise<LibraryValue<Store> | undefined> => {
-	const cachedValue = valueCache.get(key)
-	if (cachedValue) {
-		return cachedValue
-	}
-
-	const promise = fetchValue()
-		.then((value) => {
-			// A database change may have invalidated this entry while the fetch
-			// was in flight, so the resolved value can already be stale. Only
-			// cache it if this fetch is still the current entry.
-			if (valueCache.get(key) === promise) {
-				valueCache.set(key, value)
-			}
-
-			return value
-		})
-		.catch((error) => {
-			if (valueCache.get(key) === promise) {
-				valueCache.delete(key)
-			}
-			throw error
-		})
-
-	valueCache.set(key, promise)
-
-	return promise
-}
-
 export type GetLibraryValueResult<
 	Store extends LibraryStoreName,
 	AllowEmpty extends boolean = false,
@@ -327,7 +280,7 @@ export const getLibraryValue = <Store extends LibraryStoreName, AllowEmpty exten
 	allowEmpty?: AllowEmpty,
 ): Promise<GetLibraryValueResult<Store, AllowEmpty>> | GetLibraryValueResult<Store, AllowEmpty> => {
 	const key = getCacheKey(storeName, id)
-	const result = getCachedOrFetchValue(key, () => {
+	const result = getCachedOrFetch<CacheKey<Store>, LibraryValue<Store>>(valueCache, key, () => {
 		const config: LibraryConfigMap[Store] = libraryConfigMap[storeName]
 
 		return config.fetch(id)

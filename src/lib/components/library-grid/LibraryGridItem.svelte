@@ -4,7 +4,10 @@
 	import { page } from '$app/state'
 	import type { RouteId } from '$app/types'
 	import { ripple } from '$lib/attachments/ripple.ts'
-	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte.ts'
+	import {
+		createManagedArtwork,
+		getAlbumManagedArtworkSource,
+	} from '$lib/helpers/create-managed-artwork.svelte.ts'
 	import { dbGetAlbumTracksIdsByName, dbGetArtistTracksIdsByName } from '$lib/library/get/ids'
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
 	import { createLibraryValueQuery } from '$lib/library/get/value-queries'
@@ -48,8 +51,9 @@
 	const { value: item } = $derived(query)
 
 	const artworkSrc = createManagedArtwork(() => {
-		if (type === 'albums') {
-			return item ? (item as AlbumData).image : undefined
+		if (type === 'albums' && item) {
+			const album = item as AlbumData
+			return getAlbumManagedArtworkSource(album)
 		}
 
 		return undefined

@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/style/noRestrictedGlobals: structural typing of IDB store views */
+import { getDatabase } from '$lib/db/database'
 import type { DatabaseChangeDetails } from '$lib/db/events.ts'
 import { keyRangeOnly } from '$lib/db/key-range.ts'
 
@@ -58,4 +59,12 @@ export const dbDeleteOrphanedImagesWithTx = async (
 	}
 
 	return changes
+}
+
+/** @public */
+export const dbGetImageRecord = async (imageId: string) => {
+	const db = await getDatabase()
+	const record = await db.get('images', imageId)
+
+	return record
 }

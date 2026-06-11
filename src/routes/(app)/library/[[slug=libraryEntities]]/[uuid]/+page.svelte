@@ -7,14 +7,17 @@
 	import MenuButton from '$lib/components/MenuButton.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
-	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
+	import {
+		createManagedArtwork,
+		getAlbumManagedArtworkSource,
+	} from '$lib/helpers/create-managed-artwork.svelte.ts'
 	import { formatArtists, formatNameOrUnknown } from '$lib/helpers/utils/text.ts'
 	import type { AlbumData, TrackData } from '$lib/library/get/value.ts'
 	import {
 		FAVORITE_PLAYLIST_ID,
 		removeTrackEntryFromPlaylist,
 	} from '$lib/library/playlists-actions.ts'
-	import { type Album, type Playlist, UNKNOWN_ITEM } from '$lib/library/types.ts'
+	import { type Playlist, UNKNOWN_ITEM } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 
 	const { data } = $props()
@@ -45,7 +48,8 @@
 
 	const artworkSrc = createManagedArtwork(() => {
 		if (slug !== 'playlists') {
-			return (item as Album).image
+			const album = item as AlbumData
+			return getAlbumManagedArtworkSource(album)
 		}
 
 		return null
