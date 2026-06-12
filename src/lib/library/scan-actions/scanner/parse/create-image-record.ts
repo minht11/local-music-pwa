@@ -1,27 +1,6 @@
 import type { ImageRecord } from '$lib/library/types.ts'
 import { getPrimaryColor } from './image-primary-color.ts'
 
-const getSmallImageDimensions = (
-	originalWidth: number,
-	originalHeight: number,
-): [width: number, height: number] => {
-	const smallerTarget = Math.min(originalWidth, originalHeight, 100)
-
-	if (originalWidth === originalHeight) {
-		return [smallerTarget, smallerTarget]
-	}
-
-	if (originalWidth > originalHeight) {
-		const ratio = originalHeight / originalWidth
-
-		return [smallerTarget, Math.floor(smallerTarget * ratio)]
-	}
-
-	const ratio = originalWidth / originalHeight
-
-	return [Math.floor(smallerTarget * ratio), smallerTarget]
-}
-
 /**
  * Builds a content-addressed {@link ImageRecord} from the original artwork
  * bytes. `id` must be the SHA-256 hex of `imageBlob` (see `sha256Hex`); the
@@ -31,19 +10,25 @@ const getSmallImageDimensions = (
 export const createImageRecord = async (imageBlob: Blob, id: string): Promise<ImageRecord> => {
 	let bitmap: ImageBitmap | undefined
 	try {
-		bitmap = await createImageBitmap(imageBlob)
-		const [tw, th] = getSmallImageDimensions(bitmap.width, bitmap.height)
+		bitmap = await createImageBitmap(imageBlob, {
+			// Browser will keep aspect ratio. Most artworks are squares
+			// and cases where ratios are extremely different should be rare.
+			resizeWidth: 100,
+			resizeQuality: 'medium',
+		})
 
-		const canvas = new OffscreenCanvas(tw, th)
-		const ctx = canvas.getContext('2d')
+		const width = bitmap.width
+		const height = bitmap.height
+
+		const canvas = new OffscreenCanvas(width, height)
+		const ctx = canvas.getContext('2d', { willReadFrequently: true })
 		invariant(ctx)
 
-		// Draw smaller image version
-		ctx.drawImage(bitmap, 0, 0, tw, th)
+		ctx.drawImage(bitmap, 0, 0)
 
-		const data = ctx.getImageData(0, 0, tw, th).data
+		const data = ctx.getImageData(0, 0, width, height).data
 
-		const primaryColor = getPrimaryColor(data, tw, th)
+		const primaryColor = getPrimaryColor(data, width, height)
 
 		return {
 			id,
@@ -51,7 +36,6 @@ export const createImageRecord = async (imageBlob: Blob, id: string): Promise<Im
 			full: imageBlob,
 			small: await canvas.convertToBlob({
 				type: 'image/webp',
-				quality: 0.7,
 			}),
 			primaryColor,
 		}
