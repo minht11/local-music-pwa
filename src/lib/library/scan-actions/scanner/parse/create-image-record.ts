@@ -1,4 +1,3 @@
-import { isSafari as isSafariCheck } from '$lib/helpers/utils/ua.ts'
 import type { ImageRecord } from '$lib/library/types.ts'
 import { getPrimaryColor } from './image-primary-color.ts'
 
@@ -22,8 +21,6 @@ const getSmallImageDimensions = (
 
 	return [Math.floor(smallerTarget * ratio), smallerTarget]
 }
-
-const isSafari = isSafariCheck()
 
 /**
  * Builds a content-addressed {@link ImageRecord} from the original artwork
@@ -53,7 +50,7 @@ export const createImageRecord = async (imageBlob: Blob, id: string): Promise<Im
 			optimized: true,
 			full: imageBlob,
 			small: await canvas.convertToBlob({
-				type: isSafari ? 'image/png' : 'image/webp',
+				type: 'image/webp',
 				quality: 0.7,
 			}),
 			primaryColor,
