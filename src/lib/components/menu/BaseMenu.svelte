@@ -42,6 +42,18 @@
 		void Promise.resolve(closeAnimation(dialog)).then(() => onclose?.())
 	}
 
+	// Separators sit between item buttons, so focus moves through a button list
+	// instead of element siblings.
+	const moveFocus = (offset: number) => {
+		if (!dialog) {
+			return
+		}
+
+		const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>('button:not([disabled])'))
+		const currentIndex = buttons.indexOf(document.activeElement as HTMLButtonElement)
+		buttons[currentIndex + offset]?.focus()
+	}
+
 	const keydownHandler = (e: KeyboardEvent) => {
 		if (e.key === 'Escape') {
 			// Keep the dialog mounted until the exit animation completes instead
@@ -54,18 +66,12 @@
 
 		if (e.key === 'ArrowDown') {
 			e.preventDefault()
-			const next = dialog?.querySelector('button:focus')
-				?.nextElementSibling as HTMLButtonElement | null
-
-			next?.focus()
+			moveFocus(1)
 		}
 
 		if (e.key === 'ArrowUp') {
 			e.preventDefault()
-			const prev = dialog?.querySelector('button:focus')
-				?.previousElementSibling as HTMLButtonElement | null
-
-			prev?.focus()
+			moveFocus(-1)
 		}
 
 		onKeydown?.(e, close)
@@ -102,22 +108,26 @@
 
 	<div role={type} class="flex flex-col py-2">
 		{#each items as item}
-			<button
-				{@attach ripple()}
-				role={type === 'menu' ? 'menuitem' : 'option'}
-				type="button"
-				class={[
-					'interactable relative flex grow items-center px-4 py-2 text-left -outline-offset-2 select-none',
-					item.selected && 'bg-surfaceVariant text-primary',
-					textSize === 'lg' ? 'min-h-12 text-body-lg' : 'min-h-10 text-body-md',
-				]}
-				onclick={() => {
-					item.action()
-					close()
-				}}
-			>
-				{item.label}
-			</button>
+			{#if 'separator' in item}
+				<hr class="my-2 border-onSurfaceVariant/24" />
+			{:else}
+				<button
+					{@attach ripple()}
+					role={type === 'menu' ? 'menuitem' : 'option'}
+					type="button"
+					class={[
+						'interactable relative flex grow items-center px-4 py-2 text-left -outline-offset-2 select-none',
+						item.selected && 'bg-surfaceVariant text-primary',
+						textSize === 'lg' ? 'min-h-12 text-body-lg' : 'min-h-10 text-body-md',
+					]}
+					onclick={() => {
+						item.action()
+						close()
+					}}
+				>
+					{item.label}
+				</button>
+			{/if}
 		{/each}
 	</div>
 </dialog>
