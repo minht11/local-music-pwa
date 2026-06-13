@@ -195,13 +195,11 @@ export const dbRemoveTracks = async (trackIds: readonly number[]): Promise<void>
 		...artistChanges,
 		...playlistChanges,
 		...imageGcChanges,
-	].filter((change) => change !== undefined)
+	]
 
 	await tx.done
 
-	if (changes.length > 0) {
-		dispatchDatabaseChangedEvent(changes)
-	}
+	dispatchDatabaseChangedEvent(changes)
 }
 
 export const dbRemoveAlbum = async (albumId: number): Promise<void> => {

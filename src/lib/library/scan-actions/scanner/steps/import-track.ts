@@ -160,7 +160,7 @@ export const dbImportTrack = async (
 		{
 			storeName: 'tracks',
 			key: trackId,
-			operation: existingTrackId === trackId ? 'update' : 'add',
+			operation: existingTrackId === undefined ? 'add' : 'update',
 		},
 		albumChange,
 		...artistsChanges,

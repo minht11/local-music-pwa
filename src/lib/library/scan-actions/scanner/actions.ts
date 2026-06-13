@@ -26,6 +26,15 @@ interface TrackEnqueueOptions {
 	uuid?: string
 }
 
+interface ArtworkEntry {
+	imageHash: string
+	primaryColor: number | undefined
+	/** The full record, retained so imports can put-if-absent without re-decoding. */
+	record: ImageRecord
+}
+
+const MAX_CACHED_ARTWORKS = 64
+
 /**
  * A three-stage pipeline for track ingestion:
  * 1. [PARSING]  - Blocks the caller; processes one file at a time.
@@ -34,13 +43,6 @@ interface TrackEnqueueOptions {
  * - This "conveyor belt" allows the caller to parse the next track while
  * previous tracks progress through artwork and import stages concurrently.
  */
-interface ArtworkEntry {
-	imageHash: string
-	primaryColor: number | undefined
-	/** The full record, kept for the duration of the scan so imports can put-if-absent. */
-	record: ImageRecord
-}
-
 class TrackProcessor {
 	#artworkQueue = new SerialQueue()
 	#importQueue = new SerialQueue()
@@ -75,6 +77,13 @@ class TrackProcessor {
 			record,
 		}
 		this.#imageCache.set(hash, entry)
+
+		if (this.#imageCache.size > MAX_CACHED_ARTWORKS) {
+			const oldest = this.#imageCache.keys().next().value
+			if (oldest !== undefined) {
+				this.#imageCache.delete(oldest)
+			}
+		}
 
 		return entry
 	}
