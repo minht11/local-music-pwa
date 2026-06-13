@@ -83,7 +83,6 @@ export interface Album extends BaseMusicItem {
 	uuid: string
 	artists: string[]
 	year?: string
-	/** Reference into the content-addressed `images` store. */
 	imageHash?: string
 	/** @legacy Legacy inline artwork blob. Present only on tracks scanned before metadata v2. */
 	image?: Blob

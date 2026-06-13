@@ -87,8 +87,7 @@ const dbPutImageIfAbsentWithTx = async (
 ): Promise<DatabaseChangeDetails | undefined> => {
 	const store = tx.objectStore('images')
 
-	// Content-addressed: identical hash implies identical bytes, so skip rewriting
-	// the (potentially megabyte) blobs if the record already exists.
+	// If the image already exists, we can skip writing it again.
 	if (await store.getKey(imageRecord.hash)) {
 		return undefined
 	}
