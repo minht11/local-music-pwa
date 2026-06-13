@@ -30,7 +30,7 @@ export type UnknownItem = typeof UNKNOWN_ITEM
  * v1: added format.codec
  *
  * v2: artwork moved out of tracks/albums into the content-addressed `images`
- * store referenced by `imageId`.
+ * store referenced by `imageHash`.
  */
 export const CURRENT_METADATA_VERSION = 2
 
@@ -53,7 +53,7 @@ export interface ParsedTrackData {
 	discNo: number
 	discOf: number
 	language?: string
-	imageId?: string
+	imageHash?: string
 	/** @legacy Legacy inline artwork blobs. Present only on tracks scanned before metadata v2. */
 	image?: {
 		optimized: boolean
@@ -84,14 +84,14 @@ export interface Album extends BaseMusicItem {
 	artists: string[]
 	year?: string
 	/** Reference into the content-addressed `images` store. */
-	imageId?: string
+	imageHash?: string
 	/** @legacy Legacy inline artwork blob. Present only on tracks scanned before metadata v2. */
 	image?: Blob
 }
 
 export interface ImageRecord {
-	/** SHA-256 hex digest of the original embedded picture bytes */
-	id: string
+	/** SHA-256 hex digest of the original embedded picture bytes. Doubles as the primary key. */
+	hash: string
 	optimized: boolean
 	full: Blob
 	small: Blob

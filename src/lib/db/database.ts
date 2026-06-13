@@ -27,7 +27,7 @@ export interface AppDB extends DBSchema {
 			| 'directory'
 			| 'fileName'
 			| 'scannedAt'
-			| 'imageId'
+			| 'imageHash'
 		> & {
 			path: [directoryId: number, fileName: string]
 			byAlbumSorted: [album: string, discNo: number, trackNo: number, name: string]
@@ -39,7 +39,7 @@ export interface AppDB extends DBSchema {
 	albums: {
 		key: number
 		value: Album
-		indexes: Pick<Album, 'uuid' | 'name' | 'artists' | 'year' | 'imageId'>
+		indexes: Pick<Album, 'uuid' | 'name' | 'artists' | 'year' | 'imageHash'>
 		meta: {
 			operations: DbStandardChange<'albums'>
 		}
@@ -164,9 +164,9 @@ const openAppDatabase = () =>
 			}
 
 			// v4: content-addressed artwork dedup. The index is sparse, so legacy
-			// tracks without `imageId` simply don't appear (correct for GC counting).
-			if (!tracksStore.indexNames.contains('imageId')) {
-				tracksStore.createIndex('imageId', 'imageId', { unique: false })
+			// tracks without `imageHash` simply don't appear (correct for GC counting).
+			if (!tracksStore.indexNames.contains('imageHash')) {
+				tracksStore.createIndex('imageHash', 'imageHash', { unique: false })
 			}
 
 			if (oldVersion === 1) {
@@ -197,15 +197,15 @@ const openAppDatabase = () =>
 				})
 			}
 
-			// v4: content-addressed artwork dedup (see tracks `imageId` index above).
+			// v4: content-addressed artwork dedup (see tracks `imageHash` index above).
 			const albumsStore = tx.objectStore('albums')
-			if (!albumsStore.indexNames.contains('imageId')) {
-				albumsStore.createIndex('imageId', 'imageId', { unique: false })
+			if (!albumsStore.indexNames.contains('imageHash')) {
+				albumsStore.createIndex('imageHash', 'imageHash', { unique: false })
 			}
 
 			if (!objectStoreNames.contains('images')) {
 				// Keyed by the SHA-256 hex digest of the original artwork bytes.
-				db.createObjectStore('images', { keyPath: 'id' })
+				db.createObjectStore('images', { keyPath: 'hash' })
 			}
 
 			if (!objectStoreNames.contains('artists')) {

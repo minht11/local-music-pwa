@@ -79,7 +79,7 @@ const dbRemoveUnusedAlbumsWithTx = async (
 	const albumsStore = tx.objectStore('albums')
 
 	const changes: DatabaseChangeDetails[] = []
-	const imageIds: (string | undefined)[] = []
+	const imageHashes: (string | undefined)[] = []
 	for (const albumName of dedupe(albumNames)) {
 		const albumNameKey = keyRangeOnly<'tracks', 'album'>(albumName)
 		const tracksWithAlbumCount = await tracksByAlbum.count(albumNameKey)
@@ -93,7 +93,7 @@ const dbRemoveUnusedAlbumsWithTx = async (
 		}
 
 		await albumsStore.delete(album.id)
-		imageIds.push(album.imageId)
+		imageHashes.push(album.imageHash)
 		changes.push({
 			storeName: 'albums',
 			key: album.id,
@@ -101,7 +101,7 @@ const dbRemoveUnusedAlbumsWithTx = async (
 		})
 	}
 
-	return { changes, imageIds }
+	return { changes, imageHashes }
 }
 
 const dbRemoveUnusedArtistsWithTx = async (
@@ -175,11 +175,11 @@ export const dbRemoveTracks = async (trackIds: readonly number[]): Promise<void>
 
 	const imageGcChanges = await dbDeleteOrphanedImagesWithTx(
 		{
-			tracksByImage: tx.objectStore('tracks').index('imageId'),
-			albumsByImage: tx.objectStore('albums').index('imageId'),
+			tracksByImage: tx.objectStore('tracks').index('imageHash'),
+			albumsByImage: tx.objectStore('albums').index('imageHash'),
 			imagesStore: tx.objectStore('images'),
 		},
-		[...existingTracks.map((track) => track.imageId), ...albumResult.imageIds],
+		[...existingTracks.map((track) => track.imageHash), ...albumResult.imageHashes],
 	)
 
 	const changes = [

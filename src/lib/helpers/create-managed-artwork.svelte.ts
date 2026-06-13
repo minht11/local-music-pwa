@@ -70,16 +70,16 @@ type ArtworkSource =
 	  }
 	| {
 			// We can't use blob directly because indexedDB returns fresh references to same data.
-			type: 'imageId'
-			imageId: string
+			type: 'imageHash'
+			imageHash: string
 			cacheKey: string
 			size: ArtworkSourceImageSize
 	  }
 
 const fetchArtwork = async (source: ArtworkSource): Promise<Artwork | undefined> => {
 	let blob: Blob | undefined
-	if (source.type === 'imageId') {
-		const record = await dbGetImageRecord(source.imageId)
+	if (source.type === 'imageHash') {
+		const record = await dbGetImageRecord(source.imageHash)
 		blob = source.size === 'full' ? record?.full : record?.small
 	} else {
 		blob = source.blob
@@ -154,11 +154,11 @@ export const getTrackManagedArtworkSource = (
 		return null
 	}
 
-	if (track.imageId) {
+	if (track.imageHash) {
 		return {
-			type: 'imageId',
-			imageId: track.imageId,
-			cacheKey: `${track.imageId}-${size}`,
+			type: 'imageHash',
+			imageHash: track.imageHash,
+			cacheKey: `${track.imageHash}-${size}`,
 			size,
 		}
 	}
@@ -183,11 +183,11 @@ export const getAlbumManagedArtworkSource = (album: Album | undefined): ArtworkS
 
 	const size = 'full' as const
 
-	if (album.imageId) {
+	if (album.imageHash) {
 		return {
-			type: 'imageId',
-			imageId: album.imageId,
-			cacheKey: `${album.imageId}-${size}`,
+			type: 'imageHash',
+			imageHash: album.imageHash,
+			cacheKey: `${album.imageHash}-${size}`,
 			size,
 		}
 	}

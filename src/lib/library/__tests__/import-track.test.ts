@@ -5,11 +5,11 @@ import { clearDatabaseStores, dbGetAllAndExpectLength } from '$lib/helpers/test-
 import { dbImportTrack } from '$lib/library/scan-actions/scanner/steps/import-track'
 import type { ImageRecord, UnknownTrack } from '$lib/library/types.ts'
 
-const makeImageRecord = (id: string): ImageRecord => ({
-	id,
+const makeImageRecord = (hash: string): ImageRecord => ({
+	hash,
 	optimized: true,
-	full: new Blob([id], { type: 'image/jpeg' }),
-	small: new Blob([`${id}-small`], { type: 'image/webp' }),
+	full: new Blob([hash], { type: 'image/jpeg' }),
+	small: new Blob([`${hash}-small`], { type: 'image/webp' }),
 	primaryColor: 0xff_11_22_33,
 })
 
@@ -39,7 +39,7 @@ const importTrack = (
 ): Promise<number> =>
 	dbImportTrack(
 		buildTrack({
-			imageId: imageRecord?.id,
+			imageHash: imageRecord?.hash,
 			primaryColor: imageRecord?.primaryColor,
 			...overrides,
 		}),
@@ -59,16 +59,16 @@ describe('dbImportTrack artwork dedup', () => {
 
 		await dbGetAllAndExpectLength('tracks', 2)
 		const images = await dbGetAllAndExpectLength('images', 1)
-		expect(images[0]?.id).toBe('cover')
+		expect(images[0]?.hash).toBe('cover')
 	})
 
-	it('points the album at the first art-bearing track imageId', async () => {
+	it('points the album at the first art-bearing track imageHash', async () => {
 		// First track has no artwork, second one does.
 		await importTrack({ name: 'Track 1', fileName: 'a.mp3' })
 		await importTrack({ name: 'Track 2', fileName: 'b.mp3' }, makeImageRecord('late-cover'))
 
 		const albums = await dbGetAllAndExpectLength('albums', 1)
-		expect(albums[0]?.imageId).toBe('late-cover')
+		expect(albums[0]?.imageHash).toBe('late-cover')
 	})
 
 	it('orphans and deletes the old image when a rescan changes artwork', async () => {
@@ -89,7 +89,7 @@ describe('dbImportTrack artwork dedup', () => {
 		)
 
 		const images = await dbGetAllAndExpectLength('images', 2)
-		expect(images.map((image) => image.id).sort()).toEqual(['album-cover', 'b-cover-v2'])
+		expect(images.map((image) => image.hash).sort()).toEqual(['album-cover', 'b-cover-v2'])
 	})
 
 	it('keeps the image when a rescan reuses the same artwork', async () => {
@@ -99,16 +99,16 @@ describe('dbImportTrack artwork dedup', () => {
 		await importTrack({ name: 'Track', fileName: 'a.mp3' }, image, trackId)
 
 		const images = await dbGetAllAndExpectLength('images', 1)
-		expect(images[0]?.id).toBe('stable-cover')
+		expect(images[0]?.hash).toBe('stable-cover')
 	})
 
-	it('stores imageId on the track and primaryColor denormalized', async () => {
+	it('stores imageHash on the track and primaryColor denormalized', async () => {
 		const image = makeImageRecord('cover')
 		const trackId = await importTrack({ name: 'Track', fileName: 'a.mp3' }, image)
 
 		const db = await getDatabase()
 		const track = await db.get('tracks', trackId)
-		expect(track?.imageId).toBe('cover')
+		expect(track?.imageHash).toBe('cover')
 		expect(track?.primaryColor).toBe(0xff_11_22_33)
 		expect(track?.image).toBeUndefined()
 	})

@@ -24,7 +24,7 @@ export interface ImageGcStores {
 }
 
 /**
- * Deletes any image records in `imageIds` that are no longer referenced by a
+ * Deletes any image records in `imageHashes` that are no longer referenced by a
  * track or album. Image records are content-addressed and immutable, so they
  * can only ever be orphaned by deleting/updating the records that point at them
  * — which is why this runs inside those same transactions, after the track and
@@ -32,28 +32,28 @@ export interface ImageGcStores {
  */
 export const dbDeleteOrphanedImagesWithTx = async (
 	{ tracksByImage, albumsByImage, imagesStore }: ImageGcStores,
-	imageIds: readonly (string | undefined)[],
+	imageHashes: readonly (string | undefined)[],
 ): Promise<DatabaseChangeDetails[]> => {
-	const candidates = [...new Set(imageIds.filter((id) => id !== undefined))]
+	const candidates = [...new Set(imageHashes.filter((hash) => hash !== undefined))]
 	if (candidates.length === 0) {
 		return []
 	}
 
 	const changes: DatabaseChangeDetails[] = []
-	for (const imageId of candidates) {
+	for (const imageHash of candidates) {
 		const [trackRefs, albumRefs] = await Promise.all([
-			tracksByImage.count(keyRangeOnly<'tracks', 'imageId'>(imageId)),
-			albumsByImage.count(keyRangeOnly<'albums', 'imageId'>(imageId)),
+			tracksByImage.count(keyRangeOnly<'tracks', 'imageHash'>(imageHash)),
+			albumsByImage.count(keyRangeOnly<'albums', 'imageHash'>(imageHash)),
 		])
 
 		if (trackRefs > 0 || albumRefs > 0) {
 			continue
 		}
 
-		await imagesStore.delete(imageId)
+		await imagesStore.delete(imageHash)
 		changes.push({
 			storeName: 'images',
-			key: imageId,
+			key: imageHash,
 			operation: 'delete',
 		})
 	}
@@ -62,9 +62,9 @@ export const dbDeleteOrphanedImagesWithTx = async (
 }
 
 /** @public */
-export const dbGetImageRecord = async (imageId: string) => {
+export const dbGetImageRecord = async (imageHash: string) => {
 	const db = await getDatabase()
-	const record = await db.get('images', imageId)
+	const record = await db.get('images', imageHash)
 
 	return record
 }

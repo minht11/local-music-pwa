@@ -2,7 +2,7 @@
  * Minimal cache contract. Entries hold either a
  * resolved value or the in-flight promise producing it.
  */
-export interface CacheLike<Key, Value> {
+export interface MapLike<Key, Value> {
 	get: (key: Key) => Value | Promise<Value | undefined> | undefined
 	set: (key: Key, value: Value | Promise<Value | undefined>) => void
 	delete: (key: Key) => void
@@ -13,11 +13,11 @@ export interface CacheLike<Key, Value> {
  * promise itself so concurrent callers share a single fetch.
  */
 export const getOrInsert = <Key, Value>(
-	cache: CacheLike<Key, Value>,
+	map: MapLike<Key, Value>,
 	key: Key,
 	compute: () => Promise<Value | undefined>,
 ): Value | Promise<Value | undefined> => {
-	const cachedValue = cache.get(key)
+	const cachedValue = map.get(key)
 	if (cachedValue !== undefined) {
 		return cachedValue
 	}
@@ -27,24 +27,24 @@ export const getOrInsert = <Key, Value>(
 			// The entry may have been invalidated while the fetch was in
 			// flight, so the resolved value can already be stale. Only cache
 			// it if this fetch is still the current entry.
-			if (cache.get(key) === promise) {
+			if (map.get(key) === promise) {
 				if (value === undefined) {
-					cache.delete(key)
+					map.delete(key)
 				} else {
-					cache.set(key, value)
+					map.set(key, value)
 				}
 			}
 
 			return value
 		})
 		.catch((error: unknown) => {
-			if (cache.get(key) === promise) {
-				cache.delete(key)
+			if (map.get(key) === promise) {
+				map.delete(key)
 			}
 			throw error
 		})
 
-	cache.set(key, promise)
+	map.set(key, promise)
 
 	return promise
 }

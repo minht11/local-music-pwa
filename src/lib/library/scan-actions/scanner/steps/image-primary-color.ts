@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/style/useNumericSeparators: exception */
+
 // Dominant accent color extraction in OKLCh.
 //
 // Pipeline:
@@ -29,7 +31,6 @@ const centerBias = 0.15 // image-center bias strength
 const CL_BINS = 32 // chroma × lightness shade histogram resolution
 const smoothSigma = 3 // hue histogram Gaussian smoothing, in bins (≈ °)
 const tieThreshold = 0.9 // peaks within 90% of the max compete for tie-break
-
 
 // sRGB → OKLCh conversion
 // 8-bit sRGB channel → linear, precomputed
@@ -130,6 +131,7 @@ const clR = new Float32Array(CL_BINS * CL_BINS)
 const clG = new Float32Array(CL_BINS * CL_BINS)
 const clB = new Float32Array(CL_BINS * CL_BINS)
 
+/** @public */
 export const SMALL_ARTWORK_IMAGE_WIDTH = 100
 
 // Per-candidate caches, densely packed in pass 1 and grown on demand.
@@ -172,7 +174,7 @@ const sumNeighborhood = (arr: Float32Array, cb: number, lb: number): number => {
 }
 
 const packArgb = (r: number, g: number, b: number): number =>
-	(((0xff << 24) | (r << 16) | (g << 8) | b) >>> 0)
+	((0xff << 24) | (r << 16) | (g << 8) | b) >>> 0
 
 /**
  * Extract a single dominant accent color, ignoring white/gray backgrounds.

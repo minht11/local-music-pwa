@@ -32,18 +32,18 @@ const dbImportTestTrack = (
 		scannedAt: Date.now(),
 		fileName: 'test.mp3',
 		directory: 1,
-		imageId: imageRecord?.id,
+		imageHash: imageRecord?.hash,
 		...overrides,
 	}
 
 	return dbImportTrack(trackData, undefined, imageRecord)
 }
 
-const makeImageRecord = (id: string): ImageRecord => ({
-	id,
+const makeImageRecord = (hash: string): ImageRecord => ({
+	hash,
 	optimized: true,
-	full: new Blob([id], { type: 'image/jpeg' }),
-	small: new Blob([`${id}-small`], { type: 'image/webp' }),
+	full: new Blob([hash], { type: 'image/jpeg' }),
+	small: new Blob([`${hash}-small`], { type: 'image/webp' }),
 	primaryColor: 0xff_11_22_33,
 })
 
@@ -261,12 +261,12 @@ describe('remove functions', () => {
 
 		it('should keep an image referenced only by an album when its art-bearing track is removed', async () => {
 			const image = makeImageRecord('album-image')
-			// Only the first track carries artwork; the album adopts its imageId.
+			// Only the first track carries artwork; the album adopts its imageHash.
 			const artTrackId = await dbImportTestTrack({ name: 'Track 1' }, image)
 			await dbImportTestTrack({ name: 'Track 2' })
 
 			const albums = await dbGetAllAndExpectLength('albums', 1)
-			expect(albums[0]?.imageId).toBe('album-image')
+			expect(albums[0]?.imageHash).toBe('album-image')
 
 			await dbRemoveTracks([artTrackId])
 
@@ -318,7 +318,7 @@ describe('remove functions', () => {
 			await dbRemoveTracks([trackAId])
 
 			const remaining = await dbGetAllAndExpectLength('images', 1)
-			expect(remaining[0]?.id).toBe('image-b')
+			expect(remaining[0]?.hash).toBe('image-b')
 		})
 	})
 

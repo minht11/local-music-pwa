@@ -30,16 +30,17 @@ const dbImportAlbum = async (tx: ImportTrackTx, track: Track) => {
 					(artist) => artist !== UNKNOWN_ITEM,
 				),
 				year: existingAlbum.year ?? track.year,
-				imageId: existingAlbum.imageId ?? track.imageId,
+				imageHash: existingAlbum.imageHash ?? track.imageHash,
 				// Drop any legacy inline blob once the album points at the images store.
-				image: (existingAlbum.imageId ?? track.imageId) ? undefined : existingAlbum.image,
+				image:
+					(existingAlbum.imageHash ?? track.imageHash) ? undefined : existingAlbum.image,
 			}
 		: {
 				uuid: crypto.randomUUID(),
 				name: albumName,
 				artists: track.artists,
 				year: track.year,
-				imageId: track.imageId,
+				imageHash: track.imageHash,
 			}
 
 	const albumId = await store.put(updatedAlbum as Album)
@@ -86,9 +87,9 @@ const dbPutImageIfAbsentWithTx = async (
 ): Promise<DatabaseChangeDetails | undefined> => {
 	const store = tx.objectStore('images')
 
-	// Content-addressed: identical id implies identical bytes, so skip rewriting
+	// Content-addressed: identical hash implies identical bytes, so skip rewriting
 	// the (potentially megabyte) blobs if the record already exists.
-	if (await store.getKey(imageRecord.id)) {
+	if (await store.getKey(imageRecord.hash)) {
 		return undefined
 	}
 
@@ -96,11 +97,12 @@ const dbPutImageIfAbsentWithTx = async (
 
 	return {
 		storeName: 'images',
-		key: imageRecord.id,
+		key: imageRecord.hash,
 		operation: 'add',
 	}
 }
 
+/** @public */
 export const dbImportTrack = async (
 	metadata: UnknownTrack,
 	existingTrackId: number | undefined,
@@ -116,10 +118,10 @@ export const dbImportTrack = async (
 
 	// Capture the previous artwork reference before overwriting, so we can GC it
 	// if this rescan changed the embedded cover.
-	const oldImageId =
+	const oldImageHash =
 		existingTrackId === undefined
 			? undefined
-			: (await tracksStore.get(existingTrackId))?.imageId
+			: (await tracksStore.get(existingTrackId))?.imageHash
 
 	const record =
 		existingTrackId === undefined
@@ -142,14 +144,14 @@ export const dbImportTrack = async (
 	// Index counts now reflect the new track + album references, so an old image
 	// that nothing else points at is safely orphaned.
 	const imageGcChanges =
-		oldImageId && oldImageId !== metadata.imageId
+		oldImageHash && oldImageHash !== metadata.imageHash
 			? await dbDeleteOrphanedImagesWithTx(
 					{
-						tracksByImage: tx.objectStore('tracks').index('imageId'),
-						albumsByImage: tx.objectStore('albums').index('imageId'),
+						tracksByImage: tx.objectStore('tracks').index('imageHash'),
+						albumsByImage: tx.objectStore('albums').index('imageHash'),
 						imagesStore: tx.objectStore('images'),
 					},
-					[oldImageId],
+					[oldImageHash],
 				)
 			: []
 

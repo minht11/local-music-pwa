@@ -118,7 +118,7 @@ describe('getLibraryValue', () => {
 			expect(result).toBeUndefined()
 		})
 
-		it('should fall back to legacy inline image when no imageId is set', async () => {
+		it('should fall back to legacy inline image when no imageHash is set', async () => {
 			const db = await getDatabase()
 
 			const legacyImage = { optimized: false, small: {} as Blob, full: {} as Blob }

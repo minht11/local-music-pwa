@@ -9,8 +9,8 @@ import {
 	LEGACY_NO_NATIVE_DIRECTORY,
 	type Track,
 } from '$lib/library/types.ts'
-import { dbImportTrack } from './steps/import-track.ts'
 import { createImageRecord } from './steps/create-image-record.ts'
+import { dbImportTrack } from './steps/import-track.ts'
 import { parseTrackMetadata } from './steps/parse-track-metadata.ts'
 import type { TracksScanMessage, TracksScanOptions } from './types.ts'
 
@@ -35,7 +35,7 @@ interface TrackEnqueueOptions {
  * previous tracks progress through artwork and import stages concurrently.
  */
 interface ArtworkEntry {
-	imageId: string
+	imageHash: string
 	primaryColor: number | undefined
 	/** The full record, kept for the duration of the scan so imports can put-if-absent. */
 	record: ImageRecord
@@ -70,7 +70,7 @@ class TrackProcessor {
 		const record = existing ?? (await createImageRecord(imageBlob, hash))
 
 		const entry: ArtworkEntry = {
-			imageId: hash,
+			imageHash: hash,
 			primaryColor: record.primaryColor,
 			record,
 		}
@@ -94,7 +94,7 @@ class TrackProcessor {
 					const trackId = await dbImportTrack(
 						{
 							...parsed.data,
-							imageId: artwork?.imageId,
+							imageHash: artwork?.imageHash,
 							primaryColor: artwork?.primaryColor,
 							file: options.file,
 							directory: options.directoryId,

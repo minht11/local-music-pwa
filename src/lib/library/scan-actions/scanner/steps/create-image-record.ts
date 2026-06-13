@@ -1,13 +1,13 @@
 import type { ImageRecord } from '$lib/library/types.ts'
-import { SMALL_ARTWORK_IMAGE_WIDTH, getPrimaryColor } from './image-primary-color.ts'
+import { getPrimaryColor, SMALL_ARTWORK_IMAGE_WIDTH } from './image-primary-color.ts'
 
 /**
  * Builds a content-addressed {@link ImageRecord} from the original artwork
- * bytes. `id` must be the SHA-256 hex of `imageBlob` (see `sha256Hex`); the
+ * bytes. `hash` must be the SHA-256 hex of `imageBlob` (see `sha256Hex`); the
  * output is deterministic per content
  * @public
  */
-export const createImageRecord = async (imageBlob: Blob, id: string): Promise<ImageRecord> => {
+export const createImageRecord = async (imageBlob: Blob, hash: string): Promise<ImageRecord> => {
 	let bitmap: ImageBitmap | undefined
 	try {
 		bitmap = await createImageBitmap(imageBlob, {
@@ -31,7 +31,7 @@ export const createImageRecord = async (imageBlob: Blob, id: string): Promise<Im
 		const primaryColor = getPrimaryColor(data, width, height)
 
 		return {
-			id,
+			hash,
 			optimized: true,
 			full: imageBlob,
 			small: await canvas.convertToBlob({
@@ -43,7 +43,7 @@ export const createImageRecord = async (imageBlob: Blob, id: string): Promise<Im
 		console.error('Failed to optimize artwork', err)
 
 		return {
-			id,
+			hash,
 			optimized: false,
 			full: imageBlob,
 			small: imageBlob,

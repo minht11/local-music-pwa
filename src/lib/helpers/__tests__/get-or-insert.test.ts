@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { getOrInsert, type CacheLike } from '../get-or-insert.ts'
+import { type CacheLike, getOrInsert } from '../get-or-insert.ts'
 
 function makeMap<K, V>(): CacheLike<K, V> {
 	const map = new Map<K, V | Promise<V | undefined>>()
