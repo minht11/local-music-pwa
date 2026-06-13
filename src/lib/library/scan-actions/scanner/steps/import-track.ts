@@ -1,7 +1,7 @@
 import type { IDBPTransaction } from 'idb'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
-import { dbDeleteOrphanedImagesWithTx } from '$lib/library/image-gc.ts'
+import { dbDeleteOrphanedImagesWithTx } from '$lib/library/images.ts'
 import {
 	type Album,
 	type Artist,

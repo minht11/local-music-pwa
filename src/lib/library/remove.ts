@@ -2,7 +2,7 @@ import type { IDBPTransaction } from 'idb'
 import { type AppDB, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { keyRangeOnly } from '$lib/db/key-range.ts'
-import { dbDeleteOrphanedImagesWithTx } from './image-gc.ts'
+import { dbDeleteOrphanedImagesWithTx } from './images.ts'
 import type { Track } from './types.ts'
 
 type TrackOperationsTransaction = IDBPTransaction<

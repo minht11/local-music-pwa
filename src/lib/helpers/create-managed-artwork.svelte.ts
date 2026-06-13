@@ -1,4 +1,4 @@
-import { dbGetImageRecord } from '$lib/library/image-gc'
+import { dbGetImageRecord } from '$lib/library/images'
 import type { Album, Track } from '$lib/library/types.ts'
 import { getOrInsert } from './get-or-insert.ts'
 
