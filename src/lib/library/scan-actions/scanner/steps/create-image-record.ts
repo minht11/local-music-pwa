@@ -1,5 +1,5 @@
 import type { ImageRecord } from '$lib/library/types.ts'
-import { getPrimaryColor } from './image-primary-color.ts'
+import { SMALL_ARTWORK_IMAGE_WIDTH, getPrimaryColor } from './image-primary-color.ts'
 
 /**
  * Builds a content-addressed {@link ImageRecord} from the original artwork
@@ -13,7 +13,7 @@ export const createImageRecord = async (imageBlob: Blob, id: string): Promise<Im
 		bitmap = await createImageBitmap(imageBlob, {
 			// Browser will keep aspect ratio. Most artworks are squares
 			// and cases where ratios are extremely different should be rare.
-			resizeWidth: 100,
+			resizeWidth: SMALL_ARTWORK_IMAGE_WIDTH,
 			resizeQuality: 'medium',
 		})
 

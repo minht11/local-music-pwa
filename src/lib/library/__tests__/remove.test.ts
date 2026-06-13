@@ -9,7 +9,7 @@ import {
 import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
 import { dbCreatePlaylist } from '$lib/library/playlists-actions.ts'
 import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTracks } from '$lib/library/remove.ts'
-import { dbImportTrack } from '$lib/library/scan-actions/scanner/import-track.ts'
+import { dbImportTrack } from '$lib/library/scan-actions/scanner/steps/import-track.ts'
 import type { ImageRecord, PlaylistEntry, UnknownTrack } from '$lib/library/types.ts'
 
 const dbImportTestTrack = (

@@ -9,9 +9,9 @@ import {
 	LEGACY_NO_NATIVE_DIRECTORY,
 	type Track,
 } from '$lib/library/types.ts'
-import { dbImportTrack } from './import-track.ts'
-import { createImageRecord } from './parse/create-image-record.ts'
-import { parseTrackMetadata } from './parse/parse-track.ts'
+import { dbImportTrack } from './steps/import-track.ts'
+import { createImageRecord } from './steps/create-image-record.ts'
+import { parseTrackMetadata } from './steps/parse-track-metadata.ts'
 import type { TracksScanMessage, TracksScanOptions } from './types.ts'
 
 declare const self: DedicatedWorkerGlobalScope

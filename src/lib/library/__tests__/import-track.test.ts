@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
 import { clearDatabaseStores, dbGetAllAndExpectLength } from '$lib/helpers/test-helpers.ts'
-import { dbImportTrack } from '$lib/library/scan-actions/scanner/import-track.ts'
+import { dbImportTrack } from '$lib/library/scan-actions/scanner/steps/import-track'
 import type { ImageRecord, UnknownTrack } from '$lib/library/types.ts'
 
 const makeImageRecord = (id: string): ImageRecord => ({
