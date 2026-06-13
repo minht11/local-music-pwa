@@ -1,7 +1,6 @@
 /**
- * Minimal cache contract for {@link getCachedOrFetch}. Entries hold either a
- * resolved value or the in-flight promise producing it. Eviction policy is
- * the cache's own concern (LRU, refcounting, etc.).
+ * Minimal cache contract. Entries hold either a
+ * resolved value or the in-flight promise producing it.
  */
 export interface CacheLike<Key, Value> {
 	get: (key: Key) => Value | Promise<Value | undefined> | undefined
@@ -10,20 +9,20 @@ export interface CacheLike<Key, Value> {
 }
 
 /**
- * Returns the cached value for `key`, or starts `fetchValue` and caches the
+ * Returns the cached value for `key`, or starts `compute` and caches the
  * promise itself so concurrent callers share a single fetch.
  */
-export const getCachedOrFetch = <Key, Value>(
+export const getOrInsert = <Key, Value>(
 	cache: CacheLike<Key, Value>,
 	key: Key,
-	fetchValue: () => Promise<Value | undefined>,
+	compute: () => Promise<Value | undefined>,
 ): Value | Promise<Value | undefined> => {
 	const cachedValue = cache.get(key)
 	if (cachedValue !== undefined) {
 		return cachedValue
 	}
 
-	const promise = fetchValue()
+	const promise = compute()
 		.then((value) => {
 			// The entry may have been invalidated while the fetch was in
 			// flight, so the resolved value can already be stale. Only cache

@@ -39,8 +39,7 @@ export const keyRangeOnly = <
 ): IDBKeyRange => IDBKeyRange.only(value)
 
 /**
- * Range covering every key of a compound index that starts with the given
- * tuple prefix, e.g. all `byAlbumSorted` keys of one album.
+ * Range covering every key of a compound index that starts with the given stuple prefix.
  * @public
  */
 export const keyRangePrefix = <

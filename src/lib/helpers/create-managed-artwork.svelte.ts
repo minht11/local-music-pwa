@@ -1,6 +1,6 @@
 import { dbGetImageRecord } from '$lib/library/image-gc'
 import type { Album, Track } from '$lib/library/types.ts'
-import { getCachedOrFetch } from './cached-fetch.ts'
+import { getOrInsert } from './get-or-insert.ts'
 
 class Artwork {
 	cacheKey: string
@@ -125,7 +125,7 @@ export const createManagedArtwork = (getSource: () => ArtworkSource | null | und
 			artworkUrl = artwork?.url
 		}
 
-		const result = getCachedOrFetch(cache, source.cacheKey, () => fetchArtwork(source))
+		const result = getOrInsert(cache, source.cacheKey, () => fetchArtwork(source))
 
 		if (result instanceof Promise) {
 			void result.then(acquire).catch((error: unknown) => {
