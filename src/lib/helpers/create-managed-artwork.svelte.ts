@@ -9,9 +9,9 @@ class Artwork {
 
 	#refCount = 0
 
-	constructor(cacheKey: string, url: string) {
+	constructor(cacheKey: string, blob: Blob) {
 		this.cacheKey = cacheKey
-		this.url = url
+		this.url = URL.createObjectURL(blob)
 	}
 
 	acquire() {
@@ -25,7 +25,6 @@ class Artwork {
 		}
 	}
 
-	/** Revokes the object URL unless the artwork was (re)acquired in the meantime. */
 	disposeIfUnused() {
 		if (this.#refCount > 0) {
 			return
@@ -89,7 +88,7 @@ const fetchArtwork = async (source: ArtworkSource): Promise<Artwork | undefined>
 		return undefined
 	}
 
-	const artwork = new Artwork(source.cacheKey, URL.createObjectURL(blob))
+	const artwork = new Artwork(source.cacheKey, blob)
 
 	// Every requester may have unmounted before the shared fetch resolved,
 	// leaving nobody to release the artwork. The cleanup pass re-checks

@@ -163,8 +163,7 @@ const openAppDatabase = () =>
 				)
 			}
 
-			// v4: content-addressed artwork dedup. The index is sparse, so legacy
-			// tracks without `imageHash` simply don't appear (correct for GC counting).
+			// v4: content-addressed artwork dedup.
 			if (!tracksStore.indexNames.contains('imageHash')) {
 				tracksStore.createIndex('imageHash', 'imageHash', { unique: false })
 			}
@@ -204,7 +203,6 @@ const openAppDatabase = () =>
 			}
 
 			if (!objectStoreNames.contains('images')) {
-				// Keyed by the SHA-256 hex digest of the original artwork bytes.
 				db.createObjectStore('images', { keyPath: 'hash' })
 			}
 
