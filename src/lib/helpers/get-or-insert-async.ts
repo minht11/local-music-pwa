@@ -1,5 +1,5 @@
 /**
- * Minimal cache contract. Entries hold either a
+ * Minimal map contract. Entries hold either a
  * resolved value or the in-flight promise producing it.
  */
 export interface MapLike<Key, Value> {
@@ -12,7 +12,7 @@ export interface MapLike<Key, Value> {
  * Returns the cached value for `key`, or starts `compute` and caches the
  * promise itself so concurrent callers share a single fetch.
  */
-export const getOrInsert = <Key, Value>(
+export const getOrInsertAsync = <Key, Value>(
 	map: MapLike<Key, Value>,
 	key: Key,
 	compute: () => Promise<Value | undefined>,

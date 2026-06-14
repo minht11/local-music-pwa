@@ -42,13 +42,13 @@
 		void Promise.resolve(closeAnimation(dialog)).then(() => onclose?.())
 	}
 
-	// Separators sit between item buttons, so focus moves through a button list
-	// instead of element siblings.
 	const moveFocus = (offset: number) => {
 		if (!dialog) {
 			return
 		}
 
+		// Separators sit between item buttons, so focus moves through a button list
+		// instead of element siblings.
 		const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>('button:not([disabled])'))
 		const currentIndex = buttons.indexOf(document.activeElement as HTMLButtonElement)
 		buttons[currentIndex + offset]?.focus()

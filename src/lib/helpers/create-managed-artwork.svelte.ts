@@ -1,6 +1,6 @@
 import { dbGetImageRecord } from '$lib/library/images'
 import type { Album, Track } from '$lib/library/types.ts'
-import { getOrInsert } from './get-or-insert.ts'
+import { getOrInsertAsync } from './get-or-insert-async.ts'
 
 class Artwork {
 	cacheKey: string
@@ -124,7 +124,7 @@ export const createManagedArtwork = (getSource: () => ArtworkSource | null | und
 			artworkUrl = artwork?.url
 		}
 
-		const result = getOrInsert(cache, source.cacheKey, () => fetchArtwork(source))
+		const result = getOrInsertAsync(cache, source.cacheKey, () => fetchArtwork(source))
 
 		if (result instanceof Promise) {
 			void result.then(acquire).catch((error: unknown) => {

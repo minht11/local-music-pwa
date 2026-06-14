@@ -1,7 +1,7 @@
 import { WeakLRUCache } from 'weak-lru-cache'
 import { type DbKey, getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, onDatabaseChange } from '$lib/db/events.ts'
-import { getOrInsert } from '$lib/helpers/get-or-insert.ts'
+import { getOrInsertAsync } from '$lib/helpers/get-or-insert-async.ts'
 import type { Album, Artist, Playlist, Track } from '$lib/library/types.ts'
 import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryStoreName } from '../types.ts'
 
@@ -280,7 +280,7 @@ export const getLibraryValue = <Store extends LibraryStoreName, AllowEmpty exten
 	allowEmpty?: AllowEmpty,
 ): Promise<GetLibraryValueResult<Store, AllowEmpty>> | GetLibraryValueResult<Store, AllowEmpty> => {
 	const key = getCacheKey(storeName, id)
-	const result = getOrInsert<CacheKey<Store>, LibraryValue<Store>>(valueCache, key, () => {
+	const result = getOrInsertAsync<CacheKey<Store>, LibraryValue<Store>>(valueCache, key, () => {
 		const config: LibraryConfigMap[Store] = libraryConfigMap[storeName]
 
 		return config.fetch(id)

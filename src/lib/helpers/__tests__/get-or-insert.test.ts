@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { getOrInsert, type MapLike } from '../get-or-insert.ts'
+import { getOrInsertAsync, type MapLike } from '../get-or-insert-async.ts'
 
 function makeMap<K, V>(): MapLike<K, V> {
 	const map = new Map<K, V | Promise<V | undefined>>()
@@ -10,12 +10,12 @@ function makeMap<K, V>(): MapLike<K, V> {
 	}
 }
 
-describe('getOrInsert', () => {
+describe('getOrInsertAsync', () => {
 	it('calls fetchValue and returns resolved value on cache miss', async () => {
 		const cache = makeMap<string, number>()
 		const fetch = vi.fn().mockResolvedValue(42)
 
-		const result = await getOrInsert(cache, 'a', fetch)
+		const result = await getOrInsertAsync(cache, 'a', fetch)
 
 		expect(fetch).toHaveBeenCalledOnce()
 		expect(result).toBe(42)
@@ -28,7 +28,7 @@ describe('getOrInsert', () => {
 		// Warm the cache
 		cache.set('a', 42)
 
-		const result = getOrInsert(cache, 'a', fetch)
+		const result = getOrInsertAsync(cache, 'a', fetch)
 
 		expect(fetch).not.toHaveBeenCalled()
 		expect(result).toBe(42)
@@ -40,8 +40,8 @@ describe('getOrInsert', () => {
 		const promise = new Promise<number>((r) => (resolve = r))
 		const fetch = vi.fn().mockReturnValue(promise)
 
-		const r1 = getOrInsert(cache, 'a', fetch)
-		const r2 = getOrInsert(cache, 'a', fetch)
+		const r1 = getOrInsertAsync(cache, 'a', fetch)
+		const r2 = getOrInsertAsync(cache, 'a', fetch)
 
 		expect(fetch).toHaveBeenCalledOnce()
 		expect(r1).toBe(r2)
@@ -54,9 +54,9 @@ describe('getOrInsert', () => {
 		const cache = makeMap<string, number>()
 		const fetch = vi.fn().mockResolvedValue(5)
 
-		await getOrInsert(cache, 'a', fetch)
+		await getOrInsertAsync(cache, 'a', fetch)
 
-		const second = getOrInsert(cache, 'a', fetch)
+		const second = getOrInsertAsync(cache, 'a', fetch)
 		expect(fetch).toHaveBeenCalledOnce()
 		expect(second).toBe(5)
 	})
@@ -65,7 +65,7 @@ describe('getOrInsert', () => {
 		const cache = makeMap<string, number>()
 		const fetch = vi.fn().mockResolvedValue(undefined)
 
-		const result = await getOrInsert(cache, 'a', fetch)
+		const result = await getOrInsertAsync(cache, 'a', fetch)
 
 		expect(result).toBeUndefined()
 		expect(cache.get('a')).toBeUndefined()
@@ -75,7 +75,7 @@ describe('getOrInsert', () => {
 		const cache = makeMap<string, number>()
 		const fetch = vi.fn().mockRejectedValue(new Error('oops'))
 
-		await expect(getOrInsert(cache, 'a', fetch)).rejects.toThrow('oops')
+		await expect(getOrInsertAsync(cache, 'a', fetch)).rejects.toThrow('oops')
 		expect(cache.get('a')).toBeUndefined()
 	})
 
@@ -84,7 +84,7 @@ describe('getOrInsert', () => {
 		let resolve!: (v: number) => void
 		const slowFetch = vi.fn().mockReturnValue(new Promise<number>((r) => (resolve = r)))
 
-		const pending = getOrInsert(cache, 'a', slowFetch)
+		const pending = getOrInsertAsync(cache, 'a', slowFetch)
 
 		// Invalidate and replace with a fresh value before the fetch lands
 		cache.delete('a')
