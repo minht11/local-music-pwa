@@ -60,6 +60,14 @@
 						"filenameCases": ["kebab-case", "export", "PascalCase"]
 					}
 				},
+				"noRestrictedGlobals": {
+					"level": "error",
+					"options": {
+						"deniedGlobals": {
+							"IDBKeyRange": "Use $lib/db/key-range.ts instead which provides proper types."
+						}
+					}
+				},
 				"useThrowNewError": "error",
 				"useThrowOnlyError": "error",
 				"useConsistentBuiltinInstantiation": "error",
@@ -104,7 +112,9 @@
 						}
 					}
 				},
-				"useConsistentObjectDefinitions": "error"
+				"useConsistentObjectDefinitions": "error",
+				"noIncrementDecrement": "error",
+				"useConsistentMethodSignatures": "error"
 			},
 			"correctness": {
 				"noUndeclaredVariables": "error",
@@ -126,11 +136,6 @@
 			"nursery": {
 				"noFloatingPromises": "error",
 				"noMisusedPromises": "error",
-				"noNestedPromises": "error",
-				"noIncrementDecrement": "error",
-				"noUnnecessaryConditions": "error",
-				"noUselessReturn": "error",
-				"useConsistentMethodSignatures": "error",
 				"noConditionalExpect": "error",
 				"useTestHooksInOrder": "error",
 				"noIdenticalTestTitle": "error"
@@ -139,7 +144,8 @@
 				"useSimplifiedLogicExpression": "error",
 				"useNumericLiterals": "error",
 				"noCommaOperator": "error",
-				"noImportantStyles": "off"
+				"noImportantStyles": "off",
+				"noUselessReturn": "error"
 			},
 			"suspicious": {
 				"useAwait": "error",
@@ -157,10 +163,18 @@
 					}
 				},
 				"noImportCycles": "error",
-				"noDeprecatedImports": "on"
+				"noDeprecatedImports": "on",
+				"noNestedPromises": "error",
+				// Lof of false positives, re-enable in the future.
+				"noUnnecessaryConditions": "off"
 			},
 			"a11y": {
-				"noSvgWithoutTitle": "off"
+				"noSvgWithoutTitle": "off",
+				// Lot of false positives, re-enable in the future.
+				"useSemanticElements": "off",
+				"noStaticElementInteractions": "off",
+				"useFocusableInteractive": "off",
+				"useValidAriaValues": "off"
 			},
 			"performance": {
 				"useTopLevelRegex": "error"
@@ -206,9 +220,13 @@
 			"includes": ["**/*.svelte", "!**/*.svelte.ts"],
 			"linter": {
 				"rules": {
+					// Disabled because of false positives
 					"correctness": {
 						"noUnusedVariables": "off",
 						"noUnusedFunctionParameters": "off"
+					},
+					"style": {
+						"noRestrictedGlobals": "off"
 					}
 				}
 			}

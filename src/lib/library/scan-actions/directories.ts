@@ -1,6 +1,7 @@
 import { getDatabase } from '$lib/db/database.ts'
 import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { lockDatabase } from '$lib/db/lock-database.ts'
+import { createUIAction } from '$lib/helpers/ui-action.ts'
 import { dbRemoveTracks } from '$lib/library/remove.ts'
 import type { Directory } from '$lib/library/types.ts'
 import { scanTracks } from './scan-tracks.ts'
@@ -58,13 +59,11 @@ const dbImportNewDirectory = async (dirHandle: FileSystemDirectoryHandle): Promi
 	})
 }
 
-export const importNewDirectory = async (handle: FileSystemDirectoryHandle): Promise<void> => {
-	try {
-		await lockDatabase(() => dbImportNewDirectory(handle))
-	} catch (error) {
-		snackbar.unexpectedError(error)
-	}
-}
+export const importNewDirectory = createUIAction({
+	action: dbImportNewDirectory,
+	lockDatabase: true,
+	successMessage: false,
+})
 
 export const rescanDirectory = async (
 	dirId: number,
@@ -174,16 +173,11 @@ const dbReplaceDirectories = async (
 	})
 }
 
-export const replaceDirectories = async (
-	parentDirHandle: FileSystemDirectoryHandle,
-	dirsIds: number[],
-): Promise<void> => {
-	try {
-		await lockDatabase(() => dbReplaceDirectories(parentDirHandle, dirsIds))
-	} catch (error) {
-		snackbar.unexpectedError(error)
-	}
-}
+export const replaceDirectories = createUIAction({
+	action: dbReplaceDirectories,
+	lockDatabase: true,
+	successMessage: false,
+})
 
 const dbRemoveDirectory = async (directoryId: number): Promise<void> => {
 	const db = await getDatabase()
@@ -199,26 +193,19 @@ const dbRemoveDirectory = async (directoryId: number): Promise<void> => {
 	})
 }
 
-export const removeDirectory = async (id: number): Promise<void> => {
-	try {
-		await lockDatabase(() => dbRemoveDirectory(id))
+export const removeDirectory = createUIAction({
+	action: dbRemoveDirectory,
+	lockDatabase: true,
+	successMessage: m.settingsDirectoryRemoved(),
+})
 
-		snackbar(m.settingsDirectoryRemoved())
-	} catch (error) {
-		snackbar.unexpectedError(error)
-	}
-}
-
-const dbImportLegacyFiles = (files: File[]): Promise<void> =>
-	scanTracks({
-		action: 'legacy-files-add',
-		files,
-	})
-
-export const importLegacyFiles = async (files: File[]): Promise<void> => {
-	try {
-		await lockDatabase(() => dbImportLegacyFiles(files))
-	} catch (error) {
-		snackbar.unexpectedError(error)
-	}
-}
+export const importLegacyFiles = createUIAction({
+	action: async (files: File[]) => {
+		await scanTracks({
+			action: 'legacy-files-add',
+			files,
+		})
+	},
+	lockDatabase: true,
+	successMessage: false,
+})

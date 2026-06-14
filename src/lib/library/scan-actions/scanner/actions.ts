@@ -1,15 +1,17 @@
 import { getDatabase } from '$lib/db/database.ts'
 import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system.ts'
+import { sha256Hex } from '$lib/helpers/hash.ts'
 import { SerialQueue } from '$lib/helpers/serial-queue.ts'
 import { dbRemoveTracks } from '$lib/library/remove.ts'
 import {
 	CURRENT_METADATA_VERSION,
+	type ImageRecord,
 	LEGACY_NO_NATIVE_DIRECTORY,
 	type Track,
 } from '$lib/library/types.ts'
-import { dbImportTrack } from './import-track.ts'
-import { getArtworkRelatedData } from './parse/format-artwork.ts'
-import { parseTrackMetadata } from './parse/parse-track.ts'
+import { createImageRecord } from './steps/create-image-record.ts'
+import { dbImportTrack } from './steps/import-track.ts'
+import { parseTrackMetadata } from './steps/parse-track-metadata.ts'
 import type { TracksScanMessage, TracksScanOptions } from './types.ts'
 
 declare const self: DedicatedWorkerGlobalScope
@@ -24,6 +26,15 @@ interface TrackEnqueueOptions {
 	uuid?: string
 }
 
+interface ArtworkEntry {
+	imageHash: string
+	primaryColor: number | undefined
+	/** The full record, retained so imports can put-if-absent without re-decoding. */
+	record: ImageRecord
+}
+
+const MAX_CACHED_ARTWORKS = 64
+
 /**
  * A three-stage pipeline for track ingestion:
  * 1. [PARSING]  - Blocks the caller; processes one file at a time.
@@ -36,12 +47,45 @@ class TrackProcessor {
 	#artworkQueue = new SerialQueue()
 	#importQueue = new SerialQueue()
 
+	#imageCache = new Map<string, ArtworkEntry>()
+
 	#tracker: StatusTracker
 	#onImportSuccess?: (trackId: number) => void
 
 	constructor(tracker: StatusTracker, onImportSuccess?: (trackId: number) => void) {
 		this.#tracker = tracker
 		this.#onImportSuccess = onImportSuccess
+	}
+
+	async #resolveArtwork(imageBlob: Blob): Promise<ArtworkEntry> {
+		const hash = await sha256Hex(imageBlob)
+
+		const cached = this.#imageCache.get(hash)
+		if (cached) {
+			return cached
+		}
+
+		// Cross-scan hit: the record already exists from a previous scan, so we can
+		// skip decode/resize/color-extraction entirely.
+		const db = await getDatabase()
+		const existing = await db.get('images', hash)
+		const record = existing ?? (await createImageRecord(imageBlob, hash))
+
+		const entry: ArtworkEntry = {
+			imageHash: hash,
+			primaryColor: record.primaryColor,
+			record,
+		}
+		this.#imageCache.set(hash, entry)
+
+		if (this.#imageCache.size > MAX_CACHED_ARTWORKS) {
+			const oldest = this.#imageCache.keys().next().value
+			if (oldest !== undefined) {
+				this.#imageCache.delete(oldest)
+			}
+		}
+
+		return entry
 	}
 
 	async parseAndEnqueue(options: TrackEnqueueOptions) {
@@ -51,16 +95,16 @@ class TrackProcessor {
 		}
 
 		this.#artworkQueue.enqueue(async () => {
-			const artworkData = parsed.imageBlob
-				? await getArtworkRelatedData(parsed.imageBlob)
-				: undefined
+			const imageBlob = parsed.imageBlob
+			const artwork = imageBlob ? await this.#resolveArtwork(imageBlob) : undefined
 
 			this.#importQueue.enqueue(async () => {
 				try {
 					const trackId = await dbImportTrack(
 						{
 							...parsed.data,
-							...artworkData,
+							imageHash: artwork?.imageHash,
+							primaryColor: artwork?.primaryColor,
 							file: options.file,
 							directory: options.directoryId,
 							fileName: options.file.name,
@@ -68,6 +112,7 @@ class TrackProcessor {
 							uuid: options.uuid ?? crypto.randomUUID(),
 						},
 						options.trackId,
+						artwork?.record,
 					)
 
 					this.#onImportSuccess?.(trackId)

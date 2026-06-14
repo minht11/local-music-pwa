@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDatabase } from '$lib/db/database.ts'
-import type { DatabaseChangeDetails } from '$lib/db/events.ts'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
 import { clearDatabaseStores } from '$lib/helpers/test-helpers.ts'
 import {
 	clearLibraryValueCache,
@@ -116,6 +116,35 @@ describe('getLibraryValue', () => {
 		it('should return undefined for non-existent track when allowEmpty is true', async () => {
 			const result = await getLibraryValue('tracks', 999, true)
 			expect(result).toBeUndefined()
+		})
+
+		it('should fall back to legacy inline image when no imageHash is set', async () => {
+			const db = await getDatabase()
+
+			const legacyImage = { optimized: false, small: {} as Blob, full: {} as Blob }
+			await db.add('tracks', {
+				id: 1,
+				name: 'Test Track',
+				album: 'Test Album',
+				artists: ['Test Artist'],
+				uuid: 'track-uuid-1',
+				year: '2023',
+				duration: 180,
+				genre: ['Rock'],
+				trackNo: 1,
+				trackOf: 10,
+				discNo: 1,
+				discOf: 1,
+				file: {} as File,
+				scannedAt: 1_234_567_890,
+				fileName: 'test-track.mp3',
+				directory: 1,
+				image: legacyImage,
+			})
+
+			const result = await getLibraryValue('tracks', 1)
+
+			expect(result.image).toEqual(legacyImage)
 		})
 
 		it('should return cached value on subsequent calls', async () => {
@@ -418,6 +447,51 @@ describe('getLibraryValue', () => {
 	})
 
 	describe('concurrent access', () => {
+		it('should not cache a value resolved after its entry was invalidated', async () => {
+			const db = await getDatabase()
+
+			const trackData = {
+				id: 1,
+				name: 'Test Track',
+				album: 'Test Album',
+				artists: ['Test Artist'],
+				uuid: 'track-uuid-1',
+				year: '2023',
+				duration: 180,
+				genre: ['Rock'],
+				trackNo: 1,
+				trackOf: 10,
+				discNo: 1,
+				discOf: 1,
+				file: {} as File,
+				scannedAt: 1_234_567_890,
+				fileName: 'test-track.mp3',
+				directory: 1,
+			}
+
+			await db.add('tracks', trackData)
+
+			// Start a fetch and invalidate the entry while it is in flight
+			const pending = getLibraryValue('tracks', 1)
+			expect(pending).toBeInstanceOf(Promise)
+
+			dispatchDatabaseChangedEvent({
+				storeName: 'tracks',
+				operation: 'update',
+				key: 1,
+			})
+
+			const resolved = await pending
+			expect(resolved.name).toBe('Test Track')
+
+			// Update the record directly, without dispatching further events,
+			// so a stale cache entry would be the only way to see the old name
+			await db.put('tracks', { ...trackData, name: 'Updated Track' })
+
+			const result = await getLibraryValue('tracks', 1)
+			expect(result.name).toBe('Updated Track')
+		})
+
 		it('should handle concurrent requests for same value', async () => {
 			const db = await getDatabase()
 

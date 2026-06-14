@@ -114,6 +114,10 @@ export class QueryImpl<K extends QueryKey, Result> {
 				})
 
 				const resultValue = await result
+				if (controller.signal.aborted) {
+					return
+				}
+
 				this.#setLoadedState(resultValue, normalizedKey)
 			} else {
 				this.#setLoadedState(result, normalizedKey)

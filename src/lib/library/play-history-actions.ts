@@ -75,4 +75,7 @@ const dbClearPlayHistory = async (): Promise<void> => {
 	notifyPlayHistoryChange()
 }
 
-export const clearPlayHistory = createUIAction(false, dbClearPlayHistory)
+export const clearPlayHistory = createUIAction({
+	action: dbClearPlayHistory,
+	successMessage: false,
+})

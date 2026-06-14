@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
+	import {
+		createManagedArtwork,
+		getTrackManagedArtworkSource,
+	} from '$lib/helpers/create-managed-artwork.svelte'
 	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
 	import { formatArtists, formatNameOrUnknown, getItemLanguage } from '$lib/helpers/utils/text.ts'
 	import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
@@ -61,7 +64,7 @@
 	const query = createTrackQuery(() => trackId)
 	const { value: track, loading } = $derived(query)
 
-	const artworkSrc = createManagedArtwork(() => track?.image?.small)
+	const artworkSrc = createManagedArtwork(() => getTrackManagedArtworkSource(track, 'small'))
 
 	const menu = useMenu()
 	const menuItemsWithItem = $derived(track && menuItems?.bind(null, track))

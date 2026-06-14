@@ -1,6 +1,9 @@
 import { AudioGraph } from '$lib/audio/audio-graph.svelte.ts'
 import { PlaybackController, type TrackLoader } from '$lib/audio/playback-controller.svelte.ts'
-import { createManagedArtwork } from '$lib/helpers/create-managed-artwork.svelte'
+import {
+	createManagedArtwork,
+	getTrackManagedArtworkSource,
+} from '$lib/helpers/create-managed-artwork.svelte'
 import { type FileLoadFailReason, resolveTrackFile } from '$lib/helpers/file-resolver.ts'
 import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
@@ -84,7 +87,9 @@ export class PlayerStore {
 	})
 	readonly activeTrack = $derived(this.#activeTrackQuery.value)
 
-	readonly #artwork = createManagedArtwork(() => this.activeTrack?.image?.full)
+	readonly #artwork = createManagedArtwork(() =>
+		getTrackManagedArtworkSource(this.activeTrack, 'full'),
+	)
 	readonly artworkSrc = $derived.by(this.#artwork)
 
 	get volume() {

@@ -137,6 +137,9 @@ const count = (options: CountOptions): void => {
 	img.addEventListener('load', () => {
 		img.remove()
 	})
+	img.addEventListener('error', () => {
+		img.remove()
+	})
 	document.body.appendChild(img)
 }
 

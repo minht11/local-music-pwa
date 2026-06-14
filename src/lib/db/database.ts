@@ -4,6 +4,7 @@ import type {
 	Album,
 	Artist,
 	Directory,
+	ImageRecord,
 	PlayHistoryEntry,
 	Playlist,
 	PlaylistEntry,
@@ -26,9 +27,10 @@ export interface AppDB extends DBSchema {
 			| 'directory'
 			| 'fileName'
 			| 'scannedAt'
+			| 'imageHash'
 		> & {
 			path: [directoryId: number, fileName: string]
-			byAlbumSorted: [album: string, name: string, trackNo: number, discNo: number]
+			byAlbumSorted: [album: string, discNo: number, trackNo: number, name: string]
 		}
 		meta: {
 			operations: DbStandardChange<'tracks'>
@@ -37,9 +39,17 @@ export interface AppDB extends DBSchema {
 	albums: {
 		key: number
 		value: Album
-		indexes: Pick<Album, 'uuid' | 'name' | 'artists' | 'year'>
+		indexes: Pick<Album, 'uuid' | 'name' | 'artists' | 'year' | 'imageHash'>
 		meta: {
 			operations: DbStandardChange<'albums'>
+		}
+	}
+	images: {
+		key: string
+		value: ImageRecord
+		indexes: Record<string, never>
+		meta: {
+			operations: DbStandardChange<'images'>
 		}
 	}
 	artists: {
@@ -113,7 +123,7 @@ const createStore = <DBTypes extends DBSchema | unknown, Name extends StoreNames
 	})
 
 const openAppDatabase = () =>
-	openDB<AppDB>('snae-app-data', 3, {
+	openDB<AppDB>('snae-app-data', 4, {
 		async upgrade(db, oldVersion, _newVersion, tx) {
 			const { objectStoreNames } = db
 
@@ -153,6 +163,11 @@ const openAppDatabase = () =>
 				)
 			}
 
+			// v4: content-addressed artwork dedup.
+			if (!tracksStore.indexNames.contains('imageHash')) {
+				tracksStore.createIndex('imageHash', 'imageHash', { unique: false })
+			}
+
 			if (oldVersion === 1) {
 				// Previous versions didn't have discNo and trackNo fields
 				for await (const cursor of tracksStore) {
@@ -179,6 +194,16 @@ const openAppDatabase = () =>
 					unique: false,
 					multiEntry: true,
 				})
+			}
+
+			// v4: content-addressed artwork dedup (see tracks `imageHash` index above).
+			const albumsStore = tx.objectStore('albums')
+			if (!albumsStore.indexNames.contains('imageHash')) {
+				albumsStore.createIndex('imageHash', 'imageHash', { unique: false })
+			}
+
+			if (!objectStoreNames.contains('images')) {
+				db.createObjectStore('images', { keyPath: 'hash' })
 			}
 
 			if (!objectStoreNames.contains('artists')) {

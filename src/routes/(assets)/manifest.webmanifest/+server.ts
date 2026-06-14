@@ -1,5 +1,5 @@
 import { APP_DESCRIPTION_EN, APP_NAME_EN, APP_NAME_SHORT_EN } from '$lib/app-metadata.ts'
-import { THEME_PALLETTE_DARK } from '../../../server/theme-colors.ts'
+import { THEME_PALLETTE_DARK } from '$lib/server/theme-colors.ts'
 
 export const prerender = true
 

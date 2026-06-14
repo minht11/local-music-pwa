@@ -31,7 +31,6 @@ export class QueueStore {
 					continue
 				}
 
-				// biome-ignore lint/nursery/noUnnecessaryConditions: loop will break conditional itself
 				while (true) {
 					const index = this.itemsIds.indexOf(change.key)
 					if (index === -1) {

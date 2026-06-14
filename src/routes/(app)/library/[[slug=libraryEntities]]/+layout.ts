@@ -2,6 +2,7 @@ import { redirect } from '@sveltejs/kit'
 import { innerWidth } from 'svelte/reactivity/window'
 import type { RouteId } from '$app/types'
 import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
+import { foldForSearch } from '$lib/helpers/utils/text.ts'
 import { getLibraryItemIds } from '$lib/library/get/ids.ts'
 import {
 	createLibraryItemKeysPageQuery,
@@ -16,7 +17,7 @@ import { configsMap, type LibraryRouteConfig, type LibrarySearchFn } from './con
 import { LibraryStore } from './store.svelte.ts'
 
 const defaultSearchFn: LibrarySearchFn<{ name: string }> = (value, searchTerm) =>
-	value.name.toLowerCase().includes(searchTerm)
+	foldForSearch(value.name).includes(searchTerm)
 
 type LoadDataResult<Slug extends LibraryStoreName> = {
 	[ExactSlug in Slug]: LibraryRouteConfig<ExactSlug> & {
@@ -34,7 +35,7 @@ const loadData = async <Slug extends LibraryStoreName>(
 	const store = new LibraryStore(slug)
 
 	const itemsIdsQueryPromise = createLibraryItemKeysPageQuery(slug, {
-		key: () => [slug, store.sortByKey, store.order, store.searchTerm.toLowerCase().trim()],
+		key: () => [slug, store.sortByKey, store.order, foldForSearch(store.searchTerm.trim())],
 		fetcher: async ([name, sortKey, order, searchTerm], signal) => {
 			const result = await getLibraryItemIds(name, {
 				sort: sortKey,

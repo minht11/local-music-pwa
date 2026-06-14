@@ -8,6 +8,16 @@ export const truncate = (text: string, length: number): string => {
 	return `${text.slice(0, length)}...`
 }
 
+/**
+ * Normalizes text for search comparisons: case-insensitive
+ * and diacritic-insensitive (e.g. "beyonce" matches "Beyoncé").
+ */
+export const foldForSearch = (text: string): string =>
+	text
+		.normalize('NFKD')
+		.replace(/\p{M}+/gu, '')
+		.toLowerCase()
+
 export const formatArtists = (artists: readonly StringOrUnknownItem[]): string =>
 	artists.filter((artist) => artist !== UNKNOWN_ITEM).join(', ')
 
