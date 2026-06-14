@@ -112,18 +112,7 @@ export interface AlbumData extends Album {
 }
 
 const albumConfig: QueryConfig<AlbumData> = {
-	fetch: async (id) => {
-		const db = await getDatabase()
-		const album = await db.get('albums', id)
-		if (!album) {
-			return undefined
-		}
-
-		return {
-			...album,
-			type: 'album',
-		}
-	},
+	fetch: (id) => dbGetValue('albums', 'album', id),
 	shouldRefetch: defaultRefreshOnDatabaseChanges.bind(null, 'albums'),
 }
 export interface ArtistData extends Artist {

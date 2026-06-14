@@ -19,7 +19,7 @@ import {
 	type UpdatePlaylistOptions,
 	updatePlaylist,
 } from '$lib/library/playlists-actions.ts'
-import { dbImportTrack } from '$lib/library/scan-actions/scanner/steps/import-track'
+import { dbImportTrack } from '$lib/library/scan-actions/scanner/steps/import-track.ts'
 import { FAVORITE_PLAYLIST_ID, type UnknownTrack } from '$lib/library/types.ts'
 
 vi.mock('$lib/components/snackbar/snackbar', () => ({
