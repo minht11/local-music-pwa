@@ -65,12 +65,15 @@
 	]
 
 	const languageOptions: { name: string; value: Locale }[] = [
-		{ name: 'English (EN)', value: 'en' },
-		{ name: 'Lietuvių (LT)', value: 'lt' },
-		{ name: 'Deutsch (DE)', value: 'de' },
-		{ name: 'Français (FR)', value: 'fr' },
-		{ name: '简体中文', value: 'zh-CN' },
-		{ name: '繁體中文', value: 'zh-TW' },
+		{ name: 'EN English', value: 'en' },
+		{ name: 'LT Lietuvių', value: 'lt' },
+		{ name: 'DE Deutsch', value: 'de' },
+		{ name: 'FR Français', value: 'fr' },
+		{ name: 'ES Español', value: 'es' },
+		{ name: 'HI हिन्दी', value: 'hi' },
+		{ name: 'JA 日本語', value: 'ja' },
+		{ name: 'ZH-CN 简体中文', value: 'zh-CN' },
+		{ name: 'ZH-TW 繁體中文', value: 'zh-TW' },
 	]
 
 	const updateMainColor = debounce((value: string | null) => {
