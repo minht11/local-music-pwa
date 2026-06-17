@@ -76,7 +76,7 @@
 			aria-selected={item[key] === selected}
 			type="button"
 			class={[
-				'interactable flex shrink-0 h-10 w-full cursor-pointer items-center overflow-hidden px-4 -outline-offset-2',
+				'interactable flex h-10 w-full shrink-0 cursor-pointer items-center overflow-hidden px-4 -outline-offset-2',
 				item[key] === selected && 'text-primary',
 			]}
 			onclick={() => {
