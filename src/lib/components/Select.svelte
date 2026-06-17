@@ -64,7 +64,7 @@
 	role="listbox"
 	popover="auto"
 	style={`position-anchor: ${anchorName};`}
-	class="select-popup m-0 hidden flex-col rounded-sm bg-surfaceContainerHighest px-0 py-2 shadow-xl open:flex"
+	class="select-popup m-0 hidden max-h-80 flex-col overflow-y-auto rounded-sm bg-surfaceContainerHighest px-0 py-2 shadow-xl open:flex"
 	ontoggle={(e) => {
 		isOpen = e.newState === 'open'
 	}}
@@ -76,7 +76,7 @@
 			aria-selected={item[key] === selected}
 			type="button"
 			class={[
-				'interactable flex h-10 w-full cursor-pointer items-center overflow-hidden px-4 -outline-offset-2',
+				'interactable flex shrink-0 h-10 w-full cursor-pointer items-center overflow-hidden px-4 -outline-offset-2',
 				item[key] === selected && 'text-primary',
 			]}
 			onclick={() => {

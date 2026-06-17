@@ -139,7 +139,7 @@
 	"settingsDisplayVolumeSlider": "Afficher le curseur de volume dans le lecteur",
 	"settingsGaplessPlayback": "Lecture sans interruption (expérimental)",
 	"settingsGaplessPlaybackDescription": "Nécessite la prise en charge par votre navigateur et le fichier audio, sinon revient à la lecture normale",
-	"settingsGaplessPlaybackInfo": "Cela utilise un peu plus de mémoire et de ressources CPU. Si vous rencontrez des problèmes, essayez de le désactiver. Si vous avez utilisé une version précédente de l'application, renumériez ou réimportez votre bibliothèque pour que cela fonctionne.",
+	"settingsGaplessPlaybackInfo": "Cela utilise un peu plus de mémoire et de ressources CPU. Si vous rencontrez des problèmes, essayez de le désactiver. Si vous avez utilisé une version précédente de l'application, rescannez ou réimportez votre bibliothèque pour que cela fonctionne.",
 	"settingsGrantDirectoryAccess": "Vous devez autoriser l’appli à accéder au dossier via une permission du navigateur afin qu’elle puisse analyser son contenu",
 	"settingsImportTracks": "Importer des pistes",
 	"settingsInstallAppDesktop": "bureau",

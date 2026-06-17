@@ -18,6 +18,10 @@ Your music files and library data stay on your device. The app does not collect 
 
 Page views are counted using [GoatCounter](https://goatcounter.com/), a minimal privacy-preserving analytics tool.
 
+## Translations
+
+Translations are machine-generated and won't always sound natural. Fixes and suggestions are welcome — each language is a file in [`messages/`](messages/), with [`en.json`](messages/en.json) as the reference. To add a language, also register its code in [`vite.config.ts`](vite.config.ts) and the settings language picker, then run `pnpm run i18n-check`.
+
 ## Tech stack
 
 SvelteKit/Svelte 5 · TypeScript · Tailwind CSS 4
