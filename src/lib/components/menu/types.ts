@@ -32,11 +32,18 @@ interface MenuSheetOptions {
 export type MenuOptions = (MenuAnchorOptions | MenuPositionOptions) & MenuSize & MenuSheetOptions
 
 /** @public */
-export interface MenuItem {
+export interface MenuActionItem {
 	label: string
 	selected?: boolean
 	action: () => void
 }
+
+export interface MenuSeparatorItem {
+	separator: true
+}
+
+/** @public */
+export type MenuItem = MenuActionItem | MenuSeparatorItem
 
 export interface MenuInternalData {
 	items: MenuItem[]
