@@ -20,7 +20,7 @@
 		"knip": "knip"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.0",
+		"@biomejs/biome": "2.5.2",
 		"@resvg/resvg-js": "^2.6.2",
 		"@rolldown/pluginutils": "^1.0.1",
 		"@sveltejs/adapter-static": "3.0.10",

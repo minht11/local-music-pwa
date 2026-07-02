@@ -164,17 +164,13 @@
 				},
 				"noImportCycles": "error",
 				"noDeprecatedImports": "on",
-				"noNestedPromises": "error",
-				// Lof of false positives, re-enable in the future.
-				"noUnnecessaryConditions": "off"
+				"noNestedPromises": "error"
 			},
 			"a11y": {
 				"noSvgWithoutTitle": "off",
 				// Lot of false positives, re-enable in the future.
 				"useSemanticElements": "off",
-				"noStaticElementInteractions": "off",
-				"useFocusableInteractive": "off",
-				"useValidAriaValues": "off"
+				"useFocusableInteractive": "off"
 			},
 			"performance": {
 				"useTopLevelRegex": "error"
@@ -223,7 +219,8 @@
 					// Disabled because of false positives
 					"correctness": {
 						"noUnusedVariables": "off",
-						"noUnusedFunctionParameters": "off"
+						"noUnusedFunctionParameters": "off",
+						"noUnusedImports": "off"
 					},
 					"style": {
 						"noRestrictedGlobals": "off"
