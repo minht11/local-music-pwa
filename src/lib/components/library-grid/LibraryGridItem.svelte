@@ -8,6 +8,7 @@
 		createManagedArtwork,
 		getAlbumManagedArtworkSource,
 	} from '$lib/helpers/create-managed-artwork.svelte.ts'
+	import { formatNameOrUnknown } from '$lib/helpers/utils/text.ts'
 	import { dbGetAlbumTracksIdsByName, dbGetArtistTracksIdsByName } from '$lib/library/get/ids'
 	import type { AlbumData, ArtistData } from '$lib/library/get/value'
 	import { createLibraryValueQuery } from '$lib/library/get/value-queries'
@@ -105,7 +106,7 @@
 					try {
 						const tracksIds = await dbGetAlbumOrArtistTrackIdsByName(item.name)
 
-						player.addToQueue(tracksIds)
+						player.enqueue(tracksIds, 'last')
 					} catch (error) {
 						snackbar.unexpectedError(error)
 					}
@@ -146,7 +147,10 @@
 				return
 			}
 
-			player.playTrack(0, tracksIds)
+			player.playTrack(0, tracksIds, {
+				type: type === 'albums' ? 'album' : 'artist',
+				name: formatNameOrUnknown(item.name),
+			})
 		} catch (error) {
 			snackbar.unexpectedError(error)
 		}

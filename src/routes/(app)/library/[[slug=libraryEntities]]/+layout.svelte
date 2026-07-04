@@ -173,7 +173,10 @@
 								</div>
 							</div>
 						{:else if slug === 'tracks'}
-							<TracksListContainer items={itemsIds} />
+							<TracksListContainer
+								items={itemsIds}
+								queueSource={{ type: 'tracks', name: m.tracks() }}
+							/>
 						{:else if slug === 'albums'}
 							<AlbumsListContainer items={itemsIds} />
 						{:else if slug === 'artists'}

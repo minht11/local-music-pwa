@@ -18,11 +18,13 @@
 	interface Props {
 		count: number
 		lanes?: number
-		size: number
+		size: number | ((index: number) => number)
 		gap?: number
 		forceRenderIndexes?: readonly number[]
 		offsetWidth?: number
 		key: (index: number) => string | number
+		/** Rows excluded from arrow-key navigation, e.g. static section headers. */
+		focusableRow?: (index: number) => boolean
 		children: Snippet<[VirtualItem]>
 	}
 
@@ -33,11 +35,13 @@
 		size: itemSize,
 		forceRenderIndexes = [],
 		key,
+		focusableRow,
 		children,
 		offsetWidth = $bindable(0),
 	}: Props = $props()
 
 	const scrollTarget = useScrollTarget()
+	let focusIndex = $state(-1)
 
 	type VirtualizerTargetOptions<E extends Window | Element> = Pick<
 		VirtualizerOptions<E, Element>,
@@ -90,7 +94,9 @@
 				arr.push(i)
 			}
 
-			if (focusIndex !== -1 && focusIndex > initialEnd) {
+			// The focused row can outlive the list shrinking under it (focusout only
+			// clears focusIndex in a microtask), so bound it like forceRenderIndexes.
+			if (focusIndex !== -1 && focusIndex > initialEnd && focusIndex < range.count) {
 				arr.push(focusIndex)
 			}
 
@@ -106,12 +112,14 @@
 		})
 
 	const getVirtualizerOptions = () => {
+		const estimateSize = typeof itemSize === 'function' ? itemSize : () => itemSize
+
 		const options: VirtualizerOptions<Window | Element, Element> = {
 			// narrowing window/element specific types is difficult so we just cast here
 			...(scrollTargetOptions as VirtualizerTargetOptions<Window | Element>),
 			count,
 			lanes,
-			estimateSize: () => itemSize,
+			estimateSize,
 			rangeExtractor,
 			overscan: 10,
 		}
@@ -120,8 +128,6 @@
 	}
 
 	const virtualizer = createVirtualizerBase(getVirtualizerOptions)
-
-	let focusIndex = $state(-1)
 
 	let container = $state<HTMLDivElement>()
 
@@ -199,8 +205,17 @@
 
 		e.preventDefault()
 
+		const isRowFocusable = (index: number) => focusableRow?.(index) ?? true
+
 		if (container && doesElementHasFocus(container)) {
-			await scrollToElementThenFocusIt(0)
+			let firstIndex = 0
+			while (firstIndex < count && !isRowFocusable(firstIndex)) {
+				firstIndex += 1
+			}
+
+			if (firstIndex < count) {
+				await scrollToElementThenFocusIt(firstIndex)
+			}
 
 			return
 		}
@@ -208,7 +223,11 @@
 		const increment = directionDown ? 1 : -1
 		const currentIndex = findCurrentFocusedRow()
 
-		const nextIndex = currentIndex + increment
+		let nextIndex = currentIndex + increment
+		while (nextIndex >= 0 && nextIndex < count && !isRowFocusable(nextIndex)) {
+			nextIndex += increment
+		}
+
 		if (nextIndex >= 0 && nextIndex < count) {
 			await scrollToElementThenFocusIt(nextIndex)
 		}
