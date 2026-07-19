@@ -106,7 +106,7 @@
 					try {
 						const tracksIds = await dbGetAlbumOrArtistTrackIdsByName(item.name)
 
-						player.enqueue(tracksIds, 'last')
+						player.queue.enqueue(tracksIds, 'last')
 					} catch (error) {
 						snackbar.unexpectedError(error)
 					}
@@ -147,7 +147,7 @@
 				return
 			}
 
-			player.playTrack(0, tracksIds, {
+			player.playFrom(0, tracksIds, {
 				type: type === 'albums' ? 'album' : 'artist',
 				name: formatNameOrUnknown(item.name),
 			})

@@ -9,11 +9,11 @@
 </script>
 
 <IconButton
-	tooltip={player.shuffle ? m.playerDisableShuffle() : m.playerEnableShuffle()}
+	tooltip={player.queue.shuffle ? m.playerDisableShuffle() : m.playerEnableShuffle()}
 	class={className}
-	onclick={player.toggleShuffle}
+	onclick={player.queue.toggleShuffle}
 >
 	<Icon type="shuffle" />
 
-	<ActiveIndicator active={player.shuffle} />
+	<ActiveIndicator active={player.queue.shuffle} />
 </IconButton>
