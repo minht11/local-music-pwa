@@ -32,10 +32,11 @@ const trackRowAt = (index: number) => {
 	return row
 }
 
-const headerKeyAt = (index: number): string => {
+const headerKeyAt = (index: number): string | number => {
 	const row = rows.listProps.rowAt(index)
 	invariant(row.type === 'custom')
-	return row.key
+
+	return rows.listProps.keyAt(index)
 }
 
 /** Now playing 1, manual [8, 9], upcoming source [2, 3] — all three sections present. */

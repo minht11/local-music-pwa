@@ -6,7 +6,6 @@
 	import MenuButton from '../MenuButton.svelte'
 	import type { MenuItem } from '../menu/types.ts'
 	import VirtualContainer from '../VirtualContainer.svelte'
-	import { TRACK_ROW_HEIGHT } from './row-height.ts'
 	import type { SelectionSnapshot, TrackRowIdentity } from './selection.ts'
 	import TrackListItem from './TrackListItem.svelte'
 	import { useTrackDragController } from './use-track-drag-controller.svelte.ts'
@@ -20,13 +19,13 @@
 	/**
 	 * A row resolved on demand by index. `entryId` is the stable per-row id — the
 	 * unit of virtualizer reconciliation, selection and drag — and `trackId` the
-	 * payload. Custom rows (e.g. section headers) carry only a height and a stable
-	 * key; the `customRow` snippet resolves their content, keeping row resolution
-	 * free of i18n and closures.
+	 * payload. A custom row (e.g. a section header) is only a marker: its height
+	 * and key come from `sizeAt`/`keyAt`, and the `customRow` snippet resolves its
+	 * content, keeping row resolution free of i18n and closures.
 	 */
 	export type TrackListRow =
 		| { type: 'track'; entryId: number; trackId: number }
-		| { type: 'custom'; key: string; size: number }
+		| { type: 'custom' }
 
 	export interface TrackItemClick extends TrackRowLocator {
 		track: TrackData
@@ -53,12 +52,13 @@
 		isRowActive: (row: TrackRowIdentity) => boolean
 		onItemClick: (data: TrackItemClick) => void
 		/**
-		 * A row's height and reconciliation key without building the row. A count
-		 * change runs the size probe for every index, not just the rendered ones, so
-		 * a source that can answer without allocating should. Both fall back to `rowAt`.
+		 * A row's height and reconciliation key, answered without building the row.
+		 * A count change runs both probes for every index, not just the rendered
+		 * ones, so they must stay cheap — that is why they are separate from `rowAt`
+		 * rather than read off it.
 		 */
-		sizeAt?: (index: number) => number
-		keyAt?: (index: number) => string | number
+		sizeAt: (index: number) => number
+		keyAt: (index: number) => string | number
 	}
 
 	export interface TracksListContainerProps extends TrackListSource {
@@ -66,7 +66,8 @@
 		menuItems?: (track: TrackData, row: TrackRowLocator) => MenuItem[]
 		/** Extra multi-select menu items appended after the predefined ones. */
 		multiSelectMenuItems?: (selection: SelectionSnapshot) => MenuItem[]
-		showReorderButton?: boolean | ((index: number) => boolean)
+		/** Which rows get a reorder handle; omitted means none do. */
+		showReorderButton?: (index: number) => boolean
 		showFavoriteButton?: boolean
 		/** Renders a custom (non-track) row, given its index. */
 		customRow?: Snippet<[number]>
@@ -93,32 +94,12 @@
 		menuItems,
 		multiSelectMenuItems,
 		predefinedMenuItems = {},
-		showReorderButton = false,
+		showReorderButton,
 		showFavoriteButton = true,
 		onDrop,
 		sizeAt,
 		keyAt,
 	}: TracksListContainerProps = $props()
-
-	const rowSize = (index: number): number => {
-		if (sizeAt) {
-			return sizeAt(index)
-		}
-
-		const row = rowAt(index)
-
-		return row.type === 'custom' ? row.size : TRACK_ROW_HEIGHT
-	}
-
-	const rowKey = (index: number): string | number => {
-		if (keyAt) {
-			return keyAt(index)
-		}
-
-		const row = rowAt(index)
-
-		return row.type === 'custom' ? row.key : row.entryId
-	}
 
 	// Total where `rowAt` is not: callers hold indexes the list can shrink under
 	// (the selection's range anchor), and a source may treat those as a bug.
@@ -132,8 +113,7 @@
 		return row.type === 'track' ? row : undefined
 	}
 
-	const isRowReorderable = (index: number) =>
-		typeof showReorderButton === 'function' ? showReorderButton(index) : showReorderButton
+	const isRowReorderable = (index: number) => showReorderButton?.(index) ?? false
 
 	/**
 	 * Whether the gesture's row still sits where it started. A list that mutates
@@ -205,11 +185,11 @@
 {/snippet}
 
 <VirtualContainer
-	size={rowSize}
+	size={sizeAt}
 	{count}
 	forceRenderIndexes={dragController.drag === null ? [] : [dragController.drag.fromIndex]}
 	focusableRow={(index) => rowAt(index).type === 'track'}
-	key={rowKey}
+	key={keyAt}
 >
 	{#snippet children(item)}
 		{@const row = rowAt(item.index)}

@@ -42,7 +42,8 @@ interface LayerSectionLayout extends QueueSectionLayout {
 
 const QUEUE_HEADER_HEIGHT = 48
 
-// Constant, so the row key of a header is not rebuilt on every probe.
+// Constants, so neither a header's row nor its key is rebuilt on every probe.
+const HEADER_ROW: TrackListRow = { type: 'custom' }
 const HEADER_KEYS = {
 	nowPlaying: 'header:nowPlaying',
 	manual: 'header:manual',
@@ -144,7 +145,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 
 		const index = rowIndex - s.headerIndex - 1
 		if (index === -1) {
-			return { type: 'custom', key: HEADER_KEYS[s.section], size: QUEUE_HEADER_HEIGHT }
+			return HEADER_ROW
 		}
 
 		const { entryId, trackId } = entryAt(s.section, index)

@@ -5,9 +5,8 @@
 	import Header from '$lib/components/Header.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import MenuButton from '$lib/components/MenuButton.svelte'
-	import TracksListContainer, {
-		type TrackListRow,
-	} from '$lib/components/tracks/TracksListContainer.svelte'
+	import { createTrackIdsSource } from '$lib/components/tracks/track-ids-source.svelte.ts'
+	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import type { TrackRowLocator } from '$lib/components/tracks/use-track-menu-items.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import {
@@ -60,20 +59,6 @@
 	})
 
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
-
-	// Rows carry their identity: `PlaylistEntry.id` for playlists (exact under
-	// duplicate tracks), the track id itself elsewhere (one row per track).
-	const trackRowAt = (index: number): TrackListRow => {
-		const entry = tracks.entries?.[index]
-		if (entry) {
-			return { type: 'track', entryId: entry.entryId, trackId: entry.trackId }
-		}
-
-		const id = tracks.tracksIds[index]
-		invariant(id !== undefined)
-
-		return { type: 'track', entryId: id, trackId: id }
-	}
 
 	// Only used on playlist views, where a row's `entryId` is the `PlaylistEntry` id.
 	const playlistTrackMenuItems = (_track: TrackData, { entryId }: TrackRowLocator) => {
@@ -151,6 +136,13 @@
 	const queueSource: QueueOrigin = $derived({
 		type: queueSourceTypes[slug],
 		name: formatNameOrUnknown(item.name),
+	})
+
+	const tracksSource = createTrackIdsSource(() => tracks.tracksIds, {
+		queueSource: () => queueSource,
+		// Playlists key rows by `PlaylistEntry.id`, exact under duplicate tracks;
+		// every other view has one row per track, so the track id stands in.
+		entryIdAt: (index) => tracks.entries?.[index]?.entryId,
 	})
 </script>
 
@@ -233,13 +225,7 @@
 	</section>
 
 	<TracksListContainer
-		count={tracks.tracksIds.length}
-		rowAt={trackRowAt}
-		trackCount={tracks.tracksIds.length}
-		isRowActive={(row) => row.trackId === player.queue.current?.trackId}
-		onItemClick={({ index }) => {
-			player.playFrom(index, tracks.tracksIds, queueSource)
-		}}
+		{...tracksSource}
 		predefinedMenuItems={{
 			disableViewAlbum: slug === 'albums',
 			disableViewArtist: slug === 'artists',
