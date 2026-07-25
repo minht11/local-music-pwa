@@ -179,7 +179,7 @@
 								</div>
 							</div>
 						{:else if slug === 'tracks'}
-							<TracksListContainer {...allTracksSource} />
+							<TracksListContainer source={allTracksSource} />
 						{:else if slug === 'albums'}
 							<AlbumsListContainer items={itemsIds} />
 						{:else if slug === 'artists'}

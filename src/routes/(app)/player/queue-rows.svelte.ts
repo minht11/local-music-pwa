@@ -4,6 +4,7 @@ import type { SelectionSnapshot } from '$lib/components/tracks/selection.ts'
 import type {
 	TrackItemClick,
 	TrackListRow,
+	TrackListSource,
 	TracksListContainerProps,
 } from '$lib/components/tracks/TracksListContainer.svelte'
 import type { TrackRowLocator } from '$lib/components/tracks/use-track-menu-items.ts'
@@ -254,11 +255,10 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	}
 
 	/**
-	 * Per-field getters, not one getter returning a fresh object: this is spread
-	 * into the container, and Svelte's spread proxy re-resolves the source on every
-	 * property read.
+	 * Per-field getters, not one getter returning a fresh object: the container
+	 * reads these at access time, so each must re-resolve against `layout`.
 	 */
-	const listProps = {
+	const source: TrackListSource = {
 		get count() {
 			return layout.count
 		},
@@ -271,12 +271,16 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		// By entry id: the same track can sit on several rows, and only the one
 		// actually playing should light up.
 		isRowActive: ({ entryId }) => isCurrentEntry(entryId),
+		onItemClick,
+	}
+
+	const listProps = {
+		source,
 		showFavoriteButton: false,
 		showReorderButton: isReorderable,
-		predefinedMenuItems: { disablePlayNext: true, disableAddToQueue: true },
+		predefinedMenuItems: { playNext: false, addToQueue: false },
 		menuItems: trackMenuItems,
 		multiSelectMenuItems,
-		onItemClick,
 		onDrop,
 	} satisfies Omit<TracksListContainerProps, 'customRow'>
 

@@ -225,12 +225,12 @@
 	</section>
 
 	<TracksListContainer
-		{...tracksSource}
+		source={tracksSource}
 		predefinedMenuItems={{
-			disableViewAlbum: slug === 'albums',
-			disableViewArtist: slug === 'artists',
-			disableAddToFavorites: isFavoritesView,
-			enableMultiRemoveFromFavorites: isFavoritesView,
+			viewAlbum: slug !== 'albums',
+			viewArtist: slug !== 'artists',
+			addToFavorites: !isFavoritesView,
+			removeFromFavorites: isFavoritesView,
 		}}
 		menuItems={slug === 'playlists' ? playlistTrackMenuItems : undefined}
 	/>

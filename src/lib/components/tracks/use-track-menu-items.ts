@@ -15,31 +15,30 @@ export interface TrackRowLocator {
 	entryId: number
 }
 
-/**
- * Every predefined item, and whether it shows when the consumer sets no flag. A
- * set flag flips that, which is what the key names promise: 'disable*' hides an
- * item that shows by default, 'enable*' shows one that does not.
- */
-const PREDEFINED_DEFAULTS = {
-	disablePlayNext: true,
-	disableAddToQueue: true,
-	disableAddToPlaylist: true,
-	disableRemoveFromLibrary: true,
-	disableAddToFavorites: true,
-	disableViewAlbum: true,
-	disableViewArtist: true,
-	enableMultiRemoveFromFavorites: false,
+/** Whether each predefined item shows when the consumer says nothing about it. */
+const DEFAULT_VISIBILITY = {
+	playNext: true,
+	addToQueue: true,
+	addToPlaylist: true,
+	removeFromLibrary: true,
+	addToFavorites: true,
+	viewAlbum: true,
+	viewArtist: true,
+	// Multi-select only: the single-row menu folds both directions into `addToFavorites`.
+	removeFromFavorites: false,
 } as const
 
-export type PredefinedTrackMenuItemOption = keyof typeof PREDEFINED_DEFAULTS
+export type PredefinedTrackMenuItemKey = keyof typeof DEFAULT_VISIBILITY
+
+/** Which predefined items to show, overriding `DEFAULT_VISIBILITY` per key. */
+export type PredefinedTrackMenuItemVisibility = Partial<Record<PredefinedTrackMenuItemKey, boolean>>
 
 interface PredefinedMenuItem extends MenuActionItem {
-	predefinedKey: PredefinedTrackMenuItemOption
+	key: PredefinedTrackMenuItemKey
 }
 
-type FalsyValue = false | undefined | null | ''
-
-type UnfilteredPredefinedMenuItem = PredefinedMenuItem | FalsyValue
+/** An item guarded by a `name && {…}` expression, so it may be the falsy name. */
+type UnfilteredPredefinedMenuItem = PredefinedMenuItem | '' | undefined
 
 const joinWithSeparator = (queueItems: MenuItem[], otherItems: MenuItem[]): MenuItem[] => {
 	if (queueItems.length === 0 || otherItems.length === 0) {
@@ -71,7 +70,7 @@ export const useTrackMenuItems = (
 		| ((track: TrackData, row: TrackRowLocator) => MenuItem[])
 		| null
 		| undefined,
-	predefinedItemsOptions: () => Partial<Record<PredefinedTrackMenuItemOption, boolean>>,
+	predefinedItemsVisibility: () => PredefinedTrackMenuItemVisibility,
 	getMultiSelectMenuItemsFn?: () =>
 		| ((selection: SelectionSnapshot) => MenuItem[])
 		| null
@@ -81,29 +80,24 @@ export const useTrackMenuItems = (
 	const player = usePlayer()
 
 	const filterPredefinedItems = (items: UnfilteredPredefinedMenuItem[]): MenuItem[] => {
-		const options = predefinedItemsOptions()
+		const visibility = predefinedItemsVisibility()
 
-		return items.filter((item): item is PredefinedMenuItem => {
-			if (!item) {
-				return false
-			}
-
-			const flagged = options[item.predefinedKey] ?? false
-
-			return flagged !== PREDEFINED_DEFAULTS[item.predefinedKey]
-		})
+		return items.filter(
+			(item): item is PredefinedMenuItem =>
+				!!item && (visibility[item.key] ?? DEFAULT_VISIBILITY[item.key]),
+		)
 	}
 
 	const queueMenuItems = (ids: readonly number[]): UnfilteredPredefinedMenuItem[] => [
 		{
-			predefinedKey: 'disablePlayNext',
+			key: 'playNext',
 			label: m.playerPlayNext(),
 			action: () => {
 				player.queue.enqueue(ids, 'next')
 			},
 		},
 		{
-			predefinedKey: 'disableAddToQueue',
+			key: 'addToQueue',
 			label: m.playerAddToQueue(),
 			action: () => {
 				player.queue.enqueue(ids, 'last')
@@ -118,35 +112,35 @@ export const useTrackMenuItems = (
 
 		const predefinedItems: UnfilteredPredefinedMenuItem[] = [
 			{
-				predefinedKey: 'disableAddToPlaylist',
+				key: 'addToPlaylist',
 				label: m.libraryAddToPlaylist(),
 				action: () => {
 					dialogs.openDialog('addToPlaylist', [track.id])
 				},
 			},
 			{
-				predefinedKey: 'disableAddToFavorites',
+				key: 'addToFavorites',
 				label: track.favorite ? m.trackRemoveFromFavorites() : m.trackAddToFavorites(),
 				action: () => {
 					void toggleFavoriteTrack(track.favorite, track.id)
 				},
 			},
 			albumName && {
-				predefinedKey: 'disableViewAlbum',
+				key: 'viewAlbum',
 				label: m.trackViewAlbum(),
 				action: () => {
 					void viewRelated('albums', albumName)
 				},
 			},
 			artistName && {
-				predefinedKey: 'disableViewArtist',
+				key: 'viewArtist',
 				label: m.trackViewArtist(),
 				action: () => {
 					void viewRelated('artists', artistName)
 				},
 			},
 			{
-				predefinedKey: 'disableRemoveFromLibrary',
+				key: 'removeFromLibrary',
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
 					dialogs.openDialog('removeFromLibrary', {
@@ -175,14 +169,14 @@ export const useTrackMenuItems = (
 
 		const predefinedItems: UnfilteredPredefinedMenuItem[] = [
 			{
-				predefinedKey: 'disableAddToPlaylist',
+				key: 'addToPlaylist',
 				label: m.libraryAddToPlaylist(),
 				action: () => {
 					dialogs.openDialog('addToPlaylist', trackIds)
 				},
 			},
 			{
-				predefinedKey: 'disableAddToFavorites',
+				key: 'addToFavorites',
 				label: m.trackAddToFavorites(),
 				action: () => {
 					uniqueTrackIds.forEach((trackId) => {
@@ -191,7 +185,7 @@ export const useTrackMenuItems = (
 				},
 			},
 			{
-				predefinedKey: 'enableMultiRemoveFromFavorites',
+				key: 'removeFromFavorites',
 				label: m.trackRemoveFromFavorites(),
 				action: () => {
 					uniqueTrackIds.forEach((trackId) => {
@@ -200,7 +194,7 @@ export const useTrackMenuItems = (
 				},
 			},
 			{
-				predefinedKey: 'disableRemoveFromLibrary',
+				key: 'removeFromLibrary',
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
 					dialogs.openDialog('removeFromLibrary', {

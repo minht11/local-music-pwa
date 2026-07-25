@@ -24,7 +24,7 @@
 	<EmptyListMessage title={m.playerHistoryEmpty()} />
 {:else}
 	<TracksListContainer
-		{...source}
+		{source}
 		menuItems={(item) => [
 			{
 				label: m.playerRemoveFromHistory(),

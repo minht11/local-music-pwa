@@ -10,7 +10,7 @@
 	import TrackListItem from './TrackListItem.svelte'
 	import { useTrackDragController } from './use-track-drag-controller.svelte.ts'
 	import {
-		type PredefinedTrackMenuItemOption,
+		type PredefinedTrackMenuItemVisibility,
 		type TrackRowLocator,
 		useTrackMenuItems,
 	} from './use-track-menu-items.ts'
@@ -61,8 +61,13 @@
 		keyAt: (index: number) => string | number
 	}
 
-	export interface TracksListContainerProps extends TrackListSource {
-		predefinedMenuItems?: Partial<Record<PredefinedTrackMenuItemOption, boolean>>
+	export interface TracksListContainerProps {
+		/**
+		 * Where the rows come from. A stable object whose fields are getters — the
+		 * container reads them at access time, so it must not be destructured.
+		 */
+		source: TrackListSource
+		predefinedMenuItems?: PredefinedTrackMenuItemVisibility
 		menuItems?: (track: TrackData, row: TrackRowLocator) => MenuItem[]
 		/** Extra multi-select menu items appended after the predefined ones. */
 		multiSelectMenuItems?: (selection: SelectionSnapshot) => MenuItem[]
@@ -84,12 +89,10 @@
 	// Only for the active row's playing animation; everything else comes from the source.
 	const player = usePlayer()
 
+	// `source` is intentionally not destructured: its fields are getters that must
+	// be re-read on every access.
 	const {
-		count,
-		rowAt,
-		trackCount,
-		isRowActive,
-		onItemClick,
+		source,
 		customRow,
 		menuItems,
 		multiSelectMenuItems,
@@ -97,18 +100,16 @@
 		showReorderButton,
 		showFavoriteButton = true,
 		onDrop,
-		sizeAt,
-		keyAt,
 	}: TracksListContainerProps = $props()
 
-	// Total where `rowAt` is not: callers hold indexes the list can shrink under
-	// (the selection's range anchor), and a source may treat those as a bug.
+	// Total where `source.rowAt` is not: callers hold indexes the list can shrink
+	// under (the selection's range anchor), and a source may treat those as a bug.
 	const trackAt = (index: number): TrackRowIdentity | undefined => {
-		if (index < 0 || index >= count) {
+		if (index < 0 || index >= source.count) {
 			return undefined
 		}
 
-		const row = rowAt(index)
+		const row = source.rowAt(index)
 
 		return row.type === 'track' ? row : undefined
 	}
@@ -130,12 +131,12 @@
 	)
 
 	const selection = useTrackSelectionController({
-		rowCount: () => count,
+		rowCount: () => source.count,
 		trackAt,
 	})
 
 	const dragController = useTrackDragController({
-		itemsCount: () => count,
+		itemsCount: () => source.count,
 		// A closure, not the prop by value, so `onDrop` is read at call time.
 		onDrop: ({ entryId }, fromIndex, insertSlot) => {
 			if (isDropStillValid(fromIndex, entryId)) {
@@ -166,7 +167,7 @@
 		<Button
 			kind="flat"
 			class="ml-auto text-inversePrimary! disabled:text-inverseOnSurface/50!"
-			disabled={selection.size === trackCount}
+			disabled={selection.size === source.trackCount}
 			onclick={() => {
 				selection.selectAll()
 			}}
@@ -185,14 +186,14 @@
 {/snippet}
 
 <VirtualContainer
-	size={sizeAt}
-	{count}
+	size={source.sizeAt}
+	count={source.count}
 	forceRenderIndexes={dragController.drag === null ? [] : [dragController.drag.fromIndex]}
-	focusableRow={(index) => rowAt(index).type === 'track'}
-	key={keyAt}
+	focusableRow={(index) => source.rowAt(index).type === 'track'}
+	key={source.keyAt}
 >
 	{#snippet children(item)}
-		{@const row = rowAt(item.index)}
+		{@const row = source.rowAt(item.index)}
 		{@const drag = dragController.drag}
 
 		{#if row.type === 'custom'}
@@ -205,7 +206,7 @@
 				{@render customRow?.(item.index)}
 			</div>
 		{:else}
-			{@const active = isRowActive(row)}
+			{@const active = source.isRowActive(row)}
 
 			<TrackListItem
 				trackId={row.trackId}
@@ -233,7 +234,7 @@
 						trackId: row.trackId,
 						index: item.index,
 						onClick: () => {
-							onItemClick({
+							source.onItemClick({
 								track,
 								index: item.index,
 								entryId: row.entryId,
@@ -259,7 +260,7 @@
 
 {#if dragController.drag !== null}
 	{@const drag = dragController.drag}
-	{@const previewActive = isRowActive(drag.row)}
+	{@const previewActive = source.isRowActive(drag.row)}
 	<div
 		popover="manual"
 		class="drag-preview-popover @container opacity-80"
