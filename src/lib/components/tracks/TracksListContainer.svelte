@@ -136,15 +136,12 @@
 		typeof showReorderButton === 'function' ? showReorderButton(index) : showReorderButton
 
 	/**
-	 * The dragged row, while `fromIndex` still resolves to it. A list that mutates
-	 * mid-drag (the queue advances when a track ends) invalidates both the drop and
-	 * the preview.
+	 * Whether the gesture's row still sits where it started. A list that mutates
+	 * mid-drag (the queue advances when a track ends) invalidates the drop; the
+	 * preview keeps rendering from the row captured at gesture start.
 	 */
-	const draggedRowAt = (fromIndex: number, entryId: number): TrackRowIdentity | null => {
-		const row = fromIndex >= 0 && fromIndex < count ? rowAt(fromIndex) : null
-
-		return row?.type === 'track' && row.entryId === entryId ? row : null
-	}
+	const isDropStillValid = (fromIndex: number, entryId: number): boolean =>
+		trackAt(fromIndex)?.entryId === entryId
 
 	const { getMenuItems, getMultiSelectMenuItems } = useTrackMenuItems(
 		() => menuItems,
@@ -160,8 +157,8 @@
 	const dragController = useTrackDragController({
 		itemsCount: () => count,
 		// A closure, not the prop by value, so `onDrop` is read at call time.
-		onDrop: (entryId, fromIndex, insertSlot) => {
-			if (draggedRowAt(fromIndex, entryId) !== null) {
+		onDrop: ({ entryId }, fromIndex, insertSlot) => {
+			if (isDropStillValid(fromIndex, entryId)) {
 				onDrop?.({ index: fromIndex, entryId }, insertSlot)
 			}
 		},
@@ -273,7 +270,7 @@
 					selection.toggleSelection(row.entryId, row.trackId, item.index)
 				}}
 				onReorderPointerDown={(e) => {
-					dragController.start(item.index, row.entryId, e)
+					dragController.start(item.index, row, e)
 				}}
 			/>
 		{/if}
@@ -282,37 +279,33 @@
 
 {#if dragController.drag !== null}
 	{@const drag = dragController.drag}
-	{@const previewRow = draggedRowAt(drag.fromIndex, drag.entryId)}
-	{#if previewRow}
-		{@const previewTrackId = previewRow.trackId}
-		{@const previewActive = isRowActive(previewRow)}
-		<div
-			popover="manual"
-			class="drag-preview-popover @container opacity-80"
-			style={`top:${drag.preview.top}px;left:${drag.preview.left}px;width:${drag.preview.width}px;`}
-			{@attach (el) => {
-				el.showPopover()
-			}}
-		>
-			<TrackListItem
-				trackId={previewTrackId}
-				active={previewActive}
-				activePlaying={player.playing && previewActive}
-				class="pointer-events-none bg-surfaceContainerHigh shadow-lg"
-				ariaRowIndex={drag.fromIndex}
-				selectionEnabled={selection.selectionEnabled}
-				selectionHover={false}
-				selected={selection.has(previewRow.entryId)}
-				menuItems={(track) =>
-					getMenuItems(track, { index: drag.fromIndex, entryId: previewRow.entryId })}
-				showReorderButton={isRowReorderable(drag.fromIndex)}
-				{showFavoriteButton}
-				reorderDragging={false}
-				reorderInsertBefore={false}
-				reorderInsertAfter={false}
-			/>
-		</div>
-	{/if}
+	{@const previewActive = isRowActive(drag.row)}
+	<div
+		popover="manual"
+		class="drag-preview-popover @container opacity-80"
+		style={`top:${drag.preview.top}px;left:${drag.preview.left}px;width:${drag.preview.width}px;`}
+		{@attach (el) => {
+			el.showPopover()
+		}}
+	>
+		<TrackListItem
+			trackId={drag.row.trackId}
+			active={previewActive}
+			activePlaying={player.playing && previewActive}
+			class="pointer-events-none bg-surfaceContainerHigh shadow-lg"
+			ariaRowIndex={drag.fromIndex}
+			selectionEnabled={selection.selectionEnabled}
+			selectionHover={false}
+			selected={selection.has(drag.row.entryId)}
+			menuItems={(track) =>
+				getMenuItems(track, { index: drag.fromIndex, entryId: drag.row.entryId })}
+			showReorderButton={isRowReorderable(drag.fromIndex)}
+			{showFavoriteButton}
+			reorderDragging={false}
+			reorderInsertBefore={false}
+			reorderInsertAfter={false}
+		/>
+	</div>
 {/if}
 
 <style lang="postcss">

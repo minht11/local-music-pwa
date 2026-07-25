@@ -15,20 +15,26 @@ export interface TrackRowLocator {
 	entryId: number
 }
 
-export type PredefinedTrackMenuItemOption =
-	| 'disablePlayNext'
-	| 'disableAddToQueue'
-	| 'disableAddToPlaylist'
-	| 'disableRemoveFromLibrary'
-	| 'disableAddToFavorites'
-	| 'disableViewAlbum'
-	| 'disableViewArtist'
-	| 'enableMultiRemoveFromFavorites'
+/**
+ * Every predefined item, and whether it shows when the consumer sets no flag. A
+ * set flag flips that, which is what the key names promise: 'disable*' hides an
+ * item that shows by default, 'enable*' shows one that does not.
+ */
+const PREDEFINED_DEFAULTS = {
+	disablePlayNext: true,
+	disableAddToQueue: true,
+	disableAddToPlaylist: true,
+	disableRemoveFromLibrary: true,
+	disableAddToFavorites: true,
+	disableViewAlbum: true,
+	disableViewArtist: true,
+	enableMultiRemoveFromFavorites: false,
+} as const
+
+export type PredefinedTrackMenuItemOption = keyof typeof PREDEFINED_DEFAULTS
 
 interface PredefinedMenuItem extends MenuActionItem {
 	predefinedKey: PredefinedTrackMenuItemOption
-	/** Visibility with no consumer flag; a set flag flips it ('disable*' hides, 'enable*' shows). */
-	defaultEnabled: boolean
 }
 
 type FalsyValue = false | undefined | null | ''
@@ -84,14 +90,13 @@ export const useTrackMenuItems = (
 
 			const flagged = options[item.predefinedKey] ?? false
 
-			return flagged !== item.defaultEnabled
+			return flagged !== PREDEFINED_DEFAULTS[item.predefinedKey]
 		})
 	}
 
 	const queueMenuItems = (ids: readonly number[]): UnfilteredPredefinedMenuItem[] => [
 		{
 			predefinedKey: 'disablePlayNext',
-			defaultEnabled: true,
 			label: m.playerPlayNext(),
 			action: () => {
 				player.queue.enqueue(ids, 'next')
@@ -99,7 +104,6 @@ export const useTrackMenuItems = (
 		},
 		{
 			predefinedKey: 'disableAddToQueue',
-			defaultEnabled: true,
 			label: m.playerAddToQueue(),
 			action: () => {
 				player.queue.enqueue(ids, 'last')
@@ -115,7 +119,6 @@ export const useTrackMenuItems = (
 		const predefinedItems: UnfilteredPredefinedMenuItem[] = [
 			{
 				predefinedKey: 'disableAddToPlaylist',
-				defaultEnabled: true,
 				label: m.libraryAddToPlaylist(),
 				action: () => {
 					dialogs.openDialog('addToPlaylist', [track.id])
@@ -123,7 +126,6 @@ export const useTrackMenuItems = (
 			},
 			{
 				predefinedKey: 'disableAddToFavorites',
-				defaultEnabled: true,
 				label: track.favorite ? m.trackRemoveFromFavorites() : m.trackAddToFavorites(),
 				action: () => {
 					void toggleFavoriteTrack(track.favorite, track.id)
@@ -131,7 +133,6 @@ export const useTrackMenuItems = (
 			},
 			albumName && {
 				predefinedKey: 'disableViewAlbum',
-				defaultEnabled: true,
 				label: m.trackViewAlbum(),
 				action: () => {
 					void viewRelated('albums', albumName)
@@ -139,7 +140,6 @@ export const useTrackMenuItems = (
 			},
 			artistName && {
 				predefinedKey: 'disableViewArtist',
-				defaultEnabled: true,
 				label: m.trackViewArtist(),
 				action: () => {
 					void viewRelated('artists', artistName)
@@ -147,7 +147,6 @@ export const useTrackMenuItems = (
 			},
 			{
 				predefinedKey: 'disableRemoveFromLibrary',
-				defaultEnabled: true,
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
 					dialogs.openDialog('removeFromLibrary', {
@@ -177,7 +176,6 @@ export const useTrackMenuItems = (
 		const predefinedItems: UnfilteredPredefinedMenuItem[] = [
 			{
 				predefinedKey: 'disableAddToPlaylist',
-				defaultEnabled: true,
 				label: m.libraryAddToPlaylist(),
 				action: () => {
 					dialogs.openDialog('addToPlaylist', trackIds)
@@ -185,7 +183,6 @@ export const useTrackMenuItems = (
 			},
 			{
 				predefinedKey: 'disableAddToFavorites',
-				defaultEnabled: true,
 				label: m.trackAddToFavorites(),
 				action: () => {
 					uniqueTrackIds.forEach((trackId) => {
@@ -195,7 +192,6 @@ export const useTrackMenuItems = (
 			},
 			{
 				predefinedKey: 'enableMultiRemoveFromFavorites',
-				defaultEnabled: false,
 				label: m.trackRemoveFromFavorites(),
 				action: () => {
 					uniqueTrackIds.forEach((trackId) => {
@@ -205,7 +201,6 @@ export const useTrackMenuItems = (
 			},
 			{
 				predefinedKey: 'disableRemoveFromLibrary',
-				defaultEnabled: true,
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
 					dialogs.openDialog('removeFromLibrary', {

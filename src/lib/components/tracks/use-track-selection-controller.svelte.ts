@@ -2,11 +2,6 @@ import { SvelteMap } from 'svelte/reactivity'
 import { isPrimaryModifierKey } from '$lib/helpers/utils/ua.ts'
 import type { SelectionAnchor, SelectionSnapshot, TrackRowIdentity } from './selection.ts'
 
-interface SelectionInteractionState {
-	hoverRangeEnd: number | null
-	isShiftActive: boolean
-}
-
 interface UseTrackSelectionControllerOptions {
 	/** Total row count (track and custom rows alike). */
 	rowCount: () => number
@@ -35,34 +30,28 @@ export const useTrackSelectionController = ({
 	// selection empties, so a later shift-click cannot range off a stale start.
 	let rangeAnchor: SelectionAnchor | null = null
 
-	const state: SelectionInteractionState = $state({
-		hoverRangeEnd: null,
-		isShiftActive: false,
-	})
+	let hoverRangeEnd = $state<number | null>(null)
+	let isShiftActive = $state(false)
 
 	const cancelSelection = () => {
 		selected.clear()
 		rangeAnchor = null
-		state.hoverRangeEnd = null
+		hoverRangeEnd = null
 	}
 
-	const liveRows = (): TrackRowIdentity[] => {
-		const rows: TrackRowIdentity[] = []
+	/** Visits every track row in order. Materializes nothing: the list can be huge. */
+	const forEachLiveRow = (fn: (row: TrackRowIdentity) => void): void => {
 		const count = rowCount()
 		for (let index = 0; index < count; index += 1) {
 			const row = trackAt(index)
 			if (row) {
-				rows.push(row)
+				fn(row)
 			}
 		}
-
-		return rows
 	}
 
 	const selectAll = () => {
-		for (const row of liveRows()) {
-			selected.set(row.entryId, row.trackId)
-		}
+		forEachLiveRow((row) => selected.set(row.entryId, row.trackId))
 	}
 
 	// Any list change while selecting (queue advance, removal, refetch) drops just
@@ -72,7 +61,8 @@ export const useTrackSelectionController = ({
 			return
 		}
 
-		const live = new Set(liveRows().map((row) => row.entryId))
+		const live = new Set<number>()
+		forEachLiveRow((row) => live.add(row.entryId))
 
 		untrack(() => {
 			for (const entryId of selected.keys()) {
@@ -95,7 +85,7 @@ export const useTrackSelectionController = ({
 			'keydown',
 			(e: KeyboardEvent) => {
 				if (e.key === 'Shift') {
-					state.isShiftActive = true
+					isShiftActive = true
 				}
 
 				if (!selectionEnabled) {
@@ -119,7 +109,7 @@ export const useTrackSelectionController = ({
 			'keyup',
 			(e: KeyboardEvent) => {
 				if (e.key === 'Shift') {
-					state.isShiftActive = false
+					isShiftActive = false
 
 					// Shift released with nothing selected: the hover-seeded anchor
 					// never committed, so drop it.
@@ -146,7 +136,7 @@ export const useTrackSelectionController = ({
 	}
 
 	const isInHoverRange = (index: number) => {
-		if (!state.isShiftActive || state.hoverRangeEnd === null) {
+		if (!isShiftActive || hoverRangeEnd === null) {
 			return false
 		}
 
@@ -155,19 +145,19 @@ export const useTrackSelectionController = ({
 			return false
 		}
 
-		const min = Math.min(anchor, state.hoverRangeEnd)
-		const max = Math.max(anchor, state.hoverRangeEnd)
+		const min = Math.min(anchor, hoverRangeEnd)
+		const max = Math.max(anchor, hoverRangeEnd)
 
 		return index >= min && index <= max
 	}
 
 	const handlePointerEnter = (index: number) => {
-		if (state.isShiftActive || selectionEnabled) {
-			state.hoverRangeEnd = index
+		if (isShiftActive || selectionEnabled) {
+			hoverRangeEnd = index
 
 			// A shift-hover seeds the anchor so the eventual shift-click ranges
 			// from where the preview started; it never overrides an existing anchor.
-			if (state.isShiftActive && rangeAnchor === null) {
+			if (isShiftActive && rangeAnchor === null) {
 				const row = trackAt(index)
 				if (row) {
 					rangeAnchor = { index, entryId: row.entryId }

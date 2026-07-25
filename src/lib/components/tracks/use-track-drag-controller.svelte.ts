@@ -1,11 +1,16 @@
 import { useScrollTarget } from '../ScrollContainer.svelte'
+import type { TrackRowIdentity } from './selection.ts'
 
 const EDGE_THRESHOLD = 84
 const MAX_SCROLL_STEP = 30
 
 interface DragState {
-	/** Identity of the dragged row, fixed for the whole gesture. */
-	readonly entryId: number
+	/**
+	 * The dragged row, captured at `start()` and fixed for the whole gesture, so
+	 * the preview keeps rendering even if the list moves the row out from under
+	 * `fromIndex`.
+	 */
+	readonly row: TrackRowIdentity
 	fromIndex: number
 	insertIndex: number
 	preview: {
@@ -18,11 +23,11 @@ interface DragState {
 interface UseTrackDragControllerOptions {
 	itemsCount: () => number
 	/**
-	 * The entry id and start index captured at `start()`, plus the raw insert slot
-	 * (a gap between rows, 0..count). The list can mutate mid-drag, so `fromIndex`
-	 * is where the gesture began, not necessarily where the row is now.
+	 * The row and start index captured at `start()`, plus the raw insert slot (a
+	 * gap between rows, 0..count). The list can mutate mid-drag, so `fromIndex` is
+	 * where the gesture began, not necessarily where the row is now.
 	 */
-	onDrop: ((entryId: number, fromIndex: number, insertSlot: number) => void) | undefined
+	onDrop: ((row: TrackRowIdentity, fromIndex: number, insertSlot: number) => void) | undefined
 	onStart?: () => void
 }
 
@@ -136,7 +141,7 @@ export const useTrackDragController = ({
 		}, 0)
 	}
 
-	const start = (index: number, entryId: number, e: PointerEvent) => {
+	const start = (index: number, row: TrackRowIdentity, e: PointerEvent) => {
 		const count = itemsCount()
 		if (!onDrop || index < 0 || index >= count) {
 			return
@@ -159,7 +164,7 @@ export const useTrackDragController = ({
 		activePointerId = e.pointerId
 
 		drag = {
-			entryId,
+			row,
 			fromIndex: index,
 			insertIndex: index,
 			preview: { top: rowRect.top, left: rowRect.left, width: rowRect.width },
@@ -190,11 +195,11 @@ export const useTrackDragController = ({
 				return
 			}
 
-			const { entryId: draggedId, fromIndex, insertIndex } = drag
+			const { row: draggedRow, fromIndex, insertIndex } = drag
 			suppressGestureClick()
 			stop()
 
-			onDrop(draggedId, fromIndex, insertIndex)
+			onDrop(draggedRow, fromIndex, insertIndex)
 		}
 
 		// A canceled pointer means the browser took over the gesture (scroll,
