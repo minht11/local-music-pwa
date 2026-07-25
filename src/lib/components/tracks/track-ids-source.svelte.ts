@@ -38,12 +38,10 @@ export const createTrackIdsSource = (
 		get trackCount() {
 			return items().length
 		},
-		get activeRow() {
-			// From the queue, not `activeTrack`: that query keeps its previous value
-			// while refetching, so across a track change it would briefly light up the
-			// row that just stopped playing.
-			return { by: 'trackId', trackId: player.queue.current?.trackId ?? null } as const
-		},
+		// From the queue, not `activeTrack`: that query keeps its previous value while
+		// refetching, so across a track change it would briefly light up the row that
+		// just stopped playing.
+		isRowActive: (row) => row.trackId === player.queue.current?.trackId,
 		rowAt: (index: number): TrackListRow => {
 			const id = items()[index]
 			invariant(id !== undefined, 'track ids source row index out of range')

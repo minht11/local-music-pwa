@@ -61,7 +61,7 @@ describe('QueueStore', () => {
 
 		it('keeps the manual queue when the source is replaced', () => {
 			q.setSource([1, 2], 0)
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			q.setSource([3, 4], 0)
 			expect(manual(q)).toEqual([9])
 		})
@@ -70,7 +70,7 @@ describe('QueueStore', () => {
 	describe('current', () => {
 		it('reports the manual layer while a manual track plays', () => {
 			q.setSource([1], 0)
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			q.advance()
 			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
 		})
@@ -95,7 +95,7 @@ describe('QueueStore', () => {
 
 		it('keeps a playing manual track when the source cannot step', () => {
 			q.setSource([1, 2], 1) // current is the last source row
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			expect(q.advance()).toMatchObject({ layer: 'manual', trackId: 9 })
 
 			// The step fails, so nothing is committed: reverting to the detour point
@@ -117,7 +117,7 @@ describe('QueueStore', () => {
 	describe('peekNext', () => {
 		it('returns the first manual id, then the next source id, without consuming', () => {
 			q.setSource([1, 2], 0)
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			expect(q.peekNext()).toBe(9)
 			expect(manual(q)).toEqual([9])
 
@@ -140,14 +140,14 @@ describe('QueueStore', () => {
 
 		it('returns to the detour point from a manual track', () => {
 			q.setSource([1, 2, 3], 1)
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			q.advance()
 			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
 			expect(q.stepBack()).toMatchObject({ layer: 'source', trackId: 2 })
 		})
 
 		it('returns null from a manual track with no source', () => {
-			q.enqueue(9, 'last')
+			q.enqueue([9], 'last')
 			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
 			expect(q.stepBack(true)).toBeNull()
 		})
@@ -156,18 +156,18 @@ describe('QueueStore', () => {
 	describe('enqueue ordering', () => {
 		it('play next chains, add to queue appends behind the block', () => {
 			q.setSource([1], 0)
-			q.enqueue(8, 'next')
-			q.enqueue(20, 'last')
-			q.enqueue(9, 'next')
+			q.enqueue([8], 'next')
+			q.enqueue([20], 'last')
+			q.enqueue([9], 'next')
 			expect(manual(q)).toEqual([8, 9, 20])
 		})
 
 		it('starts a new play-next block after the previous one drains', () => {
 			q.setSource([1, 2], 0)
-			q.enqueue(8, 'next')
-			q.enqueue(20, 'last')
+			q.enqueue([8], 'next')
+			q.enqueue([20], 'last')
 			q.advance() // plays 8
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			expect(manual(q)).toEqual([9, 20])
 		})
 
@@ -180,7 +180,7 @@ describe('QueueStore', () => {
 		it('inserts after the last next-tagged entry even after a reorder interleaves kinds', () => {
 			q.setSource([1], 0)
 			q.enqueue([8, 9], 'next')
-			q.enqueue(20, 'last')
+			q.enqueue([20], 'last')
 			expect(manual(q)).toEqual([8, 9, 20])
 
 			// Reorder the queued track (20) between the two play-next tracks, so kinds
@@ -192,7 +192,7 @@ describe('QueueStore', () => {
 
 			// A later play-next chains after the last next-tagged entry (9), not after
 			// the queued track sitting between the two next-tagged rows.
-			q.enqueue(10, 'next')
+			q.enqueue([10], 'next')
 			expect(manual(q)).toEqual([8, 20, 9, 10])
 		})
 	})
@@ -239,7 +239,7 @@ describe('QueueStore', () => {
 
 		it('returns null for an unknown id while a manual track plays, leaving it playing', () => {
 			q.setSource([1], 0)
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			q.advance()
 
 			expect(q.playEntry(999_999)).toBeNull()
@@ -248,7 +248,7 @@ describe('QueueStore', () => {
 
 		it('returns null for the current manual entry id, leaving it playing', () => {
 			q.setSource([1], 0)
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			q.advance()
 			const currentEntryId = q.current?.entryId
 			invariant(currentEntryId !== undefined)
@@ -301,12 +301,12 @@ describe('QueueStore', () => {
 		it('adjusts the play-next block for removed block entries', () => {
 			q.setSource([1], 0)
 			q.enqueue([8, 9], 'next')
-			q.enqueue(20, 'last')
+			q.enqueue([20], 'last')
 			const entryId = q.itemAt('manual', 0)?.entryId
 			invariant(entryId !== undefined)
 
 			q.removeEntries([entryId])
-			q.enqueue(10, 'next')
+			q.enqueue([10], 'next')
 
 			expect(manual(q)).toEqual([9, 10, 20])
 		})
@@ -319,7 +319,7 @@ describe('QueueStore', () => {
 			q.removeEntries([sourceEntryId])
 			expect(q.current).toMatchObject({ layer: 'source', trackId: 1 })
 
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			q.advance()
 			const manualEntryId = q.current?.entryId
 			invariant(manualEntryId !== undefined)
@@ -386,7 +386,7 @@ describe('QueueStore', () => {
 
 		it('moves a manual track into the source queue', () => {
 			q.setSource([1, 2, 3], 0)
-			q.enqueue(99, 'last')
+			q.enqueue([99], 'last')
 			const entryId = q.itemAt('manual', 0)?.entryId
 			invariant(entryId !== undefined)
 			q.moveEntry(entryId, { layer: 'source', slot: 1 })
@@ -405,8 +405,8 @@ describe('QueueStore', () => {
 
 		it('joins the play-next block when moved inside it', () => {
 			q.setSource([1, 2], 0)
-			q.enqueue(8, 'next')
-			q.enqueue(20, 'last')
+			q.enqueue([8], 'next')
+			q.enqueue([20], 'last')
 
 			const entryId = q.itemAt('source', 0)?.entryId
 			invariant(entryId !== undefined)
@@ -414,14 +414,14 @@ describe('QueueStore', () => {
 			expect(manual(q)).toEqual([2, 8, 20])
 
 			// a later play-next still chains after the whole block
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			expect(manual(q)).toEqual([2, 8, 9, 20])
 		})
 
 		it('cross-layer insert dropped inside the play-next block joins it', () => {
 			q.setSource([1, 2, 3], 0)
 			q.enqueue([8, 9], 'next')
-			q.enqueue(20, 'last')
+			q.enqueue([20], 'last')
 			expect(manual(q)).toEqual([8, 9, 20])
 
 			// slot 0: strictly inside the block, ahead of both next-tagged tracks
@@ -432,14 +432,14 @@ describe('QueueStore', () => {
 
 			// the moved-in track (2) joined the block, so a later play-next chains
 			// after it and the rest of the block
-			q.enqueue(10, 'next')
+			q.enqueue([10], 'next')
 			expect(manual(q)).toEqual([2, 8, 9, 10, 20])
 		})
 
 		it('cross-layer insert dropped at the play-next block boundary joins it', () => {
 			q.setSource([1, 2, 3], 0)
 			q.enqueue([8, 9], 'next')
-			q.enqueue(20, 'last')
+			q.enqueue([20], 'last')
 			expect(manual(q)).toEqual([8, 9, 20])
 
 			// slot 1: right at the boundary, immediately ahead of the last next-tagged track
@@ -448,14 +448,14 @@ describe('QueueStore', () => {
 			q.moveEntry(entryId, { layer: 'manual', slot: 1 })
 			expect(manual(q)).toEqual([8, 2, 9, 20])
 
-			q.enqueue(10, 'next')
+			q.enqueue([10], 'next')
 			expect(manual(q)).toEqual([8, 2, 9, 10, 20])
 		})
 
 		it('cross-layer insert dropped after the play-next block boundary does not join it', () => {
 			q.setSource([1, 2, 3], 0)
 			q.enqueue([8, 9], 'next')
-			q.enqueue(20, 'last')
+			q.enqueue([20], 'last')
 			expect(manual(q)).toEqual([8, 9, 20])
 
 			// slot 2: right after the block, ahead of the plain queued track
@@ -466,7 +466,7 @@ describe('QueueStore', () => {
 
 			// the moved-in track (2) stayed 'queued', so a later play-next lands
 			// before it, not after
-			q.enqueue(10, 'next')
+			q.enqueue([10], 'next')
 			expect(manual(q)).toEqual([8, 9, 10, 2, 20])
 		})
 
@@ -526,7 +526,7 @@ describe('QueueStore', () => {
 
 		it("clear('all') empties both layers", () => {
 			q.setSource([1, 2, 3], 1, { type: 'album', name: 'A' })
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			q.clear('all')
 			expect(q.isEmpty).toBe(true)
 			expect(q.current).toBeNull()
@@ -546,9 +546,9 @@ describe('QueueStore', () => {
 		it('keeps play-next chaining consistent after a block track is deleted', () => {
 			q.setSource([1], 0)
 			q.enqueue([8, 9], 'next')
-			q.enqueue(20, 'last')
+			q.enqueue([20], 'last')
 			dispatchTrackDelete(8)
-			q.enqueue(10, 'next')
+			q.enqueue([10], 'next')
 			expect(manual(q)).toEqual([9, 10, 20])
 		})
 
@@ -560,7 +560,7 @@ describe('QueueStore', () => {
 
 		it('falls back to the source return point when the playing manual track is deleted', () => {
 			q.setSource([1], 0)
-			q.enqueue(9, 'next')
+			q.enqueue([9], 'next')
 			q.advance()
 			dispatchTrackDelete(9)
 			expect(q.current).toMatchObject({ layer: 'source', trackId: 1 })

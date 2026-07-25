@@ -18,6 +18,11 @@
 	interface Props {
 		count: number
 		lanes?: number
+		/**
+		 * A constant row height, or one per index. A function's identity is the
+		 * remeasure trigger, so pass a stable reference — a fresh closure on every
+		 * render drops the whole size cache and re-runs the probe for every row.
+		 */
 		size: number | ((index: number) => number)
 		gap?: number
 		forceRenderIndexes?: readonly number[]

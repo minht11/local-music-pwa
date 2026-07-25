@@ -236,7 +236,7 @@
 		count={tracks.tracksIds.length}
 		rowAt={trackRowAt}
 		trackCount={tracks.tracksIds.length}
-		activeRow={{ by: 'trackId', trackId: player.queue.current?.trackId ?? null }}
+		isRowActive={(row) => row.trackId === player.queue.current?.trackId}
 		onItemClick={({ index }) => {
 			player.playFrom(index, tracks.tracksIds, queueSource)
 		}}

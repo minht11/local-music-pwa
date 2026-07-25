@@ -36,7 +36,7 @@ export interface QueueView {
 	count: (layer: QueueLayer) => number
 	itemAt: (layer: QueueLayer, i: number) => QueueItem | undefined
 	toggleShuffle: () => void
-	enqueue: (trackId: number | readonly number[], position: 'next' | 'last') => void
+	enqueue: (trackIds: readonly number[], position: 'next' | 'last') => void
 	removeEntries: (entryIds: readonly number[]) => void
 	moveEntry: (entryId: number, toSlot: QueueSlot) => void
 	clear: (target: 'manual' | 'source' | 'all') => void
@@ -54,7 +54,7 @@ interface UpcomingList {
 	insertUpcoming: (item: QueueItem, slot: number) => void
 	removeUpcomingAt: (i: number) => void
 	moveUpcomingItem: (from: number, to: number) => void
-	removeEntries: (entryIds: ReadonlySet<number>) => void
+	clearUpcoming: () => void
 }
 
 // The layers' records carry bookkeeping (`kind`, `canonical`) that must not leak out.
@@ -159,9 +159,8 @@ export class QueueStore {
 		this.#source.toggleShuffle()
 	}
 
-	/** Starts no audio, but onto an idle queue the first added track becomes current. */
-	enqueue = (trackId: number | readonly number[], position: 'next' | 'last'): void => {
-		this.#manual.enqueue(Array.isArray(trackId) ? trackId : [trackId], position)
+	enqueue = (trackIds: readonly number[], position: 'next' | 'last'): void => {
+		this.#manual.enqueue(trackIds, position)
 		this.#activateIfIdle()
 	}
 
@@ -232,20 +231,16 @@ export class QueueStore {
 		this.#list(toSlot.layer).insertUpcoming(item, toSlot.slot)
 	}
 
-	/** `'source'` keeps the current track; `'all'` drops it too. */
+	/** A layer keeps the current track; `'all'` drops it too. */
 	clear = (target: 'manual' | 'source' | 'all'): void => {
-		if (target === 'manual') {
-			this.#manual.clearUpcoming()
-		}
-
-		if (target === 'source') {
-			this.#source.clearUpcoming()
-		}
-
 		if (target === 'all') {
 			this.#manual.clear()
 			this.#source.clear()
+
+			return
 		}
+
+		this.#list(target).clearUpcoming()
 	}
 
 	#list = (layer: QueueLayer): UpcomingList => (layer === 'manual' ? this.#manual : this.#source)
@@ -279,7 +274,7 @@ export class QueueStore {
 		return this.#currentSourceEntry()
 	}
 
-	/** Starts no audio: `PlayerStore.play` picks the row up on the next press. */
+	/** Advances for the cursor only; `PlayerStore.play` picks the row up on the next press. */
 	#activateIfIdle = (): void => {
 		if (this.current === null) {
 			this.advance(false)

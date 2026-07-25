@@ -88,7 +88,7 @@ export const useTrackMenuItems = (
 		})
 	}
 
-	const queueMenuItems = (ids: number | readonly number[]): UnfilteredPredefinedMenuItem[] => [
+	const queueMenuItems = (ids: readonly number[]): UnfilteredPredefinedMenuItem[] => [
 		{
 			predefinedKey: 'disablePlayNext',
 			defaultEnabled: true,
@@ -162,7 +162,7 @@ export const useTrackMenuItems = (
 
 		const menuItems = getMenuItemsFn()
 
-		return joinWithSeparator(filterPredefinedItems(queueMenuItems(track.id)), [
+		return joinWithSeparator(filterPredefinedItems(queueMenuItems([track.id])), [
 			...filterPredefinedItems(predefinedItems),
 			...(menuItems ? menuItems(track, row) : []),
 		])

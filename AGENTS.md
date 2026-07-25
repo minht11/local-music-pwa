@@ -234,9 +234,9 @@ Note: `Snippet<T>` and `ClassValue` are **Svelte/TypeScript built-in types**, no
 Browse `src/lib/components/` for the full set (buttons, inputs, icons, dialogs, etc. — names are self-describing). The non-obvious conventions worth knowing:
 
 - Render long lists with `VirtualContainer.svelte` or the entity `*ListContainer.svelte` wrappers (`TracksListContainer`, `AlbumsListContainer`, `ArtistListContainer`, `PlaylistListContainer`) — never a plain `{#each}` over the whole library.
-- `TracksListContainer` renders a **`TrackListSource`**: `count` / `trackCount` / `rowAt(index)` / `activeRow` / `onItemClick`, resolved on demand so nothing materializes the list. It has no default click — playback policy belongs to the source. Use `createTrackIdsSource(() => ids, options?)` for a plain list of track ids (clicking plays the list; `entryId` is the track id, so ids must be unique). Sectioned lists and lists that repeat a track id build their own `rowAt` with real entry ids — see `routes/(app)/player/queue-rows.svelte.ts`.
-- `activeRow` picks how the playing row is matched: `{ by: 'trackId', … }` for lists keyed by track id (or by an unrelated id, like playlist entries), `{ by: 'entryId', … }` for the queue, where only the row actually playing lights up.
-- A source may add `sizeAt` / `keyAt` to answer the virtualizer's height and key probes without building a row; both fall back to `rowAt`. Worth it only for lists that get large — a count change runs the size probe for every index.
+- `TracksListContainer` renders a **`TrackListSource`**: `count` / `trackCount` / `rowAt(index)` / `isRowActive(row)` / `onItemClick`, resolved on demand so nothing materializes the list. It has no default click — playback policy belongs to the source. Use `createTrackIdsSource(() => ids, options?)` for a plain list of track ids (clicking plays the list; `entryId` is the track id, so ids must be unique). Sectioned lists and lists that repeat a track id build their own `rowAt` with real entry ids — see `routes/(app)/player/queue-rows.svelte.ts`.
+- `isRowActive` decides which row is playing: most lists compare `row.trackId` against `player.queue.current`, the queue compares `row.entryId` so a track on several rows lights up only where it actually plays.
+- A source may add `sizeAt` / `keyAt` to answer the virtualizer's height and key probes without building a row; both fall back to `rowAt`. Worth it only for lists that get large — a count change re-runs both probes for every index. A source is spread into the container, so expose its fields as individual getters; a single getter returning a fresh object is rebuilt on every property read.
 - Use `ListDetailsLayout.svelte` for master-detail views (library + player); the library toggles split vs stacked via `mainStore.librarySplitLayoutEnabled`.
 - `Artwork.svelte` handles album/track artwork (optimized blobs + fallback); `PlayerOverlay.svelte` is the mini player.
 
@@ -297,7 +297,7 @@ player.queue.isEmpty      // boolean
 player.queue.count(layer)                // 'manual' | 'source' — upcoming row count
 player.queue.itemAt(layer, i)            // QueueItem | undefined, layer-relative
 player.queue.toggleShuffle()             // Shuffles the source layer only
-player.queue.enqueue(trackId, position)  // position: 'next' | 'last'; accepts an array
+player.queue.enqueue(trackIds, position) // trackIds is an array; position: 'next' | 'last'
 player.queue.removeEntries(entryIds)     // Never removes the current entry
 player.queue.moveEntry(entryId, toSlot)  // toSlot: { layer, slot }; cross-layer moves keep the entry id
 player.queue.clear(target)               // 'manual' | 'source' | 'all'

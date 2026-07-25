@@ -37,9 +37,14 @@ export function createVirtualizerBase<
 		onChange: handleChange,
 	})
 
-	// Pushes option changes into the instance. `$derived` rather than `$effect` so
-	// rendering stays in sync with state changes.
-	const optionsSync = $derived.by(() => {
+	/**
+	 * Pushes option changes into the instance, and returns what it applied so the
+	 * snapshot below re-derives with them. `$derived` rather than `$effect` so
+	 * rendering stays in sync with state changes, and kept separate from the
+	 * snapshot so `setOptions` runs on an option change rather than on every
+	 * `version` bump — the instance notifies on every scroll frame.
+	 */
+	const appliedOptions = $derived.by(() => {
 		const resolved = options()
 		userOnChange = resolved.onChange
 
@@ -61,13 +66,12 @@ export function createVirtualizerBase<
 			syncing = false
 		}
 
-		// A fresh object each run, so the snapshot below re-derives.
-		return {}
+		return resolved
 	})
 
 	// The consistent snapshot consumers read.
 	const snapshot = $derived.by(() => {
-		void optionsSync
+		void appliedOptions
 		void version
 
 		syncing = true

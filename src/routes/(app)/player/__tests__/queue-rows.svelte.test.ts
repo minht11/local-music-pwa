@@ -91,7 +91,8 @@ describe('queue rows layout', () => {
 		expect(trackRowAt(1).entryId).toBe(queue.current?.entryId)
 		expect(trackRowAt(3).entryId).toBe(queue.itemAt('manual', 0)?.entryId)
 		expect(trackRowAt(6).entryId).toBe(queue.itemAt('source', 0)?.entryId)
-		expect(rows.listProps.activeRow).toEqual({ by: 'entryId', entryId: queue.current?.entryId })
+		expect(rows.listProps.isRowActive(trackRowAt(1))).toBe(true)
+		expect(rows.listProps.isRowActive(trackRowAt(3))).toBe(false)
 	})
 
 	it('throws for an out-of-range row index', () => {

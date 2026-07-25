@@ -8,7 +8,12 @@ import type {
 } from '$lib/components/tracks/TracksListContainer.svelte'
 import type { TrackRowLocator } from '$lib/components/tracks/use-track-menu-items.ts'
 import type { TrackData } from '$lib/library/get/value.ts'
-import type { QueueLayer, QueueSlot, QueueView } from '$lib/stores/player/queue.svelte.ts'
+import type {
+	QueueItem,
+	QueueLayer,
+	QueueSlot,
+	QueueView,
+} from '$lib/stores/player/queue.svelte.ts'
 
 export interface QueueTabPlayer {
 	readonly queue: QueueView
@@ -35,13 +40,14 @@ interface LayerSectionLayout extends QueueSectionLayout {
 	readonly section: QueueLayer
 }
 
-// `index` is the position within the section; -1 is the section's header row.
-interface QueuePosition {
-	section: QueueSection
-	index: number
-}
-
 const QUEUE_HEADER_HEIGHT = 48
+
+// Constant, so the row key of a header is not rebuilt on every probe.
+const HEADER_KEYS = {
+	nowPlaying: 'header:nowPlaying',
+	manual: 'header:manual',
+	source: 'header:source',
+} as const satisfies Record<QueueSection, string>
 
 /**
  * The queue tab's flat row model. Section geometry is computed once per queue
@@ -79,15 +85,36 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return { sections, layers, count, trackCount }
 	})
 
-	const positionAt = (rowIndex: number): QueuePosition | null => {
+	/**
+	 * The section owning `rowIndex`, or undefined. Allocation-free, and the single
+	 * scan every resolver below builds on: virtual-core re-runs the size and key
+	 * probes for every index whenever `count` changes, and every queue advance
+	 * changes `count`.
+	 */
+	const sectionAt = (rowIndex: number): QueueSectionLayout | undefined => {
 		for (const s of layout.sections) {
 			const offset = rowIndex - s.headerIndex
 			if (offset >= 0 && offset <= s.count) {
-				return { section: s.section, index: offset - 1 }
+				return s
 			}
 		}
 
-		return null
+		return undefined
+	}
+
+	/** The stored record for a track row. Reads return the records themselves. */
+	const entryAt = (section: QueueSection, index: number): QueueItem => {
+		if (section === 'nowPlaying') {
+			const current = player.queue.current
+			invariant(current)
+
+			return current
+		}
+
+		const item = player.queue.itemAt(section, index)
+		invariant(item !== undefined)
+
+		return item
 	}
 
 	const headerData = (section: QueueSection): QueueHeaderData => {
@@ -112,52 +139,41 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	}
 
 	const rowAt = (rowIndex: number): TrackListRow => {
-		const position = positionAt(rowIndex)
-		invariant(position, 'queue row index out of range')
+		const s = sectionAt(rowIndex)
+		invariant(s, 'queue row index out of range')
 
-		if (position.index === -1) {
-			return {
-				type: 'custom',
-				key: `header:${position.section}`,
-				size: QUEUE_HEADER_HEIGHT,
-			}
+		const index = rowIndex - s.headerIndex - 1
+		if (index === -1) {
+			return { type: 'custom', key: HEADER_KEYS[s.section], size: QUEUE_HEADER_HEIGHT }
 		}
 
-		if (position.section === 'nowPlaying') {
-			const current = player.queue.current
-			invariant(current)
-			return { type: 'track', entryId: current.entryId, trackId: current.trackId }
-		}
+		const { entryId, trackId } = entryAt(s.section, index)
 
-		const item = player.queue.itemAt(position.section, position.index)
-		invariant(item !== undefined)
-		return { type: 'track', entryId: item.entryId, trackId: item.trackId }
+		return { type: 'track', entryId, trackId }
 	}
 
-	/**
-	 * virtual-core re-runs the size probe for every index whenever `count` changes,
-	 * and every queue advance changes `count` — so at queue scale this has to stay
-	 * allocation-free, which going through `positionAt`/`rowAt` would not be.
-	 */
-	const sizeAt = (rowIndex: number): number => {
-		for (const s of layout.sections) {
-			if (s.headerIndex === rowIndex) {
-				return QUEUE_HEADER_HEIGHT
-			}
-		}
+	const sizeAt = (rowIndex: number): number =>
+		sectionAt(rowIndex)?.headerIndex === rowIndex ? QUEUE_HEADER_HEIGHT : TRACK_ROW_HEIGHT
 
-		return TRACK_ROW_HEIGHT
+	const keyAt = (rowIndex: number): string | number => {
+		const s = sectionAt(rowIndex)
+		invariant(s, 'queue row index out of range')
+
+		const index = rowIndex - s.headerIndex - 1
+
+		return index === -1 ? HEADER_KEYS[s.section] : entryAt(s.section, index).entryId
 	}
 
 	/** Called only for rendered header rows, keeping i18n out of the size/key probes. */
 	const headerAt = (rowIndex: number): QueueHeaderData => {
-		const position = positionAt(rowIndex)
-		invariant(position && position.index === -1)
-		return headerData(position.section)
+		const s = sectionAt(rowIndex)
+		invariant(s !== undefined && s.headerIndex === rowIndex)
+
+		return headerData(s.section)
 	}
 
 	const isReorderable = (rowIndex: number): boolean =>
-		positionAt(rowIndex)?.section !== 'nowPlaying'
+		sectionAt(rowIndex)?.section !== 'nowPlaying'
 
 	const isCurrentEntry = (entryId: number): boolean => entryId === player.queue.current?.entryId
 
@@ -225,8 +241,8 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	const onDrop = ({ index, entryId }: TrackRowLocator, insertSlot: number): void => {
 		// The container only fires while `index` still resolves to the dragged row,
 		// so the row's own section answers which layer it came from.
-		const from = positionAt(index)
-		if (from === null || from.section === 'nowPlaying') {
+		const from = sectionAt(index)
+		if (from === undefined || from.section === 'nowPlaying') {
 			return
 		}
 
@@ -236,26 +252,36 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		}
 	}
 
+	/**
+	 * Per-field getters, not one getter returning a fresh object: this is spread
+	 * into the container, and Svelte's spread proxy re-resolves the source on every
+	 * property read.
+	 */
+	const listProps = {
+		get count() {
+			return layout.count
+		},
+		get trackCount() {
+			return layout.trackCount
+		},
+		rowAt,
+		sizeAt,
+		keyAt,
+		// By entry id: the same track can sit on several rows, and only the one
+		// actually playing should light up.
+		isRowActive: ({ entryId }) => isCurrentEntry(entryId),
+		showFavoriteButton: false,
+		showReorderButton: isReorderable,
+		predefinedMenuItems: { disablePlayNext: true, disableAddToQueue: true },
+		menuItems: trackMenuItems,
+		multiSelectMenuItems,
+		onItemClick,
+		onDrop,
+	} satisfies Omit<TracksListContainerProps, 'customRow'>
+
 	return {
 		headerAt,
 		/** Props for `TracksListContainer`, minus the `customRow` snippet only markup can supply. */
-		get listProps() {
-			return {
-				count: layout.count,
-				rowAt,
-				sizeAt,
-				trackCount: layout.trackCount,
-				// By entry id: the same track can sit on several rows, and only the one
-				// actually playing should light up.
-				activeRow: { by: 'entryId', entryId: player.queue.current?.entryId ?? null },
-				showFavoriteButton: false,
-				showReorderButton: isReorderable,
-				predefinedMenuItems: { disablePlayNext: true, disableAddToQueue: true },
-				menuItems: trackMenuItems,
-				multiSelectMenuItems,
-				onItemClick,
-				onDrop,
-			} satisfies Omit<TracksListContainerProps, 'customRow'>
-		},
+		listProps,
 	}
 }

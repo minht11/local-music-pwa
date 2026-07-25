@@ -33,16 +33,6 @@
 	}
 
 	/**
-	 * Which row is playing, and how to recognize it. Lists keyed by track id match
-	 * that way, as do lists whose `entryId` means something else (a playlist entry
-	 * id); the queue matches by entry id, so a track sitting on several rows lights
-	 * up only on the row actually playing.
-	 */
-	export type ActiveRow =
-		| { by: 'trackId'; trackId: number | null }
-		| { by: 'entryId'; entryId: number | null }
-
-	/**
 	 * Where rows come from, resolved on demand so nothing materializes the full
 	 * list. `trackCount` (used by "select all") excludes custom rows, and clicking
 	 * a row is the source's business — the container has no default.
@@ -55,7 +45,12 @@
 		count: number
 		trackCount: number
 		rowAt: (index: number) => TrackListRow
-		activeRow: ActiveRow
+		/**
+		 * Whether this row is the one playing. Most lists compare track ids; the
+		 * queue compares entry ids, so a track sitting on several rows lights up
+		 * only on the row actually playing.
+		 */
+		isRowActive: (row: TrackRowIdentity) => boolean
 		onItemClick: (data: TrackItemClick) => void
 		/**
 		 * A row's height and reconciliation key without building the row. A count
@@ -92,7 +87,7 @@
 		count,
 		rowAt,
 		trackCount,
-		activeRow,
+		isRowActive,
 		onItemClick,
 		customRow,
 		menuItems,
@@ -136,11 +131,6 @@
 
 		return row.type === 'track' ? row : undefined
 	}
-
-	const isRowActive = (row: TrackRowIdentity): boolean =>
-		activeRow.by === 'trackId'
-			? activeRow.trackId === row.trackId
-			: activeRow.entryId === row.entryId
 
 	const isRowReorderable = (index: number) =>
 		typeof showReorderButton === 'function' ? showReorderButton(index) : showReorderButton

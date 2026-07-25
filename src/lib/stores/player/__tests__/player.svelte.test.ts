@@ -264,7 +264,7 @@ describe('PlayerStore', () => {
 			// An unseeded track stands in for a query that has not come back yet.
 			// Enqueueing onto an idle player makes track 7 current; pressing play
 			// right then must not wait on the query — the loader fetches the track.
-			player.queue.enqueue(7, 'last')
+			player.queue.enqueue([7], 'last')
 			expect(player.activeTrack).toBeNull()
 
 			player.play()
@@ -317,7 +317,7 @@ describe('PlayerStore', () => {
 			seedTrack(2)
 			seedTrack(9)
 			player.playFrom(0, [1, 2])
-			player.queue.enqueue(9, 'next')
+			player.queue.enqueue([9], 'next')
 			vi.clearAllMocks()
 
 			player.playNext()
@@ -334,7 +334,7 @@ describe('PlayerStore', () => {
 			seedTrack(2)
 			seedTrack(9)
 			player.playFrom(0, [1, 2])
-			player.queue.enqueue(9, 'last')
+			player.queue.enqueue([9], 'last')
 			vi.clearAllMocks()
 
 			opts.onTrackEnded()
@@ -347,7 +347,7 @@ describe('PlayerStore', () => {
 			seedTrack(2)
 			seedTrack(9)
 			player.playFrom(0, [1, 2])
-			player.queue.enqueue(9, 'next')
+			player.queue.enqueue([9], 'next')
 			flushSync()
 			vi.clearAllMocks()
 
