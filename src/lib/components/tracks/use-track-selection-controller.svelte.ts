@@ -1,5 +1,6 @@
+import { SvelteMap } from 'svelte/reactivity'
 import { isPrimaryModifierKey } from '$lib/helpers/utils/ua.ts'
-import { SelectionTracker } from './selection.svelte.ts'
+import type { SelectionAnchor, SelectionSnapshot, TrackRowIdentity } from './selection.ts'
 
 interface SelectionInteractionState {
 	hoverRangeEnd: number | null
@@ -7,18 +8,32 @@ interface SelectionInteractionState {
 }
 
 interface UseTrackSelectionControllerOptions {
-	items: () => readonly number[]
+	/** Total row count (track and custom rows alike). */
+	rowCount: () => number
+	/** Row identity, or undefined for a non-track row (a section header) or a stale index. */
+	trackAt: (index: number) => TrackRowIdentity | undefined
 }
 
 interface HandleItemClickOptions {
 	event: MouseEvent | KeyboardEvent
+	entryId: number
 	trackId: number
 	index: number
 	onClick: () => void
 }
 
-export const useTrackSelectionController = ({ items }: UseTrackSelectionControllerOptions) => {
-	const selection = new SelectionTracker()
+export const useTrackSelectionController = ({
+	rowCount,
+	trackAt,
+}: UseTrackSelectionControllerOptions) => {
+	// entryId -> trackId, keyed by entry id so rows sharing a track id select
+	// independently and a selection can survive list changes.
+	const selected = new SvelteMap<number, number>()
+	const selectionEnabled = $derived(selected.size > 0)
+
+	// Not reactive: only the next shift interaction reads it. Dropped whenever the
+	// selection empties, so a later shift-click cannot range off a stale start.
+	let rangeAnchor: SelectionAnchor | null = null
 
 	const state: SelectionInteractionState = $state({
 		hoverRangeEnd: null,
@@ -26,9 +41,51 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 	})
 
 	const cancelSelection = () => {
-		selection.clear()
+		selected.clear()
+		rangeAnchor = null
 		state.hoverRangeEnd = null
 	}
+
+	const liveRows = (): TrackRowIdentity[] => {
+		const rows: TrackRowIdentity[] = []
+		const count = rowCount()
+		for (let index = 0; index < count; index += 1) {
+			const row = trackAt(index)
+			if (row) {
+				rows.push(row)
+			}
+		}
+
+		return rows
+	}
+
+	const selectAll = () => {
+		for (const row of liveRows()) {
+			selected.set(row.entryId, row.trackId)
+		}
+	}
+
+	// Any list change while selecting (queue advance, removal, refetch) drops just
+	// the entries that are gone; the rest of the selection survives.
+	$effect(() => {
+		if (!selectionEnabled) {
+			return
+		}
+
+		const live = new Set(liveRows().map((row) => row.entryId))
+
+		untrack(() => {
+			for (const entryId of selected.keys()) {
+				if (!live.has(entryId)) {
+					selected.delete(entryId)
+				}
+			}
+
+			if (selected.size === 0) {
+				rangeAnchor = null
+			}
+		})
+	})
 
 	$effect(() => {
 		const ac = new AbortController()
@@ -41,7 +98,7 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 					state.isShiftActive = true
 				}
 
-				if (!selection.selectionEnabled) {
+				if (!selectionEnabled) {
 					return
 				}
 
@@ -52,7 +109,7 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 
 				if (e.key === 'a' && isPrimaryModifierKey(e)) {
 					e.preventDefault()
-					selection.selectMany(items())
+					selectAll()
 				}
 			},
 			{ signal },
@@ -63,7 +120,12 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 			(e: KeyboardEvent) => {
 				if (e.key === 'Shift') {
 					state.isShiftActive = false
-					selection.clearHoverAnchor()
+
+					// Shift released with nothing selected: the hover-seeded anchor
+					// never committed, so drop it.
+					if (!selectionEnabled) {
+						rangeAnchor = null
+					}
 				}
 			},
 			{ signal },
@@ -72,12 +134,23 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 		return () => ac.abort()
 	})
 
+	// The list can shift under the anchor's index, so trust it only while the row
+	// there still bears the anchor's entry id.
+	const validAnchorIndex = (): number | null => {
+		const anchor = rangeAnchor
+		if (anchor === null || trackAt(anchor.index)?.entryId !== anchor.entryId) {
+			return null
+		}
+
+		return anchor.index
+	}
+
 	const isInHoverRange = (index: number) => {
 		if (!state.isShiftActive || state.hoverRangeEnd === null) {
 			return false
 		}
 
-		const anchor = selection.rangeAnchor
+		const anchor = validAnchorIndex()
 		if (anchor === null) {
 			return false
 		}
@@ -89,67 +162,89 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 	}
 
 	const handlePointerEnter = (index: number) => {
-		if (state.isShiftActive || selection.selectionEnabled) {
+		if (state.isShiftActive || selectionEnabled) {
 			state.hoverRangeEnd = index
 
-			if (state.isShiftActive) {
-				selection.setHoverAnchor(index)
+			// A shift-hover seeds the anchor so the eventual shift-click ranges
+			// from where the preview started; it never overrides an existing anchor.
+			if (state.isShiftActive && rangeAnchor === null) {
+				const row = trackAt(index)
+				if (row) {
+					rangeAnchor = { index, entryId: row.entryId }
+				}
 			}
 		}
 	}
 
-	const applyShiftClick = (trackId: number, index: number) => {
-		if (!selection.selectionEnabled) {
-			selection.enterSelectionMode()
+	const toggleSelection = (entryId: number, trackId: number, index: number) => {
+		if (selected.has(entryId)) {
+			selected.delete(entryId)
+		} else {
+			selected.set(entryId, trackId)
 		}
 
-		if (selection.rangeAnchor === null) {
-			selection.select(trackId, index)
+		rangeAnchor = selected.size > 0 ? { index, entryId } : null
+	}
+
+	const applyShiftClick = (entryId: number, trackId: number, index: number) => {
+		const anchorIndex = validAnchorIndex()
+		if (anchorIndex === null) {
+			selected.set(entryId, trackId)
+			rangeAnchor = { index, entryId }
 			return
 		}
 
-		const allItems = items()
-		const min = Math.min(selection.rangeAnchor, index)
-		const max = Math.max(selection.rangeAnchor, index)
-		const rangeIds: number[] = []
+		const min = Math.min(anchorIndex, index)
+		const max = Math.max(anchorIndex, index)
+		const rangeRows: TrackRowIdentity[] = []
 
 		let allSelected = true
 		for (let i = min; i <= max; i += 1) {
-			const itemAtIndex = allItems[i]
-			if (itemAtIndex === undefined) {
+			const row = trackAt(i)
+			if (row === undefined) {
 				continue
 			}
 
-			rangeIds.push(itemAtIndex)
-			if (allSelected && !selection.has(itemAtIndex)) {
+			rangeRows.push(row)
+			if (allSelected && !selected.has(row.entryId)) {
 				allSelected = false
 			}
 		}
 
 		if (allSelected) {
-			selection.unselectMany(rangeIds)
+			for (const row of rangeRows) {
+				selected.delete(row.entryId)
+			}
 		} else {
-			selection.selectMany(rangeIds)
+			for (const row of rangeRows) {
+				selected.set(row.entryId, row.trackId)
+			}
 		}
 
-		selection.rangeAnchor = index
+		rangeAnchor = { index, entryId }
 	}
 
-	const handleItemClick = ({ event, trackId, index, onClick }: HandleItemClickOptions) => {
+	const handleItemClick = ({
+		event,
+		entryId,
+		trackId,
+		index,
+		onClick,
+	}: HandleItemClickOptions) => {
 		if (isPrimaryModifierKey(event)) {
 			event.preventDefault()
-			selection.toggle(trackId, index)
+			toggleSelection(entryId, trackId, index)
 			return
 		}
 
 		if (event.shiftKey) {
 			event.preventDefault()
-			applyShiftClick(trackId, index)
+			applyShiftClick(entryId, trackId, index)
 			return
 		}
 
-		if (selection.selectionEnabled) {
-			selection.toggle(trackId, index)
+		if (selectionEnabled) {
+			toggleSelection(entryId, trackId, index)
 			return
 		}
 
@@ -158,17 +253,19 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 
 	return {
 		get selectionEnabled() {
-			return selection.selectionEnabled
-		},
-		get selectedIds() {
-			return selection.selectedIds
+			return selectionEnabled
 		},
 		get size() {
-			return selection.size
+			return selected.size
 		},
-		has: (trackId: number) => selection.has(trackId),
-		selectMany: (trackIds: readonly number[]) => selection.selectMany(trackIds),
-		toggleSelection: (trackId: number, index: number) => selection.toggle(trackId, index),
+		get snapshot(): SelectionSnapshot {
+			return {
+				rows: Array.from(selected, ([entryId, trackId]) => ({ entryId, trackId })),
+			}
+		},
+		has: (entryId: number) => selected.has(entryId),
+		selectAll,
+		toggleSelection,
 		cancelSelection,
 		isInHoverRange,
 		handlePointerEnter,

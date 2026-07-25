@@ -12,6 +12,7 @@
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import { createTrackIdsSource } from '$lib/components/tracks/track-ids-source.svelte.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.js'
 	import { isMobile } from '$lib/helpers/utils/ua.ts'
 	import { useSetOverlaySnippet } from '$lib/layout-bottom-bar.svelte.ts'
@@ -29,6 +30,11 @@
 	const itemsIds = $derived(data.itemsIdsQuery.value)
 	const slug = $derived(data.slug)
 	const isHandHeldDevice = isMobile()
+
+	// Only read on the tracks slug, where `itemsIds` are track ids.
+	const allTracksSource = createTrackIdsSource(() => itemsIds, {
+		queueSource: () => ({ type: 'tracks', name: m.tracks() }),
+	})
 
 	interface NavItem {
 		slug: typeof slug
@@ -173,10 +179,7 @@
 								</div>
 							</div>
 						{:else if slug === 'tracks'}
-							<TracksListContainer
-								items={itemsIds}
-								queueSource={{ type: 'tracks', name: m.tracks() }}
-							/>
+							<TracksListContainer {...allTracksSource} />
 						{:else if slug === 'albums'}
 							<AlbumsListContainer items={itemsIds} />
 						{:else if slug === 'artists'}

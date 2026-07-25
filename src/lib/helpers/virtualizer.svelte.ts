@@ -27,30 +27,41 @@ export function createVirtualizerBase<
 
 	const initialOptions = options()
 	userOnChange = initialOptions.onChange
+	// The size function the instance last measured against. `count` and `lanes`
+	// are in virtual-core's measurement memo key and invalidate on their own;
+	// `estimateSize` is not, so a change to it has to be forced through.
+	let measuredEstimateSize = initialOptions.estimateSize
 
 	const instance = new Virtualizer<TScrollElement, TItemElement>({
 		...initialOptions,
 		onChange: handleChange,
 	})
 
-	// Pushes option changes into the instance.
-	// Using $derived instead of $effect because rendering must remain
-	// sync with state changes
+	// Pushes option changes into the instance. `$derived` rather than `$effect` so
+	// rendering stays in sync with state changes.
 	const optionsSync = $derived.by(() => {
 		const resolved = options()
 		userOnChange = resolved.onChange
+
+		// `measure()` drops the whole size cache, making the next read run
+		// `estimateSize` for every index.
+		const sizeChanged = resolved.estimateSize !== measuredEstimateSize
+		measuredEstimateSize = resolved.estimateSize
 
 		syncing = true
 		try {
 			untrack(() => {
 				instance.setOptions({ ...resolved, onChange: handleChange })
-				instance.measure()
+
+				if (sizeChanged) {
+					instance.measure()
+				}
 			})
 		} finally {
 			syncing = false
 		}
 
-		// Returning new object so each new rerun updated snapshot below
+		// A fresh object each run, so the snapshot below re-derives.
 		return {}
 	})
 

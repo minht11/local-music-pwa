@@ -3,9 +3,20 @@ import { resolve } from '$app/paths'
 import { getDatabase } from '$lib/db/database.ts'
 import type { TrackData } from '$lib/library/get/value'
 import { toggleFavoriteTrack } from '$lib/library/playlists-actions'
-import type { MenuItem } from '../menu/types.ts'
+import type { MenuActionItem, MenuItem } from '../menu/types.ts'
+import type { SelectionSnapshot } from './selection.ts'
+
+/**
+ * The row a callback fires on: its index and identity. `entryId` equals the
+ * track id on `items` lists, the real row entry id elsewhere.
+ */
+export interface TrackRowLocator {
+	index: number
+	entryId: number
+}
 
 export type PredefinedTrackMenuItemOption =
+	| 'disablePlayNext'
 	| 'disableAddToQueue'
 	| 'disableAddToPlaylist'
 	| 'disableRemoveFromLibrary'
@@ -14,13 +25,23 @@ export type PredefinedTrackMenuItemOption =
 	| 'disableViewArtist'
 	| 'enableMultiRemoveFromFavorites'
 
-interface PredefinedMenuItem extends MenuItem {
+interface PredefinedMenuItem extends MenuActionItem {
 	predefinedKey: PredefinedTrackMenuItemOption
+	/** Visibility with no consumer flag; a set flag flips it ('disable*' hides, 'enable*' shows). */
+	defaultEnabled: boolean
 }
 
 type FalsyValue = false | undefined | null | ''
 
 type UnfilteredPredefinedMenuItem = PredefinedMenuItem | FalsyValue
+
+const joinWithSeparator = (queueItems: MenuItem[], otherItems: MenuItem[]): MenuItem[] => {
+	if (queueItems.length === 0 || otherItems.length === 0) {
+		return [...queueItems, ...otherItems]
+	}
+
+	return [...queueItems, { separator: true }, ...otherItems]
+}
 
 const viewRelated = async (store: 'albums' | 'artists', name: string) => {
 	try {
@@ -40,32 +61,53 @@ const viewRelated = async (store: 'albums' | 'artists', name: string) => {
 }
 
 export const useTrackMenuItems = (
-	getMenuItemsFn: () => ((track: TrackData, index: number) => MenuItem[]) | null | undefined,
+	getMenuItemsFn: () =>
+		| ((track: TrackData, row: TrackRowLocator) => MenuItem[])
+		| null
+		| undefined,
 	predefinedItemsOptions: () => Partial<Record<PredefinedTrackMenuItemOption, boolean>>,
+	getMultiSelectMenuItemsFn?: () =>
+		| ((selection: SelectionSnapshot) => MenuItem[])
+		| null
+		| undefined,
 ) => {
 	const dialogs = useDialogsStore()
 	const player = usePlayer()
 
-	const filterPredefinedItems = (items: UnfilteredPredefinedMenuItem[]) => {
+	const filterPredefinedItems = (items: UnfilteredPredefinedMenuItem[]): MenuItem[] => {
 		const options = predefinedItemsOptions()
-		const predefinedItems = items.filter((item) => {
+
+		return items.filter((item): item is PredefinedMenuItem => {
 			if (!item) {
 				return false
 			}
 
-			const valueFromOptions = options[item.predefinedKey]
+			const flagged = options[item.predefinedKey] ?? false
 
-			if (item.predefinedKey.startsWith('disable')) {
-				return valueFromOptions === undefined ? true : !valueFromOptions
-			}
-
-			return valueFromOptions ?? false
-		}) as MenuItem[]
-
-		return predefinedItems
+			return flagged !== item.defaultEnabled
+		})
 	}
 
-	const getMenuItems = (track: TrackData, index: number) => {
+	const queueMenuItems = (ids: number | readonly number[]): UnfilteredPredefinedMenuItem[] => [
+		{
+			predefinedKey: 'disablePlayNext',
+			defaultEnabled: true,
+			label: m.playerPlayNext(),
+			action: () => {
+				player.queue.enqueue(ids, 'next')
+			},
+		},
+		{
+			predefinedKey: 'disableAddToQueue',
+			defaultEnabled: true,
+			label: m.playerAddToQueue(),
+			action: () => {
+				player.queue.enqueue(ids, 'last')
+			},
+		},
+	]
+
+	const getMenuItems = (track: TrackData, row: TrackRowLocator) => {
 		const albumName = track.album
 		// In a future we should handle ability to view multiple artists
 		const artistName = track.artists[0]
@@ -73,6 +115,7 @@ export const useTrackMenuItems = (
 		const predefinedItems: UnfilteredPredefinedMenuItem[] = [
 			{
 				predefinedKey: 'disableAddToPlaylist',
+				defaultEnabled: true,
 				label: m.libraryAddToPlaylist(),
 				action: () => {
 					dialogs.openDialog('addToPlaylist', [track.id])
@@ -80,20 +123,15 @@ export const useTrackMenuItems = (
 			},
 			{
 				predefinedKey: 'disableAddToFavorites',
+				defaultEnabled: true,
 				label: track.favorite ? m.trackRemoveFromFavorites() : m.trackAddToFavorites(),
 				action: () => {
 					void toggleFavoriteTrack(track.favorite, track.id)
 				},
 			},
-			{
-				predefinedKey: 'disableAddToQueue',
-				label: m.playerAddToQueue(),
-				action: () => {
-					player.addToQueue(track.id)
-				},
-			},
 			albumName && {
 				predefinedKey: 'disableViewAlbum',
+				defaultEnabled: true,
 				label: m.trackViewAlbum(),
 				action: () => {
 					void viewRelated('albums', albumName)
@@ -101,6 +139,7 @@ export const useTrackMenuItems = (
 			},
 			artistName && {
 				predefinedKey: 'disableViewArtist',
+				defaultEnabled: true,
 				label: m.trackViewArtist(),
 				action: () => {
 					void viewRelated('artists', artistName)
@@ -108,6 +147,7 @@ export const useTrackMenuItems = (
 			},
 			{
 				predefinedKey: 'disableRemoveFromLibrary',
+				defaultEnabled: true,
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
 					dialogs.openDialog('removeFromLibrary', {
@@ -122,16 +162,22 @@ export const useTrackMenuItems = (
 
 		const menuItems = getMenuItemsFn()
 
-		return [
+		return joinWithSeparator(filterPredefinedItems(queueMenuItems(track.id)), [
 			...filterPredefinedItems(predefinedItems),
-			...(menuItems ? menuItems(track, index) : []),
-		]
+			...(menuItems ? menuItems(track, row) : []),
+		])
 	}
 
-	const getMultiSelectMenuItems = (trackIds: readonly number[]) => {
+	const getMultiSelectMenuItems = (selection: SelectionSnapshot) => {
+		// One row per selected row, so track ids may repeat. Queue and playlist
+		// additions act per row; per-track actions de-duplicate.
+		const trackIds = selection.rows.map((row) => row.trackId)
+		const uniqueTrackIds = [...new Set(trackIds)]
+
 		const predefinedItems: UnfilteredPredefinedMenuItem[] = [
 			{
 				predefinedKey: 'disableAddToPlaylist',
+				defaultEnabled: true,
 				label: m.libraryAddToPlaylist(),
 				action: () => {
 					dialogs.openDialog('addToPlaylist', trackIds)
@@ -139,43 +185,44 @@ export const useTrackMenuItems = (
 			},
 			{
 				predefinedKey: 'disableAddToFavorites',
+				defaultEnabled: true,
 				label: m.trackAddToFavorites(),
 				action: () => {
-					trackIds.forEach((trackId) => {
+					uniqueTrackIds.forEach((trackId) => {
 						void toggleFavoriteTrack(false, trackId)
 					})
 				},
 			},
 			{
-				predefinedKey: 'disableAddToQueue',
-				label: m.playerAddToQueue(),
-				action: () => {
-					player.addToQueue(trackIds)
-				},
-			},
-			{
 				predefinedKey: 'enableMultiRemoveFromFavorites',
+				defaultEnabled: false,
 				label: m.trackRemoveFromFavorites(),
 				action: () => {
-					trackIds.forEach((trackId) => {
+					uniqueTrackIds.forEach((trackId) => {
 						void toggleFavoriteTrack(true, trackId)
 					})
 				},
 			},
 			{
 				predefinedKey: 'disableRemoveFromLibrary',
+				defaultEnabled: true,
 				label: m.libraryRemoveFromLibrary(),
 				action: () => {
 					dialogs.openDialog('removeFromLibrary', {
 						type: 'multiple',
-						ids: trackIds,
+						ids: uniqueTrackIds,
 						storeName: 'tracks',
 					})
 				},
 			},
 		]
 
-		return filterPredefinedItems(predefinedItems)
+		const consumerItems = getMultiSelectMenuItemsFn?.()
+
+		return joinWithSeparator(filterPredefinedItems(queueMenuItems(trackIds)), [
+			...filterPredefinedItems(predefinedItems),
+			...(consumerItems ? consumerItems(selection) : []),
+		])
 	}
 
 	return {

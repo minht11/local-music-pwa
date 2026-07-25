@@ -234,6 +234,9 @@ Note: `Snippet<T>` and `ClassValue` are **Svelte/TypeScript built-in types**, no
 Browse `src/lib/components/` for the full set (buttons, inputs, icons, dialogs, etc. — names are self-describing). The non-obvious conventions worth knowing:
 
 - Render long lists with `VirtualContainer.svelte` or the entity `*ListContainer.svelte` wrappers (`TracksListContainer`, `AlbumsListContainer`, `ArtistListContainer`, `PlaylistListContainer`) — never a plain `{#each}` over the whole library.
+- `TracksListContainer` renders a **`TrackListSource`**: `count` / `trackCount` / `rowAt(index)` / `activeRow` / `onItemClick`, resolved on demand so nothing materializes the list. It has no default click — playback policy belongs to the source. Use `createTrackIdsSource(() => ids, options?)` for a plain list of track ids (clicking plays the list; `entryId` is the track id, so ids must be unique). Sectioned lists and lists that repeat a track id build their own `rowAt` with real entry ids — see `routes/(app)/player/queue-rows.svelte.ts`.
+- `activeRow` picks how the playing row is matched: `{ by: 'trackId', … }` for lists keyed by track id (or by an unrelated id, like playlist entries), `{ by: 'entryId', … }` for the queue, where only the row actually playing lights up.
+- A source may add `sizeAt` / `keyAt` to answer the virtualizer's height and key probes without building a row; both fall back to `rowAt`. Worth it only for lists that get large — a count change runs the size probe for every index.
 - Use `ListDetailsLayout.svelte` for master-detail views (library + player); the library toggles split vs stacked via `mainStore.librarySplitLayoutEnabled`.
 - `Artwork.svelte` handles album/track artwork (optimized blobs + fallback); `PlayerOverlay.svelte` is the mini player.
 
@@ -258,28 +261,46 @@ mainStore.librarySplitLayoutEnabled // boolean
 const player = usePlayer()
 player.playing          // boolean (true = playing)
 player.loading          // boolean (true = loading audio)
-player.activeTrack      // TrackData | undefined
-player.itemsIds         // readonly number[] (queue track IDs)
+player.activeTrack      // TrackData | undefined (async query — may lag `queue.current`)
 player.currentTime      // number (seconds)
 player.duration         // number (seconds)
 player.volume           // number (0–100)
 player.muted            // boolean
-player.shuffle          // boolean
 player.repeat           // PlayerRepeat: 'none' | 'one' | 'all'
+player.playbackRate     // number (0.5–2)
 player.equalizer        // EqualizerStore
 player.artworkSrc       // string | undefined
+player.queue            // QueueView (see below)
 
-// Player actions
-player.playTrack(trackIds, options?)  // Set queue and play
-player.togglePlay(force?)             // Toggle or force play/pause
-player.playNext()                     // Next track
-player.playPrev()                     // Previous track
-player.seek(time)                     // Seek to time in seconds
-player.toggleRepeat()                 // Cycle repeat mode
-player.toggleShuffle()                // Toggle shuffle
-player.addToQueue(trackId)            // Add track(s) to queue
-player.removeFromQueue(index)         // Remove by queue index
-player.clearQueue()                   // Empty the queue
+// Player actions — everything that can start audio
+player.play()                          // Plays the current queue entry
+player.pause()
+player.togglePlay()
+player.playNext()                      // Next entry (manual queue first)
+player.playPrev()                      // Restarts the track past 3s, else steps back
+player.seek(time)                      // Seek to time in seconds
+player.toggleRepeat()                  // Cycle none → all → one
+player.playFrom(start, list, origin?)  // Replace the source queue and play; start is an index or 'shuffle'
+player.playQueueEntry(entryId)         // Play a queue row by its entry id
+player.playTrackId(id)                 // Jump to the track in the source queue, else start a fresh one
+```
+
+The queue is a **two-layer** model (`src/lib/stores/player/`): a `manual` layer (explicit "play next" / "add to queue", never shuffled, consumed as it plays) always precedes a `source` layer (the album/playlist playback started from, held by `SourceQueue` with a cursor). Rows are addressed by session-scoped `entryId`, never by position — the same track can sit on several rows.
+
+`player.queue` is a `QueueView`: reads plus mutations that never start audio. Playback-entangled methods live on `PlayerStore` above and are deliberately absent here.
+
+```typescript
+player.queue.current      // QueueEntry | null ({ layer, trackId, entryId })
+player.queue.origin       // QueueOrigin | null (what the source queue was started from)
+player.queue.shuffle      // boolean
+player.queue.isEmpty      // boolean
+player.queue.count(layer)                // 'manual' | 'source' — upcoming row count
+player.queue.itemAt(layer, i)            // QueueItem | undefined, layer-relative
+player.queue.toggleShuffle()             // Shuffles the source layer only
+player.queue.enqueue(trackId, position)  // position: 'next' | 'last'; accepts an array
+player.queue.removeEntries(entryIds)     // Never removes the current entry
+player.queue.moveEntry(entryId, toSlot)  // toSlot: { layer, slot }; cross-layer moves keep the entry id
+player.queue.clear(target)               // 'manual' | 'source' | 'all'
 ```
 
 ### Persistence

@@ -78,8 +78,7 @@
 	})
 
 	const rangeExtractor = (range: Range) =>
-		// We untrack because when focusIndex changes it forces virtualizer deps to change
-		// which is not needed here.
+		// Untracked: a focusIndex change would otherwise invalidate the virtualizer's deps.
 		untrack(() => {
 			const start = Math.max(range.startIndex - range.overscan, 0)
 			const initialEnd = range.endIndex + range.overscan
@@ -111,9 +110,11 @@
 			return arr
 		})
 
-	const getVirtualizerOptions = () => {
-		const estimateSize = typeof itemSize === 'function' ? itemSize : () => itemSize
+	// Changes identity only when the `size` prop does; the virtualizer keys its
+	// remeasure on that.
+	const estimateSize = $derived(typeof itemSize === 'function' ? itemSize : () => itemSize)
 
+	const getVirtualizerOptions = () => {
 		const options: VirtualizerOptions<Window | Element, Element> = {
 			// narrowing window/element specific types is difficult so we just cast here
 			...(scrollTargetOptions as VirtualizerTargetOptions<Window | Element>),
@@ -205,31 +206,27 @@
 
 		e.preventDefault()
 
-		const isRowFocusable = (index: number) => focusableRow?.(index) ?? true
-
-		if (container && doesElementHasFocus(container)) {
-			let firstIndex = 0
-			while (firstIndex < count && !isRowFocusable(firstIndex)) {
-				firstIndex += 1
+		/** Scans from `from` in `step`'s direction, skipping rows like section headers. */
+		const focusableFrom = (from: number, step: number): number | null => {
+			for (let index = from; index >= 0 && index < count; index += step) {
+				if (focusableRow?.(index) ?? true) {
+					return index
+				}
 			}
 
-			if (firstIndex < count) {
-				await scrollToElementThenFocusIt(firstIndex)
-			}
-
-			return
+			return null
 		}
 
 		const increment = directionDown ? 1 : -1
-		const currentIndex = findCurrentFocusedRow()
+		// Focus sitting on the container rather than a row means the list has not
+		// been entered yet, so either arrow key enters it at the top.
+		const target =
+			container && doesElementHasFocus(container)
+				? focusableFrom(0, 1)
+				: focusableFrom(findCurrentFocusedRow() + increment, increment)
 
-		let nextIndex = currentIndex + increment
-		while (nextIndex >= 0 && nextIndex < count && !isRowFocusable(nextIndex)) {
-			nextIndex += increment
-		}
-
-		if (nextIndex >= 0 && nextIndex < count) {
-			await scrollToElementThenFocusIt(nextIndex)
+		if (target !== null) {
+			await scrollToElementThenFocusIt(target)
 		}
 	}
 

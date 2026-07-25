@@ -4,6 +4,8 @@ const EDGE_THRESHOLD = 84
 const MAX_SCROLL_STEP = 30
 
 interface DragState {
+	/** Identity of the dragged row, fixed for the whole gesture. */
+	readonly entryId: number
 	fromIndex: number
 	insertIndex: number
 	preview: {
@@ -15,13 +17,18 @@ interface DragState {
 
 interface UseTrackDragControllerOptions {
 	itemsCount: () => number
-	onReorder: ((from: number, to: number) => void) | undefined
+	/**
+	 * The entry id and start index captured at `start()`, plus the raw insert slot
+	 * (a gap between rows, 0..count). The list can mutate mid-drag, so `fromIndex`
+	 * is where the gesture began, not necessarily where the row is now.
+	 */
+	onDrop: ((entryId: number, fromIndex: number, insertSlot: number) => void) | undefined
 	onStart?: () => void
 }
 
 export const useTrackDragController = ({
 	itemsCount,
-	onReorder,
+	onDrop,
 	onStart,
 }: UseTrackDragControllerOptions) => {
 	const scrollTarget = useScrollTarget()
@@ -30,7 +37,6 @@ export const useTrackDragController = ({
 	let activePointerId: number | null = null
 	let pointerOffsetY = 0
 	let currentPointerY = 0
-	let dragItemCount = 0
 	let rafId: number | null = null
 	let abortController: AbortController | null = null
 
@@ -90,14 +96,17 @@ export const useTrackDragController = ({
 			return null
 		}
 
+		// Read the count live: the list can mutate mid-drag (the queue advances
+		// when a track ends), so a start-of-drag snapshot would clamp wrong.
+		const count = itemsCount()
 		const index = Number(row.ariaRowIndex)
-		if (!Number.isInteger(index) || index < 0 || index >= dragItemCount) {
+		if (!Number.isInteger(index) || index < 0 || index >= count) {
 			return null
 		}
 
 		const rowRect = row.getBoundingClientRect()
 		const isAfterHalf = y >= rowRect.top + rowRect.height / 2
-		return Math.max(0, Math.min(dragItemCount, isAfterHalf ? index + 1 : index))
+		return Math.max(0, Math.min(count, isAfterHalf ? index + 1 : index))
 	}
 
 	const stop = () => {
@@ -111,9 +120,25 @@ export const useTrackDragController = ({
 		abortController = null
 	}
 
-	const start = (index: number, e: PointerEvent) => {
+	// Releasing a drag still synthesizes a `click` — preventing the handle's
+	// pointerdown default does not cancel it — and mid-drag the handle is
+	// `pointer-events: none`, so it retargets to the row and reads as an activation
+	// (the queue would play the row). The zero timeout disarms right after the
+	// current event turn, so a click that never materializes cannot eat a later one.
+	const suppressGestureClick = () => {
+		const suppress = (event: Event) => {
+			event.preventDefault()
+			event.stopPropagation()
+		}
+		window.addEventListener('click', suppress, { capture: true, once: true })
+		setTimeout(() => {
+			window.removeEventListener('click', suppress, { capture: true })
+		}, 0)
+	}
+
+	const start = (index: number, entryId: number, e: PointerEvent) => {
 		const count = itemsCount()
-		if (!onReorder || index < 0 || index >= count) {
+		if (!onDrop || index < 0 || index >= count) {
 			return
 		}
 
@@ -132,9 +157,9 @@ export const useTrackDragController = ({
 		const rowRect = rowElement.getBoundingClientRect()
 		pointerOffsetY = e.clientY - rowRect.top
 		activePointerId = e.pointerId
-		dragItemCount = count
 
 		drag = {
+			entryId,
 			fromIndex: index,
 			insertIndex: index,
 			preview: { top: rowRect.top, left: rowRect.left, width: rowRect.width },
@@ -165,15 +190,18 @@ export const useTrackDragController = ({
 				return
 			}
 
-			const from = drag.fromIndex
-			const insertIndex = drag.insertIndex
+			const { entryId: draggedId, fromIndex, insertIndex } = drag
+			suppressGestureClick()
 			stop()
 
-			// insertIndex is a slot *between* items; when the item moved downward the
-			// slot index is one ahead of the target item index, so subtract 1.
-			const to = insertIndex > from ? insertIndex - 1 : insertIndex
-			if (to !== from) {
-				onReorder(from, to)
+			onDrop(draggedId, fromIndex, insertIndex)
+		}
+
+		// A canceled pointer means the browser took over the gesture (scroll,
+		// notification shade); abort the drag instead of committing a drop.
+		const onCancel = (event: PointerEvent) => {
+			if (event.pointerId === activePointerId) {
+				stop()
 			}
 		}
 
@@ -182,7 +210,7 @@ export const useTrackDragController = ({
 			signal: abortController.signal,
 		})
 		window.addEventListener('pointerup', onEnd, { signal: abortController.signal })
-		window.addEventListener('pointercancel', onEnd, { signal: abortController.signal })
+		window.addEventListener('pointercancel', onCancel, { signal: abortController.signal })
 	}
 
 	return {

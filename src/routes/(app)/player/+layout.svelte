@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
 	import BackButton from '$lib/components/BackButton.svelte'
-	import Button from '$lib/components/Button.svelte'
 	import Header from '$lib/components/Header.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
@@ -19,11 +18,12 @@
 	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
 	import Slider from '$lib/components/Slider.svelte'
 	import Tabs from '$lib/components/Tabs.svelte'
-	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.js'
 	import { formatArtists, getItemLanguage } from '$lib/helpers/utils/text.ts'
-	import { clearPlayHistory, dbRemoveFromPlayHistory } from '$lib/library/play-history-actions.js'
+	import { clearPlayHistory } from '$lib/library/play-history-actions.js'
+	import HistoryList from './HistoryList.svelte'
 	import { getLayoutProps } from './layout-props.ts'
+	import QueueList from './QueueList.svelte'
 
 	const { data } = $props()
 
@@ -113,10 +113,6 @@
 
 			<div class="flex h-18 w-full shrink-0 items-center rounded-2xl bg-secondaryContainer px-4">
 				{#if activeTrack}
-					<div class="mr-2 min-w-6 text-center text-body-lg tabular-nums">
-						{player.activeTrackIndex + 1}
-					</div>
-
 					<div class="grid overflow-hidden" lang={getItemLanguage(activeTrack.language)}>
 						<div class="truncate text-body-lg">{activeTrack.name}</div>
 						<div class="truncate text-body-md">{formatArtists(activeTrack.artists)}</div>
@@ -143,17 +139,6 @@
 				</div>
 			</div>
 		</div>
-	</div>
-{/snippet}
-
-{#snippet emptyList(title: string)}
-	<div class="m-auto flex flex-col items-center text-center">
-		<Icon type="playlistMusic" class="color-onSecondaryContainer my-auto size-35 opacity-54" />
-
-		<div class="mb-4 text-body-lg">{title}</div>
-		<Button kind="outlined" as="a" href="/library/tracks">
-			{m.playerQueuePlaySomething()}
-		</Button>
 	</div>
 {/snippet}
 
@@ -190,14 +175,7 @@
 				</Tabs>
 			</div>
 
-			{#if isSelectedTabQueue}
-				<IconButton
-					tooltip={m.playerClearQueue()}
-					disabled={player.isQueueEmpty}
-					icon="trayRemove"
-					onclick={player.clearQueue}
-				/>
-			{:else}
+			{#if !isSelectedTabQueue}
 				<IconButton
 					tooltip={m.playerClearHistory()}
 					disabled={data.historyTrackIds.value.length === 0}
@@ -210,55 +188,9 @@
 		<div class="mx-auto flex w-full max-w-(--app-max-content-width) grow flex-col">
 			<div class="flex grow p-4">
 				{#if isSelectedTabQueue}
-					{#if player.isQueueEmpty}
-						{@render emptyList(m.playerQueueEmpty())}
-					{:else}
-						<TracksListContainer
-							items={player.itemsIds}
-							showReorderButton
-							showFavoriteButton={false}
-							onReorder={(fromIndex, toIndex) => {
-								player.moveQueueItem(fromIndex, toIndex)
-							}}
-							predefinedMenuItems={{
-								disableAddToQueue: true,
-							}}
-							menuItems={(_track, index) => [
-								{
-									label: m.playerRemoveFromQueue(),
-									action: () => {
-										player.removeFromQueue(index)
-									},
-								},
-							]}
-							onItemClick={({ index }) => {
-								player.playTrack(index)
-							}}
-						/>
-					{/if}
-				{:else if data.historyTrackIds.value.length === 0}
-					{@render emptyList(m.playerHistoryEmpty())}
+					<QueueList />
 				{:else}
-					<TracksListContainer
-						items={data.historyTrackIds.value}
-						menuItems={(item) => [
-							{
-								label: m.playerRemoveFromHistory(),
-								action: () => {
-									void dbRemoveFromPlayHistory(item.id)
-								},
-							},
-						]}
-						onItemClick={({ track }) => {
-							const trackIndexInQueue = player.itemsIds.indexOf(track.id)
-							if (trackIndexInQueue !== -1) {
-								player.playTrack(trackIndexInQueue)
-								return
-							}
-
-							player.playTrack(0, [track.id])
-						}}
-					/>
+					<HistoryList items={data.historyTrackIds.value} />
 				{/if}
 			</div>
 		</div>

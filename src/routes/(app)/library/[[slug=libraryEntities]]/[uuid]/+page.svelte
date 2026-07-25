@@ -5,7 +5,10 @@
 	import Header from '$lib/components/Header.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import MenuButton from '$lib/components/MenuButton.svelte'
-	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import TracksListContainer, {
+		type TrackListRow,
+	} from '$lib/components/tracks/TracksListContainer.svelte'
+	import type { TrackRowLocator } from '$lib/components/tracks/use-track-menu-items.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import {
 		createManagedArtwork,
@@ -19,6 +22,7 @@
 	} from '$lib/library/playlists-actions.ts'
 	import { type Playlist, UNKNOWN_ITEM } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
+	import type { QueueOrigin } from '$lib/stores/player/queue.svelte.ts'
 
 	const { data } = $props()
 
@@ -57,7 +61,22 @@
 
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
 
-	const playlistTrackMenuItems = (track: TrackData) => {
+	// Rows carry their identity: `PlaylistEntry.id` for playlists (exact under
+	// duplicate tracks), the track id itself elsewhere (one row per track).
+	const trackRowAt = (index: number): TrackListRow => {
+		const entry = tracks.entries?.[index]
+		if (entry) {
+			return { type: 'track', entryId: entry.entryId, trackId: entry.trackId }
+		}
+
+		const id = tracks.tracksIds[index]
+		invariant(id !== undefined)
+
+		return { type: 'track', entryId: id, trackId: id }
+	}
+
+	// Only used on playlist views, where a row's `entryId` is the `PlaylistEntry` id.
+	const playlistTrackMenuItems = (_track: TrackData, { entryId }: TrackRowLocator) => {
 		if (isFavoritesView) {
 			return []
 		}
@@ -66,9 +85,6 @@
 			{
 				label: m.libraryTrackRemoveFromPlaylist(),
 				action: () => {
-					const entryId = tracks.playlistIdMap?.[track.id]
-					invariant(entryId)
-
 					void removeTrackEntryFromPlaylist(entryId)
 				},
 			},
@@ -82,7 +98,7 @@
 				: {
 						label: m.playerAddToQueue(),
 						action: () => {
-							player.addToQueue(tracks.tracksIds)
+							player.queue.enqueue(tracks.tracksIds, 'last')
 						},
 					}
 
@@ -125,6 +141,17 @@
 	const description = $derived(slug === 'playlists' && (item as Playlist).description)
 
 	const artists = $derived(slug === 'albums' && formatArtists((item as AlbumData).artists))
+
+	const queueSourceTypes = {
+		albums: 'album',
+		artists: 'artist',
+		playlists: 'playlist',
+	} as const
+
+	const queueSource: QueueOrigin = $derived({
+		type: queueSourceTypes[slug],
+		name: formatNameOrUnknown(item.name),
+	})
 </script>
 
 {#if !(isWideLayout.current && main.librarySplitLayoutEnabled)}
@@ -180,7 +207,7 @@
 					class="my-1"
 					disabled={tracks.tracksIds.length === 0}
 					onclick={() => {
-						player.playTrack(0, tracks.tracksIds)
+						player.playFrom(0, tracks.tracksIds, queueSource)
 					}}
 				>
 					{m.play()}
@@ -191,7 +218,7 @@
 					class="my-1 mr-auto"
 					disabled={tracks.tracksIds.length === 0}
 					onclick={() => {
-						player.playTrack('shuffle', tracks.tracksIds)
+						player.playFrom('shuffle', tracks.tracksIds, queueSource)
 					}}
 				>
 					{m.shuffle()}
@@ -206,7 +233,13 @@
 	</section>
 
 	<TracksListContainer
-		items={tracks.tracksIds}
+		count={tracks.tracksIds.length}
+		rowAt={trackRowAt}
+		trackCount={tracks.tracksIds.length}
+		activeRow={{ by: 'trackId', trackId: player.queue.current?.trackId ?? null }}
+		onItemClick={({ index }) => {
+			player.playFrom(index, tracks.tracksIds, queueSource)
+		}}
 		predefinedMenuItems={{
 			disableViewAlbum: slug === 'albums',
 			disableViewArtist: slug === 'artists',

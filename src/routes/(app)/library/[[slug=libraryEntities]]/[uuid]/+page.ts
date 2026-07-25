@@ -42,7 +42,7 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 
 export interface TracksQueryRegularResult {
 	tracksIds: number[]
-	playlistIdMap: null
+	entries: null
 }
 
 const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
@@ -65,7 +65,7 @@ const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 				)
 			}
 
-			return { tracksIds: keys, playlistIdMap: null }
+			return { tracksIds: keys, entries: null }
 		},
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {
@@ -82,14 +82,15 @@ const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 	return query
 }
 
-export interface PlaylistTrackItem {
+/** A playlist row: `entryId` is the `PlaylistEntry` id, exact under duplicate tracks. */
+export interface PlaylistEntryRow {
+	entryId: number
 	trackId: number
-	uuid: string
 }
 
 export interface PlaylistTracksQueryResult {
 	tracksIds: number[]
-	playlistIdMap: Record<number, number>
+	entries: PlaylistEntryRow[]
 }
 
 const createPlaylistTracksPageQuery = (
@@ -103,14 +104,14 @@ const createPlaylistTracksPageQuery = (
 			const values = await db.getAllFromIndex('playlistEntries', 'playlistId', playlistId)
 
 			const tracksIds: number[] = Array.from({ length: values.length })
-			const playlistIdMap: Record<number, number> = {}
+			const entries: PlaylistEntryRow[] = Array.from({ length: values.length })
 			for (let i = 0; i < values.length; i += 1) {
 				// biome-ignore lint/style/noNonNullAssertion: value is always defined
 				const value = values[i]!
 				tracksIds[i] = value.trackId
-				playlistIdMap[value.trackId] = value.id
+				entries[i] = { entryId: value.id, trackId: value.trackId }
 			}
-			return { tracksIds, playlistIdMap }
+			return { tracksIds, entries }
 		},
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {
