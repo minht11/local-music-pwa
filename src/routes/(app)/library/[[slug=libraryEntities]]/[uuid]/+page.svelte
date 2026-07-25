@@ -5,8 +5,8 @@
 	import Header from '$lib/components/Header.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import MenuButton from '$lib/components/MenuButton.svelte'
-	import { createTrackIdsSource } from '$lib/components/tracks/track-ids-source.svelte.ts'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import { createTrackIdsSource } from '$lib/components/tracks/track-ids-source.svelte.ts'
 	import type { TrackRowLocator } from '$lib/components/tracks/use-track-menu-items.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import {
