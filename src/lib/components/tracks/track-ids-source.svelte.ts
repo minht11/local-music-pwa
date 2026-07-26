@@ -82,8 +82,8 @@ export const createTrackIdsSource = (
 		// just stopped playing.
 		isRowActive: (row) => row.trackId === player.queue.current?.trackId,
 		rowAt: (index) => ({ type: 'track', entryId: entryIdAt(index), trackId: trackIdAt(index) }),
-		// Every row is a default-height track row.
-		sizeAt: () => TRACK_ROW_HEIGHT,
+		// Every row is a default-height track row, so no reflow signal is needed.
+		size: TRACK_ROW_HEIGHT,
 		keyAt: entryIdAt,
 		hasEntry: (entryId) => entryIds.has(entryId),
 		onItemClick: (data) => {

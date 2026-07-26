@@ -39,6 +39,14 @@ const headerKeyAt = (index: number): string | number => {
 	return rows.listProps.source.keyAt(index)
 }
 
+/** The queue always mixes header and track heights, so its size is never a constant. */
+const sizeKey = (): string | number => {
+	const { size } = rows.listProps.source
+	invariant(typeof size !== 'number')
+
+	return size.key
+}
+
 /** Now playing 1, manual [8, 9], upcoming source [2, 3] — all three sections present. */
 const seedAllSections = () => {
 	queue.setSource([1, 2, 3], 0)
@@ -108,6 +116,43 @@ describe('queue rows layout', () => {
 		expect(rows.listProps.showReorderButton(1)).toBe(false)
 		expect(rows.listProps.showReorderButton(3)).toBe(true)
 		expect(rows.listProps.showReorderButton(6)).toBe(true)
+	})
+})
+
+describe('row heights', () => {
+	it('changes when a cross-layer move shifts a header, even though count does not', () => {
+		// Now playing 1, manual [8, 9], source [2, 3] — headers at 0, 2, 5.
+		seedAllSections()
+
+		const countBefore = rows.listProps.source.count
+		const sizeKeyBefore = sizeKey()
+		const headerIndexBefore = rows.listProps.source.rowAt(5)
+
+		expect(headerIndexBefore.type).toBe('custom')
+
+		// Drag the first upcoming source row into the manual layer.
+		const moved = queue.itemAt('source', 0)?.entryId
+		invariant(moved !== undefined)
+		queue.moveEntry(moved, { layer: 'manual', slot: 2 })
+
+		// The row total is unchanged, so `count` alone cannot trigger a reflow...
+		expect(rows.listProps.source.count).toBe(countBefore)
+		// ...but index 5 is a track row now and the header moved down one.
+		expect(rows.listProps.source.rowAt(5).type).toBe('track')
+		expect(rows.listProps.source.rowAt(6).type).toBe('custom')
+
+		expect(sizeKey()).not.toBe(sizeKeyBefore)
+	})
+
+	it('stays put when a reorder leaves every header where it was', () => {
+		seedAllSections()
+
+		const sizeKeyBefore = sizeKey()
+		const moved = queue.itemAt('manual', 0)?.entryId
+		invariant(moved !== undefined)
+		queue.moveEntry(moved, { layer: 'manual', slot: 2 })
+
+		expect(sizeKey()).toBe(sizeKeyBefore)
 	})
 })
 

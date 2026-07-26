@@ -1,3 +1,20 @@
+<script lang="ts" module>
+	/**
+	 * Per-index row heights, carrying the reflow signal they require. Row heights
+	 * are not part of the virtualizer's own invalidation key, and `count` can stay
+	 * identical while heights move around — a sectioned list shifting a header onto
+	 * a different index — so `key` must change whenever `at` would answer
+	 * differently anywhere, or the cached offsets below the change stay stale.
+	 */
+	export interface VariableRowSize {
+		key: string | number
+		at: (index: number) => number
+	}
+
+	/** A uniform row height, which needs no signal — the number itself is one. */
+	export type RowSize = number | VariableRowSize
+</script>
+
 <script lang="ts">
 	import {
 		elementScroll,
@@ -18,12 +35,7 @@
 	interface Props {
 		count: number
 		lanes?: number
-		/**
-		 * A constant row height, or one per index. A function's identity is the
-		 * remeasure trigger, so pass a stable reference — a fresh closure on every
-		 * render drops the whole size cache and re-runs the probe for every row.
-		 */
-		size: number | ((index: number) => number)
+		size: RowSize
 		gap?: number
 		forceRenderIndexes?: readonly number[]
 		offsetWidth?: number
@@ -115,9 +127,19 @@
 			return arr
 		})
 
-	// Changes identity only when the `size` prop does; the virtualizer keys its
-	// remeasure on that.
-	const estimateSize = $derived(typeof itemSize === 'function' ? itemSize : () => itemSize)
+	// A new identity here is what makes the virtualizer drop its size cache and
+	// re-probe every row, so this wrapper is rebuilt exactly when the heights can
+	// have changed: a new constant, or a new `key` on a per-index size.
+	const estimateSize = $derived.by(() => {
+		const size = itemSize
+		if (typeof size === 'number') {
+			return () => size
+		}
+
+		void size.key
+
+		return (index: number) => size.at(index)
+	})
 
 	const getVirtualizerOptions = () => {
 		const options: VirtualizerOptions<Window | Element, Element> = {

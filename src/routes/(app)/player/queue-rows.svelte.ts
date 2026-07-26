@@ -8,6 +8,7 @@ import type {
 	TracksListContainerProps,
 } from '$lib/components/tracks/TracksListContainer.svelte'
 import type { TrackRowLocator } from '$lib/components/tracks/use-track-menu-items.ts'
+import type { VariableRowSize } from '$lib/components/VirtualContainer.svelte'
 import type { TrackData } from '$lib/library/get/value.ts'
 import type {
 	QueueItem,
@@ -84,7 +85,12 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		add('manual', player.queue.count('manual'))
 		add('source', player.queue.count('source'))
 
-		return { sections, layers, count, trackCount }
+		// A row's height depends only on whether its index is a header, so the header
+		// positions are the whole reflow signal. They move without `count` moving: a
+		// row crossing between layers shifts the section below it by one.
+		const sizeKey = sections.map((s) => s.headerIndex).join(',')
+
+		return { sections, layers, count, trackCount, sizeKey }
 	})
 
 	/**
@@ -154,8 +160,18 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return { type: 'track', entryId, trackId }
 	}
 
-	const sizeAt = (rowIndex: number): number =>
-		sectionAt(rowIndex)?.headerIndex === rowIndex ? QUEUE_HEADER_HEIGHT : TRACK_ROW_HEIGHT
+	/**
+	 * Headers are shorter than track rows, so heights vary by index. `key` tracks
+	 * the header positions because that is all a height depends on — and they move
+	 * without `count` moving, as when a row crosses between layers.
+	 */
+	const size: VariableRowSize = {
+		at: (rowIndex) =>
+			sectionAt(rowIndex)?.headerIndex === rowIndex ? QUEUE_HEADER_HEIGHT : TRACK_ROW_HEIGHT,
+		get key() {
+			return layout.sizeKey
+		},
+	}
 
 	const keyAt = (rowIndex: number): string | number => {
 		const s = sectionAt(rowIndex)
@@ -292,7 +308,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 			return layout.trackCount
 		},
 		rowAt,
-		sizeAt,
+		size,
 		keyAt,
 		// By entry id: the same track can sit on several rows, and only the one
 		// actually playing should light up.

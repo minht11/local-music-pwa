@@ -5,7 +5,7 @@
 	import IconButton from '../IconButton.svelte'
 	import MenuButton from '../MenuButton.svelte'
 	import type { MenuItem } from '../menu/types.ts'
-	import VirtualContainer from '../VirtualContainer.svelte'
+	import VirtualContainer, { type RowSize } from '../VirtualContainer.svelte'
 	import type { SelectionSnapshot, TrackRowIdentity } from './selection.ts'
 	import TrackListItem from './TrackListItem.svelte'
 	import { useTrackDragController } from './use-track-drag-controller.svelte.ts'
@@ -20,7 +20,7 @@
 	 * A row resolved on demand by index. `entryId` is the stable per-row id — the
 	 * unit of virtualizer reconciliation, selection and drag — and `trackId` the
 	 * payload. A custom row (e.g. a section header) is only a marker: its height
-	 * and key come from `sizeAt`/`keyAt`, and the `customRow` snippet resolves its
+	 * and key come from `size`/`keyAt`, and the `customRow` snippet resolves its
 	 * content, keeping row resolution free of i18n and closures.
 	 */
 	export type TrackListRow =
@@ -52,12 +52,18 @@
 		isRowActive: (row: TrackRowIdentity) => boolean
 		onItemClick: (data: TrackItemClick) => void
 		/**
-		 * A row's height and reconciliation key, answered without building the row.
-		 * A count change runs both probes for every index, not just the rendered
-		 * ones, so they must stay cheap — that is why they are separate from `rowAt`
-		 * rather than read off it.
+		 * Row heights: a constant, or `{ at, key }` for a list whose rows differ —
+		 * see `RowSize`. A sectioned list owes a `key`, because moving a queue row
+		 * across layers shifts a header onto a different index while `count` stays
+		 * put.
 		 */
-		sizeAt: (index: number) => number
+		size: RowSize
+		/**
+		 * A row's reconciliation key, answered without building the row. A count
+		 * change runs this probe for every index, not just the rendered ones, so it
+		 * must stay cheap — that is why it is separate from `rowAt` rather than read
+		 * off it. The same holds for a per-index `size.at`.
+		 */
 		keyAt: (index: number) => string | number
 		/**
 		 * Whether `entryId` still names a row. The selection prunes through this on
@@ -193,7 +199,7 @@
 {/snippet}
 
 <VirtualContainer
-	size={source.sizeAt}
+	size={source.size}
 	count={source.count}
 	forceRenderIndexes={dragController.drag === null ? [] : [dragController.drag.fromIndex]}
 	focusableRow={(index) => source.rowAt(index).type === 'track'}
