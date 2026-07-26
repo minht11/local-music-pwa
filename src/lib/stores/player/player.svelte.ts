@@ -82,7 +82,13 @@ export class PlayerStore {
 		return { kind: 'advance', loop: this.repeat === 'all' }
 	})
 
-	readonly #upNext = $derived.by(() => {
+	/**
+	 * The track that plays when the current one ends, or null when playback stops
+	 * there. Folds in repeat and the loop-wrap, so it is not the same question as
+	 * "does the queue have upcoming rows": with repeat on, an exhausted queue still
+	 * has something up next.
+	 */
+	readonly upNextTrackId: number | null = $derived.by(() => {
 		const action = this.#trackEndAction
 		if (action.kind === 'pause') {
 			return null
@@ -218,7 +224,7 @@ export class PlayerStore {
 				return
 			}
 
-			const upNext = this.#upNext
+			const upNext = this.upNextTrackId
 
 			untrack(() => {
 				if (upNext === null) {

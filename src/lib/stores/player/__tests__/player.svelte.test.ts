@@ -458,6 +458,44 @@ describe('PlayerStore', () => {
 		})
 	})
 
+	describe('upNextTrackId', () => {
+		it('is null at the end of a manual-only queue despite repeat all', () => {
+			seedTrack(8)
+			player.queue.enqueue([8], 'last')
+			player.repeat = 'all'
+
+			// The repeat mode alone would promise a wrap; there is nothing to wrap to.
+			expect(player.repeat).toBe('all')
+			expect(player.queue.current).toMatchObject({ layer: 'manual', trackId: 8 })
+			expect(player.upNextTrackId).toBeNull()
+		})
+
+		it('wraps to the first source track at the end when repeat is all', () => {
+			seedTrack(1)
+			seedTrack(2)
+			player.playFrom(1, [1, 2])
+			player.repeat = 'all'
+
+			expect(player.upNextTrackId).toBe(1)
+		})
+
+		it('is the current track when repeat is one', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			player.repeat = 'one'
+
+			expect(player.upNextTrackId).toBe(1)
+		})
+
+		it('is null at the end of the queue when repeat is none', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			player.repeat = 'none'
+
+			expect(player.upNextTrackId).toBeNull()
+		})
+	})
+
 	describe('track ended handler', () => {
 		it('advances the queue and plays next track with gapless flag', () => {
 			seedTrack(1)
@@ -494,6 +532,24 @@ describe('PlayerStore', () => {
 
 			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 1 })
 			expect(ctrl.play).toHaveBeenCalledWith(1, { gapless: true, fromBeginning: true })
+		})
+
+		it('pauses at the end of a manual-only queue even when repeat is all', () => {
+			seedTrack(8)
+			seedTrack(9)
+			// Enqueued with nothing playing, so 8 becomes current and the source layer
+			// stays empty — repeat has no earlier track to wrap back to.
+			player.queue.enqueue([8, 9], 'last')
+			player.repeat = 'all'
+
+			opts.onTrackEnded()
+			expect(player.queue.current).toMatchObject({ layer: 'manual', trackId: 9 })
+
+			vi.clearAllMocks()
+			opts.onTrackEnded()
+
+			expect(ctrl.pause).toHaveBeenCalled()
+			expect(ctrl.play).not.toHaveBeenCalled()
 		})
 
 		it('replays the same track when repeat is one', () => {

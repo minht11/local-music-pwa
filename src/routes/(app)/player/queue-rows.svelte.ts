@@ -20,26 +20,18 @@ import type {
 export interface QueueTabPlayer {
 	readonly queue: QueueView
 	playQueueEntry: (entryId: number) => void
-	togglePlay: () => void
 }
-
-type QueueSection = 'nowPlaying' | QueueLayer
 
 export interface QueueHeaderData {
 	title: string
-	clearTooltip?: string
-	onClear?: () => void
+	clearTooltip: string
+	onClear: () => void
 }
 
 interface QueueSectionLayout {
-	readonly section: QueueSection
+	readonly section: QueueLayer
 	readonly headerIndex: number
 	readonly count: number
-}
-
-/** A section holding reorderable rows — every section except "now playing". */
-interface LayerSectionLayout extends QueueSectionLayout {
-	readonly section: QueueLayer
 }
 
 const QUEUE_HEADER_HEIGHT = 48
@@ -47,41 +39,37 @@ const QUEUE_HEADER_HEIGHT = 48
 // Constants, so neither a header's row nor its key is rebuilt on every probe.
 const HEADER_ROW: TrackListRow = { type: 'custom' }
 const HEADER_KEYS = {
-	nowPlaying: 'header:nowPlaying',
 	manual: 'header:manual',
 	source: 'header:source',
-} as const satisfies Record<QueueSection, string>
+} as const satisfies Record<QueueLayer, string>
 
 /**
- * The queue tab's flat row model. Section geometry is computed once per queue
- * change into `layout`, and every resolver walks it; a section is present only
- * when non-empty, contributing its header plus its rows. Everything resolves by
- * row index in O(sections), so nothing materializes the list.
+ * The queue tab's flat row model: the *upcoming* rows of each layer, headed by a
+ * section title. The playing track is deliberately absent — the player panel
+ * already shows it — so every row here is reorderable, removable, and inactive.
+ *
+ * Section geometry is computed once per queue change into `layout`, and every
+ * resolver walks it; a section is present only when non-empty, contributing its
+ * header plus its rows. Everything resolves by row index in O(sections), so
+ * nothing materializes the list.
  */
 export const createQueueRows = (player: QueueTabPlayer) => {
 	const layout = $derived.by(() => {
 		const sections: QueueSectionLayout[] = []
-		// The reorderable subset, in order — every drop target comes from here.
-		const layers: LayerSectionLayout[] = []
 		let count = 0
 		let trackCount = 0
 
-		const add = (section: QueueSection, size: number) => {
+		const add = (section: QueueLayer, size: number) => {
 			if (size === 0) {
 				return
 			}
 
-			const entry = { section, headerIndex: count, count: size }
-			sections.push(entry)
-			if (section !== 'nowPlaying') {
-				layers.push({ ...entry, section })
-			}
+			sections.push({ section, headerIndex: count, count: size })
 
 			count += size + 1
 			trackCount += size
 		}
 
-		add('nowPlaying', player.queue.current === null ? 0 : 1)
 		add('manual', player.queue.count('manual'))
 		add('source', player.queue.count('source'))
 
@@ -90,7 +78,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		// row crossing between layers shifts the section below it by one.
 		const sizeKey = sections.map((s) => s.headerIndex).join(',')
 
-		return { sections, layers, count, trackCount, sizeKey }
+		return { sections, count, trackCount, sizeKey }
 	})
 
 	/**
@@ -111,25 +99,14 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	}
 
 	/** The stored record for a track row. Reads return the records themselves. */
-	const entryAt = (section: QueueSection, index: number): QueueItem => {
-		if (section === 'nowPlaying') {
-			const current = player.queue.current
-			invariant(current)
-
-			return current
-		}
-
+	const entryAt = (section: QueueLayer, index: number): QueueItem => {
 		const item = player.queue.itemAt(section, index)
 		invariant(item !== undefined)
 
 		return item
 	}
 
-	const headerData = (section: QueueSection): QueueHeaderData => {
-		if (section === 'nowPlaying') {
-			return { title: m.playerNowPlaying() }
-		}
-
+	const headerData = (section: QueueLayer): QueueHeaderData => {
 		if (section === 'manual') {
 			return {
 				title: m.playerNextInQueue(),
@@ -190,11 +167,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return headerData(s.section)
 	}
 
-	const isReorderable = (rowIndex: number): boolean =>
-		sectionAt(rowIndex)?.section !== 'nowPlaying'
-
-	const isCurrentEntry = (entryId: number): boolean => entryId === player.queue.current?.entryId
-
 	/**
 	 * Every entry id the queue currently shows. Derived, so the O(rows) build happens
 	 * once per queue change and only when something reads it — nothing does until a
@@ -204,18 +176,9 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		const ids = new Set<number>()
 
 		for (const { section, count } of layout.sections) {
-			if (section === 'nowPlaying') {
-				continue
-			}
-
 			for (let i = 0; i < count; i += 1) {
 				ids.add(entryAt(section, i).entryId)
 			}
-		}
-
-		const current = player.queue.current
-		if (current !== null) {
-			ids.add(current.entryId)
 		}
 
 		return ids
@@ -233,20 +196,16 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		},
 	})
 
-	const trackMenuItems = (_track: TrackData, { entryId }: TrackRowLocator): MenuItem[] =>
-		isCurrentEntry(entryId) ? [] : [removeFromQueueItem([entryId])]
+	const trackMenuItems = (_track: TrackData, { entryId }: TrackRowLocator): MenuItem[] => [
+		removeFromQueueItem([entryId]),
+	]
 
 	const multiSelectMenuItems = (selection: SelectionSnapshot): MenuItem[] => [
 		removeFromQueueItem(selection.rows.map((row) => row.entryId)),
 	]
 
+	// A stale entry id (the row was consumed or removed) is a store-level no-op.
 	const onItemClick = ({ entryId }: TrackItemClick): void => {
-		if (isCurrentEntry(entryId)) {
-			player.togglePlay()
-			return
-		}
-
-		// A stale entry id (the row was consumed or removed) is a store-level no-op.
 		player.playQueueEntry(entryId)
 	}
 
@@ -260,7 +219,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	const dropSlotFor = (insertSlot: number, fromLayer: QueueLayer): QueueSlot | null => {
 		let match: QueueSlot | null = null
 
-		for (const { section, headerIndex, count } of layout.layers) {
+		for (const { section, headerIndex, count } of layout.sections) {
 			if (insertSlot < headerIndex || insertSlot > headerIndex + count + 1) {
 				continue
 			}
@@ -271,22 +230,16 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 			}
 		}
 
-		if (match !== null) {
-			return match
-		}
-
-		// Owned by no layer: the slot sits in the now-playing block, which has no
-		// insertion gaps, so snap to the start of the queue.
-		const firstLayer = layout.layers[0]
-
-		return firstLayer === undefined ? null : { layer: firstLayer.section, slot: 0 }
+		// Sections are contiguous and every row belongs to one, so a slot in
+		// 0..count always matches; null only when the queue holds no rows at all.
+		return match
 	}
 
 	const onDrop = ({ index, entryId }: TrackRowLocator, insertSlot: number): void => {
 		// The container only fires while `index` still resolves to the dragged row,
 		// so the row's own section answers which layer it came from.
 		const from = sectionAt(index)
-		if (from === undefined || from.section === 'nowPlaying') {
+		if (from === undefined) {
 			return
 		}
 
@@ -310,9 +263,9 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		rowAt,
 		size,
 		keyAt,
-		// By entry id: the same track can sit on several rows, and only the one
-		// actually playing should light up.
-		isRowActive: ({ entryId }) => isCurrentEntry(entryId),
+		// The list holds only upcoming rows — the playing track is never one of them,
+		// so no row is ever the active one.
+		isRowActive: () => false,
 		hasEntry: (entryId) => liveEntryIds.has(entryId),
 		onItemClick,
 	}
@@ -320,7 +273,8 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	const listProps = {
 		source,
 		showFavoriteButton: false,
-		showReorderButton: isReorderable,
+		// Every row is upcoming, so every row can be dragged.
+		showReorderButton: (_rowIndex: number) => true,
 		predefinedMenuItems: { playNext: false, addToQueue: false },
 		menuItems: trackMenuItems,
 		multiSelectMenuItems,
@@ -329,6 +283,13 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 
 	return {
 		headerAt,
+		/**
+		 * No upcoming rows. Not the same as `queue.isEmpty`: a track can be playing
+		 * with nothing behind it, and the playing track is not a row here.
+		 */
+		get isEmpty() {
+			return layout.count === 0
+		},
 		/** Props for `TracksListContainer`, minus the `customRow` snippet only markup can supply. */
 		listProps,
 	}

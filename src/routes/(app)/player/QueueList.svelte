@@ -6,6 +6,19 @@
 
 	const player = usePlayer()
 	const queueRows = createQueueRows(player)
+
+	/**
+	 * Shown once no rows are left but a track is still playing. Read from
+	 * `upNextTrackId` rather than the repeat mode, so the message says what will
+	 * actually happen: repeat only wraps when the source queue has tracks to wrap to.
+	 */
+	const exhaustedTitle = $derived.by(() => {
+		if (player.upNextTrackId === null) {
+			return m.playerNothingUpNext()
+		}
+
+		return player.repeat === 'one' ? m.playerRepeatingTrack() : m.playerRepeatingQueue()
+	})
 </script>
 
 {#snippet queueHeaderRow(index: number)}
@@ -13,14 +26,15 @@
 	<div class="flex h-12 w-full items-center justify-between pl-4">
 		<h2 class="text-title-sm text-onSurfaceVariant">{header.title}</h2>
 
-		{#if header.clearTooltip && header.onClear}
-			<IconButton tooltip={header.clearTooltip} icon="trayRemove" onclick={header.onClear} />
-		{/if}
+		<IconButton tooltip={header.clearTooltip} icon="trayRemove" onclick={header.onClear} />
 	</div>
 {/snippet}
 
-{#if player.queue.isEmpty}
-	<EmptyListMessage title={m.playerQueueEmpty()} />
-{:else}
+{#if !queueRows.isEmpty}
 	<TracksListContainer {...queueRows.listProps} customRow={queueHeaderRow} />
+{:else if player.queue.current}
+	<!-- Playing the last track: the queue is exhausted rather than never started. -->
+	<EmptyListMessage title={exhaustedTitle} browseAction={false} />
+{:else}
+	<EmptyListMessage title={m.playerQueueEmpty()} />
 {/if}
