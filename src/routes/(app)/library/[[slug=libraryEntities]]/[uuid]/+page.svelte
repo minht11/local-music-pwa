@@ -127,19 +127,19 @@
 
 	const artists = $derived(slug === 'albums' && formatArtists((item as AlbumData).artists))
 
-	const queueSourceTypes = {
+	const queueOriginTypes = {
 		albums: 'album',
 		artists: 'artist',
 		playlists: 'playlist',
 	} as const
 
-	const queueSource: QueueOrigin = $derived({
-		type: queueSourceTypes[slug],
+	const queueOrigin: QueueOrigin = $derived({
+		type: queueOriginTypes[slug],
 		name: formatNameOrUnknown(item.name),
 	})
 
 	const tracksSource = createTrackIdsSource(() => tracks.tracksIds, {
-		queueSource: () => queueSource,
+		queueOrigin: () => queueOrigin,
 		// Playlists key rows by `PlaylistEntry.id`, exact under duplicate tracks;
 		// every other view has one row per track, so the track id stands in.
 		entryIdAt: (index) => tracks.entries?.[index]?.entryId,
@@ -199,7 +199,7 @@
 					class="my-1"
 					disabled={tracks.tracksIds.length === 0}
 					onclick={() => {
-						player.playFrom(0, tracks.tracksIds, queueSource)
+						player.playFrom(0, tracks.tracksIds, queueOrigin)
 					}}
 				>
 					{m.play()}
@@ -210,7 +210,7 @@
 					class="my-1 mr-auto"
 					disabled={tracks.tracksIds.length === 0}
 					onclick={() => {
-						player.playFrom('shuffle', tracks.tracksIds, queueSource)
+						player.playFrom('shuffle', tracks.tracksIds, queueOrigin)
 					}}
 				>
 					{m.shuffle()}

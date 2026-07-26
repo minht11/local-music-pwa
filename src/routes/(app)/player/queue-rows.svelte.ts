@@ -180,6 +180,32 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	const isCurrentEntry = (entryId: number): boolean => entryId === player.queue.current?.entryId
 
 	/**
+	 * Every entry id the queue currently shows. Derived, so the O(rows) build happens
+	 * once per queue change and only when something reads it — nothing does until a
+	 * selection is active.
+	 */
+	const liveEntryIds = $derived.by(() => {
+		const ids = new Set<number>()
+
+		for (const { section, count } of layout.sections) {
+			if (section === 'nowPlaying') {
+				continue
+			}
+
+			for (let i = 0; i < count; i += 1) {
+				ids.add(entryAt(section, i).entryId)
+			}
+		}
+
+		const current = player.queue.current
+		if (current !== null) {
+			ids.add(current.entryId)
+		}
+
+		return ids
+	})
+
+	/**
 	 * The ids are captured in the closure, so a queue that advances while the menu
 	 * is open still removes the rows it was opened on; the store never removes the
 	 * current entry and ignores stale ids.
@@ -271,6 +297,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		// By entry id: the same track can sit on several rows, and only the one
 		// actually playing should light up.
 		isRowActive: ({ entryId }) => isCurrentEntry(entryId),
+		hasEntry: (entryId) => liveEntryIds.has(entryId),
 		onItemClick,
 	}
 

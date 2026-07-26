@@ -4,13 +4,14 @@ import type { TrackItemClick, TrackListSource } from './TracksListContainer.svel
 
 interface TrackIdsSourceOptions {
 	/** Describes where playback originates when the default click starts a new queue. */
-	queueSource?: () => QueueOrigin
+	queueOrigin?: () => QueueOrigin
 	/** Replaces the default click, which plays the list from the clicked row. */
 	onItemClick?: (data: TrackItemClick) => void
 	/**
 	 * A row's stable id, for lists that carry one of their own — a playlist row is
-	 * its `PlaylistEntry.id`, exact under duplicate tracks. Falls back to the track
-	 * id per row, which is what makes the ids-must-be-unique rule below conditional.
+	 * its `PlaylistEntry.id`, exact under duplicate tracks. Omitting it entirely is
+	 * what makes the ids-must-be-unique rule below conditional; supplying it and
+	 * then returning `undefined` for a live row is a bug, not a fallback.
 	 */
 	entryIdAt?: (index: number) => number | undefined
 }
@@ -32,14 +33,38 @@ export const createTrackIdsSource = (
 		return id
 	}
 
-	const entryIdAt = (index: number): number => options.entryIdAt?.(index) ?? trackIdAt(index)
+	// Without `entryIdAt` a row's identity is its track id. With it, a row the list
+	// still holds must resolve — silently falling back would swap in a foreign
+	// identity and desync selection and virtualizer keys.
+	const { entryIdAt: providedEntryIdAt } = options
+	const entryIdAt =
+		providedEntryIdAt === undefined
+			? trackIdAt
+			: (index: number): number => {
+					const entryId = providedEntryIdAt(index)
+					invariant(entryId !== undefined, 'track ids source row has no entry id')
+
+					return entryId
+				}
+
+	/**
+	 * Answers the selection controller's liveness check in O(1). `$derived`, so it
+	 * is built only once a selection exists to probe it, and rebuilt only when the
+	 * ids array itself changes. Without `entryIdAt` the ids array *is* the id set,
+	 * so it is handed to `Set` directly rather than mapped into a throwaway copy.
+	 */
+	const entryIds = $derived(
+		providedEntryIdAt === undefined
+			? new Set(items())
+			: new Set(items().map((_, index) => entryIdAt(index))),
+	)
 
 	if (import.meta.env.DEV) {
 		$effect(() => {
 			const ids = items()
 
 			invariant(
-				options.entryIdAt !== undefined || new Set(ids).size === ids.length,
+				providedEntryIdAt !== undefined || new Set(ids).size === ids.length,
 				'createTrackIdsSource requires unique track ids; pass `entryIdAt` for a list that repeats one',
 			)
 		})
@@ -60,13 +85,14 @@ export const createTrackIdsSource = (
 		// Every row is a default-height track row.
 		sizeAt: () => TRACK_ROW_HEIGHT,
 		keyAt: entryIdAt,
+		hasEntry: (entryId) => entryIds.has(entryId),
 		onItemClick: (data) => {
 			if (options.onItemClick) {
 				options.onItemClick(data)
 				return
 			}
 
-			player.playFrom(data.index, items(), options.queueSource?.())
+			player.playFrom(data.index, items(), options.queueOrigin?.())
 		},
 	}
 }

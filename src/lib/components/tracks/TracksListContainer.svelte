@@ -59,6 +59,12 @@
 		 */
 		sizeAt: (index: number) => number
 		keyAt: (index: number) => string | number
+		/**
+		 * Whether `entryId` still names a row. The selection prunes through this on
+		 * every list change, so it must not scan per call — sources answer from a
+		 * lazily derived set, not by walking rows.
+		 */
+		hasEntry: (entryId: number) => boolean
 	}
 
 	export interface TracksListContainerProps {
@@ -133,6 +139,7 @@
 	const selection = useTrackSelectionController({
 		rowCount: () => source.count,
 		trackAt,
+		hasEntry: (entryId) => source.hasEntry(entryId),
 	})
 
 	const dragController = useTrackDragController({

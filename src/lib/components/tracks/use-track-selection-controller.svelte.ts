@@ -7,6 +7,8 @@ interface UseTrackSelectionControllerOptions {
 	rowCount: () => number
 	/** Row identity, or undefined for a non-track row (a section header) or a stale index. */
 	trackAt: (index: number) => TrackRowIdentity | undefined
+	/** Whether an entry id still names a row; O(1), see `TrackListSource.hasEntry`. */
+	hasEntry: (entryId: number) => boolean
 }
 
 interface HandleItemClickOptions {
@@ -20,6 +22,7 @@ interface HandleItemClickOptions {
 export const useTrackSelectionController = ({
 	rowCount,
 	trackAt,
+	hasEntry,
 }: UseTrackSelectionControllerOptions) => {
 	// entryId -> trackId, keyed by entry id so rows sharing a track id select
 	// independently and a selection can survive list changes.
@@ -55,20 +58,22 @@ export const useTrackSelectionController = ({
 	}
 
 	// Any list change while selecting (queue advance, removal, refetch) drops just
-	// the entries that are gone; the rest of the selection survives.
+	// the entries that are gone; the rest of the selection survives. Costs one
+	// `hasEntry` probe per *selected* row, not a walk of the list — which can be
+	// the whole library.
 	$effect(() => {
 		if (!selectionEnabled) {
 			return
 		}
 
-		const live = new Set<number>()
-		forEachLiveRow((row) => live.add(row.entryId))
+		// The ids are read untracked — only `hasEntry` should re-trigger this, or the
+		// deletions below would re-run it. Selecting more rows needs no prune: a row
+		// is live at the moment it is selected.
+		const dead = untrack(() => [...selected.keys()]).filter((entryId) => !hasEntry(entryId))
 
 		untrack(() => {
-			for (const entryId of selected.keys()) {
-				if (!live.has(entryId)) {
-					selected.delete(entryId)
-				}
+			for (const entryId of dead) {
+				selected.delete(entryId)
 			}
 
 			if (selected.size === 0) {

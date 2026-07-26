@@ -33,7 +33,7 @@
 
 	// Only read on the tracks slug, where `itemsIds` are track ids.
 	const allTracksSource = createTrackIdsSource(() => itemsIds, {
-		queueSource: () => ({ type: 'tracks', name: m.tracks() }),
+		queueOrigin: () => ({ type: 'tracks', name: m.tracks() }),
 	})
 
 	interface NavItem {

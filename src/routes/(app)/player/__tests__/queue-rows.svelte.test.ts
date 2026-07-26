@@ -111,6 +111,52 @@ describe('queue rows layout', () => {
 	})
 })
 
+describe('hasEntry', () => {
+	const hasEntry = (entryId: number): boolean => rows.listProps.source.hasEntry(entryId)
+
+	it('covers every rendered row, the now-playing one included', () => {
+		seedAllSections()
+
+		const trackRows = Array.from({ length: rows.listProps.source.count }, (_, index) =>
+			rows.listProps.source.rowAt(index),
+		).filter((row) => row.type === 'track')
+
+		expect(trackRows).toHaveLength(5)
+		expect(trackRows.map((row) => hasEntry(row.entryId))).not.toContain(false)
+	})
+
+	it('reports an unknown entry id as gone', () => {
+		seedAllSections()
+
+		expect(hasEntry(999_999)).toBe(false)
+	})
+
+	it('drops a removed row and keeps the rest', () => {
+		seedAllSections()
+		const removed = trackRowAt(3).entryId
+		const kept = trackRowAt(4).entryId
+
+		queue.removeEntries([removed])
+
+		expect(hasEntry(removed)).toBe(false)
+		expect(hasEntry(kept)).toBe(true)
+	})
+
+	it('drops a manual row once it has been consumed', () => {
+		seedAllSections()
+		const consumed = trackRowAt(3).entryId
+
+		queue.advance()
+
+		// It is now the current row, so it is still live — one more advance retires it.
+		expect(hasEntry(consumed)).toBe(true)
+
+		queue.advance()
+
+		expect(hasEntry(consumed)).toBe(false)
+	})
+})
+
 describe('item clicks', () => {
 	it('toggles playback on the now-playing row', () => {
 		seedAllSections()
