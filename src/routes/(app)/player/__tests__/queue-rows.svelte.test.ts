@@ -290,13 +290,27 @@ describe('drop slot mapping', () => {
 		expect(sourceIds()).toEqual([2, 3])
 	})
 
-	it('a drop on the source header from the source layer targets its start', () => {
+	it('a drop on the source header from the source layer targets the end of manual', () => {
 		seedAllSections()
 
 		rows.listProps.onDrop({ index: 5, entryId: trackRowAt(5).entryId }, 3)
 
+		expect(manualIds()).toEqual([8, 9, 3])
+		expect(sourceIds()).toEqual([2])
+	})
+
+	it('the start of the source layer stays reachable from either layer', () => {
+		seedAllSections()
+
+		rows.listProps.onDrop({ index: 5, entryId: trackRowAt(5).entryId }, 4)
+
 		expect(manualIds()).toEqual([8, 9])
 		expect(sourceIds()).toEqual([3, 2])
+
+		rows.listProps.onDrop({ index: 1, entryId: trackRowAt(1).entryId }, 4)
+
+		expect(manualIds()).toEqual([9])
+		expect(sourceIds()).toEqual([8, 3, 2])
 	})
 
 	it('a drop above the first row lands at the start of the first layer', () => {
@@ -317,12 +331,12 @@ describe('drop slot mapping', () => {
 		expect(sourceIds()).toEqual([2, 3])
 	})
 
-	it('ignores a drop whose row index is out of range', () => {
+	it('does not consult the dragged row index', () => {
 		seedAllSections()
 
 		rows.listProps.onDrop({ index: 99, entryId: trackRowAt(1).entryId }, 3)
 
-		expect(manualIds()).toEqual([8, 9])
+		expect(manualIds()).toEqual([9, 8])
 		expect(sourceIds()).toEqual([2, 3])
 	})
 })

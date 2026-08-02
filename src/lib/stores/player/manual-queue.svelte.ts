@@ -36,7 +36,8 @@ export class ManualQueue {
 	/**
 	 * The end of the play-next block, and the single definition of that boundary:
 	 * `enqueue('next')` chains onto it, and an inserted row joins the block only by
-	 * landing strictly before it.
+	 * landing strictly before it. The block is a contiguous prefix, so this is its
+	 * length.
 	 */
 	get #playNextEnd(): number {
 		return this.#entries.findLastIndex((entry) => entry.kind === 'next') + 1
@@ -56,9 +57,9 @@ export class ManualQueue {
 	}
 
 	/**
-	 * Keeps the item's entry id, so a row carried over from the source layer holds
-	 * its identity. Dropping onto the block boundary appends behind it, where
-	 * `enqueue('next')` would extend it.
+	 * Keeps the item's entry id, so a moved row holds its identity. `kind` is
+	 * re-derived from where the row lands, keeping the play-next block contiguous;
+	 * dropping onto its boundary lands behind it, where `enqueue('next')` extends it.
 	 */
 	insertUpcoming = (item: QueueItem, slot: number): void => {
 		const at = Math.max(0, Math.min(slot, this.#entries.length))
@@ -77,18 +78,6 @@ export class ManualQueue {
 		}
 
 		this.#entries = this.#entries.toSpliced(i, 1)
-	}
-
-	/** Carries `kind` along, so a reorder never changes which rows form the block. */
-	moveUpcomingItem = (from: number, to: number): void => {
-		const { length } = this.#entries
-		if (from < 0 || from >= length || to < 0 || to >= length) {
-			return
-		}
-
-		const moved = this.#entries[from]
-		invariant(moved !== undefined)
-		this.#entries = this.#entries.toSpliced(from, 1).toSpliced(to, 0, moved)
 	}
 
 	removeEntries = (entryIds: ReadonlySet<number>): void => {

@@ -177,23 +177,36 @@ describe('QueueStore', () => {
 			expect(manual(q)).toEqual([9])
 		})
 
-		it('inserts after the last next-tagged entry even after a reorder interleaves kinds', () => {
+		it('a row dragged into the play-next block joins it', () => {
 			q.setSource([1], 0)
 			q.enqueue([8, 9], 'next')
 			q.enqueue([20], 'last')
 			expect(manual(q)).toEqual([8, 9, 20])
 
-			// Reorder the queued track (20) between the two play-next tracks, so kinds
-			// interleave: 8 (next), 20 (queued), 9 (next).
 			const queuedEntryId = q.itemAt('manual', 2)?.entryId
 			invariant(queuedEntryId !== undefined)
 			q.moveEntry(queuedEntryId, { layer: 'manual', slot: 1 })
 			expect(manual(q)).toEqual([8, 20, 9])
 
-			// A later play-next chains after the last next-tagged entry (9), not after
-			// the queued track sitting between the two next-tagged rows.
+			// The block is now 8, 20, 9, so play-next chains behind all three.
 			q.enqueue([10], 'next')
 			expect(manual(q)).toEqual([8, 20, 9, 10])
+		})
+
+		it('a row dragged out of the play-next block leaves it, so play-next still plays next', () => {
+			q.setSource([1], 0)
+			q.enqueue([8, 9], 'next')
+			q.enqueue([20], 'last')
+			expect(manual(q)).toEqual([8, 9, 20])
+
+			const nextEntryId = q.itemAt('manual', 0)?.entryId
+			invariant(nextEntryId !== undefined)
+			q.moveEntry(nextEntryId, { layer: 'manual', slot: 3 })
+			expect(manual(q)).toEqual([9, 20, 8])
+
+			// The block is now just 9, so play-next lands second.
+			q.enqueue([10], 'next')
+			expect(manual(q)).toEqual([9, 10, 20, 8])
 		})
 	})
 

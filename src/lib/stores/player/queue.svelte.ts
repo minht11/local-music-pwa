@@ -53,7 +53,6 @@ interface UpcomingList {
 	upcomingIndexOf: (entryId: number) => number
 	insertUpcoming: (item: QueueItem, slot: number) => void
 	removeUpcomingAt: (i: number) => void
-	moveUpcomingItem: (from: number, to: number) => void
 	clearUpcoming: () => void
 }
 
@@ -197,35 +196,35 @@ export class QueueStore {
 		this.#source.removeEntries(toRemove)
 	}
 
-	/** A failed locate is a silent no-op — the row was consumed or removed mid-drag. */
+	/**
+	 * Remove then insert, so the destination re-derives whatever it tracks by
+	 * position — the manual layer's play-next block stays a contiguous prefix.
+	 * A failed locate is a silent no-op: the row was consumed or removed mid-drag.
+	 */
 	moveEntry = (entryId: number, toSlot: QueueSlot): void => {
 		const from = this.#locateMovable(entryId)
 		if (from === null) {
 			return
 		}
 
-		const fromList = this.#list(from.layer)
-
-		if (from.layer === toSlot.layer) {
-			// A slot is the gap before its index, so a downward move lands one short
-			// once the row itself is removed.
-			const to = toSlot.slot > from.index ? toSlot.slot - 1 : toSlot.slot
-			if (to !== from.index) {
-				fromList.moveUpcomingItem(from.index, to)
-			}
-
+		// A slot is the gap before its index, so a downward move within a layer lands
+		// one short once the row itself is removed.
+		const sameLayer = from.layer === toSlot.layer
+		const slot = sameLayer && toSlot.slot > from.index ? toSlot.slot - 1 : toSlot.slot
+		if (sameLayer && slot === from.index) {
 			return
 		}
 
+		const fromList = this.#list(from.layer)
 		const item = fromList.upcomingAt(from.index)
 		if (item === undefined) {
 			return
 		}
 
 		// The entry id travels with the row, so it keeps its identity (selection,
-		// virtualizer key) on the other side.
+		// virtualizer key) wherever it lands.
 		fromList.removeUpcomingAt(from.index)
-		this.#list(toSlot.layer).insertUpcoming(item, toSlot.slot)
+		this.#list(toSlot.layer).insertUpcoming(item, slot)
 	}
 
 	/** Drops the layer's upcoming rows; the current track keeps playing. */

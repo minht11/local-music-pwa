@@ -210,40 +210,24 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	}
 
 	/**
-	 * Maps a drop slot in the flat list to an insertion gap within a layer. A layer
-	 * owns the slots from its header down to the gap after its last row, so adjacent
-	 * layers overlap by exactly one: the seam is both "the end of the one above" and
-	 * "the start of the one below". Ties go to the dragged row's own layer, so a drop
-	 * at a seam never silently changes layer.
+	 * Maps a drop slot in the flat list to an insertion gap within a layer. The seam
+	 * between two layers is the end of the one above; the one below starts a gap
+	 * further down, so both stay reachable. Slot 0 clamps into the first layer.
 	 */
-	const dropSlotFor = (insertSlot: number, fromLayer: QueueLayer): QueueSlot | null => {
-		let match: QueueSlot | null = null
-
+	const dropSlotFor = (insertSlot: number): QueueSlot | null => {
 		for (const { section, headerIndex, count } of layout.sections) {
-			if (insertSlot < headerIndex || insertSlot > headerIndex + count + 1) {
-				continue
-			}
-
-			match = { layer: section, slot: Math.max(0, insertSlot - headerIndex - 1) }
-			if (section === fromLayer) {
-				return match
+			if (insertSlot <= headerIndex + count + 1) {
+				return { layer: section, slot: Math.max(0, insertSlot - headerIndex - 1) }
 			}
 		}
 
 		// Sections are contiguous and every row belongs to one, so a slot in
 		// 0..count always matches; null only when the queue holds no rows at all.
-		return match
+		return null
 	}
 
-	const onDrop = ({ index, entryId }: TrackRowLocator, insertSlot: number): void => {
-		// The container only fires while `index` still resolves to the dragged row,
-		// so the row's own section answers which layer it came from.
-		const from = sectionAt(index)
-		if (from === undefined) {
-			return
-		}
-
-		const toSlot = dropSlotFor(insertSlot, from.section)
+	const onDrop = ({ entryId }: TrackRowLocator, insertSlot: number): void => {
+		const toSlot = dropSlotFor(insertSlot)
 		if (toSlot) {
 			player.queue.moveEntry(entryId, toSlot)
 		}

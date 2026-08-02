@@ -111,24 +111,6 @@ export class SourceQueue {
 		this.#apply((entries) => entries.toSpliced(absolute, 1))
 	}
 
-	/** Commits the visible order (shuffle off). */
-	moveUpcomingItem = (from: number, to: number): void => {
-		const count = this.upcomingCount
-		if (from < 0 || from >= count || to < 0 || to >= count || from === to) {
-			return
-		}
-
-		const absoluteFrom = this.#index + 1 + from
-		const absoluteTo = this.#index + 1 + to
-
-		this.#applyCommitted((entries) => {
-			const moved = entries[absoluteFrom]
-			invariant(moved !== undefined)
-
-			return entries.toSpliced(absoluteFrom, 1).toSpliced(absoluteTo, 0, moved)
-		})
-	}
-
 	/** Commits the visible order (shuffle off); the item keeps its entry id. */
 	insertUpcoming = (item: QueueItem, slot: number): void => {
 		const at = this.#index + 1 + Math.max(0, Math.min(slot, this.upcomingCount))
