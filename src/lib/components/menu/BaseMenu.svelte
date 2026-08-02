@@ -109,10 +109,7 @@
 	<div role={type} class="flex flex-col py-2">
 		{#each items as item}
 			{#if 'separator' in item}
-				<!--
-					`separator` is a valid child of `role="menu"` but not of `role="listbox"`,
-					which owns only options — there it stays a purely decorative divider.
-				-->
+				<!-- `separator` is a valid child of `role="menu"` but not of `role="listbox"` -->
 				<hr
 					role={type === 'menu' ? 'separator' : 'presentation'}
 					class="my-2 border-onSurfaceVariant/24"
