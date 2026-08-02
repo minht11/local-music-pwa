@@ -7,22 +7,15 @@ export interface QueueOrigin {
 }
 
 interface SourceEntry extends QueueItem {
-	readonly canonical: number // original rank; unshuffle's sort key
+	/** Original rank used to restore correct order when shuffle is off */
+	readonly canonical: number
 }
 
-/**
- * The shuffleable, positional list playback was started from (an album, playlist,
- * or track list), held as immutable entry records in *visible* order. Knows
- * nothing of the manual queue, so shuffle structurally cannot touch it.
- *
- * `#entries` is `$state.raw` and its records immutable: every structural edit
- * flows through the `#apply` frame, which reassigns the array and keeps the
- * cursor on the current row. In-place mutation would silently break reactivity.
- */
 export class SourceQueue {
 	shuffle = $state(false)
 	origin: QueueOrigin | null = $state(null)
 
+	// Every edit must go through #apply() so correct cursor is preserved
 	#entries: readonly SourceEntry[] = $state.raw([])
 	// While a manual track plays this is the return point: playback resumes at the
 	// following source track. Absolute positions are private to this class — every

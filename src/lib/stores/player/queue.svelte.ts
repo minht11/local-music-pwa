@@ -57,7 +57,6 @@ interface UpcomingList {
 	clearUpcoming: () => void
 }
 
-// The layers' records carry bookkeeping (`kind`, `canonical`) that must not leak out.
 const toEntry = (layer: QueueLayer, item: QueueItem): QueueEntry => ({
 	layer,
 	trackId: item.trackId,
@@ -65,11 +64,9 @@ const toEntry = (layer: QueueLayer, item: QueueItem): QueueEntry => ({
 })
 
 /**
- * Two-layer playback queue (Spotify/Apple model): the tracks the user explicitly
- * queued, then the album/playlist/list playback was started from. Each layer owns
- * its own rows, so "manual precedes source" is structural. What is left here is
- * the orchestration neither layer can see: which one `current` comes from, when a
- * manual detour ends, and how a row crosses between them.
+ * Two-layer playback queue:
+ *  - manual - the tracks the user explicitly queued
+ *  - source - place where album/playlist/list playback was started from.
  */
 export class QueueStore {
 	readonly #manual = new ManualQueue()

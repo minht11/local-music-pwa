@@ -19,11 +19,14 @@ import { type QueueEntry, type QueueOrigin, QueueStore, type QueueView } from '.
 
 export type PlayerRepeat = 'none' | 'one' | 'all'
 
-/** What to do when the current track ends; `loop` wraps at the queue's end. */
 type TrackEndAction =
 	| { kind: 'pause' }
 	| { kind: 'repeat-current' }
-	| { kind: 'advance'; loop: boolean }
+	| {
+			kind: 'advance'
+			/** Should wrap at the queue's end */
+			loop: boolean
+	  }
 
 // How many seconds before track end to begin pre-buffering the next track.
 const PRE_BUFFER_THRESHOLD_SECONDS = 10

@@ -1,14 +1,10 @@
-/**
- * A queue row as read surfaces expose it. Reads return the stored records
- * themselves, structurally narrowed to this shape — no per-read allocation.
- */
 export interface QueueItem {
+	/** The same track id can appear multiple times in queue with different entryIds */
 	readonly trackId: number
+	/** Unique id for queue item. */
 	readonly entryId: number
 }
 
-// One counter across both layers, so entry ids never collide: selections and
-// removals mix rows from either layer in a single map and a single set.
 let nextEntryId = 0
 export const mintEntryId = (): number => {
 	const entryId = nextEntryId

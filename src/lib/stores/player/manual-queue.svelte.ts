@@ -6,13 +6,8 @@ interface ManualEntry extends QueueItem {
 }
 
 /**
- * The tracks the user explicitly queued: never shuffled, survives replacing the
- * source, and consumed as it plays — so the rows are a FIFO with no cursor. The
- * playing entry has already been shifted out of `#entries` into `#current`, which
- * is what makes it structurally unreachable to removal, reorder and
- * `clearUpcoming`.
- *
- * `#entries` is `$state.raw` and its records immutable: every mutation reassigns.
+ * The tracks the user explicitly queued. FIFO.
+ * Shuffle does not affect it.
  */
 export class ManualQueue {
 	#entries: readonly ManualEntry[] = $state.raw([])
@@ -126,7 +121,6 @@ export class ManualQueue {
 		}
 	}
 
-	/** Drops the upcoming rows; a playing manual track keeps playing. */
 	clearUpcoming = (): void => {
 		this.#entries = []
 	}
