@@ -86,8 +86,6 @@ export const createTrackRowsSource = (
 		get trackCount() {
 			return rows().count
 		},
-		// From the queue, not `activeTrack`: that query holds its previous value while
-		// refetching, so it would briefly light up the row that just stopped playing.
 		isRowActive: (row) => row.trackId === player.queue.current?.trackId,
 		rowAt: (index) => {
 			const current = rows()
@@ -98,7 +96,6 @@ export const createTrackRowsSource = (
 				trackId: current.trackIdAt(index),
 			}
 		},
-		// Uniform rows, so no reflow signal is needed.
 		size: TRACK_ROW_HEIGHT,
 		keyAt: (index) => rows().entryIdAt(index),
 		hasEntry: (entryId) => entryIds.has(entryId),
