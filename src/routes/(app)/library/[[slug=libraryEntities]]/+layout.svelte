@@ -12,7 +12,7 @@
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { createTrackIdsSource } from '$lib/components/tracks/track-ids-source.svelte.ts'
+	import { createTrackRowsSource, trackIdRows } from '$lib/components/tracks/track-rows.svelte.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.js'
 	import { isMobile } from '$lib/helpers/utils/ua.ts'
 	import { useSetOverlaySnippet } from '$lib/layout-bottom-bar.svelte.ts'
@@ -32,7 +32,8 @@
 	const isHandHeldDevice = isMobile()
 
 	// Only read on the tracks slug, where `itemsIds` are track ids.
-	const allTracksSource = createTrackIdsSource(() => itemsIds, {
+	const allTracksRows = trackIdRows(() => itemsIds)
+	const allTracksSource = createTrackRowsSource(() => allTracksRows, {
 		queueOrigin: () => ({ type: 'tracks', name: m.tracks() }),
 	})
 

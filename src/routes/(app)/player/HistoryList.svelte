@@ -1,6 +1,6 @@
 <script lang="ts">
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { createTrackIdsSource } from '$lib/components/tracks/track-ids-source.svelte.ts'
+	import { createTrackRowsSource, trackIdRows } from '$lib/components/tracks/track-rows.svelte.ts'
 	import { dbRemoveFromPlayHistory } from '$lib/library/play-history-actions.ts'
 	import EmptyListMessage from './EmptyListMessage.svelte'
 
@@ -13,7 +13,8 @@
 	const player = usePlayer()
 	// Playing from history jumps to the track wherever it lives; it never replaces
 	// the queue with the history list.
-	const source = createTrackIdsSource(() => items, {
+	const rows = trackIdRows(() => items)
+	const source = createTrackRowsSource(() => rows, {
 		onItemClick: ({ track }) => {
 			player.playTrackId(track.id)
 		},

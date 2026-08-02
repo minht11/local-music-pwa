@@ -9,6 +9,7 @@ import {
 	FAVORITE_PLAYLIST_ID,
 	FAVORITE_PLAYLIST_UUID,
 	type LibraryStoreName,
+	type PlaylistEntry,
 } from '$lib/library/types.ts'
 import type { PageLoad } from './$types.d.ts'
 
@@ -41,8 +42,7 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 }
 
 export interface TracksQueryRegularResult {
-	tracksIds: number[]
-	entries: null
+	trackIds: number[]
 }
 
 const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
@@ -65,7 +65,7 @@ const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 				)
 			}
 
-			return { tracksIds: keys, entries: null }
+			return { trackIds: keys }
 		},
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {
@@ -82,15 +82,8 @@ const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 	return query
 }
 
-/** A playlist row: `entryId` is the `PlaylistEntry` id, exact under duplicate tracks. */
-export interface PlaylistEntryRow {
-	entryId: number
-	trackId: number
-}
-
 export interface PlaylistTracksQueryResult {
-	tracksIds: number[]
-	entries: PlaylistEntryRow[]
+	entries: PlaylistEntry[]
 }
 
 const createPlaylistTracksPageQuery = (
@@ -101,17 +94,9 @@ const createPlaylistTracksPageQuery = (
 		fetcher: async (): Promise<PlaylistTracksQueryResult> => {
 			const db = await getDatabase()
 
-			const values = await db.getAllFromIndex('playlistEntries', 'playlistId', playlistId)
-
-			const tracksIds: number[] = Array.from({ length: values.length })
-			const entries: PlaylistEntryRow[] = Array.from({ length: values.length })
-			for (let i = 0; i < values.length; i += 1) {
-				// biome-ignore lint/style/noNonNullAssertion: value is always defined
-				const value = values[i]!
-				tracksIds[i] = value.trackId
-				entries[i] = { entryId: value.id, trackId: value.trackId }
+			return {
+				entries: await db.getAllFromIndex('playlistEntries', 'playlistId', playlistId),
 			}
-			return { tracksIds, entries }
 		},
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {

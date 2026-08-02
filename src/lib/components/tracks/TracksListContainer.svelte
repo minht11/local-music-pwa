@@ -36,8 +36,7 @@
 	 * list. `trackCount` (used by "select all") excludes custom rows, and clicking
 	 * a row is the source's business — the container has no default.
 	 *
-	 * `createTrackIdsSource` covers a plain list of track ids; sectioned lists and
-	 * lists that can repeat a track id build their own.
+	 * `createTrackRowsSource` covers any flat list; sectioned lists build their own.
 	 */
 	export interface TrackListSource {
 		/** Total row count, track and custom rows alike. */
