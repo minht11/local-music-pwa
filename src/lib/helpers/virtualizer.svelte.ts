@@ -1,110 +1,120 @@
-import { Virtualizer, type VirtualizerOptions } from '@tanstack/virtual-core'
+import { type VirtualItem, Virtualizer, type VirtualizerOptions } from '@tanstack/virtual-core'
 
 export * from '@tanstack/virtual-core'
+
+interface VirtualizerSnapshot {
+	virtualItems: VirtualItem[]
+	totalSize: number
+}
+
+type VirtualizerInstance = Virtualizer<Element, Element>
+
+export interface ReactiveVirtualizer {
+	readonly virtualItems: VirtualItem[]
+	readonly totalSize: number
+	readonly range: VirtualizerInstance['range']
+	readonly scrollToIndex: VirtualizerInstance['scrollToIndex']
+}
 
 export function createVirtualizerBase<
 	TScrollElement extends Element | Window,
 	TItemElement extends Element,
->(
-	options: () => VirtualizerOptions<TScrollElement, TItemElement>,
-): Virtualizer<TScrollElement, TItemElement> {
+>(options: () => VirtualizerOptions<TScrollElement, TItemElement>): ReactiveVirtualizer {
+	const resolvedOptions = $derived(options())
+
 	let version = $state(0)
-	// True while one of the derived blocks below drives the instance.
-	let syncing = false
-	let userOnChange: VirtualizerOptions<TScrollElement, TItemElement>['onChange']
+	let driving = false
 
 	const handleChange = (
 		instance: Virtualizer<TScrollElement, TItemElement>,
 		sync: boolean,
 	): void => {
-		if (syncing) {
+		if (driving) {
 			return
 		}
 
 		version += 1
-		userOnChange?.(instance, sync)
+		resolvedOptions.onChange?.(instance, sync)
 	}
 
 	const initialOptions = options()
-	userOnChange = initialOptions.onChange
-	// The size function the instance last measured against. `count` and `lanes`
-	// are in virtual-core's measurement memo key and invalidate on their own;
-	// `estimateSize` is not, so a change to it has to be forced through.
-	let measuredEstimateSize = initialOptions.estimateSize
-
 	const instance = new Virtualizer<TScrollElement, TItemElement>({
 		...initialOptions,
 		onChange: handleChange,
 	})
 
+	// `count` and `lanes` are in virtual-core's measurement memo key; `estimateSize`
+	// is not, so a change to it has to be forced through.
+	let measuredEstimateSize = initialOptions.estimateSize
+
 	/**
-	 * Pushes option changes into the instance, and returns what it applied so the
-	 * snapshot below re-derives with them. `$derived` rather than `$effect` so
-	 * rendering stays in sync with state changes, and kept separate from the
-	 * snapshot so `setOptions` runs on an option change rather than on every
-	 * `version` bump — the instance notifies on every scroll frame.
+	 * Mutates the instance from inside a derivation. `measure()` and `_willUpdate()`
+	 * notify synchronously and a derivation may not write state, so those
+	 * notifications are dropped and a caller's `onChange` never hears its own edits.
+	 */
+	const drive = <T>(mutate: () => T): T => {
+		driving = true
+
+		try {
+			return untrack(mutate)
+		} finally {
+			driving = false
+		}
+	}
+
+	/**
+	 * Pushes option changes into the instance. At read time rather than in an effect
+	 * because async rendering may update the DOM before an effect runs. Separate
+	 * from the snapshot so `setOptions` skips the per-scroll-frame `version` bumps.
 	 */
 	const appliedOptions = $derived.by(() => {
-		const resolved = options()
-		userOnChange = resolved.onChange
+		const resolved = resolvedOptions
 
-		// `measure()` drops the whole size cache, making the next read run
-		// `estimateSize` for every index.
-		const sizeChanged = resolved.estimateSize !== measuredEstimateSize
-		measuredEstimateSize = resolved.estimateSize
+		drive(() => {
+			const sizeChanged = resolved.estimateSize !== measuredEstimateSize
+			measuredEstimateSize = resolved.estimateSize
 
-		syncing = true
-		try {
-			untrack(() => {
-				instance.setOptions({ ...resolved, onChange: handleChange })
+			instance.setOptions({ ...resolved, onChange: handleChange })
 
-				if (sizeChanged) {
-					instance.measure()
-				}
-			})
-		} finally {
-			syncing = false
-		}
+			if (sizeChanged) {
+				instance.measure()
+			}
+		})
 
 		return resolved
 	})
 
-	// The consistent snapshot consumers read.
-	const snapshot = $derived.by(() => {
+	const snapshot: VirtualizerSnapshot = $derived.by(() => {
+		// Rerun snapshot when these changes
 		void appliedOptions
 		void version
 
-		syncing = true
-		try {
+		return drive(() => {
 			instance._willUpdate()
 
 			return {
 				virtualItems: instance.getVirtualItems(),
 				totalSize: instance.getTotalSize(),
 			}
-		} finally {
-			syncing = false
-		}
-	})
-
-	const virtualizer = new Proxy(instance, {
-		get(target, prop) {
-			switch (prop) {
-				case 'getVirtualItems':
-					return () => snapshot.virtualItems
-				case 'getTotalSize':
-					return () => snapshot.totalSize
-				default:
-					return Reflect.get(target, prop)
-			}
-		},
+		})
 	})
 
 	$effect(() => {
-		const cleanup = untrack(() => virtualizer._didMount())
+		const cleanup = untrack(() => instance._didMount())
 
 		return cleanup
 	})
 
-	return virtualizer
+	return {
+		get virtualItems() {
+			return snapshot.virtualItems
+		},
+		get totalSize() {
+			return snapshot.totalSize
+		},
+		get range() {
+			return instance.range
+		},
+		scrollToIndex: instance.scrollToIndex,
+	}
 }

@@ -175,13 +175,14 @@
 	}
 
 	const scrollToIndexIfNeeded = async (index: number) => {
-		if (!virtualizer.range) {
+		const range = virtualizer.range
+		if (!range) {
 			return
 		}
 
 		// Top/bottom elements cover the element, so we adjust bounds a bit
-		const startIndex = Math.max(virtualizer.range.startIndex - 1, 0)
-		const endIndex = Math.min(virtualizer.range.endIndex + 1, virtualizer.options.count - 1)
+		const startIndex = Math.max(range.startIndex - 1, 0)
+		const endIndex = Math.min(range.endIndex + 1, count - 1)
 
 		if (index >= startIndex && index <= endIndex) {
 			return
@@ -284,14 +285,14 @@
 		bind:offsetWidth
 		role="grid"
 		aria-rowcount={count}
-		style:height={`${virtualizer.getTotalSize() - gap}px`}
+		style:height={`${virtualizer.totalSize - gap}px`}
 		class="@container relative w-full rounded-lg -outline-offset-2 contain-strict"
 		tabindex="0"
 		onfocusin={focusinHandler}
 		onfocusout={focusoutHandler}
 		onkeydown={keydownHandler}
 	>
-		{#each virtualizer.getVirtualItems() as virtualItem (key(virtualItem.index))}
+		{#each virtualizer.virtualItems as virtualItem (key(virtualItem.index))}
 			{@render children(virtualItem)}
 		{/each}
 	</div>

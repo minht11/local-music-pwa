@@ -15,10 +15,13 @@ afterEach(() => {
 	cleanup?.()
 })
 
-const setup = (initialSize: (index: number) => number) => {
+const setup = (initialSize: (index: number) => number, onChange?: Options['onChange']) => {
 	let count = $state(3)
 	let overscan = $state(0)
 	let estimateSize = $state(initialSize)
+
+	// Captured when the scroll element binds, so a scroll can be simulated.
+	let notifyOffset: ((offset: number, isScrolling: boolean) => void) | undefined
 
 	let virtualizer!: ReturnType<typeof createVirtualizerBase<Element, Element>>
 
@@ -28,11 +31,13 @@ const setup = (initialSize: (index: number) => number) => {
 				count,
 				overscan,
 				estimateSize,
+				onChange,
 				getScrollElement: () => element,
 				observeElementRect: (_i, cb) => {
 					cb({ width: 300, height: 500 })
 				},
 				observeElementOffset: (_i, cb) => {
+					notifyOffset = cb
 					cb(0, false)
 				},
 				scrollToFn: () => {},
@@ -42,23 +47,38 @@ const setup = (initialSize: (index: number) => number) => {
 		})
 	})
 
-	flushSync()
+	// Stands in for a render: reading the list is what drives the instance, and
+	// derivations do no work until something reads them.
+	const render = () => {
+		flushSync()
+		void virtualizer.virtualItems
+	}
+
+	render()
 
 	return {
 		get totalSize() {
-			return virtualizer.getTotalSize()
+			return virtualizer.totalSize
+		},
+		get virtualItems() {
+			return virtualizer.virtualItems
 		},
 		setCount: (value: number) => {
 			count = value
-			flushSync()
+			render()
 		},
 		setOverscan: (value: number) => {
 			overscan = value
-			flushSync()
+			render()
 		},
 		setEstimateSize: (value: (index: number) => number) => {
 			estimateSize = value
-			flushSync()
+			render()
+		},
+		scrollTo: (offset: number) => {
+			invariant(notifyOffset !== undefined)
+			notifyOffset(offset, false)
+			render()
 		},
 	}
 }
@@ -91,5 +111,32 @@ describe('createVirtualizerBase', () => {
 		expect(v.totalSize).toBe(30)
 
 		expect(estimateSize.mock.calls.length).toBe(callsAfterInitial)
+	})
+
+	// Binding the scroll element notifies partway through applying the options, so
+	// this covers the instance calling back while it is being driven.
+	it('publishes rows once the scroll element binds', () => {
+		const v = setup(() => 10)
+		expect(v.virtualItems.map((item) => item.index)).toEqual([0, 1, 2])
+	})
+
+	it('publishes a scroll-driven notification', () => {
+		const v = setup(() => 10)
+		v.setCount(1000)
+
+		v.scrollTo(5000)
+
+		expect(v.virtualItems[0]?.index).toBe(500)
+	})
+
+	it('forwards externally raised notifications to the caller', () => {
+		const onChange = vi.fn()
+		const v = setup(() => 10, onChange)
+		v.setCount(1000)
+
+		onChange.mockClear()
+		v.scrollTo(5000)
+
+		expect(onChange).toHaveBeenCalled()
 	})
 })
