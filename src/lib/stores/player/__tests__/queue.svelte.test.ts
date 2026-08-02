@@ -523,15 +523,6 @@ describe('QueueStore', () => {
 			expect(upcomingSource(q)).toEqual([])
 			expect(q.current).toMatchObject({ layer: 'source', trackId: 2 })
 		})
-
-		it("clear('all') empties both layers", () => {
-			q.setSource([1, 2, 3], 1, { type: 'album', name: 'A' })
-			q.enqueue([9], 'next')
-			q.clear('all')
-			expect(q.isEmpty).toBe(true)
-			expect(q.current).toBeNull()
-			expect(q.origin).toBeNull()
-		})
 	})
 
 	describe('deleted tracks', () => {

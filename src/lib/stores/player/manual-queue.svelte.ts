@@ -124,9 +124,4 @@ export class ManualQueue {
 	clearUpcoming = (): void => {
 		this.#entries = []
 	}
-
-	clear = (): void => {
-		this.#entries = []
-		this.#current = undefined
-	}
 }

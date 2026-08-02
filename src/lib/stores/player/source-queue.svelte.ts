@@ -146,12 +146,6 @@ export class SourceQueue {
 		}
 	}
 
-	clear = (): void => {
-		this.#entries = []
-		this.#index = -1
-		this.origin = null
-	}
-
 	removeAll = (id: number): void => {
 		this.#apply((entries) => entries.filter((entry) => entry.trackId !== id))
 	}

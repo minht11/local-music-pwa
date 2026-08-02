@@ -303,7 +303,7 @@ player.queue.toggleShuffle()             // Shuffles the source layer only
 player.queue.enqueue(trackIds, position) // trackIds is an array; position: 'next' | 'last'
 player.queue.removeEntries(entryIds)     // Never removes the current entry
 player.queue.moveEntry(entryId, toSlot)  // toSlot: { layer, slot }; cross-layer moves keep the entry id
-player.queue.clear(target)               // 'manual' | 'source' | 'all'
+player.queue.clear(layer)                // Drops the layer's upcoming rows; current keeps playing
 ```
 
 ### Persistence

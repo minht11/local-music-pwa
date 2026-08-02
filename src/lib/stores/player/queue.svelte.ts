@@ -39,7 +39,7 @@ export interface QueueView {
 	enqueue: (trackIds: readonly number[], position: 'next' | 'last') => void
 	removeEntries: (entryIds: readonly number[]) => void
 	moveEntry: (entryId: number, toSlot: QueueSlot) => void
-	clear: (target: 'manual' | 'source' | 'all') => void
+	clear: (layer: QueueLayer) => void
 }
 
 /**
@@ -228,16 +228,9 @@ export class QueueStore {
 		this.#list(toSlot.layer).insertUpcoming(item, toSlot.slot)
 	}
 
-	/** A layer keeps the current track; `'all'` drops it too. */
-	clear = (target: 'manual' | 'source' | 'all'): void => {
-		if (target === 'all') {
-			this.#manual.clear()
-			this.#source.clear()
-
-			return
-		}
-
-		this.#list(target).clearUpcoming()
+	/** Drops the layer's upcoming rows; the current track keeps playing. */
+	clear = (layer: QueueLayer): void => {
+		this.#list(layer).clearUpcoming()
 	}
 
 	#list = (layer: QueueLayer): UpcomingList => (layer === 'manual' ? this.#manual : this.#source)
