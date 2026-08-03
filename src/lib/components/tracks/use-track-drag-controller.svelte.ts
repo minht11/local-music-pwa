@@ -5,11 +5,7 @@ const EDGE_THRESHOLD = 84
 const MAX_SCROLL_STEP = 30
 
 interface DragState {
-	/**
-	 * The dragged row, captured at `start()` and fixed for the whole gesture, so
-	 * the preview keeps rendering even if the list moves the row out from under
-	 * `fromIndex`.
-	 */
+	/** Fixed for the gesture, so the preview survives the list moving the row. */
 	readonly row: TrackRowIdentity
 	fromIndex: number
 	insertIndex: number
@@ -23,9 +19,8 @@ interface DragState {
 interface UseTrackDragControllerOptions {
 	itemsCount: () => number
 	/**
-	 * The row and start index captured at `start()`, plus the raw insert slot (a
-	 * gap between rows, 0..count). The list can mutate mid-drag, so `fromIndex` is
-	 * where the gesture began, not necessarily where the row is now.
+	 * `insertSlot` is a gap between rows (0..count). The list can mutate mid-drag,
+	 * so `fromIndex` is where the gesture began, not where the row is now.
 	 */
 	onDrop: ((row: TrackRowIdentity, fromIndex: number, insertSlot: number) => void) | undefined
 	onStart?: () => void
@@ -101,8 +96,7 @@ export const useTrackDragController = ({
 			return null
 		}
 
-		// Read the count live: the list can mutate mid-drag (the queue advances
-		// when a track ends), so a start-of-drag snapshot would clamp wrong.
+		// Live count: the list can mutate mid-drag, so a snapshot would clamp wrong.
 		const count = itemsCount()
 		const index = Number(row.ariaRowIndex)
 		if (!Number.isInteger(index) || index < 0 || index >= count) {
@@ -125,11 +119,9 @@ export const useTrackDragController = ({
 		abortController = null
 	}
 
-	// Releasing a drag still synthesizes a `click` — preventing the handle's
-	// pointerdown default does not cancel it — and mid-drag the handle is
-	// `pointer-events: none`, so it retargets to the row and reads as an activation
-	// (the queue would play the row). The zero timeout disarms right after the
-	// current event turn, so a click that never materializes cannot eat a later one.
+	// Releasing a drag synthesizes a `click` that retargets to the row and reads as an
+	// activation. The zero timeout disarms right after the current event turn, so a
+	// click that never materializes cannot eat a later one.
 	const suppressGestureClick = () => {
 		const suppress = (event: Event) => {
 			event.preventDefault()
@@ -141,7 +133,7 @@ export const useTrackDragController = ({
 		}, 0)
 	}
 
-	const start = (index: number, row: TrackRowIdentity, e: PointerEvent) => {
+	const handlePointerDown = (index: number, row: TrackRowIdentity, e: PointerEvent) => {
 		const count = itemsCount()
 		if (!onDrop || index < 0 || index >= count) {
 			return
@@ -202,8 +194,7 @@ export const useTrackDragController = ({
 			onDrop(draggedRow, fromIndex, insertIndex)
 		}
 
-		// A canceled pointer means the browser took over the gesture (scroll,
-		// notification shade); abort the drag instead of committing a drop.
+		// The browser took over the gesture (scroll, shade); abort instead of dropping.
 		const onCancel = (event: PointerEvent) => {
 			if (event.pointerId === activePointerId) {
 				stop()
@@ -218,11 +209,16 @@ export const useTrackDragController = ({
 		window.addEventListener('pointercancel', onCancel, { signal: abortController.signal })
 	}
 
+	$effect(() => {
+		const cleanup = stop
+
+		return cleanup
+	})
+
 	return {
 		get drag() {
 			return drag
 		},
-		start,
-		stop,
+		handlePointerDown,
 	}
 }

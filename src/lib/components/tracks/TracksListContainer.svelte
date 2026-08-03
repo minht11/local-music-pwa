@@ -144,8 +144,6 @@
 		onStart: () => selection.cancelSelection(),
 	})
 
-	$effect(() => () => dragController.stop())
-
 	useSetOverlaySnippet('above-player', () => (selection.selectionEnabled ? multiselectPane : null))
 </script>
 
@@ -249,7 +247,7 @@
 					selection.toggleSelection(row.entryId, row.trackId, item.index)
 				}}
 				onReorderPointerDown={(e) => {
-					dragController.start(item.index, row, e)
+					dragController.handlePointerDown(item.index, row, e)
 				}}
 			/>
 		{/if}
