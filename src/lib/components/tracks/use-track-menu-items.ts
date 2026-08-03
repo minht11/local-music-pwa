@@ -88,7 +88,18 @@ export const useTrackMenuItems = (
 		)
 	}
 
-	const queueMenuItems = (ids: readonly number[]): UnfilteredPredefinedMenuItem[] => [
+	/** Queue items lead, separated from the rest. */
+	const assemble = (
+		trackIds: readonly number[],
+		predefinedItems: UnfilteredPredefinedMenuItem[],
+		extraItems: MenuItem[],
+	): MenuItem[] =>
+		joinWithSeparator(filterPredefinedItems(queueMenuItems(trackIds)), [
+			...filterPredefinedItems(predefinedItems),
+			...extraItems,
+		])
+
+	const queueMenuItems = (ids: readonly number[]): PredefinedMenuItem[] => [
 		{
 			key: 'playNext',
 			label: m.playerPlayNext(),
@@ -155,10 +166,7 @@ export const useTrackMenuItems = (
 
 		const menuItems = getMenuItemsFn()
 
-		return joinWithSeparator(filterPredefinedItems(queueMenuItems([track.id])), [
-			...filterPredefinedItems(predefinedItems),
-			...(menuItems ? menuItems(track, row) : []),
-		])
+		return assemble([track.id], predefinedItems, menuItems ? menuItems(track, row) : [])
 	}
 
 	const getMultiSelectMenuItems = (selection: SelectionSnapshot) => {
@@ -167,7 +175,7 @@ export const useTrackMenuItems = (
 		const trackIds = selection.rows.map((row) => row.trackId)
 		const uniqueTrackIds = [...new Set(trackIds)]
 
-		const predefinedItems: UnfilteredPredefinedMenuItem[] = [
+		const predefinedItems: PredefinedMenuItem[] = [
 			{
 				key: 'addToPlaylist',
 				label: m.libraryAddToPlaylist(),
@@ -208,10 +216,7 @@ export const useTrackMenuItems = (
 
 		const consumerItems = getMultiSelectMenuItemsFn?.()
 
-		return joinWithSeparator(filterPredefinedItems(queueMenuItems(trackIds)), [
-			...filterPredefinedItems(predefinedItems),
-			...(consumerItems ? consumerItems(selection) : []),
-		])
+		return assemble(trackIds, predefinedItems, consumerItems ? consumerItems(selection) : [])
 	}
 
 	return {
