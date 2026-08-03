@@ -67,7 +67,7 @@ export const createTrackRowsSource = (
 ): TrackListSource => {
 	const player = usePlayer()
 
-	// Answers the selection's liveness check in O(1), built only once it probes.
+	// Answers `hasEntry` in O(1).
 	const entryIds = $derived.by(() => {
 		const { count, entryIdAt } = rows()
 		const ids = new Set<number>()

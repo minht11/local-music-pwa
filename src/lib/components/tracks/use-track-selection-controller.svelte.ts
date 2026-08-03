@@ -24,13 +24,11 @@ export const useTrackSelectionController = ({
 	trackAt,
 	hasEntry,
 }: UseTrackSelectionControllerOptions) => {
-	// entryId -> trackId, keyed by entry id so rows sharing a track id select
-	// independently and a selection can survive list changes.
+	// entryId -> trackId: rows sharing a track id select independently.
 	const selected = new SvelteMap<number, number>()
 	const selectionEnabled = $derived(selected.size > 0)
 
-	// Not reactive: only the next shift interaction reads it. Dropped whenever the
-	// selection empties, so a later shift-click cannot range off a stale start.
+	// Not reactive: only the next shift interaction reads it.
 	let rangeAnchor: SelectionAnchor | null = null
 
 	let hoverRangeEnd = $state<number | null>(null)
@@ -42,7 +40,6 @@ export const useTrackSelectionController = ({
 		hoverRangeEnd = null
 	}
 
-	/** Visits every track row in order. Materializes nothing: the list can be huge. */
 	const forEachLiveRow = (fn: (row: TrackRowIdentity) => void): void => {
 		const count = rowCount()
 		for (let index = 0; index < count; index += 1) {
@@ -57,18 +54,15 @@ export const useTrackSelectionController = ({
 		forEachLiveRow((row) => selected.set(row.entryId, row.trackId))
 	}
 
-	// Any list change while selecting (queue advance, removal, refetch) drops just
-	// the entries that are gone; the rest of the selection survives. Costs one
-	// `hasEntry` probe per *selected* row, not a walk of the list — which can be
-	// the whole library.
+	// Any list change while selecting drops just the entries that are gone. Costs
+	// one `hasEntry` probe per *selected* row, never a walk of the list.
 	$effect(() => {
 		if (!selectionEnabled) {
 			return
 		}
 
-		// The ids are read untracked — only `hasEntry` should re-trigger this, or the
-		// deletions below would re-run it. Selecting more rows needs no prune: a row
-		// is live at the moment it is selected.
+		// Ids are read untracked — only `hasEntry` should re-trigger this. A newly
+		// selected row needs no prune: it is live at the moment it is selected.
 		const dead = untrack(() => [...selected.keys()]).filter((entryId) => !hasEntry(entryId))
 
 		untrack(() => {
@@ -161,7 +155,7 @@ export const useTrackSelectionController = ({
 			hoverRangeEnd = index
 
 			// A shift-hover seeds the anchor so the eventual shift-click ranges
-			// from where the preview started; it never overrides an existing anchor.
+			// from where the preview started.
 			if (isShiftActive && rangeAnchor === null) {
 				const row = trackAt(index)
 				if (row) {

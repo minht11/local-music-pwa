@@ -64,8 +64,8 @@ export class SourceQueue {
 		this.origin = origin
 		this.shuffle = start === 'shuffle'
 		this.#entries = this.shuffle ? toShuffledArray(entries) : entries
-		// A negative start means "no current track, everything upcoming"; an empty
-		// list clamps to -1. Both fall out of the invariant `-1 <= index < length`.
+		// A negative start means "no current track, everything upcoming"; the clamp
+		// keeps `-1 <= index < length`.
 		this.#index = Math.max(-1, Math.min(start === 'shuffle' ? 0 : start, entries.length - 1))
 	}
 
@@ -97,7 +97,6 @@ export class SourceQueue {
 					return toShuffledArray(entries)
 				}
 
-				// Leading, so the frame resolves the cursor back to 0 by its entry id.
 				return [current, ...toShuffledArray(entries.filter((entry) => entry !== current))]
 			})
 		} else {
@@ -146,10 +145,9 @@ export class SourceQueue {
 	}
 
 	/**
-	 * The single mutation frame. Applies a pure entries → entries transform, then
-	 * re-resolves the cursor by the current row's entry id: a survivor keeps the
-	 * cursor wherever it moved, even across record replacement, and a dropped row
-	 * resolves to -1. Transforms never adjust the cursor themselves.
+	 * The single mutation frame: a pure entries → entries transform, after which
+	 * the cursor re-resolves by the current row's entry id (a dropped row resolves
+	 * to -1). Transforms never adjust the cursor themselves.
 	 */
 	#apply = (transform: (entries: readonly SourceEntry[]) => SourceEntry[]): void => {
 		const currentEntryId = this.#entries[this.#index]?.entryId
@@ -179,10 +177,7 @@ export class SourceQueue {
 	#indexOfEntry = (entryId: number): number =>
 		this.#entries.findIndex((entry) => entry.entryId === entryId)
 
-	/**
-	 * Every cursor move lands here; an absent or out-of-range target moves nothing.
-	 * True when the cursor moved — the row it landed on is read back off `current`.
-	 */
+	/** True when the cursor moved; an absent or out-of-range target moves nothing. */
 	#jumpToIndex = (absolute: number | undefined): boolean => {
 		if (absolute === undefined || absolute < 0 || absolute >= this.#entries.length) {
 			return false

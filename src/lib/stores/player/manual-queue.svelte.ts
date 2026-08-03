@@ -33,12 +33,7 @@ export class ManualQueue {
 		return this.#entries.findIndex((entry) => entry.entryId === entryId)
 	}
 
-	/**
-	 * The end of the play-next block, and the single definition of that boundary:
-	 * `enqueue('next')` chains onto it, and an inserted row joins the block only by
-	 * landing strictly before it. The block is a contiguous prefix, so this is its
-	 * length.
-	 */
+	/** The end of the play-next block — a contiguous prefix, so also its length. */
 	get #playNextEnd(): number {
 		return this.#entries.findLastIndex((entry) => entry.kind === 'next') + 1
 	}
@@ -57,9 +52,8 @@ export class ManualQueue {
 	}
 
 	/**
-	 * Keeps the item's entry id, so a moved row holds its identity. `kind` is
-	 * re-derived from where the row lands, keeping the play-next block contiguous;
-	 * dropping onto its boundary lands behind it, where `enqueue('next')` extends it.
+	 * `kind` is re-derived from where the row lands, keeping the play-next block
+	 * contiguous; dropping onto its boundary lands behind it.
 	 */
 	insertUpcoming = (item: QueueItem, slot: number): void => {
 		const at = Math.max(0, Math.min(slot, this.#entries.length))

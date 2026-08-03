@@ -185,10 +185,7 @@ export class QueueStore {
 		return jumped ?? this.setSource([id], 0)
 	}
 
-	/**
-	 * Never removes the current entry: a playing manual entry already sits outside
-	 * its list, and the source pass skips its cursor row.
-	 */
+	/** Never removes the current entry. */
 	removeEntries = (entryIds: readonly number[]): void => {
 		const toRemove = new Set(entryIds)
 
@@ -198,7 +195,8 @@ export class QueueStore {
 
 	/**
 	 * Remove then insert, so the destination re-derives whatever it tracks by
-	 * position — the manual layer's play-next block stays a contiguous prefix.
+	 * position — the manual layer's play-next block stays a contiguous prefix, and
+	 * a move into the source layer commits the visible order, dropping shuffle.
 	 * A failed locate is a silent no-op: the row was consumed or removed mid-drag.
 	 */
 	moveEntry = (entryId: number, toSlot: QueueSlot): void => {
@@ -221,8 +219,6 @@ export class QueueStore {
 			return
 		}
 
-		// The entry id travels with the row, so it keeps its identity (selection,
-		// virtualizer key) wherever it lands.
 		fromList.removeUpcomingAt(from.index)
 		this.#list(toSlot.layer).insertUpcoming(item, slot)
 	}

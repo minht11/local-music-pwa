@@ -17,9 +17,8 @@
 	import { useTrackSelectionController } from './use-track-selection-controller.svelte.ts'
 
 	/**
-	 * A row resolved on demand by index. `entryId` is the stable per-row id — the
-	 * unit of virtualizer reconciliation, selection and drag. A custom row (e.g. a
-	 * section header) is only a marker; the `customRow` snippet renders it.
+	 * `entryId` is the stable per-row id — the unit of virtualizer reconciliation,
+	 * selection and drag.
 	 */
 	export type TrackListRow =
 		| { type: 'track'; entryId: number; trackId: number }
@@ -40,24 +39,15 @@
 		/** Excludes custom rows; used by "select all". */
 		trackCount: number
 		rowAt: (index: number) => TrackListRow
-		/**
-		 * Whether this row is the one playing. The queue compares entry ids, so a
-		 * track on several rows lights up only on the row actually playing.
-		 */
+		/** Whether this row is the one playing (shows the playing indicator). */
 		isRowActive: (row: TrackRowIdentity) => boolean
-		/** No default — playback policy belongs to the source. */
 		onItemClick: (data: TrackItemClick) => void
 		/**
-		 * A constant, or `{ at, key }` for a list whose rows differ. A sectioned list
-		 * owes a `key`, because moving a queue row across layers shifts a header onto
-		 * a different index while `count` stays put.
+		 * A constant, or `{ at, key }` (see `VariableRowSize`). `at` re-runs for
+		 * every index on any count change, so it must stay allocation-free.
 		 */
 		size: RowSize
-		/**
-		 * A row's key, answered without building the row: a custom row carries no
-		 * identity of its own. `size.at` is the probe a count change re-runs for
-		 * every index, so that is the one that must stay allocation-free.
-		 */
+		/** A row's key, answered without building the row — a custom row carries no identity. */
 		keyAt: (index: number) => string | number
 		/**
 		 * Whether `entryId` still names a row. The selection prunes through this on
@@ -71,27 +61,22 @@
 		source: TrackListSource
 		predefinedMenuItems?: PredefinedTrackMenuItemVisibility
 		menuItems?: (track: TrackData, row: TrackRowLocator) => MenuItem[]
-		/** Extra multi-select menu items appended after the predefined ones. */
 		multiSelectMenuItems?: (selection: SelectionSnapshot) => MenuItem[]
-		/** Which rows get a reorder handle; omitted means none do. */
 		showReorderButton?: (index: number) => boolean
 		showFavoriteButton?: boolean
 		/** Renders a custom (non-track) row, given its index. */
 		customRow?: Snippet<[number]>
 		/**
-		 * The dragged row plus the raw insert slot (a gap between rows, 0..count),
-		 * which the consumer maps to a target. Only fires while `row.index` still
-		 * resolves to the row the gesture started on.
+		 * The dragged row plus the raw insert slot (a gap between rows, 0..count).
+		 * Only fires while `row.index` still resolves to the row the gesture started on.
 		 */
 		onDrop?: (row: TrackRowLocator, insertSlot: number) => void
 	}
 </script>
 
 <script lang="ts">
-	// Only for the active row's playing animation; everything else comes from the source.
 	const player = usePlayer()
 
-	// `source` is intentionally not destructured — see its prop doc.
 	const {
 		source,
 		customRow,
@@ -103,8 +88,7 @@
 		onDrop,
 	}: TracksListContainerProps = $props()
 
-	// Total where `source.rowAt` is not: callers hold indexes the list can shrink
-	// under, such as the selection's range anchor.
+	// Bounds-checked, unlike `source.rowAt`: callers hold indexes the list can shrink under.
 	const trackAt = (index: number): TrackRowIdentity | undefined => {
 		if (index < 0 || index >= source.count) {
 			return undefined
@@ -135,7 +119,6 @@
 
 	const dragController = useTrackDragController({
 		itemsCount: () => source.count,
-		// A closure, not the prop by value, so `onDrop` is read at call time.
 		onDrop: ({ entryId }, fromIndex, insertSlot) => {
 			if (isDropStillValid(fromIndex, entryId)) {
 				onDrop?.({ index: fromIndex, entryId }, insertSlot)

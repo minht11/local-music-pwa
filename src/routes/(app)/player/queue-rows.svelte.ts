@@ -125,7 +125,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return { type: 'track', entryId, trackId }
 	}
 
-	/** Headers are shorter than track rows, so heights vary by index. */
 	const size: VariableRowSize = {
 		at: (rowIndex) =>
 			sectionAt(rowIndex)?.headerIndex === rowIndex ? QUEUE_HEADER_HEIGHT : TRACK_ROW_HEIGHT,
@@ -151,7 +150,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return headerData(s.section)
 	}
 
-	// Answers the selection's liveness check in O(1), built only once it probes.
+	// Answers `hasEntry` in O(1).
 	const liveEntryIds = $derived.by(() => {
 		const ids = new Set<number>()
 
@@ -181,7 +180,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		removeFromQueueItem(selection.rows.map((row) => row.entryId)),
 	]
 
-	// A stale entry id (the row was consumed or removed) is a store-level no-op.
 	const onItemClick = ({ entryId }: TrackItemClick): void => {
 		player.playQueueEntry(entryId)
 	}
@@ -189,8 +187,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	/**
 	 * Maps a drop slot in the flat list to an insertion gap within a layer. The seam
 	 * between two layers is the end of the one above; the one below starts a gap
-	 * further down, so both stay reachable. Slot 0 clamps into the first layer.
-	 * Null only when the queue holds no rows at all.
+	 * further down, so both stay reachable.
 	 */
 	const dropSlotFor = (insertSlot: number): QueueSlot | null => {
 		for (const { section, headerIndex, count } of layout.sections) {
@@ -209,7 +206,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		}
 	}
 
-	/** Per-field getters: the container reads these at access time, never destructured. */
 	const source: TrackListSource = {
 		get count() {
 			return layout.count
@@ -220,7 +216,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		rowAt,
 		size,
 		keyAt,
-		// Only upcoming rows, so the playing track is never one of them.
 		isRowActive: () => false,
 		hasEntry: (entryId) => liveEntryIds.has(entryId),
 		onItemClick,
@@ -242,7 +237,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		get isEmpty() {
 			return layout.count === 0
 		},
-		/** For `TracksListContainer`, minus the `customRow` snippet only markup can supply. */
 		listProps,
 	}
 }
