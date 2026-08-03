@@ -1,4 +1,5 @@
 import { SvelteMap } from 'svelte/reactivity'
+import { isElementTextInput } from '$lib/helpers/input.ts'
 import { isPrimaryModifierKey } from '$lib/helpers/utils/ua.ts'
 import type { SelectionAnchor, SelectionSnapshot, TrackRowIdentity } from './selection.ts'
 
@@ -87,7 +88,9 @@ export const useTrackSelectionController = ({
 					isShiftActive = true
 				}
 
-				if (!selectionEnabled) {
+				// A selection outlives the dialogs opened from it, so these listeners are
+				// live over their text fields; a keystroke typed into one belongs to it.
+				if (!selectionEnabled || isElementTextInput(e.target)) {
 					return
 				}
 
