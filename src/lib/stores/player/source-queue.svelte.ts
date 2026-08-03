@@ -69,18 +69,21 @@ export class SourceQueue {
 		this.#index = Math.max(-1, Math.min(start === 'shuffle' ? 0 : start, entries.length - 1))
 	}
 
-	advance = (loop: boolean): number | undefined => this.#jumpToIndex(this.#stepped(1, loop))
+	advance = (loop: boolean): boolean => this.#jumpToIndex(this.#stepped(1, loop))
 
-	peekNext = (loop: boolean): number | undefined => this.#trackIdAt(this.#stepped(1, loop))
+	peekNext = (loop: boolean): number | undefined => {
+		const next = this.#stepped(1, loop)
 
-	stepBack = (loop: boolean): number | undefined => this.#jumpToIndex(this.#stepped(-1, loop))
+		return next === undefined ? undefined : this.#entries[next]?.trackId
+	}
+
+	stepBack = (loop: boolean): boolean => this.#jumpToIndex(this.#stepped(-1, loop))
 
 	/** Backward jumps are legal. */
-	jumpToEntryId = (entryId: number): number | undefined =>
-		this.#jumpToIndex(this.#indexOfEntry(entryId))
+	jumpToEntryId = (entryId: number): boolean => this.#jumpToIndex(this.#indexOfEntry(entryId))
 
 	/** The first row playing `id`; backward jumps are legal. */
-	jumpToTrackId = (id: number): number | undefined =>
+	jumpToTrackId = (id: number): boolean =>
 		this.#jumpToIndex(this.#entries.findIndex((entry) => entry.trackId === id))
 
 	/** On: pins the current row to the front. Off: restores canonical order. */
@@ -176,18 +179,18 @@ export class SourceQueue {
 	#indexOfEntry = (entryId: number): number =>
 		this.#entries.findIndex((entry) => entry.entryId === entryId)
 
-	#trackIdAt = (absolute: number | undefined): number | undefined =>
-		absolute === undefined ? undefined : this.#entries[absolute]?.trackId
-
-	/** Every cursor move lands here; an absent or out-of-range target moves nothing. */
-	#jumpToIndex = (absolute: number | undefined): number | undefined => {
+	/**
+	 * Every cursor move lands here; an absent or out-of-range target moves nothing.
+	 * True when the cursor moved — the row it landed on is read back off `current`.
+	 */
+	#jumpToIndex = (absolute: number | undefined): boolean => {
 		if (absolute === undefined || absolute < 0 || absolute >= this.#entries.length) {
-			return undefined
+			return false
 		}
 
 		this.#index = absolute
 
-		return this.#trackIdAt(absolute)
+		return true
 	}
 
 	/** The index one step from the cursor, wrapping when `loop`; undefined at an end. */

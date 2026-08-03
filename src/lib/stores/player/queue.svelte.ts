@@ -145,7 +145,7 @@ export class QueueStore {
 	 */
 	stepBack = (loop = false): QueueEntry | null => {
 		if (this.#manual.current !== undefined) {
-			return this.#resumeSource(this.#source.current?.trackId)
+			return this.#resumeSource(this.#source.current !== undefined)
 		}
 
 		return this.#resumeSource(this.#source.stepBack(loop))
@@ -252,9 +252,9 @@ export class QueueStore {
 		return item === undefined ? null : toEntry('source', item)
 	}
 
-	/** `undefined` means the step never landed, so a playing manual track keeps playing. */
-	#resumeSource = (stepped: number | undefined): QueueEntry | null => {
-		if (stepped === undefined) {
+	/** A step that never landed leaves a playing manual track playing. */
+	#resumeSource = (landed: boolean): QueueEntry | null => {
+		if (!landed) {
 			return null
 		}
 

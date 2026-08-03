@@ -57,21 +57,21 @@ describe('SourceQueue', () => {
 	})
 
 	describe('advance / peekNext / stepBack', () => {
-		it('advance moves to the next row and returns the id', () => {
+		it('advance moves to the next row', () => {
 			q.setItems([1, 2, 3], 0, null)
-			expect(q.advance(false)).toBe(2)
+			expect(q.advance(false)).toBe(true)
 			expect(q.current?.trackId).toBe(2)
 			expect(upcoming(q)).toEqual([3])
 		})
 
-		it('advance returns undefined at the end without loop', () => {
+		it('advance does not move at the end without loop', () => {
 			q.setItems([1, 2], 1, null)
-			expect(q.advance(false)).toBeUndefined()
+			expect(q.advance(false)).toBe(false)
 		})
 
 		it('advance wraps with loop', () => {
 			q.setItems([1, 2], 1, null)
-			expect(q.advance(true)).toBe(1)
+			expect(q.advance(true)).toBe(true)
 			expect(q.current?.trackId).toBe(1)
 		})
 
@@ -84,8 +84,8 @@ describe('SourceQueue', () => {
 
 		it('stepBack moves back and wraps with loop', () => {
 			q.setItems([1, 2, 3], 0, null)
-			expect(q.stepBack(false)).toBeUndefined()
-			expect(q.stepBack(true)).toBe(3)
+			expect(q.stepBack(false)).toBe(false)
+			expect(q.stepBack(true)).toBe(true)
 			expect(q.current?.trackId).toBe(3)
 			expect(q.upcomingCount).toBe(0)
 		})
@@ -100,27 +100,27 @@ describe('SourceQueue', () => {
 			q.advance(false)
 			expect(q.current?.trackId).toBe(3)
 
-			expect(q.jumpToEntryId(firstEntryId)).toBe(1)
+			expect(q.jumpToEntryId(firstEntryId)).toBe(true)
 			expect(q.current?.entryId).toBe(firstEntryId)
 			expect(upcoming(q)).toEqual([2, 3])
 		})
 
 		it('ignores an unknown entry id', () => {
 			q.setItems([1, 2], 0, null)
-			expect(q.jumpToEntryId(999_999)).toBeUndefined()
+			expect(q.jumpToEntryId(999_999)).toBe(false)
 			expect(q.current?.trackId).toBe(1)
 		})
 
 		it('jumps to the first row playing a track id, backward included', () => {
 			q.setItems([1, 2, 3], 2, null)
-			expect(q.jumpToTrackId(1)).toBe(1)
+			expect(q.jumpToTrackId(1)).toBe(true)
 			expect(q.current?.trackId).toBe(1)
 			expect(upcoming(q)).toEqual([2, 3])
 		})
 
 		it('ignores a track id that is not in the queue', () => {
 			q.setItems([1, 2], 0, null)
-			expect(q.jumpToTrackId(99)).toBeUndefined()
+			expect(q.jumpToTrackId(99)).toBe(false)
 			expect(q.current?.trackId).toBe(1)
 		})
 	})
@@ -229,8 +229,10 @@ describe('SourceQueue', () => {
 			q.removeAll(9)
 			expect([q.current?.trackId, ...upcoming(q)]).toEqual([3])
 			// The two survivors stay behind the current row, in order.
-			expect(q.stepBack(false)).toBe(2)
-			expect(q.stepBack(false)).toBe(1)
+			q.stepBack(false)
+			expect(q.current?.trackId).toBe(2)
+			q.stepBack(false)
+			expect(q.current?.trackId).toBe(1)
 		})
 
 		it('drops the current row when its track is removed', () => {
@@ -287,7 +289,8 @@ describe('SourceQueue', () => {
 			expect(q.current?.trackId).toBe(2)
 			expect(upcoming(q)).toEqual([4])
 			// The played row is untouched.
-			expect(q.stepBack(false)).toBe(1)
+			q.stepBack(false)
+			expect(q.current?.trackId).toBe(1)
 		})
 
 		it('insertUpcoming keeps the inserted row’s entry id', () => {
@@ -330,7 +333,9 @@ describe('SourceQueue', () => {
 			expect(q.current?.trackId).toBe(7)
 			// Still the last row, now with one copy played behind it.
 			expect(q.upcomingCount).toBe(0)
-			expect(q.stepBack(false)).toBe(7)
+			q.stepBack(false)
+			expect(q.current?.entryId).not.toBe(thirdEntryId)
+			expect(q.current?.trackId).toBe(7)
 		})
 
 		it('drops the current row when every duplicate is removed', () => {
