@@ -22,7 +22,7 @@ interface UseTrackDragControllerOptions {
 	 * `insertSlot` is a gap between rows (0..count). The list can mutate mid-drag,
 	 * so `fromIndex` is where the gesture began, not where the row is now.
 	 */
-	onDrop: ((row: TrackRowIdentity, fromIndex: number, insertSlot: number) => void) | undefined
+	onDrop: (row: TrackRowIdentity, fromIndex: number, insertSlot: number) => void
 	onStart?: () => void
 }
 
@@ -135,7 +135,7 @@ export const useTrackDragController = ({
 
 	const handlePointerDown = (index: number, row: TrackRowIdentity, e: PointerEvent) => {
 		const count = itemsCount()
-		if (!onDrop || index < 0 || index >= count) {
+		if (index < 0 || index >= count) {
 			return
 		}
 

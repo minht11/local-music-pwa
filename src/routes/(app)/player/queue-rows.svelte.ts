@@ -210,7 +210,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	const listProps = {
 		source,
 		showFavoriteButton: false,
-		showReorderButton: (_rowIndex: number) => true,
 		predefinedMenuItems: { playNext: false, addToQueue: false },
 		menuItems: trackMenuItems,
 		multiSelectMenuItems,

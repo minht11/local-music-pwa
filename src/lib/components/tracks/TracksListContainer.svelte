@@ -62,12 +62,12 @@
 		predefinedMenuItems?: PredefinedTrackMenuItemVisibility
 		menuItems?: (track: TrackData, row: TrackRowLocator) => MenuItem[]
 		multiSelectMenuItems?: (selection: SelectionSnapshot) => MenuItem[]
-		showReorderButton?: (index: number) => boolean
 		showFavoriteButton?: boolean
 		customRow?: Snippet<[number]>
 		/**
-		 * The dragged row plus the raw insert slot (a gap between rows, 0..count).
-		 * Only fires while `row.index` still resolves to the row the gesture started on.
+		 * Supplying this makes track rows draggable; custom rows never are. Receives
+		 * the dragged row plus the raw insert slot (a gap between rows, 0..count), and
+		 * only fires while `row.index` still resolves to the row the gesture started on.
 		 */
 		onDrop?: (row: TrackRowLocator, insertSlot: number) => void
 	}
@@ -82,10 +82,11 @@
 		menuItems,
 		multiSelectMenuItems,
 		predefinedMenuItems = {},
-		showReorderButton,
 		showFavoriteButton = true,
 		onDrop,
 	}: TracksListContainerProps = $props()
+
+	const isReorderable = $derived(onDrop !== undefined)
 
 	// Bounds-checked, unlike `source.rowAt`: callers hold indexes the list can shrink under.
 	const trackAt = (index: number): TrackRowIdentity | undefined => {
@@ -97,8 +98,6 @@
 
 		return row.type === 'track' ? row : undefined
 	}
-
-	const isRowReorderable = (index: number) => showReorderButton?.(index) ?? false
 
 	/** A list that mutates mid-drag (the queue advances on track end) invalidates the drop. */
 	const isDropStillValid = (fromIndex: number, entryId: number): boolean =>
@@ -211,7 +210,7 @@
 				selectionEnabled={selection.selectionEnabled}
 				selectionHover={selection.isInHoverRange(item.index)}
 				selected={selection.has(row.entryId)}
-				showReorderButton={isRowReorderable(item.index)}
+				showReorderButton={isReorderable}
 				{showFavoriteButton}
 				reorderDragging={drag?.fromIndex === item.index}
 				reorderInsertBefore={drag !== null && drag.insertIndex === item.index}
@@ -270,7 +269,7 @@
 			selected={selection.has(drag.row.entryId)}
 			menuItems={(track) =>
 				getMenuItems(track, { index: drag.fromIndex, entryId: drag.row.entryId })}
-			showReorderButton={isRowReorderable(drag.fromIndex)}
+			showReorderButton={isReorderable}
 			{showFavoriteButton}
 			reorderDragging={false}
 			reorderInsertBefore={false}

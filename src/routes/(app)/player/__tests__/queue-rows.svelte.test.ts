@@ -128,13 +128,6 @@ describe('queue rows layout', () => {
 
 		expect(() => rows.listProps.source.rowAt(6)).toThrow()
 	})
-
-	it('makes every row reorderable', () => {
-		seedAllSections()
-
-		expect(rows.listProps.showReorderButton(1)).toBe(true)
-		expect(rows.listProps.showReorderButton(4)).toBe(true)
-	})
 })
 
 describe('row heights', () => {
