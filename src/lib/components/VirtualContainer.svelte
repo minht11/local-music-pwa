@@ -1,17 +1,14 @@
 <script lang="ts" module>
 	/**
-	 * Per-index row heights, carrying the reflow signal they require. Row heights
-	 * are not part of the virtualizer's own invalidation key, and `count` can stay
-	 * identical while heights move around — a sectioned list shifting a header onto
-	 * a different index — so `key` must change whenever `at` would answer
-	 * differently anywhere, or the cached offsets below the change stay stale.
+	 * Per-index row heights. Heights are not part of the virtualizer's own
+	 * invalidation key and can move while `count` stays put, so `key` must change
+	 * whenever `at` would answer differently anywhere.
 	 */
 	export interface VariableRowSize {
 		key: string | number
 		at: (index: number) => number
 	}
 
-	/** A uniform row height, which needs no signal — the number itself is one. */
 	export type RowSize = number | VariableRowSize
 </script>
 
@@ -127,9 +124,8 @@
 			return arr
 		})
 
-	// A new identity here is what makes the virtualizer drop its size cache and
-	// re-probe every row, so this wrapper is rebuilt exactly when the heights can
-	// have changed: a new constant, or a new `key` on a per-index size.
+	// A new identity makes the virtualizer drop its size cache and re-probe every
+	// row, so this rebuilds exactly when heights can have changed.
 	const estimateSize = $derived.by(() => {
 		const size = itemSize
 		if (typeof size === 'number') {
@@ -234,7 +230,6 @@
 
 		e.preventDefault()
 
-		/** Scans from `from` in `step`'s direction, skipping rows like section headers. */
 		const focusableFrom = (from: number, step: number): number | null => {
 			for (let index = from; index >= 0 && index < count; index += step) {
 				if (focusableRow?.(index) ?? true) {

@@ -64,7 +64,6 @@
 		multiSelectMenuItems?: (selection: SelectionSnapshot) => MenuItem[]
 		showReorderButton?: (index: number) => boolean
 		showFavoriteButton?: boolean
-		/** Renders a custom (non-track) row, given its index. */
 		customRow?: Snippet<[number]>
 		/**
 		 * The dragged row plus the raw insert slot (a gap between rows, 0..count).
