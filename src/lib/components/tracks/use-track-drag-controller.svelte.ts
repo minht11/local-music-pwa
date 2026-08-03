@@ -36,6 +36,7 @@ export const useTrackDragController = ({
 
 	let activePointerId: number | null = null
 	let pointerOffsetY = 0
+	let currentPointerX = 0
 	let currentPointerY = 0
 	let rafId: number | null = null
 	let abortController: AbortController | null = null
@@ -62,27 +63,39 @@ export const useTrackDragController = ({
 		return () => observer.disconnect()
 	})
 
+	/** Re-reads the row under the pointer; a gap between rows leaves the target put. */
+	const updateInsertIndex = () => {
+		const next = getInsertIndex(currentPointerX, currentPointerY)
+		if (next !== null && drag) {
+			drag.insertIndex = next
+		}
+	}
+
 	const scrollLoop = () => {
 		const { top, bottom } = scrollViewport
 
 		const topDelta = top + EDGE_THRESHOLD - currentPointerY
 		const bottomDelta = currentPointerY - (bottom - EDGE_THRESHOLD)
 
+		let step = 0
 		if (topDelta > 0) {
-			scrollTarget.current.scrollBy(
-				0,
-				-Math.round((topDelta / EDGE_THRESHOLD) * MAX_SCROLL_STEP),
-			)
-			rafId = requestAnimationFrame(scrollLoop)
+			step = -Math.round((topDelta / EDGE_THRESHOLD) * MAX_SCROLL_STEP)
 		} else if (bottomDelta > 0) {
-			scrollTarget.current.scrollBy(
-				0,
-				Math.round((bottomDelta / EDGE_THRESHOLD) * MAX_SCROLL_STEP),
-			)
-			rafId = requestAnimationFrame(scrollLoop)
-		} else {
-			rafId = null
+			step = Math.round((bottomDelta / EDGE_THRESHOLD) * MAX_SCROLL_STEP)
 		}
+
+		if (step === 0) {
+			rafId = null
+
+			return
+		}
+
+		scrollTarget.current.scrollBy(0, step)
+		// Rows travel under a stationary pointer, so the target has to be re-read each
+		// frame rather than left at whatever the last pointermove computed.
+		updateInsertIndex()
+
+		rafId = requestAnimationFrame(scrollLoop)
 	}
 
 	const getInsertIndex = (x: number, y: number): number | null => {
@@ -171,15 +184,14 @@ export const useTrackDragController = ({
 			event.preventDefault()
 
 			drag.preview.top = event.clientY - pointerOffsetY
+			currentPointerX = event.clientX
 			currentPointerY = event.clientY
+
 			if (rafId === null) {
 				rafId = requestAnimationFrame(scrollLoop)
 			}
 
-			const newInsertIndex = getInsertIndex(event.clientX, event.clientY)
-			if (newInsertIndex !== null) {
-				drag.insertIndex = newInsertIndex
-			}
+			updateInsertIndex()
 		}
 
 		const onEnd = (event: PointerEvent) => {
