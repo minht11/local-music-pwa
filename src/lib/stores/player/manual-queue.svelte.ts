@@ -1,4 +1,4 @@
-import { mintEntryId, type QueueItem } from './queue-entry.ts'
+import { mintEntryId, type QueueItem, type UpcomingList } from './queue-entry.ts'
 
 /** `kind`: in the "play next" block (`'next'`) or appended behind it (`'queued'`). */
 interface ManualEntry extends QueueItem {
@@ -9,7 +9,7 @@ interface ManualEntry extends QueueItem {
  * The tracks the user explicitly queued. FIFO.
  * Shuffle does not affect it.
  */
-export class ManualQueue {
+export class ManualQueue implements UpcomingList {
 	#entries: readonly ManualEntry[] = $state.raw([])
 	#current: ManualEntry | undefined = $state(undefined)
 

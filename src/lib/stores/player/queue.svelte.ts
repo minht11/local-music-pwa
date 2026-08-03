@@ -1,6 +1,6 @@
 import { onDatabaseChange } from '$lib/db/events.ts'
 import { ManualQueue } from './manual-queue.svelte.ts'
-import type { QueueItem } from './queue-entry.ts'
+import type { QueueItem, UpcomingList } from './queue-entry.ts'
 import { type QueueOrigin, SourceQueue } from './source-queue.svelte.ts'
 
 export type { QueueItem, QueueOrigin }
@@ -40,20 +40,6 @@ export interface QueueView {
 	removeEntries: (entryIds: readonly number[]) => void
 	moveEntry: (entryId: number, toSlot: QueueSlot) => void
 	clear: (layer: QueueLayer) => void
-}
-
-/**
- * A layer's upcoming rows, addressed layer-relative. Both layers answer these
- * despite storing rows differently (a FIFO vs a window past a cursor), which is
- * what lets `QueueStore` route by layer instead of branching per operation.
- */
-interface UpcomingList {
-	readonly upcomingCount: number
-	upcomingAt: (i: number) => QueueItem | undefined
-	upcomingIndexOf: (entryId: number) => number
-	insertUpcoming: (item: QueueItem, slot: number) => void
-	removeUpcomingAt: (i: number) => void
-	clearUpcoming: () => void
 }
 
 const toEntry = (layer: QueueLayer, item: QueueItem): QueueEntry => ({

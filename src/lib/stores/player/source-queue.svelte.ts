@@ -1,5 +1,5 @@
 import { toShuffledArray } from '$lib/helpers/utils/array.ts'
-import { mintEntryId, type QueueItem } from './queue-entry.ts'
+import { mintEntryId, type QueueItem, type UpcomingList } from './queue-entry.ts'
 
 export interface QueueOrigin {
 	type: 'album' | 'artist' | 'playlist' | 'tracks'
@@ -11,7 +11,7 @@ interface SourceEntry extends QueueItem {
 	readonly canonical: number
 }
 
-export class SourceQueue {
+export class SourceQueue implements UpcomingList {
 	shuffle = $state(false)
 	origin: QueueOrigin | null = $state(null)
 
@@ -61,12 +61,15 @@ export class SourceQueue {
 			canonical: index,
 		}))
 
+		const shuffle = start === 'shuffle'
+		const startIndex = shuffle ? 0 : start
+
 		this.origin = origin
-		this.shuffle = start === 'shuffle'
-		this.#entries = this.shuffle ? toShuffledArray(entries) : entries
+		this.shuffle = shuffle
+		this.#entries = shuffle ? toShuffledArray(entries) : entries
 		// A negative start means "no current track, everything upcoming"; the clamp
 		// keeps `-1 <= index < length`.
-		this.#index = Math.max(-1, Math.min(start === 'shuffle' ? 0 : start, entries.length - 1))
+		this.#index = Math.max(-1, Math.min(startIndex, entries.length - 1))
 	}
 
 	advance = (loop: boolean): boolean => this.#jumpToIndex(this.#stepped(1, loop))

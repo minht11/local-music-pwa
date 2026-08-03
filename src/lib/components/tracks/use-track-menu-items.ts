@@ -37,8 +37,8 @@ interface PredefinedMenuItem extends MenuActionItem {
 	key: PredefinedTrackMenuItemKey
 }
 
-/** An item guarded by a `name && {…}` expression, so it may be the falsy name. */
-type UnfilteredPredefinedMenuItem = PredefinedMenuItem | '' | undefined
+/** Absent when the row lacks what the item acts on, e.g. a track with no album. */
+type UnfilteredPredefinedMenuItem = PredefinedMenuItem | undefined
 
 const joinWithSeparator = (queueItems: MenuItem[], otherItems: MenuItem[]): MenuItem[] => {
 	if (queueItems.length === 0 || otherItems.length === 0) {
@@ -84,7 +84,7 @@ export const useTrackMenuItems = (
 
 		return items.filter(
 			(item): item is PredefinedMenuItem =>
-				!!item && (visibility[item.key] ?? DEFAULT_VISIBILITY[item.key]),
+				item !== undefined && (visibility[item.key] ?? DEFAULT_VISIBILITY[item.key]),
 		)
 	}
 
@@ -136,20 +136,24 @@ export const useTrackMenuItems = (
 					void toggleFavoriteTrack(track.favorite, track.id)
 				},
 			},
-			albumName && {
-				key: 'viewAlbum',
-				label: m.trackViewAlbum(),
-				action: () => {
-					void viewRelated('albums', albumName)
-				},
-			},
-			artistName && {
-				key: 'viewArtist',
-				label: m.trackViewArtist(),
-				action: () => {
-					void viewRelated('artists', artistName)
-				},
-			},
+			albumName
+				? {
+						key: 'viewAlbum',
+						label: m.trackViewAlbum(),
+						action: () => {
+							void viewRelated('albums', albumName)
+						},
+					}
+				: undefined,
+			artistName
+				? {
+						key: 'viewArtist',
+						label: m.trackViewArtist(),
+						action: () => {
+							void viewRelated('artists', artistName)
+						},
+					}
+				: undefined,
 			{
 				key: 'removeFromLibrary',
 				label: m.libraryRemoveFromLibrary(),
