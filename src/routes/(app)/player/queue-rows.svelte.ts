@@ -151,7 +151,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return headerData(s.section)
 	}
 
-	/** Backs `hasEntry`. Nothing reads it until a selection is active. */
+	// Answers the selection's liveness check in O(1), built only once it probes.
 	const liveEntryIds = $derived.by(() => {
 		const ids = new Set<number>()
 
