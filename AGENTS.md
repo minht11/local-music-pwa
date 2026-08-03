@@ -71,6 +71,9 @@ Stores self-persist via the `persist()` helper inside their constructors (localS
 
 IndexedDB via `idb`, with change events (`$lib/db/events.ts`) driving reactive queries (`$lib/db/query/`). Entity interfaces and special constants (`FAVORITE_PLAYLIST_ID`, `UNKNOWN_ITEM` sentinel for unknown artist/album/year, `LEGACY_NO_NATIVE_DIRECTORY`) live in `$lib/library/types.ts` — read them there.
 
+- **Every DB write must dispatch `dispatchDatabaseChangedEvent`** (`$lib/db/events.ts`) — it is what updates reactive queries, other tabs, and the player queue. Writing to `idb` without it silently leaves the UI stale.
+- Route data: queries are created in `+page.ts` / `+layout.ts` loaders and the component must call `initPageQueries(() => data)` before reading their `.value`.
+
 ## Development Workflow
 
 ### Commands
