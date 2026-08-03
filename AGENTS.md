@@ -86,6 +86,14 @@ pnpm run knip         # Find unused files/exports/deps
 pnpm run test         # Run tests
 ```
 
+### Comments
+
+Prefer self-documenting code — good names and structure over explanatory comments. When a comment is warranted:
+
+- Only for non-obvious behavior: invariants, constraints, or "why", never restating what the code does
+- Describe what the code *is*, not what changed — never narrate or justify a diff
+- Keep it concise; longer doc blocks are fine at boundaries (public contracts, module seams, subtle protocols)
+
 ### Code Quality Rules
 
 #### Always Do ✅
