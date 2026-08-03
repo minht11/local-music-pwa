@@ -173,10 +173,30 @@ describe('row heights', () => {
 	})
 })
 
-describe('hasEntry', () => {
-	const hasEntry = (entryId: number): boolean => rows.listProps.source.hasEntry(entryId)
+describe('row keys', () => {
+	/** How `TracksListContainer` derives the live entry ids for the selection prune. */
+	const liveKeys = (): Set<string | number> =>
+		new Set(
+			Array.from({ length: rows.listProps.source.count }, (_, index) =>
+				rows.listProps.source.keyAt(index),
+			),
+		)
 
-	it('covers every rendered row', () => {
+	const isLive = (entryId: number): boolean => liveKeys().has(entryId)
+
+	it('gives each track row its entry id and each header a key no entry id can collide with', () => {
+		seedAllSections()
+
+		const keys = liveKeys()
+
+		expect(keys.size).toBe(6)
+		expect([...keys].filter((key) => typeof key === 'string')).toStrictEqual([
+			'header:manual',
+			'header:source',
+		])
+	})
+
+	it('covers every rendered track row', () => {
 		seedAllSections()
 
 		const trackRows = Array.from({ length: rows.listProps.source.count }, (_, index) =>
@@ -184,13 +204,7 @@ describe('hasEntry', () => {
 		).filter((row) => row.type === 'track')
 
 		expect(trackRows).toHaveLength(4)
-		expect(trackRows.map((row) => hasEntry(row.entryId))).not.toContain(false)
-	})
-
-	it('reports an unknown entry id as gone', () => {
-		seedAllSections()
-
-		expect(hasEntry(999_999)).toBe(false)
+		expect(trackRows.map((row) => isLive(row.entryId))).not.toContain(false)
 	})
 
 	it('drops a removed row and keeps the rest', () => {
@@ -200,8 +214,8 @@ describe('hasEntry', () => {
 
 		queue.removeEntries([removed])
 
-		expect(hasEntry(removed)).toBe(false)
-		expect(hasEntry(kept)).toBe(true)
+		expect(isLive(removed)).toBe(false)
+		expect(isLive(kept)).toBe(true)
 	})
 
 	it('drops a row as soon as it starts playing, since it leaves the list', () => {
@@ -211,7 +225,7 @@ describe('hasEntry', () => {
 		queue.advance()
 
 		expect(queue.current?.entryId).toBe(next)
-		expect(hasEntry(next)).toBe(false)
+		expect(isLive(next)).toBe(false)
 	})
 })
 

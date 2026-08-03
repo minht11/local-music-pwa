@@ -67,18 +67,6 @@ export const createTrackRowsSource = (
 ): TrackListSource => {
 	const player = usePlayer()
 
-	// Answers `hasEntry` in O(1).
-	const entryIds = $derived.by(() => {
-		const { count, entryIdAt } = rows()
-		const ids = new Set<number>()
-
-		for (let index = 0; index < count; index += 1) {
-			ids.add(entryIdAt(index))
-		}
-
-		return ids
-	})
-
 	return {
 		get count() {
 			return rows().count
@@ -98,7 +86,6 @@ export const createTrackRowsSource = (
 		},
 		size: TRACK_ROW_HEIGHT,
 		keyAt: (index) => rows().entryIdAt(index),
-		hasEntry: (entryId) => entryIds.has(entryId),
 		onItemClick: (data) => {
 			if (options.onItemClick) {
 				options.onItemClick(data)

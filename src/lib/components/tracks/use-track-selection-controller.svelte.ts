@@ -7,7 +7,7 @@ interface UseTrackSelectionControllerOptions {
 	rowCount: () => number
 	/** Row identity, or undefined for a non-track row (a section header) or a stale index. */
 	trackAt: (index: number) => TrackRowIdentity | undefined
-	/** Whether an entry id still names a row; O(1), see `TrackListSource.hasEntry`. */
+	/** Whether an entry id still names a row. Must answer in O(1); the prune probes per selected row. */
 	hasEntry: (entryId: number) => boolean
 }
 

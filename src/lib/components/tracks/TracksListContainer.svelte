@@ -47,13 +47,13 @@
 		 * every index on any count change, so it must stay allocation-free.
 		 */
 		size: RowSize
-		/** A row's key, answered without building the row — a custom row carries no identity. */
-		keyAt: (index: number) => string | number
 		/**
-		 * Whether `entryId` still names a row. The selection prunes through this on
-		 * every list change, so sources answer from a derived set, never a scan.
+		 * A row's key, answered without building the row. For a track row this *is*
+		 * its `entryId` — one identity shared by virtualizer reconciliation, selection
+		 * and drag. A custom row carries no identity and answers a constant of its own,
+		 * which must not be a number.
 		 */
-		hasEntry: (entryId: number) => boolean
+		keyAt: (index: number) => string | number
 	}
 
 	export interface TracksListContainerProps {
@@ -110,10 +110,22 @@
 		() => multiSelectMenuItems,
 	)
 
+	// Row keys are row identities, so the live keys are exactly the live entry ids;
+	// a custom row's key is a string and can never match one. Lazy — only the
+	// selection prune reads it, and only while something is selected.
+	const liveEntryIds = $derived.by(() => {
+		const ids = new Set<string | number>()
+		for (let index = 0; index < source.count; index += 1) {
+			ids.add(source.keyAt(index))
+		}
+
+		return ids
+	})
+
 	const selection = useTrackSelectionController({
 		rowCount: () => source.count,
 		trackAt,
-		hasEntry: (entryId) => source.hasEntry(entryId),
+		hasEntry: (entryId) => liveEntryIds.has(entryId),
 	})
 
 	const dragController = useTrackDragController({

@@ -150,19 +150,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return headerData(s.section)
 	}
 
-	// Answers `hasEntry` in O(1).
-	const liveEntryIds = $derived.by(() => {
-		const ids = new Set<number>()
-
-		for (const { section, count } of layout.sections) {
-			for (let i = 0; i < count; i += 1) {
-				ids.add(entryAt(section, i).entryId)
-			}
-		}
-
-		return ids
-	})
-
 	// Ids are captured in the closure, so a queue advancing under an open menu still
 	// removes the rows it was opened on. The store ignores stale ids.
 	const removeFromQueueItem = (entryIds: readonly number[]): MenuItem => ({
@@ -217,7 +204,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		size,
 		keyAt,
 		isRowActive: () => false,
-		hasEntry: (entryId) => liveEntryIds.has(entryId),
 		onItemClick,
 	}
 
