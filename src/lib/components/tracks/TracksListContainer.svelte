@@ -18,10 +18,8 @@
 
 	/**
 	 * A row resolved on demand by index. `entryId` is the stable per-row id — the
-	 * unit of virtualizer reconciliation, selection and drag — and `trackId` the
-	 * payload. A custom row (e.g. a section header) is only a marker: its height
-	 * and key come from `size`/`keyAt`, and the `customRow` snippet resolves its
-	 * content, keeping row resolution free of i18n and closures.
+	 * unit of virtualizer reconciliation, selection and drag. A custom row (e.g. a
+	 * section header) is only a marker; the `customRow` snippet renders it.
 	 */
 	export type TrackListRow =
 		| { type: 'track'; entryId: number; trackId: number }
@@ -33,50 +31,43 @@
 
 	/**
 	 * Where rows come from, resolved on demand so nothing materializes the full
-	 * list. `trackCount` (used by "select all") excludes custom rows, and clicking
-	 * a row is the source's business — the container has no default.
-	 *
-	 * `createTrackRowsSource` covers any flat list; sectioned lists build their own.
+	 * list. `createTrackRowsSource` covers any flat list; sectioned lists build
+	 * their own.
 	 */
 	export interface TrackListSource {
 		/** Total row count, track and custom rows alike. */
 		count: number
+		/** Excludes custom rows; used by "select all". */
 		trackCount: number
 		rowAt: (index: number) => TrackListRow
 		/**
-		 * Whether this row is the one playing. Most lists compare track ids; the
-		 * queue compares entry ids, so a track sitting on several rows lights up
-		 * only on the row actually playing.
+		 * Whether this row is the one playing. The queue compares entry ids, so a
+		 * track on several rows lights up only on the row actually playing.
 		 */
 		isRowActive: (row: TrackRowIdentity) => boolean
+		/** No default — playback policy belongs to the source. */
 		onItemClick: (data: TrackItemClick) => void
 		/**
-		 * Row heights: a constant, or `{ at, key }` for a list whose rows differ —
-		 * see `RowSize`. A sectioned list owes a `key`, because moving a queue row
-		 * across layers shifts a header onto a different index while `count` stays
-		 * put.
+		 * A constant, or `{ at, key }` for a list whose rows differ. A sectioned list
+		 * owes a `key`, because moving a queue row across layers shifts a header onto
+		 * a different index while `count` stays put.
 		 */
 		size: RowSize
 		/**
-		 * A row's reconciliation key, answered without building the row. A count
-		 * change runs this probe for every index, not just the rendered ones, so it
-		 * must stay cheap — that is why it is separate from `rowAt` rather than read
-		 * off it. The same holds for a per-index `size.at`.
+		 * A row's key, answered without building the row: a custom row carries no
+		 * identity of its own. `size.at` is the probe a count change re-runs for
+		 * every index, so that is the one that must stay allocation-free.
 		 */
 		keyAt: (index: number) => string | number
 		/**
 		 * Whether `entryId` still names a row. The selection prunes through this on
-		 * every list change, so it must not scan per call — sources answer from a
-		 * lazily derived set, not by walking rows.
+		 * every list change, so sources answer from a derived set, never a scan.
 		 */
 		hasEntry: (entryId: number) => boolean
 	}
 
 	export interface TracksListContainerProps {
-		/**
-		 * Where the rows come from. A stable object whose fields are getters — the
-		 * container reads them at access time, so it must not be destructured.
-		 */
+		/** A stable object whose fields are getters, read at access time. */
 		source: TrackListSource
 		predefinedMenuItems?: PredefinedTrackMenuItemVisibility
 		menuItems?: (track: TrackData, row: TrackRowLocator) => MenuItem[]
@@ -90,7 +81,7 @@
 		/**
 		 * The dragged row plus the raw insert slot (a gap between rows, 0..count),
 		 * which the consumer maps to a target. Only fires while `row.index` still
-		 * resolves to the row the gesture started on, so both fields can be trusted.
+		 * resolves to the row the gesture started on.
 		 */
 		onDrop?: (row: TrackRowLocator, insertSlot: number) => void
 	}
@@ -100,8 +91,7 @@
 	// Only for the active row's playing animation; everything else comes from the source.
 	const player = usePlayer()
 
-	// `source` is intentionally not destructured: its fields are getters that must
-	// be re-read on every access.
+	// `source` is intentionally not destructured — see its prop doc.
 	const {
 		source,
 		customRow,
@@ -114,7 +104,7 @@
 	}: TracksListContainerProps = $props()
 
 	// Total where `source.rowAt` is not: callers hold indexes the list can shrink
-	// under (the selection's range anchor), and a source may treat those as a bug.
+	// under, such as the selection's range anchor.
 	const trackAt = (index: number): TrackRowIdentity | undefined => {
 		if (index < 0 || index >= source.count) {
 			return undefined
@@ -127,11 +117,7 @@
 
 	const isRowReorderable = (index: number) => showReorderButton?.(index) ?? false
 
-	/**
-	 * Whether the gesture's row still sits where it started. A list that mutates
-	 * mid-drag (the queue advances when a track ends) invalidates the drop; the
-	 * preview keeps rendering from the row captured at gesture start.
-	 */
+	/** A list that mutates mid-drag (the queue advances on track end) invalidates the drop. */
 	const isDropStillValid = (fromIndex: number, entryId: number): boolean =>
 		trackAt(fromIndex)?.entryId === entryId
 

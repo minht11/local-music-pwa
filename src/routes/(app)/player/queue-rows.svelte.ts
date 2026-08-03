@@ -36,7 +36,6 @@ interface QueueSectionLayout {
 
 const QUEUE_HEADER_HEIGHT = 48
 
-// Constants, so neither a header's row nor its key is rebuilt on every probe.
 const HEADER_ROW: TrackListRow = { type: 'custom' }
 const HEADER_KEYS = {
 	manual: 'header:manual',
@@ -47,11 +46,7 @@ const HEADER_KEYS = {
  * The queue tab's flat row model: the *upcoming* rows of each layer, headed by a
  * section title. The playing track is deliberately absent — the player panel
  * already shows it — so every row here is reorderable, removable, and inactive.
- *
- * Section geometry is computed once per queue change into `layout`, and every
- * resolver walks it; a section is present only when non-empty, contributing its
- * header plus its rows. Everything resolves by row index in O(sections), so
- * nothing materializes the list.
+ * Everything resolves by row index against `layout`, so nothing materializes.
  */
 export const createQueueRows = (player: QueueTabPlayer) => {
 	const layout = $derived.by(() => {
@@ -73,20 +68,14 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		add('manual', player.queue.count('manual'))
 		add('source', player.queue.count('source'))
 
-		// A row's height depends only on whether its index is a header, so the header
-		// positions are the whole reflow signal. They move without `count` moving: a
-		// row crossing between layers shifts the section below it by one.
+		// Header positions are the whole reflow signal, and they move without `count`
+		// moving: a row crossing between layers shifts the section below it by one.
 		const sizeKey = sections.map((s) => s.headerIndex).join(',')
 
 		return { sections, count, trackCount, sizeKey }
 	})
 
-	/**
-	 * The section owning `rowIndex`, or undefined. Allocation-free, and the single
-	 * scan every resolver below builds on: virtual-core re-runs the size and key
-	 * probes for every index whenever `count` changes, and every queue advance
-	 * changes `count`.
-	 */
+	/** Allocation-free: the size probe below calls it for every index on any `count` change. */
 	const sectionAt = (rowIndex: number): QueueSectionLayout | undefined => {
 		for (const s of layout.sections) {
 			const offset = rowIndex - s.headerIndex
@@ -98,7 +87,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return undefined
 	}
 
-	/** The stored record for a track row. Reads return the records themselves. */
 	const entryAt = (section: QueueLayer, index: number): QueueItem => {
 		const item = player.queue.itemAt(section, index)
 		invariant(item !== undefined)
@@ -137,11 +125,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return { type: 'track', entryId, trackId }
 	}
 
-	/**
-	 * Headers are shorter than track rows, so heights vary by index. `key` tracks
-	 * the header positions because that is all a height depends on — and they move
-	 * without `count` moving, as when a row crosses between layers.
-	 */
+	/** Headers are shorter than track rows, so heights vary by index. */
 	const size: VariableRowSize = {
 		at: (rowIndex) =>
 			sectionAt(rowIndex)?.headerIndex === rowIndex ? QUEUE_HEADER_HEIGHT : TRACK_ROW_HEIGHT,
@@ -159,19 +143,15 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return index === -1 ? HEADER_KEYS[s.section] : entryAt(s.section, index).entryId
 	}
 
-	/** Called only for rendered header rows, keeping i18n out of the size/key probes. */
+	/** Only for rendered header rows, keeping i18n out of the size probe. */
 	const headerAt = (rowIndex: number): QueueHeaderData => {
 		const s = sectionAt(rowIndex)
-		invariant(s !== undefined && s.headerIndex === rowIndex)
+		invariant(s !== undefined && s.headerIndex === rowIndex, 'queue row index is not a header')
 
 		return headerData(s.section)
 	}
 
-	/**
-	 * Every entry id the queue currently shows. Derived, so the O(rows) build happens
-	 * once per queue change and only when something reads it — nothing does until a
-	 * selection is active.
-	 */
+	/** Backs `hasEntry`. Nothing reads it until a selection is active. */
 	const liveEntryIds = $derived.by(() => {
 		const ids = new Set<number>()
 
@@ -184,11 +164,8 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return ids
 	})
 
-	/**
-	 * The ids are captured in the closure, so a queue that advances while the menu
-	 * is open still removes the rows it was opened on; the store never removes the
-	 * current entry and ignores stale ids.
-	 */
+	// Ids are captured in the closure, so a queue advancing under an open menu still
+	// removes the rows it was opened on. The store ignores stale ids.
 	const removeFromQueueItem = (entryIds: readonly number[]): MenuItem => ({
 		label: m.playerRemoveFromQueue(),
 		action: () => {
@@ -213,6 +190,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	 * Maps a drop slot in the flat list to an insertion gap within a layer. The seam
 	 * between two layers is the end of the one above; the one below starts a gap
 	 * further down, so both stay reachable. Slot 0 clamps into the first layer.
+	 * Null only when the queue holds no rows at all.
 	 */
 	const dropSlotFor = (insertSlot: number): QueueSlot | null => {
 		for (const { section, headerIndex, count } of layout.sections) {
@@ -221,8 +199,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 			}
 		}
 
-		// Sections are contiguous and every row belongs to one, so a slot in
-		// 0..count always matches; null only when the queue holds no rows at all.
 		return null
 	}
 
@@ -233,10 +209,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		}
 	}
 
-	/**
-	 * Per-field getters, not one getter returning a fresh object: the container
-	 * reads these at access time, so each must re-resolve against `layout`.
-	 */
+	/** Per-field getters: the container reads these at access time, never destructured. */
 	const source: TrackListSource = {
 		get count() {
 			return layout.count
@@ -247,8 +220,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		rowAt,
 		size,
 		keyAt,
-		// The list holds only upcoming rows — the playing track is never one of them,
-		// so no row is ever the active one.
+		// Only upcoming rows, so the playing track is never one of them.
 		isRowActive: () => false,
 		hasEntry: (entryId) => liveEntryIds.has(entryId),
 		onItemClick,
@@ -257,7 +229,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	const listProps = {
 		source,
 		showFavoriteButton: false,
-		// Every row is upcoming, so every row can be dragged.
 		showReorderButton: (_rowIndex: number) => true,
 		predefinedMenuItems: { playNext: false, addToQueue: false },
 		menuItems: trackMenuItems,
@@ -267,14 +238,11 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 
 	return {
 		headerAt,
-		/**
-		 * No upcoming rows. Not the same as `queue.isEmpty`: a track can be playing
-		 * with nothing behind it, and the playing track is not a row here.
-		 */
+		/** No upcoming rows. Unlike `queue.isEmpty`, a track may still be playing. */
 		get isEmpty() {
 			return layout.count === 0
 		},
-		/** Props for `TracksListContainer`, minus the `customRow` snippet only markup can supply. */
+		/** For `TracksListContainer`, minus the `customRow` snippet only markup can supply. */
 		listProps,
 	}
 }
