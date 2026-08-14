@@ -9,7 +9,7 @@ interface MockOptions {
 	isGaplessEnabled: () => boolean
 }
 
-const { MockPlaybackController, mockHistory, controllerRef } = vi.hoisted(() => {
+const { MockPlaybackController, mockHistory, controllerRef, databaseChange } = vi.hoisted(() => {
 	// No type declarations inside vi.hoisted (Oxc parser issue in .svelte.ts files)
 	const controllerRef: { instance: unknown; options: unknown } = {
 		instance: null,
@@ -20,6 +20,9 @@ const { MockPlaybackController, mockHistory, controllerRef } = vi.hoisted(() => 
 		begin: vi.fn(),
 		update: vi.fn(),
 		complete: vi.fn(),
+	}
+	const databaseChange: { listener: ((changes: readonly unknown[]) => void) | null } = {
+		listener: null,
 	}
 
 	class MockPlaybackController {
@@ -52,7 +55,7 @@ const { MockPlaybackController, mockHistory, controllerRef } = vi.hoisted(() => 
 		}
 	}
 
-	return { MockPlaybackController, mockHistory, controllerRef }
+	return { MockPlaybackController, mockHistory, controllerRef, databaseChange }
 })
 
 vi.mock('$lib/audio/playback-controller.svelte.ts', () => ({
@@ -93,7 +96,12 @@ vi.mock('$lib/stores/player/play-history-tracker.ts', () => ({
 
 // Prevent BroadcastChannel usage in QueueStore
 vi.mock('$lib/db/events.ts', () => ({
-	onDatabaseChange: vi.fn(() => () => {}),
+	onDatabaseChange: vi.fn((listener) => {
+		databaseChange.listener = listener
+		return () => {
+			databaseChange.listener = null
+		}
+	}),
 	dispatchDatabaseChangedEvent: vi.fn(),
 }))
 
@@ -147,6 +155,14 @@ const seedTrack = (id: number) => {
 
 const mockMain = { volumeSliderEnabled: true } as unknown as MainStore
 
+const dispatchTrackDeletes = (keys: readonly number[]) => {
+	const listener = databaseChange.listener
+	invariant(listener)
+	listener(keys.map((key) => ({ storeName: 'tracks', operation: 'delete', key })))
+}
+
+const dispatchTrackDelete = (key: number) => dispatchTrackDeletes([key])
+
 let player!: PlayerStore
 let cleanupPlayer: () => void
 let ctrl: InstanceType<typeof MockPlaybackController> = null as never
@@ -168,6 +184,7 @@ afterEach(() => {
 	cleanupPlayer()
 	vi.clearAllMocks()
 	queryTracks.clear()
+	databaseChange.listener = null
 })
 
 describe('PlayerStore', () => {
@@ -312,6 +329,78 @@ describe('PlayerStore', () => {
 	})
 
 	describe('manual queue', () => {
+		it('advances to the next manual track when the playing manual track is deleted', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(8)
+			seedTrack(9)
+			player.playFrom(0, [1, 2])
+			player.queue.enqueue([9, 8], 'next')
+			player.playNext()
+			flushSync()
+			vi.clearAllMocks()
+
+			dispatchTrackDelete(9)
+			flushSync()
+
+			expect(player.queue.current).toMatchObject({ layer: 'manual', trackId: 8 })
+			expect(ctrl.play).toHaveBeenCalledWith(8, { fromBeginning: true })
+			expect(mockHistory.begin).toHaveBeenCalledWith(8)
+		})
+
+		it('advances to the source successor rather than restarting the return point', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(9)
+			player.playFrom(0, [1, 2])
+			player.queue.enqueue([9], 'next')
+			player.playNext()
+			flushSync()
+			vi.clearAllMocks()
+
+			dispatchTrackDelete(9)
+			flushSync()
+
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 2 })
+			expect(ctrl.play).toHaveBeenCalledWith(2, { fromBeginning: true })
+			expect(mockHistory.begin).toHaveBeenCalledWith(2)
+		})
+
+		it('advances to the source successor when the manual and source return tracks share an id', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(3)
+			player.playFrom(1, [1, 2, 3])
+			player.queue.enqueue([2], 'next')
+			player.playNext()
+			flushSync()
+			vi.clearAllMocks()
+
+			dispatchTrackDelete(2)
+			flushSync()
+
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 3 })
+			expect(ctrl.play).toHaveBeenCalledWith(3, { fromBeginning: true })
+		})
+
+		it('preserves the source return gap when a batch deletes the manual track then its anchor', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(3)
+			seedTrack(9)
+			player.playFrom(1, [1, 2, 3])
+			player.queue.enqueue([9], 'next')
+			player.playNext()
+			flushSync()
+			vi.clearAllMocks()
+
+			dispatchTrackDeletes([9, 2])
+			flushSync()
+
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 3 })
+			expect(ctrl.play).toHaveBeenCalledWith(3, { fromBeginning: true })
+		})
+
 		it('playNext consumes the manual queue before the context', () => {
 			seedTrack(1)
 			seedTrack(2)

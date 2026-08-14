@@ -133,8 +133,11 @@ export class SourceQueue implements UpcomingList {
 		}
 	}
 
-	removeAll = (id: number): void => {
-		this.#apply((entries) => entries.filter((entry) => entry.trackId !== id))
+	removeAll = (id: number, preserveReturnPoint = false): void => {
+		this.#apply(
+			(entries) => entries.filter((entry) => entry.trackId !== id),
+			preserveReturnPoint,
+		)
 	}
 
 	/** Never removes the cursor row. */
@@ -149,17 +152,42 @@ export class SourceQueue implements UpcomingList {
 
 	/**
 	 * The single mutation frame: a pure entries → entries transform, after which
-	 * the cursor re-resolves by the current row's entry id (a dropped row resolves
-	 * to -1). Transforms never adjust the cursor themselves.
+	 * the cursor re-resolves by the current row's entry id. During a manual detour,
+	 * removing the source return point instead leaves the cursor just before its
+	 * logical successor, so playback resumes forward rather than at the queue start.
+	 * Transforms never adjust the cursor themselves.
 	 */
-	#apply = (transform: (entries: readonly SourceEntry[]) => SourceEntry[]): void => {
-		const currentEntryId = this.#entries[this.#index]?.entryId
+	#apply = (
+		transform: (entries: readonly SourceEntry[]) => SourceEntry[],
+		preserveReturnPoint = false,
+	): void => {
 		const next = transform(this.#entries)
-		this.#index =
-			currentEntryId === undefined
-				? -1
-				: next.findIndex((entry) => entry.entryId === currentEntryId)
+		this.#index = this.#resolveCursorAfterMutation(next, preserveReturnPoint)
 		this.#entries = next
+	}
+
+	#resolveCursorAfterMutation = (
+		next: readonly SourceEntry[],
+		preserveReturnPoint: boolean,
+	): number => {
+		const currentEntryId = this.#entries[this.#index]?.entryId
+		if (currentEntryId === undefined) {
+			return -1
+		}
+
+		const currentIndex = next.findIndex((entry) => entry.entryId === currentEntryId)
+		if (currentIndex !== -1 || !preserveReturnPoint) {
+			return currentIndex
+		}
+
+		const survivingEntryIds = new Set(next.map((entry) => entry.entryId))
+		const predecessor = this.#entries
+			.slice(0, this.#index)
+			.findLast((entry) => survivingEntryIds.has(entry.entryId))
+
+		return predecessor === undefined
+			? -1
+			: next.findIndex((entry) => entry.entryId === predecessor.entryId)
 	}
 
 	/**

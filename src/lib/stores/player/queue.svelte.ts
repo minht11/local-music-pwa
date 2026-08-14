@@ -1,4 +1,3 @@
-import { onDatabaseChange } from '$lib/db/events.ts'
 import { ManualQueue } from './manual-queue.svelte.ts'
 import type { QueueItem, UpcomingList } from './queue-entry.ts'
 import { type QueueOrigin, SourceQueue } from './source-queue.svelte.ts'
@@ -88,19 +87,6 @@ export class QueueStore {
 		return this.#manual.isEmpty && this.#source.length === 0
 	}
 
-	constructor() {
-		onDatabaseChange((changes) => {
-			for (const change of changes) {
-				if (change.storeName !== 'tracks' || change.operation !== 'delete') {
-					continue
-				}
-
-				this.#manual.removeAll(change.key)
-				this.#source.removeAll(change.key)
-			}
-		})
-	}
-
 	/** A playing manual track goes with the queue it detoured from; queued ones survive. */
 	setSource = (
 		ids: readonly number[],
@@ -178,6 +164,18 @@ export class QueueStore {
 		this.#manual.removeEntries(toRemove)
 		this.#source.removeEntries(toRemove)
 	}
+
+	/** Removes every occurrence of deleted library tracks from both queue layers. */
+	removeTracks = (trackIds: readonly number[]): void => {
+		const wasPlayingManual = this.#manual.current !== undefined
+
+		for (const trackId of trackIds) {
+			this.#manual.removeAll(trackId)
+			this.#source.removeAll(trackId, wasPlayingManual)
+		}
+	}
+
+	removeTrack = (trackId: number): void => this.removeTracks([trackId])
 
 	/**
 	 * Remove then insert, so the destination re-derives whatever it tracks by

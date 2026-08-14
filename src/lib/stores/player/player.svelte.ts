@@ -1,5 +1,6 @@
 import { AudioGraph } from '$lib/audio/audio-graph.svelte.ts'
 import { PlaybackController, type TrackLoader } from '$lib/audio/playback-controller.svelte.ts'
+import { onDatabaseChange } from '$lib/db/events.ts'
 import {
 	createManagedArtwork,
 	getTrackManagedArtworkSource,
@@ -45,6 +46,7 @@ export class PlayerStore {
 	readonly #main: MainStore
 
 	readonly #controller: PlaybackController
+	#removeDatabaseListener: (() => void) | undefined
 
 	repeat: PlayerRepeat = $state('none')
 	muted = $state(false)
@@ -137,12 +139,43 @@ export class PlayerStore {
 		persist('player', this.#queue, ['shuffle'])
 
 		this.#controller = this.#createPlaybackController()
+		this.#setupQueueDatabaseListener()
 
 		this.#setupTrackChangeEffect()
 		this.#setupPreloadEffect()
 		this.#setupVolumeEffect()
 		this.#setupPlaybackRateEffect()
 		this.#setupPlayHistoryEffect()
+	}
+
+	#setupQueueDatabaseListener(): void {
+		this.#removeDatabaseListener = onDatabaseChange((changes) => {
+			const deletedTrackIds = new Set<number>()
+			for (const change of changes) {
+				if (change.storeName === 'tracks' && change.operation === 'delete') {
+					deletedTrackIds.add(change.key)
+				}
+			}
+
+			if (deletedTrackIds.size === 0) {
+				return
+			}
+
+			const previous = this.#queue.current
+			this.#queue.removeTracks([...deletedTrackIds])
+
+			if (previous === null || !deletedTrackIds.has(previous.trackId)) {
+				return
+			}
+
+			const next =
+				previous.layer === 'manual' ? this.#queue.advance(false) : this.#queue.current
+			if (next === null) {
+				this.#controller.abort()
+			} else {
+				this.#startEntry(next)
+			}
+		})
 	}
 
 	#createPlaybackController() {
@@ -380,6 +413,7 @@ export class PlayerStore {
 	}
 
 	dispose(): void {
+		this.#removeDatabaseListener?.()
 		this.#controller.abort()
 		this.#graph.dispose()
 	}

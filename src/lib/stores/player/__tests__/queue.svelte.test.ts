@@ -1,12 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { onDatabaseChange } from '$lib/db/events.ts'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { QueueStore } from '$lib/stores/player/queue.svelte.ts'
-
-// Prevent BroadcastChannel usage and DB wiring in tests
-vi.mock('$lib/db/events.ts', () => ({
-	onDatabaseChange: vi.fn(() => () => {}),
-	dispatchDatabaseChangedEvent: vi.fn(),
-}))
 
 let q!: QueueStore
 let cleanupQueue: () => void
@@ -23,12 +16,6 @@ const upcomingSource = (queue: QueueStore): number[] =>
 		(_, i) => queue.itemAt('source', i)?.trackId as number,
 	)
 
-const dispatchTrackDelete = (key: number) => {
-	const listener = vi.mocked(onDatabaseChange).mock.lastCall?.[0]
-	invariant(listener)
-	listener([{ storeName: 'tracks', operation: 'delete', key }] as Parameters<typeof listener>[0])
-}
-
 beforeEach(() => {
 	cleanupQueue = $effect.root(() => {
 		q = new QueueStore()
@@ -37,7 +24,6 @@ beforeEach(() => {
 
 afterEach(() => {
 	cleanupQueue()
-	vi.clearAllMocks()
 })
 
 describe('QueueStore', () => {
@@ -542,7 +528,7 @@ describe('QueueStore', () => {
 		it('purges the track from manual and source in one fan-out', () => {
 			q.setSource([1, 9, 2, 9], 0)
 			q.enqueue([9, 8], 'last')
-			dispatchTrackDelete(9)
+			q.removeTrack(9)
 			expect(manual(q)).toEqual([8])
 			expect([q.current?.trackId, ...upcomingSource(q)]).toEqual([1, 2])
 		})
@@ -551,23 +537,45 @@ describe('QueueStore', () => {
 			q.setSource([1], 0)
 			q.enqueue([8, 9], 'next')
 			q.enqueue([20], 'last')
-			dispatchTrackDelete(8)
+			q.removeTrack(8)
 			q.enqueue([10], 'next')
 			expect(manual(q)).toEqual([9, 10, 20])
 		})
 
 		it('clears the active entry when the current source track is deleted', () => {
 			q.setSource([10, 20, 30], 1)
-			dispatchTrackDelete(20)
+			q.removeTrack(20)
 			expect(q.current).toBeNull()
 		})
 
-		it('falls back to the source return point when the playing manual track is deleted', () => {
-			q.setSource([1], 0)
+		it('can advance from a deleted manual track to the source successor', () => {
+			q.setSource([1, 2], 0)
 			q.enqueue([9], 'next')
 			q.advance()
-			dispatchTrackDelete(9)
-			expect(q.current).toMatchObject({ layer: 'source', trackId: 1 })
+			q.removeTrack(9)
+			expect(q.advance()).toMatchObject({ layer: 'source', trackId: 2 })
+		})
+
+		it('resumes at the source successor when the manual detour return point is deleted', () => {
+			q.setSource([1, 2, 3], 1)
+			q.enqueue([9], 'next')
+			q.advance()
+
+			q.removeTrack(2)
+
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+			expect(q.advance()).toMatchObject({ layer: 'source', trackId: 3 })
+		})
+
+		it('does not promote an upcoming source row when later batch deletions follow a removed anchor', () => {
+			q.setSource([2, 3, 4], 0)
+			q.enqueue([9], 'next')
+			q.advance()
+
+			q.removeTracks([2, 4])
+
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+			expect(q.advance()).toMatchObject({ layer: 'source', trackId: 3 })
 		})
 	})
 })

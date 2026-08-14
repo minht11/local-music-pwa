@@ -242,6 +242,15 @@ describe('SourceQueue', () => {
 			// With no current row the survivors are all upcoming again.
 			expect(upcoming(q)).toEqual([1, 3])
 		})
+
+		it('keeps the return cursor before the logical successor during a manual detour', () => {
+			q.setItems([1, 2, 3], 1, null)
+			q.removeAll(2, true)
+
+			expect(q.current?.trackId).toBe(1)
+			q.advance(false)
+			expect(q.current?.trackId).toBe(3)
+		})
 	})
 
 	describe('entry ids', () => {
