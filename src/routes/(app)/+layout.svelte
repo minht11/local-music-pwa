@@ -12,7 +12,6 @@
 	import Seo from '$lib/components/Seo.svelte'
 	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
 	import { isElementTextInput } from '$lib/helpers/input.ts'
-	import { setupOverlaySnippets } from '$lib/layout-bottom-bar.svelte'
 	import { DialogsStore } from '$lib/stores/dialogs/store.svelte.ts'
 	import { setDialogsStoreContext } from '$lib/stores/dialogs/use-store.ts'
 	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
@@ -24,6 +23,7 @@
 		setupDirectoriesPermissionPrompt,
 	} from './layout/setup-directories-permission-prompt.svelte.ts'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'
+	import { libraryBottomNavigationBar } from './library/[[slug=libraryEntities]]/+layout.svelte'
 
 	const main = useMainStore()
 
@@ -46,7 +46,6 @@
 	setupTheme()
 	setupGlobalMenu()
 	setupAppInstallPromptListeners()
-	const overlaySnippets = setupOverlaySnippets()
 
 	const { children } = $props()
 
@@ -143,17 +142,14 @@
 	<SnackbarRenderer />
 
 	<div bind:clientHeight={overlayContentHeight} class="col-[2/5] grid grid-cols-subgrid gap-y-2">
-		{#each overlaySnippets.abovePlayer as snippet}
-			{@render snippet()}
-		{/each}
-
 		{#if !page.data.noPlayerOverlay}
 			<PlayerOverlay class={['col-[1/4]', bottomBarHeight < 0 && 'mb-2']} />
 		{/if}
 	</div>
 
 	<div bind:clientHeight={bottomBarHeight} class="col-[1/6]">
-		{@render overlaySnippets.bottomBar?.()}
+		<!-- TODO. Pass real value -->
+		{@render libraryBottomNavigationBar('tracks')}
 	</div>
 </div>
 

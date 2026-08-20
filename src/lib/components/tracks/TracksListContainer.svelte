@@ -1,5 +1,4 @@
 <script lang="ts" module>
-	import { useSetOverlaySnippet } from '$lib/layout-bottom-bar.svelte.ts'
 	import type { TrackData } from '$lib/library/get/value.ts'
 	import Button from '../Button.svelte'
 	import IconButton from '../IconButton.svelte'
@@ -181,7 +180,27 @@
 		onStart: () => selection.cancelSelection(),
 	})
 
-	useSetOverlaySnippet('above-player', () => (selection.selectionEnabled ? multiselectPane : null))
+	const selectionSnackbarId = $props.id()
+
+	$effect(() => {
+		if (!selection.selectionEnabled) {
+			snackbar.dismiss(selectionSnackbarId)
+			return
+		}
+
+		snackbar({
+			id: selectionSnackbarId,
+			message: '',
+			duration: false,
+			order: 'end',
+			controls: {
+				type: 'snippet',
+				snippet: multiselectPane,
+			},
+		})
+
+		return () => snackbar.dismiss(selectionSnackbarId)
+	})
 </script>
 
 {#snippet multiselectPane()}

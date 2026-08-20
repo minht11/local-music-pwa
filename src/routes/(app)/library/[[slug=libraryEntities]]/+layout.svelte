@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" module>
 	import type { Snapshot } from '@sveltejs/kit'
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
@@ -13,32 +13,15 @@
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
 	import { createTrackRowsSource, trackIdRows } from '$lib/components/tracks/track-rows.svelte.ts'
-	import { initPageQueries } from '$lib/db/query/page-query.svelte.js'
+	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { isMobile } from '$lib/helpers/utils/ua.ts'
-	import { useSetOverlaySnippet } from '$lib/layout-bottom-bar.svelte.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
+	import type { LibraryStoreName } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import Search from './Search.svelte'
 
-	const { data, children } = $props()
-
-	initPageQueries(() => data)
-
-	const main = useMainStore()
-	const dialogs = useDialogsStore()
-
-	const itemsIds = $derived(data.itemsIdsQuery.value)
-	const slug = $derived(data.slug)
-	const isHandHeldDevice = isMobile()
-
-	// Only read on the tracks slug, where `itemsIds` are track ids.
-	const allTracksRows = trackIdRows(() => itemsIds)
-	const allTracksSource = createTrackRowsSource(() => allTracksRows, {
-		queueOrigin: () => ({ type: 'tracks', name: m.tracks() }),
-	})
-
 	interface NavItem {
-		slug: typeof slug
+		slug: LibraryStoreName
 		title: string
 		icon: IconType
 	}
@@ -66,12 +49,31 @@
 		},
 	]
 
+	export { bottomNavigationBar as libraryBottomNavigationBar }
+</script>
+
+<script lang="ts">
+	const { data, children } = $props()
+
+	initPageQueries(() => data)
+
+	const main = useMainStore()
+	const dialogs = useDialogsStore()
+
+	const itemsIds = $derived(data.itemsIdsQuery.value)
+	const slug = $derived(data.slug)
+	const isHandHeldDevice = isMobile()
+
+	// Only read on the tracks slug, where `itemsIds` are track ids.
+	const allTracksRows = trackIdRows(() => itemsIds)
+	const allTracksSource = createTrackRowsSource(() => allTracksRows, {
+		queueOrigin: () => ({ type: 'tracks', name: m.tracks() }),
+	})
+
 	const isWideLayout = $derived(data.isWideLayout())
 	const layoutMode = $derived(
 		data.layoutMode(main.librarySplitLayoutEnabled, isWideLayout, page.params.uuid),
 	)
-
-	useSetOverlaySnippet('bottom-bar', () => layoutBottom)
 
 	export const snapshot: Snapshot<string> = {
 		capture: () => data.store.searchTerm,
@@ -81,7 +83,7 @@
 	}
 </script>
 
-{#snippet navItemsSnippet(className: string)}
+{#snippet navItemsSnippet(activeSlug: LibraryStoreName, className: string)}
 	{#each navItems as item}
 		<Button
 			as="a"
@@ -93,7 +95,7 @@
 			<div
 				class={[
 					'flex items-center justify-center rounded-full p-2',
-					item.slug === slug && 'bg-secondaryContainer text-onSecondaryContainer',
+					item.slug === activeSlug && 'bg-secondaryContainer text-onSecondaryContainer',
 				]}
 			>
 				<Icon type={item.icon} />
@@ -102,12 +104,12 @@
 	{/each}
 {/snippet}
 
-{#snippet layoutBottom()}
-	{#if isHandHeldDevice}
+{#snippet bottomNavigationBar(activeSlug: LibraryStoreName)}
+	{#if isMobile()}
 		<div
 			class="pointer-events-auto grid h-[calc(--spacing(16)+env(safe-area-inset-bottom))] w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer pb-[env(safe-area-inset-bottom)] sm:hidden active-view-regular:view-name-[bottom-bar]"
 		>
-			{@render navItemsSnippet('h-full')}
+			{@render navItemsSnippet(activeSlug, 'h-full')}
 		</div>
 	{/if}
 {/snippet}
@@ -119,7 +121,7 @@
 			isHandHeldDevice ? 'hidden sm:flex' : 'flex',
 		]}
 	>
-		{@render navItemsSnippet('h-14 w-20')}
+		{@render navItemsSnippet(slug, 'h-14 w-20')}
 
 		{#if (slug === 'albums' || slug === 'artists') && isWideLayout}
 			<IconButton

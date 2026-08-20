@@ -16,6 +16,7 @@
 		duration?: number | false
 		controls?: SnackbarButton | SnackbarSnippet<T> | false
 		layout?: 'row' | 'column'
+		order?: 'auto' | 'end'
 	}
 
 	export interface SnackbarProps extends SnackbarData {
