@@ -51,6 +51,8 @@ const toEntry = (layer: QueueLayer, item: QueueItem): QueueEntry => ({
  * Two-layer playback queue:
  *  - manual - the tracks the user explicitly queued
  *  - source - place where album/playlist/list playback was started from.
+ * This store alone exposes the externally active `current`; layer state
+ * describes how it is resolved and where source playback resumes.
  */
 export class QueueStore {
 	readonly #manual = new ManualQueue()
@@ -78,25 +80,25 @@ export class QueueStore {
 	}
 
 	readonly current: QueueEntry | null = $derived.by((): QueueEntry | null => {
-		const manual = this.#manual.current
+		const manual = this.#manual.activeDetour
 
-		return manual === undefined ? this.#currentSourceEntry() : toEntry('manual', manual)
+		return manual === undefined ? this.#sourceEntryAtCursor() : toEntry('manual', manual)
 	})
 
 	get isEmpty(): boolean {
 		return this.#manual.isEmpty && this.#source.length === 0
 	}
 
-	/** A playing manual track goes with the queue it detoured from; queued ones survive. */
+	/** An active manual detour goes with the source it interrupted; queued rows survive. */
 	setSource = (
 		ids: readonly number[],
 		start: number | 'shuffle',
 		origin?: QueueOrigin,
 	): QueueEntry | null => {
-		this.#manual.releaseCurrent()
+		this.#manual.endDetour()
 		this.#source.setItems(ids, start, origin ?? null)
 
-		return this.#currentSourceEntry()
+		return this.#sourceEntryAtCursor()
 	}
 
 	advance = (loop = false): QueueEntry | null => {
@@ -105,7 +107,7 @@ export class QueueStore {
 			return toEntry('manual', taken)
 		}
 
-		return this.#resumeSource(this.#source.advance(loop))
+		return this.#activateSourceCursor(this.#source.advance(loop))
 	}
 
 	peekNext = (loop = false): number | null =>
@@ -116,11 +118,11 @@ export class QueueStore {
 	 * manual track it returns to the source row playback detoured from.
 	 */
 	stepBack = (loop = false): QueueEntry | null => {
-		if (this.#manual.current !== undefined) {
-			return this.#resumeSource(this.#source.current !== undefined)
+		if (this.#manual.activeDetour !== undefined) {
+			return this.#activateSourceCursor(this.#source.cursorEntry !== undefined)
 		}
 
-		return this.#resumeSource(this.#source.stepBack(loop))
+		return this.#activateSourceCursor(this.#source.stepBack(loop))
 	}
 
 	toggleShuffle = (): void => {
@@ -144,7 +146,7 @@ export class QueueStore {
 			return taken === undefined ? null : toEntry('manual', taken)
 		}
 
-		return this.#resumeSource(this.#source.jumpToEntryId(entryId))
+		return this.#activateSourceCursor(this.#source.jumpToEntryId(entryId))
 	}
 
 	/**
@@ -152,7 +154,7 @@ export class QueueStore {
 	 * manual queue is not consulted — its rows are addressed by entry id.
 	 */
 	playTrackId = (id: number): QueueEntry | null => {
-		const jumped = this.#resumeSource(this.#source.jumpToTrackId(id))
+		const jumped = this.#activateSourceCursor(this.#source.jumpToTrackId(id))
 
 		return jumped ?? this.setSource([id], 0)
 	}
@@ -167,11 +169,11 @@ export class QueueStore {
 
 	/** Removes every occurrence of deleted library tracks from both queue layers. */
 	removeTracks = (trackIds: readonly number[]): void => {
-		const wasPlayingManual = this.#manual.current !== undefined
+		const hadActiveManualDetour = this.#manual.activeDetour !== undefined
 
 		for (const trackId of trackIds) {
 			this.#manual.removeAll(trackId)
-			this.#source.removeAll(trackId, wasPlayingManual)
+			this.#source.removeAll(trackId, hadActiveManualDetour)
 		}
 	}
 
@@ -207,14 +209,14 @@ export class QueueStore {
 		this.#list(toSlot.layer).insertUpcoming(item, slot)
 	}
 
-	/** Drops the layer's upcoming rows; the current track keeps playing. */
+	/** Drops the layer's upcoming rows; the current entry remains active. */
 	clear = (layer: QueueLayer): void => {
 		this.#list(layer).clearUpcoming()
 	}
 
 	#list = (layer: QueueLayer): UpcomingList => (layer === 'manual' ? this.#manual : this.#source)
 
-	/** Only upcoming rows move: a played or current source row is rejected, as is an unknown id. */
+	/** Only upcoming rows move: a row at/before the source cursor is rejected, as is an unknown id. */
 	#locateMovable = (entryId: number): { layer: QueueLayer; index: number } | null => {
 		for (const layer of ['manual', 'source'] as const) {
 			const index = this.#list(layer).upcomingIndexOf(entryId)
@@ -226,24 +228,24 @@ export class QueueStore {
 		return null
 	}
 
-	#currentSourceEntry = (): QueueEntry | null => {
-		const item = this.#source.current
+	#sourceEntryAtCursor = (): QueueEntry | null => {
+		const item = this.#source.cursorEntry
 
 		return item === undefined ? null : toEntry('source', item)
 	}
 
-	/** A step that never landed leaves a playing manual track playing. */
-	#resumeSource = (landed: boolean): QueueEntry | null => {
+	/** A step that never landed leaves the active manual detour unchanged. */
+	#activateSourceCursor = (landed: boolean): QueueEntry | null => {
 		if (!landed) {
 			return null
 		}
 
-		this.#manual.releaseCurrent()
+		this.#manual.endDetour()
 
-		return this.#currentSourceEntry()
+		return this.#sourceEntryAtCursor()
 	}
 
-	/** Advances for the cursor only; `PlayerStore.play` picks the row up on the next press. */
+	/** Advances logical queue state only; `PlayerStore.play` starts the row on the next press. */
 	#activateIfIdle = (): void => {
 		if (this.current === null) {
 			this.advance(false)

@@ -11,14 +11,15 @@ interface SourceEntry extends QueueItem {
 	readonly canonical: number
 }
 
+/** Source playback order plus its cursor, which becomes a resume anchor during a manual detour. */
 export class SourceQueue implements UpcomingList {
 	shuffle = $state(false)
 	origin: QueueOrigin | null = $state(null)
 
 	// Every edit must go through #apply() so correct cursor is preserved
 	#entries: readonly SourceEntry[] = $state.raw([])
-	// While a manual track plays this is the return point: playback resumes at the
-	// following source track. Absolute positions are private to this class — every
+	// During a manual detour this is the return point: source playback resumes at
+	// the following track. Absolute positions are private to this class — every
 	// public read addresses rows by entry id, track id, or upcoming-relative index.
 	#index = $state(-1)
 
@@ -26,7 +27,11 @@ export class SourceQueue implements UpcomingList {
 		return this.#entries.length
 	}
 
-	get current(): QueueItem | undefined {
+	/**
+	 * The source cursor. During a manual detour this serves as the return anchor,
+	 * not the externally active row.
+	 */
+	get cursorEntry(): QueueItem | undefined {
 		return this.#entries[this.#index]
 	}
 
@@ -43,7 +48,7 @@ export class SourceQueue implements UpcomingList {
 		return this.#entries[this.#index + 1 + i]
 	}
 
-	/** -1 when absent, or at/before the cursor — played and current rows do not move. */
+	/** -1 when absent or at/before the cursor; only upcoming rows can move. */
 	upcomingIndexOf(entryId: number): number {
 		const absolute = this.#indexOfEntry(entryId)
 
@@ -67,7 +72,7 @@ export class SourceQueue implements UpcomingList {
 		this.origin = origin
 		this.shuffle = shuffle
 		this.#entries = shuffle ? toShuffledArray(entries) : entries
-		// A negative start means "no current track, everything upcoming"; the clamp
+		// A negative start means "no source cursor, everything upcoming"; the clamp
 		// keeps `-1 <= index < length`.
 		this.#index = Math.max(-1, Math.min(startIndex, entries.length - 1))
 	}
@@ -85,22 +90,25 @@ export class SourceQueue implements UpcomingList {
 	/** Backward jumps are legal. */
 	jumpToEntryId = (entryId: number): boolean => this.#jumpToIndex(this.#indexOfEntry(entryId))
 
-	/** The first row playing `id`; backward jumps are legal. */
+	/** The first row with track id `id`; backward jumps are legal. */
 	jumpToTrackId = (id: number): boolean =>
 		this.#jumpToIndex(this.#entries.findIndex((entry) => entry.trackId === id))
 
-	/** On: pins the current row to the front. Off: restores canonical order. */
+	/** On: pins the cursor row to the front. Off: restores canonical order. */
 	toggleShuffle = (): void => {
 		this.shuffle = !this.shuffle
 
 		if (this.shuffle) {
 			this.#apply((entries) => {
-				const current = entries[this.#index]
-				if (current === undefined) {
+				const cursorEntry = entries[this.#index]
+				if (cursorEntry === undefined) {
 					return toShuffledArray(entries)
 				}
 
-				return [current, ...toShuffledArray(entries.filter((entry) => entry !== current))]
+				return [
+					cursorEntry,
+					...toShuffledArray(entries.filter((entry) => entry !== cursorEntry)),
+				]
 			})
 		} else {
 			this.#apply((entries) => entries.toSorted((a, b) => a.canonical - b.canonical))
@@ -142,17 +150,17 @@ export class SourceQueue implements UpcomingList {
 
 	/** Never removes the cursor row. */
 	removeEntries = (entryIds: ReadonlySet<number>): void => {
-		const currentEntryId = this.current?.entryId
+		const cursorEntryId = this.cursorEntry?.entryId
 		this.#apply((entries) =>
 			entries.filter(
-				(entry) => entry.entryId === currentEntryId || !entryIds.has(entry.entryId),
+				(entry) => entry.entryId === cursorEntryId || !entryIds.has(entry.entryId),
 			),
 		)
 	}
 
 	/**
 	 * The single mutation frame: a pure entries → entries transform, after which
-	 * the cursor re-resolves by the current row's entry id. During a manual detour,
+	 * the cursor re-resolves by the cursor row's entry id. During a manual detour,
 	 * removing the source return point instead leaves the cursor just before its
 	 * logical successor, so playback resumes forward rather than at the queue start.
 	 * Transforms never adjust the cursor themselves.
@@ -170,14 +178,14 @@ export class SourceQueue implements UpcomingList {
 		next: readonly SourceEntry[],
 		preserveReturnPoint: boolean,
 	): number => {
-		const currentEntryId = this.#entries[this.#index]?.entryId
-		if (currentEntryId === undefined) {
+		const cursorEntryId = this.#entries[this.#index]?.entryId
+		if (cursorEntryId === undefined) {
 			return -1
 		}
 
-		const currentIndex = next.findIndex((entry) => entry.entryId === currentEntryId)
-		if (currentIndex !== -1 || !preserveReturnPoint) {
-			return currentIndex
+		const cursorIndex = next.findIndex((entry) => entry.entryId === cursorEntryId)
+		if (cursorIndex !== -1 || !preserveReturnPoint) {
+			return cursorIndex
 		}
 
 		const survivingEntryIds = new Set(next.map((entry) => entry.entryId))

@@ -11,10 +11,11 @@ interface ManualEntry extends QueueItem {
  */
 export class ManualQueue implements UpcomingList {
 	#entries: readonly ManualEntry[] = $state.raw([])
-	#current: ManualEntry | undefined = $state(undefined)
+	#activeDetour: ManualEntry | undefined = $state(undefined)
 
-	get current(): QueueItem | undefined {
-		return this.#current
+	/** The active manual row detouring from the source cursor, if any. */
+	get activeDetour(): QueueItem | undefined {
+		return this.#activeDetour
 	}
 
 	get upcomingCount(): number {
@@ -22,7 +23,7 @@ export class ManualQueue implements UpcomingList {
 	}
 
 	get isEmpty(): boolean {
-		return this.#current === undefined && this.#entries.length === 0
+		return this.#activeDetour === undefined && this.#entries.length === 0
 	}
 
 	upcomingAt(i: number): QueueItem | undefined {
@@ -78,7 +79,7 @@ export class ManualQueue implements UpcomingList {
 		this.#entries = this.#entries.filter((entry) => !entryIds.has(entry.entryId))
 	}
 
-	/** Consumes through row `i`: it becomes current and the rows it skipped are dropped. */
+	/** Consumes through row `i`: it starts the detour and the rows it skipped are dropped. */
 	take = (i: number): QueueItem | undefined => {
 		const entry = this.#entries[i]
 		if (entry === undefined) {
@@ -86,21 +87,21 @@ export class ManualQueue implements UpcomingList {
 		}
 
 		this.#entries = this.#entries.slice(i + 1)
-		this.#current = entry
+		this.#activeDetour = entry
 
 		return entry
 	}
 
-	/** Ends the detour: whatever was playing from here no longer is. */
-	releaseCurrent = (): void => {
-		this.#current = undefined
+	/** Ends the active manual detour. */
+	endDetour = (): void => {
+		this.#activeDetour = undefined
 	}
 
 	removeAll = (trackId: number): void => {
 		this.#entries = this.#entries.filter((entry) => entry.trackId !== trackId)
 
-		if (this.#current?.trackId === trackId) {
-			this.#current = undefined
+		if (this.#activeDetour?.trackId === trackId) {
+			this.#activeDetour = undefined
 		}
 	}
 

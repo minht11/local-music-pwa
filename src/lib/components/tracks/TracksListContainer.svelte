@@ -8,6 +8,12 @@
 	import VirtualContainer, { type RowSize } from '../VirtualContainer.svelte'
 	import type { SelectionSnapshot, TrackRowIdentity } from './selection.ts'
 	import TrackListItem from './TrackListItem.svelte'
+	import {
+		validateTrackListSourceCounts,
+		validateTrackListSourceRow,
+		validateTrackListSourceTrackCount,
+		validateUniqueTrackListSourceKey,
+	} from './track-list-source-validation.ts'
 	import { useTrackDragController } from './use-track-drag-controller.svelte.ts'
 	import {
 		type PredefinedTrackMenuItemVisibility,
@@ -88,13 +94,40 @@
 
 	const isReorderable = $derived(onDrop !== undefined)
 
+	const rowCount = $derived.by(() => {
+		const count = source.count
+		if (import.meta.env.DEV) {
+			validateTrackListSourceCounts(count, source.trackCount)
+		}
+
+		return count
+	})
+
+	const trackCount = $derived.by(() => {
+		const count = source.trackCount
+		if (import.meta.env.DEV) {
+			validateTrackListSourceCounts(source.count, count)
+		}
+
+		return count
+	})
+
+	const rowAt = (index: number): TrackListRow => {
+		const row = source.rowAt(index)
+		if (import.meta.env.DEV) {
+			validateTrackListSourceRow(index, row, source.keyAt(index))
+		}
+
+		return row
+	}
+
 	// Bounds-checked, unlike `source.rowAt`: callers hold indexes the list can shrink under.
 	const trackAt = (index: number): TrackRowIdentity | undefined => {
-		if (index < 0 || index >= source.count) {
+		if (index < 0 || index >= rowCount) {
 			return undefined
 		}
 
-		const row = source.rowAt(index)
+		const row = rowAt(index)
 
 		return row.type === 'track' ? row : undefined
 	}
@@ -114,21 +147,32 @@
 	// selection prune reads it, and only while something is selected.
 	const liveEntryIds = $derived.by(() => {
 		const ids = new Set<string | number>()
-		for (let index = 0; index < source.count; index += 1) {
-			ids.add(source.keyAt(index))
+		let resolvedTrackCount = 0
+		for (let index = 0; index < rowCount; index += 1) {
+			const key = source.keyAt(index)
+			if (import.meta.env.DEV) {
+				validateUniqueTrackListSourceKey(index, key, ids)
+				const row = source.rowAt(index)
+				validateTrackListSourceRow(index, row, key)
+				resolvedTrackCount += row.type === 'track' ? 1 : 0
+			}
+			ids.add(key)
+		}
+		if (import.meta.env.DEV) {
+			validateTrackListSourceTrackCount(trackCount, resolvedTrackCount)
 		}
 
 		return ids
 	})
 
 	const selection = useTrackSelectionController({
-		rowCount: () => source.count,
+		rowCount: () => rowCount,
 		trackAt,
 		hasEntry: (entryId) => liveEntryIds.has(entryId),
 	})
 
 	const dragController = useTrackDragController({
-		itemsCount: () => source.count,
+		itemsCount: () => rowCount,
 		onDrop: ({ entryId }, fromIndex, insertSlot) => {
 			if (isDropStillValid(fromIndex, entryId)) {
 				onDrop?.({ index: fromIndex, entryId }, insertSlot)
@@ -156,7 +200,7 @@
 		<Button
 			kind="flat"
 			class="ml-auto text-inversePrimary! disabled:text-inverseOnSurface/50!"
-			disabled={selection.size === source.trackCount}
+			disabled={selection.size === trackCount}
 			onclick={() => {
 				selection.selectAll()
 			}}
@@ -176,13 +220,13 @@
 
 <VirtualContainer
 	size={source.size}
-	count={source.count}
+	count={rowCount}
 	forceRenderIndexes={dragController.drag === null ? [] : [dragController.drag.fromIndex]}
-	focusableRow={(index) => source.rowAt(index).type === 'track'}
+	focusableRow={(index) => rowAt(index).type === 'track'}
 	key={source.keyAt}
 >
 	{#snippet children(item)}
-		{@const row = source.rowAt(item.index)}
+		{@const row = rowAt(item.index)}
 		{@const drag = dragController.drag}
 
 		{#if row.type === 'custom'}
