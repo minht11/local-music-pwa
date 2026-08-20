@@ -220,7 +220,8 @@
 					"correctness": {
 						"noUnusedVariables": "off",
 						"noUnusedFunctionParameters": "off",
-						"noUnusedImports": "off"
+						"noUnusedImports": "off",
+						"noUndeclaredVariables": "off"
 					},
 					"style": {
 						"noRestrictedGlobals": "off"
