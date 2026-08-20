@@ -7,6 +7,7 @@
 		APP_DIALOGS_KEYS,
 	} from '$lib/components/global-dialogs/dialogs.ts'
 	import Icon from '$lib/components/icon/Icon.svelte'
+	import LibraryNavigation from '$lib/components/LibraryNavigation.svelte'
 	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
 	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
 	import Seo from '$lib/components/Seo.svelte'
@@ -23,7 +24,6 @@
 		setupDirectoriesPermissionPrompt,
 	} from './layout/setup-directories-permission-prompt.svelte.ts'
 	import { setupTheme } from './layout/setup-theme.svelte.ts'
-	import { libraryBottomNavigationBar } from './library/[[slug=libraryEntities]]/+layout.svelte'
 
 	const main = useMainStore()
 
@@ -51,6 +51,10 @@
 
 	let overlayContentHeight = $state(0)
 	let bottomBarHeight = $state(0)
+	const activeLibrarySlug = $derived.by(() => {
+		const slug = page.params.slug
+		return slug === 'albums' || slug === 'artists' || slug === 'playlists' ? slug : 'tracks'
+	})
 
 	$effect(() => {
 		document.documentElement.style.setProperty(
@@ -148,8 +152,7 @@
 	</div>
 
 	<div bind:clientHeight={bottomBarHeight} class="col-[1/6]">
-		<!-- TODO. Pass real value -->
-		{@render libraryBottomNavigationBar('tracks')}
+		<LibraryNavigation variant="bottom" activeSlug={activeLibrarySlug} />
 	</div>
 </div>
 
