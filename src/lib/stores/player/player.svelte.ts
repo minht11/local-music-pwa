@@ -297,17 +297,16 @@ export class PlayerStore {
 		})
 	}
 
-	/**
-	 * Gated on the queue, not `activeTrack`: that is an async query and may not have
-	 * resolved yet. The controller's loader fetches the track itself.
-	 */
+	/** Starts the current row, or explicitly activates the first queued row when idle. */
 	play = (): void => {
-		const trackId = this.#queue.current?.trackId
-		if (trackId === undefined) {
+		const current = this.#queue.current
+		if (current !== null) {
+			this.#controller.play(current.trackId)
+
 			return
 		}
 
-		this.#controller.play(trackId)
+		this.#startEntry(this.#queue.advance(false))
 	}
 
 	pause = (): void => {

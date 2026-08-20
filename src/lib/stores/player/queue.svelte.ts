@@ -23,9 +23,7 @@ export interface QueueSlot {
 
 /**
  * The queue as UI consumers may touch it: reads, plus mutations that never start
- * audio — everything that can start audio lives on `PlayerStore`. Starting no
- * audio is not the same as never changing what plays: `enqueue` onto an idle
- * queue makes the first added track current.
+ * audio or select a new current entry. Playback commands live on `PlayerStore`.
  */
 export interface QueueView {
 	readonly current: QueueEntry | null
@@ -131,7 +129,6 @@ export class QueueStore {
 
 	enqueue = (trackIds: readonly number[], position: 'next' | 'last'): void => {
 		this.#manual.enqueue(trackIds, position)
-		this.#activateIfIdle()
 	}
 
 	/**
@@ -243,12 +240,5 @@ export class QueueStore {
 		this.#manual.endDetour()
 
 		return this.#sourceEntryAtCursor()
-	}
-
-	/** Advances logical queue state only; `PlayerStore.play` starts the row on the next press. */
-	#activateIfIdle = (): void => {
-		if (this.current === null) {
-			this.advance(false)
-		}
 	}
 }

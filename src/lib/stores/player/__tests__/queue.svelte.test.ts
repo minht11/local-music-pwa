@@ -92,7 +92,7 @@ describe('QueueStore', () => {
 
 		it('keeps a playing manual track when the source is empty', () => {
 			q.enqueue([8, 9], 'last')
-			expect(q.current).toMatchObject({ layer: 'manual', trackId: 8 })
+			expect(q.advance(true)).toMatchObject({ layer: 'manual', trackId: 8 })
 			expect(q.advance(true)).toMatchObject({ layer: 'manual', trackId: 9 })
 
 			expect(q.advance(true)).toBeNull()
@@ -134,6 +134,7 @@ describe('QueueStore', () => {
 
 		it('returns null from a manual track with no source', () => {
 			q.enqueue([9], 'last')
+			q.advance()
 			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
 			expect(q.stepBack(true)).toBeNull()
 		})
@@ -157,10 +158,10 @@ describe('QueueStore', () => {
 			expect(manual(q)).toEqual([9, 20])
 		})
 
-		it('activates the first added track when nothing plays', () => {
+		it('leaves every added track pending when nothing plays', () => {
 			q.enqueue([8, 9], 'last')
-			expect(q.current).toMatchObject({ layer: 'manual', trackId: 8 })
-			expect(manual(q)).toEqual([9])
+			expect(q.current).toBeNull()
+			expect(manual(q)).toEqual([8, 9])
 		})
 
 		it('a row dragged into the play-next block joins it', () => {

@@ -247,7 +247,7 @@ describe('drop slot mapping', () => {
 	})
 
 	it('a drop past the last row lands at the end of manual when no source exists', () => {
-		// Enqueueing on an idle queue activates the first track: 8 plays, manual is [9, 10].
+		// Idle enqueue leaves all three tracks pending.
 		queue.enqueue([8, 9, 10], 'last')
 
 		rows.listProps.onDrop(
@@ -255,7 +255,7 @@ describe('drop slot mapping', () => {
 			rows.listProps.source.count,
 		)
 
-		expect(manualIds()).toEqual([10, 9])
+		expect(manualIds()).toEqual([9, 10, 8])
 	})
 
 	it('a drop between two rows of a layer reorders within it', () => {

@@ -7,7 +7,7 @@
 
 <IconButton
 	tooltip={player.playing ? m.playerPause() : m.playerPlay()}
-	disabled={!player.activeTrack}
+	disabled={player.queue.isEmpty}
 	onclick={() => player.togglePlay()}
 >
 	<PlayPauseIcon playing={player.playing} loading={player.loading} />

@@ -8,7 +8,7 @@
 <Button
 	tooltip={player.playing ? m.playerPause() : m.playerPlay()}
 	class="w-18 p-0!"
-	disabled={!player.activeTrack}
+	disabled={player.queue.isEmpty}
 	onclick={() => player.togglePlay()}
 >
 	<PlayPauseIcon playing={player.playing} loading={player.loading} />

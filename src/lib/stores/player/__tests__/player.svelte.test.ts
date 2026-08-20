@@ -277,16 +277,18 @@ describe('PlayerStore', () => {
 			expect(ctrl.play).toHaveBeenCalledWith(5)
 		})
 
-		it('plays the current entry before its track query has resolved', () => {
+		it('activates and plays the first pending entry before its track query has resolved', () => {
 			// An unseeded track stands in for a query that has not come back yet.
-			// Enqueueing onto an idle player makes track 7 current; pressing play
-			// right then must not wait on the query — the loader fetches the track.
-			player.queue.enqueue([7], 'last')
+			player.queue.enqueue([7, 8], 'last')
+			expect(player.queue.current).toBeNull()
+			expect(player.queue.count('manual')).toBe(2)
 			expect(player.activeTrack).toBeNull()
 
 			player.play()
 
-			expect(ctrl.play).toHaveBeenCalledWith(7)
+			expect(ctrl.play).toHaveBeenCalledWith(7, { fromBeginning: true })
+			expect(player.queue.current).toMatchObject({ layer: 'manual', trackId: 7 })
+			expect(player.queue.count('manual')).toBe(1)
 		})
 
 		it('does nothing when the queue is empty', () => {
@@ -551,6 +553,7 @@ describe('PlayerStore', () => {
 		it('is null at the end of a manual-only queue despite repeat all', () => {
 			seedTrack(8)
 			player.queue.enqueue([8], 'last')
+			player.play()
 			player.repeat = 'all'
 
 			// The repeat mode alone would promise a wrap; there is nothing to wrap to.
@@ -626,10 +629,10 @@ describe('PlayerStore', () => {
 		it('pauses at the end of a manual-only queue even when repeat is all', () => {
 			seedTrack(8)
 			seedTrack(9)
-			// Enqueued with nothing playing, so 8 becomes current and the source layer
-			// stays empty — repeat has no earlier track to wrap back to.
 			player.queue.enqueue([8, 9], 'last')
+			player.play()
 			player.repeat = 'all'
+			vi.clearAllMocks()
 
 			opts.onTrackEnded()
 			expect(player.queue.current).toMatchObject({ layer: 'manual', trackId: 9 })
