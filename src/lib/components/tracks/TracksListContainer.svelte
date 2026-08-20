@@ -1,4 +1,5 @@
 <script lang="ts" module>
+	import { onNavigate } from '$app/navigation'
 	import type { TrackData } from '$lib/library/get/value.ts'
 	import Button from '../Button.svelte'
 	import IconButton from '../IconButton.svelte'
@@ -181,6 +182,12 @@
 	})
 
 	const selectionSnackbarId = $props.id()
+
+	onNavigate(() => {
+		// Its snippet renders outside this route branch, so release it before route data changes.
+		selection.cancelSelection()
+		snackbar.dismiss(selectionSnackbarId)
+	})
 
 	$effect(() => {
 		if (!selection.selectionEnabled) {
