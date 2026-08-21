@@ -7,15 +7,6 @@ let cleanup: () => void
 const upcoming = (queue: SourceQueue): number[] =>
 	Array.from({ length: queue.upcomingCount }, (_, i) => queue.upcomingAt(i)?.trackId as number)
 
-/** How `QueueStore.moveEntry` reorders within a layer: remove, then re-insert. */
-const moveUpcoming = (queue: SourceQueue, from: number, to: number): void => {
-	const item = queue.upcomingAt(from)
-	invariant(item !== undefined)
-
-	queue.removeUpcomingAt(from)
-	queue.insertUpcoming(item, to)
-}
-
 beforeEach(() => {
 	cleanup = $effect.root(() => {
 		q = new SourceQueue()
@@ -52,9 +43,10 @@ describe('SourceQueue', () => {
 		})
 
 		it('reports no cursor entry for an empty list', () => {
-			q.setItems([], 0, null)
+			q.setItems([], 0, { type: 'album', name: 'Empty' })
 			expect(q.cursorEntry).toBeUndefined()
 			expect(q.upcomingCount).toBe(0)
+			expect(q.origin).toBeNull()
 		})
 	})
 
@@ -178,12 +170,21 @@ describe('SourceQueue', () => {
 	})
 
 	describe('reordering within upcoming', () => {
+		it('preserves the origin when reordering is the only mutation', () => {
+			q.setItems([1, 2], -1, { type: 'album', name: 'A' })
+
+			q.moveUpcoming(0, 1)
+
+			expect(upcoming(q)).toEqual([2, 1])
+			expect(q.origin).toEqual({ type: 'album', name: 'A' })
+		})
+
 		it('reorders within upcoming and commits the visible order as canonical', () => {
 			q.setItems([1, 2, 3, 4], 0, null)
 			q.toggleShuffle()
 			const before = upcoming(q)
 
-			moveUpcoming(q, 0, 2)
+			q.moveUpcoming(0, 2)
 
 			expect(q.shuffle).toBe(false)
 			const reordered = [before[1], before[2], before[0]]
@@ -197,7 +198,7 @@ describe('SourceQueue', () => {
 
 		it('moves forward correctly', () => {
 			q.setItems([1, 2, 3, 4], 0, null)
-			moveUpcoming(q, 0, 2) // upcoming [2,3,4] → move 2 to index 2
+			q.moveUpcoming(0, 2) // upcoming [2,3,4] → move 2 to index 2
 			expect(upcoming(q)).toEqual([3, 4, 2])
 		})
 	})
@@ -226,6 +227,14 @@ describe('SourceQueue', () => {
 	})
 
 	describe('removeAll', () => {
+		it('clears the origin when no source rows survive', () => {
+			q.setItems([1], 0, { type: 'album', name: 'A' })
+
+			q.removeAll(1)
+
+			expect(q.origin).toBeNull()
+		})
+
 		it('removes every occurrence in one pass and keeps the cursor row', () => {
 			q.setItems([1, 9, 2, 9, 3], 4, null) // cursor is on the last row (3)
 			q.removeAll(9)
@@ -318,7 +327,7 @@ describe('SourceQueue', () => {
 
 			// A committed reorder recreates every record (fresh canonical ranks);
 			// the cursor must follow the row by entry id, not by object reference.
-			moveUpcoming(q, 0, 1)
+			q.moveUpcoming(0, 1)
 
 			expect(q.cursorEntry?.entryId).toBe(cursorEntryId)
 			expect(q.cursorEntry?.trackId).toBe(1)

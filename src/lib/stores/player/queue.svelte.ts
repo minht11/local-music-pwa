@@ -195,6 +195,11 @@ export class QueueStore {
 		if (sameLayer && slot === from.index) {
 			return
 		}
+		if (sameLayer && from.layer === 'source') {
+			this.#source.moveUpcoming(from.index, slot)
+
+			return
+		}
 
 		const fromList = this.#list(from.layer)
 		const item = fromList.upcomingAt(from.index)

@@ -29,6 +29,7 @@
 		"@types/node": "^26.2.0",
 		"@types/wicg-file-system-access": "^2023.10.7",
 		"fake-indexeddb": "^6.2.5",
+		"fast-check": "^4.9.0",
 		"happy-dom": "^20.11.2",
 		"image-size": "^2.0.2",
 		"knip": "^6.32.2",

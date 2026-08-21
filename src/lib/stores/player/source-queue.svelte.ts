@@ -69,7 +69,7 @@ export class SourceQueue implements UpcomingList {
 		const shuffle = start === 'shuffle'
 		const startIndex = shuffle ? 0 : start
 
-		this.origin = origin
+		this.origin = entries.length === 0 ? null : origin
 		this.shuffle = shuffle
 		this.#entries = shuffle ? toShuffledArray(entries) : entries
 		// A negative start means "no source cursor, everything upcoming"; the clamp
@@ -124,6 +124,20 @@ export class SourceQueue implements UpcomingList {
 		this.#apply((entries) => entries.toSpliced(absolute, 1))
 	}
 
+	/** Reorders upcoming rows in one mutation and commits their visible order. */
+	moveUpcoming = (from: number, to: number): void => {
+		const absoluteFrom = this.#index + 1 + from
+		if (from < 0 || absoluteFrom >= this.#entries.length) {
+			return
+		}
+
+		const item = this.#entries[absoluteFrom]
+		invariant(item !== undefined)
+		const at = this.#index + 1 + Math.max(0, Math.min(to, this.upcomingCount - 1))
+
+		this.#applyCommitted((entries) => entries.toSpliced(absoluteFrom, 1).toSpliced(at, 0, item))
+	}
+
 	/** Commits the visible order (shuffle off); the item keeps its entry id. */
 	insertUpcoming = (item: QueueItem, slot: number): void => {
 		const at = this.#index + 1 + Math.max(0, Math.min(slot, this.upcomingCount))
@@ -135,10 +149,6 @@ export class SourceQueue implements UpcomingList {
 
 	clearUpcoming = (): void => {
 		this.#apply((entries) => entries.slice(0, this.#index + 1))
-
-		if (this.#entries.length === 0) {
-			this.origin = null
-		}
 	}
 
 	removeAll = (id: number, preserveReturnPoint = false): void => {
@@ -172,6 +182,9 @@ export class SourceQueue implements UpcomingList {
 		const next = transform(this.#entries)
 		this.#index = this.#resolveCursorAfterMutation(next, preserveReturnPoint)
 		this.#entries = next
+		if (next.length === 0) {
+			this.origin = null
+		}
 	}
 
 	#resolveCursorAfterMutation = (
