@@ -228,18 +228,18 @@ describe('SourceQueue', () => {
 		})
 	})
 
-	describe('removeAll', () => {
+	describe('removeTracks', () => {
 		it('clears the origin when no source rows survive', () => {
 			q.setItems([1], 0, { type: 'album', name: 'A' })
 
-			q.removeAll(1)
+			q.removeTracks(new Set([1]), false)
 
 			expect(q.origin).toBeNull()
 		})
 
 		it('removes every occurrence in one pass and keeps the row before the gap', () => {
 			q.setItems([1, 9, 2, 9, 3], 4, null) // gap follows the last row (3)
-			q.removeAll(9)
+			q.removeTracks(new Set([9]), false)
 			expect([q.entryBeforeNext?.trackId, ...upcoming(q)]).toEqual([3])
 			// The earlier survivors remain before the row preceding the gap, in order.
 			q.stepBack(false)
@@ -250,7 +250,7 @@ describe('SourceQueue', () => {
 
 		it('drops the row before the gap when its track is removed', () => {
 			q.setItems([1, 2, 3], 1, null)
-			q.removeAll(2)
+			q.removeTracks(new Set([2]), false)
 			expect(q.entryBeforeNext).toBeUndefined()
 			// With no row before the gap the survivors are all upcoming again.
 			expect(upcoming(q)).toEqual([1, 3])
@@ -258,7 +258,7 @@ describe('SourceQueue', () => {
 
 		it('keeps the resume gap before the logical successor during a manual detour', () => {
 			q.setItems([1, 2, 3], 1, null)
-			q.removeAll(2, true)
+			q.removeTracks(new Set([2]), true)
 
 			expect(q.entryBeforeNext?.trackId).toBe(1)
 			q.advance(false)
@@ -362,7 +362,7 @@ describe('SourceQueue', () => {
 
 		it('drops the row before the gap when every duplicate is removed', () => {
 			q.setItems([7, 7, 7], 1, null) // gap follows the middle copy
-			q.removeAll(7) // drops every copy, including the row before the gap
+			q.removeTracks(new Set([7]), false) // drops every copy, including the row before the gap
 			expect(q.entryBeforeNext).toBeUndefined()
 			expect(q.upcomingCount).toBe(0)
 		})

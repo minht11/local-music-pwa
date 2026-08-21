@@ -139,10 +139,6 @@ export class SourceQueue implements UpcomingList {
 		)
 	}
 
-	removeAll = (id: number, preserveGap = false): void => {
-		this.removeTracks(new Set([id]), preserveGap)
-	}
-
 	/** Never removes the row immediately before the next gap. */
 	removeEntries = (entryIds: ReadonlySet<number>): void => {
 		const previousEntryId = this.entryBeforeNext?.entryId

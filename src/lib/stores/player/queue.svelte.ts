@@ -184,8 +184,6 @@ export class QueueStore {
 		}
 	}
 
-	removeTrack = (trackId: number): void => this.removeTracks([trackId])
-
 	/**
 	 * Remove then insert, so the destination re-derives whatever it tracks by
 	 * position — the manual layer's play-next block stays a contiguous prefix, and
