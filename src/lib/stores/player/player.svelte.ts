@@ -149,7 +149,7 @@ export class PlayerStore {
 		this.#setupPreloadEffect()
 		this.#setupVolumeEffect()
 		this.#setupPlaybackRateEffect()
-		this.#setupPlayHistoryEffect()
+		this.#setupPlayHistoryUpdateEffect()
 	}
 
 	#setupQueueDatabaseListener(): void {
@@ -176,7 +176,7 @@ export class PlayerStore {
 			if (next === null) {
 				this.#controller.abort()
 			} else {
-				this.#startEntry(next)
+				this.#beginEntryPlayback(next)
 			}
 		})
 	}
@@ -282,10 +282,7 @@ export class PlayerStore {
 			return
 		}
 
-		this.#controller.play(next.trackId, {
-			gapless: true,
-			fromBeginning: true,
-		})
+		this.#beginEntryPlayback(next, { gapless: true })
 	}
 
 	/** Starts the current row, or explicitly activates the first queued row when idle. */
@@ -297,7 +294,7 @@ export class PlayerStore {
 			return
 		}
 
-		this.#startEntry(this.#queue.advance(false))
+		this.#beginEntryPlayback(this.#queue.advance(false))
 	}
 
 	pause = (): void => {
@@ -310,42 +307,43 @@ export class PlayerStore {
 	}
 
 	/**
-	 * Every playback-affecting queue command reports the row it landed on, or null
-	 * when it was a no-op (queue end, unknown row) — which leaves playback alone.
+	 * Starts a fresh playback/history session for a selected row. Null is a queue
+	 * navigation no-op, so the existing session remains untouched.
 	 */
-	#startEntry = (entry: QueueEntry | null): void => {
+	#beginEntryPlayback = (entry: QueueEntry | null, options: { gapless?: boolean } = {}): void => {
 		if (entry !== null) {
-			this.#controller.play(entry.trackId, { fromBeginning: true })
+			this.#history.begin(entry.trackId)
+			this.#controller.play(entry.trackId, { ...options, fromBeginning: true })
 		}
 	}
 
 	playNext = (): void => {
-		this.#startEntry(this.#queue.advance(true))
+		this.#beginEntryPlayback(this.#queue.advance(true))
 	}
 
 	playPrev = (): void => {
 		// Past the restart threshold "previous" means restarting the current track.
 		if (this.currentTime > 3) {
-			this.#startEntry(this.#queue.current)
+			this.#beginEntryPlayback(this.#queue.current)
 
 			return
 		}
 
-		this.#startEntry(this.#queue.stepBack(true))
+		this.#beginEntryPlayback(this.#queue.stepBack(true))
 	}
 
 	/** Replaces the source queue with `list` and starts playback at `start`. */
 	playFrom = (start: number | 'shuffle', list: readonly number[], origin?: QueueOrigin): void => {
-		this.#startEntry(this.#queue.setSource(list, start, origin))
+		this.#beginEntryPlayback(this.#queue.setSource(list, start, origin))
 	}
 
 	playQueueEntry = (entryId: number): void => {
-		this.#startEntry(this.#queue.playEntry(entryId))
+		this.#beginEntryPlayback(this.#queue.playEntry(entryId))
 	}
 
 	/** Plays a track id wherever it lives: jumps in the source queue, else starts fresh. */
 	playTrackId = (id: number): void => {
-		this.#startEntry(this.#queue.playTrackId(id))
+		this.#beginEntryPlayback(this.#queue.playTrackId(id))
 	}
 
 	togglePlay = (): void => {
@@ -385,16 +383,7 @@ export class PlayerStore {
 		})
 	}
 
-	#setupPlayHistoryEffect(): void {
-		$effect(() => {
-			const trackId = this.#queue.current?.trackId
-			if (trackId == null) {
-				return
-			}
-
-			untrack(() => this.#history.begin(trackId))
-		})
-
+	#setupPlayHistoryUpdateEffect(): void {
 		$effect(() => {
 			const currentTime = this.currentTime
 			const duration = this.duration

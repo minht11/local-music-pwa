@@ -186,7 +186,7 @@ beforeEach(() => {
 	cleanupPlayer = $effect.root(() => {
 		player = new PlayerStore(mockMain)
 	})
-	// Force initial effects (track-change, preload, history, volume, playback-rate)
+	// Force initial effects (preload, history updates, volume, playback-rate)
 	// to run now, then clear their side effects so tests start clean.
 	flushSync()
 	vi.clearAllMocks()
@@ -692,6 +692,8 @@ describe('PlayerStore', () => {
 
 			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 1 })
 			expect(ctrl.play).toHaveBeenCalledWith(1, { gapless: true, fromBeginning: true })
+			expect(mockHistory.complete).toHaveBeenCalledOnce()
+			expect(mockHistory.begin).toHaveBeenCalledWith(1)
 		})
 
 		it('pauses when pauseAfterTrackWhenRepeatIsOff is true and repeat is none', () => {
@@ -720,11 +722,12 @@ describe('PlayerStore', () => {
 	})
 
 	describe('play history tracking', () => {
-		it('calls history.begin with the track id when a track becomes active', () => {
+		it('begins history exactly once when a new entry starts playback', () => {
 			seedTrack(7)
 			player.playFrom(0, [7])
 			flushSync()
 
+			expect(mockHistory.begin).toHaveBeenCalledOnce()
 			expect(mockHistory.begin).toHaveBeenCalledWith(7)
 		})
 
@@ -741,6 +744,45 @@ describe('PlayerStore', () => {
 			flushSync()
 
 			expect(mockHistory.begin).toHaveBeenCalledWith(2)
+		})
+
+		it('begins a new history session on every repeat-one loop', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			player.repeat = 'one'
+			vi.clearAllMocks()
+
+			opts.onTrackEnded()
+			opts.onTrackEnded()
+
+			expect(mockHistory.complete).toHaveBeenCalledTimes(2)
+			expect(mockHistory.begin).toHaveBeenCalledTimes(2)
+			expect(mockHistory.begin).toHaveBeenNthCalledWith(1, 1)
+			expect(mockHistory.begin).toHaveBeenNthCalledWith(2, 1)
+		})
+
+		it('does not begin a new history session when resuming the current entry', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			player.pause()
+			vi.clearAllMocks()
+
+			player.play()
+
+			expect(ctrl.play).toHaveBeenCalledWith(1)
+			expect(mockHistory.begin).not.toHaveBeenCalled()
+		})
+
+		it('begins a new history session when restarting the current entry', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			ctrl.currentTime = 10
+			vi.clearAllMocks()
+
+			player.playPrev()
+
+			expect(ctrl.play).toHaveBeenCalledWith(1, { fromBeginning: true })
+			expect(mockHistory.begin).toHaveBeenCalledWith(1)
 		})
 
 		it('calls history.update when currentTime changes', () => {
