@@ -238,6 +238,8 @@ export class PlayerStore {
 			untrack(() => {
 				updatePlaybackRate(rate, preservePitch)
 			})
+
+			return updatePlaybackRate.cancel
 		})
 	}
 
@@ -393,6 +395,7 @@ export class PlayerStore {
 
 	dispose(): void {
 		this.#removeDatabaseListener?.()
+		this.#ms.dispose()
 		this.#controller.abort()
 		this.#graph.dispose()
 	}

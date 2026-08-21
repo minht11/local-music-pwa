@@ -9,54 +9,65 @@ interface MockOptions {
 	isGaplessEnabled: () => boolean
 }
 
-const { MockPlaybackController, mockHistory, controllerRef, databaseChange } = vi.hoisted(() => {
-	// No type declarations inside vi.hoisted (Oxc parser issue in .svelte.ts files)
-	const controllerRef: { instance: unknown; options: unknown } = {
-		instance: null,
-		options: null,
-	}
-
-	const mockHistory = {
-		begin: vi.fn(),
-		update: vi.fn(),
-		complete: vi.fn(),
-	}
-	const databaseChange: { listener: ((changes: readonly unknown[]) => void) | null } = {
-		listener: null,
-	}
-
-	class MockPlaybackController {
-		playing = $state(false)
-		duration = $state(0)
-		currentTime = $state(0)
-		loading = $state(false)
-
-		play = vi.fn((_trackId: number, _opts?: unknown) => {
-			this.playing = true
-			return Promise.resolve()
-		})
-		pause = vi.fn(() => {
-			this.playing = false
-		})
-		seek = vi.fn((time: number) => {
-			this.currentTime = time
-		})
-		setPlaybackRate = vi.fn()
-		preloadNext = vi.fn(() => Promise.resolve())
-		abortNext = vi.fn()
-		abort = vi.fn(() => {
-			this.playing = false
-			this.duration = 0
-		})
-
-		constructor(_graph: unknown, options: MockOptions) {
-			controllerRef.instance = this
-			controllerRef.options = options
+const { MockPlaybackController, mockHistory, mockMediaSession, controllerRef, databaseChange } =
+	vi.hoisted(() => {
+		// No type declarations inside vi.hoisted (Oxc parser issue in .svelte.ts files)
+		const controllerRef: { instance: unknown; options: unknown } = {
+			instance: null,
+			options: null,
 		}
-	}
 
-	return { MockPlaybackController, mockHistory, controllerRef, databaseChange }
-})
+		const mockHistory = {
+			begin: vi.fn(),
+			update: vi.fn(),
+			complete: vi.fn(),
+		}
+		const mockMediaSession = {
+			updatePosition: vi.fn(),
+			dispose: vi.fn(),
+		}
+		const databaseChange: { listener: ((changes: readonly unknown[]) => void) | null } = {
+			listener: null,
+		}
+
+		class MockPlaybackController {
+			playing = $state(false)
+			duration = $state(0)
+			currentTime = $state(0)
+			loading = $state(false)
+
+			play = vi.fn((_trackId: number, _opts?: unknown) => {
+				this.playing = true
+				return Promise.resolve()
+			})
+			pause = vi.fn(() => {
+				this.playing = false
+			})
+			seek = vi.fn((time: number) => {
+				this.currentTime = time
+			})
+			setPlaybackRate = vi.fn()
+			preloadNext = vi.fn(() => Promise.resolve())
+			abortNext = vi.fn()
+			abort = vi.fn(() => {
+				this.playing = false
+				this.duration = 0
+			})
+
+			constructor(_graph: unknown, options: MockOptions) {
+				controllerRef.instance = this
+				controllerRef.options = options
+			}
+		}
+
+		return {
+			MockPlaybackController,
+			mockHistory,
+			mockMediaSession,
+			controllerRef,
+			databaseChange,
+		}
+	})
 
 vi.mock('$lib/audio/playback-controller.svelte.ts', () => ({
 	PlaybackController: MockPlaybackController,
@@ -82,7 +93,8 @@ vi.mock('$lib/stores/player/equalizer.svelte.ts', () => ({
 
 vi.mock('$lib/stores/player/media-session.svelte.ts', () => ({
 	MediaSessionController: class {
-		updatePosition() {}
+		updatePosition = mockMediaSession.updatePosition
+		dispose = mockMediaSession.dispose
 	},
 }))
 
@@ -183,6 +195,7 @@ let ctrl: InstanceType<typeof MockPlaybackController> = null as never
 let opts: MockOptions = null as never
 
 beforeEach(() => {
+	vi.useFakeTimers()
 	cleanupPlayer = $effect.root(() => {
 		player = new PlayerStore(mockMain)
 	})
@@ -201,9 +214,29 @@ afterEach(() => {
 	queryState.retainedValue = undefined
 	queryState.retainPrevious = false
 	databaseChange.listener = null
+	vi.useRealTimers()
 })
 
 describe('PlayerStore', () => {
+	describe('lifecycle', () => {
+		it('disposes the Media Session controller', () => {
+			player.dispose()
+
+			expect(mockMediaSession.dispose).toHaveBeenCalledOnce()
+		})
+
+		it('cancels a pending playback-rate update when its effects are destroyed', () => {
+			player.playbackRate = 1.5
+			flushSync()
+			vi.clearAllMocks()
+
+			cleanupPlayer()
+			vi.advanceTimersByTime(200)
+
+			expect(ctrl.setPlaybackRate).not.toHaveBeenCalled()
+		})
+	})
+
 	describe('volume', () => {
 		it('starts at 100 by default', () => {
 			expect(player.volume).toBe(100)
