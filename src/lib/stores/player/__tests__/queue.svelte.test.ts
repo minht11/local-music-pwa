@@ -221,7 +221,7 @@ describe('QueueStore', () => {
 		it('jumps backward to an already-played source row', () => {
 			q.setSource([1, 2, 3], 0)
 			// Capture the row while upcoming, then advance past it so it lands behind
-			// the cursor — playEntry must still jump back to it.
+			// the source gap — playEntry must still jump back to it.
 			const entryId = q.itemAt('source', 0)?.entryId
 			invariant(entryId !== undefined)
 			q.advance()
@@ -549,12 +549,19 @@ describe('QueueStore', () => {
 			expect(q.current).toBeNull()
 		})
 
-		it('can advance from a deleted manual track to the source successor', () => {
+		it('selects the source successor when the current manual track is deleted', () => {
 			q.setSource([1, 2], 0)
 			q.enqueue([9], 'next')
 			q.advance()
 			q.removeTrack(9)
-			expect(q.advance()).toMatchObject({ layer: 'source', trackId: 2 })
+			expect(q.current).toMatchObject({ layer: 'source', trackId: 2 })
+		})
+
+		it('clears current when a deleted manual track has no successor', () => {
+			q.enqueue([9], 'next')
+			q.advance()
+			q.removeTrack(9)
+			expect(q.current).toBeNull()
 		})
 
 		it('resumes at the source successor when the manual detour return point is deleted', () => {

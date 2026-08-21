@@ -168,8 +168,7 @@ export class PlayerStore {
 				return
 			}
 
-			const next =
-				previous.layer === 'manual' ? this.#queue.advance(false) : this.#queue.current
+			const next = this.#queue.current
 			if (next === null) {
 				this.#controller.abort()
 			} else {

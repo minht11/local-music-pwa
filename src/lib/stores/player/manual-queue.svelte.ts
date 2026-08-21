@@ -6,24 +6,18 @@ interface ManualEntry extends QueueItem {
 }
 
 /**
- * The tracks the user explicitly queued. FIFO.
+ * Pending tracks the user explicitly queued. FIFO.
  * Shuffle does not affect it.
  */
 export class ManualQueue implements UpcomingList {
 	#entries: readonly ManualEntry[] = $state.raw([])
-	#activeDetour: ManualEntry | undefined = $state(undefined)
-
-	/** The active manual row detouring from the source cursor, if any. */
-	get activeDetour(): QueueItem | undefined {
-		return this.#activeDetour
-	}
 
 	get upcomingCount(): number {
 		return this.#entries.length
 	}
 
 	get isEmpty(): boolean {
-		return this.#activeDetour === undefined && this.#entries.length === 0
+		return this.#entries.length === 0
 	}
 
 	upcomingAt(i: number): QueueItem | undefined {
@@ -79,7 +73,7 @@ export class ManualQueue implements UpcomingList {
 		this.#entries = this.#entries.filter((entry) => !entryIds.has(entry.entryId))
 	}
 
-	/** Consumes through row `i`: it starts the detour and the rows it skipped are dropped. */
+	/** Consumes through row `i`; rows skipped before it are dropped. */
 	take = (i: number): QueueItem | undefined => {
 		const entry = this.#entries[i]
 		if (entry === undefined) {
@@ -87,22 +81,12 @@ export class ManualQueue implements UpcomingList {
 		}
 
 		this.#entries = this.#entries.slice(i + 1)
-		this.#activeDetour = entry
 
 		return entry
 	}
 
-	/** Ends the active manual detour. */
-	endDetour = (): void => {
-		this.#activeDetour = undefined
-	}
-
-	removeAll = (trackId: number): void => {
-		this.#entries = this.#entries.filter((entry) => entry.trackId !== trackId)
-
-		if (this.#activeDetour?.trackId === trackId) {
-			this.#activeDetour = undefined
-		}
+	removeTracks = (trackIds: ReadonlySet<number>): void => {
+		this.#entries = this.#entries.filter((entry) => !trackIds.has(entry.trackId))
 	}
 
 	clearUpcoming = (): void => {

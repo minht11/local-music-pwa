@@ -123,8 +123,8 @@ export class QueueModel {
 			return
 		}
 		if (manualWasActive) {
-			const anchor = this.sourcePlayed.at(-1)
-			this.current = anchor ? asQueueEntry('source', anchor) : null
+			this.current = null
+			this.advance(false)
 		} else {
 			this.sourceUpcoming = [...this.sourcePlayed, ...this.sourceUpcoming]
 			this.sourcePlayed = []

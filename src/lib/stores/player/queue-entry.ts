@@ -7,7 +7,7 @@ export interface QueueItem {
 
 /**
  * A layer's upcoming rows, addressed layer-relative. Both layers answer these
- * despite storing rows differently (a FIFO vs a window past a cursor), which is
+ * despite storing rows differently (a FIFO vs an ordered list split by its next gap), which is
  * what lets `QueueStore` route by layer instead of branching per operation.
  */
 export interface UpcomingList {
