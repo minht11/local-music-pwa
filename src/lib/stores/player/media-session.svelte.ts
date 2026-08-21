@@ -1,16 +1,6 @@
 import { formatArtists, formatNameOrUnknown } from '$lib/helpers/utils/text'
 import type { TrackData } from '$lib/library/get/value'
 
-const ACTIONS = [
-	'play',
-	'pause',
-	'nexttrack',
-	'previoustrack',
-	'seekbackward',
-	'seekforward',
-	'seekto',
-] as const satisfies readonly MediaSessionAction[]
-
 interface PlayerImpl {
 	activeTrack: TrackData | undefined
 	artworkSrc: string | undefined
@@ -27,7 +17,6 @@ interface PlayerImpl {
 
 export class MediaSessionController {
 	#player: PlayerImpl
-	#mediaSession: MediaSession | undefined
 
 	constructor(player: PlayerImpl) {
 		this.#player = player
@@ -36,8 +25,6 @@ export class MediaSessionController {
 		if (!ms) {
 			return
 		}
-		this.#mediaSession = ms
-
 		const setAction = ms.setActionHandler.bind(ms)
 
 		setAction('play', () => player.play())
@@ -93,20 +80,6 @@ export class MediaSessionController {
 				],
 			})
 		})
-	}
-
-	dispose(): void {
-		const ms = this.#mediaSession
-		if (!ms) {
-			return
-		}
-
-		for (const action of ACTIONS) {
-			ms.setActionHandler(action, null)
-		}
-		ms.metadata = null
-		ms.playbackState = 'none'
-		this.#mediaSession = undefined
 	}
 
 	updatePosition(currentTime: number): void {
