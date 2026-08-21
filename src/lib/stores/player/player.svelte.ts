@@ -109,7 +109,12 @@ export class PlayerStore {
 	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.current?.trackId ?? -1, {
 		allowEmpty: true,
 	})
-	readonly activeTrack = $derived(this.#activeTrackQuery.value)
+	readonly activeTrack = $derived.by(() => {
+		const currentTrackId = this.#queue.current?.trackId
+		const track = this.#activeTrackQuery.value
+
+		return track?.id === currentTrackId ? track : undefined
+	})
 
 	readonly #artwork = createManagedArtwork(() =>
 		getTrackManagedArtworkSource(this.activeTrack, 'full'),
@@ -141,7 +146,6 @@ export class PlayerStore {
 		this.#controller = this.#createPlaybackController()
 		this.#setupQueueDatabaseListener()
 
-		this.#setupTrackChangeEffect()
 		this.#setupPreloadEffect()
 		this.#setupVolumeEffect()
 		this.#setupPlaybackRateEffect()
@@ -233,18 +237,6 @@ export class PlayerStore {
 
 			untrack(() => {
 				updatePlaybackRate(rate, preservePitch)
-			})
-		})
-	}
-
-	#setupTrackChangeEffect(): void {
-		$effect(() => {
-			const track = this.activeTrack
-
-			untrack(() => {
-				if (!track) {
-					this.#controller.abort()
-				}
 			})
 		})
 	}

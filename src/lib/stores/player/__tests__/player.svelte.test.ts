@@ -105,12 +105,26 @@ vi.mock('$lib/db/events.ts', () => ({
 	dispatchDatabaseChangedEvent: vi.fn(),
 }))
 
-const queryTracks = new Map<number, { id: number; name: string; duration: number }>()
+interface QueryTrack {
+	id: number
+	name: string
+	duration: number
+}
+
+const queryTracks = new Map<number, QueryTrack>()
+const queryState: { retainedValue: QueryTrack | undefined; retainPrevious: boolean } = {
+	retainedValue: undefined,
+	retainPrevious: false,
+}
 
 vi.mock('$lib/library/get/value-queries.ts', () => ({
 	createTrackQuery: (idGetter: () => number, _opts?: unknown) => ({
 		get value() {
-			return queryTracks.get(idGetter()) ?? null
+			if (queryState.retainPrevious) {
+				return queryState.retainedValue
+			}
+
+			return queryTracks.get(idGetter())
 		},
 		get error() {
 			return undefined
@@ -184,6 +198,8 @@ afterEach(() => {
 	cleanupPlayer()
 	vi.clearAllMocks()
 	queryTracks.clear()
+	queryState.retainedValue = undefined
+	queryState.retainPrevious = false
 	databaseChange.listener = null
 })
 
@@ -277,18 +293,39 @@ describe('PlayerStore', () => {
 			expect(ctrl.play).toHaveBeenCalledWith(5)
 		})
 
-		it('activates and plays the first pending entry before its track query has resolved', () => {
+		it('keeps playing the first pending entry while its track query is unresolved', () => {
 			// An unseeded track stands in for a query that has not come back yet.
 			player.queue.enqueue([7, 8], 'last')
 			expect(player.queue.current).toBeNull()
 			expect(player.queue.count('manual')).toBe(2)
-			expect(player.activeTrack).toBeNull()
+			expect(player.activeTrack).toBeUndefined()
 
 			player.play()
+			flushSync()
 
 			expect(ctrl.play).toHaveBeenCalledWith(7, { fromBeginning: true })
+			expect(ctrl.abort).not.toHaveBeenCalled()
+			expect(ctrl.playing).toBe(true)
 			expect(player.queue.current).toMatchObject({ layer: 'manual', trackId: 7 })
 			expect(player.queue.count('manual')).toBe(1)
+		})
+
+		it('does not expose metadata retained from the previous query key', () => {
+			seedTrack(1)
+			player.playFrom(0, [1, 2])
+			expect(player.activeTrack?.id).toBe(1)
+
+			queryState.retainedValue = queryTracks.get(1)
+			queryState.retainPrevious = true
+			vi.clearAllMocks()
+
+			player.playNext()
+			flushSync()
+
+			expect(player.queue.current?.trackId).toBe(2)
+			expect(player.activeTrack).toBeUndefined()
+			expect(ctrl.abort).not.toHaveBeenCalled()
+			expect(ctrl.playing).toBe(true)
 		})
 
 		it('does nothing when the queue is empty', () => {
