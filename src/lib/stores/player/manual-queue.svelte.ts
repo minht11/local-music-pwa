@@ -20,13 +20,9 @@ export class ManualQueue implements UpcomingList {
 	}
 
 	enqueue = (trackIds: readonly number[], position: 'next' | 'last'): void => {
-		const at = position === 'next' ? 0 : this.#entries.length
-
-		this.#entries = this.#entries.toSpliced(
-			at,
-			0,
-			...trackIds.map((trackId) => ({ trackId, entryId: mintEntryId() })),
-		)
+		const entries = trackIds.map((trackId) => ({ trackId, entryId: mintEntryId() }))
+		this.#entries =
+			position === 'next' ? entries.concat(this.#entries) : this.#entries.concat(entries)
 	}
 
 	insertUpcoming = (item: QueueItem, slot: number): void => {

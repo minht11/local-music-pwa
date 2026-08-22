@@ -188,10 +188,7 @@ export class PlayerStore {
 				return
 			}
 
-			const previous = this.#queue.current
-			this.#queue.removeTracks([...deletedTrackIds])
-
-			if (previous === null || !deletedTrackIds.has(previous.trackId)) {
+			if (!this.#queue.removeTracks(deletedTrackIds)) {
 				return
 			}
 

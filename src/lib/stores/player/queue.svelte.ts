@@ -165,23 +165,25 @@ export class QueueStore {
 
 	/**
 	 * Removes every occurrence of deleted library tracks. Deleting an active
-	 * manual row selects its next successor; deleting an active source row clears current.
+	 * manual row selects its next successor; deleting an active source row clears
+	 * current. Returns whether the active entry was removed.
 	 */
-	removeTracks = (trackIds: readonly number[]): void => {
-		const toRemove = new Set(trackIds)
+	removeTracks = (trackIds: ReadonlySet<number>): boolean => {
 		const previous = this.#current
 
-		this.#manual.removeTracks(toRemove)
-		this.#source.removeTracks(toRemove, previous?.layer === 'manual')
+		this.#manual.removeTracks(trackIds)
+		this.#source.removeTracks(trackIds, previous?.layer === 'manual')
 
-		if (previous === null || !toRemove.has(previous.trackId)) {
-			return
+		if (previous === null || !trackIds.has(previous.trackId)) {
+			return false
 		}
 
 		this.#current = null
 		if (previous.layer === 'manual') {
 			this.advance(false)
 		}
+
+		return true
 	}
 
 	/**

@@ -429,7 +429,7 @@ describe('QueueStore', () => {
 		it('purges the track from manual and source in one fan-out', () => {
 			q.setSource([1, 9, 2, 9], 0)
 			q.enqueue([9, 8], 'last')
-			q.removeTracks([9])
+			q.removeTracks(new Set([9]))
 			expect(manual(q)).toEqual([8])
 			expect([q.current?.trackId, ...upcomingSource(q)]).toEqual([1, 2])
 		})
@@ -438,14 +438,14 @@ describe('QueueStore', () => {
 			q.setSource([1], 0)
 			q.enqueue([8, 9], 'next')
 			q.enqueue([20], 'last')
-			q.removeTracks([8])
+			q.removeTracks(new Set([8]))
 			q.enqueue([10], 'next')
 			expect(manual(q)).toEqual([10, 9, 20])
 		})
 
 		it('clears the active entry when the current source track is deleted', () => {
 			q.setSource([10, 20, 30], 1)
-			q.removeTracks([20])
+			expect(q.removeTracks(new Set([20]))).toBe(true)
 			expect(q.current).toBeNull()
 		})
 
@@ -453,14 +453,14 @@ describe('QueueStore', () => {
 			q.setSource([1, 2], 0)
 			q.enqueue([9], 'next')
 			q.advance()
-			q.removeTracks([9])
+			expect(q.removeTracks(new Set([9]))).toBe(true)
 			expect(q.current).toMatchObject({ layer: 'source', trackId: 2 })
 		})
 
 		it('clears current when a deleted manual track has no successor', () => {
 			q.enqueue([9], 'next')
 			q.advance()
-			q.removeTracks([9])
+			expect(q.removeTracks(new Set([9]))).toBe(true)
 			expect(q.current).toBeNull()
 		})
 
@@ -469,7 +469,7 @@ describe('QueueStore', () => {
 			q.enqueue([9], 'next')
 			q.advance()
 
-			q.removeTracks([2])
+			expect(q.removeTracks(new Set([2]))).toBe(false)
 
 			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
 			expect(q.advance()).toMatchObject({ layer: 'source', trackId: 3 })
@@ -480,7 +480,7 @@ describe('QueueStore', () => {
 			q.enqueue([9], 'next')
 			q.advance()
 
-			q.removeTracks([2, 4])
+			expect(q.removeTracks(new Set([2, 4]))).toBe(false)
 
 			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
 			expect(q.advance()).toMatchObject({ layer: 'source', trackId: 3 })

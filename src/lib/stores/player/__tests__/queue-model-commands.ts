@@ -206,7 +206,7 @@ const removeTracksCommand = defineCommand({
 	weight: 15,
 	arbitrary: fc.array(trackId, { minLength: 1, maxLength: 3 }),
 	run: (trackIds, model, real) => {
-		real.queue.removeTracks(trackIds)
+		real.queue.removeTracks(new Set(trackIds))
 		model.removeTracks(new Set(trackIds))
 	},
 	describe: (trackIds) => `removeTracks(${JSON.stringify(trackIds)})`,
