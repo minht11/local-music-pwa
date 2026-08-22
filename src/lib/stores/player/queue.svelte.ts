@@ -29,7 +29,6 @@ export interface QueueView {
 	readonly current: QueueEntry | null
 	readonly origin: QueueOrigin | null
 	readonly shuffle: boolean
-	readonly isEmpty: boolean
 	count: (layer: QueueLayer) => number
 	itemAt: (layer: QueueLayer, i: number) => QueueItem | undefined
 	toggleShuffle: () => void
@@ -82,10 +81,6 @@ export class QueueStore {
 		return this.#current
 	}
 
-	get isEmpty(): boolean {
-		return this.#current === null && this.#manual.isEmpty && this.#source.length === 0
-	}
-
 	/** Selecting a source ends the active manual row; queued rows survive. */
 	setSource = (
 		ids: readonly number[],
@@ -109,6 +104,11 @@ export class QueueStore {
 
 	peekNext = (loop = false): number | null =>
 		this.#manual.upcomingAt(0)?.trackId ?? this.#source.peekNext(loop) ?? null
+
+	canStepBack = (loop = false): boolean =>
+		this.#current?.layer === 'manual'
+			? this.#source.entryBeforeNext !== undefined
+			: this.#source.canStepBack(loop)
 
 	/**
 	 * Consumed manual tracks are gone, so this navigates the source only; from a

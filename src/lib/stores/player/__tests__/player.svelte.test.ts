@@ -360,6 +360,37 @@ describe('PlayerStore', () => {
 		})
 	})
 
+	describe('control capabilities', () => {
+		it('distinguishes playable rows from retained source history', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(9)
+			player.playFrom(0, [1, 2])
+			player.queue.enqueue([9], 'next')
+			player.playNext()
+			player.queue.clear('source')
+			flushSync()
+			vi.clearAllMocks()
+
+			dispatchTrackDelete(9)
+			flushSync()
+
+			expect(player.queue.current).toBeNull()
+			expect(player.queue.count('manual')).toBe(0)
+			expect(player.queue.count('source')).toBe(0)
+			expect(player.canTogglePlay).toBe(false)
+			expect(player.canPlayNext).toBe(true)
+			expect(player.canPlayPrev).toBe(true)
+
+			vi.clearAllMocks()
+			player.play()
+			expect(ctrl.play).not.toHaveBeenCalled()
+
+			player.playNext()
+			expect(ctrl.play).toHaveBeenCalledWith(1, { fromBeginning: true })
+		})
+	})
+
 	describe('seek', () => {
 		it('delegates to controller.seek', () => {
 			player.seek(42)

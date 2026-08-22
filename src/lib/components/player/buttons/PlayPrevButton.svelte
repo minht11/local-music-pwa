@@ -9,7 +9,7 @@
 
 <IconButton
 	tooltip={m.playerPlayPreviousTrack()}
-	disabled={player.queue.isEmpty}
+	disabled={!player.canPlayPrev}
 	class={className}
 	onclick={player.playPrev}
 >

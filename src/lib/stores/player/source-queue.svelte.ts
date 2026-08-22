@@ -72,6 +72,8 @@ export class SourceQueue implements UpcomingList {
 	peekNext = (loop: boolean): number | undefined =>
 		this.#entries[this.#stepped(1, loop) ?? -1]?.trackId
 
+	canStepBack = (loop: boolean): boolean => this.#stepped(-1, loop) !== undefined
+
 	stepBack = (loop: boolean): QueueItem | undefined => this.#land(this.#stepped(-1, loop))
 
 	jumpToEntryId = (entryId: number): QueueItem | undefined =>

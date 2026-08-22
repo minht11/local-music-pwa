@@ -16,10 +16,6 @@ export class ManualQueue implements UpcomingList {
 		return this.#entries.length
 	}
 
-	get isEmpty(): boolean {
-		return this.#entries.length === 0
-	}
-
 	upcomingAt(i: number): QueueItem | undefined {
 		return this.#entries[i]
 	}

@@ -37,7 +37,8 @@ describe('QueueStore', () => {
 		it('returns null for an empty source', () => {
 			expect(q.setSource([], 0)).toBeNull()
 			expect(q.current).toBeNull()
-			expect(q.isEmpty).toBe(true)
+			expect(q.count('manual')).toBe(0)
+			expect(q.count('source')).toBe(0)
 		})
 
 		it('stores the origin', () => {

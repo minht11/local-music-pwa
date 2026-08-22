@@ -85,6 +85,19 @@ export class PlayerStore {
 	get loading() {
 		return this.#controller.loading
 	}
+	get canTogglePlay(): boolean {
+		return this.playing || this.#queue.current !== null || this.#queue.peekNext(false) !== null
+	}
+	get canPlayNext(): boolean {
+		return this.#queue.peekNext(true) !== null
+	}
+	get canPlayPrev(): boolean {
+		if (this.#queue.canStepBack(true)) {
+			return true
+		}
+
+		return this.#queue.current !== null && this.currentTime > 3
+	}
 
 	/**
 	 * Everything decided about the moment the current track ends, computed once so
