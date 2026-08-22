@@ -18,11 +18,8 @@ interface DragState {
 
 interface UseTrackDragControllerOptions {
 	itemsCount: () => number
-	/**
-	 * `insertSlot` is a gap between rows (0..count). The list can mutate mid-drag,
-	 * so `fromIndex` is where the gesture began, not where the row is now.
-	 */
-	onDrop: (row: TrackRowIdentity, fromIndex: number, insertSlot: number) => void
+	/** `insertSlot` is a gap between rows (0..count). */
+	onDrop: (row: TrackRowIdentity, insertSlot: number) => void
 	onStart?: () => void
 }
 
@@ -199,11 +196,12 @@ export const useTrackDragController = ({
 				return
 			}
 
-			const { row: draggedRow, fromIndex, insertIndex } = drag
+			const { row: draggedRow, insertIndex } = drag
+			const releaseInsertIndex = getInsertIndex(event.clientX, event.clientY) ?? insertIndex
 			suppressGestureClick()
 			stop()
 
-			onDrop(draggedRow, fromIndex, insertIndex)
+			onDrop(draggedRow, releaseInsertIndex)
 		}
 
 		// The browser took over the gesture (scroll, shade); abort instead of dropping.

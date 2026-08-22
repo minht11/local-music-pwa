@@ -237,10 +237,7 @@ describe('drop slot mapping', () => {
 	it('a drop past the last row lands at the end of the last layer', () => {
 		seedAllSections()
 
-		rows.listProps.onDrop(
-			{ index: 1, entryId: trackRowAt(1).entryId },
-			rows.listProps.source.count,
-		)
+		rows.listProps.onDrop(trackRowAt(1).entryId, rows.listProps.source.count)
 
 		expect(manualIds()).toEqual([9])
 		expect(sourceIds()).toEqual([2, 3, 8])
@@ -250,10 +247,7 @@ describe('drop slot mapping', () => {
 		// Idle enqueue leaves all three tracks pending.
 		queue.enqueue([8, 9, 10], 'last')
 
-		rows.listProps.onDrop(
-			{ index: 1, entryId: trackRowAt(1).entryId },
-			rows.listProps.source.count,
-		)
+		rows.listProps.onDrop(trackRowAt(1).entryId, rows.listProps.source.count)
 
 		expect(manualIds()).toEqual([9, 10, 8])
 	})
@@ -262,7 +256,7 @@ describe('drop slot mapping', () => {
 		seedAllSections()
 
 		// Row 2 is manual track 9; slot 1 is the gap before manual track 8.
-		rows.listProps.onDrop({ index: 2, entryId: trackRowAt(2).entryId }, 1)
+		rows.listProps.onDrop(trackRowAt(2).entryId, 1)
 
 		expect(manualIds()).toEqual([9, 8])
 		expect(sourceIds()).toEqual([2, 3])
@@ -272,7 +266,7 @@ describe('drop slot mapping', () => {
 		seedAllSections()
 
 		// Row 5 is source track 3; slot 4 is the gap before source track 2.
-		rows.listProps.onDrop({ index: 5, entryId: trackRowAt(5).entryId }, 4)
+		rows.listProps.onDrop(trackRowAt(5).entryId, 4)
 
 		expect(manualIds()).toEqual([8, 9])
 		expect(sourceIds()).toEqual([3, 2])
@@ -282,7 +276,7 @@ describe('drop slot mapping', () => {
 		seedAllSections()
 
 		// Row 1 is manual track 8; slot 5 is the gap between source tracks 2 and 3.
-		rows.listProps.onDrop({ index: 1, entryId: trackRowAt(1).entryId }, 5)
+		rows.listProps.onDrop(trackRowAt(1).entryId, 5)
 
 		expect(manualIds()).toEqual([9])
 		expect(sourceIds()).toEqual([2, 8, 3])
@@ -291,7 +285,7 @@ describe('drop slot mapping', () => {
 	it('a drop on the source header from the manual layer targets the end of manual', () => {
 		seedAllSections()
 
-		rows.listProps.onDrop({ index: 1, entryId: trackRowAt(1).entryId }, 3)
+		rows.listProps.onDrop(trackRowAt(1).entryId, 3)
 
 		expect(manualIds()).toEqual([9, 8])
 		expect(sourceIds()).toEqual([2, 3])
@@ -300,7 +294,7 @@ describe('drop slot mapping', () => {
 	it('a drop on the source header from the source layer targets the end of manual', () => {
 		seedAllSections()
 
-		rows.listProps.onDrop({ index: 5, entryId: trackRowAt(5).entryId }, 3)
+		rows.listProps.onDrop(trackRowAt(5).entryId, 3)
 
 		expect(manualIds()).toEqual([8, 9, 3])
 		expect(sourceIds()).toEqual([2])
@@ -309,12 +303,12 @@ describe('drop slot mapping', () => {
 	it('the start of the source layer stays reachable from either layer', () => {
 		seedAllSections()
 
-		rows.listProps.onDrop({ index: 5, entryId: trackRowAt(5).entryId }, 4)
+		rows.listProps.onDrop(trackRowAt(5).entryId, 4)
 
 		expect(manualIds()).toEqual([8, 9])
 		expect(sourceIds()).toEqual([3, 2])
 
-		rows.listProps.onDrop({ index: 1, entryId: trackRowAt(1).entryId }, 4)
+		rows.listProps.onDrop(trackRowAt(1).entryId, 4)
 
 		expect(manualIds()).toEqual([9])
 		expect(sourceIds()).toEqual([8, 3, 2])
@@ -323,7 +317,7 @@ describe('drop slot mapping', () => {
 	it('a drop above the first row lands at the start of the first layer', () => {
 		seedAllSections()
 
-		rows.listProps.onDrop({ index: 4, entryId: trackRowAt(4).entryId }, 0)
+		rows.listProps.onDrop(trackRowAt(4).entryId, 0)
 
 		expect(manualIds()).toEqual([2, 8, 9])
 		expect(sourceIds()).toEqual([3])
@@ -332,18 +326,21 @@ describe('drop slot mapping', () => {
 	it('ignores a drop whose entry id is no longer in the queue', () => {
 		seedAllSections()
 
-		rows.listProps.onDrop({ index: 1, entryId: 999_999 }, 0)
+		rows.listProps.onDrop(999_999, 0)
 
 		expect(manualIds()).toEqual([8, 9])
 		expect(sourceIds()).toEqual([2, 3])
 	})
 
-	it('does not consult the dragged row index', () => {
+	it('moves a live entry after an earlier row shifts its index', () => {
 		seedAllSections()
+		const removedEntryId = trackRowAt(1).entryId
+		const draggedEntryId = trackRowAt(2).entryId
 
-		rows.listProps.onDrop({ index: 99, entryId: trackRowAt(1).entryId }, 3)
+		queue.removeEntries([removedEntryId])
+		rows.listProps.onDrop(draggedEntryId, rows.listProps.source.count)
 
-		expect(manualIds()).toEqual([9, 8])
-		expect(sourceIds()).toEqual([2, 3])
+		expect(manualIds()).toEqual([])
+		expect(sourceIds()).toEqual([2, 3, 9])
 	})
 })

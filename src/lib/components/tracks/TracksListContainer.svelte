@@ -72,10 +72,9 @@
 		customRow?: Snippet<[number]>
 		/**
 		 * Supplying this makes track rows draggable; custom rows never are. Receives
-		 * the dragged row plus the raw insert slot (a gap between rows, 0..count), and
-		 * only fires while `row.index` still resolves to the row the gesture started on.
+		 * the dragged entry id plus the raw insert slot (a gap between rows, 0..count).
 		 */
-		onDrop?: (row: TrackRowLocator, insertSlot: number) => void
+		onDrop?: (entryId: number, insertSlot: number) => void
 	}
 </script>
 
@@ -132,10 +131,6 @@
 		return row.type === 'track' ? row : undefined
 	}
 
-	/** A list that mutates mid-drag (the queue advances on track end) invalidates the drop. */
-	const isDropStillValid = (fromIndex: number, entryId: number): boolean =>
-		trackAt(fromIndex)?.entryId === entryId
-
 	const { getMenuItems, getMultiSelectMenuItems } = useTrackMenuItems(
 		() => menuItems,
 		() => predefinedMenuItems,
@@ -173,10 +168,8 @@
 
 	const dragController = useTrackDragController({
 		itemsCount: () => rowCount,
-		onDrop: ({ entryId }, fromIndex, insertSlot) => {
-			if (isDropStillValid(fromIndex, entryId)) {
-				onDrop?.({ index: fromIndex, entryId }, insertSlot)
-			}
+		onDrop: ({ entryId }, insertSlot) => {
+			onDrop?.(entryId, insertSlot)
 		},
 		onStart: () => selection.cancelSelection(),
 	})
@@ -282,7 +275,7 @@
 				selected={selection.has(row.entryId)}
 				showReorderButton={isReorderable}
 				{showFavoriteButton}
-				reorderDragging={drag?.fromIndex === item.index}
+				reorderDragging={drag?.row.entryId === row.entryId}
 				reorderInsertBefore={drag !== null && drag.insertIndex === item.index}
 				reorderInsertAfter={drag !== null && drag.insertIndex === item.index + 1}
 				menuItems={(track) => getMenuItems(track, { index: item.index, entryId: row.entryId })}

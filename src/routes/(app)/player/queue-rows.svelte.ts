@@ -186,7 +186,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		return null
 	}
 
-	const onDrop = ({ entryId }: TrackRowLocator, insertSlot: number): void => {
+	const onDrop = (entryId: number, insertSlot: number): void => {
 		const toSlot = dropSlotFor(insertSlot)
 		if (toSlot) {
 			player.queue.moveEntry(entryId, toSlot)
