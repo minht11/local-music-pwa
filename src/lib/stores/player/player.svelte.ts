@@ -20,19 +20,7 @@ import { type QueueEntry, type QueueOrigin, QueueStore, type QueueView } from '.
 
 export type PlayerRepeat = 'none' | 'one' | 'all'
 
-/**
- * What follows the current track once its upcoming rows are gone — the states a
- * view behind the playing track can be in.
- */
-export type UpNextStatus =
-	/** Playback was never started. */
-	| { kind: 'idle' }
-	/** Upcoming rows remain (manual or source). */
-	| { kind: 'queued' }
-	/** The current track is the last thing that will play. */
-	| { kind: 'stops-after' }
-	| { kind: 'repeats-track' }
-	| { kind: 'repeats-queue' }
+export type QueueExhaustion = 'stops-after' | 'repeats-track' | 'repeats-queue'
 
 /**
  * Everything decided about the moment the current track ends, so the ended
@@ -125,31 +113,20 @@ export class PlayerStore {
 		return { action: 'advance', loop, nextTrackId: this.#queue.peekNext(loop) }
 	})
 
-	readonly #hasUpcomingRows = $derived(
-		this.#queue.count('manual') > 0 || this.#queue.count('source') > 0,
-	)
-
-	/**
-	 * The single answer to "what state is playback in behind the current track",
-	 * so every view of the queue's tail renders the same story `#trackEndPlan`
-	 * decides. Folds in repeat and the wrap availability.
-	 */
-	readonly upNextStatus: UpNextStatus = $derived.by(() => {
-		if (this.#queue.current === null) {
-			return { kind: 'idle' }
-		}
-
-		if (this.#hasUpcomingRows) {
-			return { kind: 'queued' }
+	readonly queueExhaustion: QueueExhaustion | null = $derived.by(() => {
+		if (
+			this.#queue.current === null ||
+			this.#queue.count('manual') > 0 ||
+			this.#queue.count('source') > 0
+		) {
+			return null
 		}
 
 		if (this.#trackEndPlan.nextTrackId === null) {
-			return { kind: 'stops-after' }
+			return 'stops-after'
 		}
 
-		return this.#trackEndPlan.action === 'repeat-current'
-			? { kind: 'repeats-track' }
-			: { kind: 'repeats-queue' }
+		return this.#trackEndPlan.action === 'repeat-current' ? 'repeats-track' : 'repeats-queue'
 	})
 
 	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.current?.trackId ?? -1, {

@@ -7,10 +7,8 @@
 	const player = usePlayer()
 	const queueRows = createQueueRows(player)
 
-	/** The exhausted-state labels, keyed by the store-decided status. */
 	const exhaustedTitle = $derived.by(() => {
-		const status = player.upNextStatus
-		switch (status.kind) {
+		switch (player.queueExhaustion) {
 			case 'stops-after':
 				return m.playerNothingUpNext()
 			case 'repeats-track':
@@ -35,7 +33,6 @@
 {#if !queueRows.isEmpty}
 	<TracksListContainer {...queueRows.listProps} customRow={queueHeaderRow} />
 {:else if exhaustedTitle !== undefined}
-	<!-- Playing the last track: the queue is exhausted rather than never started. -->
 	<EmptyListMessage title={exhaustedTitle} browseAction={false} />
 {:else}
 	<EmptyListMessage title={m.playerQueueEmpty()} />

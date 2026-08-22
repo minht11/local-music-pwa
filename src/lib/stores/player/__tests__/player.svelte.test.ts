@@ -617,17 +617,17 @@ describe('PlayerStore', () => {
 		})
 	})
 
-	describe('upNextStatus', () => {
-		it('is idle before playback starts', () => {
-			expect(player.upNextStatus).toEqual({ kind: 'idle' })
+	describe('queueExhaustion', () => {
+		it('is null before playback starts', () => {
+			expect(player.queueExhaustion).toBeNull()
 		})
 
-		it('is queued while upcoming rows remain, regardless of repeat mode', () => {
+		it('is null while upcoming rows remain', () => {
 			seedTrack(1)
 			seedTrack(2)
 			player.playFrom(0, [1, 2])
 
-			expect(player.upNextStatus).toEqual({ kind: 'queued' })
+			expect(player.queueExhaustion).toBeNull()
 		})
 
 		it('reports repeats-track when repeat is one', () => {
@@ -635,7 +635,7 @@ describe('PlayerStore', () => {
 			player.playFrom(0, [1])
 			player.repeat = 'one'
 
-			expect(player.upNextStatus).toEqual({ kind: 'repeats-track' })
+			expect(player.queueExhaustion).toBe('repeats-track')
 		})
 
 		it('reports stops-after when repeat is none and nothing is queued', () => {
@@ -643,7 +643,7 @@ describe('PlayerStore', () => {
 			player.playFrom(0, [1])
 			player.repeat = 'none'
 
-			expect(player.upNextStatus).toEqual({ kind: 'stops-after' })
+			expect(player.queueExhaustion).toBe('stops-after')
 		})
 
 		it('reports stops-after at the end of a manual-only queue despite repeat all', () => {
@@ -653,7 +653,7 @@ describe('PlayerStore', () => {
 			player.repeat = 'all'
 
 			// The repeat mode alone would promise a wrap; there is nothing to wrap to.
-			expect(player.upNextStatus).toEqual({ kind: 'stops-after' })
+			expect(player.queueExhaustion).toBe('stops-after')
 		})
 
 		it('reports repeats-queue when repeat all wraps back to the source', () => {
@@ -662,18 +662,18 @@ describe('PlayerStore', () => {
 			player.playFrom(1, [1, 2])
 			player.repeat = 'all'
 
-			expect(player.upNextStatus).toEqual({ kind: 'repeats-queue' })
+			expect(player.queueExhaustion).toBe('repeats-queue')
 		})
 
 		it('returns to queued when a row is enqueued behind an exhausted queue', () => {
 			seedTrack(1)
 			player.playFrom(0, [1])
 			player.repeat = 'none'
-			expect(player.upNextStatus).toEqual({ kind: 'stops-after' })
+			expect(player.queueExhaustion).toBe('stops-after')
 
 			player.queue.enqueue([2], 'next')
 
-			expect(player.upNextStatus).toEqual({ kind: 'queued' })
+			expect(player.queueExhaustion).toBeNull()
 		})
 	})
 

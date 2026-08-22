@@ -19,10 +19,6 @@ export class SourceQueue implements UpcomingList {
 	#entries: readonly SourceEntry[] = $state.raw([])
 	#nextIndex = $state(0)
 
-	get length(): number {
-		return this.#entries.length
-	}
-
 	/** The source row immediately before the next gap, used to resume after a manual row. */
 	get entryBeforeNext(): QueueItem | undefined {
 		return this.#entries[this.#nextIndex - 1]
