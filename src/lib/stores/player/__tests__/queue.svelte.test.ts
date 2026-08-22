@@ -142,59 +142,25 @@ describe('QueueStore', () => {
 	})
 
 	describe('enqueue ordering', () => {
-		it('play next chains, add to queue appends behind the block', () => {
+		it('play next prepends and add to queue appends', () => {
 			q.setSource([1], 0)
 			q.enqueue([8], 'next')
 			q.enqueue([20], 'last')
 			q.enqueue([9], 'next')
-			expect(manual(q)).toEqual([8, 9, 20])
+			expect(manual(q)).toEqual([9, 8, 20])
 		})
 
-		it('starts a new play-next block after the previous one drains', () => {
+		it('preserves the order within a play-next batch', () => {
 			q.setSource([1, 2], 0)
-			q.enqueue([8], 'next')
+			q.enqueue([8, 9], 'next')
 			q.enqueue([20], 'last')
-			q.advance() // plays 8
-			q.enqueue([9], 'next')
-			expect(manual(q)).toEqual([9, 20])
+			expect(manual(q)).toEqual([8, 9, 20])
 		})
 
 		it('leaves every added track pending when nothing plays', () => {
 			q.enqueue([8, 9], 'last')
 			expect(q.current).toBeNull()
 			expect(manual(q)).toEqual([8, 9])
-		})
-
-		it('a row dragged into the play-next block joins it', () => {
-			q.setSource([1], 0)
-			q.enqueue([8, 9], 'next')
-			q.enqueue([20], 'last')
-			expect(manual(q)).toEqual([8, 9, 20])
-
-			const queuedEntryId = q.itemAt('manual', 2)?.entryId
-			invariant(queuedEntryId !== undefined)
-			q.moveEntry(queuedEntryId, { layer: 'manual', slot: 1 })
-			expect(manual(q)).toEqual([8, 20, 9])
-
-			// The block is now 8, 20, 9, so play-next chains behind all three.
-			q.enqueue([10], 'next')
-			expect(manual(q)).toEqual([8, 20, 9, 10])
-		})
-
-		it('a row dragged out of the play-next block leaves it, so play-next still plays next', () => {
-			q.setSource([1], 0)
-			q.enqueue([8, 9], 'next')
-			q.enqueue([20], 'last')
-			expect(manual(q)).toEqual([8, 9, 20])
-
-			const nextEntryId = q.itemAt('manual', 0)?.entryId
-			invariant(nextEntryId !== undefined)
-			q.moveEntry(nextEntryId, { layer: 'manual', slot: 3 })
-			expect(manual(q)).toEqual([9, 20, 8])
-
-			// The block is now just 9, so play-next lands second.
-			q.enqueue([10], 'next')
-			expect(manual(q)).toEqual([9, 10, 20, 8])
 		})
 	})
 
@@ -299,7 +265,7 @@ describe('QueueStore', () => {
 			expect(q.current?.trackId).toBe(7)
 		})
 
-		it('adjusts the play-next block for removed block entries', () => {
+		it('prepends play next after an entry is removed', () => {
 			q.setSource([1], 0)
 			q.enqueue([8, 9], 'next')
 			q.enqueue([20], 'last')
@@ -309,7 +275,7 @@ describe('QueueStore', () => {
 			q.removeEntries([entryId])
 			q.enqueue([10], 'next')
 
-			expect(manual(q)).toEqual([9, 10, 20])
+			expect(manual(q)).toEqual([10, 9, 20])
 		})
 
 		it('never removes the current entry', () => {
@@ -404,73 +370,6 @@ describe('QueueStore', () => {
 			expect(upcomingSource(q)).toEqual([3])
 		})
 
-		it('joins the play-next block when moved inside it', () => {
-			q.setSource([1, 2], 0)
-			q.enqueue([8], 'next')
-			q.enqueue([20], 'last')
-
-			const entryId = q.itemAt('source', 0)?.entryId
-			invariant(entryId !== undefined)
-			q.moveEntry(entryId, { layer: 'manual', slot: 0 })
-			expect(manual(q)).toEqual([2, 8, 20])
-
-			// a later play-next still chains after the whole block
-			q.enqueue([9], 'next')
-			expect(manual(q)).toEqual([2, 8, 9, 20])
-		})
-
-		it('cross-layer insert dropped inside the play-next block joins it', () => {
-			q.setSource([1, 2, 3], 0)
-			q.enqueue([8, 9], 'next')
-			q.enqueue([20], 'last')
-			expect(manual(q)).toEqual([8, 9, 20])
-
-			// slot 0: strictly inside the block, ahead of both next-tagged tracks
-			const entryId = q.itemAt('source', 0)?.entryId
-			invariant(entryId !== undefined)
-			q.moveEntry(entryId, { layer: 'manual', slot: 0 })
-			expect(manual(q)).toEqual([2, 8, 9, 20])
-
-			// the moved-in track (2) joined the block, so a later play-next chains
-			// after it and the rest of the block
-			q.enqueue([10], 'next')
-			expect(manual(q)).toEqual([2, 8, 9, 10, 20])
-		})
-
-		it('cross-layer insert dropped at the play-next block boundary joins it', () => {
-			q.setSource([1, 2, 3], 0)
-			q.enqueue([8, 9], 'next')
-			q.enqueue([20], 'last')
-			expect(manual(q)).toEqual([8, 9, 20])
-
-			// slot 1: right at the boundary, immediately ahead of the last next-tagged track
-			const entryId = q.itemAt('source', 0)?.entryId
-			invariant(entryId !== undefined)
-			q.moveEntry(entryId, { layer: 'manual', slot: 1 })
-			expect(manual(q)).toEqual([8, 2, 9, 20])
-
-			q.enqueue([10], 'next')
-			expect(manual(q)).toEqual([8, 2, 9, 10, 20])
-		})
-
-		it('cross-layer insert dropped after the play-next block boundary does not join it', () => {
-			q.setSource([1, 2, 3], 0)
-			q.enqueue([8, 9], 'next')
-			q.enqueue([20], 'last')
-			expect(manual(q)).toEqual([8, 9, 20])
-
-			// slot 2: right after the block, ahead of the plain queued track
-			const entryId = q.itemAt('source', 0)?.entryId
-			invariant(entryId !== undefined)
-			q.moveEntry(entryId, { layer: 'manual', slot: 2 })
-			expect(manual(q)).toEqual([8, 9, 2, 20])
-
-			// the moved-in track (2) stayed 'queued', so a later play-next lands
-			// before it, not after
-			q.enqueue([10], 'next')
-			expect(manual(q)).toEqual([8, 9, 10, 2, 20])
-		})
-
 		it('ignores a move whose entry id is unknown', () => {
 			q.setSource([1], 0)
 			q.enqueue([8, 9], 'last')
@@ -535,13 +434,13 @@ describe('QueueStore', () => {
 			expect([q.current?.trackId, ...upcomingSource(q)]).toEqual([1, 2])
 		})
 
-		it('keeps play-next chaining consistent after a block track is deleted', () => {
+		it('prepends play next after a manual track is deleted', () => {
 			q.setSource([1], 0)
 			q.enqueue([8, 9], 'next')
 			q.enqueue([20], 'last')
 			q.removeTracks([8])
 			q.enqueue([10], 'next')
-			expect(manual(q)).toEqual([9, 10, 20])
+			expect(manual(q)).toEqual([10, 9, 20])
 		})
 
 		it('clears the active entry when the current source track is deleted', () => {

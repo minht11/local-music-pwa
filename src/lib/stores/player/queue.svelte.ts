@@ -185,9 +185,8 @@ export class QueueStore {
 	}
 
 	/**
-	 * Remove then insert, so the destination re-derives whatever it tracks by
-	 * position — the manual layer's play-next block stays a contiguous prefix, and
-	 * a move into the source layer commits the visible order, dropping shuffle.
+	 * Remove then insert. A move into the source layer commits the visible order,
+	 * dropping shuffle.
 	 * A failed locate is a silent no-op: the row was consumed or removed mid-drag.
 	 */
 	moveEntry = (entryId: number, toSlot: QueueSlot): void => {

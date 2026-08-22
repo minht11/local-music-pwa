@@ -34,17 +34,12 @@ export const shuffled = <T>(items: readonly T[], random: () => number): T[] => {
 
 /** A semantic queue split into the rows already passed and the rows still upcoming. */
 export class QueueModel {
-	playNext: ModelItem[] = []
-	queued: ModelItem[] = []
+	manualUpcoming: ModelItem[] = []
 	sourcePlayed: ModelSourceItem[] = []
 	sourceUpcoming: ModelSourceItem[] = []
 	current: QueueEntry | null = null
 	shuffle = false
 	origin: QueueOrigin | null = null
-
-	get manualUpcoming(): readonly ModelItem[] {
-		return [...this.playNext, ...this.queued]
-	}
 
 	get source(): readonly ModelSourceItem[] {
 		return [...this.sourcePlayed, ...this.sourceUpcoming]
@@ -72,14 +67,14 @@ export class QueueModel {
 
 	enqueue(items: readonly ModelItem[], position: 'next' | 'last'): void {
 		if (position === 'next') {
-			this.playNext.push(...items)
+			this.manualUpcoming.unshift(...items)
 		} else {
-			this.queued.push(...items)
+			this.manualUpcoming.push(...items)
 		}
 	}
 
 	advance(loop: boolean): QueueEntry | null {
-		const manual = this.playNext.shift() ?? this.queued.shift()
+		const manual = this.manualUpcoming.shift()
 		if (manual) {
 			this.current = asQueueEntry('manual', manual)
 
@@ -113,8 +108,7 @@ export class QueueModel {
 		const manualWasActive = this.current?.layer === 'manual'
 		const currentWasDeleted = this.current !== null && trackIds.has(this.current.trackId)
 
-		this.playNext = this.playNext.filter((entry) => !trackIds.has(entry.trackId))
-		this.queued = this.queued.filter((entry) => !trackIds.has(entry.trackId))
+		this.manualUpcoming = this.manualUpcoming.filter((entry) => !trackIds.has(entry.trackId))
 		this.sourcePlayed = this.sourcePlayed.filter((entry) => !trackIds.has(entry.trackId))
 		this.sourceUpcoming = this.sourceUpcoming.filter((entry) => !trackIds.has(entry.trackId))
 		this.#clearOriginWhenSourceIsEmpty()
@@ -195,20 +189,12 @@ export class QueueModel {
 	}
 
 	#removeManualAt(index: number): ModelItem | undefined {
-		if (index < this.playNext.length) {
-			return this.playNext.splice(index, 1)[0]
-		}
-
-		return this.queued.splice(index - this.playNext.length, 1)[0]
+		return this.manualUpcoming.splice(index, 1)[0]
 	}
 
 	#insertManual(item: ModelItem, slot: number): void {
-		const at = Math.max(0, Math.min(slot, this.playNext.length + this.queued.length))
-		if (at < this.playNext.length) {
-			this.playNext.splice(at, 0, item)
-		} else {
-			this.queued.splice(at - this.playNext.length, 0, item)
-		}
+		const at = Math.max(0, Math.min(slot, this.manualUpcoming.length))
+		this.manualUpcoming.splice(at, 0, item)
 	}
 
 	#commitVisibleSourceOrder(): void {

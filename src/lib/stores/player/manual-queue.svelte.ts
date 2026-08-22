@@ -1,16 +1,11 @@
 import { mintEntryId, type QueueItem, type UpcomingList } from './queue-entry.ts'
 
-/** `kind`: in the "play next" block (`'next'`) or appended behind it (`'queued'`). */
-interface ManualEntry extends QueueItem {
-	readonly kind: 'next' | 'queued'
-}
-
 /**
- * Pending tracks the user explicitly queued. FIFO.
- * Shuffle does not affect it.
+ * Pending tracks the user explicitly queued. Play-next batches go to the front;
+ * add-to-queue batches go to the back. Shuffle does not affect it.
  */
 export class ManualQueue implements UpcomingList {
-	#entries: readonly ManualEntry[] = $state.raw([])
+	#entries: readonly QueueItem[] = $state.raw([])
 
 	get upcomingCount(): number {
 		return this.#entries.length
@@ -24,36 +19,22 @@ export class ManualQueue implements UpcomingList {
 		return this.#entries.findIndex((entry) => entry.entryId === entryId)
 	}
 
-	/** The end of the play-next block — a contiguous prefix, so also its length. */
-	get #playNextEnd(): number {
-		return this.#entries.findLastIndex((entry) => entry.kind === 'next') + 1
-	}
-
-	/** `'next'` extends the play-next block; `'last'` appends behind the whole block. */
 	enqueue = (trackIds: readonly number[], position: 'next' | 'last'): void => {
-		const isNext = position === 'next'
-		const at = isNext ? this.#playNextEnd : this.#entries.length
-		const kind = isNext ? 'next' : 'queued'
+		const at = position === 'next' ? 0 : this.#entries.length
 
 		this.#entries = this.#entries.toSpliced(
 			at,
 			0,
-			...trackIds.map((trackId) => ({ trackId, entryId: mintEntryId(), kind }) as const),
+			...trackIds.map((trackId) => ({ trackId, entryId: mintEntryId() })),
 		)
 	}
 
-	/**
-	 * `kind` is re-derived from where the row lands, keeping the play-next block
-	 * contiguous; dropping onto its boundary lands behind it.
-	 */
 	insertUpcoming = (item: QueueItem, slot: number): void => {
 		const at = Math.max(0, Math.min(slot, this.#entries.length))
-		const kind = at < this.#playNextEnd ? 'next' : 'queued'
 
 		this.#entries = this.#entries.toSpliced(at, 0, {
 			trackId: item.trackId,
 			entryId: item.entryId,
-			kind,
 		})
 	}
 
