@@ -26,14 +26,13 @@ const sourceIds = (): number[] =>
 	)
 
 const trackRowAt = (index: number) => {
-	const row = rows.listProps.source.rowAt(index)
-	invariant(row.type === 'track')
+	const row = rows.listProps.source.trackAt(index)
+	invariant(row !== undefined)
 	return row
 }
 
 const headerKeyAt = (index: number): string | number => {
-	const row = rows.listProps.source.rowAt(index)
-	invariant(row.type === 'custom')
+	invariant(rows.listProps.source.trackAt(index) === undefined)
 
 	return rows.listProps.source.keyAt(index)
 }
@@ -73,7 +72,6 @@ describe('queue rows layout', () => {
 		seedAllSections()
 
 		expect(rows.listProps.source.count).toBe(6)
-		expect(rows.listProps.source.trackCount).toBe(4)
 
 		expect(headerKeyAt(0)).toBe('header:manual')
 		expect(trackRowAt(1).trackId).toBe(8)
@@ -87,9 +85,9 @@ describe('queue rows layout', () => {
 		seedAllSections()
 
 		const trackIds = Array.from({ length: rows.listProps.source.count }, (_, index) =>
-			rows.listProps.source.rowAt(index),
+			rows.listProps.source.trackAt(index),
 		)
-			.filter((row) => row.type === 'track')
+			.filter((row) => row !== undefined)
 			.map((row) => row.trackId)
 
 		// Track 1 is playing, and it is the only source row that is not upcoming.
@@ -123,10 +121,10 @@ describe('queue rows layout', () => {
 		expect(trackRowAt(4).entryId).toBe(queue.itemAt('source', 0)?.entryId)
 	})
 
-	it('throws for an out-of-range row index', () => {
+	it('returns undefined for an out-of-range row index', () => {
 		seedAllSections()
 
-		expect(() => rows.listProps.source.rowAt(6)).toThrow()
+		expect(rows.listProps.source.trackAt(6)).toBeUndefined()
 	})
 })
 
@@ -138,7 +136,7 @@ describe('row heights', () => {
 		const countBefore = rows.listProps.source.count
 		const sizeKeyBefore = sizeKey()
 
-		expect(rows.listProps.source.rowAt(3).type).toBe('custom')
+		expect(rows.listProps.source.trackAt(3)).toBeUndefined()
 
 		// Drag the first upcoming source row into the manual layer.
 		const moved = queue.itemAt('source', 0)?.entryId
@@ -148,8 +146,8 @@ describe('row heights', () => {
 		// The row total is unchanged, so `count` alone cannot trigger a reflow...
 		expect(rows.listProps.source.count).toBe(countBefore)
 		// ...but index 3 is a track row now and the header moved down one.
-		expect(rows.listProps.source.rowAt(3).type).toBe('track')
-		expect(rows.listProps.source.rowAt(4).type).toBe('custom')
+		expect(rows.listProps.source.trackAt(3)).toBeDefined()
+		expect(rows.listProps.source.trackAt(4)).toBeUndefined()
 
 		expect(sizeKey()).not.toBe(sizeKeyBefore)
 	})
@@ -193,8 +191,8 @@ describe('row keys', () => {
 		seedAllSections()
 
 		const trackRows = Array.from({ length: rows.listProps.source.count }, (_, index) =>
-			rows.listProps.source.rowAt(index),
-		).filter((row) => row.type === 'track')
+			rows.listProps.source.trackAt(index),
+		).filter((row) => row !== undefined)
 
 		expect(trackRows).toHaveLength(4)
 		expect(trackRows.map((row) => isLive(row.entryId))).not.toContain(false)

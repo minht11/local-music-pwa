@@ -71,15 +71,14 @@ export const createTrackRowsSource = (
 		get count() {
 			return rows().count
 		},
-		get trackCount() {
-			return rows().count
-		},
 		isRowActive: (row) => row.trackId === player.queue.current?.trackId,
-		rowAt: (index) => {
+		trackAt: (index) => {
 			const current = rows()
+			if (index < 0 || index >= current.count) {
+				return undefined
+			}
 
 			return {
-				type: 'track',
 				entryId: current.entryIdAt(index),
 				trackId: current.trackIdAt(index),
 			}

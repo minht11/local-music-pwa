@@ -8,12 +8,6 @@
 	import VirtualContainer, { type RowSize } from '../VirtualContainer.svelte'
 	import type { SelectionSnapshot, TrackRowIdentity } from './selection.ts'
 	import TrackListItem from './TrackListItem.svelte'
-	import {
-		validateTrackListSourceCounts,
-		validateTrackListSourceRow,
-		validateTrackListSourceTrackCount,
-		validateUniqueTrackListSourceKey,
-	} from './track-list-source-validation.ts'
 	import { useTrackDragController } from './use-track-drag-controller.svelte.ts'
 	import {
 		type PredefinedTrackMenuItemVisibility,
@@ -21,14 +15,6 @@
 		useTrackMenuItems,
 	} from './use-track-menu-items.ts'
 	import { useTrackSelectionController } from './use-track-selection-controller.svelte.ts'
-
-	/**
-	 * `entryId` is the stable per-row id — the unit of virtualizer reconciliation,
-	 * selection and drag.
-	 */
-	export type TrackListRow =
-		| { type: 'track'; entryId: number; trackId: number }
-		| { type: 'custom' }
 
 	export interface TrackItemClick extends TrackRowLocator {
 		track: TrackData
@@ -42,9 +28,8 @@
 	export interface TrackListSource {
 		/** Total row count, track and custom rows alike. */
 		count: number
-		/** Excludes custom rows; used by "select all". */
-		trackCount: number
-		rowAt: (index: number) => TrackListRow
+		/** The track row at `index`, or undefined for a custom or stale row. */
+		trackAt: (index: number) => TrackRowIdentity | undefined
 		/** Whether this row is the one playing (shows the playing indicator). */
 		isRowActive: (row: TrackRowIdentity) => boolean
 		onItemClick: (data: TrackItemClick) => void
@@ -93,43 +78,7 @@
 
 	const isReorderable = $derived(onDrop !== undefined)
 
-	const rowCount = $derived.by(() => {
-		const count = source.count
-		if (import.meta.env.DEV) {
-			validateTrackListSourceCounts(count, source.trackCount)
-		}
-
-		return count
-	})
-
-	const trackCount = $derived.by(() => {
-		const count = source.trackCount
-		if (import.meta.env.DEV) {
-			validateTrackListSourceCounts(source.count, count)
-		}
-
-		return count
-	})
-
-	const rowAt = (index: number): TrackListRow => {
-		const row = source.rowAt(index)
-		if (import.meta.env.DEV) {
-			validateTrackListSourceRow(index, row, source.keyAt(index))
-		}
-
-		return row
-	}
-
-	// Bounds-checked, unlike `source.rowAt`: callers hold indexes the list can shrink under.
-	const trackAt = (index: number): TrackRowIdentity | undefined => {
-		if (index < 0 || index >= rowCount) {
-			return undefined
-		}
-
-		const row = rowAt(index)
-
-		return row.type === 'track' ? row : undefined
-	}
+	const rowCount = $derived(source.count)
 
 	const { getMenuItems, getMultiSelectMenuItems } = useTrackMenuItems(
 		() => menuItems,
@@ -137,24 +86,14 @@
 		() => multiSelectMenuItems,
 	)
 
-	// Row keys are row identities, so the live keys are exactly the live entry ids;
-	// a custom row's key is a string and can never match one. Lazy — only the
-	// selection prune reads it, and only while something is selected.
+	// Numeric row keys are the live entry ids. Lazy — only selection reads it.
 	const liveEntryIds = $derived.by(() => {
-		const ids = new Set<string | number>()
-		let resolvedTrackCount = 0
+		const ids = new Set<number>()
 		for (let index = 0; index < rowCount; index += 1) {
 			const key = source.keyAt(index)
-			if (import.meta.env.DEV) {
-				validateUniqueTrackListSourceKey(index, key, ids)
-				const row = source.rowAt(index)
-				validateTrackListSourceRow(index, row, key)
-				resolvedTrackCount += row.type === 'track' ? 1 : 0
+			if (typeof key === 'number') {
+				ids.add(key)
 			}
-			ids.add(key)
-		}
-		if (import.meta.env.DEV) {
-			validateTrackListSourceTrackCount(trackCount, resolvedTrackCount)
 		}
 
 		return ids
@@ -162,7 +101,7 @@
 
 	const selection = useTrackSelectionController({
 		rowCount: () => rowCount,
-		trackAt,
+		trackAt: (index) => source.trackAt(index),
 		hasEntry: (entryId) => liveEntryIds.has(entryId),
 	})
 
@@ -219,7 +158,7 @@
 		<Button
 			kind="flat"
 			class="ml-auto text-inversePrimary! disabled:text-inverseOnSurface/50!"
-			disabled={selection.size === trackCount}
+			disabled={selection.size === liveEntryIds.size}
 			onclick={() => {
 				selection.selectAll()
 			}}
@@ -241,14 +180,14 @@
 	size={source.size}
 	count={rowCount}
 	forceRenderIndexes={dragController.drag === null ? [] : [dragController.drag.fromIndex]}
-	focusableRow={(index) => rowAt(index).type === 'track'}
+	focusableRow={(index) => source.trackAt(index) !== undefined}
 	key={source.keyAt}
 >
 	{#snippet children(item)}
-		{@const row = rowAt(item.index)}
+		{@const row = source.trackAt(item.index)}
 		{@const drag = dragController.drag}
 
-		{#if row.type === 'custom'}
+		{#if row === undefined}
 			<div
 				role="row"
 				style={`transform: translateY(${item.start}px); height: ${item.size}px`}

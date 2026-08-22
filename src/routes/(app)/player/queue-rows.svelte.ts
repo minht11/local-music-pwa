@@ -1,9 +1,8 @@
 import type { MenuItem } from '$lib/components/menu/types.ts'
 import { TRACK_ROW_HEIGHT } from '$lib/components/tracks/row-height.ts'
-import type { SelectionSnapshot } from '$lib/components/tracks/selection.ts'
+import type { SelectionSnapshot, TrackRowIdentity } from '$lib/components/tracks/selection.ts'
 import type {
 	TrackItemClick,
-	TrackListRow,
 	TrackListSource,
 	TracksListContainerProps,
 } from '$lib/components/tracks/TracksListContainer.svelte'
@@ -36,7 +35,6 @@ interface QueueSectionLayout {
 
 const QUEUE_HEADER_HEIGHT = 48
 
-const HEADER_ROW: TrackListRow = { type: 'custom' }
 const HEADER_KEYS = {
 	manual: 'header:manual',
 	source: 'header:source',
@@ -52,7 +50,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 	const layout = $derived.by(() => {
 		const sections: QueueSectionLayout[] = []
 		let count = 0
-		let trackCount = 0
 
 		const add = (section: QueueLayer, size: number) => {
 			if (size === 0) {
@@ -62,7 +59,6 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 			sections.push({ section, headerIndex: count, count: size })
 
 			count += size + 1
-			trackCount += size
 		}
 
 		add('manual', player.queue.count('manual'))
@@ -72,7 +68,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		// moving: a row crossing between layers shifts the section below it by one.
 		const sizeKey = sections.map((s) => s.headerIndex).join(',')
 
-		return { sections, count, trackCount, sizeKey }
+		return { sections, count, sizeKey }
 	})
 
 	/** Allocation-free: the size probe below calls it for every index on any `count` change. */
@@ -111,18 +107,20 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		}
 	}
 
-	const rowAt = (rowIndex: number): TrackListRow => {
+	const trackAt = (rowIndex: number): TrackRowIdentity | undefined => {
 		const s = sectionAt(rowIndex)
-		invariant(s, 'queue row index out of range')
+		if (s === undefined) {
+			return undefined
+		}
 
 		const index = rowIndex - s.headerIndex - 1
 		if (index === -1) {
-			return HEADER_ROW
+			return undefined
 		}
 
 		const { entryId, trackId } = entryAt(s.section, index)
 
-		return { type: 'track', entryId, trackId }
+		return { entryId, trackId }
 	}
 
 	const size: VariableRowSize = {
@@ -197,10 +195,7 @@ export const createQueueRows = (player: QueueTabPlayer) => {
 		get count() {
 			return layout.count
 		},
-		get trackCount() {
-			return layout.trackCount
-		},
-		rowAt,
+		trackAt,
 		size,
 		keyAt,
 		isRowActive: () => false,
