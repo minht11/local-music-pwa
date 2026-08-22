@@ -253,7 +253,8 @@
 				role="row"
 				style={`transform: translateY(${item.start}px); height: ${item.size}px`}
 				class="virtual-item top-0 left-0 w-full"
-				aria-rowindex={item.index}
+				data-row-index={item.index}
+				aria-rowindex={item.index + 1}
 			>
 				{@render customRow?.(item.index)}
 			</div>
@@ -269,7 +270,7 @@
 					'virtual-item top-0 left-0 w-full',
 					drag !== null && 'no-drag-hover hover:bg-transparent!',
 				]}
-				ariaRowIndex={item.index}
+				rowIndex={item.index}
 				selectionEnabled={selection.selectionEnabled}
 				selectionHover={selection.isInHoverRange(item.index)}
 				selected={selection.has(row.entryId)}
@@ -315,6 +316,7 @@
 	{@const previewActive = source.isRowActive(drag.row)}
 	<div
 		popover="manual"
+		aria-hidden="true"
 		class="drag-preview-popover @container opacity-80"
 		style={`top:${drag.preview.top}px;left:${drag.preview.left}px;width:${drag.preview.width}px;`}
 		{@attach (el) => {
@@ -326,7 +328,7 @@
 			active={previewActive}
 			activePlaying={player.playing && previewActive}
 			class="pointer-events-none bg-surfaceContainerHigh shadow-lg"
-			ariaRowIndex={drag.fromIndex}
+			rowIndex={drag.fromIndex}
 			selectionEnabled={selection.selectionEnabled}
 			selectionHover={false}
 			selected={selection.has(drag.row.entryId)}

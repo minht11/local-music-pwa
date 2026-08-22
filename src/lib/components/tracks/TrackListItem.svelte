@@ -17,7 +17,7 @@
 	interface Props {
 		trackId: number
 		style?: string
-		ariaRowIndex: number
+		rowIndex: number
 		active: boolean
 		activePlaying: boolean
 		class?: ClassValue
@@ -50,7 +50,7 @@
 		reorderDragging = false,
 		reorderInsertBefore = false,
 		reorderInsertAfter = false,
-		ariaRowIndex: ariaRowIndexProp,
+		rowIndex: rowIndexProp,
 		menuItems,
 		onclick,
 		onpointerenter,
@@ -58,8 +58,8 @@
 		toggleSelection,
 	}: Props = $props()
 
-	// ariaRowIndexProp rerenders a lot even when it doesn't change
-	const ariaRowIndex = $derived(ariaRowIndexProp)
+	// rowIndexProp rerenders a lot even when it doesn't change
+	const rowIndex = $derived(rowIndexProp)
 
 	const query = createTrackQuery(() => trackId)
 	const { value: track, loading } = $derived(query)
@@ -83,7 +83,7 @@
 		reorderDragging && 'track-item-container-dragging',
 	]}
 	ariaLabel={m.trackPlay({ name: track?.name ?? '' })}
-	{ariaRowIndex}
+	{rowIndex}
 	onclick={(e) => {
 		if (track) {
 			onclick?.(track, e)

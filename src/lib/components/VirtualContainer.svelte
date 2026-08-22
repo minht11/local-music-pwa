@@ -156,7 +156,7 @@
 	let container = $state<HTMLDivElement>()
 
 	const findRow = (index: number) => {
-		const el = container?.querySelector(`[aria-rowindex="${index}"]`)
+		const el = container?.querySelector(`[data-row-index="${index}"]`)
 		if (el instanceof HTMLElement) {
 			return el
 		}
@@ -165,7 +165,7 @@
 	}
 
 	const findCurrentFocusedRow = () => {
-		const index = container ? Number(findFocusedElement(container)?.ariaRowIndex) : -1
+		const index = container ? Number(findFocusedElement(container)?.dataset.rowIndex) : -1
 
 		return Number.isNaN(index) ? -1 : index
 	}

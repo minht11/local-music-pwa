@@ -101,14 +101,14 @@ export const useTrackDragController = ({
 			return null
 		}
 
-		const row = target.closest('[aria-rowindex]')
+		const row = target.closest('[data-row-index]')
 		if (!(row instanceof HTMLElement)) {
 			return null
 		}
 
 		// Live count: the list can mutate mid-drag, so a snapshot would clamp wrong.
 		const count = itemsCount()
-		const index = Number(row.ariaRowIndex)
+		const index = Number(row.dataset.rowIndex)
 		if (!Number.isInteger(index) || index < 0 || index >= count) {
 			return null
 		}
@@ -152,7 +152,7 @@ export const useTrackDragController = ({
 		e.preventDefault()
 		e.stopPropagation()
 
-		const rowElement = (e.currentTarget as HTMLElement | null)?.closest('[aria-rowindex]')
+		const rowElement = (e.currentTarget as HTMLElement | null)?.closest('[data-row-index]')
 		if (!(rowElement instanceof HTMLElement)) {
 			return
 		}

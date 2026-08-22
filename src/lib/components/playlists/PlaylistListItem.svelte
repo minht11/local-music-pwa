@@ -21,7 +21,7 @@
 	interface Props {
 		playlistId: number
 		style?: string
-		ariaRowIndex: number
+		rowIndex: number
 		active?: boolean
 		class?: ClassValue
 		icon?: Snippet<[Playlist]> | IconType
@@ -36,7 +36,7 @@
 		class: className,
 		onclick,
 		icon,
-		ariaRowIndex,
+		rowIndex,
 		menuItems,
 	}: Props = $props()
 
@@ -66,7 +66,7 @@
 	tabindex={-1}
 	class={['h-14 text-left', active && 'bg-onSurfaceVariant/10 text-onSurfaceVariant', className]}
 	ariaLabel={`Play ${playlist?.name}`}
-	{ariaRowIndex}
+	{rowIndex}
 	onclick={() => {
 		invariant(playlist)
 		onclick?.(playlist)
