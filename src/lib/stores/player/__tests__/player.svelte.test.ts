@@ -586,42 +586,63 @@ describe('PlayerStore', () => {
 		})
 	})
 
-	describe('upNextTrackId', () => {
-		it('is null at the end of a manual-only queue despite repeat all', () => {
+	describe('upNextStatus', () => {
+		it('is idle before playback starts', () => {
+			expect(player.upNextStatus).toEqual({ kind: 'idle' })
+		})
+
+		it('is queued while upcoming rows remain, regardless of repeat mode', () => {
+			seedTrack(1)
+			seedTrack(2)
+			player.playFrom(0, [1, 2])
+
+			expect(player.upNextStatus).toEqual({ kind: 'queued' })
+		})
+
+		it('reports repeats-track when repeat is one', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			player.repeat = 'one'
+
+			expect(player.upNextStatus).toEqual({ kind: 'repeats-track' })
+		})
+
+		it('reports stops-after when repeat is none and nothing is queued', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			player.repeat = 'none'
+
+			expect(player.upNextStatus).toEqual({ kind: 'stops-after' })
+		})
+
+		it('reports stops-after at the end of a manual-only queue despite repeat all', () => {
 			seedTrack(8)
 			player.queue.enqueue([8], 'last')
 			player.play()
 			player.repeat = 'all'
 
 			// The repeat mode alone would promise a wrap; there is nothing to wrap to.
-			expect(player.repeat).toBe('all')
-			expect(player.queue.current).toMatchObject({ layer: 'manual', trackId: 8 })
-			expect(player.upNextTrackId).toBeNull()
+			expect(player.upNextStatus).toEqual({ kind: 'stops-after' })
 		})
 
-		it('wraps to the first source track at the end when repeat is all', () => {
+		it('reports repeats-queue when repeat all wraps back to the source', () => {
 			seedTrack(1)
 			seedTrack(2)
 			player.playFrom(1, [1, 2])
 			player.repeat = 'all'
 
-			expect(player.upNextTrackId).toBe(1)
+			expect(player.upNextStatus).toEqual({ kind: 'repeats-queue' })
 		})
 
-		it('is the current track when repeat is one', () => {
-			seedTrack(1)
-			player.playFrom(0, [1])
-			player.repeat = 'one'
-
-			expect(player.upNextTrackId).toBe(1)
-		})
-
-		it('is null at the end of the queue when repeat is none', () => {
+		it('returns to queued when a row is enqueued behind an exhausted queue', () => {
 			seedTrack(1)
 			player.playFrom(0, [1])
 			player.repeat = 'none'
+			expect(player.upNextStatus).toEqual({ kind: 'stops-after' })
 
-			expect(player.upNextTrackId).toBeNull()
+			player.queue.enqueue([2], 'next')
+
+			expect(player.upNextStatus).toEqual({ kind: 'queued' })
 		})
 	})
 

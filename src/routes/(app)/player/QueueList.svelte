@@ -7,17 +7,19 @@
 	const player = usePlayer()
 	const queueRows = createQueueRows(player)
 
-	/**
-	 * Shown once no rows are left but a track is still playing. Read from
-	 * `upNextTrackId` rather than the repeat mode, so the message says what will
-	 * actually happen: repeat only wraps when the source queue has tracks to wrap to.
-	 */
+	/** The exhausted-state labels, keyed by the store-decided status. */
 	const exhaustedTitle = $derived.by(() => {
-		if (player.upNextTrackId === null) {
-			return m.playerNothingUpNext()
+		const status = player.upNextStatus
+		switch (status.kind) {
+			case 'stops-after':
+				return m.playerNothingUpNext()
+			case 'repeats-track':
+				return m.playerRepeatingTrack()
+			case 'repeats-queue':
+				return m.playerRepeatingQueue()
+			default:
+				return undefined
 		}
-
-		return player.repeat === 'one' ? m.playerRepeatingTrack() : m.playerRepeatingQueue()
 	})
 </script>
 
@@ -32,7 +34,7 @@
 
 {#if !queueRows.isEmpty}
 	<TracksListContainer {...queueRows.listProps} customRow={queueHeaderRow} />
-{:else if player.queue.current}
+{:else if exhaustedTitle !== undefined}
 	<!-- Playing the last track: the queue is exhausted rather than never started. -->
 	<EmptyListMessage title={exhaustedTitle} browseAction={false} />
 {:else}

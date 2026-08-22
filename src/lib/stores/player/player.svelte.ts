@@ -20,14 +20,31 @@ import { type QueueEntry, type QueueOrigin, QueueStore, type QueueView } from '.
 
 export type PlayerRepeat = 'none' | 'one' | 'all'
 
-type TrackEndAction =
-	| { kind: 'pause' }
-	| { kind: 'repeat-current' }
-	| {
-			kind: 'advance'
-			/** Should wrap at the queue's end */
-			loop: boolean
-	  }
+/**
+ * What follows the current track once its upcoming rows are gone — the states a
+ * view behind the playing track can be in.
+ */
+export type UpNextStatus =
+	/** Playback was never started. */
+	| { kind: 'idle' }
+	/** Upcoming rows remain (manual or source). */
+	| { kind: 'queued' }
+	/** The current track is the last thing that will play. */
+	| { kind: 'stops-after' }
+	| { kind: 'repeats-track' }
+	| { kind: 'repeats-queue' }
+
+/**
+ * Everything decided about the moment the current track ends, so the ended
+ * handler (which consumes), the preload effect (which peeks) and tail views
+ * cannot disagree.
+ */
+interface TrackEndPlan {
+	action: 'pause' | 'repeat-current' | 'advance'
+	loop: boolean
+	/** What plays next, or null when playback stops here. */
+	nextTrackId: number | null
+}
 
 // How many seconds before track end to begin pre-buffering the next track.
 const PRE_BUFFER_THRESHOLD_SECONDS = 10
@@ -70,40 +87,56 @@ export class PlayerStore {
 	}
 
 	/**
-	 * What happens when the current track ends, decided in one place so the
-	 * preload effect (which peeks) and the ended handler (which consumes) cannot
-	 * disagree — a drift between them would gapless-preload a different track
-	 * than the one that then plays.
+	 * Everything decided about the moment the current track ends, computed once so
+	 * the ended handler (which consumes), the preload effect (which peeks) and
+	 * tail views cannot disagree — a drift between them would gapless-preload a
+	 * different track than the one that then plays. Note `nextTrackId` is not the
+	 * question "does the queue have upcoming rows": with repeat on, an exhausted
+	 * queue still has something up next.
 	 */
-	readonly #trackEndAction: TrackEndAction = $derived.by((): TrackEndAction => {
+	readonly #trackEndPlan: TrackEndPlan = $derived.by(() => {
 		if (this.repeat === 'none' && this.pauseAfterTrackWhenRepeatIsOff) {
-			return { kind: 'pause' }
+			return { action: 'pause', loop: false, nextTrackId: null }
 		}
 
 		if (this.repeat === 'one') {
-			return { kind: 'repeat-current' }
+			return {
+				action: 'repeat-current',
+				loop: false,
+				nextTrackId: this.#queue.current?.trackId ?? null,
+			}
 		}
 
-		return { kind: 'advance', loop: this.repeat === 'all' }
+		const loop = this.repeat === 'all'
+
+		return { action: 'advance', loop, nextTrackId: this.#queue.peekNext(loop) }
 	})
 
+	readonly #hasUpcomingRows = $derived(
+		this.#queue.count('manual') > 0 || this.#queue.count('source') > 0,
+	)
+
 	/**
-	 * The track that plays when the current one ends, or null when playback stops
-	 * there. Folds in repeat and the loop-wrap, so it is not the same question as
-	 * "does the queue have upcoming rows": with repeat on, an exhausted queue still
-	 * has something up next.
+	 * The single answer to "what state is playback in behind the current track",
+	 * so every view of the queue's tail renders the same story `#trackEndPlan`
+	 * decides. Folds in repeat and the wrap availability.
 	 */
-	readonly upNextTrackId: number | null = $derived.by(() => {
-		const action = this.#trackEndAction
-		if (action.kind === 'pause') {
-			return null
+	readonly upNextStatus: UpNextStatus = $derived.by(() => {
+		if (this.#queue.current === null) {
+			return { kind: 'idle' }
 		}
 
-		if (action.kind === 'repeat-current') {
-			return this.#queue.current?.trackId ?? null
+		if (this.#hasUpcomingRows) {
+			return { kind: 'queued' }
 		}
 
-		return this.#queue.peekNext(action.loop)
+		if (this.#trackEndPlan.nextTrackId === null) {
+			return { kind: 'stops-after' }
+		}
+
+		return this.#trackEndPlan.action === 'repeat-current'
+			? { kind: 'repeats-track' }
+			: { kind: 'repeats-queue' }
 	})
 
 	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.current?.trackId ?? -1, {
@@ -251,7 +284,7 @@ export class PlayerStore {
 				return
 			}
 
-			const upNext = this.upNextTrackId
+			const upNext = this.#trackEndPlan.nextTrackId
 
 			untrack(() => {
 				if (upNext === null) {
@@ -266,16 +299,14 @@ export class PlayerStore {
 	#handleTrackEnded = () => {
 		this.#history.complete()
 
-		const action = this.#trackEndAction
-		if (action.kind === 'pause') {
+		const plan = this.#trackEndPlan
+		if (plan.action === 'pause') {
 			this.pause()
 			return
 		}
 
 		const next =
-			action.kind === 'repeat-current'
-				? this.#queue.current
-				: this.#queue.advance(action.loop)
+			plan.action === 'repeat-current' ? this.#queue.current : this.#queue.advance(plan.loop)
 
 		if (!next) {
 			this.pause()
