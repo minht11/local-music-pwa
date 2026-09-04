@@ -350,8 +350,15 @@ export class PlayerStore {
 		this.#beginEntryPlayback(this.#queue.stepBack(true))
 	}
 
-	/** Replaces the source queue with `list` and starts playback at `start`. */
+	/**
+	 * Replaces the source queue and starts its selected row. An empty list is a
+	 * no-op, preserving the current queue and audio.
+	 */
 	playFrom = (start: number | 'shuffle', list: readonly number[], origin?: QueueOrigin): void => {
+		if (list.length === 0) {
+			return
+		}
+
 		this.#beginEntryPlayback(this.#queue.setSource(list, start, origin))
 	}
 

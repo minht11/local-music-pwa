@@ -280,6 +280,27 @@ describe('PlayerStore', () => {
 			player.playFrom(0, [1], { type: 'album', name: 'Album A' })
 			expect(player.queue.origin).toEqual({ type: 'album', name: 'Album A' })
 		})
+
+		it.each([0, 'shuffle'] as const)(
+			'ignores an empty source with start %s without changing the queue or audio',
+			(start) => {
+				seedTrack(1)
+				seedTrack(2)
+				player.playFrom(0, [1, 2])
+				const current = player.queue.current
+				const upcoming = player.queue.itemAt('source', 0)
+				vi.clearAllMocks()
+
+				player.playFrom(start, [])
+
+				expect(player.queue.current).toBe(current)
+				expect(player.queue.itemAt('source', 0)).toBe(upcoming)
+				expect(ctrl.playing).toBe(true)
+				expect(ctrl.play).not.toHaveBeenCalled()
+				expect(ctrl.abort).not.toHaveBeenCalled()
+				expect(mockHistory.begin).not.toHaveBeenCalled()
+			},
+		)
 	})
 
 	describe('play', () => {

@@ -23,7 +23,7 @@
 
 {#snippet queueHeaderRow(index: number)}
 	{@const header = queueRows.headerAt(index)}
-	<div class="flex h-12 w-full items-center justify-between pl-4">
+	<div role="gridcell" class="flex h-12 w-full items-center justify-between pl-4">
 		<h2 class="text-title-sm text-onSurfaceVariant">{header.title}</h2>
 
 		<IconButton tooltip={header.clearTooltip} icon="trayRemove" onclick={header.onClear} />
