@@ -191,7 +191,7 @@
 		const abortController = new AbortController()
 		const { promise: scrollEndPromise, resolve } = Promise.withResolvers<void>()
 
-		scrollTarget.current.addEventListener(
+		scrollTarget.current?.addEventListener(
 			'scrollend',
 			() => {
 				resolve()

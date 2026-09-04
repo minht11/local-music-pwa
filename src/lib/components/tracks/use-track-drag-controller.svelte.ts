@@ -42,6 +42,9 @@ export const useTrackDragController = ({
 
 	const refreshScrollViewport = () => {
 		const target = scrollTarget.current
+		if (target === null) {
+			return
+		}
 		if (target instanceof Window) {
 			scrollViewport = { top: 0, bottom: target.innerHeight }
 			return
@@ -52,6 +55,9 @@ export const useTrackDragController = ({
 
 	$effect(() => {
 		const target = scrollTarget.current
+		if (target === null) {
+			return
+		}
 		const observed = target instanceof Window ? document.documentElement : target
 		refreshScrollViewport()
 
@@ -87,7 +93,7 @@ export const useTrackDragController = ({
 			return
 		}
 
-		scrollTarget.current.scrollBy(0, step)
+		scrollTarget.current?.scrollBy(0, step)
 		// Rows travel under a stationary pointer, so the target has to be re-read each
 		// frame rather than left at whatever the last pointermove computed.
 		updateInsertIndex()

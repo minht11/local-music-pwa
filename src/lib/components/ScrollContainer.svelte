@@ -9,10 +9,10 @@
 		const nodeGetter = getContext<() => ScrollTargetElement>(contextKey)
 
 		return {
-			get current(): Element | Window {
-				const node = nodeGetter?.()
-
-				return node ?? window
+			get current(): Element | Window | null {
+				// A scoped target remains null until its element mounts. Falling back to
+				// window here would seed descendants with the previous page's scroll offset.
+				return nodeGetter ? nodeGetter() : window
 			},
 		}
 	}
