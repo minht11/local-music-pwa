@@ -3,10 +3,8 @@
 	"tags": ["-lintignore"],
 	"entry": [
 		"src/env.ts",
-		"src/hooks.server.ts",
-		"src/service-worker.ts",
 		"src/params/**/*",
-		"src/routes/**/*.{svelte,ts}",
+		"src/routes/**/*",
 		"src/lib/stores/**/*",
 		".generated/types/auto-imports.d.ts"
 	],
