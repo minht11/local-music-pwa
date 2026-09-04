@@ -143,9 +143,7 @@
 </script>
 
 {#snippet multiselectPane()}
-	<div
-		class="pointer-events-auto col-2 flex w-full items-center gap-1 rounded-lg bg-inverseSurface p-2 py-1 text-inverseOnSurface"
-	>
+	<div class="flex w-full items-center gap-1">
 		<MenuButton
 			menuItems={() => getMultiSelectMenuItems(selection.snapshot)}
 			alignment={{ horizontal: 'left', vertical: 'bottom' }}
