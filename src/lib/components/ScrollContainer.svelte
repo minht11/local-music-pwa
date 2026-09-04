@@ -1,18 +1,19 @@
 <script lang="ts" module>
-	import { getContext, setContext } from 'svelte'
+	import { createContext } from 'svelte'
 
 	type ScrollTargetElement = Element | Window | null
 
-	const contextKey = Symbol('scroll-target')
+	const [getScrollTarget, setScrollTarget, hasScrollTarget] =
+		createContext<() => ScrollTargetElement>()
 
 	export const useScrollTarget = () => {
-		const nodeGetter = getContext<() => ScrollTargetElement>(contextKey)
+		// A scoped target remains null until its element mounts. Falling back to
+		// window here would seed descendants with the previous page's scroll offset.
+		const nodeGetter = hasScrollTarget() ? getScrollTarget() : () => window
 
 		return {
 			get current(): Element | Window | null {
-				// A scoped target remains null until its element mounts. Falling back to
-				// window here would seed descendants with the previous page's scroll offset.
-				return nodeGetter ? nodeGetter() : window
+				return nodeGetter()
 			},
 		}
 	}
@@ -29,7 +30,7 @@
 
 	let scrollTarget = $state<ScrollTargetElement>(null)
 
-	setContext(contextKey, () => scrollTarget)
+	setScrollTarget(() => scrollTarget)
 </script>
 
 <div bind:this={scrollTarget} bind:offsetWidth class={['overscroll-contain', className]}>
