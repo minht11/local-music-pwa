@@ -158,7 +158,7 @@
 	"settingsDirRemove": "移除",
 	"settingsDirRescan": "重新扫描",
 	"settingsDisplayVolumeSlider": "在播放器内显示音量滑块",
-	"settingsGaplessPlayback": "无缝播放（实验性）",
+	"settingsGaplessPlayback": "无缝播放",
 	"settingsGaplessPlaybackDescription": "需要您的浏览器和音频文件支持，否则回退到正常播放",
 	"settingsGaplessPlaybackInfo": "这会使用更多内存和CPU资源，如果遇到任何问题请尝试禁用它。如果您使用过旧版本的应用，请重新扫描或重新导入您的音乐库以使其正常工作。",
 	"settingsGrantDirectoryAccess": "您需要允许应用访问该目录，通过浏览器权限，以便它可以扫描其内容",

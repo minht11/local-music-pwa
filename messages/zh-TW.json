@@ -158,7 +158,7 @@
 	"settingsDirRemove": "移除",
 	"settingsDirRescan": "重新掃描",
 	"settingsDisplayVolumeSlider": "在播放器內顯示音量滑桿",
-	"settingsGaplessPlayback": "無縫播放（實驗性）",
+	"settingsGaplessPlayback": "無縫播放",
 	"settingsGaplessPlaybackDescription": "需要您的瀏覽器和音訊檔案支援，否則回退到正常播放",
 	"settingsGaplessPlaybackInfo": "這會使用更多記憶體和CPU資源，如果遇到任何問題請嘗試停用它。如果您使用過舊版本的應用程式，請重新掃描或重新匯入您的音樂庫以使其正常運作。",
 	"settingsGrantDirectoryAccess": "您需要允許應用程式存取該目錄，透過瀏覽器權限，以便它可以掃描其內容",

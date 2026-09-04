@@ -159,7 +159,7 @@
 	"settingsDirRemove": "削除",
 	"settingsDirRescan": "再スキャン",
 	"settingsDisplayVolumeSlider": "プレイヤー内に音量スライダーを表示する",
-	"settingsGaplessPlayback": "ギャップレス再生（実験的）",
+	"settingsGaplessPlayback": "ギャップレス再生",
 	"settingsGaplessPlaybackDescription": "ブラウザと音声ファイルが対応している必要があります。対応していない場合は通常の再生に切り替わります",
 	"settingsGaplessPlaybackInfo": "これはメモリとCPUリソースを少し多く使用します。問題が発生した場合は無効にしてみてください。以前のバージョンのアプリを使用していた場合は、これを機能させるためにライブラリを再スキャンまたは再インポートしてください。",
 	"settingsGrantDirectoryAccess": "アプリがディレクトリの内容をスキャンできるよう、ブラウザの許可を通じてアクセスを許可する必要があります",

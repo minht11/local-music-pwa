@@ -158,7 +158,7 @@
 	"settingsDirRemove": "Entfernen",
 	"settingsDirRescan": "Erneut scannen",
 	"settingsDisplayVolumeSlider": "Lautstärkeregler im Player anzeigen",
-	"settingsGaplessPlayback": "Nahtlose Wiedergabe (experimentell)",
+	"settingsGaplessPlayback": "Nahtlose Wiedergabe",
 	"settingsGaplessPlaybackDescription": "Erfordert Unterstützung durch Ihren Browser und die Audiodatei, andernfalls wird auf normale Wiedergabe zurückgegriffen",
 	"settingsGaplessPlaybackInfo": "Dies verbraucht etwas mehr Speicher und CPU-Ressourcen. Wenn Probleme auftreten, versuchen Sie es zu deaktivieren. Wenn Sie eine ältere Version der App verwendet haben, scannen oder importieren Sie Ihre Bibliothek erneut, damit dies funktioniert.",
 	"settingsGrantDirectoryAccess": "Bitte erlauben Sie der App den Ordnerzugriff über die Browser-Berechtigungen, damit die Inhalte gescannt werden können",
