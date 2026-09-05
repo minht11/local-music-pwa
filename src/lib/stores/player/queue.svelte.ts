@@ -170,9 +170,17 @@ export class QueueStore {
 	 */
 	removeTracks = (trackIds: ReadonlySet<number>): boolean => {
 		const previous = this.#current
+		const sourceAnchor = this.#source.entryBeforeNext
+		const shouldMakeAllSourceRowsUpcoming =
+			previous?.layer !== 'manual' &&
+			sourceAnchor !== undefined &&
+			trackIds.has(sourceAnchor.trackId)
 
 		this.#manual.removeTracks(trackIds)
-		this.#source.removeTracks(trackIds, previous?.layer === 'manual')
+		this.#source.removeTracks(trackIds)
+		if (shouldMakeAllSourceRowsUpcoming) {
+			this.#source.makeAllUpcoming()
+		}
 
 		if (previous === null || !trackIds.has(previous.trackId)) {
 			return false

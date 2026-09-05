@@ -6,18 +6,55 @@ export interface QueueOrigin {
 	name: string
 }
 
-interface SourceEntry extends QueueItem {
-	/** Original rank used to restore correct order when shuffle is off. */
-	readonly canonical: number
-}
-
 /** Source playback order, split by the gap immediately before the next source row. */
 export class SourceQueue implements UpcomingList {
-	shuffle = $state(false)
 	origin: QueueOrigin | null = $state(null)
 
-	#entries: readonly SourceEntry[] = $state.raw([])
+	#entries: readonly QueueItem[] = $state.raw([])
+	/** Retains the order at shuffle enablement; removed rows stay here until shuffle is disabled. */
+	#orderBeforeShuffle: readonly QueueItem[] | null = $state.raw(null)
 	#nextIndex = $state(0)
+
+	get shuffle(): boolean {
+		return this.#orderBeforeShuffle !== null
+	}
+
+	set shuffle(value: boolean) {
+		if (value === this.shuffle) {
+			return
+		}
+		const previous = this.entryBeforeNext
+
+		if (value) {
+			this.#orderBeforeShuffle = this.#entries
+			if (previous === undefined) {
+				this.#replace(toShuffledArray(this.#entries), 0)
+
+				return
+			}
+
+			this.#replace(
+				[previous, ...toShuffledArray(this.#entries, (entry) => entry !== previous)],
+				1,
+			)
+
+			return
+		}
+
+		const snapshot = this.#orderBeforeShuffle
+		invariant(snapshot !== null)
+		let entries = snapshot
+		if (snapshot.length !== this.#entries.length) {
+			const liveEntryIds = new Set(this.#entries.map((entry) => entry.entryId))
+			entries = snapshot.filter((entry) => liveEntryIds.has(entry.entryId))
+		}
+		const previousIndex =
+			previous === undefined
+				? -1
+				: entries.findIndex((entry) => entry.entryId === previous.entryId)
+		this.#orderBeforeShuffle = null
+		this.#replace(entries, previousIndex + 1)
+	}
 
 	/** The source row immediately before the next gap, used to resume after a manual row. */
 	get entryBeforeNext(): QueueItem | undefined {
@@ -37,9 +74,13 @@ export class SourceQueue implements UpcomingList {
 	}
 
 	upcomingIndexOf(entryId: number): number {
-		const absolute = this.#indexOfEntry(entryId)
+		for (let index = this.#nextIndex; index < this.#entries.length; index += 1) {
+			if (this.#entries[index]?.entryId === entryId) {
+				return index - this.#nextIndex
+			}
+		}
 
-		return absolute >= this.#nextIndex ? absolute - this.#nextIndex : -1
+		return -1
 	}
 
 	setItems = (
@@ -47,18 +88,15 @@ export class SourceQueue implements UpcomingList {
 		start: number | 'shuffle',
 		origin: QueueOrigin | null,
 	): QueueItem | undefined => {
-		const entries: SourceEntry[] = ids.map((trackId, canonical) => ({
+		const entries: QueueItem[] = ids.map((trackId) => ({
 			entryId: mintEntryId(),
 			trackId,
-			canonical,
 		}))
 		const shuffle = start === 'shuffle'
 		const selectedIndex = Math.max(-1, Math.min(shuffle ? 0 : start, entries.length - 1))
 
-		this.origin = entries.length === 0 ? null : origin
-		this.shuffle = shuffle
-		this.#entries = shuffle ? toShuffledArray(entries) : entries
-		this.#nextIndex = selectedIndex + 1
+		this.#orderBeforeShuffle = shuffle ? entries : null
+		this.#replace(shuffle ? toShuffledArray(entries) : entries, selectedIndex + 1, origin)
 
 		return this.#entries[selectedIndex]
 	}
@@ -73,129 +111,93 @@ export class SourceQueue implements UpcomingList {
 	stepBack = (loop: boolean): QueueItem | undefined => this.#land(this.#stepped(-1, loop))
 
 	jumpToEntryId = (entryId: number): QueueItem | undefined =>
-		this.#land(this.#indexOfEntry(entryId))
+		this.#land(this.#entries.findIndex((entry) => entry.entryId === entryId))
 
 	jumpToTrackId = (id: number): QueueItem | undefined =>
 		this.#land(this.#entries.findIndex((entry) => entry.trackId === id))
 
-	/** On: pins the row before the gap to the front. Off: restores canonical order. */
+	/** On: saves the current order and pins the row before the gap to the front. */
 	toggleShuffle = (): void => {
 		this.shuffle = !this.shuffle
-
-		if (this.shuffle) {
-			this.#apply((entries) => {
-				const previous = entries[this.#nextIndex - 1]
-				if (previous === undefined) {
-					return toShuffledArray(entries)
-				}
-
-				return [previous, ...toShuffledArray(entries.filter((entry) => entry !== previous))]
-			})
-		} else {
-			this.#apply((entries) => entries.toSorted((a, b) => a.canonical - b.canonical))
-		}
 	}
 
 	removeUpcomingAt = (i: number): void => {
-		const absolute = this.#nextIndex + i
-		if (i < 0 || absolute >= this.#entries.length) {
+		if (i < 0 || i >= this.upcomingCount) {
 			return
 		}
 
-		this.#apply((entries) => entries.toSpliced(absolute, 1))
+		this.#replace(this.#entries.toSpliced(this.#nextIndex + i, 1), this.#nextIndex)
 	}
 
 	moveUpcoming = (from: number, to: number): void => {
-		const absoluteFrom = this.#nextIndex + from
-		if (from < 0 || absoluteFrom >= this.#entries.length) {
+		if (from < 0 || from >= this.upcomingCount) {
 			return
 		}
 
-		const item = this.#entries[absoluteFrom]
+		const at = Math.max(0, Math.min(to, this.upcomingCount - 1))
+		const entries = [...this.#entries]
+		const [item] = entries.splice(this.#nextIndex + from, 1)
 		invariant(item !== undefined)
-		const at = this.#nextIndex + Math.max(0, Math.min(to, this.upcomingCount - 1))
-
-		this.#applyCommitted((entries) => entries.toSpliced(absoluteFrom, 1).toSpliced(at, 0, item))
+		entries.splice(this.#nextIndex + at, 0, item)
+		this.#commitVisibleOrder(entries, this.#nextIndex)
 	}
 
 	insertUpcoming = (item: QueueItem, slot: number): void => {
-		const at = this.#nextIndex + Math.max(0, Math.min(slot, this.upcomingCount))
-
-		this.#applyCommitted((entries) =>
-			entries.toSpliced(at, 0, { entryId: item.entryId, trackId: item.trackId }),
-		)
+		const at = Math.max(0, Math.min(slot, this.upcomingCount))
+		const entries: QueueItem[] = [...this.#entries]
+		entries.splice(this.#nextIndex + at, 0, item)
+		this.#commitVisibleOrder(entries, this.#nextIndex)
 	}
 
 	clearUpcoming = (): void => {
-		this.#apply((entries) => entries.slice(0, this.#nextIndex))
+		this.#replace(this.#entries.slice(0, this.#nextIndex), this.#nextIndex)
 	}
 
-	removeTracks = (trackIds: ReadonlySet<number>, preserveGap: boolean): void => {
-		this.#apply(
-			(entries) => entries.filter((entry) => !trackIds.has(entry.trackId)),
-			preserveGap,
-		)
+	removeTracks = (trackIds: ReadonlySet<number>): void => {
+		this.#removeWhere((entry) => trackIds.has(entry.trackId))
 	}
 
 	/** Never removes the row immediately before the next gap. */
 	removeEntries = (entryIds: ReadonlySet<number>): void => {
 		const previousEntryId = this.entryBeforeNext?.entryId
-		this.#apply((entries) =>
-			entries.filter(
-				(entry) => entry.entryId === previousEntryId || !entryIds.has(entry.entryId),
-			),
+		this.#removeWhere(
+			(entry) => entry.entryId !== previousEntryId && entryIds.has(entry.entryId),
 		)
 	}
 
-	#apply = (
-		transform: (entries: readonly SourceEntry[]) => SourceEntry[],
-		preserveGap = false,
+	makeAllUpcoming = (): void => {
+		this.#replace(this.#entries, 0)
+	}
+
+	#commitVisibleOrder = (entries: readonly QueueItem[], nextIndex: number): void => {
+		this.#orderBeforeShuffle = null
+		this.#replace(entries, nextIndex)
+	}
+
+	#removeWhere = (shouldRemove: (entry: QueueItem) => boolean): void => {
+		let removedBeforeNext = 0
+		const entries = this.#entries.filter((entry, index) => {
+			if (!shouldRemove(entry)) {
+				return true
+			}
+			if (index < this.#nextIndex) {
+				removedBeforeNext += 1
+			}
+
+			return false
+		})
+		this.#replace(entries, this.#nextIndex - removedBeforeNext)
+	}
+
+	#replace = (
+		entries: readonly QueueItem[],
+		nextIndex: number,
+		origin: QueueOrigin | null = this.origin,
 	): void => {
-		const next = transform(this.#entries)
-		this.#nextIndex = this.#resolveGapAfterMutation(next, preserveGap)
-		this.#entries = next
-		if (next.length === 0) {
-			this.origin = null
-		}
+		this.#entries = entries
+		this.#nextIndex = Math.max(0, Math.min(nextIndex, entries.length))
+		this.origin = entries.length === 0 ? null : origin
 	}
-
-	#resolveGapAfterMutation(next: readonly SourceEntry[], preserveGap: boolean): number {
-		const previousEntryId = this.entryBeforeNext?.entryId
-		if (previousEntryId === undefined) {
-			return 0
-		}
-
-		const previousIndex = next.findIndex((entry) => entry.entryId === previousEntryId)
-		if (previousIndex !== -1) {
-			return previousIndex + 1
-		}
-		if (!preserveGap) {
-			return 0
-		}
-
-		const survivingEntryIds = new Set(next.map((entry) => entry.entryId))
-		const predecessor = this.#entries
-			.slice(0, this.#nextIndex - 1)
-			.findLast((entry) => survivingEntryIds.has(entry.entryId))
-
-		return predecessor === undefined
-			? 0
-			: next.findIndex((entry) => entry.entryId === predecessor.entryId) + 1
-	}
-
-	#applyCommitted = (transform: (entries: readonly QueueItem[]) => QueueItem[]): void => {
-		this.shuffle = false
-		this.#apply((entries) =>
-			transform(entries).map(({ entryId, trackId }, canonical) => ({
-				entryId,
-				trackId,
-				canonical,
-			})),
-		)
-	}
-
-	#indexOfEntry = (entryId: number): number =>
-		this.#entries.findIndex((entry) => entry.entryId === entryId)
 
 	#land(index: number | undefined): QueueItem | undefined {
 		if (index === undefined || index < 0 || index >= this.#entries.length) {

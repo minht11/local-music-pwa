@@ -48,6 +48,16 @@ describe('SourceQueue', () => {
 			expect(q.upcomingCount).toBe(0)
 			expect(q.origin).toBeNull()
 		})
+
+		it('replaces a shuffled source without retaining its snapshot', () => {
+			q.setItems([1, 2, 3], 'shuffle', null)
+			q.setItems([4, 5, 6], 'shuffle', null)
+
+			expect(q.shuffle).toBe(true)
+			q.toggleShuffle()
+			q.makeAllUpcoming()
+			expect(upcoming(q)).toEqual([4, 5, 6])
+		})
 	})
 
 	describe('advance / peekNext / stepBack', () => {
@@ -82,6 +92,29 @@ describe('SourceQueue', () => {
 			expect(q.stepBack(true)).toMatchObject({ trackId: 3 })
 			expect(q.entryBeforeNext?.trackId).toBe(3)
 			expect(q.upcomingCount).toBe(0)
+		})
+	})
+
+	describe('upcomingIndexOf', () => {
+		it('finds only upcoming entries by their distinct entry ids', () => {
+			q.setItems([7, 7, 8], 0, null)
+			const anchorEntryId = q.entryBeforeNext?.entryId
+			const duplicateEntryId = q.upcomingAt(0)?.entryId
+			const nextEntryId = q.upcomingAt(1)?.entryId
+			invariant(
+				anchorEntryId !== undefined &&
+					duplicateEntryId !== undefined &&
+					nextEntryId !== undefined,
+			)
+
+			expect(q.upcomingIndexOf(anchorEntryId)).toBe(-1)
+			expect(q.upcomingIndexOf(duplicateEntryId)).toBe(0)
+			expect(q.upcomingIndexOf(nextEntryId)).toBe(1)
+			expect(q.upcomingIndexOf(999_999)).toBe(-1)
+
+			q.advance(false)
+			expect(q.upcomingIndexOf(duplicateEntryId)).toBe(-1)
+			expect(q.upcomingIndexOf(nextEntryId)).toBe(0)
 		})
 	})
 
@@ -134,7 +167,7 @@ describe('SourceQueue', () => {
 			).toEqual([10, 20, 30, 40])
 		})
 
-		it('restores canonical order on unshuffle with the correct gap', () => {
+		it('restores the pre-shuffle order with the correct gap', () => {
 			q.setItems([10, 20, 30], 1, null)
 			q.toggleShuffle()
 			q.toggleShuffle()
@@ -160,14 +193,23 @@ describe('SourceQueue', () => {
 			expect(q.entryBeforeNext?.trackId).toBe(2)
 		})
 
-		it('preserves canonical order across removal (unshuffle restores album order)', () => {
+		it('preserves the unshuffled order across removal', () => {
 			q.setItems([1, 2, 3, 4], 0, null)
-			q.toggleShuffle()
-			q.toggleShuffle() // back to canonical [1,2,3,4]
-			q.removeUpcomingAt(1) // remove visible upcoming index 1 → track 3
-			q.toggleShuffle()
-			q.toggleShuffle()
+			q.removeUpcomingAt(1)
 			expect([q.entryBeforeNext?.trackId, ...upcoming(q)]).toEqual([1, 2, 4])
+		})
+
+		it('filters the shuffle snapshot by entry id when a duplicate is removed', () => {
+			q.setItems([7, 7, 8], 0, null)
+			q.toggleShuffle()
+			const duplicate = Array.from({ length: q.upcomingCount }, (_, i) =>
+				q.upcomingAt(i),
+			).find((entry) => entry?.trackId === 7)
+			invariant(duplicate !== undefined)
+			q.removeEntries(new Set([duplicate.entryId]))
+			q.toggleShuffle()
+
+			expect([q.entryBeforeNext?.trackId, ...upcoming(q)]).toEqual([7, 8])
 		})
 	})
 
@@ -181,7 +223,7 @@ describe('SourceQueue', () => {
 			expect(q.origin).toEqual({ type: 'album', name: 'A' })
 		})
 
-		it('reorders within upcoming and commits the visible order as canonical', () => {
+		it('reorders within upcoming, drops shuffle, and commits the visible order', () => {
 			q.setItems([1, 2, 3, 4], 0, null)
 			q.toggleShuffle()
 			const before = upcoming(q)
@@ -192,7 +234,6 @@ describe('SourceQueue', () => {
 			const reordered = [before[1], before[2], before[0]]
 			expect(upcoming(q)).toEqual(reordered)
 
-			// The committed order is now canonical: a shuffle round-trip restores it.
 			q.toggleShuffle()
 			q.toggleShuffle()
 			expect(upcoming(q)).toEqual(reordered)
@@ -211,6 +252,18 @@ describe('SourceQueue', () => {
 			q.insertUpcoming({ trackId: 9, entryId: 900 }, 1)
 			expect(upcoming(q)).toEqual([2, 9, 3])
 		})
+
+		it('drops the shuffle snapshot when inserting', () => {
+			q.setItems([1, 2, 3], 0, null)
+			q.toggleShuffle()
+			q.insertUpcoming({ trackId: 9, entryId: 900 }, 0)
+			const committed = upcoming(q)
+
+			expect(q.shuffle).toBe(false)
+			q.toggleShuffle()
+			q.toggleShuffle()
+			expect(upcoming(q)).toEqual(committed)
+		})
 	})
 
 	describe('clearUpcoming', () => {
@@ -226,20 +279,29 @@ describe('SourceQueue', () => {
 			q.clearUpcoming()
 			expect(q.origin).toBeNull()
 		})
+
+		it('does not bring cleared rows back when shuffle is disabled', () => {
+			q.setItems([1, 2, 3], 0, null)
+			q.toggleShuffle()
+			q.clearUpcoming()
+			q.toggleShuffle()
+
+			expect(q.upcomingCount).toBe(0)
+		})
 	})
 
 	describe('removeTracks', () => {
 		it('clears the origin when no source rows survive', () => {
 			q.setItems([1], 0, { type: 'album', name: 'A' })
 
-			q.removeTracks(new Set([1]), false)
+			q.removeTracks(new Set([1]))
 
 			expect(q.origin).toBeNull()
 		})
 
 		it('removes every occurrence in one pass and keeps the row before the gap', () => {
 			q.setItems([1, 9, 2, 9, 3], 4, null) // gap follows the last row (3)
-			q.removeTracks(new Set([9]), false)
+			q.removeTracks(new Set([9]))
 			expect([q.entryBeforeNext?.trackId, ...upcoming(q)]).toEqual([3])
 			// The earlier survivors remain before the row preceding the gap, in order.
 			q.stepBack(false)
@@ -248,17 +310,16 @@ describe('SourceQueue', () => {
 			expect(q.entryBeforeNext?.trackId).toBe(1)
 		})
 
-		it('drops the row before the gap when its track is removed', () => {
+		it('keeps the gap before the logical successor when its anchor track is removed', () => {
 			q.setItems([1, 2, 3], 1, null)
-			q.removeTracks(new Set([2]), false)
-			expect(q.entryBeforeNext).toBeUndefined()
-			// With no row before the gap the survivors are all upcoming again.
-			expect(upcoming(q)).toEqual([1, 3])
+			q.removeTracks(new Set([2]))
+			expect(q.entryBeforeNext?.trackId).toBe(1)
+			expect(upcoming(q)).toEqual([3])
 		})
 
 		it('keeps the resume gap before the logical successor during a manual detour', () => {
 			q.setItems([1, 2, 3], 1, null)
-			q.removeTracks(new Set([2]), true)
+			q.removeTracks(new Set([2]))
 
 			expect(q.entryBeforeNext?.trackId).toBe(1)
 			q.advance(false)
@@ -327,8 +388,6 @@ describe('SourceQueue', () => {
 			const entryBeforeNextId = q.entryBeforeNext?.entryId
 			invariant(entryBeforeNextId !== undefined)
 
-			// A committed reorder recreates every record (fresh canonical ranks);
-			// the gap must follow the row by entry id, not by object reference.
 			q.moveUpcoming(0, 1)
 
 			expect(q.entryBeforeNext?.entryId).toBe(entryBeforeNextId)
@@ -362,7 +421,7 @@ describe('SourceQueue', () => {
 
 		it('drops the row before the gap when every duplicate is removed', () => {
 			q.setItems([7, 7, 7], 1, null) // gap follows the middle copy
-			q.removeTracks(new Set([7]), false) // drops every copy, including the row before the gap
+			q.removeTracks(new Set([7])) // drops every copy, including the row before the gap
 			expect(q.entryBeforeNext).toBeUndefined()
 			expect(q.upcomingCount).toBe(0)
 		})

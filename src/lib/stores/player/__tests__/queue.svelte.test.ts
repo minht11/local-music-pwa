@@ -361,6 +361,22 @@ describe('QueueStore', () => {
 			expect(upcomingSource(q)).toEqual([2, 99, 3])
 		})
 
+		it('drops a shuffle snapshot when moving a manual row into the source', () => {
+			q.setSource([1, 2, 3], 0)
+			q.toggleShuffle()
+			q.enqueue([99], 'last')
+			const entryId = q.itemAt('manual', 0)?.entryId
+			invariant(entryId !== undefined)
+
+			q.moveEntry(entryId, { layer: 'source', slot: 1 })
+			const committed = upcomingSource(q)
+
+			expect(q.shuffle).toBe(false)
+			q.toggleShuffle()
+			q.toggleShuffle()
+			expect(upcomingSource(q)).toEqual(committed)
+		})
+
 		it('moves a source track into the manual queue', () => {
 			q.setSource([1, 2, 3], 0)
 			const entryId = q.itemAt('source', 0)?.entryId
@@ -368,6 +384,19 @@ describe('QueueStore', () => {
 			q.moveEntry(entryId, { layer: 'manual', slot: 0 })
 			expect(manual(q)).toEqual([2])
 			expect(upcomingSource(q)).toEqual([3])
+		})
+
+		it('does not restore a source row moved to manual when shuffle is disabled', () => {
+			q.setSource([1, 2, 3, 4], 0)
+			q.toggleShuffle()
+			const item = q.itemAt('source', 0)
+			invariant(item !== undefined)
+
+			q.moveEntry(item.entryId, { layer: 'manual', slot: 0 })
+			q.toggleShuffle()
+
+			expect(manual(q)).toEqual([item.trackId])
+			expect(upcomingSource(q)).toEqual([2, 3, 4].filter((id) => id !== item.trackId))
 		})
 
 		it('ignores a move whose entry id is unknown', () => {
@@ -404,6 +433,16 @@ describe('QueueStore', () => {
 			expect(manual(q)).toEqual([8, 9])
 			q.toggleShuffle()
 			expect(manual(q)).toEqual([8, 9])
+		})
+
+		it('keeps the snapshot lifecycle coherent through the persisted shuffle setter', () => {
+			q.setSource([1, 2, 3], 0)
+			q.shuffle = true
+			expect(q.shuffle).toBe(true)
+
+			q.shuffle = false
+			expect(q.shuffle).toBe(false)
+			expect([q.current?.trackId, ...upcomingSource(q)]).toEqual([1, 2, 3])
 		})
 	})
 
@@ -447,6 +486,7 @@ describe('QueueStore', () => {
 			q.setSource([10, 20, 30], 1)
 			expect(q.removeTracks(new Set([20]))).toBe(true)
 			expect(q.current).toBeNull()
+			expect(upcomingSource(q)).toEqual([10, 30])
 		})
 
 		it('selects the source successor when the current manual track is deleted', () => {
@@ -462,6 +502,18 @@ describe('QueueStore', () => {
 			q.advance()
 			expect(q.removeTracks(new Set([9]))).toBe(true)
 			expect(q.current).toBeNull()
+		})
+
+		it('makes every source row upcoming when a later deletion removes its anchor', () => {
+			q.setSource([1, 2, 3], 2)
+			q.enqueue([9], 'next')
+			q.advance()
+			q.removeTracks(new Set([9]))
+			expect(q.current).toBeNull()
+
+			q.removeTracks(new Set([3]))
+
+			expect(upcomingSource(q)).toEqual([1, 2])
 		})
 
 		it('resumes at the source successor when the manual detour return point is deleted', () => {
