@@ -260,12 +260,6 @@
 		/>
 
 		<SettingsSwitchListItem
-			title={m.settingsDisplayVolumeSlider()}
-			bind:checked={mainStore.volumeSliderEnabled}
-			bottomDivider
-		/>
-
-		<SettingsSwitchListItem
 			title={m.settingsPauseAfterEachTrack()}
 			description={m.settingsPauseAfterEachTrackDescription()}
 			bind:checked={player.pauseAfterTrackWhenRepeatIsOff}

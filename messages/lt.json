@@ -160,7 +160,6 @@
 	"settingsDirectoryRemoved": "Katalogas pašalintas",
 	"settingsDirRemove": "Pašalinti",
 	"settingsDirRescan": "Skenuoti iš naujo",
-	"settingsDisplayVolumeSlider": "Rodyti garso slankiklį grotuve",
 	"settingsGaplessPlayback": "Nepertraukiamas atkūrimas",
 	"settingsGaplessPlaybackDescription": "Reikia, kad naršyklė ir garso failas tai palaikytų, kitu atveju grįžtama prie įprasto atkūrimo",
 	"settingsGaplessPlaybackInfo": "Tai naudoja šiek tiek daugiau atminties ir procesoriaus išteklių, jei kyla problemų, pabandykite išjungti. Jei naudojote ankstesnę programos versiją, iš naujo nuskanuokite arba importuokite biblioteką, kad tai veiktų.",

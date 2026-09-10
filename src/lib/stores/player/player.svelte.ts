@@ -10,10 +10,10 @@ import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { truncate } from '$lib/helpers/utils/text.ts'
+import { isMobile, isSafari } from '$lib/helpers/utils/ua.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
 import { createTrackQuery } from '$lib/library/get/value-queries.ts'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
-import type { MainStore } from '../main/store.svelte.ts'
 import { MediaSessionController } from './media-session.svelte.ts'
 import { PlayHistoryTracker } from './play-history-tracker.ts'
 import { type QueueEntry, type QueueOrigin, QueueStore, type QueueView } from './queue.svelte.ts'
@@ -48,7 +48,9 @@ export class PlayerStore {
 	readonly #history = new PlayHistoryTracker()
 	readonly #ms = new MediaSessionController(this)
 	readonly equalizer = new EqualizerStore(this.#graph)
-	readonly #main: MainStore
+
+	/** Mobile iOS does not allow changing volume */
+	readonly canChangeVolume = !(isMobile() && isSafari())
 
 	readonly #controller: PlaybackController
 	#removeDatabaseListener: (() => void) | undefined
@@ -145,16 +147,14 @@ export class PlayerStore {
 	readonly artworkSrc = $derived.by(this.#artwork)
 
 	get volume() {
-		return this.#main.volumeSliderEnabled ? this.#volume : 100
+		return this.canChangeVolume ? this.#volume : 100
 	}
 
 	set volume(value) {
 		this.#volume = clamp(value, 0, 100)
 	}
 
-	constructor(main: MainStore) {
-		this.#main = main
-
+	constructor() {
 		persist('player', this, [
 			'volume',
 			'repeat',

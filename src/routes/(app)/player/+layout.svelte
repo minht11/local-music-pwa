@@ -30,7 +30,6 @@
 
 	initPageQueries(() => data)
 
-	const mainStore = useMainStore()
 	const player = usePlayer()
 	const dialogs = useDialogsStore()
 	const activeTrack = $derived(player.activeTrack)
@@ -45,10 +44,6 @@
 	)
 
 	const toggleAudioControls = () => {
-		if (!isAudioControlsOpen) {
-			mainStore.volumeSliderEnabled = true
-		}
-
 		isAudioControlsOpen = !isAudioControlsOpen
 	}
 
@@ -118,23 +113,27 @@
 			<div class="controls-switcher">
 				{#if isAudioControlsOpen}
 					<div class="flex min-h-38 flex-col justify-center gap-2 px-4">
-						<div class="grid grid-cols-[max-content_minmax(0,1fr)_max-content] items-center gap-2">
-							<IconButton
-								icon="volumeMid"
-								tooltip={m.playerDecreaseVolume()}
-								onclick={() => (player.volume -= 10)}
-							/>
+						{#if player.canChangeVolume}
+							<div
+								class="grid grid-cols-[max-content_minmax(0,1fr)_max-content] items-center gap-2"
+							>
+								<IconButton
+									icon="volumeMid"
+									tooltip={m.playerDecreaseVolume()}
+									onclick={() => (player.volume -= 10)}
+								/>
 
-							<Slider bind:value={player.volume} />
+								<Slider bind:value={player.volume} />
 
-							<IconButton
-								icon="volumeHigh"
-								tooltip={m.playerIncreaseVolume()}
-								onclick={() => (player.volume += 10)}
-							/>
-						</div>
+								<IconButton
+									icon="volumeHigh"
+									tooltip={m.playerIncreaseVolume()}
+									onclick={() => (player.volume += 10)}
+								/>
+							</div>
 
-						<div class="border-t border-onSecondaryContainer/10"></div>
+							<div class="border-t border-onSecondaryContainer/10"></div>
+						{/if}
 
 						<Button
 							kind="blank"
@@ -265,7 +264,7 @@
 />
 
 <!-- Only used to prevent "tag missing — inner content will not be rendered" build warning -->
-{@render children()}
+{@render children?.()}
 
 <style lang="postcss">
 	@reference '../../../app.css';

@@ -161,7 +161,6 @@
 	"settingsDirectoryRemoved": "Directory removed",
 	"settingsDirRemove": "Remove",
 	"settingsDirRescan": "Rescan",
-	"settingsDisplayVolumeSlider": "Display volume slider inside player",
 	"settingsGaplessPlayback": "Gapless playback",
 	"settingsGaplessPlaybackDescription": "Requires your browser and audio file to support it, fallbacks to normal playback otherwise",
 	"settingsGaplessPlaybackInfo": "This uses a bit more memory and CPU resources, if you experience any issues try disabling it. If you used a previous version of the app rescan or reimport your library for this to work.",

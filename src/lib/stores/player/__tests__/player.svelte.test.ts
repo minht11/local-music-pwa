@@ -1,6 +1,5 @@
 import { flushSync } from 'svelte'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { MainStore } from '$lib/stores/main/store.svelte.ts'
 import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
 
 interface MockOptions {
@@ -167,8 +166,6 @@ const seedTrack = (id: number) => {
 	queryTracks.set(id, { id, name: `Track ${id}`, duration: 180 })
 }
 
-const mockMain = { volumeSliderEnabled: true } as unknown as MainStore
-
 const dispatchTrackDeletes = (keys: readonly number[]) => {
 	const listener = databaseChange.listener
 	invariant(listener)
@@ -184,7 +181,7 @@ let opts: MockOptions = null as never
 
 beforeEach(() => {
 	cleanupPlayer = $effect.root(() => {
-		player = new PlayerStore(mockMain)
+		player = new PlayerStore()
 	})
 	// Force initial effects (preload, history updates, volume, playback-rate)
 	// to run now, then clear their side effects so tests start clean.
@@ -222,17 +219,6 @@ describe('PlayerStore', () => {
 		it('clamps to 100 when set above 100', () => {
 			player.volume = 200
 			expect(player.volume).toBe(100)
-		})
-
-		it('always returns 100 when volumeSliderEnabled is false, regardless of stored value', () => {
-			const noSliderMain = { volumeSliderEnabled: false } as unknown as MainStore
-			let noSliderPlayer!: PlayerStore
-			const cleanup = $effect.root(() => {
-				noSliderPlayer = new PlayerStore(noSliderMain)
-			})
-			noSliderPlayer.volume = 40
-			expect(noSliderPlayer.volume).toBe(100)
-			cleanup()
 		})
 	})
 

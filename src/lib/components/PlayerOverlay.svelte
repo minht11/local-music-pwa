@@ -12,7 +12,6 @@
 
 	const { class: className }: { class?: ClassValue } = $props()
 
-	const mainStore = useMainStore()
 	const player = usePlayer()
 
 	const track = $derived(player.activeTrack)
@@ -75,7 +74,7 @@
 			<MainControls class="max-sm:hidden" />
 
 			<div class="ml-auto flex items-center gap-2 pr-2 max-sm:hidden">
-				{#if mainStore.volumeSliderEnabled}
+				{#if player.canChangeVolume}
 					<VolumeSlider />
 				{/if}
 			</div>

@@ -161,7 +161,6 @@
 	"settingsDirectoryRemoved": "Directorio eliminado",
 	"settingsDirRemove": "Eliminar",
 	"settingsDirRescan": "Volver a escanear",
-	"settingsDisplayVolumeSlider": "Mostrar el control de volumen dentro del reproductor",
 	"settingsGaplessPlayback": "Reproducción sin pausas",
 	"settingsGaplessPlaybackDescription": "Requiere que tu navegador y el archivo de audio lo admitan; de lo contrario, se recurre a la reproducción normal",
 	"settingsGaplessPlaybackInfo": "Esto usa un poco más de memoria y recursos de CPU; si experimentas algún problema, prueba a desactivarlo. Si usaste una versión anterior de la aplicación, vuelve a escanear o reimportar tu biblioteca para que funcione.",
