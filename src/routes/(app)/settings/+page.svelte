@@ -158,6 +158,9 @@
 					class="w-full sm:w-40"
 					onclick={() => {
 						const colorPicker = document.getElementById('color-picker') as HTMLInputElement
+						// Mobile iOS can't show picker without focus
+						// https://github.com/whatwg/html/issues/9757
+						colorPicker.focus()
 						colorPicker.click()
 					}}
 				>
@@ -172,7 +175,7 @@
 						bind:value={
 							() => mainStore.customThemePaletteHex ?? '#000000', (value) => updateMainColor(value)
 						}
-						class="pointer-events-none absolute inset-0 size-full appearance-none opacity-0"
+						class="pointer-events-none! absolute inset-0 size-full appearance-none opacity-0"
 					/>
 				</Button>
 			</div>
