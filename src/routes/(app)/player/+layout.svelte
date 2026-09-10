@@ -26,7 +26,7 @@
 	import { getLayoutProps } from './layout-props.ts'
 	import QueueList from './QueueList.svelte'
 
-	const { data } = $props()
+	const { data, children } = $props()
 
 	initPageQueries(() => data)
 
@@ -263,6 +263,9 @@
 	noListStableGutter
 	noPlayerOverlayPadding
 />
+
+<!-- Only used to prevent "tag missing — inner content will not be rendered" build warning -->
+{@render children()}
 
 <style lang="postcss">
 	@reference '../../../app.css';
