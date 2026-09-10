@@ -51,7 +51,7 @@
 			onload={() => {
 				error = false
 			}}
-		/>
+		>
 	{:else if fallbackIcon !== false}
 		<Icon type={fallbackIcon} class="m-auto size-2/3" />
 	{/if}

@@ -38,7 +38,7 @@
 					height={equalizerPreview.height}
 					alt="Snae Player equalizer dialog in dark mode with Bass Boost enabled"
 					class="equalizer-shot absolute top-5 left-[4%] block h-auto max-w-none rounded-[1.4rem] shadow-[0_28px_56px_--alpha(var(--color-shadow)/0.26),0_0_0_1px_--alpha(var(--color-outline)/0.08)]"
-				/>
+				>
 			</div>
 		</div>
 	</div>

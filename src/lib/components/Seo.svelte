@@ -18,26 +18,26 @@
 <svelte:head>
 	<title>{seoTitle}</title>
 
-	<meta name="description" content={seoDescription} />
+	<meta name="description" content={seoDescription}>
 
-	<meta property="og:type" content="website" />
-	<meta property="og:title" content={seoTitle} />
-	<meta property="og:description" content={seoDescription} />
-	<meta property="og:url" content={canonicalUrl} />
-	<meta property="og:image" content={thumbnail.src} />
-	<meta property="og:image:alt" content="Snae Player showing the library and player interface" />
-	<meta property="og:logo" content="/icons/responsive.svg" />
-	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content={seoTitle} />
-	<meta name="twitter:description" content={seoDescription} />
-	<meta name="twitter:image" content={thumbnail.src} />
+	<meta property="og:type" content="website">
+	<meta property="og:title" content={seoTitle}>
+	<meta property="og:description" content={seoDescription}>
+	<meta property="og:url" content={canonicalUrl}>
+	<meta property="og:image" content={thumbnail.src}>
+	<meta property="og:image:alt" content="Snae Player showing the library and player interface">
+	<meta property="og:logo" content="/icons/responsive.svg">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content={seoTitle}>
+	<meta name="twitter:description" content={seoDescription}>
+	<meta name="twitter:image" content={thumbnail.src}>
 
 	<meta
 		name="keywords"
 		content="local music player, offline music player, browser music player, android music player, ios music player, chromebook music player, windows music player, macos music player, play music from device, private music player, playlists, queue, favorites, equalizer, playback speed control"
-	/>
+	>
 
-	<link rel="canonical" href={canonicalUrl} />
+	<link rel="canonical" href={canonicalUrl}>
 
 	{#if schema}
 		{@html `<script type="application/ld+json">${JSON.stringify(schema, null, 2)}</script>`}

@@ -36,7 +36,7 @@
 <PlainLayout title={m.about()}>
 	<section class="m-auto flex w-full flex-col select-text sm:max-w-lg">
 		<div class="mb-10 flex flex-col items-center gap-4 text-center text-headline-md">
-			<img src="/icons/responsive.svg" alt="Logo" class="size-16" />
+			<img src="/icons/responsive.svg" alt="Logo" class="size-16">
 			{m.appName()}
 		</div>
 

@@ -49,7 +49,7 @@
 				alt="Snae Player showing the music library and playback controls"
 				loading="eager"
 				fetchpriority="high"
-			/>
+			>
 		</div>
 		<div class="hero-floating-card hero-floating-card-top lg:absolute lg:max-w-60">
 			<div class="text-label-sm text-onSurfaceVariant">Private by default</div>

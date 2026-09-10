@@ -53,7 +53,7 @@
 	<div
 		class="mr-auto flex items-center gap-2 text-title-sm font-medium text-onSurface xs:text-title-md"
 	>
-		<img src="/icons/responsive.svg" width="24" height="24" alt="Logo" class="size-6" />
+		<img src="/icons/responsive.svg" width="24" height="24" alt="Logo" class="size-6">
 		{m.appName()}
 	</div>
 
@@ -93,13 +93,7 @@
 <footer class="w-full border-t border-outlineVariant bg-shadow/7">
 	<div class="mktg-content-width items-center justify-between gap-4 py-8 sm:flex-row">
 		<div class="flex items-center gap-2 text-label-lg font-medium text-onSurfaceVariant">
-			<img
-				src="/icons/responsive.svg"
-				width="24"
-				height="24"
-				alt="Logo"
-				class="size-5 opacity-60"
-			/>
+			<img src="/icons/responsive.svg" width="24" height="24" alt="Logo" class="size-5 opacity-60">
 			{m.appName()}
 		</div>
 

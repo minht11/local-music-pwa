@@ -145,9 +145,7 @@
 			<div class="h-1 w-1/8 rounded-xs bg-onSurface/10"></div>
 		</div>
 	{:else if query.error}
-		<div class="text-error">
-			Error loading track with id {trackId}
-		</div>
+		<div class="text-error">Error loading track with id {trackId}</div>
 	{:else if track}
 		<div
 			role="gridcell"
