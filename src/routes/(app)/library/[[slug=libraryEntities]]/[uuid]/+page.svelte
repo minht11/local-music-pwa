@@ -6,6 +6,13 @@
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import MenuButton from '$lib/components/MenuButton.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import {
+		createTrackRowsSource,
+		playlistEntryRows,
+		type TrackRows,
+		trackIdRows,
+	} from '$lib/components/tracks/track-rows.svelte.ts'
+	import type { TrackRowLocator } from '$lib/components/tracks/use-track-menu-items.ts'
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import {
 		createManagedArtwork,
@@ -19,6 +26,7 @@
 	} from '$lib/library/playlists-actions.ts'
 	import { type Playlist, UNKNOWN_ITEM } from '$lib/library/types.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
+	import type { QueueOrigin } from '$lib/stores/player/queue.svelte.ts'
 
 	const { data } = $props()
 
@@ -57,7 +65,8 @@
 
 	const isWideLayout = new MediaQuery('(min-width: 1154px)')
 
-	const playlistTrackMenuItems = (track: TrackData) => {
+	// Only used on playlist views, where a row's `entryId` is the `PlaylistEntry` id.
+	const playlistTrackMenuItems = (_track: TrackData, { entryId }: TrackRowLocator) => {
 		if (isFavoritesView) {
 			return []
 		}
@@ -66,9 +75,6 @@
 			{
 				label: m.libraryTrackRemoveFromPlaylist(),
 				action: () => {
-					const entryId = tracks.playlistIdMap?.[track.id]
-					invariant(entryId)
-
 					void removeTrackEntryFromPlaylist(entryId)
 				},
 			},
@@ -77,12 +83,12 @@
 
 	const getMenuItems = () => {
 		const addToQueueMenuItem =
-			tracks.tracksIds.length === 0
+			rows.count === 0
 				? null
 				: {
 						label: m.playerAddToQueue(),
 						action: () => {
-							player.addToQueue(tracks.tracksIds)
+							player.queue.enqueue(rows.trackIds(), 'last')
 						},
 					}
 
@@ -99,7 +105,7 @@
 			{
 				label: m.libraryAddToPlaylist(),
 				action: () => {
-					dialogs.openDialog('addToPlaylist', tracks.tracksIds)
+					dialogs.openDialog('addToPlaylist', rows.trackIds())
 				},
 			},
 			{
@@ -125,6 +131,32 @@
 	const description = $derived(slug === 'playlists' && (item as Playlist).description)
 
 	const artists = $derived(slug === 'albums' && formatArtists((item as AlbumData).artists))
+
+	const queueOriginTypes = {
+		albums: 'album',
+		artists: 'artist',
+		playlists: 'playlist',
+	} as const
+
+	const queueOrigin: QueueOrigin = $derived({
+		type: queueOriginTypes[slug],
+		name: formatNameOrUnknown(item.name),
+	})
+
+	// Playlists key rows by `PlaylistEntry.id`, exact under duplicate tracks; every
+	// other view has one row per track, so the track id stands in. Branching here
+	// rather than per row, since only a refetch can change the shape.
+	const rows = $derived.by((): TrackRows => {
+		const value = tracks
+
+		return 'entries' in value
+			? playlistEntryRows(() => value.entries)
+			: trackIdRows(() => value.trackIds)
+	})
+
+	const tracksSource = createTrackRowsSource(() => rows, {
+		queueOrigin: () => queueOrigin,
+	})
 </script>
 
 {#if !(isWideLayout.current && main.librarySplitLayoutEnabled)}
@@ -170,7 +202,7 @@
 						{(item as AlbumData).year} •
 					{/if}
 
-					{m.libraryTracksCount({ count: tracks.tracksIds.length })}
+					{m.libraryTracksCount({ count: rows.count })}
 				</div>
 			</div>
 
@@ -178,9 +210,9 @@
 				<Button
 					kind="filled"
 					class="my-1"
-					disabled={tracks.tracksIds.length === 0}
+					disabled={rows.count === 0}
 					onclick={() => {
-						player.playTrack(0, tracks.tracksIds)
+						player.playFrom(0, rows.trackIds(), queueOrigin)
 					}}
 				>
 					{m.play()}
@@ -189,9 +221,9 @@
 				<Button
 					kind="flat"
 					class="my-1 mr-auto"
-					disabled={tracks.tracksIds.length === 0}
+					disabled={rows.count === 0}
 					onclick={() => {
-						player.playTrack('shuffle', tracks.tracksIds)
+						player.playFrom('shuffle', rows.trackIds(), queueOrigin)
 					}}
 				>
 					{m.shuffle()}
@@ -206,12 +238,12 @@
 	</section>
 
 	<TracksListContainer
-		items={tracks.tracksIds}
+		source={tracksSource}
 		predefinedMenuItems={{
-			disableViewAlbum: slug === 'albums',
-			disableViewArtist: slug === 'artists',
-			disableAddToFavorites: isFavoritesView,
-			enableMultiRemoveFromFavorites: isFavoritesView,
+			viewAlbum: slug !== 'albums',
+			viewArtist: slug !== 'artists',
+			addToFavorites: !isFavoritesView,
+			removeFromFavorites: isFavoritesView,
 		}}
 		menuItems={slug === 'playlists' ? playlistTrackMenuItems : undefined}
 	/>

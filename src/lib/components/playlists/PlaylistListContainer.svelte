@@ -30,7 +30,7 @@
 			{playlistId}
 			style="transform: translateY({item.start}px)"
 			class="virtual-item top-0 left-0 w-full"
-			ariaRowIndex={item.index}
+			rowIndex={item.index}
 			{menuItems}
 			{icon}
 			onclick={(playlist) => {

@@ -1,6 +1,5 @@
 import { flushSync } from 'svelte'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { MainStore } from '$lib/stores/main/store.svelte.ts'
 import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
 
 interface MockOptions {
@@ -9,7 +8,7 @@ interface MockOptions {
 	isGaplessEnabled: () => boolean
 }
 
-const { MockPlaybackController, mockHistory, controllerRef } = vi.hoisted(() => {
+const { MockPlaybackController, mockHistory, controllerRef, databaseChange } = vi.hoisted(() => {
 	// No type declarations inside vi.hoisted (Oxc parser issue in .svelte.ts files)
 	const controllerRef: { instance: unknown; options: unknown } = {
 		instance: null,
@@ -20,6 +19,9 @@ const { MockPlaybackController, mockHistory, controllerRef } = vi.hoisted(() => 
 		begin: vi.fn(),
 		update: vi.fn(),
 		complete: vi.fn(),
+	}
+	const databaseChange: { listener: ((changes: readonly unknown[]) => void) | null } = {
+		listener: null,
 	}
 
 	class MockPlaybackController {
@@ -52,7 +54,7 @@ const { MockPlaybackController, mockHistory, controllerRef } = vi.hoisted(() => 
 		}
 	}
 
-	return { MockPlaybackController, mockHistory, controllerRef }
+	return { MockPlaybackController, mockHistory, controllerRef, databaseChange }
 })
 
 vi.mock('$lib/audio/playback-controller.svelte.ts', () => ({
@@ -93,16 +95,35 @@ vi.mock('$lib/stores/player/play-history-tracker.ts', () => ({
 
 // Prevent BroadcastChannel usage in QueueStore
 vi.mock('$lib/db/events.ts', () => ({
-	onDatabaseChange: vi.fn(() => () => {}),
+	onDatabaseChange: vi.fn((listener) => {
+		databaseChange.listener = listener
+		return () => {
+			databaseChange.listener = null
+		}
+	}),
 	dispatchDatabaseChangedEvent: vi.fn(),
 }))
 
-const queryTracks = new Map<number, { id: number; name: string; duration: number }>()
+interface QueryTrack {
+	id: number
+	name: string
+	duration: number
+}
+
+const queryTracks = new Map<number, QueryTrack>()
+const queryState: { retainedValue: QueryTrack | undefined; retainPrevious: boolean } = {
+	retainedValue: undefined,
+	retainPrevious: false,
+}
 
 vi.mock('$lib/library/get/value-queries.ts', () => ({
 	createTrackQuery: (idGetter: () => number, _opts?: unknown) => ({
 		get value() {
-			return queryTracks.get(idGetter()) ?? null
+			if (queryState.retainPrevious) {
+				return queryState.retainedValue
+			}
+
+			return queryTracks.get(idGetter())
 		},
 		get error() {
 			return undefined
@@ -145,7 +166,13 @@ const seedTrack = (id: number) => {
 	queryTracks.set(id, { id, name: `Track ${id}`, duration: 180 })
 }
 
-const mockMain = { volumeSliderEnabled: true } as unknown as MainStore
+const dispatchTrackDeletes = (keys: readonly number[]) => {
+	const listener = databaseChange.listener
+	invariant(listener)
+	listener(keys.map((key) => ({ storeName: 'tracks', operation: 'delete', key })))
+}
+
+const dispatchTrackDelete = (key: number) => dispatchTrackDeletes([key])
 
 let player!: PlayerStore
 let cleanupPlayer: () => void
@@ -154,9 +181,9 @@ let opts: MockOptions = null as never
 
 beforeEach(() => {
 	cleanupPlayer = $effect.root(() => {
-		player = new PlayerStore(mockMain)
+		player = new PlayerStore()
 	})
-	// Force initial effects (track-change, preload, history, volume, playback-rate)
+	// Force initial effects (preload, history updates, volume, playback-rate)
 	// to run now, then clear their side effects so tests start clean.
 	flushSync()
 	vi.clearAllMocks()
@@ -168,6 +195,9 @@ afterEach(() => {
 	cleanupPlayer()
 	vi.clearAllMocks()
 	queryTracks.clear()
+	queryState.retainedValue = undefined
+	queryState.retainPrevious = false
+	databaseChange.listener = null
 })
 
 describe('PlayerStore', () => {
@@ -190,17 +220,6 @@ describe('PlayerStore', () => {
 			player.volume = 200
 			expect(player.volume).toBe(100)
 		})
-
-		it('always returns 100 when volumeSliderEnabled is false, regardless of stored value', () => {
-			const noSliderMain = { volumeSliderEnabled: false } as unknown as MainStore
-			let noSliderPlayer!: PlayerStore
-			const cleanup = $effect.root(() => {
-				noSliderPlayer = new PlayerStore(noSliderMain)
-			})
-			noSliderPlayer.volume = 40
-			expect(noSliderPlayer.volume).toBe(100)
-			cleanup()
-		})
 	})
 
 	describe('toggleRepeat', () => {
@@ -215,45 +234,65 @@ describe('PlayerStore', () => {
 		})
 	})
 
-	describe('playTrack', () => {
+	describe('playFrom', () => {
 		it('calls controller.play with the correct track id and fromBeginning', () => {
 			seedTrack(1)
-			player.playTrack(0, [1, 2, 3])
+			player.playFrom(0, [1, 2, 3])
 			expect(ctrl.play).toHaveBeenCalledWith(1, { fromBeginning: true })
 		})
 
-		it('updates itemsIds to reflect the new queue', () => {
+		it('updates the source queue to reflect the new list', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(0, [1, 2])
-			expect(player.itemsIds).toEqual([1, 2])
+			player.playFrom(0, [1, 2])
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 1 })
+			expect(player.queue.count('source')).toBe(1)
+			expect(player.queue.itemAt('source', 0)?.trackId).toBe(2)
 		})
 
-		it('enables shuffle and pins active track to index 0 when called with shuffle', () => {
+		it('enables shuffle and pins the current track to the front when called with shuffle', () => {
 			seedTrack(1)
 			seedTrack(2)
 			seedTrack(3)
-			player.playTrack('shuffle', [1, 2, 3])
-			expect(player.shuffle).toBe(true)
-			expect(player.activeTrackIndex).toBe(0)
-			expect(player.itemsIds).toHaveLength(3)
+			player.playFrom('shuffle', [1, 2, 3])
+			expect(player.queue.shuffle).toBe(true)
+			expect(player.queue.current?.layer).toBe('source')
+			// Two of three upcoming means the current track sits at the front.
+			expect(player.queue.count('source')).toBe(2)
 		})
 
-		it('changes only the active index when no queue is provided', () => {
+		it('exposes the queue origin', () => {
 			seedTrack(1)
-			seedTrack(2)
-			player.playTrack(0, [1, 2])
-			player.playTrack(1)
-			expect(player.itemsIds).toEqual([1, 2])
-			expect(player.activeTrackIndex).toBe(1)
-			expect(ctrl.play).toHaveBeenLastCalledWith(2, { fromBeginning: true })
+			player.playFrom(0, [1], { type: 'album', name: 'Album A' })
+			expect(player.queue.origin).toEqual({ type: 'album', name: 'Album A' })
 		})
+
+		it.each([0, 'shuffle'] as const)(
+			'ignores an empty source with start %s without changing the queue or audio',
+			(start) => {
+				seedTrack(1)
+				seedTrack(2)
+				player.playFrom(0, [1, 2])
+				const current = player.queue.current
+				const upcoming = player.queue.itemAt('source', 0)
+				vi.clearAllMocks()
+
+				player.playFrom(start, [])
+
+				expect(player.queue.current).toBe(current)
+				expect(player.queue.itemAt('source', 0)).toBe(upcoming)
+				expect(ctrl.playing).toBe(true)
+				expect(ctrl.play).not.toHaveBeenCalled()
+				expect(ctrl.abort).not.toHaveBeenCalled()
+				expect(mockHistory.begin).not.toHaveBeenCalled()
+			},
+		)
 	})
 
 	describe('play', () => {
-		it('calls controller.play with the active track id', () => {
+		it('calls controller.play with the current queue track id', () => {
 			seedTrack(5)
-			player.playTrack(0, [5])
+			player.playFrom(0, [5])
 			vi.clearAllMocks()
 
 			player.play()
@@ -261,7 +300,42 @@ describe('PlayerStore', () => {
 			expect(ctrl.play).toHaveBeenCalledWith(5)
 		})
 
-		it('does nothing when there is no active track', () => {
+		it('keeps playing the first pending entry while its track query is unresolved', () => {
+			// An unseeded track stands in for a query that has not come back yet.
+			player.queue.enqueue([7, 8], 'last')
+			expect(player.queue.current).toBeNull()
+			expect(player.queue.count('manual')).toBe(2)
+			expect(player.activeTrack).toBeUndefined()
+
+			player.play()
+			flushSync()
+
+			expect(ctrl.play).toHaveBeenCalledWith(7, { fromBeginning: true })
+			expect(ctrl.abort).not.toHaveBeenCalled()
+			expect(ctrl.playing).toBe(true)
+			expect(player.queue.current).toMatchObject({ layer: 'manual', trackId: 7 })
+			expect(player.queue.count('manual')).toBe(1)
+		})
+
+		it('does not expose metadata retained from the previous query key', () => {
+			seedTrack(1)
+			player.playFrom(0, [1, 2])
+			expect(player.activeTrack?.id).toBe(1)
+
+			queryState.retainedValue = queryTracks.get(1)
+			queryState.retainPrevious = true
+			vi.clearAllMocks()
+
+			player.playNext()
+			flushSync()
+
+			expect(player.queue.current?.trackId).toBe(2)
+			expect(player.activeTrack).toBeUndefined()
+			expect(ctrl.abort).not.toHaveBeenCalled()
+			expect(ctrl.playing).toBe(true)
+		})
+
+		it('does nothing when the queue is empty', () => {
 			player.play()
 			expect(ctrl.play).not.toHaveBeenCalled()
 		})
@@ -277,7 +351,7 @@ describe('PlayerStore', () => {
 	describe('togglePlay', () => {
 		it('calls play when not currently playing', () => {
 			seedTrack(1)
-			player.playTrack(0, [1])
+			player.playFrom(0, [1])
 			vi.clearAllMocks()
 
 			ctrl.playing = false
@@ -293,6 +367,37 @@ describe('PlayerStore', () => {
 		})
 	})
 
+	describe('control capabilities', () => {
+		it('distinguishes playable rows from retained source history', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(9)
+			player.playFrom(0, [1, 2])
+			player.queue.enqueue([9], 'next')
+			player.playNext()
+			player.queue.clear('source')
+			flushSync()
+			vi.clearAllMocks()
+
+			dispatchTrackDelete(9)
+			flushSync()
+
+			expect(player.queue.current).toBeNull()
+			expect(player.queue.count('manual')).toBe(0)
+			expect(player.queue.count('source')).toBe(0)
+			expect(player.canTogglePlay).toBe(false)
+			expect(player.canPlayNext).toBe(true)
+			expect(player.canPlayPrev).toBe(true)
+
+			vi.clearAllMocks()
+			player.play()
+			expect(ctrl.play).not.toHaveBeenCalled()
+
+			player.playNext()
+			expect(ctrl.play).toHaveBeenCalledWith(1, { fromBeginning: true })
+		})
+	})
+
 	describe('seek', () => {
 		it('delegates to controller.seek', () => {
 			player.seek(42)
@@ -300,28 +405,178 @@ describe('PlayerStore', () => {
 		})
 	})
 
-	describe('playNext', () => {
-		it('plays the next track in the queue', () => {
+	describe('manual queue', () => {
+		it('advances to the next manual track when the playing manual track is deleted', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(0, [1, 2])
+			seedTrack(8)
+			seedTrack(9)
+			player.playFrom(0, [1, 2])
+			player.queue.enqueue([9, 8], 'next')
+			player.playNext()
+			flushSync()
+			vi.clearAllMocks()
+
+			dispatchTrackDelete(9)
+			flushSync()
+
+			expect(player.queue.current).toMatchObject({ layer: 'manual', trackId: 8 })
+			expect(ctrl.play).toHaveBeenCalledWith(8, { fromBeginning: true })
+			expect(mockHistory.begin).toHaveBeenCalledWith(8)
+		})
+
+		it('advances to the source successor rather than restarting the return point', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(9)
+			player.playFrom(0, [1, 2])
+			player.queue.enqueue([9], 'next')
+			player.playNext()
+			flushSync()
+			vi.clearAllMocks()
+
+			dispatchTrackDelete(9)
+			flushSync()
+
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 2 })
+			expect(ctrl.play).toHaveBeenCalledWith(2, { fromBeginning: true })
+			expect(mockHistory.begin).toHaveBeenCalledWith(2)
+		})
+
+		it('advances to the source successor when the manual and source return tracks share an id', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(3)
+			player.playFrom(1, [1, 2, 3])
+			player.queue.enqueue([2], 'next')
+			player.playNext()
+			flushSync()
+			vi.clearAllMocks()
+
+			dispatchTrackDelete(2)
+			flushSync()
+
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 3 })
+			expect(ctrl.play).toHaveBeenCalledWith(3, { fromBeginning: true })
+		})
+
+		it('preserves the source return gap when a batch deletes the manual track then its anchor', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(3)
+			seedTrack(9)
+			player.playFrom(1, [1, 2, 3])
+			player.queue.enqueue([9], 'next')
+			player.playNext()
+			flushSync()
+			vi.clearAllMocks()
+
+			dispatchTrackDeletes([9, 2])
+			flushSync()
+
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 3 })
+			expect(ctrl.play).toHaveBeenCalledWith(3, { fromBeginning: true })
+		})
+
+		it('playNext consumes the manual queue before the context', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(9)
+			player.playFrom(0, [1, 2])
+			player.queue.enqueue([9], 'next')
 			vi.clearAllMocks()
 
 			player.playNext()
 
-			expect(player.activeTrackIndex).toBe(1)
+			expect(ctrl.play).toHaveBeenCalledWith(9, { fromBeginning: true })
+			expect(player.queue.count('manual')).toBe(0)
+
+			player.playNext()
+			expect(ctrl.play).toHaveBeenLastCalledWith(2, { fromBeginning: true })
+		})
+
+		it('track ended advances into the manual queue with gapless flag', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(9)
+			player.playFrom(0, [1, 2])
+			player.queue.enqueue([9], 'last')
+			vi.clearAllMocks()
+
+			opts.onTrackEnded()
+
+			expect(ctrl.play).toHaveBeenCalledWith(9, { gapless: true, fromBeginning: true })
+		})
+
+		it('preloads the first manual track near the end of the current one', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(9)
+			player.playFrom(0, [1, 2])
+			player.queue.enqueue([9], 'next')
+			flushSync()
+			vi.clearAllMocks()
+
+			ctrl.duration = 30
+			ctrl.currentTime = 25
+			flushSync()
+
+			expect(ctrl.preloadNext).toHaveBeenCalledWith(9)
+		})
+
+		it('playQueueEntry plays the chosen manual track and discards skipped ones', () => {
+			seedTrack(1)
+			seedTrack(8)
+			seedTrack(9)
+			player.playFrom(0, [1])
+			player.queue.enqueue([8, 9], 'last')
+			const entryId = player.queue.itemAt('manual', 1)?.entryId
+			invariant(entryId !== undefined)
+			vi.clearAllMocks()
+
+			player.playQueueEntry(entryId)
+
+			expect(ctrl.play).toHaveBeenCalledWith(9, { fromBeginning: true })
+			expect(player.queue.count('manual')).toBe(0)
+		})
+
+		it('playQueueEntry jumps within the source', () => {
+			seedTrack(1)
+			seedTrack(2)
+			seedTrack(3)
+			player.playFrom(0, [1, 2, 3])
+			const entryId = player.queue.itemAt('source', 1)?.entryId
+			invariant(entryId !== undefined)
+			vi.clearAllMocks()
+
+			player.playQueueEntry(entryId)
+
+			expect(ctrl.play).toHaveBeenCalledWith(3, { fromBeginning: true })
+		})
+	})
+
+	describe('playNext', () => {
+		it('plays the next track in the queue', () => {
+			seedTrack(1)
+			seedTrack(2)
+			player.playFrom(0, [1, 2])
+			vi.clearAllMocks()
+
+			player.playNext()
+
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 2 })
 			expect(ctrl.play).toHaveBeenCalledWith(2, { fromBeginning: true })
 		})
 
 		it('wraps to the first track when at the end of the queue', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(1, [1, 2])
+			player.playFrom(1, [1, 2])
 			vi.clearAllMocks()
 
 			player.playNext()
 
-			expect(player.activeTrackIndex).toBe(0)
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 1 })
 			expect(ctrl.play).toHaveBeenCalledWith(1, { fromBeginning: true })
 		})
 	})
@@ -330,27 +585,27 @@ describe('PlayerStore', () => {
 		it('seeks to the beginning of the current track when currentTime > 3 seconds', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(1, [1, 2])
+			player.playFrom(1, [1, 2])
 			vi.clearAllMocks()
 
 			ctrl.currentTime = 10
 			player.playPrev()
 
-			// Active index stays the same (track 2 at index 1)
-			expect(player.activeTrackIndex).toBe(1)
+			// Still the same source entry (track 2)
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 2 })
 			expect(ctrl.play).toHaveBeenCalledWith(2, { fromBeginning: true })
 		})
 
 		it('plays the previous track when currentTime <= 3 seconds', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(1, [1, 2])
+			player.playFrom(1, [1, 2])
 			vi.clearAllMocks()
 
 			ctrl.currentTime = 2
 			player.playPrev()
 
-			expect(player.activeTrackIndex).toBe(0)
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 1 })
 			expect(ctrl.play).toHaveBeenCalledWith(1, { fromBeginning: true })
 		})
 
@@ -358,14 +613,74 @@ describe('PlayerStore', () => {
 			seedTrack(1)
 			seedTrack(2)
 			seedTrack(3)
-			player.playTrack(0, [1, 2, 3])
+			player.playFrom(0, [1, 2, 3])
 			vi.clearAllMocks()
 
 			ctrl.currentTime = 0
 			player.playPrev()
 
-			expect(player.activeTrackIndex).toBe(2)
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 3 })
 			expect(ctrl.play).toHaveBeenCalledWith(3, { fromBeginning: true })
+		})
+	})
+
+	describe('queueExhaustion', () => {
+		it('is null before playback starts', () => {
+			expect(player.queueExhaustion).toBeNull()
+		})
+
+		it('is null while upcoming rows remain', () => {
+			seedTrack(1)
+			seedTrack(2)
+			player.playFrom(0, [1, 2])
+
+			expect(player.queueExhaustion).toBeNull()
+		})
+
+		it('reports repeats-track when repeat is one', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			player.repeat = 'one'
+
+			expect(player.queueExhaustion).toBe('repeats-track')
+		})
+
+		it('reports stops-after when repeat is none and nothing is queued', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			player.repeat = 'none'
+
+			expect(player.queueExhaustion).toBe('stops-after')
+		})
+
+		it('reports stops-after at the end of a manual-only queue despite repeat all', () => {
+			seedTrack(8)
+			player.queue.enqueue([8], 'last')
+			player.play()
+			player.repeat = 'all'
+
+			// The repeat mode alone would promise a wrap; there is nothing to wrap to.
+			expect(player.queueExhaustion).toBe('stops-after')
+		})
+
+		it('reports repeats-queue when repeat all wraps back to the source', () => {
+			seedTrack(1)
+			seedTrack(2)
+			player.playFrom(1, [1, 2])
+			player.repeat = 'all'
+
+			expect(player.queueExhaustion).toBe('repeats-queue')
+		})
+
+		it('returns to queued when a row is enqueued behind an exhausted queue', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			player.repeat = 'none'
+			expect(player.queueExhaustion).toBe('stops-after')
+
+			player.queue.enqueue([2], 'next')
+
+			expect(player.queueExhaustion).toBeNull()
 		})
 	})
 
@@ -373,18 +688,18 @@ describe('PlayerStore', () => {
 		it('advances the queue and plays next track with gapless flag', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(0, [1, 2])
+			player.playFrom(0, [1, 2])
 			vi.clearAllMocks()
 
 			opts.onTrackEnded()
 
-			expect(player.activeTrackIndex).toBe(1)
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 2 })
 			expect(ctrl.play).toHaveBeenCalledWith(2, { gapless: true, fromBeginning: true })
 		})
 
 		it('pauses when no next track and repeat is none', () => {
 			seedTrack(1)
-			player.playTrack(0, [1])
+			player.playFrom(0, [1])
 			player.repeat = 'none'
 			vi.clearAllMocks()
 
@@ -397,33 +712,53 @@ describe('PlayerStore', () => {
 		it('wraps to the first track when repeat is all and queue ends', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(1, [1, 2])
+			player.playFrom(1, [1, 2])
 			player.repeat = 'all'
 			vi.clearAllMocks()
 
 			opts.onTrackEnded()
 
-			expect(player.activeTrackIndex).toBe(0)
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 1 })
 			expect(ctrl.play).toHaveBeenCalledWith(1, { gapless: true, fromBeginning: true })
+		})
+
+		it('pauses at the end of a manual-only queue even when repeat is all', () => {
+			seedTrack(8)
+			seedTrack(9)
+			player.queue.enqueue([8, 9], 'last')
+			player.play()
+			player.repeat = 'all'
+			vi.clearAllMocks()
+
+			opts.onTrackEnded()
+			expect(player.queue.current).toMatchObject({ layer: 'manual', trackId: 9 })
+
+			vi.clearAllMocks()
+			opts.onTrackEnded()
+
+			expect(ctrl.pause).toHaveBeenCalled()
+			expect(ctrl.play).not.toHaveBeenCalled()
 		})
 
 		it('replays the same track when repeat is one', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(0, [1, 2])
+			player.playFrom(0, [1, 2])
 			player.repeat = 'one'
 			vi.clearAllMocks()
 
 			opts.onTrackEnded()
 
-			expect(player.activeTrackIndex).toBe(0)
+			expect(player.queue.current).toMatchObject({ layer: 'source', trackId: 1 })
 			expect(ctrl.play).toHaveBeenCalledWith(1, { gapless: true, fromBeginning: true })
+			expect(mockHistory.complete).toHaveBeenCalledOnce()
+			expect(mockHistory.begin).toHaveBeenCalledWith(1)
 		})
 
 		it('pauses when pauseAfterTrackWhenRepeatIsOff is true and repeat is none', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(0, [1, 2])
+			player.playFrom(0, [1, 2])
 			player.repeat = 'none'
 			player.pauseAfterTrackWhenRepeatIsOff = true
 			vi.clearAllMocks()
@@ -436,7 +771,7 @@ describe('PlayerStore', () => {
 
 		it('calls history.complete when a track ends', () => {
 			seedTrack(1)
-			player.playTrack(0, [1])
+			player.playFrom(0, [1])
 			vi.clearAllMocks()
 
 			opts.onTrackEnded()
@@ -446,25 +781,67 @@ describe('PlayerStore', () => {
 	})
 
 	describe('play history tracking', () => {
-		it('calls history.begin with the track id when a track becomes active', () => {
+		it('begins history exactly once when a new entry starts playback', () => {
 			seedTrack(7)
-			player.playTrack(0, [7])
+			player.playFrom(0, [7])
 			flushSync()
 
+			expect(mockHistory.begin).toHaveBeenCalledOnce()
 			expect(mockHistory.begin).toHaveBeenCalledWith(7)
 		})
 
 		it('calls history.begin again with the new id when the active track changes', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(0, [1, 2])
+			player.playFrom(0, [1, 2])
 			flushSync()
+			const entryId = player.queue.itemAt('source', 0)?.entryId
+			invariant(entryId !== undefined)
 			vi.clearAllMocks()
 
-			player.playTrack(1)
+			player.playQueueEntry(entryId)
 			flushSync()
 
 			expect(mockHistory.begin).toHaveBeenCalledWith(2)
+		})
+
+		it('begins a new history session on every repeat-one loop', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			player.repeat = 'one'
+			vi.clearAllMocks()
+
+			opts.onTrackEnded()
+			opts.onTrackEnded()
+
+			expect(mockHistory.complete).toHaveBeenCalledTimes(2)
+			expect(mockHistory.begin).toHaveBeenCalledTimes(2)
+			expect(mockHistory.begin).toHaveBeenNthCalledWith(1, 1)
+			expect(mockHistory.begin).toHaveBeenNthCalledWith(2, 1)
+		})
+
+		it('does not begin a new history session when resuming the current entry', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			player.pause()
+			vi.clearAllMocks()
+
+			player.play()
+
+			expect(ctrl.play).toHaveBeenCalledWith(1)
+			expect(mockHistory.begin).not.toHaveBeenCalled()
+		})
+
+		it('begins a new history session when restarting the current entry', () => {
+			seedTrack(1)
+			player.playFrom(0, [1])
+			ctrl.currentTime = 10
+			vi.clearAllMocks()
+
+			player.playPrev()
+
+			expect(ctrl.play).toHaveBeenCalledWith(1, { fromBeginning: true })
+			expect(mockHistory.begin).toHaveBeenCalledWith(1)
 		})
 
 		it('calls history.update when currentTime changes', () => {
@@ -480,7 +857,7 @@ describe('PlayerStore', () => {
 		it('calls preloadNext with the next track id when within 10 seconds of the end', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(0, [1, 2])
+			player.playFrom(0, [1, 2])
 			flushSync()
 			vi.clearAllMocks()
 
@@ -494,7 +871,7 @@ describe('PlayerStore', () => {
 		it('does not preload when more than 10 seconds remain', () => {
 			seedTrack(1)
 			seedTrack(2)
-			player.playTrack(0, [1, 2])
+			player.playFrom(0, [1, 2])
 			flushSync()
 			vi.clearAllMocks()
 
@@ -507,7 +884,7 @@ describe('PlayerStore', () => {
 
 		it('calls abortNext when near the end with no next track', () => {
 			seedTrack(1)
-			player.playTrack(0, [1])
+			player.playFrom(0, [1])
 			player.repeat = 'none'
 			flushSync()
 			vi.clearAllMocks()

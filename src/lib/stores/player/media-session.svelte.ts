@@ -25,7 +25,6 @@ export class MediaSessionController {
 		if (!ms) {
 			return
 		}
-
 		const setAction = ms.setActionHandler.bind(ms)
 
 		setAction('play', () => player.play())

@@ -3,7 +3,7 @@
 	import { tooltip } from '../attachments/tooltip.ts'
 
 	export type AllowedButtonElement = 'button' | 'a'
-	export type ButtonKind = 'filled' | 'toned' | 'outlined' | 'flat' | 'blank'
+	export type ButtonKind = 'filled' | 'toned' | 'toned-low' | 'outlined' | 'flat' | 'blank'
 
 	export type ButtonHref<As extends AllowedButtonElement> = As extends 'a' ? string : never
 
@@ -40,7 +40,8 @@
 
 	const KIND_CLASS_MAP = {
 		filled: 'filled-button',
-		toned: 'tonal-button',
+		toned: 'toned-button',
+		'toned-low': 'toned-low-button',
 		outlined: 'outlined-button',
 		flat: 'flat-button',
 		blank: '',
@@ -78,8 +79,13 @@
 		color: var(--color-onPrimary);
 	}
 
-	.tonal-button {
+	.toned-button {
 		background: var(--color-secondaryContainer);
+		color: var(--color-onSecondaryContainer);
+	}
+
+	.toned-low-button {
+		background: --alpha(var(--color-secondaryContainer) / 50%);
 		color: var(--color-onSecondaryContainer);
 	}
 

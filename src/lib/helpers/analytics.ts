@@ -1,4 +1,4 @@
-import { PUBLIC_GOAT_COUNTER_URL } from '$env/static/public'
+import { PUBLIC_GOAT_COUNTER_URL } from '$app/env/public'
 
 // Minimal GoatCounter client. Replaces the external https://gc.zgo.at/count.js
 // script: we only ever call `count()` with an explicit path, so the rest of the

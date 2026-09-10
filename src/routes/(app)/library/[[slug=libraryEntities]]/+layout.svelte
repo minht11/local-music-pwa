@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" module>
 	import type { Snapshot } from '@sveltejs/kit'
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
@@ -6,19 +6,20 @@
 	import AlbumsListContainer from '$lib/components/AlbumsListContainer.svelte'
 	import ArtistListContainer from '$lib/components/ArtistListContainer.svelte'
 	import Button from '$lib/components/Button.svelte'
-	import IconButton from '$lib/components/IconButton.svelte'
-	import type { IconType } from '$lib/components/icon/Icon.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
+	import LibraryNavigation from '$lib/components/LibraryNavigation.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
 	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
 	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { initPageQueries } from '$lib/db/query/page-query.svelte.js'
+	import { createTrackRowsSource, trackIdRows } from '$lib/components/tracks/track-rows.svelte.ts'
+	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
 	import { isMobile } from '$lib/helpers/utils/ua.ts'
-	import { useSetOverlaySnippet } from '$lib/layout-bottom-bar.svelte.ts'
 	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
 	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
 	import Search from './Search.svelte'
+</script>
 
+<script lang="ts">
 	const { data, children } = $props()
 
 	initPageQueries(() => data)
@@ -30,41 +31,16 @@
 	const slug = $derived(data.slug)
 	const isHandHeldDevice = isMobile()
 
-	interface NavItem {
-		slug: typeof slug
-		title: string
-		icon: IconType
-	}
-
-	const navItems: NavItem[] = [
-		{
-			slug: 'tracks',
-			title: m.tracks(),
-			icon: 'musicNote',
-		},
-		{
-			slug: 'albums',
-			title: m.albums(),
-			icon: 'album',
-		},
-		{
-			slug: 'artists',
-			title: m.artists(),
-			icon: 'person',
-		},
-		{
-			slug: 'playlists',
-			title: m.playlists(),
-			icon: 'playlist',
-		},
-	]
+	// Only read on the tracks slug, where `itemsIds` are track ids.
+	const allTracksRows = trackIdRows(() => itemsIds)
+	const allTracksSource = createTrackRowsSource(() => allTracksRows, {
+		queueOrigin: () => ({ type: 'tracks', name: m.tracks() }),
+	})
 
 	const isWideLayout = $derived(data.isWideLayout())
 	const layoutMode = $derived(
 		data.layoutMode(main.librarySplitLayoutEnabled, isWideLayout, page.params.uuid),
 	)
-
-	useSetOverlaySnippet('bottom-bar', () => layoutBottom)
 
 	export const snapshot: Snapshot<string> = {
 		capture: () => data.store.searchTerm,
@@ -74,60 +50,7 @@
 	}
 </script>
 
-{#snippet navItemsSnippet(className: string)}
-	{#each navItems as item}
-		<Button
-			as="a"
-			href={`/library/${item.slug}`}
-			kind="blank"
-			tooltip={item.title}
-			class={['flex shrink-0 items-center justify-center', className]}
-		>
-			<div
-				class={[
-					'flex items-center justify-center rounded-full p-2',
-					item.slug === slug && 'bg-secondaryContainer text-onSecondaryContainer',
-				]}
-			>
-				<Icon type={item.icon} />
-			</div>
-		</Button>
-	{/each}
-{/snippet}
-
-{#snippet layoutBottom()}
-	{#if isHandHeldDevice}
-		<div
-			class="pointer-events-auto grid h-[calc(--spacing(16)+env(safe-area-inset-bottom))] w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer pb-[env(safe-area-inset-bottom)] sm:hidden active-view-regular:view-name-[bottom-bar]"
-		>
-			{@render navItemsSnippet('h-full')}
-		</div>
-	{/if}
-{/snippet}
-
-{#if layoutMode !== 'details'}
-	<div
-		class={[
-			'desktop-sidebar fixed z-1 mt-20 h-max w-max flex-col items-center gap-2 [@media(max-height:500px)]:mt-2',
-			isHandHeldDevice ? 'hidden sm:flex' : 'flex',
-		]}
-	>
-		{@render navItemsSnippet('h-14 w-20')}
-
-		{#if (slug === 'albums' || slug === 'artists') && isWideLayout}
-			<IconButton
-				icon="sidePanel"
-				tooltip={main.librarySplitLayoutEnabled
-					? m.librarySplitViewDisable()
-					: m.librarySplitViewEnable()}
-				class={['mt-4', main.librarySplitLayoutEnabled && 'rotate-180']}
-				onclick={() => {
-					main.librarySplitLayoutEnabled = !main.librarySplitLayoutEnabled
-				}}
-			/>
-		{/if}
-	</div>
-{/if}
+<LibraryNavigation variant="rail" activeSlug={slug} {layoutMode} {isWideLayout} />
 
 <ListDetailsLayout mode={layoutMode} class="mx-auto w-full max-w-(--app-max-content-width) grow">
 	{#snippet list(mode)}
@@ -173,7 +96,7 @@
 								</div>
 							</div>
 						{:else if slug === 'tracks'}
-							<TracksListContainer items={itemsIds} />
+							<TracksListContainer source={allTracksSource} />
 						{:else if slug === 'albums'}
 							<AlbumsListContainer items={itemsIds} />
 						{:else if slug === 'artists'}

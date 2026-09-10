@@ -1,198 +1,261 @@
-import { onDatabaseChange } from '$lib/db/events.ts'
-import { toShuffledArray } from '$lib/helpers/utils/array.ts'
+import { ManualQueue } from './manual-queue.svelte.ts'
+import type { QueueItem, UpcomingList } from './queue-entry.ts'
+import { type QueueOrigin, SourceQueue } from './source-queue.svelte.ts'
 
-export interface QueueEntry {
-	id: number
-	index: number
+export type { QueueItem, QueueOrigin }
+
+/**
+ * A queue row tagged by its layer. `entryId` is the row's session-scoped
+ * identity — stable across reorder, shuffle and the upcoming → current
+ * transition, unique across both layers.
+ */
+export interface QueueEntry extends QueueItem {
+	layer: QueueLayer
 }
 
+export type QueueLayer = 'manual' | 'source'
+
+/** An insertion gap between upcoming rows in a layer (0..upcoming count). */
+export interface QueueSlot {
+	layer: QueueLayer
+	slot: number
+}
+
+/**
+ * The queue as UI consumers may touch it: reads, plus mutations that never start
+ * audio or select a new current entry. Playback commands live on `PlayerStore`.
+ */
+export interface QueueView {
+	readonly current: QueueEntry | null
+	readonly origin: QueueOrigin | null
+	readonly shuffle: boolean
+	count: (layer: QueueLayer) => number
+	itemAt: (layer: QueueLayer, i: number) => QueueItem | undefined
+	toggleShuffle: () => void
+	enqueue: (trackIds: readonly number[], position: 'next' | 'last') => void
+	removeEntries: (entryIds: readonly number[]) => void
+	moveEntry: (entryId: number, toSlot: QueueSlot) => void
+	clear: (layer: QueueLayer) => void
+}
+
+const toEntry = (layer: QueueLayer, item: QueueItem): QueueEntry => ({
+	layer,
+	trackId: item.trackId,
+	entryId: item.entryId,
+})
+
+/**
+ * Two-layer playback queue:
+ *  - manual - the tracks the user explicitly queued
+ *  - source - place where album/playlist/list playback was started from.
+ * This store owns the externally active `current`; the layers contain only
+ * pending manual rows and source order around its next-row gap.
+ */
 export class QueueStore {
-	shuffle: boolean = $state(false)
+	readonly #manual = new ManualQueue()
+	readonly #source = new SourceQueue()
+	#current: QueueEntry | null = $state(null)
 
-	#currentIndex = $state(-1)
-
-	#itemsIdsOriginalOrder: number[] = $state([])
-	#itemsIdsShuffled: number[] | null = $state(null)
-
-	itemsIds: readonly number[] = $derived(
-		this.#itemsIdsShuffled ? this.#itemsIdsShuffled : this.#itemsIdsOriginalOrder,
-	)
-
-	readonly current = $derived(this.#atIndex(this.#currentIndex))
-
-	get isQueueEmpty(): boolean {
-		return this.itemsIds.length === 0
+	get shuffle(): boolean {
+		return this.#source.shuffle
 	}
 
-	constructor() {
-		onDatabaseChange((changes) => {
-			for (const change of changes) {
-				if (change.storeName !== 'tracks' || change.operation !== 'delete') {
-					continue
-				}
-
-				while (true) {
-					const index = this.itemsIds.indexOf(change.key)
-					if (index === -1) {
-						break
-					}
-
-					this.#removeByIndex(index, change.key)
-				}
-			}
-		})
+	set shuffle(value: boolean) {
+		this.#source.shuffle = value
 	}
 
-	#atIndex(index: number): QueueEntry | null {
-		const id = this.itemsIds[index]
-
-		return id === undefined ? null : { id, index }
+	get origin(): QueueOrigin | null {
+		return this.#source.origin
 	}
 
-	setTrack = (trackIndex: number | 'shuffle', newQueue?: readonly number[]): number | null => {
-		if (newQueue) {
-			this.#itemsIdsOriginalOrder = [...newQueue]
-			this.shuffle = trackIndex === 'shuffle'
+	count(layer: QueueLayer): number {
+		return this.#list(layer).upcomingCount
+	}
 
-			if (this.shuffle) {
-				this.#itemsIdsShuffled = toShuffledArray(this.#itemsIdsOriginalOrder)
-			} else {
-				this.#itemsIdsShuffled = null
-			}
+	/** `i` is layer-relative (0 = first upcoming row). */
+	itemAt(layer: QueueLayer, i: number): QueueItem | undefined {
+		return this.#list(layer).upcomingAt(i)
+	}
+
+	get current(): QueueEntry | null {
+		return this.#current
+	}
+
+	/** Selecting a source ends the active manual row; queued rows survive. */
+	setSource = (
+		ids: readonly number[],
+		start: number | 'shuffle',
+		origin?: QueueOrigin,
+	): QueueEntry | null => {
+		const item = this.#source.setItems(ids, start, origin ?? null)
+		this.#current = item === undefined ? null : toEntry('source', item)
+
+		return this.#current
+	}
+
+	advance = (loop = false): QueueEntry | null => {
+		const taken = this.#manual.take(0)
+		if (taken !== undefined) {
+			return this.#activate('manual', taken)
 		}
 
-		if (this.itemsIds.length === 0) {
-			this.#currentIndex = -1
-		} else {
-			this.#currentIndex = trackIndex === 'shuffle' ? 0 : trackIndex
-		}
-
-		return this.current?.id ?? null
+		return this.#activate('source', this.#source.advance(loop))
 	}
 
-	peekNext = (loop = false) => {
-		let nextIndex = this.#currentIndex + 1
-		if (nextIndex >= this.itemsIds.length && loop) {
-			nextIndex = 0
+	peekNext = (loop = false): number | null =>
+		this.#manual.upcomingAt(0)?.trackId ?? this.#source.peekNext(loop) ?? null
+
+	canStepBack = (loop = false): boolean =>
+		this.#current?.layer === 'manual'
+			? this.#source.entryBeforeNext !== undefined
+			: this.#source.canStepBack(loop)
+
+	/**
+	 * Consumed manual tracks are gone, so this navigates the source only; from a
+	 * manual track it returns to the source row playback detoured from.
+	 */
+	stepBack = (loop = false): QueueEntry | null => {
+		if (this.#current?.layer === 'manual') {
+			return this.#activate('source', this.#source.entryBeforeNext)
 		}
 
-		return this.#atIndex(nextIndex)
-	}
-
-	peekPrev = (loop = false) => {
-		let prevIndex = this.#currentIndex - 1
-		if (prevIndex < 0 && loop) {
-			prevIndex = this.itemsIds.length - 1
-		}
-
-		return this.#atIndex(prevIndex)
+		return this.#activate('source', this.#source.stepBack(loop))
 	}
 
 	toggleShuffle = (): void => {
-		const activeTrackId = this.itemsIds[this.#currentIndex] ?? -1
-		this.shuffle = !this.shuffle
+		this.#source.toggleShuffle()
+	}
 
-		if (this.shuffle) {
-			this.#itemsIdsShuffled = toShuffledArray(this.#itemsIdsOriginalOrder)
+	enqueue = (trackIds: readonly number[], position: 'next' | 'last'): void => {
+		this.#manual.enqueue(trackIds, position)
+	}
 
-			const newIndex = this.#itemsIdsShuffled.indexOf(activeTrackId)
-			if (newIndex === -1) {
-				this.#currentIndex = -1
-			} else {
-				const displaced = this.#itemsIdsShuffled[0] as number
-				this.#itemsIdsShuffled[0] = activeTrackId
-				this.#itemsIdsShuffled[newIndex] = displaced
-				this.#currentIndex = 0
+	/**
+	 * A manual row is consumed through, dropping the rows it skipped; a source row
+	 * is jumped to, backward included. Null when the id names no upcoming row.
+	 */
+	playEntry = (entryId: number): QueueEntry | null => {
+		const manualIndex = this.#manual.upcomingIndexOf(entryId)
+		if (manualIndex !== -1) {
+			const taken = this.#manual.take(manualIndex)
+
+			return this.#activate('manual', taken)
+		}
+
+		return this.#activate('source', this.#source.jumpToEntryId(entryId))
+	}
+
+	/**
+	 * Jumps to `id` in the source queue, else starts a fresh single-track one. The
+	 * manual queue is not consulted — its rows are addressed by entry id.
+	 */
+	playTrackId = (id: number): QueueEntry | null => {
+		const jumped = this.#activate('source', this.#source.jumpToTrackId(id))
+
+		return jumped ?? this.setSource([id], 0)
+	}
+
+	/** Never removes the current entry. */
+	removeEntries = (entryIds: readonly number[]): void => {
+		const toRemove = new Set(entryIds)
+
+		this.#manual.removeEntries(toRemove)
+		this.#source.removeEntries(toRemove)
+	}
+
+	/**
+	 * Removes every occurrence of deleted library tracks. Deleting an active
+	 * manual row selects its next successor; deleting an active source row clears
+	 * current. Returns whether the active entry was removed.
+	 */
+	removeTracks = (trackIds: ReadonlySet<number>): boolean => {
+		const previous = this.#current
+		const sourceAnchor = this.#source.entryBeforeNext
+		const shouldMakeAllSourceRowsUpcoming =
+			previous?.layer !== 'manual' &&
+			sourceAnchor !== undefined &&
+			trackIds.has(sourceAnchor.trackId)
+
+		this.#manual.removeTracks(trackIds)
+		this.#source.removeTracks(trackIds)
+		if (shouldMakeAllSourceRowsUpcoming) {
+			this.#source.makeAllUpcoming()
+		}
+
+		if (previous === null || !trackIds.has(previous.trackId)) {
+			return false
+		}
+
+		this.#current = null
+		if (previous.layer === 'manual') {
+			this.advance(false)
+		}
+
+		return true
+	}
+
+	/**
+	 * Remove then insert. A move into the source layer commits the visible order,
+	 * dropping shuffle.
+	 * A failed locate is a silent no-op: the row was consumed or removed mid-drag.
+	 */
+	moveEntry = (entryId: number, toSlot: QueueSlot): void => {
+		const from = this.#locateMovable(entryId)
+		if (from === null) {
+			return
+		}
+
+		// A slot is the gap before its index, so a downward move within a layer lands
+		// one short once the row itself is removed.
+		const sameLayer = from.layer === toSlot.layer
+		const slot = sameLayer && toSlot.slot > from.index ? toSlot.slot - 1 : toSlot.slot
+		if (sameLayer && slot === from.index) {
+			return
+		}
+		if (sameLayer && from.layer === 'source') {
+			this.#source.moveUpcoming(from.index, slot)
+
+			return
+		}
+
+		const fromList = this.#list(from.layer)
+		const item = fromList.upcomingAt(from.index)
+		if (item === undefined) {
+			return
+		}
+
+		fromList.removeUpcomingAt(from.index)
+		this.#list(toSlot.layer).insertUpcoming(item, slot)
+	}
+
+	/** Drops the layer's upcoming rows; the current entry remains active. */
+	clear = (layer: QueueLayer): void => {
+		this.#list(layer).clearUpcoming()
+	}
+
+	#list = (layer: QueueLayer): UpcomingList => (layer === 'manual' ? this.#manual : this.#source)
+
+	/** Only upcoming rows move: a row before the source gap is rejected, as is an unknown id. */
+	#locateMovable = (entryId: number): { layer: QueueLayer; index: number } | null => {
+		for (const layer of ['manual', 'source'] as const) {
+			const index = this.#list(layer).upcomingIndexOf(entryId)
+			if (index !== -1) {
+				return { layer, index }
 			}
-		} else {
-			this.#itemsIdsShuffled = null
-			this.#currentIndex = this.#itemsIdsOriginalOrder.indexOf(activeTrackId)
 		}
+
+		return null
 	}
 
-	addToQueue = (trackId: number | readonly number[]): void => {
-		const ids: readonly number[] = Array.isArray(trackId) ? trackId : [trackId]
-		// Pushing to end of shuffled array is intentional, shuffle only applies when toggled
-		this.#itemsIdsShuffled?.push(...ids)
-		this.#itemsIdsOriginalOrder.push(...ids)
-
-		if (this.#currentIndex === -1) {
-			this.#currentIndex = 0
-		}
-	}
-
-	removeFromQueue = (index: number): void => {
-		if (index < 0 || index >= this.itemsIds.length) {
-			return
+	/** A command that did not land leaves the active entry unchanged. */
+	#activate = (layer: QueueLayer, item: QueueItem | undefined): QueueEntry | null => {
+		if (item === undefined) {
+			return null
 		}
 
-		const trackId = this.itemsIds[index]
-		invariant(trackId !== undefined)
-		this.#removeByIndex(index, trackId)
-	}
+		const entry = toEntry(layer, item)
+		this.#current = entry
 
-	clearQueue = (): void => {
-		this.#itemsIdsOriginalOrder = []
-		this.#itemsIdsShuffled = null
-		this.#currentIndex = -1
-	}
-
-	moveQueueItem = (fromIndex: number, toIndex: number): void => {
-		if (
-			fromIndex < 0 ||
-			fromIndex >= this.itemsIds.length ||
-			toIndex < 0 ||
-			toIndex >= this.itemsIds.length ||
-			fromIndex === toIndex
-		) {
-			return
-		}
-
-		// Manual reorder uses the currently visible order as source of truth.
-		if (this.#itemsIdsShuffled) {
-			this.#itemsIdsOriginalOrder = [...this.#itemsIdsShuffled]
-			this.#itemsIdsShuffled = null
-			this.shuffle = false
-		}
-
-		const movedTrackId = this.#itemsIdsOriginalOrder[fromIndex]
-		if (movedTrackId === undefined) {
-			return
-		}
-
-		this.#itemsIdsOriginalOrder.splice(fromIndex, 1)
-		this.#itemsIdsOriginalOrder.splice(toIndex, 0, movedTrackId)
-
-		if (this.#currentIndex === fromIndex) {
-			this.#currentIndex = toIndex
-			return
-		}
-
-		if (fromIndex < this.#currentIndex && toIndex >= this.#currentIndex) {
-			this.#currentIndex -= 1
-			return
-		}
-
-		if (fromIndex > this.#currentIndex && toIndex <= this.#currentIndex) {
-			this.#currentIndex += 1
-		}
-	}
-
-	#removeByIndex = (index: number, trackId: number): void => {
-		if (this.#itemsIdsShuffled) {
-			this.#itemsIdsShuffled.splice(index, 1)
-			const originalIndex = this.#itemsIdsOriginalOrder.indexOf(trackId)
-			if (originalIndex !== -1) {
-				this.#itemsIdsOriginalOrder.splice(originalIndex, 1)
-			}
-		} else {
-			this.#itemsIdsOriginalOrder.splice(index, 1)
-		}
-
-		if (index < this.#currentIndex) {
-			this.#currentIndex -= 1
-		} else if (index === this.#currentIndex) {
-			this.#currentIndex = -1
-		}
+		return entry
 	}
 }

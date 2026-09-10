@@ -1,5 +1,6 @@
 import { getDatabase } from '$lib/db/database.ts'
 import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
+import { isSafari } from '$lib/helpers/utils/ua'
 import { defineViewTransitionMatcher } from '$lib/view-transitions.svelte.ts'
 import type { LayoutLoad } from './$types.ts'
 import { getLayoutProps } from './layout-props.ts'
@@ -35,14 +36,20 @@ export const load: LayoutLoad = async (): Promise<LoadResult> => {
 		const prevRouteWasPlayer = from.startsWith(playerRouteId)
 		const nextRouteIsPlayer = to.startsWith(playerRouteId)
 
-		if (prevRouteWasPlayer && nextRouteIsPlayer) {
-			const { layoutMode } = getLayoutProps(to)
+		const { layoutMode } = getLayoutProps(to)
 
+		if (prevRouteWasPlayer && nextRouteIsPlayer) {
 			if (layoutMode === 'both' || (layoutMode === 'details' && from !== playerRouteId)) {
 				return { view: 'disabled' }
 			}
 
 			// Use default transition
+			return null
+		}
+
+		if (layoutMode === 'both' && isSafari()) {
+			// Safari view transition has performance issue with long scroll containers
+			// fallback to standard transition
 			return null
 		}
 

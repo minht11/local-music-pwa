@@ -1,9 +1,12 @@
 import { useScrollTarget } from '../ScrollContainer.svelte'
+import type { TrackRowIdentity } from './selection.ts'
 
 const EDGE_THRESHOLD = 84
 const MAX_SCROLL_STEP = 30
 
 interface DragState {
+	/** Fixed for the gesture, so the preview survives the list moving the row. */
+	readonly row: TrackRowIdentity
 	fromIndex: number
 	insertIndex: number
 	preview: {
@@ -15,13 +18,14 @@ interface DragState {
 
 interface UseTrackDragControllerOptions {
 	itemsCount: () => number
-	onReorder: ((from: number, to: number) => void) | undefined
+	/** `insertSlot` is a gap between rows (0..count). */
+	onDrop: (row: TrackRowIdentity, insertSlot: number) => void
 	onStart?: () => void
 }
 
 export const useTrackDragController = ({
 	itemsCount,
-	onReorder,
+	onDrop,
 	onStart,
 }: UseTrackDragControllerOptions) => {
 	const scrollTarget = useScrollTarget()
@@ -29,8 +33,8 @@ export const useTrackDragController = ({
 
 	let activePointerId: number | null = null
 	let pointerOffsetY = 0
+	let currentPointerX = 0
 	let currentPointerY = 0
-	let dragItemCount = 0
 	let rafId: number | null = null
 	let abortController: AbortController | null = null
 
@@ -38,6 +42,9 @@ export const useTrackDragController = ({
 
 	const refreshScrollViewport = () => {
 		const target = scrollTarget.current
+		if (target === null) {
+			return
+		}
 		if (target instanceof Window) {
 			scrollViewport = { top: 0, bottom: target.innerHeight }
 			return
@@ -48,6 +55,9 @@ export const useTrackDragController = ({
 
 	$effect(() => {
 		const target = scrollTarget.current
+		if (target === null) {
+			return
+		}
 		const observed = target instanceof Window ? document.documentElement : target
 		refreshScrollViewport()
 
@@ -56,27 +66,39 @@ export const useTrackDragController = ({
 		return () => observer.disconnect()
 	})
 
+	/** Re-reads the row under the pointer; a gap between rows leaves the target put. */
+	const updateInsertIndex = () => {
+		const next = getInsertIndex(currentPointerX, currentPointerY)
+		if (next !== null && drag) {
+			drag.insertIndex = next
+		}
+	}
+
 	const scrollLoop = () => {
 		const { top, bottom } = scrollViewport
 
 		const topDelta = top + EDGE_THRESHOLD - currentPointerY
 		const bottomDelta = currentPointerY - (bottom - EDGE_THRESHOLD)
 
+		let step = 0
 		if (topDelta > 0) {
-			scrollTarget.current.scrollBy(
-				0,
-				-Math.round((topDelta / EDGE_THRESHOLD) * MAX_SCROLL_STEP),
-			)
-			rafId = requestAnimationFrame(scrollLoop)
+			step = -Math.round((topDelta / EDGE_THRESHOLD) * MAX_SCROLL_STEP)
 		} else if (bottomDelta > 0) {
-			scrollTarget.current.scrollBy(
-				0,
-				Math.round((bottomDelta / EDGE_THRESHOLD) * MAX_SCROLL_STEP),
-			)
-			rafId = requestAnimationFrame(scrollLoop)
-		} else {
-			rafId = null
+			step = Math.round((bottomDelta / EDGE_THRESHOLD) * MAX_SCROLL_STEP)
 		}
+
+		if (step === 0) {
+			rafId = null
+
+			return
+		}
+
+		scrollTarget.current?.scrollBy(0, step)
+		// Rows travel under a stationary pointer, so the target has to be re-read each
+		// frame rather than left at whatever the last pointermove computed.
+		updateInsertIndex()
+
+		rafId = requestAnimationFrame(scrollLoop)
 	}
 
 	const getInsertIndex = (x: number, y: number): number | null => {
@@ -85,19 +107,21 @@ export const useTrackDragController = ({
 			return null
 		}
 
-		const row = target.closest('[aria-rowindex]')
+		const row = target.closest('[data-row-index]')
 		if (!(row instanceof HTMLElement)) {
 			return null
 		}
 
-		const index = Number(row.ariaRowIndex)
-		if (!Number.isInteger(index) || index < 0 || index >= dragItemCount) {
+		// Live count: the list can mutate mid-drag, so a snapshot would clamp wrong.
+		const count = itemsCount()
+		const index = Number(row.dataset.rowIndex)
+		if (!Number.isInteger(index) || index < 0 || index >= count) {
 			return null
 		}
 
 		const rowRect = row.getBoundingClientRect()
 		const isAfterHalf = y >= rowRect.top + rowRect.height / 2
-		return Math.max(0, Math.min(dragItemCount, isAfterHalf ? index + 1 : index))
+		return Math.max(0, Math.min(count, isAfterHalf ? index + 1 : index))
 	}
 
 	const stop = () => {
@@ -111,16 +135,30 @@ export const useTrackDragController = ({
 		abortController = null
 	}
 
-	const start = (index: number, e: PointerEvent) => {
+	// Releasing a drag synthesizes a `click` that retargets to the row and reads as an
+	// activation. The zero timeout disarms right after the current event turn, so a
+	// click that never materializes cannot eat a later one.
+	const suppressGestureClick = () => {
+		const suppress = (event: Event) => {
+			event.preventDefault()
+			event.stopPropagation()
+		}
+		window.addEventListener('click', suppress, { capture: true, once: true })
+		setTimeout(() => {
+			window.removeEventListener('click', suppress, { capture: true })
+		}, 0)
+	}
+
+	const handlePointerDown = (index: number, row: TrackRowIdentity, e: PointerEvent) => {
 		const count = itemsCount()
-		if (!onReorder || index < 0 || index >= count) {
+		if (index < 0 || index >= count) {
 			return
 		}
 
 		e.preventDefault()
 		e.stopPropagation()
 
-		const rowElement = (e.currentTarget as HTMLElement | null)?.closest('[aria-rowindex]')
+		const rowElement = (e.currentTarget as HTMLElement | null)?.closest('[data-row-index]')
 		if (!(rowElement instanceof HTMLElement)) {
 			return
 		}
@@ -132,9 +170,9 @@ export const useTrackDragController = ({
 		const rowRect = rowElement.getBoundingClientRect()
 		pointerOffsetY = e.clientY - rowRect.top
 		activePointerId = e.pointerId
-		dragItemCount = count
 
 		drag = {
+			row,
 			fromIndex: index,
 			insertIndex: index,
 			preview: { top: rowRect.top, left: rowRect.left, width: rowRect.width },
@@ -149,15 +187,14 @@ export const useTrackDragController = ({
 			event.preventDefault()
 
 			drag.preview.top = event.clientY - pointerOffsetY
+			currentPointerX = event.clientX
 			currentPointerY = event.clientY
+
 			if (rafId === null) {
 				rafId = requestAnimationFrame(scrollLoop)
 			}
 
-			const newInsertIndex = getInsertIndex(event.clientX, event.clientY)
-			if (newInsertIndex !== null) {
-				drag.insertIndex = newInsertIndex
-			}
+			updateInsertIndex()
 		}
 
 		const onEnd = (event: PointerEvent) => {
@@ -165,15 +202,18 @@ export const useTrackDragController = ({
 				return
 			}
 
-			const from = drag.fromIndex
-			const insertIndex = drag.insertIndex
+			const { row: draggedRow, insertIndex } = drag
+			const releaseInsertIndex = getInsertIndex(event.clientX, event.clientY) ?? insertIndex
+			suppressGestureClick()
 			stop()
 
-			// insertIndex is a slot *between* items; when the item moved downward the
-			// slot index is one ahead of the target item index, so subtract 1.
-			const to = insertIndex > from ? insertIndex - 1 : insertIndex
-			if (to !== from) {
-				onReorder(from, to)
+			onDrop(draggedRow, releaseInsertIndex)
+		}
+
+		// The browser took over the gesture (scroll, shade); abort instead of dropping.
+		const onCancel = (event: PointerEvent) => {
+			if (event.pointerId === activePointerId) {
+				stop()
 			}
 		}
 
@@ -182,14 +222,19 @@ export const useTrackDragController = ({
 			signal: abortController.signal,
 		})
 		window.addEventListener('pointerup', onEnd, { signal: abortController.signal })
-		window.addEventListener('pointercancel', onEnd, { signal: abortController.signal })
+		window.addEventListener('pointercancel', onCancel, { signal: abortController.signal })
 	}
+
+	$effect(() => {
+		const cleanup = stop
+
+		return cleanup
+	})
 
 	return {
 		get drag() {
 			return drag
 		},
-		start,
-		stop,
+		handlePointerDown,
 	}
 }

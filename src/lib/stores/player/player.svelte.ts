@@ -1,5 +1,6 @@
 import { AudioGraph } from '$lib/audio/audio-graph.svelte.ts'
 import { PlaybackController, type TrackLoader } from '$lib/audio/playback-controller.svelte.ts'
+import { onDatabaseChange } from '$lib/db/events.ts'
 import {
 	createManagedArtwork,
 	getTrackManagedArtworkSource,
@@ -9,15 +10,29 @@ import { persist } from '$lib/helpers/persist.svelte.ts'
 import { clamp } from '$lib/helpers/utils/clamp.ts'
 import { debounce } from '$lib/helpers/utils/debounce.ts'
 import { truncate } from '$lib/helpers/utils/text.ts'
+import { isMobile, isSafari } from '$lib/helpers/utils/ua.ts'
 import { getLibraryValue } from '$lib/library/get/value.ts'
 import { createTrackQuery } from '$lib/library/get/value-queries.ts'
 import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
-import type { MainStore } from '../main/store.svelte.ts'
 import { MediaSessionController } from './media-session.svelte.ts'
 import { PlayHistoryTracker } from './play-history-tracker.ts'
-import { QueueStore } from './queue.svelte.ts'
+import { type QueueEntry, type QueueOrigin, QueueStore, type QueueView } from './queue.svelte.ts'
 
 export type PlayerRepeat = 'none' | 'one' | 'all'
+
+export type QueueExhaustion = 'stops-after' | 'repeats-track' | 'repeats-queue'
+
+/**
+ * Everything decided about the moment the current track ends, so the ended
+ * handler (which consumes), the preload effect (which peeks) and tail views
+ * cannot disagree.
+ */
+interface TrackEndPlan {
+	action: 'pause' | 'repeat-current' | 'advance'
+	loop: boolean
+	/** What plays next, or null when playback stops here. */
+	nextTrackId: number | null
+}
 
 // How many seconds before track end to begin pre-buffering the next track.
 const PRE_BUFFER_THRESHOLD_SECONDS = 10
@@ -28,12 +43,17 @@ export const PLAYER_PLAYBACK_RATE_MAX = 2
 export class PlayerStore {
 	readonly #graph = new AudioGraph()
 	readonly #queue = new QueueStore()
+	/** Narrowed to `QueueView`, which cannot start audio. */
+	readonly queue: QueueView = this.#queue
 	readonly #history = new PlayHistoryTracker()
 	readonly #ms = new MediaSessionController(this)
 	readonly equalizer = new EqualizerStore(this.#graph)
-	readonly #main: MainStore
+
+	/** Mobile iOS does not allow changing volume */
+	readonly canChangeVolume = !(isMobile() && isSafari())
 
 	readonly #controller: PlaybackController
+	#removeDatabaseListener: (() => void) | undefined
 
 	repeat: PlayerRepeat = $state('none')
 	muted = $state(false)
@@ -55,37 +75,71 @@ export class PlayerStore {
 	get loading() {
 		return this.#controller.loading
 	}
+	get canTogglePlay(): boolean {
+		return this.playing || this.#queue.current !== null || this.#queue.peekNext(false) !== null
+	}
+	get canPlayNext(): boolean {
+		return this.#queue.peekNext(true) !== null
+	}
+	get canPlayPrev(): boolean {
+		if (this.#queue.canStepBack(true)) {
+			return true
+		}
 
-	get shuffle() {
-		return this.#queue.shuffle
-	}
-	get itemsIds() {
-		return this.#queue.itemsIds
-	}
-	get activeTrackIndex() {
-		return this.#queue.current?.index ?? -1
-	}
-	get isQueueEmpty() {
-		return this.#queue.isQueueEmpty
+		return this.#queue.current !== null && this.currentTime > 3
 	}
 
-	/** Returns the next track to play based on the current repeat mode and queue state. */
-	readonly #upNext = $derived.by(() => {
+	/**
+	 * Everything decided about the moment the current track ends, computed once so
+	 * the ended handler (which consumes), the preload effect (which peeks) and
+	 * tail views cannot disagree — a drift between them would gapless-preload a
+	 * different track than the one that then plays. Note `nextTrackId` is not the
+	 * question "does the queue have upcoming rows": with repeat on, an exhausted
+	 * queue still has something up next.
+	 */
+	readonly #trackEndPlan: TrackEndPlan = $derived.by(() => {
 		if (this.repeat === 'none' && this.pauseAfterTrackWhenRepeatIsOff) {
-			return null
+			return { action: 'pause', loop: false, nextTrackId: null }
 		}
 
 		if (this.repeat === 'one') {
-			return this.#queue.current
+			return {
+				action: 'repeat-current',
+				loop: false,
+				nextTrackId: this.#queue.current?.trackId ?? null,
+			}
 		}
 
-		return this.#queue.peekNext(this.repeat === 'all')
+		const loop = this.repeat === 'all'
+
+		return { action: 'advance', loop, nextTrackId: this.#queue.peekNext(loop) }
 	})
 
-	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.current?.id ?? -1, {
+	readonly queueExhaustion: QueueExhaustion | null = $derived.by(() => {
+		if (
+			this.#queue.current === null ||
+			this.#queue.count('manual') > 0 ||
+			this.#queue.count('source') > 0
+		) {
+			return null
+		}
+
+		if (this.#trackEndPlan.nextTrackId === null) {
+			return 'stops-after'
+		}
+
+		return this.#trackEndPlan.action === 'repeat-current' ? 'repeats-track' : 'repeats-queue'
+	})
+
+	readonly #activeTrackQuery = createTrackQuery(() => this.#queue.current?.trackId ?? -1, {
 		allowEmpty: true,
 	})
-	readonly activeTrack = $derived(this.#activeTrackQuery.value)
+	readonly activeTrack = $derived.by(() => {
+		const currentTrackId = this.#queue.current?.trackId
+		const track = this.#activeTrackQuery.value
+
+		return track?.id === currentTrackId ? track : undefined
+	})
 
 	readonly #artwork = createManagedArtwork(() =>
 		getTrackManagedArtworkSource(this.activeTrack, 'full'),
@@ -93,16 +147,14 @@ export class PlayerStore {
 	readonly artworkSrc = $derived.by(this.#artwork)
 
 	get volume() {
-		return this.#main.volumeSliderEnabled ? this.#volume : 100
+		return this.canChangeVolume ? this.#volume : 100
 	}
 
 	set volume(value) {
 		this.#volume = clamp(value, 0, 100)
 	}
 
-	constructor(main: MainStore) {
-		this.#main = main
-
+	constructor() {
 		persist('player', this, [
 			'volume',
 			'repeat',
@@ -115,12 +167,38 @@ export class PlayerStore {
 		persist('player', this.#queue, ['shuffle'])
 
 		this.#controller = this.#createPlaybackController()
+		this.#setupQueueDatabaseListener()
 
-		this.#setupTrackChangeEffect()
 		this.#setupPreloadEffect()
 		this.#setupVolumeEffect()
 		this.#setupPlaybackRateEffect()
-		this.#setupPlayHistoryEffect()
+		this.#setupPlayHistoryUpdateEffect()
+	}
+
+	#setupQueueDatabaseListener(): void {
+		this.#removeDatabaseListener = onDatabaseChange((changes) => {
+			const deletedTrackIds = new Set<number>()
+			for (const change of changes) {
+				if (change.storeName === 'tracks' && change.operation === 'delete') {
+					deletedTrackIds.add(change.key)
+				}
+			}
+
+			if (deletedTrackIds.size === 0) {
+				return
+			}
+
+			if (!this.#queue.removeTracks(deletedTrackIds)) {
+				return
+			}
+
+			const next = this.#queue.current
+			if (next === null) {
+				this.#controller.abort()
+			} else {
+				this.#beginEntryPlayback(next)
+			}
+		})
 	}
 
 	#createPlaybackController() {
@@ -157,8 +235,7 @@ export class PlayerStore {
 
 			const muted = this.muted
 
-			// Humans perceive volume logarithmically
-			// so we adjust the volume to match that perception
+			// Humans perceive volume logarithmically, so match that perception.
 			const k = 0.5
 			const volume = (this.volume / 100) ** k
 
@@ -184,22 +261,6 @@ export class PlayerStore {
 		})
 	}
 
-	#setupTrackChangeEffect(): void {
-		$effect(() => {
-			const track = this.activeTrack
-
-			untrack(() => {
-				if (!track) {
-					this.#controller.abort()
-				}
-			})
-		})
-	}
-
-	/**
-	 * Watches currentTime. When close to the end of the current track,
-	 * asks the player to preload the next track for gapless playback.
-	 */
 	#setupPreloadEffect(): void {
 		$effect(() => {
 			const duration = this.duration
@@ -210,13 +271,13 @@ export class PlayerStore {
 				return
 			}
 
-			const upNext = this.#upNext
+			const upNext = this.#trackEndPlan.nextTrackId
 
 			untrack(() => {
-				if (upNext) {
-					void this.#controller.preloadNext(upNext.id)
-				} else {
+				if (upNext === null) {
 					this.#controller.abortNext()
+				} else {
+					void this.#controller.preloadNext(upNext)
 				}
 			})
 		})
@@ -225,25 +286,33 @@ export class PlayerStore {
 	#handleTrackEnded = () => {
 		this.#history.complete()
 
-		const upNext = this.#upNext
-		if (!upNext) {
+		const plan = this.#trackEndPlan
+		if (plan.action === 'pause') {
 			this.pause()
 			return
 		}
 
-		this.#queue.setTrack(upNext.index)
-		this.#controller.play(upNext.id, {
-			gapless: true,
-			fromBeginning: true,
-		})
-	}
+		const next =
+			plan.action === 'repeat-current' ? this.#queue.current : this.#queue.advance(plan.loop)
 
-	play = (): void => {
-		if (!this.activeTrack) {
+		if (!next) {
+			this.pause()
 			return
 		}
 
-		this.#controller.play(this.activeTrack.id)
+		this.#beginEntryPlayback(next, { gapless: true })
+	}
+
+	/** Starts the current row, or explicitly activates the first queued row when idle. */
+	play = (): void => {
+		const current = this.#queue.current
+		if (current !== null) {
+			this.#controller.play(current.trackId)
+
+			return
+		}
+
+		this.#beginEntryPlayback(this.#queue.advance(false))
 	}
 
 	pause = (): void => {
@@ -255,38 +324,51 @@ export class PlayerStore {
 		this.#ms.updatePosition(time)
 	}
 
-	playNext = (): void => {
-		const next = this.#queue.peekNext(true)
-
-		if (next !== null) {
-			this.playTrack(next.index)
+	/**
+	 * Starts a fresh playback/history session for a selected row. Null is a queue
+	 * navigation no-op, so the existing session remains untouched.
+	 */
+	#beginEntryPlayback = (entry: QueueEntry | null, options: { gapless?: boolean } = {}): void => {
+		if (entry !== null) {
+			this.#history.begin(entry.trackId)
+			this.#controller.play(entry.trackId, { ...options, fromBeginning: true })
 		}
 	}
 
+	playNext = (): void => {
+		this.#beginEntryPlayback(this.#queue.advance(true))
+	}
+
 	playPrev = (): void => {
+		// Past the restart threshold "previous" means restarting the current track.
 		if (this.currentTime > 3) {
-			if (this.activeTrack) {
-				this.#controller.play(this.activeTrack.id, { fromBeginning: true })
-			}
+			this.#beginEntryPlayback(this.#queue.current)
 
 			return
 		}
 
-		const prev = this.#queue.peekPrev(true)
-
-		if (prev !== null) {
-			this.playTrack(prev.index)
-		}
+		this.#beginEntryPlayback(this.#queue.stepBack(true))
 	}
 
-	playTrack = (trackIndex: number | 'shuffle', queue?: readonly number[]): void => {
-		const newTrackId = this.#queue.setTrack(trackIndex, queue)
-
-		if (newTrackId) {
-			this.#controller.play(newTrackId, {
-				fromBeginning: true,
-			})
+	/**
+	 * Replaces the source queue and starts its selected row. An empty list is a
+	 * no-op, preserving the current queue and audio.
+	 */
+	playFrom = (start: number | 'shuffle', list: readonly number[], origin?: QueueOrigin): void => {
+		if (list.length === 0) {
+			return
 		}
+
+		this.#beginEntryPlayback(this.#queue.setSource(list, start, origin))
+	}
+
+	playQueueEntry = (entryId: number): void => {
+		this.#beginEntryPlayback(this.#queue.playEntry(entryId))
+	}
+
+	/** Plays a track id wherever it lives: jumps in the source queue, else starts fresh. */
+	playTrackId = (id: number): void => {
+		this.#beginEntryPlayback(this.#queue.playTrackId(id))
 	}
 
 	togglePlay = (): void => {
@@ -311,12 +393,6 @@ export class PlayerStore {
 		this.repeat = repeat
 	}
 
-	toggleShuffle = this.#queue.toggleShuffle
-	addToQueue = this.#queue.addToQueue
-	removeFromQueue = this.#queue.removeFromQueue
-	moveQueueItem = this.#queue.moveQueueItem
-	clearQueue = this.#queue.clearQueue
-
 	#handleError = (reason: FileLoadFailReason): void => {
 		const name = truncate(this.activeTrack?.name ?? 'Unknown', 30)
 		const errorMap = {
@@ -332,16 +408,7 @@ export class PlayerStore {
 		})
 	}
 
-	#setupPlayHistoryEffect(): void {
-		$effect(() => {
-			const trackId = this.#queue.current?.id
-			if (trackId == null) {
-				return
-			}
-
-			untrack(() => this.#history.begin(trackId))
-		})
-
+	#setupPlayHistoryUpdateEffect(): void {
 		$effect(() => {
 			const currentTime = this.currentTime
 			const duration = this.duration
@@ -350,6 +417,7 @@ export class PlayerStore {
 	}
 
 	dispose(): void {
+		this.#removeDatabaseListener?.()
 		this.#controller.abort()
 		this.#graph.dispose()
 	}

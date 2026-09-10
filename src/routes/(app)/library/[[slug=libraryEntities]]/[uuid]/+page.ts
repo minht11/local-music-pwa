@@ -9,6 +9,7 @@ import {
 	FAVORITE_PLAYLIST_ID,
 	FAVORITE_PLAYLIST_UUID,
 	type LibraryStoreName,
+	type PlaylistEntry,
 } from '$lib/library/types.ts'
 import type { PageLoad } from './$types.d.ts'
 
@@ -41,8 +42,7 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 }
 
 export interface TracksQueryRegularResult {
-	tracksIds: number[]
-	playlistIdMap: null
+	trackIds: number[]
 }
 
 const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
@@ -65,7 +65,7 @@ const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 				)
 			}
 
-			return { tracksIds: keys, playlistIdMap: null }
+			return { trackIds: keys }
 		},
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {
@@ -82,14 +82,8 @@ const createTracksPageQuery = <Slug extends Exclude<DetailsSlug, 'playlists'>>(
 	return query
 }
 
-export interface PlaylistTrackItem {
-	trackId: number
-	uuid: string
-}
-
 export interface PlaylistTracksQueryResult {
-	tracksIds: number[]
-	playlistIdMap: Record<number, number>
+	entries: PlaylistEntry[]
 }
 
 const createPlaylistTracksPageQuery = (
@@ -100,17 +94,9 @@ const createPlaylistTracksPageQuery = (
 		fetcher: async (): Promise<PlaylistTracksQueryResult> => {
 			const db = await getDatabase()
 
-			const values = await db.getAllFromIndex('playlistEntries', 'playlistId', playlistId)
-
-			const tracksIds: number[] = Array.from({ length: values.length })
-			const playlistIdMap: Record<number, number> = {}
-			for (let i = 0; i < values.length; i += 1) {
-				// biome-ignore lint/style/noNonNullAssertion: value is always defined
-				const value = values[i]!
-				tracksIds[i] = value.trackId
-				playlistIdMap[value.trackId] = value.id
+			return {
+				entries: await db.getAllFromIndex('playlistEntries', 'playlistId', playlistId),
 			}
-			return { tracksIds, playlistIdMap }
 		},
 		onDatabaseChange: (changes, actions) => {
 			for (const change of changes) {

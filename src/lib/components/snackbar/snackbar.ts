@@ -14,6 +14,14 @@ const showSnackbar = <const T>(newSnackbar: SnackbarOptions<T> | string): void =
 	const index = snackbarItems.findIndex((snackbar) => snackbar.id === newSnackbarNormalized.id)
 
 	if (index > -1) {
+		if (newSnackbarNormalized.order === 'end') {
+			// Reinsert repeated end-ordered items at the end.
+			snackbarItems.splice(index, 1)
+			snackbarItems.push(newSnackbarNormalized)
+
+			return
+		}
+
 		snackbarItems[index] = newSnackbarNormalized
 	} else {
 		snackbarItems.push(newSnackbarNormalized)

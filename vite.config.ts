@@ -66,7 +66,7 @@ export default defineConfig(async ({ command, isPreview }): Promise<UserConfig> 
 			rolldownOptions: {
 				output: {
 					comments: false,
-					advancedChunks: {
+					codeSplitting: {
 						groups: [
 							{
 								// Merge all css into a single file
@@ -100,10 +100,9 @@ export default defineConfig(async ({ command, isPreview }): Promise<UserConfig> 
 						async: true,
 					},
 				},
-				// TODO. Reenable this once https://github.com/sveltejs/kit/issues/15985 is fixed.
-				// experimental: {
-				// 	explicitEnvironmentVariables: true,
-				// },
+				experimental: {
+					explicitEnvironmentVariables: true,
+				},
 				paths: {
 					relative: false,
 				},

@@ -93,6 +93,14 @@
 
 		const fade = (el: HTMLElement | null): AnimationSequence | null =>
 			el ? [el, { opacity: [0, 1] }, { duration: 300, at: '<' }] : null
+		const fadeContent = (el: HTMLElement | null): AnimationSequence | null =>
+			el
+				? [
+						el,
+						{ opacity: [0, 1] },
+						{ duration: 250, delay: 75, easing: 'linear', fill: 'both', at: '<' },
+					]
+				: null
 
 		animateBackdrop(dialog, {
 			duration: 300,
@@ -111,7 +119,7 @@
 				},
 			] satisfies AnimationSequence,
 			fade(dialogHeader),
-			fade(dialogBody),
+			fadeContent(dialogBody),
 			fade(dialogFooter),
 			dialogFooter &&
 				([

@@ -1,5 +1,4 @@
 <script lang="ts" module>
-	// biome-ignore lint/correctness/noUnusedImports: false positive
 	import { tooltip as attachTooltip } from '$lib/attachments/tooltip.ts'
 	import Icon from '$lib/components/icon/Icon.svelte'
 

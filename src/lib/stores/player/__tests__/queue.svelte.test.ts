@@ -1,14 +1,20 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { QueueStore } from '$lib/stores/player/queue.svelte.ts'
-
-// Prevent BroadcastChannel usage and DB wiring in tests
-vi.mock('$lib/db/events.ts', () => ({
-	onDatabaseChange: vi.fn(() => () => {}),
-	dispatchDatabaseChangedEvent: vi.fn(),
-}))
 
 let q!: QueueStore
 let cleanupQueue: () => void
+
+const manual = (queue: QueueStore): number[] =>
+	Array.from(
+		{ length: queue.count('manual') },
+		(_, i) => queue.itemAt('manual', i)?.trackId as number,
+	)
+
+const upcomingSource = (queue: QueueStore): number[] =>
+	Array.from(
+		{ length: queue.count('source') },
+		(_, i) => queue.itemAt('source', i)?.trackId as number,
+	)
 
 beforeEach(() => {
 	cleanupQueue = $effect.root(() => {
@@ -18,273 +24,518 @@ beforeEach(() => {
 
 afterEach(() => {
 	cleanupQueue()
-	vi.clearAllMocks()
 })
 
 describe('QueueStore', () => {
-	describe('setTrack', () => {
-		it('sets queue and active index', () => {
-			q.setTrack(1, [10, 20, 30])
-			expect(q.itemsIds).toEqual([10, 20, 30])
-			expect(q.current?.index).toBe(1)
+	describe('setSource', () => {
+		it('replaces the source and sets the current track', () => {
+			q.setSource([10, 20, 30], 1)
+			expect(q.current).toMatchObject({ layer: 'source', trackId: 20 })
+			expect(upcomingSource(q)).toEqual([30])
 		})
 
-		it('returns null as active entry for an empty queue', () => {
-			q.setTrack(0, [])
+		it('returns null for an empty source', () => {
+			expect(q.setSource([], 0)).toBeNull()
 			expect(q.current).toBeNull()
-			expect(q.isQueueEmpty).toBe(true)
+			expect(q.count('manual')).toBe(0)
+			expect(q.count('source')).toBe(0)
 		})
 
-		it("shuffles queue and pins active track to index 0 when 'shuffle' is the track index", () => {
-			q.setTrack('shuffle', [1, 2, 3, 4, 5])
-			expect(q.shuffle).toBe(true)
-			expect(q.current?.index).toBe(0)
-			expect(q.itemsIds.toSorted((a, b) => a - b)).toEqual([1, 2, 3, 4, 5])
+		it('stores the origin', () => {
+			q.setSource([1], 0, { type: 'album', name: 'A' })
+			expect(q.origin).toEqual({ type: 'album', name: 'A' })
 		})
 
-		it('disables shuffle when a new queue is set with a numeric index', () => {
-			q.setTrack('shuffle', [1, 2])
-			q.setTrack(0, [3, 4])
-			expect(q.shuffle).toBe(false)
-		})
-
-		it('changes only the active index when no new queue is given', () => {
-			q.setTrack(0, [10, 20, 30])
-			q.setTrack(2)
-			expect(q.itemsIds).toEqual([10, 20, 30])
-			expect(q.current?.index).toBe(2)
+		it('keeps the manual queue when the source is replaced', () => {
+			q.setSource([1, 2], 0)
+			q.enqueue([9], 'next')
+			q.setSource([3, 4], 0)
+			expect(manual(q)).toEqual([9])
 		})
 	})
 
-	describe('peekNext / peekPrev', () => {
-		it('peekNext returns the next entry', () => {
-			q.setTrack(1, [1, 2, 3])
-			expect(q.peekNext()?.index).toBe(2)
+	describe('current', () => {
+		it('reports the manual layer while a manual track plays', () => {
+			q.setSource([1], 0)
+			q.enqueue([9], 'next')
+			q.advance()
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+		})
+	})
+
+	describe('advance', () => {
+		it('consumes the manual queue first, then resumes the source', () => {
+			q.setSource([1, 2, 3], 0)
+			q.enqueue([8, 9], 'next')
+
+			expect(q.advance()).toMatchObject({ layer: 'manual', trackId: 8 })
+			expect(manual(q)).toEqual([9])
+			expect(q.advance()).toMatchObject({ layer: 'manual', trackId: 9 })
+			expect(q.advance()).toMatchObject({ layer: 'source', trackId: 2 })
 		})
 
-		it('peekNext without loop returns null at the end of the queue', () => {
-			q.setTrack(2, [1, 2, 3])
-			expect(q.peekNext()).toBeNull()
+		it('returns null at the end without loop, wraps with loop', () => {
+			q.setSource([1, 2], 1)
+			expect(q.advance(false)).toBeNull()
+			expect(q.advance(true)).toMatchObject({ layer: 'source', trackId: 1 })
 		})
 
-		it('peekNext with loop wraps to index 0 at the end', () => {
-			q.setTrack(2, [1, 2, 3])
-			expect(q.peekNext(true)?.index).toBe(0)
+		it('keeps a playing manual track when the source cannot step', () => {
+			q.setSource([1, 2], 1) // current is the last source row
+			q.enqueue([9], 'next')
+			expect(q.advance()).toMatchObject({ layer: 'manual', trackId: 9 })
+
+			// The step fails, so nothing is committed: reverting to the detour point
+			// here would show a track the player is not playing.
+			expect(q.advance(false)).toBeNull()
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
 		})
 
-		it('peekPrev returns the previous entry', () => {
-			q.setTrack(2, [1, 2, 3])
-			expect(q.peekPrev()?.index).toBe(1)
+		it('keeps a playing manual track when the source is empty', () => {
+			q.enqueue([8, 9], 'last')
+			expect(q.advance(true)).toMatchObject({ layer: 'manual', trackId: 8 })
+			expect(q.advance(true)).toMatchObject({ layer: 'manual', trackId: 9 })
+
+			expect(q.advance(true)).toBeNull()
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+		})
+	})
+
+	describe('peekNext', () => {
+		it('returns the first manual id, then the next source id, without consuming', () => {
+			q.setSource([1, 2], 0)
+			q.enqueue([9], 'next')
+			expect(q.peekNext()).toBe(9)
+			expect(manual(q)).toEqual([9])
+
+			q.clear('manual')
+			expect(q.peekNext()).toBe(2)
 		})
 
-		it('peekPrev without loop returns null at the start of the queue', () => {
-			q.setTrack(0, [1, 2, 3])
-			expect(q.peekPrev()).toBeNull()
+		it('wraps with loop', () => {
+			q.setSource([1, 2], 1)
+			expect(q.peekNext(false)).toBeNull()
+			expect(q.peekNext(true)).toBe(1)
+		})
+	})
+
+	describe('stepBack', () => {
+		it('navigates the source', () => {
+			q.setSource([1, 2, 3], 2)
+			expect(q.stepBack()).toMatchObject({ layer: 'source', trackId: 2 })
 		})
 
-		it('peekPrev with loop wraps to the last entry at the start', () => {
-			q.setTrack(0, [1, 2, 3])
-			expect(q.peekPrev(true)?.index).toBe(2)
+		it('returns to the detour point from a manual track', () => {
+			q.setSource([1, 2, 3], 1)
+			q.enqueue([9], 'next')
+			q.advance()
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+			expect(q.stepBack()).toMatchObject({ layer: 'source', trackId: 2 })
+		})
+
+		it('returns null from a manual track with no source', () => {
+			q.enqueue([9], 'last')
+			q.advance()
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+			expect(q.stepBack(true)).toBeNull()
+		})
+	})
+
+	describe('enqueue ordering', () => {
+		it('play next prepends and add to queue appends', () => {
+			q.setSource([1], 0)
+			q.enqueue([8], 'next')
+			q.enqueue([20], 'last')
+			q.enqueue([9], 'next')
+			expect(manual(q)).toEqual([9, 8, 20])
+		})
+
+		it('preserves the order within a play-next batch', () => {
+			q.setSource([1, 2], 0)
+			q.enqueue([8, 9], 'next')
+			q.enqueue([20], 'last')
+			expect(manual(q)).toEqual([8, 9, 20])
+		})
+
+		it('leaves every added track pending when nothing plays', () => {
+			q.enqueue([8, 9], 'last')
+			expect(q.current).toBeNull()
+			expect(manual(q)).toEqual([8, 9])
+		})
+	})
+
+	describe('playEntry', () => {
+		it('plays a manual row, discarding skipped manual tracks', () => {
+			q.setSource([1], 0)
+			q.enqueue([8, 9, 10], 'last')
+			const entryId = q.itemAt('manual', 1)?.entryId
+			invariant(entryId !== undefined)
+
+			expect(q.playEntry(entryId)).toMatchObject({ layer: 'manual', trackId: 9 })
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+			expect(manual(q)).toEqual([10])
+		})
+
+		it('jumps to an upcoming source row', () => {
+			q.setSource([1, 2, 3], 0)
+			const entryId = q.itemAt('source', 1)?.entryId
+			invariant(entryId !== undefined)
+
+			expect(q.playEntry(entryId)).toMatchObject({ layer: 'source', trackId: 3 })
+			expect(q.current).toMatchObject({ layer: 'source', trackId: 3 })
+		})
+
+		it('jumps backward to an already-played source row', () => {
+			q.setSource([1, 2, 3], 0)
+			// Capture the row while upcoming, then advance past it so it lands behind
+			// the source gap — playEntry must still jump back to it.
+			const entryId = q.itemAt('source', 0)?.entryId
+			invariant(entryId !== undefined)
+			q.advance()
+			q.advance()
+			expect(q.current).toMatchObject({ layer: 'source', trackId: 3 })
+
+			expect(q.playEntry(entryId)).toMatchObject({ layer: 'source', trackId: 2 })
+			expect(q.current).toMatchObject({ layer: 'source', trackId: 2 })
+		})
+
+		it('returns null for a missing entry id', () => {
+			q.setSource([1], 0)
+			expect(q.playEntry(999_999)).toBeNull()
+		})
+
+		it('returns null for an unknown id while a manual track plays, leaving it playing', () => {
+			q.setSource([1], 0)
+			q.enqueue([9], 'next')
+			q.advance()
+
+			expect(q.playEntry(999_999)).toBeNull()
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+		})
+
+		it('returns null for the current manual entry id, leaving it playing', () => {
+			q.setSource([1], 0)
+			q.enqueue([9], 'next')
+			q.advance()
+			const currentEntryId = q.current?.entryId
+			invariant(currentEntryId !== undefined)
+
+			expect(q.playEntry(currentEntryId)).toBeNull()
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+		})
+	})
+
+	describe('playTrackId', () => {
+		it('jumps to the track when already in the source (backward allowed)', () => {
+			q.setSource([1, 2, 3], 2)
+			expect(q.playTrackId(1)).toMatchObject({ layer: 'source', trackId: 1 })
+			expect(q.current).toMatchObject({ layer: 'source', trackId: 1 })
+		})
+
+		it('starts a fresh single-track source when absent', () => {
+			q.setSource([1, 2], 0)
+			expect(q.playTrackId(99)).toMatchObject({ layer: 'source', trackId: 99 })
+			expect(q.current).toMatchObject({ layer: 'source', trackId: 99 })
+			expect(q.count('source')).toBe(0)
+		})
+	})
+
+	describe('removeEntries', () => {
+		it('removes the addressed rows across both layers in one call', () => {
+			q.setSource([1, 2, 3], 0)
+			q.enqueue([8, 9], 'last')
+			const manualEntryId = q.itemAt('manual', 0)?.entryId
+			const sourceEntryId = q.itemAt('source', 0)?.entryId
+			invariant(manualEntryId !== undefined && sourceEntryId !== undefined)
+
+			q.removeEntries([manualEntryId, sourceEntryId])
+
+			expect(manual(q)).toEqual([9])
+			expect(upcomingSource(q)).toEqual([3])
+		})
+
+		it('removes exactly the selected occurrence of a duplicated track', () => {
+			q.setSource([7, 7, 7], 0)
+			const entryId = q.itemAt('source', 1)?.entryId
+			invariant(entryId !== undefined)
+
+			q.removeEntries([entryId])
+
+			expect(upcomingSource(q)).toEqual([7])
+			expect(q.current?.trackId).toBe(7)
+		})
+
+		it('prepends play next after an entry is removed', () => {
+			q.setSource([1], 0)
+			q.enqueue([8, 9], 'next')
+			q.enqueue([20], 'last')
+			const entryId = q.itemAt('manual', 0)?.entryId
+			invariant(entryId !== undefined)
+
+			q.removeEntries([entryId])
+			q.enqueue([10], 'next')
+
+			expect(manual(q)).toEqual([10, 9, 20])
+		})
+
+		it('never removes the current entry', () => {
+			q.setSource([1, 2], 0)
+			const sourceEntryId = q.current?.entryId
+			invariant(sourceEntryId !== undefined)
+
+			q.removeEntries([sourceEntryId])
+			expect(q.current).toMatchObject({ layer: 'source', trackId: 1 })
+
+			q.enqueue([9], 'next')
+			q.advance()
+			const manualEntryId = q.current?.entryId
+			invariant(manualEntryId !== undefined)
+
+			q.removeEntries([manualEntryId])
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+		})
+	})
+
+	describe('entry ids', () => {
+		it('keeps a row id stable from upcoming to current', () => {
+			q.setSource([1, 2], 0)
+			const upcomingEntryId = q.itemAt('source', 0)?.entryId
+
+			const advanced = q.advance()
+
+			expect(advanced?.entryId).toBe(upcomingEntryId)
+			expect(q.current?.entryId).toBe(upcomingEntryId)
+		})
+
+		it('never collides across layers', () => {
+			q.setSource([1, 2, 3], 0)
+			q.enqueue([8, 9], 'last')
+			const entryIds = [
+				q.current?.entryId,
+				q.itemAt('manual', 0)?.entryId,
+				q.itemAt('manual', 1)?.entryId,
+				q.itemAt('source', 0)?.entryId,
+				q.itemAt('source', 1)?.entryId,
+			]
+
+			expect(entryIds.every((entryId) => entryId !== undefined)).toBe(true)
+			expect(new Set(entryIds).size).toBe(entryIds.length)
+		})
+
+		it('travels with a row moved across layers', () => {
+			q.setSource([1, 2, 3], 0)
+			const entryId = q.itemAt('source', 0)?.entryId
+			invariant(entryId !== undefined)
+
+			q.moveEntry(entryId, { layer: 'manual', slot: 0 })
+
+			expect(q.itemAt('manual', 0)?.entryId).toBe(entryId)
+		})
+	})
+
+	describe('moveEntry', () => {
+		it('reorders within the manual layer (downward adjustment)', () => {
+			q.setSource([1], 0)
+			q.enqueue([10, 20, 30, 40], 'last')
+			const entryId = q.itemAt('manual', 0)?.entryId
+			invariant(entryId !== undefined)
+			q.moveEntry(entryId, { layer: 'manual', slot: 3 })
+			expect(manual(q)).toEqual([20, 30, 10, 40])
+		})
+
+		it('reorders within the source layer', () => {
+			q.setSource([1, 2, 3, 4], 0)
+			const entryId = q.itemAt('source', 0)?.entryId
+			invariant(entryId !== undefined)
+			q.moveEntry(entryId, { layer: 'source', slot: 2 })
+			expect(upcomingSource(q)).toEqual([3, 2, 4])
+		})
+
+		it('moves a manual track into the source queue', () => {
+			q.setSource([1, 2, 3], 0)
+			q.enqueue([99], 'last')
+			const entryId = q.itemAt('manual', 0)?.entryId
+			invariant(entryId !== undefined)
+			q.moveEntry(entryId, { layer: 'source', slot: 1 })
+			expect(manual(q)).toEqual([])
+			expect(upcomingSource(q)).toEqual([2, 99, 3])
+		})
+
+		it('drops a shuffle snapshot when moving a manual row into the source', () => {
+			q.setSource([1, 2, 3], 0)
+			q.toggleShuffle()
+			q.enqueue([99], 'last')
+			const entryId = q.itemAt('manual', 0)?.entryId
+			invariant(entryId !== undefined)
+
+			q.moveEntry(entryId, { layer: 'source', slot: 1 })
+			const committed = upcomingSource(q)
+
+			expect(q.shuffle).toBe(false)
+			q.toggleShuffle()
+			q.toggleShuffle()
+			expect(upcomingSource(q)).toEqual(committed)
+		})
+
+		it('moves a source track into the manual queue', () => {
+			q.setSource([1, 2, 3], 0)
+			const entryId = q.itemAt('source', 0)?.entryId
+			invariant(entryId !== undefined)
+			q.moveEntry(entryId, { layer: 'manual', slot: 0 })
+			expect(manual(q)).toEqual([2])
+			expect(upcomingSource(q)).toEqual([3])
+		})
+
+		it('does not restore a source row moved to manual when shuffle is disabled', () => {
+			q.setSource([1, 2, 3, 4], 0)
+			q.toggleShuffle()
+			const item = q.itemAt('source', 0)
+			invariant(item !== undefined)
+
+			q.moveEntry(item.entryId, { layer: 'manual', slot: 0 })
+			q.toggleShuffle()
+
+			expect(manual(q)).toEqual([item.trackId])
+			expect(upcomingSource(q)).toEqual([2, 3, 4].filter((id) => id !== item.trackId))
+		})
+
+		it('ignores a move whose entry id is unknown', () => {
+			q.setSource([1], 0)
+			q.enqueue([8, 9], 'last')
+
+			q.moveEntry(999_999, { layer: 'manual', slot: 0 })
+
+			expect(manual(q)).toEqual([8, 9])
+		})
+
+		it('ignores a move whose row advance consumed mid-drag', () => {
+			q.setSource([1, 2, 3], 0)
+			q.enqueue([8, 9], 'last')
+			// Capture the first manual row, then advance so it becomes the current
+			// entry (shifted out of #manual): the drag's entry id is now stale.
+			const entryId = q.itemAt('manual', 0)?.entryId
+			invariant(entryId !== undefined)
+
+			q.advance()
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 8 })
+
+			q.moveEntry(entryId, { layer: 'manual', slot: 1 })
+			expect(manual(q)).toEqual([9])
+			expect(upcomingSource(q)).toEqual([2, 3])
 		})
 	})
 
 	describe('toggleShuffle', () => {
-		it('enables shuffle and moves the active track to index 0', () => {
-			q.setTrack(1, [10, 20, 30])
+		it('shuffles the source but never the manual queue', () => {
+			q.setSource([10, 20, 30, 40, 50], 0)
+			q.enqueue([8, 9], 'next')
 			q.toggleShuffle()
+			expect(manual(q)).toEqual([8, 9])
+			q.toggleShuffle()
+			expect(manual(q)).toEqual([8, 9])
+		})
+
+		it('keeps the snapshot lifecycle coherent through the persisted shuffle setter', () => {
+			q.setSource([1, 2, 3], 0)
+			q.shuffle = true
 			expect(q.shuffle).toBe(true)
-			expect(q.current?.index).toBe(0)
-			expect(q.itemsIds[0]).toBe(20)
-		})
 
-		it('shuffled list contains all original IDs', () => {
-			q.setTrack(0, [10, 20, 30, 40, 50])
-			q.toggleShuffle()
-			expect(q.itemsIds.toSorted((a, b) => a - b)).toEqual([10, 20, 30, 40, 50])
-		})
-
-		it('disables shuffle and restores original order with the correct active index', () => {
-			q.setTrack(1, [10, 20, 30])
-			q.toggleShuffle()
-			q.toggleShuffle()
+			q.shuffle = false
 			expect(q.shuffle).toBe(false)
-			expect(q.itemsIds).toEqual([10, 20, 30])
-			expect(q.current?.index).toBe(1)
-		})
-
-		it('preserves the active track ID when disabling after navigating in shuffle mode', () => {
-			q.setTrack(0, [10, 20, 30])
-			q.toggleShuffle()
-			const navigatedId = q.itemsIds[1] as number
-			q.setTrack(1)
-			q.toggleShuffle()
-			expect(q.current?.id).toBe(navigatedId)
-			expect(q.itemsIds).toEqual([10, 20, 30])
-		})
-
-		it('sets active entry to null when enabling with no currently active track', () => {
-			q.setTrack(0, [10, 20, 30])
-			q.removeFromQueue(0) // active track removed → current becomes null
-			q.toggleShuffle()
-			expect(q.shuffle).toBe(true)
-			expect(q.current).toBeNull()
-			expect(q.itemsIds.toSorted((a, b) => a - b)).toEqual([20, 30])
-		})
-
-		it('toggles gracefully on an empty queue', () => {
-			q.toggleShuffle()
-			expect(q.shuffle).toBe(true)
-			expect(q.current).toBeNull()
-			expect(q.itemsIds).toEqual([])
-			q.toggleShuffle()
-			expect(q.shuffle).toBe(false)
-			expect(q.current).toBeNull()
+			expect([q.current?.trackId, ...upcomingSource(q)]).toEqual([1, 2, 3])
 		})
 	})
 
-	describe('addToQueue', () => {
-		it('appends a single track', () => {
-			q.setTrack(0, [1, 2])
-			q.addToQueue(3)
-			expect(q.itemsIds).toEqual([1, 2, 3])
+	describe('clears', () => {
+		it("clear('manual') keeps a playing manual track", () => {
+			q.setSource([1], 0)
+			q.enqueue([8, 9], 'next')
+			q.advance()
+			q.clear('manual')
+			expect(manual(q)).toEqual([])
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 8 })
 		})
 
-		it('appends multiple tracks', () => {
-			q.setTrack(0, [1])
-			q.addToQueue([2, 3])
-			expect(q.itemsIds).toEqual([1, 2, 3])
-		})
-
-		it('activates index 0 when the queue was empty', () => {
-			expect(q.current).toBeNull()
-			q.addToQueue(5)
-			expect(q.current?.index).toBe(0)
-		})
-
-		it('while shuffled, added track is visible immediately and survives toggle-off', () => {
-			q.setTrack(0, [10, 20])
-			q.toggleShuffle()
-			q.addToQueue(30)
-			expect(q.itemsIds).toContain(30)
-			q.toggleShuffle()
-			expect(q.itemsIds).toContain(30)
+		it("clear('source') keeps current and played tracks", () => {
+			q.setSource([1, 2, 3, 4], 1)
+			q.clear('source')
+			expect(upcomingSource(q)).toEqual([])
+			expect(q.current).toMatchObject({ layer: 'source', trackId: 2 })
 		})
 	})
 
-	describe('removeFromQueue', () => {
-		it('removes a track by index', () => {
-			q.setTrack(0, [10, 20, 30])
-			q.removeFromQueue(1)
-			expect(q.itemsIds).toEqual([10, 30])
+	describe('deleted tracks', () => {
+		it('purges the track from manual and source in one fan-out', () => {
+			q.setSource([1, 9, 2, 9], 0)
+			q.enqueue([9, 8], 'last')
+			q.removeTracks(new Set([9]))
+			expect(manual(q)).toEqual([8])
+			expect([q.current?.trackId, ...upcomingSource(q)]).toEqual([1, 2])
 		})
 
-		it('decrements active index when removing a track before it', () => {
-			q.setTrack(2, [10, 20, 30])
-			q.removeFromQueue(0)
-			expect(q.current?.index).toBe(1)
+		it('prepends play next after a manual track is deleted', () => {
+			q.setSource([1], 0)
+			q.enqueue([8, 9], 'next')
+			q.enqueue([20], 'last')
+			q.removeTracks(new Set([8]))
+			q.enqueue([10], 'next')
+			expect(manual(q)).toEqual([10, 9, 20])
 		})
 
-		it('clears active entry when removing the active track', () => {
-			q.setTrack(1, [10, 20, 30])
-			q.removeFromQueue(1)
+		it('clears the active entry when the current source track is deleted', () => {
+			q.setSource([10, 20, 30], 1)
+			expect(q.removeTracks(new Set([20]))).toBe(true)
+			expect(q.current).toBeNull()
+			expect(upcomingSource(q)).toEqual([10, 30])
+		})
+
+		it('selects the source successor when the current manual track is deleted', () => {
+			q.setSource([1, 2], 0)
+			q.enqueue([9], 'next')
+			q.advance()
+			expect(q.removeTracks(new Set([9]))).toBe(true)
+			expect(q.current).toMatchObject({ layer: 'source', trackId: 2 })
+		})
+
+		it('clears current when a deleted manual track has no successor', () => {
+			q.enqueue([9], 'next')
+			q.advance()
+			expect(q.removeTracks(new Set([9]))).toBe(true)
 			expect(q.current).toBeNull()
 		})
 
-		it('does not change active index when removing a track after it', () => {
-			q.setTrack(0, [10, 20, 30])
-			q.removeFromQueue(2)
-			expect(q.current?.index).toBe(0)
-		})
-
-		it('ignores an out-of-bounds index', () => {
-			q.setTrack(0, [10, 20])
-			q.removeFromQueue(5)
-			expect(q.itemsIds).toEqual([10, 20])
-		})
-
-		it('removes the track from both lists when shuffle is enabled', () => {
-			q.setTrack(0, [10, 20, 30])
-			q.toggleShuffle()
-			const removedId = q.itemsIds[1] as number
-			q.removeFromQueue(1)
-			expect(q.itemsIds).not.toContain(removedId)
-			q.toggleShuffle()
-			expect(q.itemsIds).not.toContain(removedId)
-		})
-	})
-
-	describe('clearQueue', () => {
-		it('empties the queue and resets the active entry', () => {
-			q.setTrack(1, [1, 2, 3])
-			q.clearQueue()
-			expect(q.itemsIds).toEqual([])
+		it('makes every source row upcoming when a later deletion removes its anchor', () => {
+			q.setSource([1, 2, 3], 2)
+			q.enqueue([9], 'next')
+			q.advance()
+			q.removeTracks(new Set([9]))
 			expect(q.current).toBeNull()
-			expect(q.isQueueEmpty).toBe(true)
-		})
-	})
 
-	describe('moveQueueItem', () => {
-		it('moves an item forward', () => {
-			q.setTrack(0, [10, 20, 30, 40])
-			q.moveQueueItem(0, 2)
-			expect(q.itemsIds).toEqual([20, 30, 10, 40])
+			q.removeTracks(new Set([3]))
+
+			expect(upcomingSource(q)).toEqual([1, 2])
 		})
 
-		it('moves an item backward', () => {
-			q.setTrack(0, [10, 20, 30, 40])
-			q.moveQueueItem(3, 1)
-			expect(q.itemsIds).toEqual([10, 40, 20, 30])
+		it('resumes at the source successor when the manual detour return point is deleted', () => {
+			q.setSource([1, 2, 3], 1)
+			q.enqueue([9], 'next')
+			q.advance()
+
+			expect(q.removeTracks(new Set([2]))).toBe(false)
+
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+			expect(q.advance()).toMatchObject({ layer: 'source', trackId: 3 })
 		})
 
-		it('updates active index when moving the active track', () => {
-			q.setTrack(0, [10, 20, 30])
-			q.moveQueueItem(0, 2)
-			expect(q.current?.index).toBe(2)
-			expect(q.current?.id).toBe(10)
-		})
+		it('does not promote an upcoming source row when later batch deletions follow a removed anchor', () => {
+			q.setSource([2, 3, 4], 0)
+			q.enqueue([9], 'next')
+			q.advance()
 
-		it('decrements active index when a track moves from before to after it', () => {
-			q.setTrack(2, [10, 20, 30, 40])
-			q.moveQueueItem(0, 3)
-			// 10 moves after 30 (the active track), so active index shifts 2 → 1
-			expect(q.current?.index).toBe(1)
-			expect(q.current?.id).toBe(30)
-		})
+			expect(q.removeTracks(new Set([2, 4]))).toBe(false)
 
-		it('increments active index when a track moves from after to before it', () => {
-			q.setTrack(1, [10, 20, 30, 40])
-			q.moveQueueItem(3, 0)
-			// 40 moves before 20 (the active track), so active index shifts 1 → 2
-			expect(q.current?.index).toBe(2)
-			expect(q.current?.id).toBe(20)
-		})
-
-		it('does nothing for out-of-bounds indices', () => {
-			q.setTrack(0, [10, 20, 30])
-			q.moveQueueItem(-1, 1)
-			q.moveQueueItem(0, 5)
-			expect(q.itemsIds).toEqual([10, 20, 30])
-		})
-
-		it('does nothing when from and to are the same index', () => {
-			q.setTrack(0, [10, 20, 30])
-			q.moveQueueItem(1, 1)
-			expect(q.itemsIds).toEqual([10, 20, 30])
-		})
-
-		it('commits the current shuffle order and disables shuffle when moving', () => {
-			q.setTrack(0, [10, 20, 30])
-			q.toggleShuffle()
-			const shuffledOrder = [...q.itemsIds]
-			q.moveQueueItem(0, 1)
-			expect(q.shuffle).toBe(false)
-			// The move applies to the committed shuffle order
-			const expected = [...shuffledOrder]
-			const moved = expected.splice(0, 1)[0]
-			if (moved !== undefined) {
-				expected.splice(1, 0, moved)
-			}
-			expect(q.itemsIds).toEqual(expected)
+			expect(q.current).toMatchObject({ layer: 'manual', trackId: 9 })
+			expect(q.advance()).toMatchObject({ layer: 'source', trackId: 3 })
 		})
 	})
 })

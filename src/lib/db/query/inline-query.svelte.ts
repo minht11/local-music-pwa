@@ -1,6 +1,7 @@
 import { type DatabaseChangeDetailsList, onDatabaseChange } from '../events.ts'
 import type { QueryKey } from './base-query.svelte.ts'
 
+/** @public */
 export type { QueryKey, QueryResult } from './base-query.svelte.ts'
 
 export interface InlineQueryOptions<K extends QueryKey, Result> {

@@ -7,7 +7,7 @@
 		style?: string
 		class?: ClassValue
 		ariaLabel: string
-		ariaRowIndex: number
+		rowIndex: number
 		tabindex: number
 		children: Snippet
 		onclick?: (e: KeyboardEvent | MouseEvent) => void
@@ -20,7 +20,7 @@
 		class: className,
 		style,
 		ariaLabel,
-		ariaRowIndex,
+		rowIndex,
 		tabindex = 0,
 		onclick,
 		oncontextmenu,
@@ -40,7 +40,8 @@
 	]}
 	role="row"
 	aria-label={ariaLabel}
-	aria-rowindex={ariaRowIndex}
+	data-row-index={rowIndex}
+	aria-rowindex={rowIndex + 1}
 	onclick={clickHandler}
 	{onpointerenter}
 	onkeydown={(e) => {

@@ -1,34 +1,81 @@
+import { SvelteMap } from 'svelte/reactivity'
+import { isElementTextInput } from '$lib/helpers/input.ts'
 import { isPrimaryModifierKey } from '$lib/helpers/utils/ua.ts'
-import { SelectionTracker } from './selection.svelte.ts'
-
-interface SelectionInteractionState {
-	hoverRangeEnd: number | null
-	isShiftActive: boolean
-}
+import type { SelectionAnchor, SelectionSnapshot, TrackRowIdentity } from './selection.ts'
 
 interface UseTrackSelectionControllerOptions {
-	items: () => readonly number[]
+	/** Total row count (track and custom rows alike). */
+	rowCount: () => number
+	/** Row identity, or undefined for a non-track row (a section header) or a stale index. */
+	trackAt: (index: number) => TrackRowIdentity | undefined
+	/** Whether an entry id still names a row. Must answer in O(1); the prune probes per selected row. */
+	hasEntry: (entryId: number) => boolean
 }
 
 interface HandleItemClickOptions {
 	event: MouseEvent | KeyboardEvent
+	entryId: number
 	trackId: number
 	index: number
 	onClick: () => void
 }
 
-export const useTrackSelectionController = ({ items }: UseTrackSelectionControllerOptions) => {
-	const selection = new SelectionTracker()
+export const useTrackSelectionController = ({
+	rowCount,
+	trackAt,
+	hasEntry,
+}: UseTrackSelectionControllerOptions) => {
+	// entryId -> trackId: rows sharing a track id select independently.
+	const selected = new SvelteMap<number, number>()
+	const selectionEnabled = $derived(selected.size > 0)
 
-	const state: SelectionInteractionState = $state({
-		hoverRangeEnd: null,
-		isShiftActive: false,
-	})
+	// Not reactive: only the next shift interaction reads it.
+	let rangeAnchor: SelectionAnchor | null = null
+
+	let hoverRangeEnd = $state<number | null>(null)
+	let isShiftActive = $state(false)
 
 	const cancelSelection = () => {
-		selection.clear()
-		state.hoverRangeEnd = null
+		selected.clear()
+		rangeAnchor = null
+		hoverRangeEnd = null
 	}
+
+	const forEachLiveRow = (fn: (row: TrackRowIdentity) => void): void => {
+		const count = rowCount()
+		for (let index = 0; index < count; index += 1) {
+			const row = trackAt(index)
+			if (row) {
+				fn(row)
+			}
+		}
+	}
+
+	const selectAll = () => {
+		forEachLiveRow((row) => selected.set(row.entryId, row.trackId))
+	}
+
+	// Any list change while selecting drops just the entries that are gone. Costs
+	// one `hasEntry` probe per *selected* row, never a walk of the list.
+	$effect(() => {
+		if (!selectionEnabled) {
+			return
+		}
+
+		// Ids are read untracked — only `hasEntry` should re-trigger this. A newly
+		// selected row needs no prune: it is live at the moment it is selected.
+		const dead = untrack(() => [...selected.keys()]).filter((entryId) => !hasEntry(entryId))
+
+		untrack(() => {
+			for (const entryId of dead) {
+				selected.delete(entryId)
+			}
+
+			if (selected.size === 0) {
+				rangeAnchor = null
+			}
+		})
+	})
 
 	$effect(() => {
 		const ac = new AbortController()
@@ -38,10 +85,12 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 			'keydown',
 			(e: KeyboardEvent) => {
 				if (e.key === 'Shift') {
-					state.isShiftActive = true
+					isShiftActive = true
 				}
 
-				if (!selection.selectionEnabled) {
+				// A selection outlives the dialogs opened from it, so these listeners are
+				// live over their text fields; a keystroke typed into one belongs to it.
+				if (!selectionEnabled || isElementTextInput(e.target)) {
 					return
 				}
 
@@ -52,7 +101,7 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 
 				if (e.key === 'a' && isPrimaryModifierKey(e)) {
 					e.preventDefault()
-					selection.selectMany(items())
+					selectAll()
 				}
 			},
 			{ signal },
@@ -62,8 +111,13 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 			'keyup',
 			(e: KeyboardEvent) => {
 				if (e.key === 'Shift') {
-					state.isShiftActive = false
-					selection.clearHoverAnchor()
+					isShiftActive = false
+
+					// Shift released with nothing selected: the hover-seeded anchor
+					// never committed, so drop it.
+					if (!selectionEnabled) {
+						rangeAnchor = null
+					}
 				}
 			},
 			{ signal },
@@ -72,84 +126,117 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 		return () => ac.abort()
 	})
 
+	// The list can shift under the anchor's index, so trust it only while the row
+	// there still bears the anchor's entry id.
+	const validAnchorIndex = (): number | null => {
+		const anchor = rangeAnchor
+		if (anchor === null || trackAt(anchor.index)?.entryId !== anchor.entryId) {
+			return null
+		}
+
+		return anchor.index
+	}
+
 	const isInHoverRange = (index: number) => {
-		if (!state.isShiftActive || state.hoverRangeEnd === null) {
+		if (!isShiftActive || hoverRangeEnd === null) {
 			return false
 		}
 
-		const anchor = selection.rangeAnchor
+		const anchor = validAnchorIndex()
 		if (anchor === null) {
 			return false
 		}
 
-		const min = Math.min(anchor, state.hoverRangeEnd)
-		const max = Math.max(anchor, state.hoverRangeEnd)
+		const min = Math.min(anchor, hoverRangeEnd)
+		const max = Math.max(anchor, hoverRangeEnd)
 
 		return index >= min && index <= max
 	}
 
 	const handlePointerEnter = (index: number) => {
-		if (state.isShiftActive || selection.selectionEnabled) {
-			state.hoverRangeEnd = index
+		if (isShiftActive || selectionEnabled) {
+			hoverRangeEnd = index
 
-			if (state.isShiftActive) {
-				selection.setHoverAnchor(index)
+			// A shift-hover seeds the anchor so the eventual shift-click ranges
+			// from where the preview started.
+			if (isShiftActive && rangeAnchor === null) {
+				const row = trackAt(index)
+				if (row) {
+					rangeAnchor = { index, entryId: row.entryId }
+				}
 			}
 		}
 	}
 
-	const applyShiftClick = (trackId: number, index: number) => {
-		if (!selection.selectionEnabled) {
-			selection.enterSelectionMode()
+	const toggleSelection = (entryId: number, trackId: number, index: number) => {
+		if (selected.has(entryId)) {
+			selected.delete(entryId)
+		} else {
+			selected.set(entryId, trackId)
 		}
 
-		if (selection.rangeAnchor === null) {
-			selection.select(trackId, index)
+		rangeAnchor = selected.size > 0 ? { index, entryId } : null
+	}
+
+	const applyShiftClick = (entryId: number, trackId: number, index: number) => {
+		const anchorIndex = validAnchorIndex()
+		if (anchorIndex === null) {
+			selected.set(entryId, trackId)
+			rangeAnchor = { index, entryId }
 			return
 		}
 
-		const allItems = items()
-		const min = Math.min(selection.rangeAnchor, index)
-		const max = Math.max(selection.rangeAnchor, index)
-		const rangeIds: number[] = []
+		const min = Math.min(anchorIndex, index)
+		const max = Math.max(anchorIndex, index)
+		const rangeRows: TrackRowIdentity[] = []
 
 		let allSelected = true
 		for (let i = min; i <= max; i += 1) {
-			const itemAtIndex = allItems[i]
-			if (itemAtIndex === undefined) {
+			const row = trackAt(i)
+			if (row === undefined) {
 				continue
 			}
 
-			rangeIds.push(itemAtIndex)
-			if (allSelected && !selection.has(itemAtIndex)) {
+			rangeRows.push(row)
+			if (allSelected && !selected.has(row.entryId)) {
 				allSelected = false
 			}
 		}
 
 		if (allSelected) {
-			selection.unselectMany(rangeIds)
+			for (const row of rangeRows) {
+				selected.delete(row.entryId)
+			}
 		} else {
-			selection.selectMany(rangeIds)
+			for (const row of rangeRows) {
+				selected.set(row.entryId, row.trackId)
+			}
 		}
 
-		selection.rangeAnchor = index
+		rangeAnchor = { index, entryId }
 	}
 
-	const handleItemClick = ({ event, trackId, index, onClick }: HandleItemClickOptions) => {
+	const handleItemClick = ({
+		event,
+		entryId,
+		trackId,
+		index,
+		onClick,
+	}: HandleItemClickOptions) => {
 		if (isPrimaryModifierKey(event)) {
 			event.preventDefault()
-			selection.toggle(trackId, index)
+			toggleSelection(entryId, trackId, index)
 			return
 		}
 
 		if (event.shiftKey) {
 			event.preventDefault()
-			applyShiftClick(trackId, index)
+			applyShiftClick(entryId, trackId, index)
 			return
 		}
 
-		if (selection.selectionEnabled) {
-			selection.toggle(trackId, index)
+		if (selectionEnabled) {
+			toggleSelection(entryId, trackId, index)
 			return
 		}
 
@@ -158,17 +245,19 @@ export const useTrackSelectionController = ({ items }: UseTrackSelectionControll
 
 	return {
 		get selectionEnabled() {
-			return selection.selectionEnabled
-		},
-		get selectedIds() {
-			return selection.selectedIds
+			return selectionEnabled
 		},
 		get size() {
-			return selection.size
+			return selected.size
 		},
-		has: (trackId: number) => selection.has(trackId),
-		selectMany: (trackIds: readonly number[]) => selection.selectMany(trackIds),
-		toggleSelection: (trackId: number, index: number) => selection.toggle(trackId, index),
+		get snapshot(): SelectionSnapshot {
+			return {
+				rows: Array.from(selected, ([entryId, trackId]) => ({ entryId, trackId })),
+			}
+		},
+		has: (entryId: number) => selected.has(entryId),
+		selectAll,
+		toggleSelection,
 		cancelSelection,
 		isInHoverRange,
 		handlePointerEnter,

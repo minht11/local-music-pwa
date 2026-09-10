@@ -1,4 +1,4 @@
-import { defineEnvVars } from '@sveltejs/kit/hooks'
+import { defineEnvVars } from '@sveltejs/kit/env'
 
 const schemaValidator = <Input, Output = Input>(
 	validator: (value: unknown) => { value: Output } | { issues: { message: string }[] },

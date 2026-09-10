@@ -1,6 +1,8 @@
 // IMPORTANT. This file must be imported as separate entry point
 // and it cannot use any modern JS syntax.
 
+const supportsSomeSortOfDirectoryPicker = 'showDirectoryPicker' in globalThis || "webkitdirectory" in HTMLInputElement.prototype
+
 var isSupportedBrowser =
 	'noModule' in HTMLScriptElement.prototype &&
 	navigator.locks &&
@@ -9,7 +11,8 @@ var isSupportedBrowser =
 	CSS.supports('color: color-mix(in oklab, black, black)') &&
 	// Container queries
 	'container' in document.documentElement.style &&
-	navigator.serviceWorker
+	navigator.serviceWorker &&
+	supportsSomeSortOfDirectoryPicker
 
 if (!isSupportedBrowser) {
 	document.getElementById('unsupported-browser').removeAttribute('hidden')

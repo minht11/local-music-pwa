@@ -1,3 +1,17 @@
+<script lang="ts" module>
+	/**
+	 * Per-index row heights. Heights are not part of the virtualizer's own
+	 * invalidation key and can move while `count` stays put, so `key` must change
+	 * whenever `at` would answer differently anywhere.
+	 */
+	export interface VariableRowSize {
+		key: string | number
+		at: (index: number) => number
+	}
+
+	export type RowSize = number | VariableRowSize
+</script>
+
 <script lang="ts">
 	import {
 		elementScroll,
@@ -18,11 +32,13 @@
 	interface Props {
 		count: number
 		lanes?: number
-		size: number
+		size: RowSize
 		gap?: number
 		forceRenderIndexes?: readonly number[]
 		offsetWidth?: number
 		key: (index: number) => string | number
+		/** Rows excluded from arrow-key navigation, e.g. static section headers. */
+		focusableRow?: (index: number) => boolean
 		children: Snippet<[VirtualItem]>
 	}
 
@@ -33,11 +49,13 @@
 		size: itemSize,
 		forceRenderIndexes = [],
 		key,
+		focusableRow,
 		children,
 		offsetWidth = $bindable(0),
 	}: Props = $props()
 
 	const scrollTarget = useScrollTarget()
+	let focusIndex = $state(-1)
 
 	type VirtualizerTargetOptions<E extends Window | Element> = Pick<
 		VirtualizerOptions<E, Element>,
@@ -74,8 +92,7 @@
 	})
 
 	const rangeExtractor = (range: Range) =>
-		// We untrack because when focusIndex changes it forces virtualizer deps to change
-		// which is not needed here.
+		// Untracked: a focusIndex change would otherwise invalidate the virtualizer's deps.
 		untrack(() => {
 			const start = Math.max(range.startIndex - range.overscan, 0)
 			const initialEnd = range.endIndex + range.overscan
@@ -90,7 +107,9 @@
 				arr.push(i)
 			}
 
-			if (focusIndex !== -1 && focusIndex > initialEnd) {
+			// The focused row can outlive the list shrinking under it (focusout only
+			// clears focusIndex in a microtask), so bound it like forceRenderIndexes.
+			if (focusIndex !== -1 && focusIndex > initialEnd && focusIndex < range.count) {
 				arr.push(focusIndex)
 			}
 
@@ -105,13 +124,26 @@
 			return arr
 		})
 
+	// A new identity makes the virtualizer drop its size cache and re-probe every
+	// row, so this rebuilds exactly when heights can have changed.
+	const estimateSize = $derived.by(() => {
+		const size = itemSize
+		if (typeof size === 'number') {
+			return () => size
+		}
+
+		void size.key
+
+		return (index: number) => size.at(index)
+	})
+
 	const getVirtualizerOptions = () => {
 		const options: VirtualizerOptions<Window | Element, Element> = {
 			// narrowing window/element specific types is difficult so we just cast here
 			...(scrollTargetOptions as VirtualizerTargetOptions<Window | Element>),
 			count,
 			lanes,
-			estimateSize: () => itemSize,
+			estimateSize,
 			rangeExtractor,
 			overscan: 10,
 		}
@@ -121,12 +153,10 @@
 
 	const virtualizer = createVirtualizerBase(getVirtualizerOptions)
 
-	let focusIndex = $state(-1)
-
 	let container = $state<HTMLDivElement>()
 
 	const findRow = (index: number) => {
-		const el = container?.querySelector(`[aria-rowindex="${index}"]`)
+		const el = container?.querySelector(`[data-row-index="${index}"]`)
 		if (el instanceof HTMLElement) {
 			return el
 		}
@@ -135,19 +165,20 @@
 	}
 
 	const findCurrentFocusedRow = () => {
-		const index = container ? Number(findFocusedElement(container)?.ariaRowIndex) : -1
+		const index = container ? Number(findFocusedElement(container)?.dataset.rowIndex) : -1
 
 		return Number.isNaN(index) ? -1 : index
 	}
 
 	const scrollToIndexIfNeeded = async (index: number) => {
-		if (!virtualizer.range) {
+		const range = virtualizer.range
+		if (!range) {
 			return
 		}
 
 		// Top/bottom elements cover the element, so we adjust bounds a bit
-		const startIndex = Math.max(virtualizer.range.startIndex - 1, 0)
-		const endIndex = Math.min(virtualizer.range.endIndex + 1, virtualizer.options.count - 1)
+		const startIndex = Math.max(range.startIndex - 1, 0)
+		const endIndex = Math.min(range.endIndex + 1, count - 1)
 
 		if (index >= startIndex && index <= endIndex) {
 			return
@@ -160,7 +191,7 @@
 		const abortController = new AbortController()
 		const { promise: scrollEndPromise, resolve } = Promise.withResolvers<void>()
 
-		scrollTarget.current.addEventListener(
+		scrollTarget.current?.addEventListener(
 			'scrollend',
 			() => {
 				resolve()
@@ -199,18 +230,26 @@
 
 		e.preventDefault()
 
-		if (container && doesElementHasFocus(container)) {
-			await scrollToElementThenFocusIt(0)
+		const focusableFrom = (from: number, step: number): number | null => {
+			for (let index = from; index >= 0 && index < count; index += step) {
+				if (focusableRow?.(index) ?? true) {
+					return index
+				}
+			}
 
-			return
+			return null
 		}
 
 		const increment = directionDown ? 1 : -1
-		const currentIndex = findCurrentFocusedRow()
+		// Focus sitting on the container rather than a row means the list has not
+		// been entered yet, so either arrow key enters it at the top.
+		const target =
+			container && doesElementHasFocus(container)
+				? focusableFrom(0, 1)
+				: focusableFrom(findCurrentFocusedRow() + increment, increment)
 
-		const nextIndex = currentIndex + increment
-		if (nextIndex >= 0 && nextIndex < count) {
-			await scrollToElementThenFocusIt(nextIndex)
+		if (target !== null) {
+			await scrollToElementThenFocusIt(target)
 		}
 	}
 
@@ -241,14 +280,14 @@
 		bind:offsetWidth
 		role="grid"
 		aria-rowcount={count}
-		style:height={`${virtualizer.getTotalSize() - gap}px`}
+		style:height={`${virtualizer.totalSize - gap}px`}
 		class="@container relative w-full rounded-lg -outline-offset-2 contain-strict"
 		tabindex="0"
 		onfocusin={focusinHandler}
 		onfocusout={focusoutHandler}
 		onkeydown={keydownHandler}
 	>
-		{#each virtualizer.getVirtualItems() as virtualItem (key(virtualItem.index))}
+		{#each virtualizer.virtualItems as virtualItem (key(virtualItem.index))}
 			{@render children(virtualItem)}
 		{/each}
 	</div>

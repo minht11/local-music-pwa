@@ -10,6 +10,7 @@ import type { LibraryStoreName } from '../types.ts'
 import { preloadLibraryValue } from './value.ts'
 
 export type { PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
+/** @public */
 export type { QueryResult } from '$lib/db/query/query.ts'
 
 const preloadLimit = 12
