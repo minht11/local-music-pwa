@@ -169,7 +169,7 @@
 		{#if isFileSystemAccessSupported}
 			{@render addButton(m.settingsAddDirectory(), addNewDirectoryHandler)}
 		{:else}
-			{@render addButton(m.settingsImportTracks(), importLegacyFilesHandler)}
+			{@render addButton(m.settingsImportDirectory(), importLegacyFilesHandler)}
 		{/if}
 	</li>
 </ul>

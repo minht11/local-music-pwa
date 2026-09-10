@@ -166,7 +166,7 @@
 	"settingsGaplessPlaybackDescription": "इसके लिए आपके ब्राउज़र और ऑडियो फ़ाइल का समर्थन आवश्यक है, अन्यथा सामान्य प्लेबैक पर वापस आ जाता है",
 	"settingsGaplessPlaybackInfo": "यह थोड़ी अधिक मेमोरी और CPU संसाधनों का उपयोग करता है, यदि आपको कोई समस्या हो तो इसे अक्षम करने का प्रयास करें। यदि आपने ऐप का पिछला संस्करण उपयोग किया था, तो इसके काम करने के लिए अपनी लाइब्रेरी को पुनः स्कैन या पुनः आयात करें।",
 	"settingsGrantDirectoryAccess": "आपको ब्राउज़र अनुमति के माध्यम से ऐप को निर्देशिका तक पहुँच देनी होगी ताकि वह उसकी सामग्री स्कैन कर सके",
-	"settingsImportTracks": "ट्रैक आयात करें",
+	"settingsImportDirectory": "निर्देशिका आयात करें",
 	"settingsInstallAppDesktop": "डेस्कटॉप",
 	"settingsInstallAppExplanation": "अधिक इमर्सिव अनुभव के लिए Snae Player को अपने {device} में जोड़ें",
 	"settingsInstallAppHomeAction": "इंस्टॉल करें",

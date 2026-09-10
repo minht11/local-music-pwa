@@ -166,7 +166,7 @@
 	"settingsGaplessPlaybackDescription": "Requiere que tu navegador y el archivo de audio lo admitan; de lo contrario, se recurre a la reproducción normal",
 	"settingsGaplessPlaybackInfo": "Esto usa un poco más de memoria y recursos de CPU; si experimentas algún problema, prueba a desactivarlo. Si usaste una versión anterior de la aplicación, vuelve a escanear o reimportar tu biblioteca para que funcione.",
 	"settingsGrantDirectoryAccess": "Debes permitir que la aplicación acceda al directorio, mediante el permiso del navegador, para que pueda escanear su contenido",
-	"settingsImportTracks": "Importar pistas",
+	"settingsImportDirectory": "Importar directorio",
 	"settingsInstallAppDesktop": "escritorio",
 	"settingsInstallAppExplanation": "Añade Snae Player a tu {device} para una experiencia más inmersiva",
 	"settingsInstallAppHomeAction": "Instalar",
