@@ -66,7 +66,7 @@ export default defineConfig(async ({ command, isPreview }): Promise<UserConfig> 
 			rolldownOptions: {
 				output: {
 					comments: false,
-					advancedChunks: {
+					codeSplitting: {
 						groups: [
 							{
 								// Merge all css into a single file
