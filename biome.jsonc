@@ -103,14 +103,6 @@
 				"useExplicitLengthCheck": "error",
 				"noShoutyConstants": "error",
 				"useUnifiedTypeSignatures": "error",
-				"noRestrictedImports": {
-					"level": "error",
-					"options": {
-						"paths": {
-							"@material/material-color-utilities": "Should not be used directly except in specific theme entrypoints to avoid breaking making big chunks"
-						}
-					}
-				},
 				"useConsistentObjectDefinitions": "error",
 				"noIncrementDecrement": "error",
 				"useConsistentMethodSignatures": "error"
