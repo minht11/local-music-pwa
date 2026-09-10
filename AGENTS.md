@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**Snae Player** is a privacy-first local music PWA that runs entirely in the browser — no data leaves the device. Built with **SvelteKit 5** (runes), **TypeScript** strict mode, and **Tailwind CSS 4**.
+**Snae Player** is a privacy-first local music PWA that runs entirely in the browser — no data leaves the device.
 
 - **Client-only SPA** — `adapter-static` with `ssr = false` and `prerender = false` (`src/routes/+layout.ts`); nothing renders on a server
 - Local playback via File System Access API (Files API fallback), metadata in IndexedDB, scanning in a Web Worker
@@ -94,7 +94,7 @@ pnpm run test         # Run tests
 Prefer self-documenting code — good names and structure over explanatory comments. When a comment is warranted:
 
 - Only for non-obvious behavior: invariants, constraints, or "why", never restating what the code does
-- Describe what the code *is*, not what changed — never narrate or justify a diff
+- Describe what the code _is_, not what changed — never narrate or justify a diff
 - Keep it concise; longer doc blocks are fine at boundaries (public contracts, module seams, subtle protocols)
 
 ### Code Quality Rules
