@@ -154,7 +154,7 @@
 		class={["col-[2/5] grid grid-cols-subgrid gap-y-2", bottomBarHeight <= 0 && 'mb-2']}
 	>
 		{#if !page.data.noPlayerOverlay}
-			<PlayerOverlay />
+			<PlayerOverlay class={'col-[1/4]'} />
 		{/if}
 	</div>
 
