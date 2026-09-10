@@ -129,7 +129,7 @@
 			class={['mr-4 hidden! h-10 w-10 rounded-sm @xs:flex!', loading && 'opacity-50']}
 		>
 			{#if activePlaying}
-				{@const barClassName = 'playing-bar h-5 w-[3px] origin-bottom rounded-sm bg-[white]'}
+				{const barClassName = 'playing-bar h-5 w-[3px] origin-bottom rounded-sm bg-[white]'}
 				<div class="absolute inset-0 flex items-center justify-center gap-1 bg-scrim/40">
 					<span class={barClassName}></span>
 					<span class={[barClassName, '[--ani-delay:0.2s]']}></span>

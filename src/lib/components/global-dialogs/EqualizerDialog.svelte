@@ -65,7 +65,7 @@
 				class="sliders-columns grid gap-3 overflow-x-auto overflow-y-hidden overscroll-none px-4 pb-3"
 			>
 				{#each EQ_BANDS as band, i}
-					{@const gain = eq.bands[i] ?? 0}
+					{const gain = eq.bands[i] ?? 0}
 					<div class="flex flex-col items-center gap-2">
 						<span class="text-label-sm tabular-nums">
 							{gain > 0 ? '+' : ''}{Math.round(gain)}
