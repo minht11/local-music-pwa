@@ -7,10 +7,8 @@
 		value: V
 	}
 
-	interface Props<V, T extends SettingsOptionsItem<V>> extends Omit<
-		SettingsListItemProps,
-		'children'
-	> {
+	interface Props<V, T extends SettingsOptionsItem<V>>
+		extends Omit<SettingsListItemProps, 'children'> {
 		selected: T['value']
 		items: T[]
 	}

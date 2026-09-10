@@ -13,8 +13,6 @@
 		"i18n-check": "node scripts/check-translations.ts",
 		"biome-check": "biome check .",
 		"biome-fix": "biome check . --write",
-		"oxfmt-check": "oxfmt --check ./src",
-		"oxfmt-fix": "oxfmt --write ./src",
 		"test": "vitest run",
 		"gen-color-theme": "node scripts/gen-color-theme.ts",
 		"knip": "knip"
@@ -33,7 +31,6 @@
 		"happy-dom": "^20.14.0",
 		"image-size": "^2.0.2",
 		"knip": "^6.35.1",
-		"oxfmt": "^0.67.0",
 		"svelte": "5.57.0",
 		"svelte-check": "4.7.6",
 		"tailwindcss": "4.3.3",

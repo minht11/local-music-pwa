@@ -199,7 +199,8 @@
 
 				<div class="mt-1 text-onSurfaceVariant">
 					{#if slug === 'albums' && (item as AlbumData).year !== UNKNOWN_ITEM}
-						{(item as AlbumData).year} •
+						{(item as AlbumData).year}
+						•
 					{/if}
 
 					{m.libraryTracksCount({ count: rows.count })}

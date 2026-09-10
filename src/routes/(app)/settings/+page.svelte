@@ -173,10 +173,11 @@
 						type="color"
 						tabindex="-1"
 						bind:value={
-							() => mainStore.customThemePaletteHex ?? '#000000', (value) => updateMainColor(value)
+							() => mainStore.customThemePaletteHex ?? '#000000',
+							(value) => updateMainColor(value)
 						}
 						class="pointer-events-none! absolute inset-0 size-full appearance-none opacity-0"
-					/>
+					>
 				</Button>
 			</div>
 		</SettingsListItem>
@@ -225,9 +226,7 @@
 
 		<SettingsListItem title={`${m.settingsPlaybackSpeed()}`} columnInCompactLayout>
 			{#snippet afterTitle()}
-				<span class="text-onSurfaceVariant">
-					{player.playbackRate}x
-				</span>
+				<span class="text-onSurfaceVariant"> {player.playbackRate}x </span>
 			{/snippet}
 			<div class="flex items-center gap-2">
 				<IconButton

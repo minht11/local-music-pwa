@@ -56,7 +56,7 @@
 			{@attach (input) => {
 				input.setCustomValidity(validationIssue ? ' ' : '')
 			}}
-		/>
+		>
 	</div>
 	<div class="text-field-error mt-1 hidden px-4 text-body-sm text-error">
 		{validationIssue ?? ''}

@@ -113,7 +113,7 @@
 				<hr
 					role={type === 'menu' ? 'separator' : 'presentation'}
 					class="my-2 border-onSurfaceVariant/24"
-				/>
+				>
 			{:else}
 				<button
 					{@attach ripple()}

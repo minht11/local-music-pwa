@@ -140,7 +140,7 @@
 		ontouchend={() => {
 			onSeekEnd?.()
 		}}
-	/>
+	>
 
 	<div
 		class={[

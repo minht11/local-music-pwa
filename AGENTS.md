@@ -84,7 +84,6 @@ pnpm run build        # Production build
 pnpm run i18n-check   # Validate translations in messages/*.json
 pnpm run type-check   # Type checking
 pnpm run biome-check  # Linting (biome-fix to auto-fix)
-pnpm run oxfmt-check  # Formatting (oxfmt-fix to apply)
 pnpm run knip         # Find unused files/exports/deps
 pnpm run test         # Run tests
 ```

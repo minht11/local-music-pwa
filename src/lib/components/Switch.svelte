@@ -51,7 +51,7 @@
 		}
 	}}
 >
-	<input type="checkbox" {disabled} bind:checked class="hidden" />
+	<input type="checkbox" {disabled} bind:checked class="hidden">
 	<div
 		class={[
 			'ml-1.5 h-4 w-4 rounded-full transition-all duration-150',
