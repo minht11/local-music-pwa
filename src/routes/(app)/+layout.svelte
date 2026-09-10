@@ -48,7 +48,13 @@
 	const { children } = $props()
 
 	let overlayContentHeight = $state(0)
-	let bottomBarHeight = $state(0)
+	let bottomBarHeightActual = $state(0)
+
+	const isBottomNavShown = $derived(
+		page.route.id?.startsWith('/(app)/library/[[slug=libraryEntities]]'),
+	)
+	const bottomBarHeight = $derived(isBottomNavShown ? bottomBarHeightActual : 0)
+
 	const activeLibrarySlug = $derived.by(() => {
 		const slug = page.params.slug
 		return slug === 'albums' || slug === 'artists' || slug === 'playlists' ? slug : 'tracks'
@@ -143,15 +149,20 @@
 >
 	<SnackbarRenderer />
 
-	<div bind:clientHeight={overlayContentHeight} class="col-[2/5] grid grid-cols-subgrid gap-y-2">
+	<div
+		bind:clientHeight={overlayContentHeight}
+		class={["col-[2/5] grid grid-cols-subgrid gap-y-2", bottomBarHeight <= 0 && 'mb-2']}
+	>
 		{#if !page.data.noPlayerOverlay}
-			<PlayerOverlay class={['col-[1/4]', bottomBarHeight < 0 && 'mb-2']} />
+			<PlayerOverlay />
 		{/if}
 	</div>
 
-	<div bind:clientHeight={bottomBarHeight} class="col-[1/6]">
-		<LibraryNavigation variant="bottom" activeSlug={activeLibrarySlug} />
-	</div>
+	{#if isBottomNavShown}
+		<div bind:clientHeight={bottomBarHeightActual} class="col-[1/6]">
+			<LibraryNavigation variant="bottom" activeSlug={activeLibrarySlug} />
+		</div>
+	{/if}
 </div>
 
 <div class="pointer-events-none fixed inset-0 z-10">
@@ -159,7 +170,7 @@
 </div>
 
 {#each APP_DIALOGS_KEYS as dialogKey}
-	{@const DialogComponent = APP_DIALOGS_COMPONENTS_MAP[dialogKey]}
+	{const DialogComponent = APP_DIALOGS_COMPONENTS_MAP[dialogKey]}
 
 	<DialogComponent open={dialogs.getAccessor(dialogKey)} />
 {/each}

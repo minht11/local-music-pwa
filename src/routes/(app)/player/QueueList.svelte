@@ -22,7 +22,7 @@
 </script>
 
 {#snippet queueHeaderRow(index: number)}
-	{@const header = queueRows.headerAt(index)}
+	{const header = queueRows.headerAt(index)}
 	<div role="gridcell" class="flex h-12 w-full items-center justify-between pl-4">
 		<h2 class="text-title-sm text-onSurfaceVariant">{header.title}</h2>
 

@@ -24,7 +24,7 @@
 
 <VirtualContainer size={56} count={items.length} key={(index) => `${items[index]}-${index}`}>
 	{#snippet children(item)}
-		{@const playlistId = items[item.index] as number}
+		{const playlistId = items[item.index] as number}
 
 		<PlaylistListItem
 			{playlistId}
