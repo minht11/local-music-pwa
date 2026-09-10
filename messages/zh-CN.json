@@ -27,6 +27,7 @@
 	"equalizerPresetAcoustic": "原声",
 	"equalizerPresetBassBoost": "低音增强",
 	"equalizerPresetClassical": "古典",
+	"equalizerPresetCustom": "自定义",
 	"equalizerPresetElectronic": "电子",
 	"equalizerPresetFlat": "平直",
 	"equalizerPresetJazz": "爵士",
@@ -97,6 +98,7 @@
 
 	"player": "播放器",
 	"playerAddToQueue": "添加到队列",
+	"playerAudio": "音频",
 	"playerAudioErrorLoadError": "无法加载\"{name}\"的音频",
 	"playerAudioErrorNotFound": "未找到\"{name}\"的音频文件。该文件可能已被移动或删除。",
 	"playerAudioErrorPermissionDenied": "没有权限加载\"{name}\"的音频。请授予浏览器权限后重试。",
@@ -121,6 +123,7 @@
 	"playerOpenQueue": "打开队列",
 	"playerPause": "暂停",
 	"playerPlay": "播放",
+	"playerPlaybackControls": "播放控制",
 	"playerPlayNext": "下一首播放",
 	"playerPlayNextTrack": "播放下一首曲目",
 	"playerPlayPreviousTrack": "播放上一首曲目",

@@ -28,6 +28,7 @@
 	"equalizerPresetAcoustic": "Acoustic",
 	"equalizerPresetBassBoost": "Bass Boost",
 	"equalizerPresetClassical": "Classical",
+	"equalizerPresetCustom": "Custom",
 	"equalizerPresetElectronic": "Electronic",
 	"equalizerPresetFlat": "Flat",
 	"equalizerPresetJazz": "Jazz",
@@ -98,6 +99,7 @@
 
 	"player": "Player",
 	"playerAddToQueue": "Add to queue",
+	"playerAudio": "Audio",
 	"playerAudioErrorLoadError": "Failed to load audio for \"{name}\"",
 	"playerAudioErrorNotFound": "Audio file not found for \"{name}\". It might have been moved or deleted.",
 	"playerAudioErrorPermissionDenied": "Permission denied to load audio for \"{name}\". Please grant browser permission and try again.",
@@ -122,6 +124,7 @@
 	"playerOpenQueue": "Open queue",
 	"playerPause": "Pause",
 	"playerPlay": "Play",
+	"playerPlaybackControls": "Playback",
 	"playerPlayNext": "Play next",
 	"playerPlayNextTrack": "Play next track",
 	"playerPlayPreviousTrack": "Play previous track",

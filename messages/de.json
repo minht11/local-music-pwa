@@ -27,6 +27,7 @@
 	"equalizerPresetAcoustic": "Akustisch",
 	"equalizerPresetBassBoost": "Bassverstärkung",
 	"equalizerPresetClassical": "Klassik",
+	"equalizerPresetCustom": "Benutzerdefiniert",
 	"equalizerPresetElectronic": "Elektronisch",
 	"equalizerPresetFlat": "Neutral",
 	"equalizerPresetJazz": "Jazz",
@@ -97,6 +98,7 @@
 
 	"player": "Player",
 	"playerAddToQueue": "Zur Warteschlange hinzufügen",
+	"playerAudio": "Audio",
 	"playerAudioErrorLoadError": "Audio für \"{name}\" konnte nicht geladen werden",
 	"playerAudioErrorNotFound": "Audiodatei für \"{name}\" nicht gefunden. Sie wurde möglicherweise verschoben oder gelöscht.",
 	"playerAudioErrorPermissionDenied": "Keine Berechtigung, Audio für \"{name}\" zu laden. Bitte erteilen Sie die Browser-Berechtigung und versuchen Sie es erneut.",
@@ -121,6 +123,7 @@
 	"playerOpenQueue": "Warteschlange öffnen",
 	"playerPause": "Pause",
 	"playerPlay": "Abspielen",
+	"playerPlaybackControls": "Wiedergabe",
 	"playerPlayNext": "Als Nächstes wiedergeben",
 	"playerPlayNextTrack": "Nächsten Titel abspielen",
 	"playerPlayPreviousTrack": "Vorherigen Titel abspielen",

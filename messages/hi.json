@@ -28,6 +28,7 @@
 	"equalizerPresetAcoustic": "ध्वनिक",
 	"equalizerPresetBassBoost": "बास बूस्ट",
 	"equalizerPresetClassical": "शास्त्रीय",
+	"equalizerPresetCustom": "कस्टम",
 	"equalizerPresetElectronic": "इलेक्ट्रॉनिक",
 	"equalizerPresetFlat": "सपाट",
 	"equalizerPresetJazz": "जैज़",
@@ -98,6 +99,7 @@
 
 	"player": "प्लेयर",
 	"playerAddToQueue": "कतार में जोड़ें",
+	"playerAudio": "ऑडियो",
 	"playerAudioErrorLoadError": "\"{name}\" के लिए ऑडियो लोड करने में विफल",
 	"playerAudioErrorNotFound": "\"{name}\" के लिए ऑडियो फ़ाइल नहीं मिली। हो सकता है इसे स्थानांतरित या हटा दिया गया हो।",
 	"playerAudioErrorPermissionDenied": "\"{name}\" के लिए ऑडियो लोड करने की अनुमति अस्वीकृत। कृपया ब्राउज़र अनुमति दें और पुनः प्रयास करें।",
@@ -122,6 +124,7 @@
 	"playerOpenQueue": "कतार खोलें",
 	"playerPause": "रोकें",
 	"playerPlay": "चलाएँ",
+	"playerPlaybackControls": "प्लेबैक",
 	"playerPlayNext": "अगला चलाएँ",
 	"playerPlayNextTrack": "अगला ट्रैक चलाएँ",
 	"playerPlayPreviousTrack": "पिछला ट्रैक चलाएँ",

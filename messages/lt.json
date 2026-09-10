@@ -27,6 +27,7 @@
 	"equalizerPresetAcoustic": "Akustinis",
 	"equalizerPresetBassBoost": "Paryškinti žemus dažnius",
 	"equalizerPresetClassical": "Klasikinis",
+	"equalizerPresetCustom": "Pasirinktinis",
 	"equalizerPresetElectronic": "Elektroninis",
 	"equalizerPresetFlat": "Neutralus",
 	"equalizerPresetJazz": "Džiazas",
@@ -97,6 +98,7 @@
 
 	"player": "Grotuvas",
 	"playerAddToQueue": "Pridėti į eilę",
+	"playerAudio": "Garsas",
 	"playerAudioErrorLoadError": "Nepavyko įkelti garso įrašo \"{name}\"",
 	"playerAudioErrorNotFound": "Garso failas \"{name}\" nerastas. Gali būti perkeltas arba ištrintas.",
 	"playerAudioErrorPermissionDenied": "Trūksta leidimo įkelti garso įrašą \"{name}\". Suteikite naršyklės leidimą ir bandykite dar kartą.",
@@ -121,6 +123,7 @@
 	"playerOpenQueue": "Atidaryti eilę",
 	"playerPause": "Pristabdyti",
 	"playerPlay": "Groti",
+	"playerPlaybackControls": "Atkūrimas",
 	"playerPlayNext": "Groti toliau",
 	"playerPlayNextTrack": "Groti kitą kūrinį",
 	"playerPlayPreviousTrack": "Groti ankstesnį kūrinį",

@@ -2,11 +2,11 @@
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
 	import BackButton from '$lib/components/BackButton.svelte'
+	import Button from '$lib/components/Button.svelte'
 	import Header from '$lib/components/Header.svelte'
 	import IconButton from '$lib/components/IconButton.svelte'
 	import Icon from '$lib/components/icon/Icon.svelte'
 	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
-	import ActiveIndicator from '$lib/components/player/buttons/ActiveIndicator.svelte'
 	import PlayerFavoriteButton from '$lib/components/player/buttons/PlayerFavoriteButton.svelte'
 	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
 	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
@@ -21,6 +21,7 @@
 	import { initPageQueries } from '$lib/db/query/page-query.svelte.js'
 	import { formatArtists, getItemLanguage } from '$lib/helpers/utils/text.ts'
 	import { clearPlayHistory } from '$lib/library/play-history-actions.js'
+	import type { BuiltinEqPresetKey } from '$lib/stores/player/equalizer.svelte.ts'
 	import HistoryList from './HistoryList.svelte'
 	import { getLayoutProps } from './layout-props.ts'
 	import QueueList from './QueueList.svelte'
@@ -33,6 +34,7 @@
 	const player = usePlayer()
 	const dialogs = useDialogsStore()
 	const activeTrack = $derived(player.activeTrack)
+	let isAudioControlsOpen = $state(false)
 
 	const isSelectedTabQueue = $derived(
 		page.route.id === '/(app)/player' || page.route.id === '/(app)/player/queue',
@@ -41,6 +43,32 @@
 	const { isCompactHorizontal, isCompactVertical, layoutMode } = $derived(
 		getLayoutProps(page.route.id),
 	)
+
+	const toggleAudioControls = () => {
+		if (!isAudioControlsOpen) {
+			mainStore.volumeSliderEnabled = true
+		}
+
+		isAudioControlsOpen = !isAudioControlsOpen
+	}
+
+	const equalizerPresetLabel = $derived.by(() => {
+		const labels: Record<BuiltinEqPresetKey, string> = {
+			flat: m.equalizerPresetFlat(),
+			bassBoost: m.equalizerPresetBassBoost(),
+			trebleBoost: m.equalizerPresetTrebleBoost(),
+			rock: m.equalizerPresetRock(),
+			pop: m.equalizerPresetPop(),
+			jazz: m.equalizerPresetJazz(),
+			classical: m.equalizerPresetClassical(),
+			electronic: m.equalizerPresetElectronic(),
+			acoustic: m.equalizerPresetAcoustic(),
+		}
+
+		const preset = player.equalizer.selectedPreset
+
+		return preset ? labels[preset] : m.equalizerPresetCustom()
+	})
 </script>
 
 {#snippet playerSnippet()}
@@ -48,95 +76,121 @@
 		class={[
 			layoutMode === 'both' && 'w-100 2xl:w-[28dvw]',
 			layoutMode === 'list' && 'mx-auto w-full',
-			'player-content z-0 grow items-center gap-x-6 overflow-clip bg-secondaryContainerVariant px-2 pb-2',
+			'player-content z-0 grow items-center gap-x-6 overflow-clip bg-secondaryContainerVariant pb-6',
 			isCompactVertical && !isCompactHorizontal && 'player-content-horizontal',
 		]}
 	>
 		<div
 			class={[
 				isCompactVertical && !isCompactHorizontal ? 'absolute top-0 left-0 h-14' : 'h-16',
-				'flex w-full items-center justify-between gap-2 [grid-area:header]',
+				'relative flex w-full items-center justify-between gap-2 px-4 [grid-area:header]',
 			]}
 		>
 			<BackButton />
 
-			<div class="text-title-lg">{m.player()}</div>
-
-			<div class="w-10"></div>
+			<div class="absolute inset-0 m-auto flex size-max items-center text-title-lg">
+				{m.player()}
+			</div>
 		</div>
 
-		<PlayerArtwork
-			class="m-auto my-auto h-full max-h-75 rounded-2xl bg-onSecondary [grid-area:artwork] active-view-player:view-name-[pl-artwork]"
-		/>
+		<div class="player-artwork-section h-full w-full px-4 [grid-area:artwork]">
+			<PlayerArtwork
+				class="h-full max-h-90 w-max max-w-full place-self-center rounded-3xl bg-onSecondary active-view-player:view-name-[pl-artwork]"
+			/>
 
-		<div class="mt-2 flex w-full flex-col gap-2 [grid-area:controls]">
-			<div class="w-full rounded-2xl bg-surfaceContainerHighest px-4 py-2">
-				<Timeline class="w-full" />
-			</div>
-
-			<div
-				class={[
-					'flex w-full flex-col gap-6 rounded-2xl bg-secondaryContainer px-4 [grid-area:header]',
-					mainStore.volumeSliderEnabled ? 'pt-8 pb-4' : 'py-8',
-				]}
-			>
-				<div class="my-auto flex items-center justify-between gap-2">
-					<ShuffleButton />
-
-					<PlayPrevButton />
-
-					<PlayTogglePillButton />
-
-					<PlayNextButton />
-
-					<RepeatButton />
-				</div>
-
-				{#if mainStore.volumeSliderEnabled}
-					<div class="flex items-center gap-2">
-						<IconButton
-							icon="volumeMid"
-							tooltip={m.playerDecreaseVolume()}
-							onclick={() => (player.volume -= 10)}
-						/>
-
-						<Slider bind:value={player.volume} />
-
-						<IconButton
-							icon="volumeHigh"
-							tooltip={m.playerIncreaseVolume()}
-							onclick={() => (player.volume += 10)}
-						/>
-					</div>
-				{/if}
-			</div>
-
-			<div class="flex h-18 w-full shrink-0 items-center rounded-2xl bg-secondaryContainer px-4">
+			<div class="flex min-h-18 w-full shrink-0 items-center">
 				{#if activeTrack}
 					<div class="grid overflow-hidden" lang={getItemLanguage(activeTrack.language)}>
-						<div class="truncate text-body-lg">{activeTrack.name}</div>
-						<div class="truncate text-body-md">{formatArtists(activeTrack.artists)}</div>
+						<div class="truncate text-title-lg">{activeTrack.name}</div>
+						<div class="truncate text-body-md text-onSecondaryContainer">
+							{formatArtists(activeTrack.artists)}
+						</div>
 					</div>
 				{/if}
 
 				<div class="ml-auto flex gap-1">
 					<PlayerFavoriteButton />
-
-					<IconButton
-						tooltip={m.equalizerOpenEqualizer()}
-						onclick={() => {
-							dialogs.openDialog('equalizer')
-						}}
-					>
-						<Icon type="equalizer" />
-
-						<ActiveIndicator active={player.equalizer.enabled} />
-					</IconButton>
-
-					{#if layoutMode === 'list'}
-						<IconButton tooltip={m.playerOpenQueue()} icon="trayFull" as="a" href="/player/queue" />
-					{/if}
 				</div>
+			</div>
+		</div>
+
+		<div class="mt-2 flex w-full flex-col [grid-area:controls]">
+			<div class="controls-switcher">
+				{#if isAudioControlsOpen}
+					<div class="flex min-h-38 flex-col justify-center gap-2 px-4">
+						<div class="grid grid-cols-[max-content_minmax(0,1fr)_max-content] items-center gap-2">
+							<IconButton
+								icon="volumeMid"
+								tooltip={m.playerDecreaseVolume()}
+								onclick={() => (player.volume -= 10)}
+							/>
+
+							<Slider bind:value={player.volume} />
+
+							<IconButton
+								icon="volumeHigh"
+								tooltip={m.playerIncreaseVolume()}
+								onclick={() => (player.volume += 10)}
+							/>
+						</div>
+
+						<div class="border-t border-onSecondaryContainer/10"></div>
+
+						<Button
+							kind="blank"
+							class="flex h-10 w-full items-center gap-1 rounded-lg pl-2 text-body-md"
+							onclick={() => {
+								dialogs.openDialog('equalizer')
+							}}
+						>
+							<div>{m.equalizerTitle()}</div>
+
+							<div class="ml-auto text-onSecondaryContainer">{equalizerPresetLabel}</div>
+
+							<Icon type="chevronRight" />
+						</Button>
+					</div>
+				{:else}
+					<div class="flex flex-col gap-6 px-4 py-5">
+						<Timeline class="w-full" />
+
+						<div class="grid grid-cols-5 place-items-center gap-2">
+							<ShuffleButton />
+
+							<PlayPrevButton />
+
+							<PlayTogglePillButton />
+
+							<PlayNextButton />
+
+							<RepeatButton />
+						</div>
+					</div>
+				{/if}
+			</div>
+
+			<div
+				class="player-controls-footer grid grid-cols-[max-content_1fr_max-content] items-center border-t border-onSecondaryContainer/10 px-4 pt-5"
+			>
+				<Button kind={isAudioControlsOpen ? 'toned' : 'toned-low'} onclick={toggleAudioControls}>
+					{#if isAudioControlsOpen}
+						<Icon type="musicNote" />
+
+						{m.playerPlaybackControls()}
+					{:else}
+						<Icon type="volumeHigh" />
+
+						{m.playerAudio()}
+					{/if}
+				</Button>
+
+				{#if layoutMode === 'list'}
+					<Button as="a" href="/player/queue" kind="toned-low" class="col-start-3">
+						{m.playerNextUp()}
+
+						<Icon type="trayFull" />
+					</Button>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -221,13 +275,25 @@
 	}
 
 	.player-content-horizontal {
-		grid-template-columns:
-			1fr minmax(0, --spacing(75)) minmax(0, --spacing(125))
-			1fr;
+		grid-template-columns: 1fr minmax(0, --spacing(75)) minmax(0, --spacing(125)) 1fr;
 		grid-template-rows: max-content 1fr;
 		grid-template-areas:
 			'header header header header'
 			'. artwork controls .';
+	}
+
+	.player-artwork-section {
+		display: grid;
+		grid-template-rows: minmax(0, 1fr) max-content;
+		gap: --spacing(4);
+	}
+
+	.controls-switcher {
+		min-height: --spacing(38);
+	}
+
+	.player-controls-footer {
+		margin-top: clamp(--spacing(4), 3dvh, --spacing(6));
 	}
 
 	@keyframes -global-view-player-container-rounded {

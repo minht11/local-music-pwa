@@ -28,6 +28,7 @@
 	"equalizerPresetAcoustic": "アコースティック",
 	"equalizerPresetBassBoost": "低音ブースト",
 	"equalizerPresetClassical": "クラシック",
+	"equalizerPresetCustom": "カスタム",
 	"equalizerPresetElectronic": "エレクトロニック",
 	"equalizerPresetFlat": "フラット",
 	"equalizerPresetJazz": "ジャズ",
@@ -98,6 +99,7 @@
 
 	"player": "プレイヤー",
 	"playerAddToQueue": "キューに追加",
+	"playerAudio": "オーディオ",
 	"playerAudioErrorLoadError": "「{name}」の音声の読み込みに失敗しました",
 	"playerAudioErrorNotFound": "「{name}」の音声ファイルが見つかりません。移動または削除された可能性があります。",
 	"playerAudioErrorPermissionDenied": "「{name}」の音声を読み込む許可がありません。ブラウザの許可を与えてから再試行してください。",
@@ -122,6 +124,7 @@
 	"playerOpenQueue": "キューを開く",
 	"playerPause": "一時停止",
 	"playerPlay": "再生",
+	"playerPlaybackControls": "再生",
 	"playerPlayNext": "次に再生",
 	"playerPlayNextTrack": "次のトラックを再生",
 	"playerPlayPreviousTrack": "前のトラックを再生",

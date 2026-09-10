@@ -28,6 +28,7 @@
 	"equalizerPresetAcoustic": "Acústico",
 	"equalizerPresetBassBoost": "Refuerzo de graves",
 	"equalizerPresetClassical": "Clásica",
+	"equalizerPresetCustom": "Personalizado",
 	"equalizerPresetElectronic": "Electrónica",
 	"equalizerPresetFlat": "Plano",
 	"equalizerPresetJazz": "Jazz",
@@ -98,6 +99,7 @@
 
 	"player": "Reproductor",
 	"playerAddToQueue": "Añadir a la cola",
+	"playerAudio": "Audio",
 	"playerAudioErrorLoadError": "No se pudo cargar el audio de \"{name}\"",
 	"playerAudioErrorNotFound": "No se encontró el archivo de audio de \"{name}\". Puede que se haya movido o eliminado.",
 	"playerAudioErrorPermissionDenied": "Permiso denegado para cargar el audio de \"{name}\". Concede el permiso del navegador e inténtalo de nuevo.",
@@ -122,6 +124,7 @@
 	"playerOpenQueue": "Abrir cola",
 	"playerPause": "Pausar",
 	"playerPlay": "Reproducir",
+	"playerPlaybackControls": "Reproducción",
 	"playerPlayNext": "Reproducir a continuación",
 	"playerPlayNextTrack": "Reproducir la pista siguiente",
 	"playerPlayPreviousTrack": "Reproducir la pista anterior",
