@@ -113,32 +113,34 @@
 	}
 </script>
 
-<div class="p-4">
-	<TextField bind:value={searchTerm} name="search" placeholder={m.librarySearch()} />
-</div>
+<div data-dialog-content class="flex min-h-0 grow flex-col overflow-hidden">
+	<div class="p-4">
+		<TextField bind:value={searchTerm} name="search" placeholder={m.librarySearch()} />
+	</div>
 
-<Separator />
-<ScrollContainer class="max-h-100 grow overflow-auto px-2 py-4">
-	<PlaylistListContainer
-		items={await getPlaylists()}
-		onItemClick={(item) => {
-			toggleSelection(item.playlist.id)
-		}}
-	>
-		{#snippet icon(playlist)}
-			{@const isInPlaylist = isTrackInPlaylist(playlist.id)}
-			<div
-				class={[
-					'flex size-6 items-center justify-center rounded-full border-2',
-					isInPlaylist ? 'border-primary bg-primary text-onPrimary' : 'border-neutral',
-				]}
-			>
-				{#if isInPlaylist}
-					<Icon type="check" />
-				{/if}
-			</div>
-		{/snippet}
-	</PlaylistListContainer>
-</ScrollContainer>
+	<Separator />
+	<ScrollContainer class="max-h-100 grow overflow-auto px-2 py-4">
+		<PlaylistListContainer
+			items={await getPlaylists()}
+			onItemClick={(item) => {
+				toggleSelection(item.playlist.id)
+			}}
+		>
+			{#snippet icon(playlist)}
+				{@const isInPlaylist = isTrackInPlaylist(playlist.id)}
+				<div
+					class={[
+						'flex size-6 items-center justify-center rounded-full border-2',
+						isInPlaylist ? 'border-primary bg-primary text-onPrimary' : 'border-neutral',
+					]}
+				>
+					{#if isInPlaylist}
+						<Icon type="check" />
+					{/if}
+				</div>
+			{/snippet}
+		</PlaylistListContainer>
+	</ScrollContainer>
+</div>
 
 {@render children({ save })}
