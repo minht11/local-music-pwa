@@ -1,9 +1,5 @@
 import { writeFileSync } from 'node:fs'
-import {
-	argbFromHex,
-	// biome-ignore lint/style/noRestrictedImports: Used for static theme generation
-} from '@material/material-color-utilities'
-import { getThemePaletteRgbEntries } from '../src/lib/theme.ts'
+import { argbFromHex, getThemePaletteRgbEntries } from '../src/lib/theme.ts'
 
 const defaultColorSeed = '#cc9724'
 const outputFile = `${import.meta.dirname}/../src/theme-colors.css`
