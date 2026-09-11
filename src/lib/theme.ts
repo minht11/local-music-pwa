@@ -3,35 +3,30 @@ import rgb from 'color-space/rgb.js'
 import xyz from 'color-space/xyz.js'
 
 type Coordinates = [number, number, number]
-type Convert = (first: number, second: number, third: number) => number[]
 
 // Individual modules register reverse conversions, which their declarations leave unknown.
-const rgbToXyz = rgb.xyz as Convert
-const xyzToHct = xyz.hct as Convert
+const rgbToXyz = rgb.xyz as (r: number, g: number, b: number) => [x: number, y: number, z: number]
+const xyzToHct = xyz.hct as (x: number, y: number, z: number) => [h: number, c: number, t: number]
+
 const GAMUT_TOLERANCE = 1e-7
 const CHROMA_SEARCH_ITERATIONS = 24
-
-const coordinates = (values: number[]): Coordinates => {
-	if (values.length !== 3) {
-		throw new RangeError('Expected three color coordinates')
-	}
-	return values as Coordinates
-}
 
 /** @public */
 export const hctFromArgb = (argb: number): { h: number; c: number } => {
 	const red = (argb >>> 16) & 255
 	const green = (argb >>> 8) & 255
 	const blue = argb & 255
-	const xyzColor = coordinates(rgbToXyz(red, green, blue))
-	const [hue, chroma] = coordinates(xyzToHct(...xyzColor))
+
+	const xyzColor = rgbToXyz(red, green, blue)
+	const [hue, chroma] = xyzToHct(...xyzColor)
 
 	return { h: hue, c: chroma }
 }
 
 const hctToRgb = (hue: number, chroma: number, tone: number): Coordinates => {
-	const xyzColor = coordinates(hct.xyz(hue, chroma, tone))
-	return coordinates(xyz.rgb(...xyzColor))
+	const xyzColor = hct.xyz(hue, chroma, tone) as Coordinates
+
+	return xyz.rgb(...xyzColor) as Coordinates
 }
 
 const fitsSrgb = (color: Coordinates): boolean =>
@@ -55,6 +50,7 @@ const fitHctToSrgb = (hue: number, chroma: number, tone: number): Coordinates =>
 
 	let minimumChroma = 0
 	let maximumChroma = chroma
+
 	// Preserve hue and tone while finding the highest chroma that fits sRGB.
 	for (let i = 0; i < CHROMA_SEARCH_ITERATIONS; i += 1) {
 		const candidateChroma = (minimumChroma + maximumChroma) / 2
@@ -79,6 +75,7 @@ const hexFromHct = (hue: number, chroma: number, tone: number): string => {
 	if (tone === 0) {
 		return '#000000'
 	}
+
 	if (tone === 100) {
 		return '#ffffff'
 	}
@@ -86,44 +83,6 @@ const hexFromHct = (hue: number, chroma: number, tone: number): string => {
 	const color = fitHctToSrgb(hue, chroma, tone)
 	return `#${color.map(channelToHex).join('')}`
 }
-
-/** @public */
-export type PaletteToken =
-	| 'primary'
-	| 'onPrimary'
-	| 'primaryContainer'
-	| 'onPrimaryContainer'
-	| 'secondary'
-	| 'onSecondary'
-	| 'secondaryContainer'
-	| 'secondaryContainerVariant'
-	| 'onSecondaryContainer'
-	| 'tertiary'
-	| 'onTertiary'
-	| 'tertiaryContainer'
-	| 'onTertiaryContainer'
-	| 'error'
-	| 'onError'
-	| 'errorContainer'
-	| 'onErrorContainer'
-	| 'surface'
-	| 'onSurface'
-	| 'surfaceVariant'
-	| 'onSurfaceVariant'
-	| 'surfaceContainerHighest'
-	| 'surfaceContainerHigh'
-	| 'surfaceContainer'
-	| 'surfaceContainerLow'
-	| 'surfaceContainerLowest'
-	| 'surfaceBright'
-	| 'surfaceDim'
-	| 'outline'
-	| 'outlineVariant'
-	| 'shadow'
-	| 'scrim'
-	| 'inverseSurface'
-	| 'inverseOnSurface'
-	| 'inversePrimary'
 
 type PaletteFamily =
 	| 'a1' /* primary */
@@ -135,9 +94,7 @@ type PaletteFamily =
 
 type PaletteTokenInput = readonly [family: PaletteFamily, lightTone: number, darkTone: number]
 
-type PaletteTokensInputMap = Record<PaletteToken, PaletteTokenInput>
-
-const COLOR_TOKENS_GENERATION_MAP: PaletteTokensInputMap = {
+const COLOR_TOKENS_GENERATION_MAP = {
 	primary: ['a1', 40, 80],
 	onPrimary: ['a1', 100, 20],
 	primaryContainer: ['a1', 90, 30],
@@ -173,7 +130,10 @@ const COLOR_TOKENS_GENERATION_MAP: PaletteTokensInputMap = {
 	inverseSurface: ['n1', 20, 90],
 	inverseOnSurface: ['n1', 95, 10],
 	inversePrimary: ['a1', 80, 40],
-}
+} as const satisfies Record<string, PaletteTokenInput>
+
+/** @public */
+export type PaletteToken = keyof typeof COLOR_TOKENS_GENERATION_MAP
 
 const COLOR_TOKENS_GENERATION_ENTRIES = Object.entries(COLOR_TOKENS_GENERATION_MAP) as [
 	PaletteToken,
