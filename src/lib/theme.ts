@@ -11,7 +11,7 @@ const rgbToXyz = rgb.xyz as (r: number, g: number, b: number) => XyzCoordinates
 const xyzToHct = xyz.hct as (x: number, y: number, z: number) => HctCoordinates
 
 const GAMUT_TOLERANCE = 1e-7
-const CHROMA_SEARCH_ITERATIONS = 20
+const CHROMA_SEARCH_ITERATIONS = 16
 
 /** @public */
 export const hctFromArgb = (argb: number): { h: number; c: number } => {
@@ -96,7 +96,7 @@ type PaletteFamily =
 
 type PaletteTokenInput = readonly [family: PaletteFamily, lightTone: number, darkTone: number]
 
-const COLOR_TOKENS_GENERATION_MAP = {
+const PALETTE_TOKENS_GENERATION_MAP = {
 	primary: ['a1', 40, 80],
 	onPrimary: ['a1', 100, 20],
 	primaryContainer: ['a1', 90, 30],
@@ -135,9 +135,12 @@ const COLOR_TOKENS_GENERATION_MAP = {
 } as const satisfies Record<string, PaletteTokenInput>
 
 /** @public */
-export type PaletteToken = keyof typeof COLOR_TOKENS_GENERATION_MAP
+export type PaletteToken = keyof typeof PALETTE_TOKENS_GENERATION_MAP
 
-const COLOR_TOKENS_GENERATION_ENTRIES = Object.entries(COLOR_TOKENS_GENERATION_MAP) as [
+/** @internal */
+export const PALETTE_TOKENS_KEYS = Object.keys(PALETTE_TOKENS_GENERATION_MAP) as PaletteToken[]
+
+const PALETTE_TOKENS_GENERATION_ENTRIES = Object.entries(PALETTE_TOKENS_GENERATION_MAP) as [
 	PaletteToken,
 	PaletteTokenInput,
 ][]
@@ -173,7 +176,7 @@ export const getThemePaletteRgbEntries = (argb: number, isDark: boolean): ThemeE
 		error: { h: 25, c: 84 },
 	}
 
-	return COLOR_TOKENS_GENERATION_ENTRIES.map(([token, [family, lightTone, darkTone]]) => {
+	return PALETTE_TOKENS_GENERATION_ENTRIES.map(([token, [family, lightTone, darkTone]]) => {
 		const palette = families[family]
 		const tone = isDark ? darkTone : lightTone
 
@@ -182,7 +185,7 @@ export const getThemePaletteRgbEntries = (argb: number, isDark: boolean): ThemeE
 }
 
 const clearThemeCssVariables = (): void => {
-	for (const [key] of COLOR_TOKENS_GENERATION_ENTRIES) {
+	for (const [key] of PALETTE_TOKENS_GENERATION_ENTRIES) {
 		document.documentElement.style.removeProperty(`--color-${key}`)
 	}
 }
