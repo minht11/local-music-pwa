@@ -170,7 +170,7 @@
 </div>
 
 {#each APP_DIALOGS_KEYS as dialogKey}
-	{const DialogComponent = APP_DIALOGS_COMPONENTS_MAP[dialogKey]}
+	{const DialogComponent = $derived(APP_DIALOGS_COMPONENTS_MAP[dialogKey])}
 
 	<DialogComponent open={dialogs.getAccessor(dialogKey)} />
 {/each}

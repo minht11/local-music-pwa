@@ -182,8 +182,8 @@
 	key={source.keyAt}
 >
 	{#snippet children(item)}
-		{const row = source.trackAt(item.index)}
-		{const drag = dragController.drag}
+		{const row = $derived(source.trackAt(item.index))}
+		{const drag = $derived(dragController.drag)}
 
 		{#if row === undefined}
 			<div
@@ -196,7 +196,7 @@
 				{@render customRow?.(item.index)}
 			</div>
 		{:else}
-			{const active = source.isRowActive(row)}
+			{const active = $derived(source.isRowActive(row))}
 
 			<TrackListItem
 				trackId={row.trackId}
@@ -249,8 +249,8 @@
 </VirtualContainer>
 
 {#if dragController.drag !== null}
-	{const drag = dragController.drag}
-	{const previewActive = source.isRowActive(drag.row)}
+	{const drag = $derived(dragController.drag)}
+	{const previewActive = $derived(source.isRowActive(drag.row))}
 	<div
 		popover="manual"
 		aria-hidden="true"

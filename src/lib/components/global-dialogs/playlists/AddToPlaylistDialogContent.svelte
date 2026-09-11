@@ -127,7 +127,7 @@
 			}}
 		>
 			{#snippet icon(playlist)}
-				{const isInPlaylist = isTrackInPlaylist(playlist.id)}
+				{const isInPlaylist = $derived(isTrackInPlaylist(playlist.id))}
 				<div
 					class={[
 						'flex size-6 items-center justify-center rounded-full border-2',
