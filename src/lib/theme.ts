@@ -2,14 +2,16 @@ import hct from 'color-space/hct.js'
 import rgb from 'color-space/rgb.js'
 import xyz from 'color-space/xyz.js'
 
-type Coordinates = [number, number, number]
+type RgbCoordinates = [r: number, g: number, b: number]
+type XyzCoordinates = [x: number, y: number, z: number]
+type HctCoordinates = [h: number, c: number, t: number]
 
 // Individual modules register reverse conversions, which their declarations leave unknown.
-const rgbToXyz = rgb.xyz as (r: number, g: number, b: number) => [x: number, y: number, z: number]
-const xyzToHct = xyz.hct as (x: number, y: number, z: number) => [h: number, c: number, t: number]
+const rgbToXyz = rgb.xyz as (r: number, g: number, b: number) => XyzCoordinates
+const xyzToHct = xyz.hct as (x: number, y: number, z: number) => HctCoordinates
 
 const GAMUT_TOLERANCE = 1e-7
-const CHROMA_SEARCH_ITERATIONS = 24
+const CHROMA_SEARCH_ITERATIONS = 20
 
 /** @public */
 export const hctFromArgb = (argb: number): { h: number; c: number } => {
@@ -23,13 +25,13 @@ export const hctFromArgb = (argb: number): { h: number; c: number } => {
 	return { h: hue, c: chroma }
 }
 
-const hctToRgb = (hue: number, chroma: number, tone: number): Coordinates => {
-	const xyzColor = hct.xyz(hue, chroma, tone) as Coordinates
+const hctToRgb = (hue: number, chroma: number, tone: number): RgbCoordinates => {
+	const xyzColor = hct.xyz(hue, chroma, tone) as XyzCoordinates
 
-	return xyz.rgb(...xyzColor) as Coordinates
+	return xyz.rgb(...xyzColor) as RgbCoordinates
 }
 
-const fitsSrgb = (color: Coordinates): boolean =>
+const fitsSrgb = (color: RgbCoordinates): boolean =>
 	color.every(
 		(channel) =>
 			Number.isFinite(channel) &&
@@ -37,7 +39,7 @@ const fitsSrgb = (color: Coordinates): boolean =>
 			channel <= 255 + GAMUT_TOLERANCE,
 	)
 
-const fitHctToSrgb = (hue: number, chroma: number, tone: number): Coordinates => {
+const fitHctToSrgb = (hue: number, chroma: number, tone: number): RgbCoordinates => {
 	const requestedColor = hctToRgb(hue, chroma, tone)
 	if (fitsSrgb(requestedColor)) {
 		return requestedColor
@@ -174,6 +176,7 @@ export const getThemePaletteRgbEntries = (argb: number, isDark: boolean): ThemeE
 	return COLOR_TOKENS_GENERATION_ENTRIES.map(([token, [family, lightTone, darkTone]]) => {
 		const palette = families[family]
 		const tone = isDark ? darkTone : lightTone
+
 		return [token, hexFromHct(palette.h, palette.c, tone)]
 	})
 }
