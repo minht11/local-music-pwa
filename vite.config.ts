@@ -102,9 +102,6 @@ export default defineConfig(async ({ command, isPreview }): Promise<UserConfig> 
 						async: true,
 					},
 				},
-				experimental: {
-					explicitEnvironmentVariables: true,
-				},
 				paths: {
 					relative: false,
 					origin: 'https://snaeplayer.com',
