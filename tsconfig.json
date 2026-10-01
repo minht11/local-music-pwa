@@ -15,6 +15,6 @@
 			"path": "./tsconfig.node.json"
 		}
 	],
-	"include": ["src", "*.ts", ".generated/types/**/*.d.ts", ".generated/i18n/**/*.d.ts"],
+	"include": ["src", "*.ts", "./.generated/types/**/*.d.ts", "./.generated/i18n/**/*.d.ts"],
 	"exclude": ["src/service-worker"]
 }

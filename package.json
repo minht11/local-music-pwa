@@ -5,7 +5,8 @@
 	"type": "module",
 	"sideEffects": false,
 	"imports": {
-		"#lib/*": "./src/lib/*"
+		"#lib/*": "./src/lib/*",
+		"#i18n/runtime": "./.generated/i18n/runtime.ts"
 	},
 	"scripts": {
 		"prepare": "svelte-kit sync",
