@@ -1,4 +1,4 @@
-import { getDatabase } from '$lib/db/database'
+import { getDatabase } from '#lib/db/database.ts'
 
 export interface DirectoryNeedingPermission {
 	name: string

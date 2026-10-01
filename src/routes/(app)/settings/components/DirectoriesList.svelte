@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { ripple } from '$lib/attachments/ripple.ts'
-	import { tooltip } from '$lib/attachments/tooltip.ts'
-	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
-	import IconButton from '$lib/components/IconButton.svelte'
-	import Icon from '$lib/components/icon/Icon.svelte'
-	import WrapTranslation from '$lib/components/WrapTranslation.svelte'
-	import { trackEvent } from '$lib/helpers/analytics.ts'
+	import { ripple } from '#lib/attachments/ripple.ts'
+	import { tooltip } from '#lib/attachments/tooltip.ts'
+	import CommonDialog from '#lib/components/dialog/CommonDialog.svelte'
+	import IconButton from '#lib/components/IconButton.svelte'
+	import Icon from '#lib/components/icon/Icon.svelte'
+	import WrapTranslation from '#lib/components/WrapTranslation.svelte'
+	import { trackEvent } from '#lib/helpers/analytics.ts'
 	import {
 		getFilesFromLegacyDirectory,
 		isFileSystemAccessSupported,
-	} from '$lib/helpers/file-system.ts'
-	import { isAndroid } from '$lib/helpers/utils/ua.ts'
+	} from '#lib/helpers/file-system.ts'
+	import { isAndroid } from '#lib/helpers/utils/ua.ts'
 	import {
 		checkNewDirectoryStatus,
 		importLegacyFiles,
@@ -18,8 +18,8 @@
 		removeDirectory,
 		replaceDirectories,
 		rescanDirectory,
-	} from '$lib/library/scan-actions/directories.ts'
-	import type { Directory } from '$lib/library/types.ts'
+	} from '#lib/library/scan-actions/directories.ts'
+	import type { Directory } from '#lib/library/types.ts'
 	import type { DirectoryWithCount } from '../+page.ts'
 
 	interface Props {

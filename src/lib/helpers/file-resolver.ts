@@ -1,6 +1,6 @@
-import { getDatabase } from '$lib/db/database'
-import type { FileEntity } from '$lib/helpers/file-system'
-import { isAndroid, isChromiumBased } from '$lib/helpers/utils/ua'
+import { getDatabase } from '#lib/db/database.ts'
+import type { FileEntity } from '#lib/helpers/file-system.ts'
+import { isAndroid, isChromiumBased } from '#lib/helpers/utils/ua.ts'
 
 /** @public */
 export type FileLoadFailReason = 'permission-denied' | 'not-found' | 'error'

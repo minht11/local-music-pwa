@@ -1,32 +1,32 @@
 <script lang="ts">
 	import { MediaQuery } from 'svelte/reactivity'
-	import Artwork from '$lib/components/Artwork.svelte'
-	import Button from '$lib/components/Button.svelte'
-	import Header from '$lib/components/Header.svelte'
-	import Icon from '$lib/components/icon/Icon.svelte'
-	import MenuButton from '$lib/components/MenuButton.svelte'
-	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import Artwork from '#lib/components/Artwork.svelte'
+	import Button from '#lib/components/Button.svelte'
+	import Header from '#lib/components/Header.svelte'
+	import Icon from '#lib/components/icon/Icon.svelte'
+	import MenuButton from '#lib/components/MenuButton.svelte'
+	import TracksListContainer from '#lib/components/tracks/TracksListContainer.svelte'
 	import {
 		createTrackRowsSource,
 		playlistEntryRows,
 		type TrackRows,
 		trackIdRows,
-	} from '$lib/components/tracks/track-rows.svelte.ts'
-	import type { TrackRowLocator } from '$lib/components/tracks/use-track-menu-items.ts'
-	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
+	} from '#lib/components/tracks/track-rows.svelte.ts'
+	import type { TrackRowLocator } from '#lib/components/tracks/use-track-menu-items.ts'
+	import { initPageQueries } from '#lib/db/query/page-query.svelte.ts'
 	import {
 		createManagedArtwork,
 		getAlbumManagedArtworkSource,
-	} from '$lib/helpers/create-managed-artwork.svelte.ts'
-	import { formatArtists, formatNameOrUnknown } from '$lib/helpers/utils/text.ts'
-	import type { AlbumData, TrackData } from '$lib/library/get/value.ts'
+	} from '#lib/helpers/create-managed-artwork.svelte.ts'
+	import { formatArtists, formatNameOrUnknown } from '#lib/helpers/utils/text.ts'
+	import type { AlbumData, TrackData } from '#lib/library/get/value.ts'
 	import {
 		FAVORITE_PLAYLIST_ID,
 		removeTrackEntryFromPlaylist,
-	} from '$lib/library/playlists-actions.ts'
-	import { type Playlist, UNKNOWN_ITEM } from '$lib/library/types.ts'
-	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
-	import type { QueueOrigin } from '$lib/stores/player/queue.svelte.ts'
+	} from '#lib/library/playlists-actions.ts'
+	import { type Playlist, UNKNOWN_ITEM } from '#lib/library/types.ts'
+	import { getPlaylistMenuItems } from '#lib/menu-actions/playlists.ts'
+	import type { QueueOrigin } from '#lib/stores/player/queue.svelte.ts'
 
 	const { data } = $props()
 

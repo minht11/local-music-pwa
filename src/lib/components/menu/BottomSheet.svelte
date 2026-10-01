@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { animateBackdrop, getEasing } from '$lib/helpers/animations.ts'
+	import { animateBackdrop, getEasing } from '#lib/helpers/animations.ts'
 	import BaseMenu from './BaseMenu.svelte'
 	import type { MenuItem } from './types.ts'
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Switch from '$lib/components/Switch.svelte'
+	import Switch from '#lib/components/Switch.svelte'
 	import SettingsListItem, { type SettingsListItemProps } from './SettingsListItem.svelte'
 
 	interface Props extends Omit<SettingsListItemProps, 'children'> {

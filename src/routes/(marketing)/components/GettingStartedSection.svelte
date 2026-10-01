@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte'
+	import Button from '#lib/components/Button.svelte'
 	import Section from './Section.svelte'
 
 	interface Props {

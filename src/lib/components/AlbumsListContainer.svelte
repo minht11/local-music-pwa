@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatArtists, formatNameOrUnknown } from '$lib/helpers/utils/text.ts'
+	import { formatArtists, formatNameOrUnknown } from '#lib/helpers/utils/text.ts'
 	import LibraryGridListContainer from './library-grid/LibraryGridListContainer.svelte'
 
 	interface Props {

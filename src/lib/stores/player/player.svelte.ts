@@ -1,19 +1,19 @@
-import { AudioGraph } from '$lib/audio/audio-graph.svelte.ts'
-import { PlaybackController, type TrackLoader } from '$lib/audio/playback-controller.svelte.ts'
-import { onDatabaseChange } from '$lib/db/events.ts'
+import { AudioGraph } from '#lib/audio/audio-graph.svelte.ts'
+import { PlaybackController, type TrackLoader } from '#lib/audio/playback-controller.svelte.ts'
+import { onDatabaseChange } from '#lib/db/events.ts'
 import {
 	createManagedArtwork,
 	getTrackManagedArtworkSource,
-} from '$lib/helpers/create-managed-artwork.svelte'
-import { type FileLoadFailReason, resolveTrackFile } from '$lib/helpers/file-resolver.ts'
-import { persist } from '$lib/helpers/persist.svelte.ts'
-import { clamp } from '$lib/helpers/utils/clamp.ts'
-import { debounce } from '$lib/helpers/utils/debounce.ts'
-import { truncate } from '$lib/helpers/utils/text.ts'
-import { isMobile, isSafari } from '$lib/helpers/utils/ua.ts'
-import { getLibraryValue } from '$lib/library/get/value.ts'
-import { createTrackQuery } from '$lib/library/get/value-queries.ts'
-import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
+} from '#lib/helpers/create-managed-artwork.svelte.ts'
+import { type FileLoadFailReason, resolveTrackFile } from '#lib/helpers/file-resolver.ts'
+import { persist } from '#lib/helpers/persist.svelte.ts'
+import { clamp } from '#lib/helpers/utils/clamp.ts'
+import { debounce } from '#lib/helpers/utils/debounce.ts'
+import { truncate } from '#lib/helpers/utils/text.ts'
+import { isMobile, isSafari } from '#lib/helpers/utils/ua.ts'
+import { getLibraryValue } from '#lib/library/get/value.ts'
+import { createTrackQuery } from '#lib/library/get/value-queries.ts'
+import { EqualizerStore } from '#lib/stores/player/equalizer.svelte.ts'
 import { MediaSessionController } from './media-session.svelte.ts'
 import { PlayHistoryTracker } from './play-history-tracker.ts'
 import { type QueueEntry, type QueueOrigin, QueueStore, type QueueView } from './queue.svelte.ts'
@@ -307,7 +307,7 @@ export class PlayerStore {
 	play = (): void => {
 		const current = this.#queue.current
 		if (current !== null) {
-			this.#controller.play(current.trackId)
+			void this.#controller.play(current.trackId)
 
 			return
 		}
@@ -331,7 +331,7 @@ export class PlayerStore {
 	#beginEntryPlayback = (entry: QueueEntry | null, options: { gapless?: boolean } = {}): void => {
 		if (entry !== null) {
 			this.#history.begin(entry.trackId)
-			this.#controller.play(entry.trackId, { ...options, fromBeginning: true })
+			void this.#controller.play(entry.trackId, { ...options, fromBeginning: true })
 		}
 	}
 

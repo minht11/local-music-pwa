@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { wait } from '$lib/helpers/utils/wait.ts'
+import { wait } from '#lib/helpers/utils/wait.ts'
 import type { AudioGraph } from '../audio-graph.svelte.ts'
 import { AudioBufferEngine, supportsBufferEngine } from '../engine-buffer.svelte.ts'
 
@@ -56,7 +56,7 @@ vi.mock('mediabunny', () => ({
 	},
 }))
 
-vi.mock('$lib/helpers/utils/ua.ts', () => ({
+vi.mock('#lib/helpers/utils/ua.ts', () => ({
 	isSafari: vi.fn(() => false),
 }))
 

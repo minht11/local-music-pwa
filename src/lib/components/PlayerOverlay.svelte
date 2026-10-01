@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatArtists, getItemLanguage } from '$lib/helpers/utils/text.ts'
+	import { formatArtists, getItemLanguage } from '#lib/helpers/utils/text.ts'
 	import Button from './Button.svelte'
 	import Icon from './icon/Icon.svelte'
 	import PlayerFavoriteButton from './player/buttons/PlayerFavoriteButton.svelte'

@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { QueueStore } from '$lib/stores/player/queue.svelte.ts'
+import { QueueStore } from '#lib/stores/player/queue.svelte.ts'
 import { actualUpcoming, queueCommandSequences, type RealQueue } from './queue-model-commands.ts'
 import { createRandom, QueueModel, shuffled } from './queue-reference-model.ts'
 

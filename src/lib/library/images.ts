@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/style/noRestrictedGlobals: structural typing of IDB store views */
-import { getDatabase } from '$lib/db/database'
-import type { DatabaseChangeDetails } from '$lib/db/events.ts'
-import { keyRangeOnly } from '$lib/db/key-range.ts'
+import { getDatabase } from '#lib/db/database.ts'
+import type { DatabaseChangeDetails } from '#lib/db/events.ts'
+import { keyRangeOnly } from '#lib/db/key-range.ts'
 
 interface CountableImageIndex {
 	count: (query: IDBKeyRange) => Promise<number>

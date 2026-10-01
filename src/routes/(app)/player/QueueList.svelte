@@ -1,6 +1,6 @@
 <script lang="ts">
-	import IconButton from '$lib/components/IconButton.svelte'
-	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
+	import IconButton from '#lib/components/IconButton.svelte'
+	import TracksListContainer from '#lib/components/tracks/TracksListContainer.svelte'
 	import EmptyListMessage from './EmptyListMessage.svelte'
 	import { createQueueRows } from './queue-rows.svelte.ts'
 

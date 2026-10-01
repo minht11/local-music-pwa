@@ -1,6 +1,6 @@
 import { flushSync } from 'svelte'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createVirtualizerBase, type VirtualizerOptions } from '$lib/helpers/virtualizer.svelte.ts'
+import { createVirtualizerBase, type VirtualizerOptions } from '#lib/helpers/virtualizer.svelte.ts'
 
 type Options = VirtualizerOptions<Element, Element>
 

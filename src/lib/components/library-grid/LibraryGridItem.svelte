@@ -3,15 +3,15 @@
 	import { resolve } from '$app/paths'
 	import { page } from '$app/state'
 	import type { RouteId } from '$app/types'
-	import { ripple } from '$lib/attachments/ripple.ts'
+	import { ripple } from '#lib/attachments/ripple.ts'
 	import {
 		createManagedArtwork,
 		getAlbumManagedArtworkSource,
-	} from '$lib/helpers/create-managed-artwork.svelte.ts'
-	import { formatNameOrUnknown } from '$lib/helpers/utils/text.ts'
-	import { dbGetAlbumTracksIdsByName, dbGetArtistTracksIdsByName } from '$lib/library/get/ids'
-	import type { AlbumData, ArtistData } from '$lib/library/get/value'
-	import { createLibraryValueQuery } from '$lib/library/get/value-queries'
+	} from '#lib/helpers/create-managed-artwork.svelte.ts'
+	import { formatNameOrUnknown } from '#lib/helpers/utils/text.ts'
+	import { dbGetAlbumTracksIdsByName, dbGetArtistTracksIdsByName } from '#lib/library/get/ids.ts'
+	import type { AlbumData, ArtistData } from '#lib/library/get/value.ts'
+	import { createLibraryValueQuery } from '#lib/library/get/value-queries.ts'
 	import Artwork from '../Artwork.svelte'
 	import PlayPauseIcon from '../animated-icons/PlayPauseIcon.svelte'
 
@@ -97,7 +97,7 @@
 			{
 				label: m.libraryViewDetails(),
 				action: () => {
-					goto(linkProps.href, { replaceState: linkProps.shouldReplace })
+					goto(linkProps.href, { replace: linkProps.shouldReplace })
 				},
 			},
 			{

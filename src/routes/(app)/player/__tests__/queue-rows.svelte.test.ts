@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { QueueStore } from '$lib/stores/player/queue.svelte.ts'
+import { QueueStore } from '#lib/stores/player/queue.svelte.ts'
 import { createQueueRows, type QueueTabPlayer } from '../queue-rows.svelte.ts'
 
 // Prevent BroadcastChannel usage and DB wiring in tests
-vi.mock('$lib/db/events.ts', () => ({
+vi.mock('#lib/db/events.ts', () => ({
 	onDatabaseChange: vi.fn(() => () => {}),
 	dispatchDatabaseChangedEvent: vi.fn(),
 }))

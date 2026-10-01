@@ -1,7 +1,7 @@
 <script lang="ts">
-	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { createTrackRowsSource, trackIdRows } from '$lib/components/tracks/track-rows.svelte.ts'
-	import { dbRemoveFromPlayHistory } from '$lib/library/play-history-actions.ts'
+	import TracksListContainer from '#lib/components/tracks/TracksListContainer.svelte'
+	import { createTrackRowsSource, trackIdRows } from '#lib/components/tracks/track-rows.svelte.ts'
+	import { dbRemoveFromPlayHistory } from '#lib/library/play-history-actions.ts'
 	import EmptyListMessage from './EmptyListMessage.svelte'
 
 	interface Props {

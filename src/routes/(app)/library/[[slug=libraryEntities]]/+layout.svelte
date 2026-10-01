@@ -3,19 +3,19 @@
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
 	import type { RouteId } from '$app/types'
-	import AlbumsListContainer from '$lib/components/AlbumsListContainer.svelte'
-	import ArtistListContainer from '$lib/components/ArtistListContainer.svelte'
-	import Button from '$lib/components/Button.svelte'
-	import Icon from '$lib/components/icon/Icon.svelte'
-	import LibraryNavigation from '$lib/components/LibraryNavigation.svelte'
-	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
-	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
-	import TracksListContainer from '$lib/components/tracks/TracksListContainer.svelte'
-	import { createTrackRowsSource, trackIdRows } from '$lib/components/tracks/track-rows.svelte.ts'
-	import { initPageQueries } from '$lib/db/query/page-query.svelte.ts'
-	import { isMobile } from '$lib/helpers/utils/ua.ts'
-	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions.ts'
-	import { getPlaylistMenuItems } from '$lib/menu-actions/playlists.ts'
+	import AlbumsListContainer from '#lib/components/AlbumsListContainer.svelte'
+	import ArtistListContainer from '#lib/components/ArtistListContainer.svelte'
+	import Button from '#lib/components/Button.svelte'
+	import Icon from '#lib/components/icon/Icon.svelte'
+	import LibraryNavigation from '#lib/components/LibraryNavigation.svelte'
+	import ListDetailsLayout from '#lib/components/ListDetailsLayout.svelte'
+	import PlaylistListContainer from '#lib/components/playlists/PlaylistListContainer.svelte'
+	import TracksListContainer from '#lib/components/tracks/TracksListContainer.svelte'
+	import { createTrackRowsSource, trackIdRows } from '#lib/components/tracks/track-rows.svelte.ts'
+	import { initPageQueries } from '#lib/db/query/page-query.svelte.ts'
+	import { isMobile } from '#lib/helpers/utils/ua.ts'
+	import { FAVORITE_PLAYLIST_ID } from '#lib/library/playlists-actions.ts'
+	import { getPlaylistMenuItems } from '#lib/menu-actions/playlists.ts'
 	import Search from './Search.svelte'
 </script>
 
@@ -112,7 +112,7 @@
 									const detailsViewId: RouteId = '/(app)/library/[[slug=libraryEntities]]/[uuid]'
 									const shouldReplace = page.route.id === detailsViewId
 
-									void goto(`/library/playlists/${playlist.uuid}`, { replaceState: shouldReplace })
+									void goto(`/library/playlists/${playlist.uuid}`, { replace: shouldReplace })
 								}}
 							/>
 						{/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getEasing, timeline } from '$lib/helpers/animations.ts'
+	import { getEasing, timeline } from '#lib/helpers/animations.ts'
 	import BaseMenu from './BaseMenu.svelte'
 	import { getMeasurementsFromAnchor, positionMenu } from './positioning.ts'
 	import type { MenuInternalData, MenuPosition } from './types.ts'

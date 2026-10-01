@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state'
-	import { APP_DESCRIPTION_EN, APP_NAME_EN } from '$lib/app-metadata.ts'
-	import thumbnail from '$lib/assets/thumbnail.jpg?as=metadata'
+	import { APP_DESCRIPTION_EN, APP_NAME_EN } from '#lib/app-metadata.ts'
+	import thumbnail from '#lib/assets/thumbnail.jpg?as=metadata'
 
 	interface Props {
 		schema?: Record<string, unknown> | Record<string, unknown>[]

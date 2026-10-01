@@ -1,17 +1,17 @@
-import type { DatabaseChangeDetailsList } from '$lib/db/events.ts'
-import type { DbChangeActions } from '$lib/db/query/base-query.svelte.ts'
+import type { DatabaseChangeDetailsList } from '#lib/db/events.ts'
+import type { DbChangeActions } from '#lib/db/query/base-query.svelte.ts'
 import {
 	createPageQuery,
 	type PageQueryOptions,
 	type PageQueryResult,
 	type QueryKey,
-} from '$lib/db/query/page-query.svelte.ts'
+} from '#lib/db/query/page-query.svelte.ts'
 import type { LibraryStoreName } from '../types.ts'
 import { preloadLibraryValue } from './value.ts'
 
-export type { PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
+export type { PageQueryResult } from '#lib/db/query/page-query.svelte.ts'
 /** @public */
-export type { QueryResult } from '$lib/db/query/query.ts'
+export type { QueryResult } from '#lib/db/query/query.ts'
 
 const preloadLimit = 12
 

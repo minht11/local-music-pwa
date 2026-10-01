@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte'
-	import { trackEvent } from '$lib/helpers/analytics.ts'
-	import { isMobile } from '$lib/helpers/utils/ua.ts'
+	import Button from '#lib/components/Button.svelte'
+	import { trackEvent } from '#lib/helpers/analytics.ts'
+	import { isMobile } from '#lib/helpers/utils/ua.ts'
 
 	interface Props {
 		class: ClassValue

@@ -1,9 +1,9 @@
 import 'fake-indexeddb/auto'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { getDatabase } from '$lib/db/database.ts'
-import { clearDatabaseStores } from '$lib/helpers/test-helpers.ts'
-import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
-import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '$lib/library/types.ts'
+import { getDatabase } from '#lib/db/database.ts'
+import { clearDatabaseStores } from '#lib/helpers/test-helpers.ts'
+import { dbAddToPlayHistory } from '#lib/library/play-history-actions.ts'
+import { LEGACY_NO_NATIVE_DIRECTORY, type Track } from '#lib/library/types.ts'
 
 const seedTrack = async (id: number) => {
 	const db = await getDatabase()

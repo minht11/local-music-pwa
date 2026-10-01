@@ -1,7 +1,7 @@
-import { getDatabase } from '$lib/db/database.ts'
-import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
-import { isSafari } from '$lib/helpers/utils/ua'
-import { defineViewTransitionMatcher } from '$lib/view-transitions.svelte.ts'
+import { getDatabase } from '#lib/db/database.ts'
+import { createPageQuery, type PageQueryResult } from '#lib/db/query/page-query.svelte.ts'
+import { isSafari } from '#lib/helpers/utils/ua.ts'
+import { defineViewTransitionMatcher } from '#lib/view-transitions.svelte.ts'
 import type { LayoutLoad } from './$types.ts'
 import { getLayoutProps } from './layout-props.ts'
 

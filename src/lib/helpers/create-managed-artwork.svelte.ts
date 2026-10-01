@@ -1,5 +1,5 @@
-import { dbGetImageRecord } from '$lib/library/images'
-import type { Album, Track } from '$lib/library/types.ts'
+import { dbGetImageRecord } from '#lib/library/images.ts'
+import type { Album, Track } from '#lib/library/types.ts'
 import { getOrInsertAsync } from './get-or-insert-async.ts'
 
 class Artwork {

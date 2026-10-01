@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte'
-	import Icon from '$lib/components/icon/Icon.svelte'
+	import Button from '#lib/components/Button.svelte'
+	import Icon from '#lib/components/icon/Icon.svelte'
 
 	interface Props {
 		title: string

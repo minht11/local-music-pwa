@@ -1,4 +1,4 @@
-import { isSafari } from '$lib/helpers/utils/ua'
+import { isSafari } from '#lib/helpers/utils/ua.ts'
 
 const updateThemeMetaElement = (element: Element) => {
 	// Background color uses --surface color
@@ -59,7 +59,7 @@ export const setupTheme = (): void => {
 			}
 		}
 
-		void import('$lib/theme.ts').then(({ updateThemeCssVariables }) => {
+		void import('#lib/theme.ts').then(({ updateThemeCssVariables }) => {
 			updateThemeCssVariables(argbOrHex, isDark)
 			updateWindowTileBarColor(isDark)
 		})

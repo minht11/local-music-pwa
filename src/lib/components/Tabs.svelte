@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import { ripple } from '$lib/attachments/ripple'
+	import { ripple } from '#lib/attachments/ripple.ts'
 
 	interface Props<T> {
 		selectedIndex: number

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { ripple } from '$lib/attachments/ripple'
-	import Icon, { type IconType } from '$lib/components/icon/Icon.svelte'
-	import PlainLayout from '$lib/components/PlainLayout.svelte'
+	import { ripple } from '#lib/attachments/ripple.ts'
+	import Icon, { type IconType } from '#lib/components/icon/Icon.svelte'
+	import PlainLayout from '#lib/components/PlainLayout.svelte'
 
 	interface Links {
 		icon: IconType

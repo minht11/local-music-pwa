@@ -1,27 +1,27 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
-	import BackButton from '$lib/components/BackButton.svelte'
-	import Button from '$lib/components/Button.svelte'
-	import Header from '$lib/components/Header.svelte'
-	import IconButton from '$lib/components/IconButton.svelte'
-	import Icon from '$lib/components/icon/Icon.svelte'
-	import ListDetailsLayout from '$lib/components/ListDetailsLayout.svelte'
-	import PlayerFavoriteButton from '$lib/components/player/buttons/PlayerFavoriteButton.svelte'
-	import PlayNextButton from '$lib/components/player/buttons/PlayNextButton.svelte'
-	import PlayPrevButton from '$lib/components/player/buttons/PlayPrevButton.svelte'
-	import PlayTogglePillButton from '$lib/components/player/buttons/PlayTogglePillButton.svelte'
-	import RepeatButton from '$lib/components/player/buttons/RepeatButton.svelte'
-	import ShuffleButton from '$lib/components/player/buttons/ShuffleButton.svelte'
-	import PlayerArtwork from '$lib/components/player/PlayerArtwork.svelte'
-	import Timeline from '$lib/components/player/Timeline.svelte'
-	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
-	import Slider from '$lib/components/Slider.svelte'
-	import Tabs from '$lib/components/Tabs.svelte'
-	import { initPageQueries } from '$lib/db/query/page-query.svelte.js'
-	import { formatArtists, getItemLanguage } from '$lib/helpers/utils/text.ts'
-	import { clearPlayHistory } from '$lib/library/play-history-actions.js'
-	import type { BuiltinEqPresetKey } from '$lib/stores/player/equalizer.svelte.ts'
+	import BackButton from '#lib/components/BackButton.svelte'
+	import Button from '#lib/components/Button.svelte'
+	import Header from '#lib/components/Header.svelte'
+	import IconButton from '#lib/components/IconButton.svelte'
+	import Icon from '#lib/components/icon/Icon.svelte'
+	import ListDetailsLayout from '#lib/components/ListDetailsLayout.svelte'
+	import PlayerFavoriteButton from '#lib/components/player/buttons/PlayerFavoriteButton.svelte'
+	import PlayNextButton from '#lib/components/player/buttons/PlayNextButton.svelte'
+	import PlayPrevButton from '#lib/components/player/buttons/PlayPrevButton.svelte'
+	import PlayTogglePillButton from '#lib/components/player/buttons/PlayTogglePillButton.svelte'
+	import RepeatButton from '#lib/components/player/buttons/RepeatButton.svelte'
+	import ShuffleButton from '#lib/components/player/buttons/ShuffleButton.svelte'
+	import PlayerArtwork from '#lib/components/player/PlayerArtwork.svelte'
+	import Timeline from '#lib/components/player/Timeline.svelte'
+	import ScrollContainer from '#lib/components/ScrollContainer.svelte'
+	import Slider from '#lib/components/Slider.svelte'
+	import Tabs from '#lib/components/Tabs.svelte'
+	import { initPageQueries } from '#lib/db/query/page-query.svelte.js'
+	import { formatArtists, getItemLanguage } from '#lib/helpers/utils/text.ts'
+	import { clearPlayHistory } from '#lib/library/play-history-actions.js'
+	import type { BuiltinEqPresetKey } from '#lib/stores/player/equalizer.svelte.ts'
 	import HistoryList from './HistoryList.svelte'
 	import { getLayoutProps } from './layout-props.ts'
 	import QueueList from './QueueList.svelte'
@@ -219,7 +219,7 @@
 						{ id: 'history', text: m.playerHistory() },
 					]}
 					onchange={(item) => {
-						void goto(`/player/${item.id}`, { replaceState: true })
+						void goto(`/player/${item.id}`, { replace: true })
 					}}
 				>
 					{#snippet text(item)}

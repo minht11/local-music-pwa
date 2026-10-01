@@ -1,6 +1,6 @@
 <script lang="ts">
-	import LibraryGridListContainer from '$lib/components/library-grid/LibraryGridListContainer.svelte'
-	import { formatNameOrUnknown } from '$lib/helpers/utils/text'
+	import LibraryGridListContainer from '#lib/components/library-grid/LibraryGridListContainer.svelte'
+	import { formatNameOrUnknown } from '#lib/helpers/utils/text.ts'
 
 	interface Props {
 		items: number[]

@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { SvelteMap } from 'svelte/reactivity'
-	import Icon from '$lib/components/icon/Icon.svelte'
-	import PlaylistListContainer from '$lib/components/playlists/PlaylistListContainer.svelte'
-	import ScrollContainer from '$lib/components/ScrollContainer.svelte'
-	import Separator from '$lib/components/Separator.svelte'
-	import TextField from '$lib/components/TextField.svelte'
-	import { getDatabase } from '$lib/db/database.ts'
-	import { createInlineQuery } from '$lib/db/query/inline-query.svelte'
-	import { foldForSearch } from '$lib/helpers/utils/text.ts'
-	import { getLibraryItemIds } from '$lib/library/get/ids'
-	import { dbBatchModifyPlaylistsSelection } from '$lib/library/playlists-actions'
+	import Icon from '#lib/components/icon/Icon.svelte'
+	import PlaylistListContainer from '#lib/components/playlists/PlaylistListContainer.svelte'
+	import ScrollContainer from '#lib/components/ScrollContainer.svelte'
+	import Separator from '#lib/components/Separator.svelte'
+	import TextField from '#lib/components/TextField.svelte'
+	import { getDatabase } from '#lib/db/database.ts'
+	import { createInlineQuery } from '#lib/db/query/inline-query.svelte.ts'
+	import { foldForSearch } from '#lib/helpers/utils/text.ts'
+	import { getLibraryItemIds } from '#lib/library/get/ids.ts'
+	import { dbBatchModifyPlaylistsSelection } from '#lib/library/playlists-actions.ts'
 
 	interface Props {
 		trackIds: readonly number[]

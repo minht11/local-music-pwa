@@ -1,8 +1,8 @@
 import { goto } from '$app/navigation'
 import { resolve } from '$app/paths'
-import { getDatabase } from '$lib/db/database.ts'
-import type { TrackData } from '$lib/library/get/value'
-import { toggleFavoriteTrack } from '$lib/library/playlists-actions'
+import { getDatabase } from '#lib/db/database.ts'
+import type { TrackData } from '#lib/library/get/value.ts'
+import { toggleFavoriteTrack } from '#lib/library/playlists-actions.ts'
 import type { MenuActionItem, MenuItem } from '../menu/types.ts'
 import type { SelectionSnapshot } from './selection.ts'
 

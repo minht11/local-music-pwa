@@ -1,11 +1,11 @@
 import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getDatabase } from '$lib/db/database.ts'
+import { getDatabase } from '#lib/db/database.ts'
 import {
 	clearDatabaseStores,
 	dbGetAllAndExpectLength,
 	expectToBeDefined,
-} from '$lib/helpers/test-helpers.ts'
+} from '#lib/helpers/test-helpers.ts'
 import {
 	createPlaylist,
 	dbAddTracksToPlaylistsWithTx,
@@ -18,11 +18,11 @@ import {
 	toggleFavoriteTrack,
 	type UpdatePlaylistOptions,
 	updatePlaylist,
-} from '$lib/library/playlists-actions.ts'
-import { dbImportTrack } from '$lib/library/scan-actions/scanner/steps/import-track.ts'
-import { FAVORITE_PLAYLIST_ID, type UnknownTrack } from '$lib/library/types.ts'
+} from '#lib/library/playlists-actions.ts'
+import { dbImportTrack } from '#lib/library/scan-actions/scanner/steps/import-track.ts'
+import { FAVORITE_PLAYLIST_ID, type UnknownTrack } from '#lib/library/types.ts'
 
-vi.mock('$lib/components/snackbar/snackbar', () => ({
+vi.mock('#lib/components/snackbar/snackbar.ts', () => ({
 	snackbar: Object.assign(vi.fn(), {
 		unexpectedError: vi.fn(),
 	}),

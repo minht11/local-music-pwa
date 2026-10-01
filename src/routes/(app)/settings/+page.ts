@@ -1,6 +1,6 @@
-import { getDatabase } from '$lib/db/database.ts'
-import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
-import { type Directory, LEGACY_NO_NATIVE_DIRECTORY } from '$lib/library/types.ts'
+import { getDatabase } from '#lib/db/database.ts'
+import { createPageQuery, type PageQueryResult } from '#lib/db/query/page-query.svelte.ts'
+import { type Directory, LEGACY_NO_NATIVE_DIRECTORY } from '#lib/library/types.ts'
 
 export type DirectoryWithCount = { count: number } & (
 	| {

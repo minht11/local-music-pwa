@@ -1,9 +1,9 @@
-import { getDatabase } from '$lib/db/database.ts'
-import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
-import { lockDatabase } from '$lib/db/lock-database.ts'
-import { createUIAction } from '$lib/helpers/ui-action.ts'
-import { dbRemoveTracks } from '$lib/library/remove.ts'
-import type { Directory } from '$lib/library/types.ts'
+import { getDatabase } from '#lib/db/database.ts'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '#lib/db/events.ts'
+import { lockDatabase } from '#lib/db/lock-database.ts'
+import { createUIAction } from '#lib/helpers/ui-action.ts'
+import { dbRemoveTracks } from '#lib/library/remove.ts'
+import type { Directory } from '#lib/library/types.ts'
 import { scanTracks } from './scan-tracks.ts'
 
 export interface DirectoryStatus {

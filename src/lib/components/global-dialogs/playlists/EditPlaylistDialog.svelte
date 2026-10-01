@@ -1,8 +1,8 @@
 <script lang="ts" module>
-	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
-	import type { DialogOpenAccessor } from '$lib/components/dialog/Dialog.svelte'
-	import TextField from '$lib/components/TextField.svelte'
-	import { type UpdatePlaylistOptions, updatePlaylist } from '$lib/library/playlists-actions'
+	import CommonDialog from '#lib/components/dialog/CommonDialog.svelte'
+	import type { DialogOpenAccessor } from '#lib/components/dialog/Dialog.svelte'
+	import TextField from '#lib/components/TextField.svelte'
+	import { type UpdatePlaylistOptions, updatePlaylist } from '#lib/library/playlists-actions.ts'
 
 	export interface EditPlaylistDialogProps {
 		open: DialogOpenAccessor<UpdatePlaylistOptions>

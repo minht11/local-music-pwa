@@ -3,7 +3,7 @@ import type {
 	QueueLayer,
 	QueueOrigin,
 	QueueSlot,
-} from '$lib/stores/player/queue.svelte.ts'
+} from '#lib/stores/player/queue.svelte.ts'
 
 export interface ModelItem {
 	entryId: number

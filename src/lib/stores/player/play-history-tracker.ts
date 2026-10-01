@@ -1,4 +1,4 @@
-import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
+import { dbAddToPlayHistory } from '#lib/library/play-history-actions.ts'
 
 const TIME_THRESHOLD_SECONDS = 30
 const PERCENT_THRESHOLD = 0.5

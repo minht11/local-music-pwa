@@ -1,4 +1,4 @@
-import type { FileEntity } from '$lib/helpers/file-system'
+import type { FileEntity } from '#lib/helpers/file-system.ts'
 
 export interface TracksScanResult {
 	/** Count of many tracks were newly added */
