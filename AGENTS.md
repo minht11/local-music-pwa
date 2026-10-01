@@ -34,7 +34,7 @@ Use design tokens from `src/app.css` and `src/theme-colors.css` — **never arbi
 
 - Spacing via the Tailwind scale: `--spacing(4)`; typography via utility classes (`text-body-md`, `text-title-lg`, … — full scale in `src/app.css`), not `font-size`
 - Prefer theme breakpoints in media queries: `@media (width >= --theme(--breakpoint-sm))`; in component `<style>` blocks add the appropriate `@reference` when using theme tokens
-- All clickable elements need the `.interactable` class; use `{@attach ripple()}` for touch feedback and `{@attach tooltip('…')}` for tooltips (`$lib/attachments/`)
+- All clickable elements need the `.interactable` class; use `{@attach ripple()}` for touch feedback and `{@attach tooltip('…')}` for tooltips (`#lib/attachments/`)
 
 ## Auto-Imported Utilities
 
@@ -69,9 +69,9 @@ Stores self-persist via the `persist()` helper inside their constructors (localS
 
 ## Database Layer
 
-IndexedDB via `idb`, with change events (`$lib/db/events.ts`) driving reactive queries (`$lib/db/query/`). Entity interfaces and special constants (`FAVORITE_PLAYLIST_ID`, `UNKNOWN_ITEM` sentinel for unknown artist/album/year, `LEGACY_NO_NATIVE_DIRECTORY`) live in `$lib/library/types.ts` — read them there.
+IndexedDB via `idb`, with change events (`#lib/db/events.ts`) driving reactive queries (`#lib/db/query/`). Entity interfaces and special constants (`FAVORITE_PLAYLIST_ID`, `UNKNOWN_ITEM` sentinel for unknown artist/album/year, `LEGACY_NO_NATIVE_DIRECTORY`) live in `#lib/library/types.ts` — read them there.
 
-- **Every DB write must dispatch `dispatchDatabaseChangedEvent`** (`$lib/db/events.ts`) — it is what updates reactive queries, other tabs, and the player queue. Writing to `idb` without it silently leaves the UI stale.
+- **Every DB write must dispatch `dispatchDatabaseChangedEvent`** (`#lib/db/events.ts`) — it is what updates reactive queries, other tabs, and the player queue. Writing to `idb` without it silently leaves the UI stale.
 - Route data: queries are created in `+page.ts` / `+layout.ts` loaders and the component must call `initPageQueries(() => data)` before reading their `.value`.
 
 ## Development Workflow

@@ -1,14 +1,16 @@
-/// <reference lib='WebWorker' />
-/// <reference types="@sveltejs/kit" />
-/// <reference types="../.generated/svelte-kit/env.d.ts" />
-
+import { version } from '$app/env'
 import { PUBLIC_FALLBACK_PAGE } from '$app/env/public'
-import { build, files, prerendered, version } from '$service-worker'
-
-declare const self: ServiceWorkerGlobalScope
+import { assets, immutable, prerendered } from '$app/manifest'
+import { asset, resolve } from '$app/paths'
+import { self } from '$app/service-worker'
 
 const CACHE = `cache-${version}`
-const ASSETS = [...build, ...files, ...prerendered, PUBLIC_FALLBACK_PAGE]
+const ASSETS = [
+	...immutable.map(({ path }) => new URL(path, self.location.href).pathname),
+	...assets.map(({ path }) => asset(path)),
+	...prerendered.map(({ path }) => resolve(path)),
+	PUBLIC_FALLBACK_PAGE,
+]
 
 self.addEventListener('install', (event) => {
 	// Create a new cache and add all files to it
