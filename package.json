@@ -4,6 +4,9 @@
 	"private": true,
 	"type": "module",
 	"sideEffects": false,
+	"imports": {
+		"#lib/*": "./src/lib/*"
+	},
 	"scripts": {
 		"prepare": "svelte-kit sync",
 		"dev": "vite dev",
@@ -21,8 +24,8 @@
 		"@biomejs/biome": "2.5.12",
 		"@resvg/resvg-js": "^2.6.2",
 		"@rolldown/pluginutils": "^1.0.1",
-		"@sveltejs/adapter-static": "3.0.10",
-		"@sveltejs/kit": "2.70.3",
+		"@sveltejs/adapter-static": "4.0.0",
+		"@sveltejs/kit": "3.0.0",
 		"@tailwindcss/vite": "4.3.3",
 		"@types/node": "^26.5.1",
 		"@types/wicg-file-system-access": "^2023.10.7",
@@ -31,7 +34,7 @@
 		"happy-dom": "^20.14.0",
 		"image-size": "^2.0.2",
 		"knip": "^6.35.1",
-		"svelte": "5.57.0",
+		"svelte": "5.57.1",
 		"svelte-check": "4.7.6",
 		"tailwindcss": "4.3.3",
 		"typescript": "6.0.3",

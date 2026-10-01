@@ -22,11 +22,11 @@ const getAutoImportPlugin = (dts: string | false = false) =>
 		imports: [
 			{
 				'i18n:messages': [['*', 'm']],
-				'$lib/stores/player/use-store.ts': ['usePlayer'],
-				'$lib/stores/main/use-store.ts': ['useMainStore'],
-				'$lib/stores/dialogs/use-store.ts': ['useDialogsStore'],
-				'$lib/components/menu/MenuRenderer.svelte': ['useMenu'],
-				'$lib/components/snackbar/snackbar.ts': ['snackbar'],
+				'#lib/stores/player/use-store.ts': ['usePlayer'],
+				'#lib/stores/main/use-store.ts': ['useMainStore'],
+				'#lib/stores/dialogs/use-store.ts': ['useDialogsStore'],
+				'#lib/components/menu/MenuRenderer.svelte': ['useMenu'],
+				'#lib/components/snackbar/snackbar.ts': ['snackbar'],
 				'tiny-invariant': [['default', 'invariant']],
 				svelte: ['untrack'],
 			},
@@ -78,6 +78,8 @@ export default defineConfig(async ({ command, isPreview }): Promise<UserConfig> 
 							{
 								// Merge smaller chunks together
 								name: 'small-chunks',
+								// SvelteKit needs a separate chunk for its dynamically loaded runtime.
+								test: (id) => !id.includes('/runtime/client/'),
 								maxModuleSize: 2 * 1024,
 							},
 						],
@@ -105,17 +107,12 @@ export default defineConfig(async ({ command, isPreview }): Promise<UserConfig> 
 				},
 				paths: {
 					relative: false,
-				},
-				alias: {
-					'i18n:runtime': '.generated/i18n/runtime.ts',
+					origin: 'https://snaeplayer.com',
 				},
 				outDir: './.generated/svelte-kit',
 				adapter: adapter({
 					fallback: env.PUBLIC_FALLBACK_PAGE,
 				}),
-				prerender: {
-					origin: 'https://snaeplayer.com',
-				},
 				csp: {
 					mode: 'hash',
 					directives: {
@@ -133,13 +130,6 @@ export default defineConfig(async ({ command, isPreview }): Promise<UserConfig> 
 						'form-action': ['none'],
 						'manifest-src': ['self'],
 						'base-uri': ['none'],
-					},
-				},
-				typescript: {
-					config: (tsConfig) => {
-						tsConfig.extends = '../../tsconfig.base.json'
-
-						return tsConfig
 					},
 				},
 				serviceWorker: {

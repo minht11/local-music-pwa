@@ -1,14 +1,14 @@
-import { getDatabase } from '$lib/db/database.ts'
-import { type FileEntity, getFileHandlesRecursively } from '$lib/helpers/file-system.ts'
-import { sha256Hex } from '$lib/helpers/hash.ts'
-import { SerialQueue } from '$lib/helpers/serial-queue.ts'
-import { dbRemoveTracks } from '$lib/library/remove.ts'
+import { getDatabase } from '#lib/db/database.ts'
+import { type FileEntity, getFileHandlesRecursively } from '#lib/helpers/file-system.ts'
+import { sha256Hex } from '#lib/helpers/hash.ts'
+import { SerialQueue } from '#lib/helpers/serial-queue.ts'
+import { dbRemoveTracks } from '#lib/library/remove.ts'
 import {
 	CURRENT_METADATA_VERSION,
 	type ImageRecord,
 	LEGACY_NO_NATIVE_DIRECTORY,
 	type Track,
-} from '$lib/library/types.ts'
+} from '#lib/library/types.ts'
 import { createImageRecord } from './steps/create-image-record.ts'
 import { dbImportTrack } from './steps/import-track.ts'
 import { parseTrackMetadata } from './steps/parse-track-metadata.ts'
@@ -94,36 +94,40 @@ class TrackProcessor {
 			return
 		}
 
-		this.#artworkQueue.enqueue(async () => {
-			const imageBlob = parsed.imageBlob
-			const artwork = imageBlob ? await this.#resolveArtwork(imageBlob) : undefined
+		void this.#artworkQueue
+			.enqueue(async () => {
+				const imageBlob = parsed.imageBlob
+				const artwork = imageBlob ? await this.#resolveArtwork(imageBlob) : undefined
 
-			this.#importQueue.enqueue(async () => {
-				try {
-					const trackId = await dbImportTrack(
-						{
-							...parsed.data,
-							imageHash: artwork?.imageHash,
-							primaryColor: artwork?.primaryColor,
-							file: options.file,
-							directory: options.directoryId,
-							fileName: options.file.name,
-							scannedAt: options.scannedAt,
-							uuid: options.uuid ?? crypto.randomUUID(),
-						},
-						options.trackId,
-						artwork?.record,
-					)
+				void this.#importQueue
+					.enqueue(async () => {
+						try {
+							const trackId = await dbImportTrack(
+								{
+									...parsed.data,
+									imageHash: artwork?.imageHash,
+									primaryColor: artwork?.primaryColor,
+									file: options.file,
+									directory: options.directoryId,
+									fileName: options.file.name,
+									scannedAt: options.scannedAt,
+									uuid: options.uuid ?? crypto.randomUUID(),
+								},
+								options.trackId,
+								artwork?.record,
+							)
 
-					this.#onImportSuccess?.(trackId)
-					this.#tracker.newlyImported += 1
-				} catch (err) {
-					console.error(err)
-				} finally {
-					this.#tracker.sendMsg(false)
-				}
+							this.#onImportSuccess?.(trackId)
+							this.#tracker.newlyImported += 1
+						} catch (err) {
+							console.error(err)
+						} finally {
+							this.#tracker.sendMsg(false)
+						}
+					})
+					.catch((err: unknown) => console.error(err))
 			})
-		})
+			.catch((err: unknown) => console.error(err))
 	}
 
 	async drain(): Promise<void> {
