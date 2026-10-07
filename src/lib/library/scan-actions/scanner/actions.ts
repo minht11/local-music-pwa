@@ -99,33 +99,31 @@ class TrackProcessor {
 				const imageBlob = parsed.imageBlob
 				const artwork = imageBlob ? await this.#resolveArtwork(imageBlob) : undefined
 
-				void this.#importQueue
-					.enqueue(async () => {
-						try {
-							const trackId = await dbImportTrack(
-								{
-									...parsed.data,
-									imageHash: artwork?.imageHash,
-									primaryColor: artwork?.primaryColor,
-									file: options.file,
-									directory: options.directoryId,
-									fileName: options.file.name,
-									scannedAt: options.scannedAt,
-									uuid: options.uuid ?? crypto.randomUUID(),
-								},
-								options.trackId,
-								artwork?.record,
-							)
+				void this.#importQueue.enqueue(async () => {
+					try {
+						const trackId = await dbImportTrack(
+							{
+								...parsed.data,
+								imageHash: artwork?.imageHash,
+								primaryColor: artwork?.primaryColor,
+								file: options.file,
+								directory: options.directoryId,
+								fileName: options.file.name,
+								scannedAt: options.scannedAt,
+								uuid: options.uuid ?? crypto.randomUUID(),
+							},
+							options.trackId,
+							artwork?.record,
+						)
 
-							this.#onImportSuccess?.(trackId)
-							this.#tracker.newlyImported += 1
-						} catch (err) {
-							console.error(err)
-						} finally {
-							this.#tracker.sendMsg(false)
-						}
-					})
-					.catch((err: unknown) => console.error(err))
+						this.#onImportSuccess?.(trackId)
+						this.#tracker.newlyImported += 1
+					} catch (err) {
+						console.error(err)
+					} finally {
+						this.#tracker.sendMsg(false)
+					}
+				})
 			})
 			.catch((err: unknown) => console.error(err))
 	}
