@@ -8,6 +8,3 @@ allowBuilds:
   '@biomejs/biome': false
   '@tailwindcss/oxide': false
 
-minimumReleaseAgeExclude:
-  - '@sveltejs/adapter-static@4.0.0'
-  - '@sveltejs/kit@3.0.0'
