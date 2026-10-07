@@ -1,6 +1,5 @@
 <script lang="ts" module>
-	import type { Snapshot } from '@sveltejs/kit'
-	import { goto } from '$app/navigation'
+	import { goto, snapshot } from '$app/navigation'
 	import { page } from '$app/state'
 	import type { RouteId } from '$app/types'
 	import AlbumsListContainer from '#lib/components/AlbumsListContainer.svelte'
@@ -42,12 +41,12 @@
 		data.layoutMode(main.librarySplitLayoutEnabled, isWideLayout, page.params.uuid),
 	)
 
-	export const snapshot: Snapshot<string> = {
+	snapshot({
 		capture: () => data.store.searchTerm,
 		restore: (value) => {
 			data.store.searchTerm = value
 		},
-	}
+	})
 </script>
 
 <LibraryNavigation variant="rail" activeSlug={slug} {layoutMode} {isWideLayout} />
