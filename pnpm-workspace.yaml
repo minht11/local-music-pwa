@@ -7,3 +7,4 @@ blockExoticSubdeps: true
 allowBuilds:
   '@biomejs/biome': false
   '@tailwindcss/oxide': false
+

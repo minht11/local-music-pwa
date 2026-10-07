@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { on } from 'svelte/events'
-	import type { PlayerRepeat } from '$lib/stores/player/player.svelte'
+	import type { PlayerRepeat } from '#lib/stores/player/player.svelte.ts'
 	import IconButton from '../../IconButton.svelte'
 	import ActiveIndicator from './ActiveIndicator.svelte'
 

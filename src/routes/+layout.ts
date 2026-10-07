@@ -1,12 +1,12 @@
 import '../app.css'
 import { browser } from '$app/env'
-import { registerServiceWorker } from '$lib/helpers/register-sw'
+import { registerServiceWorker } from '#lib/helpers/register-sw.ts'
 
 export const ssr = false
 export const prerender = false
 
 if (browser) {
-	registerServiceWorker({
+	void registerServiceWorker({
 		onNeedRefresh(update) {
 			snackbar({
 				id: 'app-update',

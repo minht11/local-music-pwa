@@ -2,10 +2,10 @@
 	import {
 		createManagedArtwork,
 		getTrackManagedArtworkSource,
-	} from '$lib/helpers/create-managed-artwork.svelte'
-	import { formatDuration } from '$lib/helpers/utils/format-duration.ts'
-	import { formatArtists, formatNameOrUnknown, getItemLanguage } from '$lib/helpers/utils/text.ts'
-	import { createTrackQuery, type TrackData } from '$lib/library/get/value-queries.ts'
+	} from '#lib/helpers/create-managed-artwork.svelte.ts'
+	import { formatDuration } from '#lib/helpers/utils/format-duration.ts'
+	import { formatArtists, formatNameOrUnknown, getItemLanguage } from '#lib/helpers/utils/text.ts'
+	import { createTrackQuery, type TrackData } from '#lib/library/get/value-queries.ts'
 	import Artwork from '../Artwork.svelte'
 	import FavoriteButton from '../FavoriteButton.svelte'
 	import IconButton from '../IconButton.svelte'

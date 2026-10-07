@@ -1,4 +1,4 @@
-import { toShuffledArray } from '$lib/helpers/utils/array.ts'
+import { toShuffledArray } from '#lib/helpers/utils/array.ts'
 import { mintEntryId, type QueueItem, type UpcomingList } from './queue-entry.ts'
 
 export interface QueueOrigin {

@@ -1,4 +1,4 @@
-import { BASE_LOCALE, LOCALES } from '../.generated/i18n/runtime.ts'
+import { BASE_LOCALE, LOCALES } from '#i18n/runtime'
 
 type Messages = Record<string, string>
 

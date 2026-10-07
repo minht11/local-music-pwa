@@ -1,5 +1,5 @@
 <script lang="ts">
-	import FavoriteButton from '$lib/components/FavoriteButton.svelte'
+	import FavoriteButton from '#lib/components/FavoriteButton.svelte'
 
 	const player = usePlayer()
 

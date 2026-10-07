@@ -1,7 +1,7 @@
-import type { DbValue } from '$lib/db/database.ts'
-import { foldForSearch } from '$lib/helpers/utils/text.ts'
-import type { LibraryItemSortKey } from '$lib/library/get/ids.ts'
-import { type LibraryStoreName, UNKNOWN_ITEM } from '$lib/library/types'
+import type { DbValue } from '#lib/db/database.ts'
+import { foldForSearch } from '#lib/helpers/utils/text.ts'
+import type { LibraryItemSortKey } from '#lib/library/get/ids.ts'
+import { type LibraryStoreName, UNKNOWN_ITEM } from '#lib/library/types.ts'
 
 export type LibrarySearchFn<Value> = (value: Value, searchTerm: string) => boolean
 

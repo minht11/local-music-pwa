@@ -1,8 +1,8 @@
 import { WeakLRUCache } from 'weak-lru-cache'
-import { type DbKey, getDatabase } from '$lib/db/database.ts'
-import { type DatabaseChangeDetails, onDatabaseChange } from '$lib/db/events.ts'
-import { getOrInsertAsync } from '$lib/helpers/get-or-insert-async.ts'
-import type { Album, Artist, Playlist, Track } from '$lib/library/types.ts'
+import { type DbKey, getDatabase } from '#lib/db/database.ts'
+import { type DatabaseChangeDetails, onDatabaseChange } from '#lib/db/events.ts'
+import { getOrInsertAsync } from '#lib/helpers/get-or-insert-async.ts'
+import type { Album, Artist, Playlist, Track } from '#lib/library/types.ts'
 import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID, type LibraryStoreName } from '../types.ts'
 
 type CacheKey<Store extends LibraryStoreName> = `${Store}:${string}`
@@ -309,7 +309,7 @@ export const shouldRefetchLibraryValue = (
 	return config.shouldRefetch(id, changes)
 }
 
-/** @private - Used for testing only */
+/** @package - Used for testing only */
 export const clearLibraryValueCache = () => {
 	valueCache.clear()
 }

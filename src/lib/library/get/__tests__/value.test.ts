@@ -1,16 +1,16 @@
 import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getDatabase } from '$lib/db/database.ts'
-import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
-import { clearDatabaseStores } from '$lib/helpers/test-helpers.ts'
+import { getDatabase } from '#lib/db/database.ts'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '#lib/db/events.ts'
+import { clearDatabaseStores } from '#lib/helpers/test-helpers.ts'
 import {
 	clearLibraryValueCache,
 	getLibraryValue,
 	LibraryValueNotFoundError,
 	preloadLibraryValue,
 	shouldRefetchLibraryValue,
-} from '$lib/library/get/value.ts'
-import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID } from '$lib/library/types.ts'
+} from '#lib/library/get/value.ts'
+import { FAVORITE_PLAYLIST_ID, FAVORITE_PLAYLIST_UUID } from '#lib/library/types.ts'
 
 // Mock crypto.randomUUID for consistent UUIDs
 vi.stubGlobal('crypto', {

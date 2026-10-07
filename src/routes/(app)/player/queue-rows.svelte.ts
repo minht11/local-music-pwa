@@ -1,20 +1,20 @@
-import type { MenuItem } from '$lib/components/menu/types.ts'
-import { TRACK_ROW_HEIGHT } from '$lib/components/tracks/row-height.ts'
-import type { SelectionSnapshot, TrackRowIdentity } from '$lib/components/tracks/selection.ts'
+import type { MenuItem } from '#lib/components/menu/types.ts'
+import { TRACK_ROW_HEIGHT } from '#lib/components/tracks/row-height.ts'
+import type { SelectionSnapshot, TrackRowIdentity } from '#lib/components/tracks/selection.ts'
 import type {
 	TrackItemClick,
 	TrackListSource,
 	TracksListContainerProps,
-} from '$lib/components/tracks/TracksListContainer.svelte'
-import type { TrackRowLocator } from '$lib/components/tracks/use-track-menu-items.ts'
-import type { VariableRowSize } from '$lib/components/VirtualContainer.svelte'
-import type { TrackData } from '$lib/library/get/value.ts'
+} from '#lib/components/tracks/TracksListContainer.svelte'
+import type { TrackRowLocator } from '#lib/components/tracks/use-track-menu-items.ts'
+import type { VariableRowSize } from '#lib/components/VirtualContainer.svelte'
+import type { TrackData } from '#lib/library/get/value.ts'
 import type {
 	QueueItem,
 	QueueLayer,
 	QueueSlot,
 	QueueView,
-} from '$lib/stores/player/queue.svelte.ts'
+} from '#lib/stores/player/queue.svelte.ts'
 
 export interface QueueTabPlayer {
 	readonly queue: QueueView

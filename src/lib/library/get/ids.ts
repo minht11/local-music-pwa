@@ -1,6 +1,6 @@
 import type { IDBPIndex } from 'idb'
-import { type AppDB, type AppIndexNames, getDatabase } from '$lib/db/database.ts'
-import { keyRangeOnly, keyRangePrefix } from '$lib/db/key-range.ts'
+import { type AppDB, type AppIndexNames, getDatabase } from '#lib/db/database.ts'
+import { keyRangeOnly, keyRangePrefix } from '#lib/db/key-range.ts'
 import type { LibraryStoreName } from '../types.ts'
 
 export type SortOrder = 'asc' | 'desc'

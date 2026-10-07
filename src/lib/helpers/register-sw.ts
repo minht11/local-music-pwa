@@ -28,6 +28,7 @@ export const registerServiceWorker = async (options: RegisterSwOptions) => {
 	const { serviceWorker } = navigator
 	const registration = await serviceWorker.register('/service-worker.js', {
 		scope: '/',
+		type: 'module',
 	})
 
 	const needsRefresh = (reg: ServiceWorkerRegistration) => {

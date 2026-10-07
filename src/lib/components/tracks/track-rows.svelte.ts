@@ -1,5 +1,5 @@
-import type { PlaylistEntry } from '$lib/library/types.ts'
-import type { QueueOrigin } from '$lib/stores/player/queue.svelte.ts'
+import type { PlaylistEntry } from '#lib/library/types.ts'
+import type { QueueOrigin } from '#lib/stores/player/queue.svelte.ts'
 import { TRACK_ROW_HEIGHT } from './row-height.ts'
 import type { TrackItemClick, TrackListSource } from './TracksListContainer.svelte'
 

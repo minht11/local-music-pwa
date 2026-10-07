@@ -1,6 +1,6 @@
 import { prefersReducedMotion } from 'svelte/motion'
 import { MediaQuery } from 'svelte/reactivity'
-import { getPersistedValue, persist } from '$lib/helpers/persist.svelte.ts'
+import { getPersistedValue, persist } from '#lib/helpers/persist.svelte.ts'
 
 export type AppTheme = 'light' | 'dark'
 export type AppThemeOption = AppTheme | 'auto'

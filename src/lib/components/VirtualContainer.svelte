@@ -24,9 +24,9 @@
 		type VirtualizerOptions,
 		windowScroll,
 	} from '@tanstack/virtual-core'
-	import { doesElementHasFocus, findFocusedElement } from '$lib/helpers/focus.ts'
-	import { wait } from '$lib/helpers/utils/wait.ts'
-	import { createVirtualizerBase } from '$lib/helpers/virtualizer.svelte.ts'
+	import { doesElementHasFocus, findFocusedElement } from '#lib/helpers/focus.ts'
+	import { wait } from '#lib/helpers/utils/wait.ts'
+	import { createVirtualizerBase } from '#lib/helpers/virtualizer.svelte.ts'
 	import { useScrollTarget } from './ScrollContainer.svelte'
 
 	interface Props {

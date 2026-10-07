@@ -1,6 +1,6 @@
 import { innerHeight, innerWidth } from 'svelte/reactivity/window'
 import type { RouteId } from '$app/types'
-import type { LayoutMode } from '$lib/components/ListDetailsLayout.svelte'
+import type { LayoutMode } from '#lib/components/ListDetailsLayout.svelte'
 
 const isRouteQueueOrHistory = (routeId: RouteId): boolean =>
 	routeId === '/(app)/player/queue' || routeId === '/(app)/player/history'

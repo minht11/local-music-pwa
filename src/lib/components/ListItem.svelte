@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import { ripple } from '$lib/attachments/ripple.ts'
+	import { ripple } from '#lib/attachments/ripple.ts'
 </script>
 
 <script lang="ts">

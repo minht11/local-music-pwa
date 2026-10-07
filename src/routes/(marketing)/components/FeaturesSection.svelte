@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Icon, { type IconType } from '$lib/components/icon/Icon.svelte'
+	import Icon, { type IconType } from '#lib/components/icon/Icon.svelte'
 	import Section from './Section.svelte'
 
 	interface Feature {

@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	import { createContext } from 'svelte'
-	import { isElementTextInput } from '$lib/helpers/input.ts'
-	import { assign } from '$lib/helpers/utils/assign.ts'
+	import { isElementTextInput } from '#lib/helpers/input.ts'
+	import { assign } from '#lib/helpers/utils/assign.ts'
 	import BottomSheet from './BottomSheet.svelte'
 	import Menu from './Menu.svelte'
 	import type { MenuInternalData, MenuItem, MenuOptions } from './types.ts'

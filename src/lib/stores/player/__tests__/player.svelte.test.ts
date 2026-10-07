@@ -1,6 +1,6 @@
 import { flushSync } from 'svelte'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
+import { PlayerStore } from '#lib/stores/player/player.svelte.ts'
 
 interface MockOptions {
 	onTrackEnded: () => void
@@ -57,11 +57,11 @@ const { MockPlaybackController, mockHistory, controllerRef, databaseChange } = v
 	return { MockPlaybackController, mockHistory, controllerRef, databaseChange }
 })
 
-vi.mock('$lib/audio/playback-controller.svelte.ts', () => ({
+vi.mock('#lib/audio/playback-controller.svelte.ts', () => ({
 	PlaybackController: MockPlaybackController,
 }))
 
-vi.mock('$lib/audio/audio-graph.svelte.ts', () => ({
+vi.mock('#lib/audio/audio-graph.svelte.ts', () => ({
 	AudioGraph: class {
 		initialized = false
 		setVolume = vi.fn()
@@ -69,7 +69,7 @@ vi.mock('$lib/audio/audio-graph.svelte.ts', () => ({
 	},
 }))
 
-vi.mock('$lib/stores/player/equalizer.svelte.ts', () => ({
+vi.mock('#lib/stores/player/equalizer.svelte.ts', () => ({
 	EqualizerStore: class {
 		init() {}
 		resumeContext() {
@@ -79,13 +79,13 @@ vi.mock('$lib/stores/player/equalizer.svelte.ts', () => ({
 	},
 }))
 
-vi.mock('$lib/stores/player/media-session.svelte.ts', () => ({
+vi.mock('#lib/stores/player/media-session.svelte.ts', () => ({
 	MediaSessionController: class {
 		updatePosition() {}
 	},
 }))
 
-vi.mock('$lib/stores/player/play-history-tracker.ts', () => ({
+vi.mock('#lib/stores/player/play-history-tracker.ts', () => ({
 	PlayHistoryTracker: class {
 		begin = mockHistory.begin
 		update = mockHistory.update
@@ -94,7 +94,7 @@ vi.mock('$lib/stores/player/play-history-tracker.ts', () => ({
 }))
 
 // Prevent BroadcastChannel usage in QueueStore
-vi.mock('$lib/db/events.ts', () => ({
+vi.mock('#lib/db/events.ts', () => ({
 	onDatabaseChange: vi.fn((listener) => {
 		databaseChange.listener = listener
 		return () => {
@@ -116,7 +116,7 @@ const queryState: { retainedValue: QueryTrack | undefined; retainPrevious: boole
 	retainPrevious: false,
 }
 
-vi.mock('$lib/library/get/value-queries.ts', () => ({
+vi.mock('#lib/library/get/value-queries.ts', () => ({
 	createTrackQuery: (idGetter: () => number, _opts?: unknown) => ({
 		get value() {
 			if (queryState.retainPrevious) {
@@ -137,21 +137,21 @@ vi.mock('$lib/library/get/value-queries.ts', () => ({
 	}),
 }))
 
-vi.mock('$lib/helpers/persist.svelte.ts', () => ({
+vi.mock('#lib/helpers/persist.svelte.ts', () => ({
 	persist: vi.fn(),
 }))
 
-vi.mock('$lib/helpers/create-managed-artwork.svelte', () => ({
+vi.mock('#lib/helpers/create-managed-artwork.svelte.ts', () => ({
 	createManagedArtwork: () => () => undefined,
 }))
 
-vi.mock('$lib/helpers/file-resolver.ts', () => ({
+vi.mock('#lib/helpers/file-resolver.ts', () => ({
 	resolveTrackFile: vi.fn(() =>
 		Promise.resolve({ status: 'loaded', file: new File([''], 'track.mp3') }),
 	),
 }))
 
-vi.mock('$lib/library/get/value.ts', () => ({
+vi.mock('#lib/library/get/value.ts', () => ({
 	getLibraryValue: vi.fn(() =>
 		Promise.resolve({
 			directory: -1,

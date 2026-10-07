@@ -1,8 +1,8 @@
 import { flushSync } from 'svelte'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { EqualizerStore } from '$lib/stores/player/equalizer.svelte.ts'
+import { EqualizerStore } from '#lib/stores/player/equalizer.svelte.ts'
 
-vi.mock('$lib/helpers/persist.svelte.ts', () => ({
+vi.mock('#lib/helpers/persist.svelte.ts', () => ({
 	persist: vi.fn(),
 }))
 

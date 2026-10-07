@@ -1,6 +1,6 @@
 <script lang="ts" module>
 	import { onNavigate } from '$app/navigation'
-	import type { TrackData } from '$lib/library/get/value.ts'
+	import type { TrackData } from '#lib/library/get/value.ts'
 	import Button from '../Button.svelte'
 	import IconButton from '../IconButton.svelte'
 	import MenuButton from '../MenuButton.svelte'

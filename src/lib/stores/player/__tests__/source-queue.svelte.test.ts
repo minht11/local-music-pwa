@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { SourceQueue } from '$lib/stores/player/source-queue.svelte.ts'
+import { SourceQueue } from '#lib/stores/player/source-queue.svelte.ts'
 
 let q!: SourceQueue
 let cleanup: () => void

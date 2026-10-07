@@ -1,6 +1,6 @@
 import { SvelteMap } from 'svelte/reactivity'
-import { isElementTextInput } from '$lib/helpers/input.ts'
-import { isPrimaryModifierKey } from '$lib/helpers/utils/ua.ts'
+import { isElementTextInput } from '#lib/helpers/input.ts'
+import { isPrimaryModifierKey } from '#lib/helpers/utils/ua.ts'
 import type { SelectionAnchor, SelectionSnapshot, TrackRowIdentity } from './selection.ts'
 
 interface UseTrackSelectionControllerOptions {

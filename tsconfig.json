@@ -1,15 +1,20 @@
 {
-	"extends": "./.generated/svelte-kit/tsconfig.json",
+	"extends": ["$app/tsconfig", "./tsconfig.base.json"],
 	"compilerOptions": {
 		"types": [
+			"$app/types",
 			"@types/wicg-file-system-access",
 			"./.generated/types/auto-imports.d.ts",
 			"./.generated/i18n/messages.d.ts"
-		]
+		],
+		"noEmit": true,
+		"emitDeclarationOnly": false
 	},
 	"references": [
 		{
 			"path": "./tsconfig.node.json"
 		}
-	]
+	],
+	"include": ["src", "*.ts", "./.generated/types/**/*.d.ts", "./.generated/i18n/**/*.d.ts"],
+	"exclude": ["src/service-worker"]
 }

@@ -1,6 +1,6 @@
 import { flushSync } from 'svelte'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { FileLoadFailReason } from '$lib/helpers/file-resolver.ts'
+import type { FileLoadFailReason } from '#lib/helpers/file-resolver.ts'
 import { PlaybackController, type TrackLoader } from '../playback-controller.svelte.ts'
 import { makeGraph } from './test-utils.ts'
 

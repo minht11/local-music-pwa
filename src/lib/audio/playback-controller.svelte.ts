@@ -1,5 +1,5 @@
-import type { FileLoadFailReason } from '$lib/helpers/file-resolver.ts'
-import { isAbortError } from '$lib/helpers/utils/errors.ts'
+import type { FileLoadFailReason } from '#lib/helpers/file-resolver.ts'
+import { isAbortError } from '#lib/helpers/utils/errors.ts'
 import type { AudioGraph } from './audio-graph.svelte.ts'
 import type { AudioEngineOptions } from './engine.ts'
 import {

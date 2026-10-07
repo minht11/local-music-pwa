@@ -5,7 +5,7 @@ import type {
 	QueueLayer,
 	QueueOrigin,
 	QueueStore,
-} from '$lib/stores/player/queue.svelte.ts'
+} from '#lib/stores/player/queue.svelte.ts'
 import { createRandom, type ModelItem, type QueueModel, shuffled } from './queue-reference-model.ts'
 
 export interface RealQueue {

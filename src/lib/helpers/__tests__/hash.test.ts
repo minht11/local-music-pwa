@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { sha256Hex } from '$lib/helpers/hash.ts'
+import { sha256Hex } from '#lib/helpers/hash.ts'
 
 const SHA256_HEX_REGEX = /^[0-9a-f]{64}$/
 

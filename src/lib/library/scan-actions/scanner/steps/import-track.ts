@@ -1,7 +1,7 @@
 import type { IDBPTransaction } from 'idb'
-import { type AppDB, getDatabase } from '$lib/db/database.ts'
-import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '$lib/db/events.ts'
-import { dbDeleteOrphanedImagesWithTx } from '$lib/library/images.ts'
+import { type AppDB, getDatabase } from '#lib/db/database.ts'
+import { type DatabaseChangeDetails, dispatchDatabaseChangedEvent } from '#lib/db/events.ts'
+import { dbDeleteOrphanedImagesWithTx } from '#lib/library/images.ts'
 import {
 	type Album,
 	type Artist,
@@ -9,7 +9,7 @@ import {
 	type Track,
 	UNKNOWN_ITEM,
 	type UnknownTrack,
-} from '$lib/library/types.ts'
+} from '#lib/library/types.ts'
 
 type ImportTrackTx = IDBPTransaction<
 	AppDB,

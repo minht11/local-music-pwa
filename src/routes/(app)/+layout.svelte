@@ -1,23 +1,23 @@
 <script lang="ts">
 	import { browser } from '$app/env'
 	import { navigating, page } from '$app/state'
-	import Button from '$lib/components/Button.svelte'
+	import Button from '#lib/components/Button.svelte'
 	import {
 		APP_DIALOGS_COMPONENTS_MAP,
 		APP_DIALOGS_KEYS,
-	} from '$lib/components/global-dialogs/dialogs.ts'
-	import Icon from '$lib/components/icon/Icon.svelte'
-	import LibraryNavigation from '$lib/components/LibraryNavigation.svelte'
-	import MenuRenderer, { setupGlobalMenu } from '$lib/components/menu/MenuRenderer.svelte'
-	import PlayerOverlay from '$lib/components/PlayerOverlay.svelte'
-	import Seo from '$lib/components/Seo.svelte'
-	import SnackbarRenderer from '$lib/components/snackbar/SnackbarRenderer.svelte'
-	import { isElementTextInput } from '$lib/helpers/input.ts'
-	import { DialogsStore } from '$lib/stores/dialogs/store.svelte.ts'
-	import { setDialogsStoreContext } from '$lib/stores/dialogs/use-store.ts'
-	import { PlayerStore } from '$lib/stores/player/player.svelte.ts'
-	import { setPlayerStoreContext } from '$lib/stores/player/use-store.ts'
-	import { onViewTransitionPrepare } from '$lib/view-transitions.svelte.ts'
+	} from '#lib/components/global-dialogs/dialogs.ts'
+	import Icon from '#lib/components/icon/Icon.svelte'
+	import LibraryNavigation from '#lib/components/LibraryNavigation.svelte'
+	import MenuRenderer, { setupGlobalMenu } from '#lib/components/menu/MenuRenderer.svelte'
+	import PlayerOverlay from '#lib/components/PlayerOverlay.svelte'
+	import Seo from '#lib/components/Seo.svelte'
+	import SnackbarRenderer from '#lib/components/snackbar/SnackbarRenderer.svelte'
+	import { isElementTextInput } from '#lib/helpers/input.ts'
+	import { DialogsStore } from '#lib/stores/dialogs/store.svelte.ts'
+	import { setDialogsStoreContext } from '#lib/stores/dialogs/use-store.ts'
+	import { PlayerStore } from '#lib/stores/player/player.svelte.ts'
+	import { setPlayerStoreContext } from '#lib/stores/player/use-store.ts'
+	import { onViewTransitionPrepare } from '#lib/view-transitions.svelte.ts'
 	import { setupAppInstallPromptListeners } from './layout/app-install-prompt.ts'
 	import {
 		type DirectoriesPermissionPromptSnackbarArg,

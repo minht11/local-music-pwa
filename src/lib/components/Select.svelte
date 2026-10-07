@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import { ripple } from '$lib/attachments/ripple.ts'
+	import { ripple } from '#lib/attachments/ripple.ts'
 	import Icon from './icon/Icon.svelte'
 
 	export interface SelectProps<T, Key extends keyof T, LabelKey extends keyof T> {

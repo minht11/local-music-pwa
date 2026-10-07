@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { toShuffledArray } from '$lib/helpers/utils/array.ts'
+import { toShuffledArray } from '#lib/helpers/utils/array.ts'
 
 describe('toShuffledArray', () => {
 	it('filters before shuffling when given a predicate', () => {

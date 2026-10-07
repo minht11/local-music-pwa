@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { isMobile } from '$lib/helpers/utils/ua.ts'
-	import type { LibraryStoreName } from '$lib/library/types.ts'
+	import { isMobile } from '#lib/helpers/utils/ua.ts'
+	import type { LibraryStoreName } from '#lib/library/types.ts'
 	import Button from './Button.svelte'
 	import IconButton from './IconButton.svelte'
 	import type { IconType } from './icon/Icon.svelte'

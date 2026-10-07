@@ -1,10 +1,10 @@
 <script lang="ts" module>
-	import CommonDialog from '$lib/components/dialog/CommonDialog.svelte'
-	import { createUIAction } from '$lib/helpers/ui-action'
-	import { truncate } from '$lib/helpers/utils/text.ts'
-	import { dbRemovePlaylist } from '$lib/library/playlists-actions.ts'
-	import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTracks } from '$lib/library/remove.ts'
-	import type { LibraryStoreName } from '$lib/library/types'
+	import CommonDialog from '#lib/components/dialog/CommonDialog.svelte'
+	import { createUIAction } from '#lib/helpers/ui-action.ts'
+	import { truncate } from '#lib/helpers/utils/text.ts'
+	import { dbRemovePlaylist } from '#lib/library/playlists-actions.ts'
+	import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTracks } from '#lib/library/remove.ts'
+	import type { LibraryStoreName } from '#lib/library/types.ts'
 	import type { DialogOpenAccessor } from '../dialog/Dialog.svelte'
 
 	type RemoveLibraryItemOptions =

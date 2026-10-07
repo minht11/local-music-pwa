@@ -1,5 +1,5 @@
 <script>
-	import Icon from '$lib/components/icon/Icon.svelte'
+	import Icon from '#lib/components/icon/Icon.svelte'
 </script>
 
 <div class="m-auto flex flex-col items-center justify-center gap-4 py-10">

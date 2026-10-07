@@ -1,4 +1,4 @@
-import type { FileEntity } from '$lib/helpers/file-system.ts'
+import type { FileEntity } from '#lib/helpers/file-system.ts'
 
 export type LibraryStoreName = 'tracks' | 'albums' | 'artists' | 'playlists'
 

@@ -5,7 +5,7 @@ import {
 	PALETTE_TOKENS_KEYS,
 	type PaletteToken,
 	updateThemeCssVariables,
-} from '$lib/theme.ts'
+} from '#lib/theme.ts'
 
 const TEXT_PAIRS = [
 	['onPrimary', 'primary'],

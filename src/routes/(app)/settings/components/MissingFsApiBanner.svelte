@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Icon from '$lib/components/icon/Icon.svelte'
+	import Icon from '#lib/components/icon/Icon.svelte'
 </script>
 
 <div

@@ -1,6 +1,5 @@
-import type { AfterNavigate, OnNavigate } from '@sveltejs/kit'
 import { browser } from '$app/env'
-import { onNavigate } from '$app/navigation'
+import { type AfterNavigate, type OnNavigate, onNavigate } from '$app/navigation'
 import type { RouteId } from '$app/types'
 import { getActiveRipplesCount } from './attachments/ripple.ts'
 import { wait } from './helpers/utils/wait.ts'
@@ -73,7 +72,7 @@ const resolveView = (nav: OnNavigate | AfterNavigate) => {
 		}
 	}
 
-	const goingBackwards = nav.delta ? nav.delta < 0 : false
+	const goingBackwards = 'delta' in nav && nav.delta !== undefined && nav.delta < 0
 	const isBackwards = customMatch?.backwards ?? goingBackwards
 	const view = customMatch?.view ?? 'regular'
 

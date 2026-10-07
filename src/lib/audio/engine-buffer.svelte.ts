@@ -9,9 +9,9 @@ import {
 	PCM_AUDIO_CODECS,
 } from 'mediabunny'
 import { browser } from '$app/env'
-import { isAbortError } from '$lib/helpers/utils/errors.ts'
-import { isSafari } from '$lib/helpers/utils/ua.ts'
-import { wait } from '$lib/helpers/utils/wait.ts'
+import { isAbortError } from '#lib/helpers/utils/errors.ts'
+import { isSafari } from '#lib/helpers/utils/ua.ts'
+import { wait } from '#lib/helpers/utils/wait.ts'
 import type { AudioGraph } from './audio-graph.svelte.ts'
 import {
 	type AudioEngineImpl,

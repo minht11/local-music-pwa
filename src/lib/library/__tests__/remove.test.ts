@@ -1,16 +1,16 @@
 import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { getDatabase } from '$lib/db/database.ts'
+import { getDatabase } from '#lib/db/database.ts'
 import {
 	clearDatabaseStores,
 	dbGetAllAndExpectLength,
 	expectToBeDefined,
-} from '$lib/helpers/test-helpers.ts'
-import { dbAddToPlayHistory } from '$lib/library/play-history-actions.ts'
-import { dbCreatePlaylist } from '$lib/library/playlists-actions.ts'
-import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTracks } from '$lib/library/remove.ts'
-import { dbImportTrack } from '$lib/library/scan-actions/scanner/steps/import-track.ts'
-import type { ImageRecord, PlaylistEntry, UnknownTrack } from '$lib/library/types.ts'
+} from '#lib/helpers/test-helpers.ts'
+import { dbAddToPlayHistory } from '#lib/library/play-history-actions.ts'
+import { dbCreatePlaylist } from '#lib/library/playlists-actions.ts'
+import { dbRemoveAlbum, dbRemoveArtist, dbRemoveTracks } from '#lib/library/remove.ts'
+import { dbImportTrack } from '#lib/library/scan-actions/scanner/steps/import-track.ts'
+import type { ImageRecord, PlaylistEntry, UnknownTrack } from '#lib/library/types.ts'
 
 const dbImportTestTrack = (
 	overrides: Partial<UnknownTrack> = {},

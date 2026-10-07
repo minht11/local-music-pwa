@@ -1,16 +1,16 @@
 import { error, redirect } from '@sveltejs/kit'
 import { goto } from '$app/navigation'
-import { type DbValue, getDatabase } from '$lib/db/database.ts'
-import { keyRangeOnly } from '$lib/db/key-range.ts'
-import { createPageQuery, type PageQueryResult } from '$lib/db/query/page-query.svelte.ts'
-import { dbGetAlbumTracksIdsByName } from '$lib/library/get/ids.ts'
-import { getLibraryValue } from '$lib/library/get/value.ts'
+import { type DbValue, getDatabase } from '#lib/db/database.ts'
+import { keyRangeOnly } from '#lib/db/key-range.ts'
+import { createPageQuery, type PageQueryResult } from '#lib/db/query/page-query.svelte.ts'
+import { dbGetAlbumTracksIdsByName } from '#lib/library/get/ids.ts'
+import { getLibraryValue } from '#lib/library/get/value.ts'
 import {
 	FAVORITE_PLAYLIST_ID,
 	FAVORITE_PLAYLIST_UUID,
 	type LibraryStoreName,
 	type PlaylistEntry,
-} from '$lib/library/types.ts'
+} from '#lib/library/types.ts'
 import type { PageLoad } from './$types.d.ts'
 
 type DetailsSlug = Exclude<LibraryStoreName, 'tracks'>
@@ -26,7 +26,7 @@ const createDetailsPageQuery = <T extends DetailsSlug>(
 			for (const change of changes) {
 				if (change.storeName === storeName && change.key === id) {
 					if (change.operation === 'delete') {
-						void goto(`/library/${storeName}`, { replaceState: true })
+						void goto(`/library/${storeName}`, { replace: true })
 						return
 					}
 

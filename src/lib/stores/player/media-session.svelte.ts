@@ -1,5 +1,5 @@
-import { formatArtists, formatNameOrUnknown } from '$lib/helpers/utils/text'
-import type { TrackData } from '$lib/library/get/value'
+import { formatArtists, formatNameOrUnknown } from '#lib/helpers/utils/text.ts'
+import type { TrackData } from '#lib/library/get/value.ts'
 
 interface PlayerImpl {
 	activeTrack: TrackData | undefined

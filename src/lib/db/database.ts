@@ -9,7 +9,7 @@ import type {
 	Playlist,
 	PlaylistEntry,
 	Track,
-} from '$lib/library/types.ts'
+} from '#lib/library/types.ts'
 import type { DbBaseChange, DbStandardChange } from './events.ts'
 
 export interface AppDB extends DBSchema {

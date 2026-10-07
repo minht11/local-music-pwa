@@ -1,4 +1,4 @@
-import { lockDatabase } from '$lib/db/lock-database'
+import { lockDatabase } from '#lib/db/lock-database.ts'
 
 interface CreateUIActionOptions<P extends unknown[] = [], R = void> {
 	/** Locks database during duration of the action */

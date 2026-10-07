@@ -1,6 +1,6 @@
 <script lang="ts" module>
-	import { tooltip as attachTooltip } from '$lib/attachments/tooltip.ts'
-	import Icon from '$lib/components/icon/Icon.svelte'
+	import { tooltip as attachTooltip } from '#lib/attachments/tooltip.ts'
+	import Icon from '#lib/components/icon/Icon.svelte'
 
 	export interface SettingsListItemProps {
 		title: string

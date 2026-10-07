@@ -1,5 +1,5 @@
-import { createAbortError } from '$lib/helpers/utils/errors.ts'
-import { throttle } from '$lib/helpers/utils/throttle'
+import { createAbortError } from '#lib/helpers/utils/errors.ts'
+import { throttle } from '#lib/helpers/utils/throttle.ts'
 import type { AudioGraph } from './audio-graph.svelte.ts'
 import {
 	type AudioEngineImpl,

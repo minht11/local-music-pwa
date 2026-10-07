@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	import Select from '$lib/components/Select.svelte'
+	import Select from '#lib/components/Select.svelte'
 	import SettingsListItem, { type SettingsListItemProps } from './SettingsListItem.svelte'
 
 	interface SettingsOptionsItem<V> {

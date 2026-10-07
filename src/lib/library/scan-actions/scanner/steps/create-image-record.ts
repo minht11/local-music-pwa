@@ -1,4 +1,4 @@
-import type { ImageRecord } from '$lib/library/types.ts'
+import type { ImageRecord } from '#lib/library/types.ts'
 import { getPrimaryColor, SMALL_ARTWORK_IMAGE_WIDTH } from './image-primary-color.ts'
 
 /**

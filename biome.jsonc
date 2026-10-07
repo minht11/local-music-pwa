@@ -19,7 +19,7 @@
 							":PACKAGE_WITH_PROTOCOL:",
 							"$app/**",
 							"$server/**",
-							"$lib/**",
+							"#lib/**",
 							":ALIAS:",
 							":PATH:"
 						]
@@ -63,7 +63,7 @@
 					"level": "error",
 					"options": {
 						"deniedGlobals": {
-							"IDBKeyRange": "Use $lib/db/key-range.ts instead which provides proper types."
+							"IDBKeyRange": "Use #lib/db/key-range.ts instead which provides proper types."
 						}
 					}
 				},
@@ -204,6 +204,21 @@
 	},
 	"overrides": [
 		{
+			"includes": ["src/**"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noPrivateImports": {
+							"level": "error",
+							"options": {
+								"defaultVisibility": "public"
+							}
+						}
+					}
+				}
+			}
+		},
+		{
 			"includes": ["**/*.svelte", "!**/*.svelte.ts"],
 			"linter": {
 				"rules": {
@@ -216,16 +231,6 @@
 					},
 					"style": {
 						"noRestrictedGlobals": "off"
-					}
-				}
-			}
-		},
-		{
-			"includes": ["**/src/params/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"useFilenamingConvention": "off"
 					}
 				}
 			}

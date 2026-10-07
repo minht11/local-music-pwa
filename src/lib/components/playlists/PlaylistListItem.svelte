@@ -1,7 +1,7 @@
 <script lang="ts" module>
-	import { createLibraryValueQuery } from '$lib/library/get/value-queries.ts'
-	import { FAVORITE_PLAYLIST_ID } from '$lib/library/playlists-actions'
-	import type { Playlist } from '$lib/library/types.ts'
+	import { createLibraryValueQuery } from '#lib/library/get/value-queries.ts'
+	import { FAVORITE_PLAYLIST_ID } from '#lib/library/playlists-actions.ts'
+	import type { Playlist } from '#lib/library/types.ts'
 	import type { IconType } from '../icon/Icon.svelte'
 	import Icon from '../icon/Icon.svelte'
 	import ListItem from '../ListItem.svelte'

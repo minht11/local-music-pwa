@@ -1,6 +1,6 @@
 <script lang="ts">
-	import IconButton from '$lib/components/IconButton.svelte'
-	import { toggleFavoriteTrack } from '$lib/library/playlists-actions'
+	import IconButton from '#lib/components/IconButton.svelte'
+	import { toggleFavoriteTrack } from '#lib/library/playlists-actions.ts'
 
 	interface FavoriteButtonProps {
 		trackId: number

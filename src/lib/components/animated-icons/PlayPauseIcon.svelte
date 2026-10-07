@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Debounced } from '$lib/helpers/debounced.svelte'
+	import { Debounced } from '#lib/helpers/debounced.svelte.ts'
 	import Spinner from '../Spinner.svelte'
 
 	interface Props {

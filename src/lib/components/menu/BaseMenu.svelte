@@ -1,6 +1,6 @@
 <!-- biome-ignore-all lint/a11y/useValidAriaRole: false positives -->
 <script lang="ts">
-	import { ripple } from '$lib/attachments/ripple.ts'
+	import { ripple } from '#lib/attachments/ripple.ts'
 	import type { MenuItem } from './types.ts'
 
 	type AnimationFn = (dialog: HTMLDialogElement) => unknown

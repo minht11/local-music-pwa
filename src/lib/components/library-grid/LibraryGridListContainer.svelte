@@ -1,6 +1,6 @@
 <script lang="ts" module>
-	import VirtualContainer from '$lib/components/VirtualContainer.svelte'
-	import { safeInteger } from '$lib/helpers/utils/integers.ts'
+	import VirtualContainer from '#lib/components/VirtualContainer.svelte'
+	import { safeInteger } from '#lib/helpers/utils/integers.ts'
 	import LibraryGridItem, {
 		type LibraryGridItemType,
 		type LibraryItemGridItemProps,

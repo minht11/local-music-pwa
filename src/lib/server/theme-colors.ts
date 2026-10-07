@@ -1,4 +1,4 @@
-import type { PaletteToken } from '$lib/theme.ts'
+import type { PaletteToken } from '#lib/theme.ts'
 import themeCss from '../../theme-colors.css?raw'
 
 /** @public */
