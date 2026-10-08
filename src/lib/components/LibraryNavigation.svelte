@@ -72,7 +72,7 @@
 {:else if props.layoutMode !== 'details'}
 	<div
 		class={[
-			'desktop-sidebar fixed z-1 mt-20 h-max w-max flex-col items-center gap-2 [@media(max-height:500px)]:mt-2',
+			'desktop-sidebar fixed top-(--safe-area-inset-top) z-1 mt-20 h-max w-max flex-col items-center gap-2 [@media(max-height:500px)]:mt-2',
 			isHandHeldDevice ? 'hidden sm:flex' : 'flex',
 			props.class,
 		]}

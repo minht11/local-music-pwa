@@ -77,7 +77,7 @@
 	>
 		<div
 			class={[
-				isCompactVertical && !isCompactHorizontal ? 'absolute top-0 left-0 h-14' : 'h-16',
+				isCompactVertical && !isCompactHorizontal ? 'absolute top-(--safe-area-inset-top) left-0 h-14' : 'h-16',
 				'relative flex w-full items-center justify-between gap-2 px-4 [grid-area:header]',
 			]}
 		>
