@@ -53,7 +53,9 @@
 
 <ListDetailsLayout mode={layoutMode} class="mx-auto w-full max-w-(--app-max-content-width) grow">
 	{#snippet list(mode)}
-		<div class={[isHandHeldDevice ? 'sm:pl-20' : 'pl-20', 'flex grow flex-col']}>
+		<div
+			class={[isHandHeldDevice ? 'sm:pl-20' : 'pl-20', 'flex grow flex-col pt-(--safe-area-inset-top)']}
+		>
 			<div class={[mode === 'both' && 'w-100', 'flex grow flex-col px-4']}>
 				<Search name={data.pluralTitle()} sortOptions={data.sortOptions} store={data.store} />
 
