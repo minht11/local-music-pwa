@@ -8,6 +8,7 @@
 	import type { LayoutMode } from './ListDetailsLayout.svelte'
 
 	type Props = {
+		class?: ClassValue
 		activeSlug: LibraryStoreName
 	} & (
 		| { variant: 'bottom' }
@@ -60,9 +61,12 @@
 {#if props.variant === 'bottom'}
 	{#if isHandHeldDevice}
 		<div
-			class="pointer-events-auto grid h-[calc(--spacing(16)+env(safe-area-inset-bottom))] w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer pb-[env(safe-area-inset-bottom)] sm:hidden active-view-regular:view-name-[bottom-bar]"
+			class={[
+				'pointer-events-auto grid w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))] bg-surfaceContainer pb-(--safe-area-max-inset-bottom) sm:hidden active-view-regular:view-name-[bottom-bar]',
+				props.class,
+			]}
 		>
-			{@render items('h-full')}
+			{@render items('h-16')}
 		</div>
 	{/if}
 {:else if props.layoutMode !== 'details'}
@@ -70,6 +74,7 @@
 		class={[
 			'desktop-sidebar fixed z-1 mt-20 h-max w-max flex-col items-center gap-2 [@media(max-height:500px)]:mt-2',
 			isHandHeldDevice ? 'hidden sm:flex' : 'flex',
+			props.class,
 		]}
 	>
 		{@render items('h-14 w-20')}

@@ -71,7 +71,7 @@
 		class={[
 			layoutMode === 'both' && 'w-100 2xl:w-[28dvw]',
 			layoutMode === 'list' && 'mx-auto w-full',
-			'player-content z-0 grow items-center gap-x-6 overflow-clip bg-secondaryContainerVariant pb-6',
+			'player-content safe-area-x z-0 grow items-center gap-x-6 overflow-clip bg-secondaryContainerVariant pb-6',
 			isCompactVertical && !isCompactHorizontal && 'player-content-horizontal',
 		]}
 	>
@@ -239,7 +239,7 @@
 		</Header>
 
 		<div class="mx-auto flex w-full max-w-(--app-max-content-width) grow flex-col">
-			<div class="flex grow p-4">
+			<div class="flex grow p-4 pb-[calc(--spacing(4)+var(--safe-area-max-inset-bottom))]">
 				{#if isSelectedTabQueue}
 					<QueueList />
 				{:else}
@@ -270,6 +270,8 @@
 	@reference '../../../app.css';
 
 	.player-content {
+		padding-top: var(--safe-area-inset-top);
+		padding-bottom: calc(--spacing(6) + var(--safe-area-max-inset-bottom));
 		display: grid;
 		grid-template-columns: 1fr;
 		grid-template-rows: max-content minmax(--spacing(35), 1fr) auto;

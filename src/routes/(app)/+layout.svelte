@@ -13,6 +13,7 @@
 	import Seo from '#lib/components/Seo.svelte'
 	import SnackbarRenderer from '#lib/components/snackbar/SnackbarRenderer.svelte'
 	import { isElementTextInput } from '#lib/helpers/input.ts'
+	import { isMobile } from '#lib/helpers/utils/ua.ts'
 	import { DialogsStore } from '#lib/stores/dialogs/store.svelte.ts'
 	import { setDialogsStoreContext } from '#lib/stores/dialogs/use-store.ts'
 	import { PlayerStore } from '#lib/stores/player/player.svelte.ts'
@@ -47,13 +48,12 @@
 
 	const { children } = $props()
 
-	let overlayContentHeight = $state(0)
-	let bottomBarHeightActual = $state(0)
+	let footerHeight = $state(0)
+	const isHandHeldDevice = isMobile()
 
 	const isBottomNavShown = $derived(
-		page.route.id?.startsWith('/(app)/library/[[slug=libraryEntities]]'),
+		isHandHeldDevice && page.route.id?.startsWith('/(app)/library/[[slug=libraryEntities]]'),
 	)
-	const bottomBarHeight = $derived(isBottomNavShown ? bottomBarHeightActual : 0)
 
 	const activeLibrarySlug = $derived.by(() => {
 		const slug = page.params.slug
@@ -61,10 +61,7 @@
 	})
 
 	$effect(() => {
-		document.documentElement.style.setProperty(
-			'--bottom-overlay-height',
-			`${overlayContentHeight + bottomBarHeight}px`,
-		)
+		document.documentElement.style.setProperty('--bottom-overlay-height', `${footerHeight}px`)
 	})
 
 	onViewTransitionPrepare((_state, match) => {
@@ -145,24 +142,23 @@
 {@render children()}
 
 <div
-	class="page-overlay-container pointer-events-none fixed inset-x-0 bottom-0 grid gap-y-2 overflow-hidden"
+	class="page-overlay-container safe-area-x pointer-events-none fixed inset-x-0 grid gap-y-2 overflow-hidden"
 >
 	<SnackbarRenderer />
 
 	<div
-		bind:clientHeight={overlayContentHeight}
-		class={["col-[2/5] grid grid-cols-subgrid gap-y-2", bottomBarHeight <= 0 && 'mb-2']}
+		bind:clientHeight={footerHeight}
+		class="persistent-footer col-[1/6] grid grid-cols-subgrid gap-y-2 pb-(--safe-area-max-inset-bottom)"
+		class:has-bottom-navigation={isBottomNavShown}
 	>
 		{#if !page.data.noPlayerOverlay}
-			<PlayerOverlay class={'col-[1/4]'} />
+			<PlayerOverlay class="overlay-content col-[2/5] mb-2" />
+		{/if}
+
+		{#if isBottomNavShown}
+			<LibraryNavigation variant="bottom" activeSlug={activeLibrarySlug} class="col-[1/6]" />
 		{/if}
 	</div>
-
-	{#if isBottomNavShown}
-		<div bind:clientHeight={bottomBarHeightActual} class="col-[1/6]">
-			<LibraryNavigation variant="bottom" activeSlug={activeLibrarySlug} />
-		</div>
-	{/if}
 </div>
 
 <div class="pointer-events-none fixed inset-0 z-10">
@@ -193,10 +189,21 @@
 	}
 
 	.page-overlay-container {
+		bottom: calc(env(safe-area-inset-bottom, 0px) - var(--safe-area-max-inset-bottom));
 		--p-overlay-side: --spacing(4);
 		grid-template-columns: var(--p-overlay-side) 1fr minmax(0, --spacing(125)) 1fr var(
 				--p-overlay-side
 			);
+	}
+
+	@media (width < --theme(--breakpoint-sm)) {
+		.persistent-footer.has-bottom-navigation {
+			padding-bottom: 0;
+
+			:global(.overlay-content) {
+				margin-bottom: 0;
+			}
+		}
 	}
 
 	@keyframes page-loading-indicator {

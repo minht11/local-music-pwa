@@ -116,7 +116,12 @@ html {
 	/* scrollbar-gutter: stable; */
 	scroll-padding-top: var(--app-header-height);
 	scroll-padding-bottom: var(--bottom-overlay-height);
-	--app-header-height: --spacing(16);
+	--safe-area-inset-top: env(safe-area-inset-top, 0px);
+	--safe-area-inset-left: env(safe-area-inset-left, 0px);
+	--safe-area-inset-right: env(safe-area-inset-right, 0px);
+	--safe-area-max-inset-bottom: env(safe-area-max-inset-bottom, env(safe-area-inset-bottom, 0px));
+	--bottom-overlay-height: 0px;
+	--app-header-height: calc(--spacing(16) + var(--safe-area-inset-top));
 	--app-max-content-width: --spacing(400);
 	--mktg-content-max-width: --spacing(300);
 }
@@ -269,6 +274,16 @@ source {
 
 @utility flip-y {
 	transform: scaleY(-1);
+}
+
+@utility safe-area-x {
+	padding-left: var(--safe-area-inset-left);
+	padding-right: var(--safe-area-inset-right);
+}
+
+@utility safe-area-bottom {
+	bottom: calc(env(safe-area-inset-bottom, 0px) - var(--safe-area-max-inset-bottom));
+	padding-bottom: var(--safe-area-max-inset-bottom);
 }
 
 @utility text-headline-lg {
