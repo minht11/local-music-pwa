@@ -48,14 +48,14 @@
 
 <header
 	class={[
-		'ease-in-out inset-x-0 top-0 z-10 flex h-(--app-header-height) shrink-0 transition-[background-color] duration-200',
+		'ease-in-out inset-x-0 top-0 z-10 flex h-(--app-header-height) shrink-0 transition-[background-color] duration-200 pt-(--safe-area-inset-top) safe-area-x',
 		isScrolled && 'bg-surfaceContainerHigh',
 		isFixed ? 'fixed' : 'sticky',
 		className?.(isScrolled),
 	]}
 >
 	<div
-		class="mx-auto flex w-full max-w-(--app-max-content-width) items-center justify-end gap-2 pr-2 pl-6"
+		class="relative mx-auto flex w-full max-w-(--app-max-content-width) items-center justify-end gap-2 pr-2 pl-6"
 	>
 		{#if !noBackButton}
 			<BackButton class={[!title && 'mr-auto']} />

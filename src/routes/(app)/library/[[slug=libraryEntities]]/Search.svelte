@@ -61,7 +61,7 @@
 </script>
 
 <div
-	class="search-bar @container sticky top-2 z-1 mt-2 mb-4 ml-auto flex w-full max-w-125 items-center gap-1 rounded-lg border border-primary/10 bg-surfaceContainerHighest px-2 @sm:gap-2"
+	class="search-bar @container sticky top-[calc(--spacing(2)+var(--safe-area-inset-top))] z-1 mt-2 mb-4 ml-auto flex w-full max-w-125 items-center gap-1 rounded-lg border border-primary/10 bg-surfaceContainerHighest px-2 @sm:gap-2"
 >
 	<input
 		value={store.searchTerm}
